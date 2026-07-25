@@ -3,728 +3,257 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Custom Developing - Dynamic Quiz</title>
+    <title>Login / Register - TopMCQ</title>
+    
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- GLOBAL CSS LINK (Handles Announcement, Header, Navigation & Footer styles) -->
+    <link rel="stylesheet" href="global/global.css">
+    
     <style>
-        :root {
-            --primary: #007bff;
-            --primary-dark: #0056b3;
-            --dark: #2c3e50;
-            --light: #f8f9fa;
-            --gray: #6c757d;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f7f6;
-            color: #333;
-            line-height: 1.6;
-        }
-
-        /* Dynamic Announcement Bar Styling */
-        #global-announce-bar {
-            background: linear-gradient(90deg, #ff9f43, #ee5253);
-            color: #fff;
-            font-size: 13px;
-            font-weight: 600;
-            padding: 8px 15px;
-            text-align: center;
-            position: relative;
-            z-index: 1001;
-        }
-        .announce-content a { color: #fff; margin-left: 10px; text-decoration: underline; font-weight: bold; }
-
-        /* Dynamic Header Styling */
-        #global-header {
-            background-color: #ffffff;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-        .header-wrapper {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 20px;
-        }
-        .site-logo a { font-size: 26px; font-weight: 800; color: var(--dark); text-decoration: none; display: flex; align-items: center; gap: 8px; }
-        .site-logo img { max-height: 40px; width: auto; }
-        .site-nav ul { display: flex; list-style: none; gap: 25px; align-items: center; }
-        .site-nav a { text-decoration: none; color: var(--dark); font-weight: 600; font-size: 15px; transition: color 0.2s ease; }
-        .site-nav a:hover { color: var(--primary); }
-        .btn-primary-head { background-color: var(--primary); color: white !important; padding: 9px 20px; border-radius: 6px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
-        .btn-primary-head:hover { background-color: var(--primary-dark); }
-
-        .nav-item { position: relative; }
-        .dropdown-menu { display: none; position: absolute; top: 100%; left: 0; background: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-radius: 6px; list-style: none; padding: 10px 0; min-width: 180px; z-index: 100; }
-        .nav-item:hover .dropdown-menu { display: block; }
-        .dropdown-menu li a { padding: 8px 15px; display: block; color: #333; font-size: 14px; }
-        .dropdown-menu li a:hover { background: #f4f7f6; color: var(--primary); }
-
-        .container {
-            max-width: 900px;
-            margin: 30px auto;
-            background: #fff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn-back {
-            position: absolute;
-            top: 0;
-            left: 0;
-            background-color: #007bff;
-            color: white;
-            text-decoration: none;
-            padding: 8px 16px;
-            border-bottom-right-radius: 6px;
-            border-top-left-radius: 8px;
-            font-size: 13px;
-            font-weight: bold;
-            display: inline-flex;
-            align-items: center;
-            transition: background-color 0.2s ease;
-            z-index: 10;
-        }
-        .btn-back:hover { background-color: #0056b3; color: white; }
-
-        h1, h2 { text-align: center; color: #2c3e50; margin-top: 10px; margin-bottom: 5px; }
-
-        .btn-reset {
-            background-color: #2ecc71;
-            color: white;
-            border: none;
-            padding: 6px 14px;
-            border-radius: 4px;
-            font-size: 13px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-        }
-        .btn-reset:hover { background-color: #27ae60; }
-
-        .floating-status-bar {
-            position: fixed;
-            top: 20px;
-            right: 20px;
+        /* LOGIN PAGE SPECIFIC STYLES */
+        .page-wrapper {
             display: flex;
             flex-direction: column;
-            align-items: flex-end;
+            min-height: 100vh;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        .auth-card {
+            background: white;
+            padding: 35px 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            width: 100%;
+            max-width: 420px;
+            border: 1px solid #e2e8f0;
+        }
+
+        h2 { margin-top: 0; color: var(--dark, #2c3e50); text-align: center; margin-bottom: 20px; font-weight: 700; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 6px; font-weight: bold; color: #555; font-size: 14px; }
+        input {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+        input:focus { border-color: var(--primary, #007bff); }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary, #007bff);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             gap: 8px;
-            z-index: 1000;
         }
+        .btn:hover { background-color: var(--primary-dark, #0056b3); }
 
-        .timer-board {
-            background: #e74c3c;
-            color: white;
-            padding: 10px 16px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-            min-width: 90px;
+        .toggle-text {
             text-align: center;
-            transition: all 0.3s ease;
+            margin-top: 18px;
+            font-size: 14px;
+            color: #666;
         }
-
-        .score-board {
-            background: #2ecc71;
-            color: white;
-            padding: 10px 16px;
-            border-radius: 8px;
-            font-size: 16px;
+        .toggle-link {
+            color: var(--primary, #007bff);
+            cursor: pointer;
             font-weight: bold;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-            min-width: 90px;
-            text-align: center;
+            text-decoration: underline;
         }
 
-        .header-info-bar { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; }
-        .exam-path { color: #7f8c8d; font-size: 14px; font-weight: 500; text-align: left; }
-        .negative-mark-note { color: #e74c3c; font-size: 13px; font-weight: 600; text-align: right; }
-
-        .controls-bar {
-            display: flex; justify-content: space-between; align-items: center; margin-top: 10px; margin-bottom: 20px;
-            background: #f8f9fa; padding: 8px 15px; border-radius: 6px; border: 1px solid #e9ecef; flex-wrap: wrap; gap: 12px;
+        .alert {
+            padding: 10px 14px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            display: none;
         }
-        .nav-actions { display: flex; align-items: center; gap: 10px; }
-        .right-controls-group { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
-        .filter-group { display: flex; align-items: center; gap: 6px; }
-        .select-dropdown { padding: 5px 8px; border-radius: 4px; border: 1px solid #ced4da; font-size: 13px; font-weight: 600; color: #2c3e50; background-color: #fff; cursor: pointer; outline: none; }
-        .select-dropdown:focus { border-color: #007bff; }
-
-        .switch-group { display: flex; align-items: center; gap: 12px; }
-        .switch-label { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #2c3e50; cursor: pointer; user-select: none; }
-        .switch { position: relative; display: inline-block; width: 36px; height: 20px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .3s; border-radius: 20px; }
-        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
-        input:checked + .slider { background-color: #007bff; }
-        input:checked + .slider:before { transform: translateX(16px); }
-
-        .color-dots-icon { display: inline-flex; align-items: center; gap: 3px; margin-left: 2px; }
-        .dot-red { width: 9px; height: 9px; background-color: #e74c3c; border-radius: 50%; }
-        .dot-green { width: 9px; height: 9px; background-color: #2ecc71; border-radius: 50%; }
-
-        .corner-popup { position: fixed; bottom: 25px; right: 25px; background: #ffffff; color: #2c3e50; padding: 16px 20px; border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); border-left: 5px solid #007bff; z-index: 2000; display: none; max-width: 320px; animation: slideInRight 0.3s ease-out; }
-        .corner-popup.warning { border-left-color: #f39c12; }
-        .corner-popup.danger { border-left-color: #e74c3c; }
-        .corner-popup h4 { margin: 0 0 6px 0; font-size: 15px; color: #2c3e50; }
-        .corner-popup p { margin: 0 0 12px 0; font-size: 13px; color: #555; line-height: 1.4; }
-        .popup-btn { background-color: #007bff; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; transition: background 0.2s ease; }
-        .popup-btn:hover { background-color: #0056b3; }
-
-        @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-
-        .question-block { margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px dashed #ccc; }
-        .question-text { font-size: 17px; font-weight: 600; margin-bottom: 15px; color: #2c3e50; text-align: left; }
-        .options-container { margin-bottom: 15px; display: flex; flex-wrap: wrap; gap: 12px 20px; }
-        .option-btn { background: #f8f9fa; border: 1px solid #ced4da; padding: 10px 18px; border-radius: 4px; cursor: pointer; font-size: 15px; text-align: left; transition: all 0.2s ease; font-weight: normal; }
-        .option-btn:hover:not(.disabled) { background: #e2e6ea; border-color: #dae0e5; }
-        .option-btn.disabled { cursor: not-allowed; }
-
-        .correct { background-color: #2ecc71 !important; color: white !important; border-color: #27ae60 !important; }
-        .incorrect { background-color: #e74c3c !important; color: white !important; border-color: #c0392b !important; }
-        .neutral-selected { background-color: #ecf7fa !important; color: #000000 !important; border-color: #222 !important; font-weight: normal !important; }
-
-        .answer-text { font-weight: bold; color: #27ae60; margin-top: 10px; display: none; text-align: left; }
-        .explanation-text { font-size: 14px; color: #555; margin-top: 5px; display: none; background: #f9f9f9; padding: 8px 12px; border-left: 3px solid #17a2b8; border-radius: 4px; }
-        .result-section { text-align: center; margin-top: 40px; padding: 20px; background: #ecf0f1; border-radius: 8px; }
-        .detailed-stats { font-size: 14px; margin-bottom: 12px; color: #555; }
-        .correct-count { color: #2ecc71; font-weight: bold; }
-        .incorrect-count { color: #e74c3c; font-weight: bold; }
-        #final-score { font-size: 24px; color: #2c3e50; font-weight: bold; border-top: 2px solid #bdc3c7; padding-top: 10px; display: inline-block; }
-
-        /* Dynamic Footer Styling */
-        #global-footer { background-color: var(--dark); color: #ecf0f1; padding: 40px 20px 20px 20px; margin-top: 60px; }
-        .footer-container { max-width: 1200px; margin: 0 auto; }
-        .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 30px; margin-bottom: 30px; }
-        .footer-col h4 { font-size: 16px; margin-bottom: 15px; color: #ffffff; border-bottom: 2px solid var(--primary); padding-bottom: 6px; display: inline-block; }
-        .footer-col p { font-size: 14px; color: #bdc3c7; line-height: 1.6; }
-        .footer-social { margin-top: 15px; display: flex; gap: 12px; }
-        .footer-social a { color: white; font-size: 18px; background: rgba(255,255,255,0.1); width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 50%; text-decoration: none; }
-        .footer-social a:hover { background: var(--primary); }
-        .footer-bottom { text-align: center; padding-top: 20px; border-top: 1px solid #34495e; font-size: 13px; color: #95a5a6; }
-
-        @media (max-width: 768px) {
-            .header-wrapper { flex-direction: column; gap: 12px; }
-            .site-nav ul { gap: 15px; flex-wrap: wrap; justify-content: center; }
-            .floating-status-bar { top: 10px; right: 10px; gap: 6px; }
-            .timer-board, .score-board { padding: 6px 12px; font-size: 14px; min-width: 80px; }
-            .header-info-bar { flex-direction: column; align-items: flex-start; gap: 5px; }
-            .negative-mark-note { text-align: left; }
-            .controls-bar { flex-direction: column; align-items: flex-start; gap: 12px; }
-            .nav-actions { width: 100%; justify-content: flex-start; flex-wrap: wrap; }
-            .right-controls-group { width: 100%; flex-direction: column; align-items: flex-start; gap: 10px; }
-            .filter-group { width: 100%; }
-            .switch-group { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 10px; }
-            .options-container { flex-direction: column; gap: 10px; }
-            .option-btn { width: 100%; box-sizing: border-box; padding: 12px 15px; }
-            .corner-popup { bottom: 15px; right: 15px; left: 15px; max-width: none; }
-        }
+        .alert-danger { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .alert-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
     </style>
 </head>
 <body>
 
-<!-- DYNAMIC ANNOUNCEMENT BAR -->
-<div id="global-announce-bar" style="display:none;"></div>
+    <div class="page-wrapper">
+        <!-- DYNAMIC GLOBAL LAYOUT CONTAINERS -->
+        <div id="global-announce-bar" style="display:none;"></div>
+        <header id="global-header"></header>
 
-<!-- DYNAMIC HEADER -->
-<header id="global-header"></header>
-
-<!-- Floating Status Container (Timer & Score) -->
-<div class="floating-status-bar">
-    <div class="timer-board" id="timer-board-box"><span id="timer-display">00:00</span></div>
-    <div class="score-board">স্কোর: <span id="live-score">0</span></div>
-</div>
-
-<!-- Bottom Right Corner Toast Popup -->
-<div id="corner-popup" class="corner-popup">
-    <h4 id="popup-title">বিজ্ঞপ্তি</h4>
-    <p id="popup-msg"></p>
-    <div id="popup-action"></div>
-</div>
-
-<div class="container">
-    <a href="index.html" class="btn-back">⬅️ হোম পেজে ফিরে যান</a>
-
-    <h1 id="main-title">Custom Developing</h1>
-    <h2 id="topic-title">টপিক লোড হচ্ছে...</h2>
-    
-    <div class="header-info-bar">
-        <div id="category-path" class="exam-path"></div>
-        <div class="negative-mark-note">[ প্রতিটি ভুল উত্তরের জন্য ০.৫ নম্বর কাটা যাবে ]</div>
-    </div>
-    
-    <hr style="margin-top: 8px; border: 0; border-top: 1px solid #ccc;">
-
-    <div class="controls-bar">
-        <div class="nav-actions">
-            <button class="btn-reset" onclick="resetQuiz()">🔄 পুনরায় শুরু করুন</button>
-        </div>
-
-        <div class="right-controls-group">
-            <div class="filter-group">
-                <select id="range-select" class="select-dropdown" onchange="renderQuizUI()">
-                    <option value="all">সকল প্রশ্ন</option>
-                </select>
+        <!-- MAIN AUTH CONTENT -->
+        <main class="main-content">
+            <div class="auth-card">
+                <h2 id="formTitle">🔐 Login to Account</h2>
                 
-                <select id="limit-select" class="select-dropdown" onchange="updateRangeOptions()">
-                    <option value="all">সকল প্রশ্ন</option>
-                    <option value="20">20</option>
-                    <option value="25">25</option>
-                    <option value="50">50</option>
-                    <option value="100">100</option>
-                </select>
+                <div id="alertBox" class="alert"></div>
+
+                <!-- LOGIN FORM -->
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label>Email Address:</label>
+                        <input type="email" id="loginEmail" placeholder="Enter your email..." required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password:</label>
+                        <input type="password" id="loginPassword" placeholder="Enter password..." required>
+                    </div>
+                    <button type="submit" class="btn" id="loginBtn">🚀 Login</button>
+                </form>
+
+                <!-- REGISTER FORM (Hidden by default) -->
+                <form id="registerForm" style="display: none;">
+                    <div class="form-group">
+                        <label>Full Name:</label>
+                        <input type="text" id="regName" placeholder="Enter full name..." required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email Address:</label>
+                        <input type="email" id="regEmail" placeholder="Enter email address..." required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password:</label>
+                        <input type="password" id="regPassword" placeholder="Create a password..." required>
+                    </div>
+                    <button type="submit" class="btn" id="regBtn" style="background-color: #28a745;">✨ Register Account</button>
+                </form>
+
+                <div class="toggle-text" id="toggleMessage">
+                    Don't have an account? <span class="toggle-link" onclick="toggleForm('register')">Register Now</span>
+                </div>
             </div>
+        </main>
 
-            <!-- Toggle Switches (Color, Correct Ans, Explanation, Time) -->
-            <div class="switch-group">
-                <label class="switch-label">
-                    <label class="switch">
-                        <input type="checkbox" id="toggle-color" checked>
-                        <span class="slider"></span>
-                    </label>
-                    <span class="color-dots-icon">
-                        <span class="dot-red"></span>
-                        <span class="dot-green"></span>
-                    </span>
-                </label>
-
-                <label class="switch-label">
-                    <label class="switch">
-                        <input type="checkbox" id="toggle-answer">
-                        <span class="slider"></span>
-                    </label>
-                    সঠিক উত্তর
-                </label>
-
-                <label class="switch-label">
-                    <label class="switch">
-                        <input type="checkbox" id="toggle-explanation" checked>
-                        <span class="slider"></span>
-                    </label>
-                    ব্যাখ্যা
-                </label>
-
-                <label class="switch-label">
-                    <label class="switch">
-                        <input type="checkbox" id="toggle-time">
-                        <span class="slider"></span>
-                    </label>
-                    সময়
-                </label>
-            </div>
-        </div>
+        <!-- DYNAMIC FOOTER CONTAINER -->
+        <footer id="global-footer"></footer>
     </div>
 
-    <div id="quiz-wrapper">
-        <p style="text-align:center; color:#888;">ডাটাবেজ থেকে প্রশ্ন লোড হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন...</p>
-    </div>
+    <!-- GLOBAL JS LINK (Handles Header, Navigation, Mobile Menu, Announce Bar & Footer SWR Rendering) -->
+    <script src="global/global.js"></script>
 
-    <div class="result-section">
-        <h2>পরীক্ষার ফলাফল</h2>
-        <div class="detailed-stats">
-            সঠিক উত্তর: <span id="correct-count-display" class="correct-count">০</span> টি &nbsp;&nbsp;|&nbsp;&nbsp; ভুল উত্তর: <span id="incorrect-count-display" class="incorrect-count">০</span> টি
-        </div>
-        <div id="final-score">আপনার মোট প্রাপ্ত স্কোর: ০</div>
-    </div>
-</div>
+    <!-- AUTHENTICATION LOGIC SCRIPT -->
+    <script>
+        const AUTH_API = 'https://mosabber-quiz-app.onrender.com/api/auth';
 
-<!-- DYNAMIC FOOTER -->
-<footer id="global-footer"></footer>
+        function showAlert(msg, isSuccess = false) {
+            const alertBox = document.getElementById('alertBox');
+            alertBox.innerText = msg;
+            alertBox.className = `alert ${isSuccess ? 'alert-success' : 'alert-danger'}`;
+            alertBox.style.display = 'block';
+        }
 
-<!-- CONFIG JS SCRIPT -->
-<script src="config.js"></script>
-
-<script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const currentCategory = urlParams.get('category');
-
-    const API_URL = currentCategory 
-        ? `https://mosabber-quiz-app.onrender.com/api/questions?category=${encodeURIComponent(currentCategory)}`
-        : null;
-
-    let quizData = []; 
-    let answeredQuestions = {}; 
-    let score = 0;
-    let correctCount = 0;
-    let incorrectCount = 0;
-
-    let timerInterval = null;
-    let initialTotalSeconds = 0;
-    let totalSecondsLeft = 0;
-    let warningTriggered = false;
-
-    const quizWrapper = document.getElementById('quiz-wrapper');
-    const liveScoreDisplay = document.getElementById('live-score');
-    const timerDisplay = document.getElementById('timer-display');
-    const timerBoardBox = document.getElementById('timer-board-box');
-    const correctCountDisplay = document.getElementById('correct-count-display');
-    const incorrectCountDisplay = document.getElementById('incorrect-count-display');
-    const finalScoreDisplay = document.getElementById('final-score');
-
-    const toggleColor = document.getElementById('toggle-color');
-    const toggleAnswer = document.getElementById('toggle-answer');
-    const toggleExplanation = document.getElementById('toggle-explanation');
-    const toggleTime = document.getElementById('toggle-time');
-    const limitSelect = document.getElementById('limit-select');
-    const rangeSelect = document.getElementById('range-select');
-
-    const cornerPopup = document.getElementById('corner-popup');
-    const popupTitle = document.getElementById('popup-title');
-    const popupMsg = document.getElementById('popup-msg');
-    const popupAction = document.getElementById('popup-action');
-
-    function getBanglaLetter(index) {
-        const letters = ['ক', 'খ', 'গ', 'ঘ'];
-        return letters[index] || index;
-    }
-
-    toggleAnswer.addEventListener('change', updateVisibility);
-    toggleExplanation.addEventListener('change', updateVisibility);
-    toggleColor.addEventListener('change', updateOptionColors);
-
-    toggleTime.addEventListener('change', () => {
-        resetQuiz();
-    });
-
-    function updateVisibility() {
-        Object.keys(answeredQuestions).forEach(qIndex => {
-            const ansElem = document.getElementById(`ans-text-${qIndex}`);
-            if (ansElem) {
-                ansElem.style.display = toggleAnswer.checked ? 'block' : 'none';
-            }
-
-            const expElem = document.getElementById(`exp-text-${qIndex}`);
-            if (expElem) {
-                expElem.style.display = toggleExplanation.checked ? 'block' : 'none';
-            }
-        });
-    }
-
-    function updateOptionColors() {
-        Object.keys(answeredQuestions).forEach(qIndex => {
-            const selectedIndex = answeredQuestions[qIndex];
-            const currentQuestion = quizData[qIndex];
-            const qBlock = document.getElementById(`q-block-${qIndex}`);
-
-            if (!qBlock || !currentQuestion) return;
-
-            const allButtons = qBlock.querySelectorAll('.option-btn');
-            const selectedBtn = allButtons[selectedIndex];
-            const correctBtn = allButtons[currentQuestion.ans];
-
-            allButtons.forEach(btn => {
-                btn.classList.remove('correct', 'incorrect', 'neutral-selected');
-            });
-
-            if (toggleColor.checked) {
-                if (selectedIndex === currentQuestion.ans) {
-                    if (selectedBtn) selectedBtn.classList.add('correct');
-                } else {
-                    if (selectedBtn) selectedBtn.classList.add('incorrect');
-                    if (correctBtn) correctBtn.classList.add('correct');
-                }
+        function toggleForm(type) {
+            document.getElementById('alertBox').style.display = 'none';
+            if (type === 'register') {
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('registerForm').style.display = 'block';
+                document.getElementById('formTitle').innerText = '📝 Register Account';
+                document.getElementById('toggleMessage').innerHTML = `Already have an account? <span class="toggle-link" onclick="toggleForm('login')">Login Here</span>`;
             } else {
-                if (selectedBtn) selectedBtn.classList.add('neutral-selected');
-            }
-        });
-    }
-
-    async function fetchQuestionsFromDB() {
-        const topicTitle = document.getElementById('topic-title');
-        const categoryPath = document.getElementById('category-path');
-
-        if (!currentCategory) {
-            topicTitle.innerText = "কোনো ক্যাটাগরি সিলেক্ট করা হয়নি!";
-            quizWrapper.innerHTML = "<p style='text-align:center; color:red;'>অনুগ্রহ করে হোম পেজ থেকে একটি টপিক নির্বাচন করুন।</p>";
-            return;
-        }
-
-        const parts = currentCategory.split('/');
-        const mainCat = parts[0] || '';
-        const subCat = parts[1] || '';
-        const topic = parts[2] || subCat || mainCat;
-
-        topicTitle.innerText = `টপিক: ${topic.replace(/-/g, ' ')}`;
-        categoryPath.innerHTML = `📁 ${mainCat} &gt; ${subCat ? subCat + ' &gt; ' : ''}${topic}`;
-
-        try {
-            const token = localStorage.getItem('token') || '';
-            const headers = { 'Content-Type': 'application/json' };
-            if (token) {
-                headers['Authorization'] = `Bearer ${token}`;
-            }
-
-            const res = await fetch(API_URL, { method: 'GET', headers: headers });
-            const data = await res.json();
-
-            if (!res.ok || !Array.isArray(data)) {
-                throw new Error(data.message || "Failed to load questions");
-            }
-
-            quizData = data;
-
-            if (quizData.length === 0) {
-                quizWrapper.innerHTML = `<p style="text-align:center; color:#888;"><b>${topic}</b>-এর অধীনে কোনো প্রশ্ন পাওয়া যায়নি। ড্যাশবোর্ড থেকে প্রশ্ন যোগ করুন!</p>`;
-                return;
-            }
-
-            updateRangeOptions();
-        } catch (err) {
-            console.error("Fetch error:", err);
-            quizWrapper.innerHTML = `<p style='text-align:center; color:red;'>সার্ভার/ডাটাবেজ থেকে প্রশ্ন লোড করতে ব্যর্থ হয়েছে!</p>`;
-        }
-    }
-
-    function updateRangeOptions() {
-        const limitValue = limitSelect.value;
-        rangeSelect.innerHTML = "";
-
-        if (limitValue === 'all' || !Array.isArray(quizData) || quizData.length === 0) {
-            const opt = document.createElement('option');
-            opt.value = 'all';
-            opt.innerText = (Array.isArray(quizData) && quizData.length > 0) ? `1-${quizData.length}` : `সকল প্রশ্ন`;
-            rangeSelect.appendChild(opt);
-        } else {
-            const chunkSize = parseInt(limitValue);
-            const totalQuestions = quizData.length;
-
-            for (let start = 0; start < totalQuestions; start += chunkSize) {
-                let end = Math.min(start + chunkSize, totalQuestions);
-                const opt = document.createElement('option');
-                opt.value = `${start}-${end}`;
-                opt.innerText = `${start + 1}-${end}`;
-                rangeSelect.appendChild(opt);
+                document.getElementById('registerForm').style.display = 'none';
+                document.getElementById('loginForm').style.display = 'block';
+                document.getElementById('formTitle').innerText = '🔐 Login to Account';
+                document.getElementById('toggleMessage').innerHTML = `Don't have an account? <span class="toggle-link" onclick="toggleForm('register')">Register Now</span>`;
             }
         }
 
-        renderQuizUI();
-    }
+        // LOGIN SUBMIT
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('loginBtn');
+            btn.innerText = "Authenticating...";
+            btn.disabled = true;
 
-    function renderQuizUI() {
-        quizWrapper.innerHTML = "";
-        hidePopup();
-        
-        if (!Array.isArray(quizData) || quizData.length === 0) {
-            return;
-        }
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
 
-        let displayData = [];
-        let startIndexOffset = 0;
+            try {
+                const res = await fetch(`${AUTH_API}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
 
-        const selectedRange = rangeSelect.value;
+                if (res.ok && (data.success || data.token)) {
+                    // Save using both 'token' and 'quiz_token' to support all pages seamlessly
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    localStorage.setItem('quiz_token', data.token);
+                    localStorage.setItem('quiz_user', JSON.stringify(data.user));
 
-        if (selectedRange === 'all') {
-            displayData = quizData;
-            startIndexOffset = 0;
-        } else {
-            const [start, end] = selectedRange.split('-').map(Number);
-            displayData = quizData.slice(start, end);
-            startIndexOffset = start;
-        }
-
-        if (toggleTime.checked) {
-            timerBoardBox.style.display = "block";
-            startTimer(displayData.length);
-        } else {
-            timerBoardBox.style.display = "none";
-            if (timerInterval) clearInterval(timerInterval);
-        }
-
-        displayData.forEach((item, relativeIndex) => {
-            const actualIndex = startIndexOffset + relativeIndex;
-
-            const qBlock = document.createElement('div');
-            qBlock.className = 'question-block';
-            qBlock.id = `q-block-${actualIndex}`;
-
-            const qText = document.createElement('div');
-            qText.className = 'question-text';
-            qText.innerText = `${actualIndex + 1}. ${item.q}`;
-            qBlock.appendChild(qText);
-
-            const optContainer = document.createElement('div');
-            optContainer.className = 'options-container';
-
-            item.options.forEach((opt, oIndex) => {
-                const btn = document.createElement('button');
-                btn.className = 'option-btn';
-                btn.innerText = `(${getBanglaLetter(oIndex)}) ${opt}`;
-                
-                if (answeredQuestions[actualIndex] !== undefined) {
-                    btn.classList.add('disabled');
+                    showAlert("✅ Login Successful! Redirecting...", true);
+                    
+                    setTimeout(() => {
+                        if (data.user && (data.user.role === 'owner' || data.user.role === 'admin')) {
+                            window.location.href = 'dashboard.html';
+                        } else {
+                            window.location.href = 'profile.html';
+                        }
+                    }, 1000);
                 } else {
-                    btn.onclick = () => handleAnswer(btn, actualIndex, oIndex, optContainer);
+                    showAlert(data.message || "❌ Invalid login credentials!");
                 }
-
-                optContainer.appendChild(btn);
-            });
-
-            qBlock.appendChild(optContainer);
-
-            const ansText = document.createElement('div');
-            ansText.className = 'answer-text';
-            ansText.id = `ans-text-${actualIndex}`;
-            ansText.innerText = `সঠিক উত্তর: (${getBanglaLetter(item.ans)}) ${item.options[item.ans]}`;
-            qBlock.appendChild(ansText);
-
-            if (item.explanation && item.explanation.trim() !== '') {
-                const expText = document.createElement('div');
-                expText.className = 'explanation-text';
-                expText.id = `exp-text-${actualIndex}`;
-                expText.innerText = `ব্যাখ্যা: ${item.explanation}`;
-                qBlock.appendChild(expText);
+            } catch (err) {
+                showAlert("❌ Server connection error!");
+            } finally {
+                btn.innerText = "🚀 Login";
+                btn.disabled = false;
             }
-
-            quizWrapper.appendChild(qBlock);
         });
 
-        updateVisibility();
-        updateOptionColors();
-    }
+        // REGISTER SUBMIT
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('regBtn');
+            btn.innerText = "Creating Account...";
+            btn.disabled = true;
 
-    function startTimer(questionCount) {
-        if (timerInterval) clearInterval(timerInterval);
+            const name = document.getElementById('regName').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
 
-        initialTotalSeconds = questionCount * 36;
-        totalSecondsLeft = initialTotalSeconds;
-        warningTriggered = false;
+            try {
+                const res = await fetch(`${AUTH_API}/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password })
+                });
+                const data = await res.json();
 
-        updateTimerDisplay();
-
-        const warningThreshold = Math.floor(initialTotalSeconds * 0.10);
-
-        timerInterval = setInterval(() => {
-            if (!toggleTime.checked) {
-                clearInterval(timerInterval);
-                return;
-            }
-
-            if (totalSecondsLeft <= 0) {
-                clearInterval(timerInterval);
-                timerDisplay.innerText = "00:00";
-                handleTimeOut();
-            } else {
-                totalSecondsLeft--;
-                updateTimerDisplay();
-
-                if (warningThreshold > 0 && totalSecondsLeft <= warningThreshold && !warningTriggered) {
-                    warningTriggered = true;
-                    show10PercentWarningPopup();
+                if (res.ok && (data.success || data.token)) {
+                    showAlert("🎉 Registration successful! Please login below.", true);
+                    setTimeout(() => toggleForm('login'), 1500);
+                } else {
+                    showAlert(data.message || "❌ Registration failed!");
                 }
+            } catch (err) {
+                showAlert("❌ Server connection error!");
+            } finally {
+                btn.innerText = "✨ Register Account";
+                btn.disabled = false;
             }
-        }, 1000);
-    }
-
-    function formatTime(totalSec) {
-        const minutes = Math.floor(totalSec / 60);
-        const seconds = totalSec % 60;
-        const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
-        const formattedSeconds = seconds < 10 ? `0${seconds}` : seconds;
-        return { formattedMinutes, formattedSeconds, minutes, seconds };
-    }
-
-    function updateTimerDisplay() {
-        const { formattedMinutes, formattedSeconds } = formatTime(totalSecondsLeft);
-        timerDisplay.innerText = `${formattedMinutes}:${formattedSeconds}`;
-    }
-
-    function show10PercentWarningPopup() {
-        if (!toggleTime.checked) return;
-
-        const { minutes, seconds } = formatTime(totalSecondsLeft);
-        let timeStr = "";
-        if (minutes > 0) timeStr += `${minutes} মিনিট `;
-        if (seconds > 0) timeStr += `${seconds} সেকেন্ড`;
-
-        cornerPopup.className = "corner-popup warning";
-        popupTitle.innerText = "⚠️ সময় প্রায় শেষ!";
-        popupMsg.innerText = `আর মাত্র ${timeStr} বাকি আছে। দ্রুত উত্তর দিন!`;
-        popupAction.innerHTML = `<button class="popup-btn" onclick="hidePopup()">ঠিক আছে</button>`;
-        cornerPopup.style.display = "block";
-    }
-
-    function handleTimeOut() {
-        if (!toggleTime.checked) return;
-
-        disableAllButtonsOnTimeOut();
-        cornerPopup.className = "corner-popup danger";
-        popupTitle.innerText = "⏰ সময় শেষ!";
-        popupMsg.innerText = `আপনার নির্ধারিত সময় শেষ হয়ে গেছে। আপনার প্রাপ্ত স্কোর হলো: ${score}`;
-        popupAction.innerHTML = `<button class="popup-btn" onclick="resetQuiz()">🔄 পুনরায় শুরু করুন</button>`;
-        cornerPopup.style.display = "block";
-    }
-
-    function hidePopup() {
-        cornerPopup.style.display = "none";
-    }
-
-    function disableAllButtonsOnTimeOut() {
-        const allOptionBtns = document.querySelectorAll('.option-btn');
-        allOptionBtns.forEach(btn => {
-            btn.classList.add('disabled');
-            btn.onclick = null;
         });
-    }
-
-    function handleAnswer(selectedBtn, qIndex, selectedIndex, optContainer) {
-        if (toggleTime.checked && totalSecondsLeft <= 0) return;
-
-        const currentQuestion = quizData[qIndex];
-        const allButtons = optContainer.querySelectorAll('.option-btn');
-        
-        allButtons.forEach(btn => {
-            btn.classList.add('disabled');
-            btn.onclick = null;
-        });
-
-        answeredQuestions[qIndex] = selectedIndex;
-
-        updateOptionColors();
-
-        if (selectedIndex === currentQuestion.ans) {
-            score += 1;
-            correctCount += 1;
-        } else {
-            score -= 0.5;
-            incorrectCount += 1;
-        }
-
-        liveScoreDisplay.innerText = score;
-        correctCountDisplay.innerText = correctCount;
-        incorrectCountDisplay.innerText = incorrectCount;
-        finalScoreDisplay.innerText = `আপনার মোট প্রাপ্ত স্কোর: ${score}`;
-
-        updateVisibility();
-    }
-
-    function resetQuiz() {
-        score = 0;
-        correctCount = 0;
-        incorrectCount = 0;
-        answeredQuestions = {};
-
-        liveScoreDisplay.innerText = 0;
-        correctCountDisplay.innerText = 0;
-        incorrectCountDisplay.innerText = 0;
-        finalScoreDisplay.innerText = 'আপনার মোট প্রাপ্ত স্কোর: ০';
-
-        hidePopup();
-        renderQuizUI();
-    }
-
-    window.onload = fetchQuestionsFromDB;
-</script>
-
+    </script>
 </body>
 </html>

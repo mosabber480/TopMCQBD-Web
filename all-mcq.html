@@ -3,141 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>All MCQ - Browse Categories</title>
+    <title>সকল কুইজ ক্যাটাগরি - TopMCQ</title>
+    
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- GLOBAL CSS LINK (Handles Announcement, Header, Navigation & Footer styles) -->
+    <link rel="stylesheet" href="global/global.css">
+    
     <style>
-        :root {
-            --primary: #007bff;
-            --primary-dark: #0056b3;
-            --dark: #2c3e50;
-            --light: #f8f9fa;
-            --gray: #6c757d;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f7f6;
-            color: #333;
-            line-height: 1.6;
-        }
-
-        /* 1. Dynamic Announcement Bar Styling */
-        #global-announce-bar {
-            background: linear-gradient(90deg, #ff9f43, #ee5253);
-            color: #fff;
-            font-size: 13px;
-            font-weight: 600;
-            padding: 8px 15px;
-            text-align: center;
-            position: relative;
-            z-index: 1001;
-        }
-        .announce-content a { color: #fff; margin-left: 10px; text-decoration: underline; font-weight: bold; }
-
-        /* 2. Dynamic Header Styling */
-        #global-header {
-            background-color: #ffffff;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-        .header-wrapper {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 20px;
-        }
-        .site-logo a { font-size: 26px; font-weight: 800; color: var(--dark); text-decoration: none; display: flex; align-items: center; gap: 8px; }
-        .site-logo img { max-height: 40px; width: auto; }
-        .site-nav ul { display: flex; list-style: none; gap: 25px; align-items: center; }
-        .site-nav a { text-decoration: none; color: var(--dark); font-weight: 600; font-size: 15px; transition: color 0.2s ease; }
-        .site-nav a:hover { color: var(--primary); }
-        .btn-primary-head { background-color: var(--primary); color: white !important; padding: 9px 20px; border-radius: 6px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
-        .btn-primary-head:hover { background-color: var(--primary-dark); }
-
-        .nav-item { position: relative; }
-        .dropdown-menu { display: none; position: absolute; top: 100%; left: 0; background: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-radius: 6px; list-style: none; padding: 10px 0; min-width: 180px; z-index: 100; }
-        .nav-item:hover .dropdown-menu { display: block; }
-        .dropdown-menu li a { padding: 8px 15px; display: block; color: #333; font-size: 14px; }
-        .dropdown-menu li a:hover { background: #f4f7f6; color: var(--primary); }
-
-        /* Container Layout */
+        /* PAGE SPECIFIC STYLES FOR ALL-MCQ */
         .container {
             max-width: 900px;
-            margin: 30px auto;
-            background: #fff;
+            margin: 35px auto;
+            background: #ffffff;
             padding: 30px;
-            border-radius: 8px;
+            border-radius: 10px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
             position: relative;
+            border: 1px solid #e2e8f0;
         }
 
         .btn-home {
             position: absolute;
             top: 0;
             left: 0;
-            background-color: #007bff;
+            background-color: var(--primary);
             color: white;
             text-decoration: none;
             padding: 8px 16px;
-            border-bottom-right-radius: 6px;
-            border-top-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+            border-top-left-radius: 9px;
             font-size: 13px;
             font-weight: bold;
             display: inline-flex;
             align-items: center;
+            gap: 6px;
             transition: background-color 0.2s ease;
         }
-        .btn-home:hover { background-color: #0056b3; }
+        .btn-home:hover { background-color: var(--primary-dark); }
 
-        h1 { text-align: center; color: #2c3e50; margin-top: 15px; margin-bottom: 25px; }
+        .page-title { 
+            text-align: center; 
+            color: var(--dark); 
+            margin-top: 15px; 
+            margin-bottom: 25px; 
+            font-size: 26px;
+            font-weight: 700;
+        }
 
-        .category-card { border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 15px; background: #fff; overflow: hidden; }
-        .category-header { background: #f8f9fa; padding: 12px 20px; font-size: 18px; font-weight: 600; color: #2c3e50; border-bottom: 1px solid #e2e8f0; }
-        .subcategory-list { padding: 15px 20px; display: flex; flex-wrap: wrap; gap: 10px; }
-        .subcategory-btn { background-color: #e2e6ea; color: #2c3e50; text-decoration: none; padding: 8px 14px; border-radius: 4px; font-size: 14px; font-weight: 500; transition: all 0.2s ease; }
-        .subcategory-btn:hover { background-color: #007bff; color: #fff; }
-        .loading-text { text-align: center; color: #888; font-size: 16px; padding: 30px 0; }
+        .category-card { 
+            border: 1px solid #e2e8f0; 
+            border-radius: 8px; 
+            margin-bottom: 20px; 
+            background: #ffffff; 
+            overflow: hidden; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            transition: border-color 0.2s ease;
+        }
+        .category-card:hover {
+            border-color: #cbd5e1;
+        }
 
-        /* 3. Dynamic Footer Styling */
-        #global-footer { background-color: var(--dark); color: #ecf0f1; padding: 40px 20px 20px 20px; margin-top: 60px; }
-        .footer-container { max-width: 1200px; margin: 0 auto; }
-        .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 30px; margin-bottom: 30px; }
-        .footer-col h4 { font-size: 16px; margin-bottom: 15px; color: #ffffff; border-bottom: 2px solid var(--primary); padding-bottom: 6px; display: inline-block; }
-        .footer-col p { font-size: 14px; color: #bdc3c7; line-height: 1.6; }
-        .footer-social { margin-top: 15px; display: flex; gap: 12px; }
-        .footer-social a { color: white; font-size: 18px; background: rgba(255,255,255,0.1); width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 50%; text-decoration: none; }
-        .footer-social a:hover { background: var(--primary); }
-        .footer-bottom { text-align: center; padding-top: 20px; border-top: 1px solid #34495e; font-size: 13px; color: #95a5a6; }
+        .category-header { 
+            background: #f8fafc; 
+            padding: 14px 20px; 
+            font-size: 18px; 
+            font-weight: 700; 
+            color: var(--dark); 
+            border-bottom: 1px solid #e2e8f0; 
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .subcategory-list { 
+            padding: 18px 20px; 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 10px; 
+        }
+
+        .subcategory-btn { 
+            background-color: #f1f5f9; 
+            color: #334155; 
+            text-decoration: none; 
+            padding: 9px 16px; 
+            border-radius: 6px; 
+            font-size: 14px; 
+            font-weight: 600; 
+            border: 1px solid #cbd5e1;
+            transition: all 0.2s ease; 
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .subcategory-btn:hover { 
+            background-color: var(--primary); 
+            color: #ffffff; 
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .loading-text { 
+            text-align: center; 
+            color: var(--gray); 
+            font-size: 16px; 
+            padding: 40px 0; 
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 20px 15px;
+                padding: 20px 15px;
+            }
+            .page-title {
+                font-size: 20px;
+                margin-top: 25px;
+            }
+            .subcategory-list {
+                padding: 12px 15px;
+            }
+            .subcategory-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
     </style>
 </head>
 <body>
 
-    <!-- DYNAMIC ANNOUNCEMENT BAR -->
+    <!-- DYNAMIC GLOBAL LAYOUT CONTAINERS -->
     <div id="global-announce-bar" style="display:none;"></div>
-
-    <!-- DYNAMIC HEADER -->
     <header id="global-header"></header>
 
+    <!-- MAIN PAGE CONTENT -->
     <div class="container">
-        <a href="index.html" class="btn-home">⬅️ হোম পেজ</a>
-        <h1>সকল কুইজ ক্যাটাগরি (All MCQ)</h1>
+        <a href="index.html" class="btn-home"><i class="fa-solid fa-arrow-left"></i> হোম পেজ</a>
+        <h1 class="page-title"><i class="fa-solid fa-layer-group" style="color: var(--primary);"></i> সকল কুইজ ক্যাটাগরি (All MCQ)</h1>
+        
         <div id="category-wrapper">
-            <p class="loading-text">ক্যাটাগরি ডাটা লোড হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন...</p>
+            <p class="loading-text"><i class="fa-solid fa-spinner fa-spin"></i> ক্যাটাগরি ডাটা লোড হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন...</p>
         </div>
     </div>
 
-    <!-- DYNAMIC FOOTER -->
+    <!-- DYNAMIC GLOBAL FOOTER CONTAINER -->
     <footer id="global-footer"></footer>
 
-    <!-- CONFIG JS SCRIPT -->
-    <script src="config.js"></script>
+    <!-- GLOBAL JS LINK (Handles Header, Navigation, Mobile Menu, Announce Bar, and Footer SWR Rendering) -->
+    <script src="global/global.js"></script>
 
+    <!-- ALL MCQ CATEGORY FETCH SCRIPT -->
     <script>
         const API_URL = 'https://mosabber-quiz-app.onrender.com/api/questions';
 
@@ -145,7 +162,7 @@
             const wrapper = document.getElementById('category-wrapper');
 
             try {
-                const token = localStorage.getItem('token') || '';
+                const token = localStorage.getItem('token') || localStorage.getItem('quiz_token') || '';
                 const headers = { 'Content-Type': 'application/json' };
                 if (token) headers['Authorization'] = `Bearer ${token}`;
 
@@ -174,7 +191,7 @@
                 wrapper.innerHTML = "";
 
                 if (Object.keys(groupedCategories).length === 0) {
-                    wrapper.innerHTML = `<p class="loading-text">কোনো ক্যাটাগরি পাওয়া যায়নি!</p>`;
+                    wrapper.innerHTML = `<p class="loading-text"><i class="fa-solid fa-circle-exclamation"></i> কোনো ক্যাটাগরি পাওয়া যায়নি!</p>`;
                     return;
                 }
 
@@ -184,7 +201,7 @@
 
                     const header = document.createElement('div');
                     header.className = 'category-header';
-                    header.innerText = `📁 ${mainCat}`;
+                    header.innerHTML = `<i class="fa-solid fa-folder-open" style="color: var(--primary);"></i> ${mainCat}`;
                     card.appendChild(header);
 
                     const subList = document.createElement('div');
@@ -193,7 +210,7 @@
                     groupedCategories[mainCat].forEach(subCat => {
                         const btn = document.createElement('a');
                         btn.className = 'subcategory-btn';
-                        btn.innerText = subCat;
+                        btn.innerHTML = `<i class="fa-regular fa-file-lines"></i> ${subCat}`;
                         btn.href = `quiz.html?category=${encodeURIComponent(mainCat + '/' + subCat)}`;
                         subList.appendChild(btn);
                     });
@@ -204,7 +221,7 @@
 
             } catch (err) {
                 console.error("Error loading categories:", err);
-                wrapper.innerHTML = `<p style="text-align:center; color:red;">ক্যাটাগরি ডাটা লোড করতে সমস্যা হয়েছে!</p>`;
+                wrapper.innerHTML = `<p style="text-align:center; color: var(--danger); padding: 30px;"><i class="fa-solid fa-triangle-exclamation"></i> ক্যাটাগরি ডাটা লোড করতে সমস্যা হয়েছে!</p>`;
             }
         }
 

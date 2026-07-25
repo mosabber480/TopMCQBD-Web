@@ -2,11 +2,9 @@
 const LAYOUT_API_URL = 'https://mosabber-quiz-app.onrender.com/api/layout-config';
 
 // 1. DEFAULT ANNOUNCEMENT CONFIGURATION
-// সার্ভার রেসপন্স দেওয়ার আগে বা প্রথমবার পেজ লোড হওয়া মাত্রই এই নোটিশটি দেখাবে।
-// প্রয়োজন হলে আপনি সরাসরি এই টেক্সট বা লিংক কোড থেকেই চেঞ্জ করে নিতে পারবেন।
 const DEFAULT_ANNOUNCEMENT = {
     text: "বিশেষ বিজ্ঞপ্তি: সার্ভার থেকে প্রথমবার কুইজের তথ্য লোড হতে ৩০ সেকেন্ড পর্যন্ত সময় লাগতে পারে। অনুগ্রহ করে ধৈর্য ধরুন!",
-    link: "" // লিংক দিতে চাইলে এখানে দিতে পারেন, যেমন: "#notice"
+    link: ""
 };
 
 // Helper Function: Correct URL Formatter (Local vs External)
@@ -22,36 +20,46 @@ function formatURL(url) {
     return 'https://' + trimmed;
 }
 
+// Helper Function: Smart Auth Redirect based on Role & Token
+function getAuthRedirectLink() {
+    const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
+    const userStr = localStorage.getItem('user') || localStorage.getItem('quiz_user');
+    
+    if (!token) {
+        return 'login.html';
+    }
+    
+    try {
+        const user = JSON.parse(userStr || '{}');
+        if (user && (user.role === 'owner' || user.role === 'admin')) {
+            return 'dashboard.html';
+        }
+    } catch(e){}
+    
+    return 'profile.html';
+}
+
 // Optimized Function: Load from Cache first, then Revalidate from Server (SWR)
 async function renderGlobalLayout() {
-    // 1. Try loading instantly from LocalStorage Cache to eliminate server load
     let cachedData = localStorage.getItem('layout_config_data');
     let config = cachedData ? JSON.parse(cachedData) : null;
 
-    // If no announcement set in cache, inject the default announcement instantly
     if (!config) {
-        config = {
-            announcement: DEFAULT_ANNOUNCEMENT
-        };
+        config = { announcement: DEFAULT_ANNOUNCEMENT };
     } else if (!config.announcement || !config.announcement.text) {
         config.announcement = DEFAULT_ANNOUNCEMENT;
     }
 
-    // Render instantly from Cache/Default if available
     applyLayoutToDOM(config);
 
-    // 2. Fetch fresh config from Server and update Cache silently
     try {
         const response = await fetch(LAYOUT_API_URL);
         if (response.ok) {
             const freshData = await response.json();
-            
-            // If server layout config doesn't have an announcement set, retain default announcement
             if (!freshData.announcement || !freshData.announcement.text) {
                 freshData.announcement = DEFAULT_ANNOUNCEMENT;
             }
 
-            // If cache is empty or data has changed on server, update DOM & Cache
             if (JSON.stringify(config) !== JSON.stringify(freshData)) {
                 localStorage.setItem('layout_config_data', JSON.stringify(freshData));
                 applyLayoutToDOM(freshData);
@@ -80,7 +88,7 @@ function applyLayoutToDOM(data) {
         }
     }
 
-    // B. Announcement Bar (Instant Fallback to DEFAULT_ANNOUNCEMENT)
+    // B. Announcement Bar
     const announceBar = document.getElementById('global-announce-bar');
     const announceInfo = (data.announcement && data.announcement.text) ? data.announcement : DEFAULT_ANNOUNCEMENT;
 
@@ -123,11 +131,34 @@ function applyLayoutToDOM(data) {
             }).join('');
         }
 
-        let headerBtnHTML = h.btnText ? `
-            <div class="header-btn">
-                <a href="${formatURL(h.btnLink)}" class="btn-primary-head">${h.btnText}</a>
+        // Auth Status and Action Link
+        const authLink = getAuthRedirectLink();
+        const isLoggedIn = authLink !== 'login.html';
+        const userStr = localStorage.getItem('user') || localStorage.getItem('quiz_user');
+        let userName = 'লগইন';
+        if (isLoggedIn) {
+            try {
+                const user = JSON.parse(userStr || '{}');
+                if (user.name) userName = user.name.split(' ')[0]; // First Name
+                else userName = 'ড্যাশবোর্ড';
+            } catch(e) { userName = 'ড্যাশবোর্ড'; }
+        }
+
+        // Header Action Buttons (Fully Controlled from Dashboard Settings)
+        let customBtnText = (h.btnText && h.btnText.trim()) ? h.btnText.trim() : 'যোগাযোগ করুন';
+        let rawLink = (h.btnLink || '').trim();
+        let customBtnLink = (rawLink && rawLink !== 'login.html') ? formatURL(rawLink) : 'index.html#mission';
+
+        let headerBtnHTML = `
+            <div class="header-btn-group">
+                <a href="${customBtnLink}" class="btn-primary-head">
+                    <i class="fa-solid fa-headset"></i> ${customBtnText}
+                </a>
+                <a href="${authLink}" class="btn-auth-head">
+                    <i class="fa-solid fa-circle-user"></i> ${userName}
+                </a>
             </div>
-        ` : '';
+        `;
 
         headerContainer.innerHTML = `
             <div class="header-wrapper">

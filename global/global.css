@@ -128,19 +128,19 @@ body {
 }
 .site-nav ul li > a:hover { color: var(--primary); }
 
-/* DESKTOP HEADER BUTTON DESIGN */
-.header-btn {
+/* DESKTOP HEADER BUTTON GROUP DESIGN */
+.header-btn-group {
     flex-shrink: 0;
     display: flex;
     align-items: center;
+    gap: 10px;
     margin-left: 20px;
 }
 
-.site-nav .btn-primary-head,
 .btn-primary-head {
     background-color: var(--primary) !important;
     color: #ffffff !important;
-    padding: 9px 20px !important;
+    padding: 8px 16px !important;
     border-radius: 6px !important;
     font-weight: 600 !important;
     font-size: 14px !important;
@@ -151,12 +151,39 @@ body {
     gap: 6px !important;
     text-decoration: none !important;
     white-space: nowrap !important;
-    line-height: 1.2 !important;
     height: auto !important;
 }
-.btn-primary-head::after { display: none !important; }
-.btn-primary-head:hover { 
-    background-color: var(--primary-dark) !important; 
+
+.btn-primary-head:hover {
+    background-color: var(--primary-dark) !important;
+}
+
+.btn-auth-head {
+    background-color: #f1f5f9 !important;
+    color: var(--dark) !important;
+    border: 1px solid #cbd5e1 !important;
+    padding: 8px 15px !important;
+    border-radius: 6px !important;
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    transition: all 0.2s ease !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    text-decoration: none !important;
+    white-space: nowrap !important;
+    height: auto !important;
+}
+
+.btn-auth-head:hover {
+    background-color: #e2e8f0 !important;
+    color: var(--primary) !important;
+    border-color: var(--primary) !important;
+}
+
+.btn-primary-head::after, .btn-auth-head::after { 
+    display: none !important; 
 }
 
 /* Mobile Toggle Button */
@@ -324,7 +351,7 @@ body {
 
 .footer-bottom { text-align: center; padding-top: 25px; border-top: 1px solid #334155; font-size: 13px; color: #64748b; }
 
-/* MOBILE RESPONSIVE STYLES (LEFT ALIGNED UNDER LOGO) */
+/* MOBILE RESPONSIVE STYLES */
 @media (max-width: 768px) {
     .mobile-toggle-btn {
         display: block;
@@ -401,7 +428,7 @@ body {
         display: flex !important;
     }
 
-    .header-btn {
+    .header-btn-group {
         width: 100%;
         margin-top: 12px;
         margin-left: 0;
@@ -409,12 +436,13 @@ body {
         border-top: 1px solid #f1f5f9;
         display: flex;
         justify-content: flex-start;
+        gap: 10px;
     }
-    .btn-primary-head {
-        width: auto !important;
-        padding: 8px 24px !important;
-        font-size: 14px !important;
-        border-radius: 6px !important;
+    .btn-primary-head, .btn-auth-head {
+        flex: 1;
+        justify-content: center !important;
+        font-size: 13px !important;
+        padding: 8px 12px !important;
     }
 
     .footer-grid {
