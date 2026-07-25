@@ -8,6 +8,8 @@ const layoutConfigSchema = new mongoose.Schema({
     header: {
         siteTitle: String,
         logoUrl: String,
+        seoTitle: String,      // 👈 NEW FIELD
+        faviconUrl: String,    // 👈 NEW FIELD
         btnText: String,
         btnLink: String,
         menus: [
@@ -34,6 +36,6 @@ const layoutConfigSchema = new mongoose.Schema({
     copyright: {
         text: String
     }
-}, { timestamps: true }); // timestamps: true দেওয়াতে updatedAt অটো জেনারেট হবে
+}, { timestamps: true });
 
 module.exports = mongoose.model('LayoutConfig', layoutConfigSchema);

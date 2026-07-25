@@ -4,18 +4,71 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Custom Developing - Dynamic Quiz</title>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        :root {
+            --primary: #007bff;
+            --primary-dark: #0056b3;
+            --dark: #2c3e50;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f4f7f6;
             color: #333;
             line-height: 1.6;
-            margin: 0;
-            padding: 20px;
         }
+
+        /* Dynamic Announcement Bar Styling */
+        #global-announce-bar {
+            background: linear-gradient(90deg, #ff9f43, #ee5253);
+            color: #fff;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 8px 15px;
+            text-align: center;
+            position: relative;
+            z-index: 1001;
+        }
+        .announce-content a { color: #fff; margin-left: 10px; text-decoration: underline; font-weight: bold; }
+
+        /* Dynamic Header Styling */
+        #global-header {
+            background-color: #ffffff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        .header-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+        }
+        .site-logo a { font-size: 26px; font-weight: 800; color: var(--dark); text-decoration: none; display: flex; align-items: center; gap: 8px; }
+        .site-logo img { max-height: 40px; width: auto; }
+        .site-nav ul { display: flex; list-style: none; gap: 25px; align-items: center; }
+        .site-nav a { text-decoration: none; color: var(--dark); font-weight: 600; font-size: 15px; transition: color 0.2s ease; }
+        .site-nav a:hover { color: var(--primary); }
+        .btn-primary-head { background-color: var(--primary); color: white !important; padding: 9px 20px; border-radius: 6px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
+        .btn-primary-head:hover { background-color: var(--primary-dark); }
+
+        .nav-item { position: relative; }
+        .dropdown-menu { display: none; position: absolute; top: 100%; left: 0; background: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-radius: 6px; list-style: none; padding: 10px 0; min-width: 180px; z-index: 100; }
+        .nav-item:hover .dropdown-menu { display: block; }
+        .dropdown-menu li a { padding: 8px 15px; display: block; color: #333; font-size: 14px; }
+        .dropdown-menu li a:hover { background: #f4f7f6; color: var(--primary); }
+
         .container {
             max-width: 900px;
-            margin: 0 auto;
+            margin: 30px auto;
             background: #fff;
             padding: 30px;
             border-radius: 8px;
@@ -41,17 +94,9 @@
             transition: background-color 0.2s ease;
             z-index: 10;
         }
-        .btn-back:hover {
-            background-color: #0056b3;
-            color: white;
-        }
+        .btn-back:hover { background-color: #0056b3; color: white; }
 
-        h1, h2 {
-            text-align: center;
-            color: #2c3e50;
-            margin-top: 10px;
-            margin-bottom: 5px;
-        }
+        h1, h2 { text-align: center; color: #2c3e50; margin-top: 10px; margin-bottom: 5px; }
 
         .btn-reset {
             background-color: #2ecc71;
@@ -64,11 +109,8 @@
             cursor: pointer;
             transition: background-color 0.2s ease;
         }
-        .btn-reset:hover {
-            background-color: #27ae60;
-        }
+        .btn-reset:hover { background-color: #27ae60; }
 
-        /* Floating Status Bar (Timer & Score) */
         .floating-status-bar {
             position: fixed;
             top: 20px;
@@ -105,370 +147,98 @@
             text-align: center;
         }
 
-        .header-info-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 20px;
-        }
-        .exam-path {
-            color: #7f8c8d;
-            font-size: 14px;
-            font-weight: 500;
-            text-align: left;
-        }
-        .negative-mark-note {
-            color: #e74c3c;
-            font-size: 13px;
-            font-weight: 600;
-            text-align: right;
-        }
+        .header-info-bar { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; }
+        .exam-path { color: #7f8c8d; font-size: 14px; font-weight: 500; text-align: left; }
+        .negative-mark-note { color: #e74c3c; font-size: 13px; font-weight: 600; text-align: right; }
 
         .controls-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 10px;
-            margin-bottom: 20px;
-            background: #f8f9fa;
-            padding: 8px 15px;
-            border-radius: 6px;
-            border: 1px solid #e9ecef;
-            flex-wrap: wrap;
-            gap: 12px;
+            display: flex; justify-content: space-between; align-items: center; margin-top: 10px; margin-bottom: 20px;
+            background: #f8f9fa; padding: 8px 15px; border-radius: 6px; border: 1px solid #e9ecef; flex-wrap: wrap; gap: 12px;
         }
-        .nav-actions {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+        .nav-actions { display: flex; align-items: center; gap: 10px; }
+        .right-controls-group { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
+        .filter-group { display: flex; align-items: center; gap: 6px; }
+        .select-dropdown { padding: 5px 8px; border-radius: 4px; border: 1px solid #ced4da; font-size: 13px; font-weight: 600; color: #2c3e50; background-color: #fff; cursor: pointer; outline: none; }
+        .select-dropdown:focus { border-color: #007bff; }
 
-        .right-controls-group {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
+        .switch-group { display: flex; align-items: center; gap: 12px; }
+        .switch-label { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #2c3e50; cursor: pointer; user-select: none; }
+        .switch { position: relative; display: inline-block; width: 36px; height: 20px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .3s; border-radius: 20px; }
+        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
+        input:checked + .slider { background-color: #007bff; }
+        input:checked + .slider:before { transform: translateX(16px); }
 
-        .filter-group {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .select-dropdown {
-            padding: 5px 8px;
-            border-radius: 4px;
-            border: 1px solid #ced4da;
-            font-size: 13px;
-            font-weight: 600;
-            color: #2c3e50;
-            background-color: #fff;
-            cursor: pointer;
-            outline: none;
-        }
-        .select-dropdown:focus {
-            border-color: #007bff;
-        }
+        .color-dots-icon { display: inline-flex; align-items: center; gap: 3px; margin-left: 2px; }
+        .dot-red { width: 9px; height: 9px; background-color: #e74c3c; border-radius: 50%; }
+        .dot-green { width: 9px; height: 9px; background-color: #2ecc71; border-radius: 50%; }
 
-        /* Toggle Switch Styles */
-        .switch-group {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .switch-label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 13px;
-            font-weight: 600;
-            color: #2c3e50;
-            cursor: pointer;
-            user-select: none;
-        }
+        .corner-popup { position: fixed; bottom: 25px; right: 25px; background: #ffffff; color: #2c3e50; padding: 16px 20px; border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); border-left: 5px solid #007bff; z-index: 2000; display: none; max-width: 320px; animation: slideInRight 0.3s ease-out; }
+        .corner-popup.warning { border-left-color: #f39c12; }
+        .corner-popup.danger { border-left-color: #e74c3c; }
+        .corner-popup h4 { margin: 0 0 6px 0; font-size: 15px; color: #2c3e50; }
+        .corner-popup p { margin: 0 0 12px 0; font-size: 13px; color: #555; line-height: 1.4; }
+        .popup-btn { background-color: #007bff; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; transition: background 0.2s ease; }
+        .popup-btn:hover { background-color: #0056b3; }
 
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 36px;
-            height: 20px;
-        }
+        @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #ccc;
-            transition: .3s;
-            border-radius: 20px;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 14px;
-            width: 14px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            transition: .3s;
-            border-radius: 50%;
-        }
-
-        input:checked + .slider {
-            background-color: #007bff;
-        }
-
-        input:checked + .slider:before {
-            transform: translateX(16px);
-        }
-
-        /* Red-Green Color Circles Indicator */
-        .color-dots-icon {
-            display: inline-flex;
-            align-items: center;
-            gap: 3px;
-            margin-left: 2px;
-        }
-        .dot-red {
-            width: 9px;
-            height: 9px;
-            background-color: #e74c3c;
-            border-radius: 50%;
-        }
-        .dot-green {
-            width: 9px;
-            height: 9px;
-            background-color: #2ecc71;
-            border-radius: 50%;
-        }
-
-        /* Bottom-Right Corner Popup Toast Styling */
-        .corner-popup {
-            position: fixed;
-            bottom: 25px;
-            right: 25px;
-            background: #ffffff;
-            color: #2c3e50;
-            padding: 16px 20px;
-            border-radius: 8px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-            border-left: 5px solid #007bff;
-            z-index: 2000;
-            display: none;
-            max-width: 320px;
-            animation: slideInRight 0.3s ease-out;
-        }
-
-        .corner-popup.warning {
-            border-left-color: #f39c12;
-        }
-
-        .corner-popup.danger {
-            border-left-color: #e74c3c;
-        }
-
-        .corner-popup h4 {
-            margin: 0 0 6px 0;
-            font-size: 15px;
-            color: #2c3e50;
-        }
-
-        .corner-popup p {
-            margin: 0 0 12px 0;
-            font-size: 13px;
-            color: #555;
-            line-height: 1.4;
-        }
-
-        .popup-btn {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background 0.2s ease;
-        }
-
-        .popup-btn:hover {
-            background-color: #0056b3;
-        }
-
-        @keyframes slideInRight {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        .question-block {
-            margin-bottom: 20px;
-            padding-bottom: 20px;
-            border-bottom: 1px dashed #ccc;
-        }
-        .question-text {
-            font-size: 17px;
-            font-weight: 600;
-            margin-bottom: 15px;
-            color: #2c3e50;
-            text-align: left;
-        }
-        
-        .options-container {
-            margin-bottom: 15px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px 20px;
-        }
-        .option-btn {
-            background: #f8f9fa;
-            border: 1px solid #ced4da;
-            padding: 10px 18px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 15px;
-            text-align: left;
-            transition: all 0.2s ease;
-            font-weight: normal;
-        }
-
-        .option-btn:hover:not(.disabled) {
-            background: #e2e6ea;
-            border-color: #dae0e5;
-        }
+        .question-block { margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px dashed #ccc; }
+        .question-text { font-size: 17px; font-weight: 600; margin-bottom: 15px; color: #2c3e50; text-align: left; }
+        .options-container { margin-bottom: 15px; display: flex; flex-wrap: wrap; gap: 12px 20px; }
+        .option-btn { background: #f8f9fa; border: 1px solid #ced4da; padding: 10px 18px; border-radius: 4px; cursor: pointer; font-size: 15px; text-align: left; transition: all 0.2s ease; font-weight: normal; }
+        .option-btn:hover:not(.disabled) { background: #e2e6ea; border-color: #dae0e5; }
         .option-btn.disabled { cursor: not-allowed; }
 
-        /* Color Feedback Classes */
-        .correct {
-            background-color: #2ecc71 !important;
-            color: white !important;
-            border-color: #27ae60 !important;
-        }
-        .incorrect {
-            background-color: #e74c3c !important;
-            color: white !important;
-            border-color: #c0392b !important;
-        }
-        
-        /* 🎨 Neutral Selected State when Color Switch is OFF */
-        .neutral-selected {
-            background-color: #ecf7fa !important;
-            color: #000000 !important;
-            border-color: #222 !important;
-            font-weight: normal !important;
-        }
+        .correct { background-color: #2ecc71 !important; color: white !important; border-color: #27ae60 !important; }
+        .incorrect { background-color: #e74c3c !important; color: white !important; border-color: #c0392b !important; }
+        .neutral-selected { background-color: #ecf7fa !important; color: #000000 !important; border-color: #222 !important; font-weight: normal !important; }
 
-        .answer-text {
-            font-weight: bold;
-            color: #27ae60;
-            margin-top: 10px;
-            display: none;
-            text-align: left;
-        }
-        .explanation-text {
-            font-size: 14px;
-            color: #555;
-            margin-top: 5px;
-            display: none;
-            background: #f9f9f9;
-            padding: 8px 12px;
-            border-left: 3px solid #17a2b8;
-            border-radius: 4px;
-        }
-        .result-section {
-            text-align: center;
-            margin-top: 40px;
-            padding: 20px;
-            background: #ecf0f1;
-            border-radius: 8px;
-        }
-        .detailed-stats {
-            font-size: 14px;
-            margin-bottom: 12px;
-            color: #555;
-        }
+        .answer-text { font-weight: bold; color: #27ae60; margin-top: 10px; display: none; text-align: left; }
+        .explanation-text { font-size: 14px; color: #555; margin-top: 5px; display: none; background: #f9f9f9; padding: 8px 12px; border-left: 3px solid #17a2b8; border-radius: 4px; }
+        .result-section { text-align: center; margin-top: 40px; padding: 20px; background: #ecf0f1; border-radius: 8px; }
+        .detailed-stats { font-size: 14px; margin-bottom: 12px; color: #555; }
         .correct-count { color: #2ecc71; font-weight: bold; }
         .incorrect-count { color: #e74c3c; font-weight: bold; }
-        #final-score {
-            font-size: 24px;
-            color: #2c3e50;
-            font-weight: bold;
-            border-top: 2px solid #bdc3c7;
-            padding-top: 10px;
-            display: inline-block;
-        }
+        #final-score { font-size: 24px; color: #2c3e50; font-weight: bold; border-top: 2px solid #bdc3c7; padding-top: 10px; display: inline-block; }
+
+        /* Dynamic Footer Styling */
+        #global-footer { background-color: var(--dark); color: #ecf0f1; padding: 40px 20px 20px 20px; margin-top: 60px; }
+        .footer-container { max-width: 1200px; margin: 0 auto; }
+        .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 30px; margin-bottom: 30px; }
+        .footer-col h4 { font-size: 16px; margin-bottom: 15px; color: #ffffff; border-bottom: 2px solid var(--primary); padding-bottom: 6px; display: inline-block; }
+        .footer-col p { font-size: 14px; color: #bdc3c7; line-height: 1.6; }
+        .footer-social { margin-top: 15px; display: flex; gap: 12px; }
+        .footer-social a { color: white; font-size: 18px; background: rgba(255,255,255,0.1); width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 50%; text-decoration: none; }
+        .footer-social a:hover { background: var(--primary); }
+        .footer-bottom { text-align: center; padding-top: 20px; border-top: 1px solid #34495e; font-size: 13px; color: #95a5a6; }
 
         @media (max-width: 768px) {
-            body { padding: 15px; }
-            .container { padding: 20px; }
-            h1, h2 { font-size: 20px; }
-            
-            .floating-status-bar {
-                top: 10px;
-                right: 10px;
-                gap: 6px;
-            }
-            .timer-board, .score-board {
-                padding: 6px 12px;
-                font-size: 14px;
-                min-width: 80px;
-            }
-
-            .header-info-bar {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 5px;
-            }
+            .header-wrapper { flex-direction: column; gap: 12px; }
+            .site-nav ul { gap: 15px; flex-wrap: wrap; justify-content: center; }
+            .floating-status-bar { top: 10px; right: 10px; gap: 6px; }
+            .timer-board, .score-board { padding: 6px 12px; font-size: 14px; min-width: 80px; }
+            .header-info-bar { flex-direction: column; align-items: flex-start; gap: 5px; }
             .negative-mark-note { text-align: left; }
-            .controls-bar {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 12px;
-            }
-            .nav-actions {
-                width: 100%;
-                justify-content: flex-start;
-                flex-wrap: wrap;
-            }
-            .right-controls-group {
-                width: 100%;
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
-            }
+            .controls-bar { flex-direction: column; align-items: flex-start; gap: 12px; }
+            .nav-actions { width: 100%; justify-content: flex-start; flex-wrap: wrap; }
+            .right-controls-group { width: 100%; flex-direction: column; align-items: flex-start; gap: 10px; }
             .filter-group { width: 100%; }
-            .switch-group {
-                flex-direction: row;
-                flex-wrap: wrap;
-                align-items: center;
-                gap: 10px;
-            }
-            .options-container {
-                flex-direction: column;
-                gap: 10px;
-            }
-            .option-btn {
-                width: 100%;
-                box-sizing: border-box;
-                padding: 12px 15px;
-            }
-            .corner-popup {
-                bottom: 15px;
-                right: 15px;
-                left: 15px;
-                max-width: none;
-            }
+            .switch-group { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 10px; }
+            .options-container { flex-direction: column; gap: 10px; }
+            .option-btn { width: 100%; box-sizing: border-box; padding: 12px 15px; }
+            .corner-popup { bottom: 15px; right: 15px; left: 15px; max-width: none; }
         }
     </style>
 </head>
 <body>
+
+<!-- DYNAMIC ANNOUNCEMENT BAR -->
+<div id="global-announce-bar" style="display:none;"></div>
+
+<!-- DYNAMIC HEADER -->
+<header id="global-header"></header>
 
 <!-- Floating Status Container (Timer & Score) -->
 <div class="floating-status-bar">
@@ -518,7 +288,6 @@
 
             <!-- Toggle Switches (Color, Correct Ans, Explanation, Time) -->
             <div class="switch-group">
-                <!-- 🔴🟢 Red-Green Color Feedback Switch (DEFAULT: checked) -->
                 <label class="switch-label">
                     <label class="switch">
                         <input type="checkbox" id="toggle-color" checked>
@@ -538,7 +307,6 @@
                     সঠিক উত্তর
                 </label>
 
-                <!-- 📖 Explanation Switch (DEFAULT: checked) -->
                 <label class="switch-label">
                     <label class="switch">
                         <input type="checkbox" id="toggle-explanation" checked>
@@ -571,6 +339,12 @@
     </div>
 </div>
 
+<!-- DYNAMIC FOOTER -->
+<footer id="global-footer"></footer>
+
+<!-- CONFIG JS SCRIPT -->
+<script src="config.js"></script>
+
 <script>
     const urlParams = new URLSearchParams(window.location.search);
     const currentCategory = urlParams.get('category');
@@ -580,12 +354,11 @@
         : null;
 
     let quizData = []; 
-    let answeredQuestions = {}; // Stores: { qIndex: selectedIndex }
+    let answeredQuestions = {}; 
     let score = 0;
     let correctCount = 0;
     let incorrectCount = 0;
 
-    // Timer Variables
     let timerInterval = null;
     let initialTotalSeconds = 0;
     let totalSecondsLeft = 0;
@@ -606,7 +379,6 @@
     const limitSelect = document.getElementById('limit-select');
     const rangeSelect = document.getElementById('range-select');
 
-    // Popup Elements
     const cornerPopup = document.getElementById('corner-popup');
     const popupTitle = document.getElementById('popup-title');
     const popupMsg = document.getElementById('popup-msg');
@@ -619,8 +391,6 @@
 
     toggleAnswer.addEventListener('change', updateVisibility);
     toggleExplanation.addEventListener('change', updateVisibility);
-    
-    // কালার সুইচে টগল করলে অপশন রঙ ডাইনামিকলি সিঙ্ক হবে
     toggleColor.addEventListener('change', updateOptionColors);
 
     toggleTime.addEventListener('change', () => {
@@ -641,7 +411,6 @@
         });
     }
 
-    // রিয়েল-টাইম অপশন কালার সিঙ্ক করার ফাংশন
     function updateOptionColors() {
         Object.keys(answeredQuestions).forEach(qIndex => {
             const selectedIndex = answeredQuestions[qIndex];
@@ -654,7 +423,6 @@
             const selectedBtn = allButtons[selectedIndex];
             const correctBtn = allButtons[currentQuestion.ans];
 
-            // আগে দেওয়া কালার ক্লাসগুলো ক্লিয়ার করা
             allButtons.forEach(btn => {
                 btn.classList.remove('correct', 'incorrect', 'neutral-selected');
             });
@@ -667,7 +435,6 @@
                     if (correctBtn) correctBtn.classList.add('correct');
                 }
             } else {
-                // কালার সুইচ OFF থাকলে .neutral-selected ব্যবহার হবে
                 if (selectedBtn) selectedBtn.classList.add('neutral-selected');
             }
         });
@@ -826,7 +593,6 @@
         updateOptionColors();
     }
 
-    // TIMER LOGIC
     function startTimer(questionCount) {
         if (timerInterval) clearInterval(timerInterval);
 
@@ -873,7 +639,6 @@
         timerDisplay.innerText = `${formattedMinutes}:${formattedSeconds}`;
     }
 
-    // POPUP DISPLAY FUNCTIONS
     function show10PercentWarningPopup() {
         if (!toggleTime.checked) return;
 
@@ -923,13 +688,10 @@
             btn.onclick = null;
         });
 
-        // ইউজারের উত্তর সংরক্ষণ
         answeredQuestions[qIndex] = selectedIndex;
 
-        // কালার আপডেট রেন্ডার করা
         updateOptionColors();
 
-        // স্কোর ক্যালকুলেশন
         if (selectedIndex === currentQuestion.ans) {
             score += 1;
             correctCount += 1;

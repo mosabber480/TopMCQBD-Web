@@ -69,6 +69,7 @@
         .section-card { background: white; padding: 25px 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid #e2e8f0; }
         .section-card.announce-card { border-left: 6px solid var(--warning); }
         .section-card.header-card { border-left: 6px solid var(--primary); }
+        .section-card.menu-card { border-left: 6px solid #20c997; }
         .section-card.footer-card { border-left: 6px solid var(--secondary); }
         .section-card.copy-card { border-left: 6px solid var(--purple-btn); }
 
@@ -141,10 +142,16 @@
             <div id="announce-container"></div>
         </div>
 
-        <!-- ২. HEADER SETTINGS CARD -->
+        <!-- ২.১ LOGO, TITLE, SEO & FAVICON CARD -->
         <div class="section-card header-card">
-            <div class="section-title"><i class="fa-solid fa-window-maximize" style="color: var(--primary);"></i> ২. হেডার সেটিং (Logo, Title, Menu & Sub-menu)</div>
-            <div id="header-container"></div>
+            <div class="section-title"><i class="fa-solid fa-id-card" style="color: var(--primary);"></i> ২.১ লোগো, টাইটেল, SEO ও ফেভিকন সেটিং</div>
+            <div id="header-brand-container"></div>
+        </div>
+
+        <!-- ২.২ MENU & SUB-MENU CARD -->
+        <div class="section-card menu-card">
+            <div class="section-title"><i class="fa-solid fa-bars-staggered" style="color: #20c997;"></i> ২.২ নেভিগেশন মেনু ও সাব-মেনু সেটিং</div>
+            <div id="header-menu-container"></div>
         </div>
 
         <!-- ৩. FOOTER SETTINGS CARD (4 COLUMNS) -->
@@ -205,7 +212,8 @@
                 copyrightInfo = data.copyright || null;
 
                 renderAnnounceSection();
-                renderHeaderSection();
+                renderHeaderBrandSection();
+                renderHeaderMenuSection();
                 renderFooterSection();
                 renderCopyrightSection();
             } catch (err) { 
@@ -283,44 +291,145 @@
             }
         }
 
-        /* ================= 2. HEADER SECTION (LOGO, MENU & SUBMENU) ================= */
-        function renderHeaderSection() {
-            const container = document.getElementById('header-container');
+        /* ================= 2.1 HEADER BRANDING & SEO SECTION ================= */
+        function renderHeaderBrandSection() {
+            const container = document.getElementById('header-brand-container');
             container.innerHTML = '';
 
-            if (headerInfo) {
-                const menusSummary = headerInfo.menus ? headerInfo.menus.map(m => {
-                    const subCount = m.subMenus ? ` (${m.subMenus.length} sub-menus)` : '';
-                    return `<b>${m.title}</b>${subCount}`;
-                }).join(' | ') : 'কোনো মেনু নেই';
-
+            if (headerInfo && (headerInfo.siteTitle || headerInfo.logoUrl || headerInfo.seoTitle || headerInfo.faviconUrl)) {
                 container.innerHTML = `
                     <div class="read-box" style="border-left: 5px solid #007bff;">
                         <div class="read-title"><i class="fa-solid fa-heading"></i> টাইটেল: ${headerInfo.siteTitle || 'TopMCQ'}</div>
-                        <div class="read-subtitle"><b>Logo Image URL:</b> ${headerInfo.logoUrl || 'নাই'}</div>
-                        <div class="read-meta"><b>হেডার বাটন:</b> ${headerInfo.btnText || 'নাই'} (${headerInfo.btnLink || '#'})</div>
-                        <div class="read-preview-text"><b>মেনু তালিকা:</b> ${menusSummary}</div>
+                        <div class="read-subtitle"><b>SEO টাইটেল:</b> ${headerInfo.seoTitle || 'TopMCQ - সেরা অনলাইন কুইজ প্ল্যাটফর্ম'}</div>
+                        <div class="read-meta"><b>Logo URL:</b> ${headerInfo.logoUrl || 'নাই'} | <b>Favicon URL:</b> ${headerInfo.faviconUrl || 'নাই'}</div>
+                        <div class="read-preview-text"><b>হেডার বাটন:</b> ${headerInfo.btnText || 'নাই'} (${headerInfo.btnLink || '#'})</div>
                         <div class="card-actions">
-                            <button class="btn btn-warning" onclick="editHeaderSection()"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-                            <button class="btn btn-danger" onclick="deleteHeaderSection()"><i class="fa-solid fa-trash"></i> Delete</button>
+                            <button class="btn btn-warning" onclick="editHeaderBrandSection()"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                            <button class="btn btn-danger" onclick="deleteHeaderBrandSection()"><i class="fa-solid fa-trash"></i> Delete</button>
                         </div>
                     </div>
                 `;
             } else {
                 container.innerHTML = `
-                    <button class="btn btn-add" onclick="editHeaderSection(true)">
-                        <i class="fa-solid fa-plus"></i> হেডার তথ্য যোগ করুন
+                    <button class="btn btn-add" onclick="editHeaderBrandSection(true)">
+                        <i class="fa-solid fa-plus"></i> ব্রান্ড ও SEO তথ্য যোগ করুন
                     </button>
                 `;
             }
         }
 
-        function editHeaderSection(isNew = false) {
-            const container = document.getElementById('header-container');
+        function editHeaderBrandSection(isNew = false) {
+            const container = document.getElementById('header-brand-container');
             const siteTitle = headerInfo ? headerInfo.siteTitle || '' : 'TopMCQ';
             const logoUrl = headerInfo ? headerInfo.logoUrl || '' : '';
+            const seoTitle = headerInfo ? headerInfo.seoTitle || '' : 'TopMCQ - সেরা অনলাইন কুইজ প্ল্যাটফর্ম';
+            const faviconUrl = headerInfo ? headerInfo.faviconUrl || '' : '';
             const btnText = headerInfo ? headerInfo.btnText || '' : 'লগইন';
             const btnLink = headerInfo ? headerInfo.btnLink || '' : 'login.html';
+
+            container.innerHTML = `
+                <div class="read-box" style="border-left: 5px solid #007bff; background: #ffffff;">
+                    <div style="font-weight: bold; margin-bottom: 12px; color: #007bff;">
+                        ${isNew ? 'নতুন ব্রান্ড ও SEO তথ্য যোগ করুন' : 'ব্রান্ড ও SEO সেটিং এডিট করুন'}
+                    </div>
+                    <div class="row">
+                        <div class="form-group" style="flex:1;">
+                            <label>লোগো টাইটেল (Site Title):</label>
+                            <input type="text" id="brand-title-input" value="${siteTitle.replace(/"/g, '&quot;')}" placeholder="যেমন: TopMCQ">
+                        </div>
+                        <div class="form-group" style="flex:1;">
+                            <label>লোগো ইমেজ URL (Logo Image URL):</label>
+                            <input type="text" id="brand-logo-input" value="${logoUrl.replace(/"/g, '&quot;')}" placeholder="যেমন: images/logo.png">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group" style="flex:1;">
+                            <label>SEO টাইটেল (Browser Meta Title):</label>
+                            <input type="text" id="brand-seo-title-input" value="${seoTitle.replace(/"/g, '&quot;')}" placeholder="যেমন: TopMCQ - সেরা প্রস্তুতি">
+                        </div>
+                        <div class="form-group" style="flex:1;">
+                            <label>ফেভিকন URL (Favicon Icon URL):</label>
+                            <input type="text" id="brand-favicon-input" value="${faviconUrl.replace(/"/g, '&quot;')}" placeholder="যেমন: images/favicon.ico">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group" style="flex:1;">
+                            <label>হেডার বাটন টেক্সট:</label>
+                            <input type="text" id="brand-btn-text-input" value="${btnText.replace(/"/g, '&quot;')}" placeholder="যেমন: লগইন">
+                        </div>
+                        <div class="form-group" style="flex:1;">
+                            <label>হেডার বাটন লিংক (URL):</label>
+                            <input type="text" id="brand-btn-link-input" value="${btnLink.replace(/"/g, '&quot;')}" placeholder="যেমন: login.html">
+                        </div>
+                    </div>
+                    <div class="card-actions" style="margin-top: 10px;">
+                        <button class="btn btn-submit" onclick="saveHeaderBrandSection()"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
+                        <button class="btn btn-secondary" onclick="renderHeaderBrandSection()"><i class="fa-solid fa-xmark"></i> Cancel</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function saveHeaderBrandSection() {
+            if (!headerInfo) headerInfo = {};
+            headerInfo.siteTitle = document.getElementById('brand-title-input').value;
+            headerInfo.logoUrl = document.getElementById('brand-logo-input').value;
+            headerInfo.seoTitle = document.getElementById('brand-seo-title-input').value;
+            headerInfo.faviconUrl = document.getElementById('brand-favicon-input').value;
+            headerInfo.btnText = document.getElementById('brand-btn-text-input').value;
+            headerInfo.btnLink = document.getElementById('brand-btn-link-input').value;
+
+            await saveLayoutConfig();
+            renderHeaderBrandSection();
+        }
+
+        async function deleteHeaderBrandSection() {
+            if (await showTopAlert("আপনি কি নিশ্চিত যে ব্রান্ড ও SEO তথ্য মুছে ফেলতে চান?", 'danger', true)) {
+                if (headerInfo) {
+                    delete headerInfo.siteTitle;
+                    delete headerInfo.logoUrl;
+                    delete headerInfo.seoTitle;
+                    delete headerInfo.faviconUrl;
+                    delete headerInfo.btnText;
+                    delete headerInfo.btnLink;
+                }
+                await saveLayoutConfig();
+                renderHeaderBrandSection();
+            }
+        }
+
+        /* ================= 2.2 HEADER MENU & SUB-MENU SECTION ================= */
+        function renderHeaderMenuSection() {
+            const container = document.getElementById('header-menu-container');
+            container.innerHTML = '';
+
+            if (headerInfo && headerInfo.menus && headerInfo.menus.length > 0) {
+                const menusSummary = headerInfo.menus.map(m => {
+                    const subCount = m.subMenus && m.subMenus.length > 0 ? ` (${m.subMenus.length} sub-menus)` : ' (0 sub-menus)';
+                    return `<b>${m.title}</b>${subCount}`;
+                }).join(' | ');
+
+                container.innerHTML = `
+                    <div class="read-box" style="border-left: 5px solid #20c997;">
+                        <div class="read-title"><i class="fa-solid fa-bars"></i> নেভিগেশন মেনু তালিকা</div>
+                        <div class="read-preview-text" style="margin-top:8px;">${menusSummary}</div>
+                        <div class="card-actions">
+                            <button class="btn btn-warning" onclick="editHeaderMenuSection()"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                            <button class="btn btn-danger" onclick="deleteHeaderMenuSection()"><i class="fa-solid fa-trash"></i> Delete</button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <button class="btn btn-add" onclick="editHeaderMenuSection(true)">
+                        <i class="fa-solid fa-plus"></i> নেভিগেশন মেনু যোগ করুন
+                    </button>
+                `;
+            }
+        }
+
+        function editHeaderMenuSection(isNew = false) {
+            const container = document.getElementById('header-menu-container');
             const menus = headerInfo ? headerInfo.menus || [] : [];
 
             let menusHtml = '';
@@ -340,8 +449,8 @@
                 menusHtml += `
                     <div style="background: #f8fafc; padding: 12px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #cbd5e1;">
                         <div class="row">
-                            <input type="text" placeholder="মেনু টাইটেল (যেমন: কুইজ)" class="header-menu-title" value="${(m.title || '').replace(/"/g, '&quot;')}">
-                            <input type="text" placeholder="মেনু URL (যেমন: quiz.html)" class="header-menu-url" value="${(m.url || '').replace(/"/g, '&quot;')}">
+                            <input type="text" placeholder="মেনু টাইটেল (যেমন: হোম)" class="header-menu-title" value="${(m.title || '').replace(/"/g, '&quot;')}">
+                            <input type="text" placeholder="মেনু URL (যেমন: index.html)" class="header-menu-url" value="${(m.url || '').replace(/"/g, '&quot;')}">
                         </div>
                         <div id="sub-menu-box-${idx}">
                             ${subMenusHtml}
@@ -354,32 +463,11 @@
             });
 
             container.innerHTML = `
-                <div class="read-box" style="border-left: 5px solid #007bff; background: #ffffff;">
-                    <div style="font-weight: bold; margin-bottom: 12px; color: #007bff;">
-                        ${isNew ? 'নতুন হেডার যোগ করুন' : 'হেডার সেটিং এডিট করুন'}
-                    </div>
-                    <div class="row">
-                        <div class="form-group" style="flex:1;">
-                            <label>সাইট টাইটেল (Site Title):</label>
-                            <input type="text" id="header-title-input" value="${siteTitle.replace(/"/g, '&quot;')}">
-                        </div>
-                        <div class="form-group" style="flex:1;">
-                            <label>লোগো ইমেজ URL (Logo URL):</label>
-                            <input type="text" id="header-logo-input" value="${logoUrl.replace(/"/g, '&quot;')}">
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="form-group" style="flex:1;">
-                            <label>বাটনের নাম (Action Button):</label>
-                            <input type="text" id="header-btn-text-input" value="${btnText.replace(/"/g, '&quot;')}">
-                        </div>
-                        <div class="form-group" style="flex:1;">
-                            <label>বাটনের লিংক (URL):</label>
-                            <input type="text" id="header-btn-link-input" value="${btnLink.replace(/"/g, '&quot;')}">
-                        </div>
+                <div class="read-box" style="border-left: 5px solid #20c997; background: #ffffff;">
+                    <div style="font-weight: bold; margin-bottom: 12px; color: #20c997;">
+                        ${isNew ? 'নতুন মেনু ও সাব-মেনু যোগ করুন' : 'মেনু ও সাব-মেনু এডিট করুন'}
                     </div>
 
-                    <label style="margin-top: 15px;">মেনু ও সাব-মেনু সমূহ:</label>
                     <div id="header-menus-wrapper">
                         ${menusHtml}
                     </div>
@@ -388,8 +476,8 @@
                     </button>
 
                     <div class="card-actions" style="margin-top: 15px;">
-                        <button class="btn btn-submit" onclick="saveHeaderSection()"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
-                        <button class="btn btn-secondary" onclick="renderHeaderSection()"><i class="fa-solid fa-xmark"></i> Cancel</button>
+                        <button class="btn btn-submit" onclick="saveHeaderMenuSection()"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
+                        <button class="btn btn-secondary" onclick="renderHeaderMenuSection()"><i class="fa-solid fa-xmark"></i> Cancel</button>
                     </div>
                 </div>
             `;
@@ -425,11 +513,8 @@
             box.appendChild(div);
         }
 
-        async function saveHeaderSection() {
-            const siteTitle = document.getElementById('header-title-input').value;
-            const logoUrl = document.getElementById('header-logo-input').value;
-            const btnText = document.getElementById('header-btn-text-input').value;
-            const btnLink = document.getElementById('header-btn-link-input').value;
+        async function saveHeaderMenuSection() {
+            if (!headerInfo) headerInfo = {};
 
             const menuDivs = document.querySelectorAll('#header-menus-wrapper > div');
             const menus = [];
@@ -453,16 +538,18 @@
                 }
             });
 
-            headerInfo = { siteTitle, logoUrl, btnText, btnLink, menus };
+            headerInfo.menus = menus;
             await saveLayoutConfig();
-            renderHeaderSection();
+            renderHeaderMenuSection();
         }
 
-        async function deleteHeaderSection() {
-            if (await showTopAlert("আপনি কি নিশ্চিত যে হেডারের সকল তথ্য মুছে ফেলতে চান?", 'danger', true)) {
-                headerInfo = null;
+        async function deleteHeaderMenuSection() {
+            if (await showTopAlert("আপনি কি নিশ্চিত যে সকল মেনু মুছে ফেলতে চান?", 'danger', true)) {
+                if (headerInfo) {
+                    headerInfo.menus = [];
+                }
                 await saveLayoutConfig();
-                renderHeaderSection();
+                renderHeaderMenuSection();
             }
         }
 

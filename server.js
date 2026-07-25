@@ -40,7 +40,7 @@ const questionSchema = new mongoose.Schema({
 
 const Question = mongoose.model('Question', questionSchema);
 
-// Layout Config Schema & Model (Header, Footer, Announcement & Copyright)
+// Layout Config Schema & Model (Header, Footer, Announcement, Copyright & SEO)
 const layoutConfigSchema = new mongoose.Schema({
     announcement: {
         text: String,
@@ -49,6 +49,8 @@ const layoutConfigSchema = new mongoose.Schema({
     header: {
         siteTitle: String,
         logoUrl: String,
+        seoTitle: String,      // 👈 NEW FIELD (SEO Title)
+        faviconUrl: String,    // 👈 NEW FIELD (Favicon Icon URL)
         btnText: String,
         btnLink: String,
         menus: [
@@ -87,7 +89,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/home-config', homeConfigRoutes);
 
 
-// ------------------- LAYOUT CONFIG ROUTES (Header, Footer, Announcement, Copyright) -------------------
+// ------------------- LAYOUT CONFIG ROUTES (Header, Footer, Announcement, Copyright & SEO) -------------------
 
 // 1. Get Layout Config (Public API - Used by config.js on all frontend pages)
 app.get('/api/layout-config', async (req, res) => {

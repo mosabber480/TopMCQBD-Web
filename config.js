@@ -29,11 +29,30 @@ async function loadLayoutConfig() {
     }
 }
 
-// 2. Master Render Function for Announcement, Header & Footer
+// 2. Master Render Function for Announcement, Header, SEO & Footer
 function renderLayout(data) {
     if (!data) return;
 
-    // A. Render Announcement Bar
+    // A. Dynamic SEO Title & Favicon Update
+    if (data.header) {
+        // Dynamic Browser Title (SEO Title)
+        if (data.header.seoTitle) {
+            document.title = data.header.seoTitle;
+        }
+
+        // Dynamic Favicon Update
+        if (data.header.faviconUrl) {
+            let favicon = document.querySelector("link[rel*='icon']");
+            if (!favicon) {
+                favicon = document.createElement('link');
+                favicon.rel = 'shortcut icon';
+                document.getElementsByTagName('head')[0].appendChild(favicon);
+            }
+            favicon.href = data.header.faviconUrl;
+        }
+    }
+
+    // B. Render Announcement Bar
     if (data.announcement && data.announcement.text) {
         const announceContainer = document.getElementById('global-announce-bar');
         if (announceContainer) {
@@ -47,7 +66,7 @@ function renderLayout(data) {
         }
     }
 
-    // B. Render Header (Logo, Menu, Sub-menu & Button)
+    // C. Render Header (Logo, Menu, Sub-menu & Button)
     if (data.header) {
         const headerContainer = document.getElementById('global-header');
         if (headerContainer) {
@@ -89,7 +108,7 @@ function renderLayout(data) {
         }
     }
 
-    // C. Render 4-Column Footer & Copyright
+    // D. Render 4-Column Footer & Copyright
     if (data.footer) {
         const footerContainer = document.getElementById('global-footer');
         if (footerContainer) {
