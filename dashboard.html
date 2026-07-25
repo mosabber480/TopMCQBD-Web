@@ -150,7 +150,7 @@
 
         /* Main Container */
         .container {
-            max-width: 1100px;
+            max-width: 1200px;
             margin: 30px auto;
             padding: 0 20px;
         }
@@ -174,10 +174,10 @@
             color: var(--dark);
         }
 
-        /* Feature Grid */
+        /* Feature Grid - STRICTLY 3 CARDS PER ROW ON DESKTOP */
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            grid-template-columns: repeat(3, 1fr);
             gap: 20px;
         }
 
@@ -223,7 +223,16 @@
         }
 
         /* Responsive Layout */
-        @media (max-width: 900px) {
+        @media (max-width: 992px) {
+            .grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
             .navbar {
                 flex-direction: column;
                 gap: 15px;
@@ -247,11 +256,6 @@
             <!-- Main Dashboard -->
             <a href="dashboard.html" class="btn btn-main-dash">
                 <i class="fa-solid fa-house"></i> Main Dashboard
-            </a>
-
-            <!-- Header & Footer Control -->
-            <a href="header-footer-dashboard.html" class="btn btn-layout-control">
-                <i class="fa-solid fa-window-restore"></i> Header & Footer
             </a>
 
             <!-- MCQ Dashboard -->
@@ -288,15 +292,15 @@
             </div>
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                 <a href="home-dashboard.html" class="btn btn-home-control">
-                    <i class="fa-solid fa-wand-magic-sparkles"></i> হোম পেজের কন্টেন্ট
+                    <i class="fa-solid fa-sliders"></i> হোম পেজের কন্টেন্ট
                 </a>
                 <a href="header-footer-dashboard.html" class="btn btn-layout-control">
-                    <i class="fa-solid fa-sliders"></i> হেডার ও ফুটার
+                    <i class="fa-solid fa-window-restore"></i> হেডার ও ফুটার
                 </a>
             </div>
         </div>
 
-        <!-- Dashboard Feature Grid -->
+        <!-- Dashboard Feature Grid (Max 3 Cards per row on Desktop) -->
         <div class="grid">
             <!-- 1. Home Page Control -->
             <div class="card" style="border: 2px solid var(--warning); background: #fffdfa;">
@@ -310,7 +314,7 @@
                 </a>
             </div>
 
-            <!-- 2. Header & Footer Control (NEW CARD) -->
+            <!-- 2. Header & Footer Control -->
             <div class="card" style="border: 2px solid var(--purple-btn); background: #fcfaff;">
                 <div>
                     <div class="card-icon" style="color: var(--purple-btn);"><i class="fa-solid fa-window-restore"></i></div>
@@ -323,9 +327,9 @@
             </div>
 
             <!-- 3. Question Management -->
-            <div class="card">
+            <div class="card" style="border: 2px solid var(--primary); background: #f4f8ff;">
                 <div>
-                    <div class="card-icon"><i class="fa-solid fa-file-circle-question"></i></div>
+                    <div class="card-icon" style="color: var(--primary);"><i class="fa-solid fa-file-circle-question"></i></div>
                     <h3>প্রশ্ন ব্যাংক ও কুইজ</h3>
                     <p>নতুন কুইজের প্রশ্ন যোগ করুন, সংশোধন করুন বা CSV ফাইল আপলোড করে এক ক্লিকে ডাটাবেজে সেভ করুন।</p>
                 </div>
@@ -335,7 +339,7 @@
             </div>
 
             <!-- 4. User Management -->
-            <div class="card">
+            <div class="card" style="border: 2px solid var(--secondary); background: #f2fafb;">
                 <div>
                     <div class="card-icon" style="color: var(--secondary);"><i class="fa-solid fa-users-gear"></i></div>
                     <h3>ইউজার ও সাবস্ক্রিপশন</h3>

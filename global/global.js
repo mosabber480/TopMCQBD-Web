@@ -1,6 +1,14 @@
 // High-Performance Cached Global Layout Renderer
 const LAYOUT_API_URL = 'https://mosabber-quiz-app.onrender.com/api/layout-config';
 
+// 1. DEFAULT ANNOUNCEMENT CONFIGURATION
+// সার্ভার রেসপন্স দেওয়ার আগে বা প্রথমবার পেজ লোড হওয়া মাত্রই এই নোটিশটি দেখাবে।
+// প্রয়োজন হলে আপনি সরাসরি এই টেক্সট বা লিংক কোড থেকেই চেঞ্জ করে নিতে পারবেন।
+const DEFAULT_ANNOUNCEMENT = {
+    text: "বিশেষ বিজ্ঞপ্তি: সার্ভার থেকে প্রথমবার কুইজের তথ্য লোড হতে ৩০ সেকেন্ড পর্যন্ত সময় লাগতে পারে। অনুগ্রহ করে ধৈর্য ধরুন!",
+    link: "" // লিংক দিতে চাইলে এখানে দিতে পারেন, যেমন: "#notice"
+};
+
 // Helper Function: Correct URL Formatter (Local vs External)
 function formatURL(url) {
     if (!url || url === '#') return '#';
@@ -20,24 +28,37 @@ async function renderGlobalLayout() {
     let cachedData = localStorage.getItem('layout_config_data');
     let config = cachedData ? JSON.parse(cachedData) : null;
 
-    // Render instantly from Cache if available
-    if (config) {
-        applyLayoutToDOM(config);
+    // If no announcement set in cache, inject the default announcement instantly
+    if (!config) {
+        config = {
+            announcement: DEFAULT_ANNOUNCEMENT
+        };
+    } else if (!config.announcement || !config.announcement.text) {
+        config.announcement = DEFAULT_ANNOUNCEMENT;
     }
+
+    // Render instantly from Cache/Default if available
+    applyLayoutToDOM(config);
 
     // 2. Fetch fresh config from Server and update Cache silently
     try {
         const response = await fetch(LAYOUT_API_URL);
         if (response.ok) {
             const freshData = await response.json();
+            
+            // If server layout config doesn't have an announcement set, retain default announcement
+            if (!freshData.announcement || !freshData.announcement.text) {
+                freshData.announcement = DEFAULT_ANNOUNCEMENT;
+            }
+
             // If cache is empty or data has changed on server, update DOM & Cache
-            if (!config || JSON.stringify(config) !== JSON.stringify(freshData)) {
+            if (JSON.stringify(config) !== JSON.stringify(freshData)) {
                 localStorage.setItem('layout_config_data', JSON.stringify(freshData));
                 applyLayoutToDOM(freshData);
             }
         }
     } catch (error) {
-        console.warn('Network offline or Server busy. Serving layout from LocalStorage Cache.');
+        console.warn('Network offline or Server busy. Serving layout with default announcement.');
     }
 }
 
@@ -59,14 +80,16 @@ function applyLayoutToDOM(data) {
         }
     }
 
-    // B. Announcement Bar
+    // B. Announcement Bar (Instant Fallback to DEFAULT_ANNOUNCEMENT)
     const announceBar = document.getElementById('global-announce-bar');
-    if (announceBar && data.announcement && data.announcement.text) {
+    const announceInfo = (data.announcement && data.announcement.text) ? data.announcement : DEFAULT_ANNOUNCEMENT;
+
+    if (announceBar && announceInfo && announceInfo.text) {
         announceBar.style.display = 'block';
         announceBar.innerHTML = `
             <div class="announce-content">
-                <span>${data.announcement.text}</span>
-                ${data.announcement.link ? `<a href="${formatURL(data.announcement.link)}">বিস্তারিত দেখুন</a>` : ''}
+                <span>${announceInfo.text}</span>
+                ${announceInfo.link ? `<a href="${formatURL(announceInfo.link)}">বিস্তারিত দেখুন</a>` : ''}
             </div>
         `;
     }
