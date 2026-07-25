@@ -24,12 +24,6 @@ const initialUsers = [
         email: 'admin2@example.com',
         password: 'adminpassword2',
         role: 'admin'
-    },
-    {
-        name: 'Test Student User',
-        email: 'user@example.com',
-        password: 'userpassword123',
-        role: 'user'
     }
 ];
 
@@ -42,29 +36,27 @@ async function seedSystemUsers() {
         await mongoose.connect(MONGO_URI);
         console.log('✅ Connected to MongoDB Atlas...');
 
-        for (const userData of initialUsers) {
-            let existingUser = await User.findOne({ email: userData.email });
+        // ১. পুরোনো সব ইউজার ডাটাবেজ থেকে মুছে ফেলা
+        console.log('🗑️ Cleaning up existing bad user data...');
+        await User.deleteMany({});
+        console.log('💥 All old users deleted successfully!');
 
-            if (existingUser) {
-                existingUser.name = userData.name;
-                existingUser.role = userData.role;
-                existingUser.password = await bcrypt.hash(userData.password, 10);
-                await existingUser.save();
-                console.log(`🔄 Updated existing user: ${userData.email} (${userData.role})`);
-            } else {
-                const hashedPassword = await bcrypt.hash(userData.password, 10);
-                const newUser = new User({
-                    name: userData.name,
-                    email: userData.email,
-                    password: hashedPassword,
-                    role: userData.role
-                });
-                await newUser.save();
-                console.log(`✨ Created new user: ${userData.email} (${userData.role})`);
-            }
+        // ২. শুধু Owner এবং Admins ইনসার্ট করা
+        for (const userData of initialUsers) {
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(userData.password, salt);
+
+            await User.create({
+                name: userData.name,
+                email: userData.email,
+                password: hashedPassword,
+                role: userData.role
+            });
+
+            console.log(`✨ Created fresh user: ${userData.email} (${userData.role})`);
         }
 
-        console.log('🎉 System users setup completed successfully!');
+        console.log('🎉 System users reset completed successfully!');
     } catch (err) {
         console.error('❌ Error seeding users:', err.message);
     } finally {

@@ -12,7 +12,6 @@
     <link rel="stylesheet" href="global/global.css">
     
     <style>
-        /* LOGIN / AUTH PAGE SPECIFIC STYLES */
         .page-wrapper {
             display: flex;
             flex-direction: column;
@@ -40,6 +39,32 @@
         h2 { margin-top: 0; color: var(--dark, #2c3e50); text-align: center; margin-bottom: 20px; font-weight: 700; }
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 6px; font-weight: bold; color: #555; font-size: 14px; }
+        
+        /* PASSWORD FIELD WITH EYE ICON STYLING */
+        .password-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .password-wrapper input {
+            padding-right: 40px;
+        }
+
+        .toggle-password-icon {
+            position: absolute;
+            right: 12px;
+            cursor: pointer;
+            color: #777;
+            font-size: 15px;
+            transition: color 0.2s ease;
+            user-select: none;
+        }
+
+        .toggle-password-icon:hover {
+            color: var(--primary, #007bff);
+        }
+
         input {
             width: 100%;
             padding: 11px 14px;
@@ -97,11 +122,9 @@
 <body>
 
     <div class="page-wrapper">
-        <!-- DYNAMIC GLOBAL LAYOUT CONTAINERS -->
         <div id="global-announce-bar" style="display:none;"></div>
         <header id="global-header"></header>
 
-        <!-- MAIN AUTH CONTENT -->
         <main class="main-content">
             <div class="auth-card">
                 <h2 id="formTitle"><i class="fa-solid fa-lock"></i> Login to Account</h2>
@@ -116,7 +139,10 @@
                     </div>
                     <div class="form-group">
                         <label>Password:</label>
-                        <input type="password" id="loginPassword" placeholder="Enter password..." required>
+                        <div class="password-wrapper">
+                            <input type="password" id="loginPassword" placeholder="Enter password..." required>
+                            <i class="fa-solid fa-eye toggle-password-icon" onclick="togglePasswordVisibility('loginPassword', this)"></i>
+                        </div>
                     </div>
                     <button type="submit" class="btn" id="loginBtn">
                         <i class="fa-solid fa-right-to-bracket"></i> Login
@@ -135,12 +161,17 @@
                     </div>
                     <div class="form-group">
                         <label>Password:</label>
-                        <input type="password" id="regPassword" placeholder="Create a password..." required>
+                        <div class="password-wrapper">
+                            <input type="password" id="regPassword" placeholder="Create a password..." required>
+                            <i class="fa-solid fa-eye toggle-password-icon" onclick="togglePasswordVisibility('regPassword', this)"></i>
+                        </div>
                     </div>
-                    <!-- Confirm Password Field -->
                     <div class="form-group">
                         <label>Confirm Password:</label>
-                        <input type="password" id="regConfirmPassword" placeholder="Re-enter password to confirm..." required>
+                        <div class="password-wrapper">
+                            <input type="password" id="regConfirmPassword" placeholder="Re-enter password to confirm..." required>
+                            <i class="fa-solid fa-eye toggle-password-icon" onclick="togglePasswordVisibility('regConfirmPassword', this)"></i>
+                        </div>
                     </div>
                     <button type="submit" class="btn" id="regBtn" style="background-color: #28a745;">
                         <i class="fa-solid fa-user-plus"></i> Register Account
@@ -153,18 +184,27 @@
             </div>
         </main>
 
-        <!-- DYNAMIC FOOTER CONTAINER -->
         <footer id="global-footer"></footer>
     </div>
 
-    <!-- GLOBAL JS LINK -->
     <script src="global/global.js"></script>
 
-    <!-- AUTHENTICATION LOGIC SCRIPT -->
     <script>
         const AUTH_API = 'https://mosabber-quiz-app.onrender.com/api/auth';
 
-        // Direct URL Check (e.g. quiz.html?action=register)
+        function togglePasswordVisibility(inputId, icon) {
+            const inputField = document.getElementById(inputId);
+            if (inputField.type === "password") {
+                inputField.type = "text";
+                icon.classList.remove("fa-eye");
+                icon.classList.add("fa-eye-slash");
+            } else {
+                inputField.type = "password";
+                icon.classList.remove("fa-eye-slash");
+                icon.classList.add("fa-eye");
+            }
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('action') === 'register' || urlParams.get('mode') === 'register') {
@@ -238,7 +278,7 @@
             }
         });
 
-        // REGISTER SUBMIT WITH DOUBLE PASS CHECK
+        // REGISTER SUBMIT
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -247,7 +287,6 @@
             const password = document.getElementById('regPassword').value;
             const confirmPassword = document.getElementById('regConfirmPassword').value;
 
-            // Double Password Validation
             if (password !== confirmPassword) {
                 showAlert("Passwords do not match! Please re-check.");
                 return;
