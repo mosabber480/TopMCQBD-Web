@@ -104,7 +104,7 @@
         <!-- MAIN AUTH CONTENT -->
         <main class="main-content">
             <div class="auth-card">
-                <h2 id="formTitle">🔐 Login to Account</h2>
+                <h2 id="formTitle"><i class="fa-solid fa-lock"></i> Login to Account</h2>
                 
                 <div id="alertBox" class="alert"></div>
 
@@ -118,10 +118,12 @@
                         <label>Password:</label>
                         <input type="password" id="loginPassword" placeholder="Enter password..." required>
                     </div>
-                    <button type="submit" class="btn" id="loginBtn">🚀 Login</button>
+                    <button type="submit" class="btn" id="loginBtn">
+                        <i class="fa-solid fa-right-to-bracket"></i> Login
+                    </button>
                 </form>
 
-                <!-- REGISTER FORM (With Double Password Check) -->
+                <!-- REGISTER FORM -->
                 <form id="registerForm" style="display: none;">
                     <div class="form-group">
                         <label>Full Name:</label>
@@ -135,12 +137,13 @@
                         <label>Password:</label>
                         <input type="password" id="regPassword" placeholder="Create a password..." required>
                     </div>
-                    <!-- 2nd Time Re-submit Password Field -->
                     <div class="form-group">
                         <label>Confirm Password:</label>
                         <input type="password" id="regConfirmPassword" placeholder="Re-enter password to confirm..." required>
                     </div>
-                    <button type="submit" class="btn" id="regBtn" style="background-color: #28a745;">✨ Register Account</button>
+                    <button type="submit" class="btn" id="regBtn" style="background-color: #28a745;">
+                        <i class="fa-solid fa-user-plus"></i> Register Account
+                    </button>
                 </form>
 
                 <div class="toggle-text" id="toggleMessage">
@@ -160,9 +163,16 @@
     <script>
         const AUTH_API = 'https://mosabber-quiz-app.onrender.com/api/auth';
 
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('action') === 'register' || urlParams.get('mode') === 'register') {
+                toggleForm('register');
+            }
+        });
+
         function showAlert(msg, isSuccess = false) {
             const alertBox = document.getElementById('alertBox');
-            alertBox.innerText = msg;
+            alertBox.innerHTML = `${isSuccess ? '<i class="fa-solid fa-circle-check"></i>' : '<i class="fa-solid fa-circle-exclamation"></i>'} ${msg}`;
             alertBox.className = `alert ${isSuccess ? 'alert-success' : 'alert-danger'}`;
             alertBox.style.display = 'block';
         }
@@ -172,12 +182,12 @@
             if (type === 'register') {
                 document.getElementById('loginForm').style.display = 'none';
                 document.getElementById('registerForm').style.display = 'block';
-                document.getElementById('formTitle').innerText = '📝 Register Account';
+                document.getElementById('formTitle').innerHTML = '<i class="fa-solid fa-user-pen"></i> Register Account';
                 document.getElementById('toggleMessage').innerHTML = `Already have an account? <span class="toggle-link" onclick="toggleForm('login')">Login Here</span>`;
             } else {
                 document.getElementById('registerForm').style.display = 'none';
                 document.getElementById('loginForm').style.display = 'block';
-                document.getElementById('formTitle').innerText = '🔐 Login to Account';
+                document.getElementById('formTitle').innerHTML = '<i class="fa-solid fa-lock"></i> Login to Account';
                 document.getElementById('toggleMessage').innerHTML = `Don't have an account? <span class="toggle-link" onclick="toggleForm('register')">Register Now</span>`;
             }
         }
@@ -186,7 +196,7 @@
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('loginBtn');
-            btn.innerText = "Authenticating...";
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Authenticating...`;
             btn.disabled = true;
 
             const email = document.getElementById('loginEmail').value;
@@ -206,7 +216,7 @@
                     localStorage.setItem('quiz_token', data.token);
                     localStorage.setItem('quiz_user', JSON.stringify(data.user));
 
-                    showAlert("✅ Login Successful! Redirecting...", true);
+                    showAlert("Login Successful! Redirecting...", true);
                     
                     setTimeout(() => {
                         if (data.user && (data.user.role === 'owner' || data.user.role === 'admin')) {
@@ -216,12 +226,12 @@
                         }
                     }, 1000);
                 } else {
-                    showAlert(data.message || "❌ Invalid login credentials!");
+                    showAlert(data.message || "Invalid login credentials!");
                 }
             } catch (err) {
-                showAlert("❌ Server connection error!");
+                showAlert("Server connection error!");
             } finally {
-                btn.innerText = "🚀 Login";
+                btn.innerHTML = `<i class="fa-solid fa-right-to-bracket"></i> Login`;
                 btn.disabled = false;
             }
         });
@@ -235,14 +245,13 @@
             const password = document.getElementById('regPassword').value;
             const confirmPassword = document.getElementById('regConfirmPassword').value;
 
-            // Double Password Validation
             if (password !== confirmPassword) {
-                showAlert("❌ Passwords do not match! Please re-check.");
+                showAlert("Passwords do not match! Please re-check.");
                 return;
             }
 
             const btn = document.getElementById('regBtn');
-            btn.innerText = "Creating Account...";
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Creating Account...`;
             btn.disabled = true;
 
             try {
@@ -254,16 +263,16 @@
                 const data = await res.json();
 
                 if (res.ok && (data.success || data.token)) {
-                    showAlert("🎉 Registration successful! Please login below.", true);
+                    showAlert("Registration successful! Please login below.", true);
                     document.getElementById('registerForm').reset();
                     setTimeout(() => toggleForm('login'), 1500);
                 } else {
-                    showAlert(data.message || "❌ Registration failed!");
+                    showAlert(data.message || "Registration failed!");
                 }
             } catch (err) {
-                showAlert("❌ Server connection error!");
+                showAlert("Server connection error!");
             } finally {
-                btn.innerText = "✨ Register Account";
+                btn.innerHTML = `<i class="fa-solid fa-user-plus"></i> Register Account`;
                 btn.disabled = false;
             }
         });
