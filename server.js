@@ -3,9 +3,10 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const multer = require('multer');
 const bcrypt = require('bcryptjs');
-
-// Environment Config & Middlewares
+const path = require('path');
 require('dotenv').config();
+
+// External Models & Routes
 const User = require('./models/User');
 const HomeConfig = require('./models/HomeConfig'); 
 const authRoutes = require('./routes/auth');
@@ -14,15 +15,21 @@ const { verifyToken, authorizeRoles } = require('./middleware/authMiddleware');
 
 const app = express();
 
-// Middleware
+// Middlewares
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cors());
+
+// Serve Static Frontend Files from 'public' folder
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Multer Setup for Memory Storage
 const upload = multer({ storage: multer.memoryStorage() });
 
 // MongoDB Connection Setup
 const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://admin:password@cluster0.mongodb.net/quizdb';
+const PORT = process.env.PORT || 5000;
+
 mongoose.connect(MONGO_URI)
     .then(() => console.log('✅ Connected to MongoDB'))
     .catch(err => console.error('❌ MongoDB Connection Error:', err));
@@ -70,10 +77,10 @@ const layoutConfigSchema = new mongoose.Schema({
         col1Text: String,
         col1Fb: String, // Facebook
         col1Yt: String, // YouTube
-        col1Wa: String, // WhatsApp (NEW)
-        col1Tw: String, // Twitter / X (NEW)
-        col1Tg: String, // Telegram (NEW)
-        col1Ln: String, // LinkedIn (NEW)
+        col1Wa: String, // WhatsApp
+        col1Tw: String, // Twitter / X
+        col1Tg: String, // Telegram
+        col1Ln: String, // LinkedIn
         col2Title: String,
         col2Links: [
             { title: String, url: String }
@@ -94,22 +101,20 @@ const layoutConfigSchema = new mongoose.Schema({
 
 const LayoutConfig = mongoose.model('LayoutConfig', layoutConfigSchema);
 
-
 // ------------------- AUTHENTICATION ROUTES -------------------
 app.use('/api/auth', authRoutes);
 
-// ------------------- HOME CONFIG ROUTES (Slider, Demo, Packages) -------------------
+// ------------------- HOME CONFIG ROUTES -------------------
 app.use('/api/home-config', homeConfigRoutes);
 
+// ------------------- LAYOUT CONFIG ROUTES -------------------
 
-// ------------------- LAYOUT CONFIG ROUTES (Header, Footer, Announcement, Copyright & SEO) -------------------
-
-// 1. Get Layout Config (Public API - Used by config.js on all frontend pages)
+// Get Layout Config (Public API)
 app.get('/api/layout-config', async (req, res) => {
     try {
         let config = await LayoutConfig.findOne();
         if (!config) {
-            config = {}; // Return empty object if no data exists yet
+            config = {};
         }
         res.json(config);
     } catch (err) {
@@ -117,7 +122,7 @@ app.get('/api/layout-config', async (req, res) => {
     }
 });
 
-// 2. Save/Update Layout Config (Owner and Admin only)
+// Save/Update Layout Config (Owner and Admin only)
 app.post('/api/layout-config', verifyToken, authorizeRoles('owner', 'admin'), async (req, res) => {
     try {
         const { announcement, header, footer, copyright } = req.body;
@@ -145,7 +150,6 @@ app.post('/api/layout-config', verifyToken, authorizeRoles('owner', 'admin'), as
     }
 });
 
-
 // Change Password API (Any Logged In User)
 app.put('/api/auth/change-password', verifyToken, async (req, res) => {
     try {
@@ -170,7 +174,7 @@ app.put('/api/auth/change-password', verifyToken, async (req, res) => {
     }
 });
 
-// ------------------- USER & SUBSCRIPTION MANAGEMENT (Owner/Admin) -------------------
+// ------------------- USER & SUBSCRIPTION MANAGEMENT -------------------
 
 // Get All Users (Owner and Admin only)
 app.get('/api/users', verifyToken, authorizeRoles('owner', 'admin'), async (req, res) => {
@@ -271,7 +275,7 @@ app.delete('/api/users/:userId', verifyToken, authorizeRoles('owner'), async (re
 
 // ------------------- QUESTION API ENDPOINTS -------------------
 
-// 1. Get Questions (Publicly Accessible)
+// 1. Get Questions
 app.get('/api/questions', async (req, res) => {
     try {
         const { category } = req.query;
@@ -286,7 +290,7 @@ app.get('/api/questions', async (req, res) => {
     }
 });
 
-// 2. Add New Single Question (Owner & Admin only)
+// 2. Add New Single Question
 app.post('/api/questions', verifyToken, authorizeRoles('owner', 'admin'), async (req, res) => {
     try {
         const { q, options, ans, explanation, category } = req.body;
@@ -298,7 +302,7 @@ app.post('/api/questions', verifyToken, authorizeRoles('owner', 'admin'), async 
     }
 });
 
-// 3. Update Question (Owner & Admin only)
+// 3. Update Question
 app.put('/api/questions/:id', verifyToken, authorizeRoles('owner', 'admin'), async (req, res) => {
     try {
         const updatedQuestion = await Question.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -308,7 +312,7 @@ app.put('/api/questions/:id', verifyToken, authorizeRoles('owner', 'admin'), asy
     }
 });
 
-// 4. Delete Single Question (Owner & Admin only)
+// 4. Delete Single Question
 app.delete('/api/questions/:id', verifyToken, authorizeRoles('owner', 'admin'), async (req, res) => {
     try {
         await Question.findByIdAndDelete(req.params.id);
@@ -318,7 +322,7 @@ app.delete('/api/questions/:id', verifyToken, authorizeRoles('owner', 'admin'), 
     }
 });
 
-// 5. Bulk Delete Questions by Category Path (Owner & Admin only)
+// 5. Bulk Delete Questions by Category
 app.delete('/api/questions', verifyToken, authorizeRoles('owner', 'admin'), async (req, res) => {
     try {
         const { category } = req.query;
@@ -342,7 +346,7 @@ app.get('/api/categories', async (req, res) => {
     }
 });
 
-// 7. Bulk Upload CSV (Owner & Admin only)
+// 7. Bulk Upload CSV
 app.post('/api/questions/upload-csv', verifyToken, authorizeRoles('owner', 'admin'), upload.single('file'), async (req, res) => {
     try {
         if (!req.file) {
@@ -441,5 +445,11 @@ app.post('/api/questions/upload-csv', verifyToken, authorizeRoles('owner', 'admi
     }
 });
 
-const PORT = process.env.PORT || 5000;
+// ------------------- FRONTEND FALLBACK ROUTE -------------------
+// Matches any route not handled by API and serves index.html
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// Server Start
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
