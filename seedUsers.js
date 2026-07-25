@@ -3,7 +3,8 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const User = require('./models/User'); 
 
-const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://mosabber480_db_user:lKwH9F8nO2BzxpKx@mosabber.3ajdj0u.mongodb.net/quizDB?retryWrites=true&w=majority';
+// Get Mongo URI from environment variable
+const MONGO_URI = process.env.MONGO_URI;
 
 const initialUsers = [
     {
@@ -34,6 +35,10 @@ const initialUsers = [
 
 async function seedSystemUsers() {
     try {
+        if (!MONGO_URI) {
+            throw new Error('MONGO_URI is missing in environment variables.');
+        }
+
         await mongoose.connect(MONGO_URI);
         console.log('✅ Connected to MongoDB Atlas...');
 
@@ -41,6 +46,7 @@ async function seedSystemUsers() {
             let existingUser = await User.findOne({ email: userData.email });
 
             if (existingUser) {
+                existingUser.name = userData.name;
                 existingUser.role = userData.role;
                 existingUser.password = await bcrypt.hash(userData.password, 10);
                 await existingUser.save();
@@ -60,7 +66,7 @@ async function seedSystemUsers() {
 
         console.log('🎉 System users setup completed successfully!');
     } catch (err) {
-        console.error('❌ Error seeding users:', err);
+        console.error('❌ Error seeding users:', err.message);
     } finally {
         await mongoose.connection.close();
         console.log('🔌 Database connection closed.');
