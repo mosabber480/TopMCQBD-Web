@@ -49,8 +49,8 @@ const layoutConfigSchema = new mongoose.Schema({
     header: {
         siteTitle: String,
         logoUrl: String,
-        seoTitle: String,      // 👈 NEW FIELD (SEO Title)
-        faviconUrl: String,    // 👈 NEW FIELD (Favicon Icon URL)
+        seoTitle: String,
+        faviconUrl: String,
         btnText: String,
         btnLink: String,
         menus: [
@@ -71,8 +71,17 @@ const layoutConfigSchema = new mongoose.Schema({
         col1Fb: String,
         col1Yt: String,
         col2Title: String,
+        col2Links: [                     // 👈 FIXED: কলাম ২ লিংক লিস্ট
+            { title: String, url: String }
+        ],
         col3Title: String,
-        col4Title: String
+        col3Links: [                     // 👈 FIXED: কলাম ৩ লিংক লিস্ট
+            { title: String, url: String }
+        ],
+        col4Title: String,
+        col4Links: [                     // 👈 FIXED: কলাম ৪ লিংক লিস্ট
+            { title: String, url: String }
+        ]
     },
     copyright: {
         text: String
