@@ -68,18 +68,22 @@ const layoutConfigSchema = new mongoose.Schema({
     },
     footer: {
         col1Text: String,
-        col1Fb: String,
-        col1Yt: String,
+        col1Fb: String, // Facebook
+        col1Yt: String, // YouTube
+        col1Wa: String, // WhatsApp (NEW)
+        col1Tw: String, // Twitter / X (NEW)
+        col1Tg: String, // Telegram (NEW)
+        col1Ln: String, // LinkedIn (NEW)
         col2Title: String,
-        col2Links: [                     // 👈 FIXED: কলাম ২ লিংক লিস্ট
+        col2Links: [
             { title: String, url: String }
         ],
         col3Title: String,
-        col3Links: [                     // 👈 FIXED: কলাম ৩ লিংক লিস্ট
+        col3Links: [
             { title: String, url: String }
         ],
         col4Title: String,
-        col4Links: [                     // 👈 FIXED: কলাম ৪ লিংক লিস্ট
+        col4Links: [
             { title: String, url: String }
         ]
     },

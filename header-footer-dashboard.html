@@ -258,7 +258,7 @@
                 announceInfo = data.announcement || null;
                 headerInfo = data.header || null;
                 footerInfo = data.footer || null;
-                copyrightInfo = data.copyright || null; // 👈 FIXED ISSUE HERE!
+                copyrightInfo = data.copyright || null;
 
                 renderAnnounceSection();
                 renderHeaderBrandSection();
@@ -761,18 +761,34 @@
             container.innerHTML = '';
 
             if (!footerInfo) {
-                footerInfo = {
-                    col1Text: 'TopMCQ অনলাইন কুইজ প্ল্যাটফর্ম।',
-                    col1Fb: '#',
-                    col1Yt: '#',
-                    col2Title: 'প্রয়োজনীয় লিংক',
-                    col2Links: [],
-                    col3Title: 'ক্যাটাগরি',
-                    col3Links: [],
-                    col4Title: 'যোগাযোগ',
-                    col4Links: []
-                };
+                footerInfo = {};
             }
+
+            footerInfo.col1Text = footerInfo.col1Text || 'TopMCQ অনলাইন কুইজ প্ল্যাটফর্ম।';
+            footerInfo.col1Fb = footerInfo.col1Fb || '';
+            footerInfo.col1Yt = footerInfo.col1Yt || '';
+            footerInfo.col1Wa = footerInfo.col1Wa || '';
+            footerInfo.col1Tw = footerInfo.col1Tw || '';
+            footerInfo.col1Tg = footerInfo.col1Tg || '';
+            footerInfo.col1Ln = footerInfo.col1Ln || '';
+
+            footerInfo.col2Title = footerInfo.col2Title || 'প্রয়োজনীয় লিংক';
+            footerInfo.col2Links = footerInfo.col2Links || [];
+            footerInfo.col3Title = footerInfo.col3Title || 'ক্যাটাগরি';
+            footerInfo.col3Links = footerInfo.col3Links || [];
+            footerInfo.col4Title = footerInfo.col4Title || 'যোগাযোগ';
+            footerInfo.col4Links = footerInfo.col4Links || [];
+
+            // Active Social Links Preview Text
+            let activeSocials = [];
+            if (footerInfo.col1Fb) activeSocials.push('Facebook');
+            if (footerInfo.col1Yt) activeSocials.push('YouTube');
+            if (footerInfo.col1Wa) activeSocials.push('WhatsApp');
+            if (footerInfo.col1Tw) activeSocials.push('Twitter');
+            if (footerInfo.col1Tg) activeSocials.push('Telegram');
+            if (footerInfo.col1Ln) activeSocials.push('LinkedIn');
+
+            const socialPreview = activeSocials.length > 0 ? activeSocials.join(', ') : 'কোনো সোশ্যাল লিংক যুক্ত করা হয়নি';
 
             // Column 1 Card
             const card1 = document.createElement('div');
@@ -783,8 +799,8 @@
                 <div class="card-header-flex">
                     <div>
                         <div class="read-title"><i class="fa-solid fa-circle-info" style="color:#17a2b8;"></i> কলাম ১: সাইট তথ্য ও সোশাল লিংক (Col 1)</div>
-                        <div class="read-subtitle"><b>About Text:</b> ${footerInfo.col1Text || 'নাই'}</div>
-                        <div class="read-meta"><b>Facebook:</b> ${footerInfo.col1Fb || 'নাই'} | <b>YouTube:</b> ${footerInfo.col1Yt || 'নাই'}</div>
+                        <div class="read-subtitle"><b>About Text:</b> ${footerInfo.col1Text}</div>
+                        <div class="read-meta"><b>Active Social Links:</b> ${socialPreview}</div>
                     </div>
                     <div class="card-actions">
                         <button class="btn btn-warning" onclick="editFooterCol1Inline()"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
@@ -816,6 +832,7 @@
                                 <div class="sub-menu-item">
                                     <span style="font-size:13px; color:#333;"><b>${lk.title}</b> <small style="color:#777;">(${lk.url || '#'})</small></span>
                                     <div>
+                                        <button class="btn btn-warning btn-sm" onclick="editFooterLinkInline(${c.id}, ${lkIdx})"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
                                         <button class="btn btn-danger btn-sm" onclick="deleteFooterLink(${c.id}, ${lkIdx})"><i class="fa-solid fa-trash"></i> Delete</button>
                                     </div>
                                 </div>
@@ -854,15 +871,35 @@
                 </div>
                 <div class="row">
                     <div class="form-group" style="flex:1;">
-                        <label>Facebook Page URL:</label>
-                        <input type="text" id="edit-col1-fb" value="${(footerInfo.col1Fb || '').replace(/"/g, '&quot;')}">
+                        <label><i class="fa-brands fa-facebook" style="color:#1877f2;"></i> Facebook Page URL:</label>
+                        <input type="text" id="edit-col1-fb" value="${(footerInfo.col1Fb || '').replace(/"/g, '&quot;')}" placeholder="যেমন: https://facebook.com/yourpage">
                     </div>
                     <div class="form-group" style="flex:1;">
-                        <label>YouTube Channel URL:</label>
-                        <input type="text" id="edit-col1-yt" value="${(footerInfo.col1Yt || '').replace(/"/g, '&quot;')}">
+                        <label><i class="fa-brands fa-youtube" style="color:#ff0000;"></i> YouTube Channel URL:</label>
+                        <input type="text" id="edit-col1-yt" value="${(footerInfo.col1Yt || '').replace(/"/g, '&quot;')}" placeholder="যেমন: https://youtube.com/@yourchannel">
                     </div>
                 </div>
-                <div class="card-actions">
+                <div class="row">
+                    <div class="form-group" style="flex:1;">
+                        <label><i class="fa-brands fa-whatsapp" style="color:#25d366;"></i> WhatsApp Link / Number:</label>
+                        <input type="text" id="edit-col1-wa" value="${(footerInfo.col1Wa || '').replace(/"/g, '&quot;')}" placeholder="যেমন: https://wa.me/8801700000000">
+                    </div>
+                    <div class="form-group" style="flex:1;">
+                        <label><i class="fa-brands fa-x-twitter" style="color:#000000;"></i> Twitter / X Profile URL:</label>
+                        <input type="text" id="edit-col1-tw" value="${(footerInfo.col1Tw || '').replace(/"/g, '&quot;')}" placeholder="যেমন: https://x.com/yourprofile">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group" style="flex:1;">
+                        <label><i class="fa-brands fa-telegram" style="color:#0088cc;"></i> Telegram Channel / Link:</label>
+                        <input type="text" id="edit-col1-tg" value="${(footerInfo.col1Tg || '').replace(/"/g, '&quot;')}" placeholder="যেমন: https://t.me/yourchannel">
+                    </div>
+                    <div class="form-group" style="flex:1;">
+                        <label><i class="fa-brands fa-linkedin" style="color:#0a66c2;"></i> LinkedIn Profile / Page URL:</label>
+                        <input type="text" id="edit-col1-ln" value="${(footerInfo.col1Ln || '').replace(/"/g, '&quot;')}" placeholder="যেমন: https://linkedin.com/in/yourprofile">
+                    </div>
+                </div>
+                <div class="card-actions" style="margin-top: 10px;">
                     <button class="btn btn-submit" onclick="saveFooterCol1Inline()"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
                     <button class="btn btn-secondary" onclick="renderFooterSectionCards()"><i class="fa-solid fa-xmark"></i> Cancel</button>
                 </div>
@@ -873,6 +910,11 @@
             footerInfo.col1Text = document.getElementById('edit-col1-text').value;
             footerInfo.col1Fb = document.getElementById('edit-col1-fb').value;
             footerInfo.col1Yt = document.getElementById('edit-col1-yt').value;
+            footerInfo.col1Wa = document.getElementById('edit-col1-wa').value;
+            footerInfo.col1Tw = document.getElementById('edit-col1-tw').value;
+            footerInfo.col1Tg = document.getElementById('edit-col1-tg').value;
+            footerInfo.col1Ln = document.getElementById('edit-col1-ln').value;
+
             await saveLayoutConfig();
             renderFooterSectionCards();
         }
@@ -897,6 +939,39 @@
         async function saveFooterTitleInline(colId) {
             const titleKey = `col${colId}Title`;
             footerInfo[titleKey] = document.getElementById(`edit-col-title-${colId}`).value;
+            await saveLayoutConfig();
+            renderFooterSectionCards();
+        }
+
+        /* --- Footer Link Inline Edit --- */
+        function editFooterLinkInline(colId, lkIdx) {
+            const linksKey = `col${colId}Links`;
+            const lk = footerInfo[linksKey][lkIdx];
+            renderFooterSectionCards();
+
+            const card = document.getElementById(`footer-col-${colId}-box`);
+            const subItems = card.querySelectorAll('.sub-menu-item');
+            const targetItem = subItems[lkIdx];
+
+            if (targetItem) {
+                targetItem.style.display = "block";
+                targetItem.innerHTML = `
+                    <div class="row" style="margin-bottom:5px;">
+                        <input type="text" id="edit-fl-title-${colId}-${lkIdx}" value="${(lk.title || '').replace(/"/g, '&quot;')}" style="flex:1;">
+                        <input type="text" id="edit-fl-url-${colId}-${lkIdx}" value="${(lk.url || '').replace(/"/g, '&quot;')}" style="flex:1;">
+                    </div>
+                    <div class="card-actions" style="margin-top:5px;">
+                        <button class="btn btn-submit btn-sm" onclick="saveFooterLinkInline(${colId}, ${lkIdx})"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+                        <button class="btn btn-secondary btn-sm" onclick="renderFooterSectionCards()"><i class="fa-solid fa-xmark"></i> Cancel</button>
+                    </div>
+                `;
+            }
+        }
+
+        async function saveFooterLinkInline(colId, lkIdx) {
+            const linksKey = `col${colId}Links`;
+            footerInfo[linksKey][lkIdx].title = document.getElementById(`edit-fl-title-${colId}-${lkIdx}`).value;
+            footerInfo[linksKey][lkIdx].url = document.getElementById(`edit-fl-url-${colId}-${lkIdx}`).value;
             await saveLayoutConfig();
             renderFooterSectionCards();
         }

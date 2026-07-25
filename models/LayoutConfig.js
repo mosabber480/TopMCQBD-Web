@@ -29,6 +29,10 @@ const layoutConfigSchema = new mongoose.Schema({
         col1Text: String,
         col1Fb: String,
         col1Yt: String,
+        col1Wa: String, // 👈 WhatsApp Link
+        col1Tw: String, // 👈 Twitter / X Link
+        col1Tg: String, // 👈 Telegram Link
+        col1Ln: String, // 👈 LinkedIn Link
         col2Title: String,
         col2Links: [
             { title: String, url: String }

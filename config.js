@@ -1,6 +1,16 @@
 // Global API Endpoint for Layout Configuration
 const LAYOUT_API_URL = 'https://mosabber-quiz-app.onrender.com/api/layout-config';
 
+// URL Helper Function to Fix Missing http/https
+function formatURL(url) {
+    if (!url || url === '#') return '#';
+    url = url.trim();
+    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('mailto:') || url.startsWith('tel:')) {
+        return url;
+    }
+    return 'https://' + url;
+}
+
 // 1. Fetch & Cache Strategy (LocalStorage with Auto Sync)
 async function loadLayoutConfig() {
     let cachedData = localStorage.getItem('layout_config_data');
@@ -43,7 +53,7 @@ function renderLayout(data) {
                 favicon.rel = 'shortcut icon';
                 document.getElementsByTagName('head')[0].appendChild(favicon);
             }
-            favicon.href = data.header.faviconUrl;
+            favicon.href = formatURL(data.header.faviconUrl);
         }
     }
 
@@ -55,7 +65,7 @@ function renderLayout(data) {
             announceContainer.innerHTML = `
                 <div class="announce-content">
                     <span>${data.announcement.text}</span>
-                    ${data.announcement.link ? `<a href="${data.announcement.link}" class="announce-link">বিস্তারিত দেখুন</a>` : ''}
+                    ${data.announcement.link ? `<a href="${formatURL(data.announcement.link)}" class="announce-link">বিস্তারিত দেখুন</a>` : ''}
                 </div>
             `;
         }
@@ -74,13 +84,13 @@ function renderLayout(data) {
                     if (m.subMenus && m.subMenus.length > 0) {
                         subHtml = `
                             <ul class="dropdown-menu">
-                                ${m.subMenus.map(sm => `<li><a href="${sm.url || '#'}">${sm.title}</a></li>`).join('')}
+                                ${m.subMenus.map(sm => `<li><a href="${formatURL(sm.url)}">${sm.title}</a></li>`).join('')}
                             </ul>
                         `;
                     }
                     return `
                         <li class="nav-item ${m.subMenus && m.subMenus.length > 0 ? 'has-dropdown' : ''}">
-                            <a href="${m.url || '#'}">${m.title}</a>
+                            <a href="${formatURL(m.url)}">${m.title}</a>
                             ${subHtml}
                         </li>
                     `;
@@ -97,13 +107,13 @@ function renderLayout(data) {
                     <nav class="site-nav">
                         <ul>${menusHtml}</ul>
                     </nav>
-                    ${h.btnText ? `<div class="header-btn"><a href="${h.btnLink || '#'}" class="btn-primary-head">${h.btnText}</a></div>` : ''}
+                    ${h.btnText ? `<div class="header-btn"><a href="${formatURL(h.btnLink)}" class="btn-primary-head">${h.btnText}</a></div>` : ''}
                 </div>
             `;
         }
     }
 
-    // D. Render 4-Column Footer & Copyright
+    // D. Render 4-Column Footer & Dynamic Social Links
     if (data.footer || data.copyright) {
         const footerContainer = document.getElementById('global-footer');
         if (footerContainer) {
@@ -112,19 +122,23 @@ function renderLayout(data) {
 
             const generateLinksHtml = (links) => {
                 if (!links || links.length === 0) return '';
-                return `<ul>` + links.map(l => `<li><a href="${l.url || '#'}">${l.title}</a></li>`).join('') + `</ul>`;
+                return `<ul>` + links.map(l => `<li><a href="${formatURL(l.url)}">${l.title}</a></li>`).join('') + `</ul>`;
             };
 
             footerContainer.innerHTML = `
                 <div class="footer-container">
                     <div class="footer-grid">
-                        <!-- Col 1: About & Social -->
+                        <!-- Col 1: About & Dynamic Social Icons -->
                         <div class="footer-col">
                             <h4>আমাদের সম্পর্কে</h4>
                             <p>${f.col1Text || ''}</p>
                             <div class="footer-social">
-                                ${f.col1Fb ? `<a href="${f.col1Fb}" target="_blank"><i class="fa-brands fa-facebook"></i></a>` : ''}
-                                ${f.col1Yt ? `<a href="${f.col1Yt}" target="_blank"><i class="fa-brands fa-youtube"></i></a>` : ''}
+                                ${f.col1Fb ? `<a href="${formatURL(f.col1Fb)}" target="_blank" title="Facebook" class="social-btn fb"><i class="fa-brands fa-facebook-f"></i></a>` : ''}
+                                ${f.col1Yt ? `<a href="${formatURL(f.col1Yt)}" target="_blank" title="YouTube" class="social-btn yt"><i class="fa-brands fa-youtube"></i></a>` : ''}
+                                ${f.col1Wa ? `<a href="${formatURL(f.col1Wa)}" target="_blank" title="WhatsApp" class="social-btn wa"><i class="fa-brands fa-whatsapp"></i></a>` : ''}
+                                ${f.col1Tw ? `<a href="${formatURL(f.col1Tw)}" target="_blank" title="Twitter / X" class="social-btn tw"><i class="fa-brands fa-x-twitter"></i></a>` : ''}
+                                ${f.col1Tg ? `<a href="${formatURL(f.col1Tg)}" target="_blank" title="Telegram" class="social-btn tg"><i class="fa-brands fa-telegram"></i></a>` : ''}
+                                ${f.col1Ln ? `<a href="${formatURL(f.col1Ln)}" target="_blank" title="LinkedIn" class="social-btn ln"><i class="fa-brands fa-linkedin-in"></i></a>` : ''}
                             </div>
                         </div>
 
