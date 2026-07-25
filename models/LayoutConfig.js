@@ -8,8 +8,8 @@ const layoutConfigSchema = new mongoose.Schema({
     header: {
         siteTitle: String,
         logoUrl: String,
-        seoTitle: String,      // 👈 NEW FIELD
-        faviconUrl: String,    // 👈 NEW FIELD
+        seoTitle: String,
+        faviconUrl: String,
         btnText: String,
         btnLink: String,
         menus: [
@@ -30,8 +30,17 @@ const layoutConfigSchema = new mongoose.Schema({
         col1Fb: String,
         col1Yt: String,
         col2Title: String,
+        col2Links: [
+            { title: String, url: String }
+        ],
         col3Title: String,
-        col4Title: String
+        col3Links: [
+            { title: String, url: String }
+        ],
+        col4Title: String,
+        col4Links: [
+            { title: String, url: String }
+        ]
     },
     copyright: {
         text: String

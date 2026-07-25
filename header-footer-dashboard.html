@@ -82,11 +82,18 @@
             padding: 20px; 
             border-radius: 8px; 
             margin-bottom: 15px; 
-            border-left: 5px solid #ffc107; 
+            border-left: 5px solid #20c997; 
             transition: all 0.2s ease;
         }
 
-        .read-title { font-size: 16px; font-weight: bold; color: #2c3e50; margin-bottom: 6px; }
+        .card-header-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .read-title { font-size: 16px; font-weight: bold; color: #2c3e50; margin-bottom: 4px; }
         .read-subtitle { font-size: 14px; color: #555; margin-bottom: 8px; }
         .read-meta { font-size: 13px; color: #555; margin-bottom: 6px; }
         .read-preview-text { font-size: 13px; color: #777; margin-bottom: 10px; }
@@ -96,11 +103,12 @@
         input, textarea { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 5px; font-size: 14px; outline: none; background: white; font-family: inherit; }
         input:focus, textarea:focus { border-color: var(--primary); }
 
-        .row { display: flex; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; align-items: center; }
-        .card-actions { display: flex; gap: 10px; margin-top: 15px; }
+        .row { display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: nowrap; align-items: center; }
+        .card-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 
         /* BUTTON STYLES */
         .btn { padding: 8px 16px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-sm { padding: 6px 12px; font-size: 12px; }
         .btn-warning { background-color: #ffc107; color: #212529; }
         .btn-warning:hover { background-color: #e0a800; }
         .btn-danger { background-color: #dc3545; color: white; }
@@ -109,7 +117,42 @@
         .btn-submit:hover { background-color: #218838; }
         .btn-secondary { background-color: #6c757d; color: white; }
         .btn-secondary:hover { background-color: #5a6268; }
+        .btn-info { background-color: #17a2b8; color: white; }
+        .btn-info:hover { background-color: #138496; }
         .btn-add { background: var(--main-dash-btn); color: white; border: none; padding: 10px 18px; border-radius: 5px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; font-size: 14px; }
+
+        .btn-icon-danger {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 38px;
+        }
+        .btn-icon-danger:hover { background-color: #c82333; }
+
+        .sub-menu-list {
+            margin-top: 10px;
+            padding-left: 15px;
+            border-left: 3px solid #17a2b8;
+            margin-bottom: 12px;
+        }
+        .sub-menu-item {
+            background: #ffffff;
+            padding: 8px 12px;
+            border: 1px dashed #cbd5e1;
+            border-radius: 5px;
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
     </style>
 </head>
 <body>
@@ -152,6 +195,12 @@
         <div class="section-card menu-card">
             <div class="section-title"><i class="fa-solid fa-bars-staggered" style="color: #20c997;"></i> ২.২ নেভিগেশন মেনু ও সাব-মেনু সেটিং</div>
             <div id="header-menu-container"></div>
+            <div id="new-menu-form-box"></div>
+            <div class="card-actions" style="margin-top:10px;" id="main-menu-action-bar">
+                <button class="btn btn-add" id="add-menu-btn" onclick="showNewMenuForm()">
+                    <i class="fa-solid fa-plus"></i> মূল মেনু যোগ করুন
+                </button>
+            </div>
         </div>
 
         <!-- ৩. FOOTER SETTINGS CARD (4 COLUMNS) -->
@@ -209,12 +258,12 @@
                 announceInfo = data.announcement || null;
                 headerInfo = data.header || null;
                 footerInfo = data.footer || null;
-                copyrightInfo = data.copyright || null;
+                copyrightInfo = data.copyright || null; // 👈 FIXED ISSUE HERE!
 
                 renderAnnounceSection();
                 renderHeaderBrandSection();
-                renderHeaderMenuSection();
-                renderFooterSection();
+                renderHeaderMenuCards();
+                renderFooterSectionCards();
                 renderCopyrightSection();
             } catch (err) { 
                 console.error("Layout Config Fetch Error:", err); 
@@ -399,256 +448,550 @@
         }
 
         /* ================= 2.2 HEADER MENU & SUB-MENU SECTION ================= */
-        function renderHeaderMenuSection() {
+        function renderHeaderMenuCards() {
             const container = document.getElementById('header-menu-container');
-            container.innerHTML = '';
-
-            if (headerInfo && headerInfo.menus && headerInfo.menus.length > 0) {
-                const menusSummary = headerInfo.menus.map(m => {
-                    const subCount = m.subMenus && m.subMenus.length > 0 ? ` (${m.subMenus.length} sub-menus)` : ' (0 sub-menus)';
-                    return `<b>${m.title}</b>${subCount}`;
-                }).join(' | ');
-
-                container.innerHTML = `
-                    <div class="read-box" style="border-left: 5px solid #20c997;">
-                        <div class="read-title"><i class="fa-solid fa-bars"></i> নেভিগেশন মেনু তালিকা</div>
-                        <div class="read-preview-text" style="margin-top:8px;">${menusSummary}</div>
-                        <div class="card-actions">
-                            <button class="btn btn-warning" onclick="editHeaderMenuSection()"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-                            <button class="btn btn-danger" onclick="deleteHeaderMenuSection()"><i class="fa-solid fa-trash"></i> Delete</button>
-                        </div>
-                    </div>
-                `;
-            } else {
-                container.innerHTML = `
-                    <button class="btn btn-add" onclick="editHeaderMenuSection(true)">
-                        <i class="fa-solid fa-plus"></i> নেভিগেশন মেনু যোগ করুন
-                    </button>
-                `;
-            }
-        }
-
-        function editHeaderMenuSection(isNew = false) {
-            const container = document.getElementById('header-menu-container');
-            const menus = headerInfo ? headerInfo.menus || [] : [];
-
-            let menusHtml = '';
-            menus.forEach((m, idx) => {
-                let subMenusHtml = '';
-                if (m.subMenus) {
-                    m.subMenus.forEach((sm, smIdx) => {
-                        subMenusHtml += `
-                            <div class="row" style="margin-left: 20px; border-left: 2px solid var(--secondary); padding-left: 10px;">
-                                <input type="text" placeholder="সাব-মেনু টাইটেল" class="sub-menu-title-${idx}" value="${(sm.title || '').replace(/"/g, '&quot;')}">
-                                <input type="text" placeholder="সাব-মেনু URL" class="sub-menu-url-${idx}" value="${(sm.url || '').replace(/"/g, '&quot;')}">
-                            </div>
-                        `;
-                    });
-                }
-
-                menusHtml += `
-                    <div style="background: #f8fafc; padding: 12px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #cbd5e1;">
-                        <div class="row">
-                            <input type="text" placeholder="মেনু টাইটেল (যেমন: হোম)" class="header-menu-title" value="${(m.title || '').replace(/"/g, '&quot;')}">
-                            <input type="text" placeholder="মেনু URL (যেমন: index.html)" class="header-menu-url" value="${(m.url || '').replace(/"/g, '&quot;')}">
-                        </div>
-                        <div id="sub-menu-box-${idx}">
-                            ${subMenusHtml}
-                        </div>
-                        <button type="button" class="btn btn-secondary" style="font-size:11px; padding:4px 8px; margin-top:5px;" onclick="addSubMenuRow(${idx})">
-                            + সাব-মেনু যোগ করুন
-                        </button>
-                    </div>
-                `;
-            });
-
-            container.innerHTML = `
-                <div class="read-box" style="border-left: 5px solid #20c997; background: #ffffff;">
-                    <div style="font-weight: bold; margin-bottom: 12px; color: #20c997;">
-                        ${isNew ? 'নতুন মেনু ও সাব-মেনু যোগ করুন' : 'মেনু ও সাব-মেনু এডিট করুন'}
-                    </div>
-
-                    <div id="header-menus-wrapper">
-                        ${menusHtml}
-                    </div>
-                    <button type="button" class="btn btn-add" style="margin-top:5px; font-size:12px; padding:6px 12px;" onclick="addMainMenuRow()">
-                        + মূল মেনু যোগ করুন
-                    </button>
-
-                    <div class="card-actions" style="margin-top: 15px;">
-                        <button class="btn btn-submit" onclick="saveHeaderMenuSection()"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
-                        <button class="btn btn-secondary" onclick="renderHeaderMenuSection()"><i class="fa-solid fa-xmark"></i> Cancel</button>
-                    </div>
-                </div>
-            `;
-        }
-
-        function addMainMenuRow() {
-            const wrapper = document.getElementById('header-menus-wrapper');
-            const idx = wrapper.children.length;
-            const div = document.createElement('div');
-            div.style.cssText = "background: #f8fafc; padding: 12px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #cbd5e1;";
-            div.innerHTML = `
-                <div class="row">
-                    <input type="text" placeholder="মেনু টাইটেল" class="header-menu-title">
-                    <input type="text" placeholder="মেনু URL" class="header-menu-url">
-                </div>
-                <div id="sub-menu-box-${idx}"></div>
-                <button type="button" class="btn btn-secondary" style="font-size:11px; padding:4px 8px; margin-top:5px;" onclick="addSubMenuRow(${idx})">
-                    + সাব-মেনু যোগ করুন
+            document.getElementById('new-menu-form-box').innerHTML = '';
+            
+            const mainActionBar = document.getElementById('main-menu-action-bar');
+            mainActionBar.innerHTML = `
+                <button class="btn btn-add" id="add-menu-btn" onclick="showNewMenuForm()">
+                    <i class="fa-solid fa-plus"></i> মূল মেনু যোগ করুন
                 </button>
             `;
-            wrapper.appendChild(div);
-        }
 
-        function addSubMenuRow(idx) {
-            const box = document.getElementById(`sub-menu-box-${idx}`);
-            const div = document.createElement('div');
-            div.className = "row";
-            div.style.cssText = "margin-left: 20px; border-left: 2px solid var(--secondary); padding-left: 10px;";
-            div.innerHTML = `
-                <input type="text" placeholder="সাব-মেনু টাইটেল" class="sub-menu-title-${idx}">
-                <input type="text" placeholder="সাব-মেনু URL" class="sub-menu-url-${idx}">
-            `;
-            box.appendChild(div);
-        }
-
-        async function saveHeaderMenuSection() {
-            if (!headerInfo) headerInfo = {};
-
-            const menuDivs = document.querySelectorAll('#header-menus-wrapper > div');
-            const menus = [];
-
-            menuDivs.forEach((mDiv, idx) => {
-                const title = mDiv.querySelector('.header-menu-title')?.value || '';
-                const url = mDiv.querySelector('.header-menu-url')?.value || '';
-
-                const subTitles = mDiv.querySelectorAll(`.sub-menu-title-${idx}`);
-                const subUrls = mDiv.querySelectorAll(`.sub-menu-url-${idx}`);
-                const subMenus = [];
-
-                subTitles.forEach((st, sIdx) => {
-                    if (st.value) {
-                        subMenus.push({ title: st.value, url: subUrls[sIdx]?.value || '' });
-                    }
-                });
-
-                if (title) {
-                    menus.push({ title, url, subMenus });
-                }
-            });
-
-            headerInfo.menus = menus;
-            await saveLayoutConfig();
-            renderHeaderMenuSection();
-        }
-
-        async function deleteHeaderMenuSection() {
-            if (await showTopAlert("আপনি কি নিশ্চিত যে সকল মেনু মুছে ফেলতে চান?", 'danger', true)) {
-                if (headerInfo) {
-                    headerInfo.menus = [];
-                }
-                await saveLayoutConfig();
-                renderHeaderMenuSection();
-            }
-        }
-
-        /* ================= 3. FOOTER SECTION (4 COLUMNS) ================= */
-        function renderFooterSection() {
-            const container = document.getElementById('footer-container');
             container.innerHTML = '';
 
-            if (footerInfo) {
-                container.innerHTML = `
-                    <div class="read-box" style="border-left: 5px solid #17a2b8;">
-                        <div class="read-title"><i class="fa-solid fa-list-check"></i> ফুটার সেটিং (৪ টি কলাম সক্রিয়)</div>
-                        <div class="read-subtitle"><b>Col 1 (About):</b> ${footerInfo.col1Text || 'নাই'}</div>
-                        <div class="read-meta"><b>Col 2 Title:</b> ${footerInfo.col2Title || 'নাই'} | <b>Col 3 Title:</b> ${footerInfo.col3Title || 'নাই'} | <b>Col 4 Title:</b> ${footerInfo.col4Title || 'নাই'}</div>
+            const menus = (headerInfo && headerInfo.menus) ? headerInfo.menus : [];
+
+            if (menus.length === 0) {
+                container.innerHTML = `<p style="color:#777; margin-bottom:12px;">কোনো নেভিগেশন মেনু তৈরি করা হয়নি।</p>`;
+                return;
+            }
+
+            menus.forEach((m, mIdx) => {
+                const card = document.createElement('div');
+                card.className = 'read-box';
+                card.id = `menu-card-${mIdx}`;
+
+                let subMenusHtml = '';
+                if (m.subMenus && m.subMenus.length > 0) {
+                    subMenusHtml = `
+                        <div class="sub-menu-list">
+                            <div style="font-size:12px; font-weight:bold; color:#555; margin-bottom:5px;">সাব-মেনু সমূহ:</div>
+                            ${m.subMenus.map((sm, smIdx) => `
+                                <div class="sub-menu-item">
+                                    <span style="font-size:13px; color:#333;"><b>${sm.title}</b> <small style="color:#777;">(${sm.url || '#'})</small></span>
+                                    <div>
+                                        <button class="btn btn-warning btn-sm" onclick="editSubMenuInline(${mIdx}, ${smIdx})"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                                        <button class="btn btn-danger btn-sm" onclick="deleteSubMenu(${mIdx}, ${smIdx})"><i class="fa-solid fa-trash"></i> Delete</button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                }
+
+                card.innerHTML = `
+                    <div class="card-header-flex">
+                        <div>
+                            <div class="read-title"><i class="fa-solid fa-bars" style="color:#20c997;"></i> মেনু #${mIdx + 1}: ${m.title || '(নাম নেই)'}</div>
+                            <div class="read-subtitle"><b>URL:</b> ${m.url || '#'}</div>
+                        </div>
                         <div class="card-actions">
-                            <button class="btn btn-warning" onclick="editFooterSection()"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-                            <button class="btn btn-danger" onclick="deleteFooterSection()"><i class="fa-solid fa-trash"></i> Delete</button>
+                            <button class="btn btn-warning" onclick="editMainMenuInline(${mIdx})"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                            <button class="btn btn-danger" onclick="deleteMainMenu(${mIdx})"><i class="fa-solid fa-trash"></i> Delete</button>
                         </div>
                     </div>
+                    ${subMenusHtml}
+                    <div id="add-submenu-box-${mIdx}"></div>
+                    <div class="card-actions" style="margin-top: 10px;" id="submenu-action-bar-${mIdx}">
+                        <button class="btn btn-info" onclick="showAddSubMenuForm(${mIdx})"><i class="fa-solid fa-plus"></i> সাব-মেনু যোগ করুন</button>
+                    </div>
                 `;
-            } else {
-                container.innerHTML = `
-                    <button class="btn btn-add" onclick="editFooterSection(true)">
-                        <i class="fa-solid fa-plus"></i> ফুটার তথ্য যোগ করুন
-                    </button>
-                `;
-            }
+                container.appendChild(card);
+            });
         }
 
-        function editFooterSection(isNew = false) {
-            const container = document.getElementById('footer-container');
-            const col1Text = footerInfo ? footerInfo.col1Text || '' : '';
-            const fb = footerInfo ? footerInfo.col1Fb || '' : '';
-            const yt = footerInfo ? footerInfo.col1Yt || '' : '';
+        function editMainMenuInline(mIdx) {
+            const m = headerInfo.menus[mIdx];
+            const card = document.getElementById(`menu-card-${mIdx}`);
+            card.style.borderLeft = "5px solid #007bff";
+            card.style.background = "#ffffff";
 
-            const c2Title = footerInfo ? footerInfo.col2Title || '' : '';
-            const c3Title = footerInfo ? footerInfo.col3Title || '' : '';
-            const c4Title = footerInfo ? footerInfo.col4Title || '' : '';
-
-            container.innerHTML = `
-                <div class="read-box" style="border-left: 5px solid #007bff; background: #ffffff;">
-                    <div style="font-weight: bold; margin-bottom: 12px; color: #007bff;">
-                        ${isNew ? 'নতুন ফুটার যোগ করুন' : 'ফুটার এডিট করুন'}
+            card.innerHTML = `
+                <div style="font-weight: bold; margin-bottom: 10px; color: #007bff;">মেনু #${mIdx + 1} এডিট করুন</div>
+                <div class="row">
+                    <div class="form-group" style="flex:1;">
+                        <label>মেনু টাইটেল:</label>
+                        <input type="text" id="edit-menu-title-${mIdx}" value="${(m.title || '').replace(/"/g, '&quot;')}">
                     </div>
-
-                    <!-- Column 1 -->
-                    <div style="border: 1px solid #cbd5e1; padding: 10px; border-radius: 6px; margin-bottom: 10px;">
-                        <label style="color:var(--primary);">কলাম ১ (About & Social Links):</label>
-                        <textarea id="footer-col1-text" rows="2" placeholder="সাইট সম্পর্কে সংক্ষিপ্ত বিবরণ">${col1Text}</textarea>
-                        <div class="row" style="margin-top:5px;">
-                            <input type="text" id="footer-col1-fb" value="${fb.replace(/"/g, '&quot;')}" placeholder="Facebook Page URL">
-                            <input type="text" id="footer-col1-yt" value="${yt.replace(/"/g, '&quot;')}" placeholder="YouTube Channel URL">
-                        </div>
+                    <div class="form-group" style="flex:1;">
+                        <label>মেনু URL:</label>
+                        <input type="text" id="edit-menu-url-${mIdx}" value="${(m.url || '').replace(/"/g, '&quot;')}">
                     </div>
-
-                    <!-- Column 2 -->
-                    <div style="border: 1px solid #cbd5e1; padding: 10px; border-radius: 6px; margin-bottom: 10px;">
-                        <label style="color:var(--primary);">কলাম ২ (Quick Links):</label>
-                        <input type="text" id="footer-col2-title" value="${c2Title.replace(/"/g, '&quot;')}" placeholder="কলাম ২ শিরোনাম (যেমন: প্রয়োজনীয় লিংক)">
-                    </div>
-
-                    <!-- Column 3 -->
-                    <div style="border: 1px solid #cbd5e1; padding: 10px; border-radius: 6px; margin-bottom: 10px;">
-                        <label style="color:var(--primary);">কলাম ৩ (Categories):</label>
-                        <input type="text" id="footer-col3-title" value="${c3Title.replace(/"/g, '&quot;')}" placeholder="কলাম ৩ শিরোনাম (যেমন: ক্যাটাগরি)">
-                    </div>
-
-                    <!-- Column 4 -->
-                    <div style="border: 1px solid #cbd5e1; padding: 10px; border-radius: 6px; margin-bottom: 10px;">
-                        <label style="color:var(--primary);">কলাম ৪ (Contact/Notice):</label>
-                        <input type="text" id="footer-col4-title" value="${c4Title.replace(/"/g, '&quot;')}" placeholder="কলাম ৪ শিরোনাম (যেমন: যোগাযোগ)">
-                    </div>
-
-                    <div class="card-actions" style="margin-top: 10px;">
-                        <button class="btn btn-submit" onclick="saveFooterSection()"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
-                        <button class="btn btn-secondary" onclick="renderFooterSection()"><i class="fa-solid fa-xmark"></i> Cancel</button>
-                    </div>
+                </div>
+                <div class="card-actions">
+                    <button class="btn btn-submit" onclick="saveMainMenuInline(${mIdx})"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
+                    <button class="btn btn-secondary" onclick="renderHeaderMenuCards()"><i class="fa-solid fa-xmark"></i> Cancel</button>
                 </div>
             `;
         }
 
-        async function saveFooterSection() {
-            footerInfo = {
-                col1Text: document.getElementById('footer-col1-text').value,
-                col1Fb: document.getElementById('footer-col1-fb').value,
-                col1Yt: document.getElementById('footer-col1-yt').value,
-                col2Title: document.getElementById('footer-col2-title').value,
-                col3Title: document.getElementById('footer-col3-title').value,
-                col4Title: document.getElementById('footer-col4-title').value
-            };
+        async function saveMainMenuInline(mIdx) {
+            headerInfo.menus[mIdx].title = document.getElementById(`edit-menu-title-${mIdx}`).value;
+            headerInfo.menus[mIdx].url = document.getElementById(`edit-menu-url-${mIdx}`).value;
             await saveLayoutConfig();
-            renderFooterSection();
+            renderHeaderMenuCards();
         }
 
-        async function deleteFooterSection() {
-            if (await showTopAlert("আপনি কি নিশ্চিত যে ফুটারের সকল তথ্য মুছে ফেলতে চান?", 'danger', true)) {
-                footerInfo = null;
+        async function deleteMainMenu(mIdx) {
+            if (await showTopAlert("আপনি কি নিশ্চিত যে এই মেনুটি মুছে ফেলতে চান?", 'danger', true)) {
+                headerInfo.menus.splice(mIdx, 1);
                 await saveLayoutConfig();
-                renderFooterSection();
+                renderHeaderMenuCards();
+            }
+        }
+
+        function showAddSubMenuForm(mIdx) {
+            const container = document.getElementById(`add-submenu-box-${mIdx}`);
+            const actionBar = document.getElementById(`submenu-action-bar-${mIdx}`);
+            if (!container) return;
+
+            let formWrapper = container.querySelector('.new-submenu-form-wrapper');
+
+            if (!formWrapper) {
+                formWrapper = document.createElement('div');
+                formWrapper.className = 'new-submenu-form-wrapper';
+                formWrapper.style.cssText = "margin-top:10px; background:#f8fafc; padding:12px; border-radius:6px; border:1px solid #cbd5e1;";
+                formWrapper.innerHTML = `
+                    <div style="font-weight:bold; font-size:13px; color:#17a2b8; margin-bottom:10px;">নতুন সাব-মেনু যোগ করুন:</div>
+                    <div class="new-submenu-rows-container"></div>
+                `;
+                container.appendChild(formWrapper);
+
+                if (actionBar && !actionBar.querySelector('.btn-submit')) {
+                    actionBar.innerHTML += `
+                        <button class="btn btn-submit" onclick="saveAllNewSubMenus(${mIdx})"><i class="fa-solid fa-floppy-disk"></i> Save Sub-Menu</button>
+                        <button class="btn btn-secondary" onclick="renderHeaderMenuCards()"><i class="fa-solid fa-xmark"></i> Cancel</button>
+                    `;
+                }
+            }
+
+            const rowsContainer = formWrapper.querySelector('.new-submenu-rows-container');
+            const rowDiv = document.createElement('div');
+            rowDiv.className = 'row new-submenu-row';
+            rowDiv.style.cssText = 'margin-bottom:8px; display:flex; gap:10px; align-items:center;';
+            rowDiv.innerHTML = `
+                <input type="text" class="new-sm-title" placeholder="সাব-মেনু টাইটেল" style="flex:1;">
+                <input type="text" class="new-sm-url" placeholder="সাব-মেনু URL" style="flex:1;">
+                <button type="button" class="btn-icon-danger" onclick="removeNewSubMenuRow(this, ${mIdx})" title="মুছে ফেলুন">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            `;
+            rowsContainer.appendChild(rowDiv);
+        }
+
+        function removeNewSubMenuRow(btn, mIdx) {
+            const row = btn.closest('.new-submenu-row');
+            if (row) {
+                const rowsContainer = row.parentElement;
+                row.remove();
+                if (rowsContainer && rowsContainer.children.length === 0) {
+                    renderHeaderMenuCards();
+                }
+            }
+        }
+
+        async function saveAllNewSubMenus(mIdx) {
+            const container = document.getElementById(`add-submenu-box-${mIdx}`);
+            if (!container) return;
+
+            const rows = container.querySelectorAll('.new-submenu-row');
+            if (rows.length === 0) {
+                showTopAlert("কমপক্ষে একটি সাব-মেনু পূরণ করুন!", "warning");
+                return;
+            }
+
+            if (!headerInfo.menus[mIdx].subMenus) {
+                headerInfo.menus[mIdx].subMenus = [];
+            }
+
+            let addedCount = 0;
+            rows.forEach(row => {
+                const title = row.querySelector('.new-sm-title')?.value.trim();
+                const url = row.querySelector('.new-sm-url')?.value.trim();
+
+                if (title) {
+                    headerInfo.menus[mIdx].subMenus.push({ title, url: url || '#' });
+                    addedCount++;
+                }
+            });
+
+            if (addedCount === 0) {
+                showTopAlert("সাব-মেনু টাইটেল প্রদান করুন!", "warning");
+                return;
+            }
+
+            await saveLayoutConfig();
+            renderHeaderMenuCards();
+        }
+
+        function editSubMenuInline(mIdx, smIdx) {
+            const sm = headerInfo.menus[mIdx].subMenus[smIdx];
+            renderHeaderMenuCards(); 
+
+            const card = document.getElementById(`menu-card-${mIdx}`);
+            const subItems = card.querySelectorAll('.sub-menu-item');
+            const targetItem = subItems[smIdx];
+
+            if (targetItem) {
+                targetItem.style.display = "block";
+                targetItem.innerHTML = `
+                    <div class="row" style="margin-bottom:5px;">
+                        <input type="text" id="edit-sm-title-${mIdx}-${smIdx}" value="${(sm.title || '').replace(/"/g, '&quot;')}" style="flex:1;">
+                        <input type="text" id="edit-sm-url-${mIdx}-${smIdx}" value="${(sm.url || '').replace(/"/g, '&quot;')}" style="flex:1;">
+                    </div>
+                    <div class="card-actions" style="margin-top:5px;">
+                        <button class="btn btn-submit btn-sm" onclick="saveSubMenuInline(${mIdx}, ${smIdx})"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+                        <button class="btn btn-secondary btn-sm" onclick="renderHeaderMenuCards()"><i class="fa-solid fa-xmark"></i> Cancel</button>
+                    </div>
+                `;
+            }
+        }
+
+        async function saveSubMenuInline(mIdx, smIdx) {
+            headerInfo.menus[mIdx].subMenus[smIdx].title = document.getElementById(`edit-sm-title-${mIdx}-${smIdx}`).value;
+            headerInfo.menus[mIdx].subMenus[smIdx].url = document.getElementById(`edit-sm-url-${mIdx}-${smIdx}`).value;
+            await saveLayoutConfig();
+            renderHeaderMenuCards();
+        }
+
+        async function deleteSubMenu(mIdx, smIdx) {
+            if (await showTopAlert("আপনি কি নিশ্চিত যে এই সাব-মেনুটি মুছে ফেলতে চান?", 'danger', true)) {
+                headerInfo.menus[mIdx].subMenus.splice(smIdx, 1);
+                await saveLayoutConfig();
+                renderHeaderMenuCards();
+            }
+        }
+
+        function showNewMenuForm() {
+            const formBox = document.getElementById('new-menu-form-box');
+            const mainActionBar = document.getElementById('main-menu-action-bar');
+
+            let formWrapper = formBox.querySelector('.new-main-menu-wrapper');
+
+            if (!formWrapper) {
+                formWrapper = document.createElement('div');
+                formWrapper.className = 'new-main-menu-wrapper read-box';
+                formWrapper.style.cssText = "border-left: 5px solid #28a745; background: #ffffff; margin-top:15px;";
+                formWrapper.innerHTML = `
+                    <div style="font-weight: bold; margin-bottom: 12px; color: #28a745;">নতুন মূল মেনু যোগ করুন</div>
+                    <div class="new-main-menu-rows-container"></div>
+                `;
+                formBox.appendChild(formWrapper);
+
+                if (mainActionBar && !mainActionBar.querySelector('.btn-submit')) {
+                    mainActionBar.innerHTML += `
+                        <button class="btn btn-submit" onclick="saveAllNewMainMenus()"><i class="fa-solid fa-floppy-disk"></i> Save Menu</button>
+                        <button class="btn btn-secondary" onclick="renderHeaderMenuCards()"><i class="fa-solid fa-xmark"></i> Cancel</button>
+                    `;
+                }
+            }
+
+            const rowsContainer = formWrapper.querySelector('.new-main-menu-rows-container');
+            const rowDiv = document.createElement('div');
+            rowDiv.className = 'row new-main-menu-row';
+            rowDiv.style.cssText = 'margin-bottom:8px; display:flex; gap:10px; align-items:center;';
+            rowDiv.innerHTML = `
+                <input type="text" class="new-mm-title" placeholder="যেমন: সাধারণ জ্ঞান" style="flex:1;">
+                <input type="text" class="new-mm-url" placeholder="যেমন: general-knowledge.html" style="flex:1;">
+                <button type="button" class="btn-icon-danger" onclick="removeNewMainMenuRow(this)" title="মুছে ফেলুন">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            `;
+            rowsContainer.appendChild(rowDiv);
+        }
+
+        function removeNewMainMenuRow(btn) {
+            const row = btn.closest('.new-main-menu-row');
+            if (row) {
+                const rowsContainer = row.parentElement;
+                row.remove();
+                if (rowsContainer && rowsContainer.children.length === 0) {
+                    renderHeaderMenuCards();
+                }
+            }
+        }
+
+        async function saveAllNewMainMenus() {
+            const formBox = document.getElementById('new-menu-form-box');
+            const rows = formBox.querySelectorAll('.new-main-menu-row');
+
+            if (rows.length === 0) {
+                showTopAlert("কমপক্ষে একটি মূল মেনু পূরণ করুন!", "warning");
+                return;
+            }
+
+            if (!headerInfo) headerInfo = {};
+            if (!headerInfo.menus) headerInfo.menus = [];
+
+            let addedCount = 0;
+            rows.forEach(row => {
+                const title = row.querySelector('.new-mm-title')?.value.trim();
+                const url = row.querySelector('.new-mm-url')?.value.trim();
+
+                if (title) {
+                    headerInfo.menus.push({ title, url: url || '#', subMenus: [] });
+                    addedCount++;
+                }
+            });
+
+            if (addedCount === 0) {
+                showTopAlert("মেনু টাইটেল প্রদান করুন!", "warning");
+                return;
+            }
+
+            await saveLayoutConfig();
+            renderHeaderMenuCards();
+        }
+
+        /* ================= 3. FOOTER SECTION (DYNAMIC READ-BOX CARDS FOR 4 COLUMNS) ================= */
+        function renderFooterSectionCards() {
+            const container = document.getElementById('footer-container');
+            container.innerHTML = '';
+
+            if (!footerInfo) {
+                footerInfo = {
+                    col1Text: 'TopMCQ অনলাইন কুইজ প্ল্যাটফর্ম।',
+                    col1Fb: '#',
+                    col1Yt: '#',
+                    col2Title: 'প্রয়োজনীয় লিংক',
+                    col2Links: [],
+                    col3Title: 'ক্যাটাগরি',
+                    col3Links: [],
+                    col4Title: 'যোগাযোগ',
+                    col4Links: []
+                };
+            }
+
+            // Column 1 Card
+            const card1 = document.createElement('div');
+            card1.className = 'read-box';
+            card1.style.borderLeft = "5px solid #17a2b8";
+            card1.id = 'footer-col-1-box';
+            card1.innerHTML = `
+                <div class="card-header-flex">
+                    <div>
+                        <div class="read-title"><i class="fa-solid fa-circle-info" style="color:#17a2b8;"></i> কলাম ১: সাইট তথ্য ও সোশাল লিংক (Col 1)</div>
+                        <div class="read-subtitle"><b>About Text:</b> ${footerInfo.col1Text || 'নাই'}</div>
+                        <div class="read-meta"><b>Facebook:</b> ${footerInfo.col1Fb || 'নাই'} | <b>YouTube:</b> ${footerInfo.col1Yt || 'নাই'}</div>
+                    </div>
+                    <div class="card-actions">
+                        <button class="btn btn-warning" onclick="editFooterCol1Inline()"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                    </div>
+                </div>
+            `;
+            container.appendChild(card1);
+
+            // Columns 2, 3, 4 Cards
+            const cols = [
+                { id: 2, titleKey: 'col2Title', linksKey: 'col2Links', defaultTitle: 'প্রয়োজনীয় লিংক' },
+                { id: 3, titleKey: 'col3Title', linksKey: 'col3Links', defaultTitle: 'ক্যাটাগরি' },
+                { id: 4, titleKey: 'col4Title', linksKey: 'col4Links', defaultTitle: 'যোগাযোগ' }
+            ];
+
+            cols.forEach(c => {
+                const card = document.createElement('div');
+                card.className = 'read-box';
+                card.style.borderLeft = "5px solid #17a2b8";
+                card.id = `footer-col-${c.id}-box`;
+
+                const linksList = footerInfo[c.linksKey] || [];
+                let linksHtml = '';
+                if (linksList.length > 0) {
+                    linksHtml = `
+                        <div class="sub-menu-list">
+                            <div style="font-size:12px; font-weight:bold; color:#555; margin-bottom:5px;">লিংক সমূহ:</div>
+                            ${linksList.map((lk, lkIdx) => `
+                                <div class="sub-menu-item">
+                                    <span style="font-size:13px; color:#333;"><b>${lk.title}</b> <small style="color:#777;">(${lk.url || '#'})</small></span>
+                                    <div>
+                                        <button class="btn btn-danger btn-sm" onclick="deleteFooterLink(${c.id}, ${lkIdx})"><i class="fa-solid fa-trash"></i> Delete</button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                }
+
+                card.innerHTML = `
+                    <div class="card-header-flex">
+                        <div>
+                            <div class="read-title"><i class="fa-solid fa-list" style="color:#17a2b8;"></i> কলাম ${c.id}: ${footerInfo[c.titleKey] || c.defaultTitle}</div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn btn-warning" onclick="editFooterTitleInline(${c.id})"><i class="fa-solid fa-pen-to-square"></i> Edit Title</button>
+                        </div>
+                    </div>
+                    ${linksHtml}
+                    <div id="add-footer-link-box-${c.id}"></div>
+                    <div class="card-actions" style="margin-top: 10px;" id="footer-link-action-bar-${c.id}">
+                        <button class="btn btn-info" onclick="showAddFooterLinkForm(${c.id})"><i class="fa-solid fa-plus"></i> লিংক যোগ করুন</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function editFooterCol1Inline() {
+            const card = document.getElementById('footer-col-1-box');
+            card.style.background = "#ffffff";
+            card.innerHTML = `
+                <div style="font-weight: bold; margin-bottom: 10px; color: #17a2b8;">কলাম ১ এডিট করুন</div>
+                <div class="form-group">
+                    <label>সাইট সম্পর্কে বিবরণ:</label>
+                    <textarea id="edit-col1-text" rows="2">${footerInfo.col1Text || ''}</textarea>
+                </div>
+                <div class="row">
+                    <div class="form-group" style="flex:1;">
+                        <label>Facebook Page URL:</label>
+                        <input type="text" id="edit-col1-fb" value="${(footerInfo.col1Fb || '').replace(/"/g, '&quot;')}">
+                    </div>
+                    <div class="form-group" style="flex:1;">
+                        <label>YouTube Channel URL:</label>
+                        <input type="text" id="edit-col1-yt" value="${(footerInfo.col1Yt || '').replace(/"/g, '&quot;')}">
+                    </div>
+                </div>
+                <div class="card-actions">
+                    <button class="btn btn-submit" onclick="saveFooterCol1Inline()"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
+                    <button class="btn btn-secondary" onclick="renderFooterSectionCards()"><i class="fa-solid fa-xmark"></i> Cancel</button>
+                </div>
+            `;
+        }
+
+        async function saveFooterCol1Inline() {
+            footerInfo.col1Text = document.getElementById('edit-col1-text').value;
+            footerInfo.col1Fb = document.getElementById('edit-col1-fb').value;
+            footerInfo.col1Yt = document.getElementById('edit-col1-yt').value;
+            await saveLayoutConfig();
+            renderFooterSectionCards();
+        }
+
+        function editFooterTitleInline(colId) {
+            const card = document.getElementById(`footer-col-${colId}-box`);
+            const titleKey = `col${colId}Title`;
+            card.style.background = "#ffffff";
+            card.innerHTML = `
+                <div style="font-weight: bold; margin-bottom: 10px; color: #17a2b8;">কলাম ${colId} টাইটেল এডিট করুন</div>
+                <div class="form-group">
+                    <label>কলাম টাইটেল:</label>
+                    <input type="text" id="edit-col-title-${colId}" value="${(footerInfo[titleKey] || '').replace(/"/g, '&quot;')}">
+                </div>
+                <div class="card-actions">
+                    <button class="btn btn-submit" onclick="saveFooterTitleInline(${colId})"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
+                    <button class="btn btn-secondary" onclick="renderFooterSectionCards()"><i class="fa-solid fa-xmark"></i> Cancel</button>
+                </div>
+            `;
+        }
+
+        async function saveFooterTitleInline(colId) {
+            const titleKey = `col${colId}Title`;
+            footerInfo[titleKey] = document.getElementById(`edit-col-title-${colId}`).value;
+            await saveLayoutConfig();
+            renderFooterSectionCards();
+        }
+
+        function showAddFooterLinkForm(colId) {
+            const container = document.getElementById(`add-footer-link-box-${colId}`);
+            const actionBar = document.getElementById(`footer-link-action-bar-${colId}`);
+            if (!container) return;
+
+            let formWrapper = container.querySelector('.new-footer-link-form-wrapper');
+
+            if (!formWrapper) {
+                formWrapper = document.createElement('div');
+                formWrapper.className = 'new-footer-link-form-wrapper';
+                formWrapper.style.cssText = "margin-top:10px; background:#f8fafc; padding:12px; border-radius:6px; border:1px solid #cbd5e1;";
+                formWrapper.innerHTML = `
+                    <div style="font-weight:bold; font-size:13px; color:#17a2b8; margin-bottom:10px;">নতুন লিংক যোগ করুন:</div>
+                    <div class="new-footer-link-rows-container"></div>
+                `;
+                container.appendChild(formWrapper);
+
+                if (actionBar && !actionBar.querySelector('.btn-submit')) {
+                    actionBar.innerHTML += `
+                        <button class="btn btn-submit" onclick="saveAllNewFooterLinks(${colId})"><i class="fa-solid fa-floppy-disk"></i> Save Links</button>
+                        <button class="btn btn-secondary" onclick="renderFooterSectionCards()"><i class="fa-solid fa-xmark"></i> Cancel</button>
+                    `;
+                }
+            }
+
+            const rowsContainer = formWrapper.querySelector('.new-footer-link-rows-container');
+            const rowDiv = document.createElement('div');
+            rowDiv.className = 'row new-footer-link-row';
+            rowDiv.style.cssText = 'margin-bottom:8px; display:flex; gap:10px; align-items:center;';
+            rowDiv.innerHTML = `
+                <input type="text" class="new-fl-title" placeholder="লিংক টাইটেল (যেমন: প্রাইভেসি পলিসি)" style="flex:1;">
+                <input type="text" class="new-fl-url" placeholder="URL (যেমন: privacy.html)" style="flex:1;">
+                <button type="button" class="btn-icon-danger" onclick="removeNewFooterLinkRow(this, ${colId})" title="মুছে ফেলুন">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            `;
+            rowsContainer.appendChild(rowDiv);
+        }
+
+        function removeNewFooterLinkRow(btn, colId) {
+            const row = btn.closest('.new-footer-link-row');
+            if (row) {
+                const rowsContainer = row.parentElement;
+                row.remove();
+                if (rowsContainer && rowsContainer.children.length === 0) {
+                    renderFooterSectionCards();
+                }
+            }
+        }
+
+        async function saveAllNewFooterLinks(colId) {
+            const container = document.getElementById(`add-footer-link-box-${colId}`);
+            if (!container) return;
+
+            const rows = container.querySelectorAll('.new-footer-link-row');
+            if (rows.length === 0) {
+                showTopAlert("কমপক্ষে একটি লিংক পূরণ করুন!", "warning");
+                return;
+            }
+
+            const linksKey = `col${colId}Links`;
+            if (!footerInfo[linksKey]) {
+                footerInfo[linksKey] = [];
+            }
+
+            let addedCount = 0;
+            rows.forEach(row => {
+                const title = row.querySelector('.new-fl-title')?.value.trim();
+                const url = row.querySelector('.new-fl-url')?.value.trim();
+
+                if (title) {
+                    footerInfo[linksKey].push({ title, url: url || '#' });
+                    addedCount++;
+                }
+            });
+
+            if (addedCount === 0) {
+                showTopAlert("লিংক টাইটেল প্রদান করুন!", "warning");
+                return;
+            }
+
+            await saveLayoutConfig();
+            renderFooterSectionCards();
+        }
+
+        async function deleteFooterLink(colId, lkIdx) {
+            const linksKey = `col${colId}Links`;
+            if (await showTopAlert("আপনি কি নিশ্চিত যে এই লিংকটি মুছে ফেলতে চান?", 'danger', true)) {
+                footerInfo[linksKey].splice(lkIdx, 1);
+                await saveLayoutConfig();
+                renderFooterSectionCards();
             }
         }
 

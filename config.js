@@ -6,24 +6,21 @@ async function loadLayoutConfig() {
     let cachedData = localStorage.getItem('layout_config_data');
     let config = cachedData ? JSON.parse(cachedData) : null;
 
-    // Background call to check for updates from DB
     try {
         const res = await fetch(LAYOUT_API_URL);
         if (res.ok) {
             const freshData = await res.json();
             
-            // Check if updated or no cache exists
             if (!config || JSON.stringify(config) !== JSON.stringify(freshData)) {
                 localStorage.setItem('layout_config_data', JSON.stringify(freshData));
                 config = freshData;
-                renderLayout(config); // Re-render if updated
+                renderLayout(config);
             }
         }
     } catch (err) {
         console.warn("Offline or Server unreachable. Loading from LocalStorage Cache.");
     }
 
-    // Render immediately using cache if available
     if (config) {
         renderLayout(config);
     }
@@ -35,12 +32,10 @@ function renderLayout(data) {
 
     // A. Dynamic SEO Title & Favicon Update
     if (data.header) {
-        // Dynamic Browser Title (SEO Title)
         if (data.header.seoTitle) {
             document.title = data.header.seoTitle;
         }
 
-        // Dynamic Favicon Update
         if (data.header.faviconUrl) {
             let favicon = document.querySelector("link[rel*='icon']");
             if (!favicon) {
@@ -79,7 +74,7 @@ function renderLayout(data) {
                     if (m.subMenus && m.subMenus.length > 0) {
                         subHtml = `
                             <ul class="dropdown-menu">
-                                ${m.subMenus.map(sm => `<li><a href="${sm.url}">${sm.title}</a></li>`).join('')}
+                                ${m.subMenus.map(sm => `<li><a href="${sm.url || '#'}">${sm.title}</a></li>`).join('')}
                             </ul>
                         `;
                     }
@@ -109,11 +104,16 @@ function renderLayout(data) {
     }
 
     // D. Render 4-Column Footer & Copyright
-    if (data.footer) {
+    if (data.footer || data.copyright) {
         const footerContainer = document.getElementById('global-footer');
         if (footerContainer) {
-            const f = data.footer;
+            const f = data.footer || {};
             const c = data.copyright || {};
+
+            const generateLinksHtml = (links) => {
+                if (!links || links.length === 0) return '';
+                return `<ul>` + links.map(l => `<li><a href="${l.url || '#'}">${l.title}</a></li>`).join('') + `</ul>`;
+            };
 
             footerContainer.innerHTML = `
                 <div class="footer-container">
@@ -130,20 +130,20 @@ function renderLayout(data) {
 
                         <!-- Col 2 -->
                         <div class="footer-col">
-                            <h4>${f.col2Title || 'Quick Links'}</h4>
-                            <div id="footer-col2-links"></div>
+                            <h4>${f.col2Title || 'প্রয়োজনীয় লিংক'}</h4>
+                            ${generateLinksHtml(f.col2Links)}
                         </div>
 
                         <!-- Col 3 -->
                         <div class="footer-col">
-                            <h4>${f.col3Title || 'Categories'}</h4>
-                            <div id="footer-col3-links"></div>
+                            <h4>${f.col3Title || 'ক্যাটাগরি'}</h4>
+                            ${generateLinksHtml(f.col3Links)}
                         </div>
 
                         <!-- Col 4 -->
                         <div class="footer-col">
-                            <h4>${f.col4Title || 'Contact'}</h4>
-                            <div id="footer-col4-links"></div>
+                            <h4>${f.col4Title || 'যোগাযোগ'}</h4>
+                            ${generateLinksHtml(f.col4Links)}
                         </div>
                     </div>
 
