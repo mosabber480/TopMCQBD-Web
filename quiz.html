@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login / Register - TopMCQ</title>
+    <title>MCQ Quiz Practice - TopMCQ</title>
     
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -12,174 +12,157 @@
     <link rel="stylesheet" href="global/global.css">
     
     <style>
+        :root {
+            --primary: #007bff;
+            --success: #28a745;
+            --danger: #dc3545;
+            --dark: #2c3e50;
+            --light: #f8f9fa;
+        }
+
         .page-wrapper {
             display: flex;
             flex-direction: column;
             min-height: 100vh;
+            background-color: #f4f7f6;
         }
 
         .main-content {
             flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 40px 20px;
+            padding: 30px 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
         }
 
-        .auth-card {
+        .quiz-card {
             background: white;
-            padding: 35px 30px;
-            border-radius: 10px;
+            padding: 30px;
+            border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            width: 100%;
-            max-width: 420px;
             border: 1px solid #e2e8f0;
         }
 
-        h2 { margin-top: 0; color: var(--dark, #2c3e50); text-align: center; margin-bottom: 20px; font-weight: 700; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 6px; font-weight: bold; color: #555; font-size: 14px; }
-        
-        /* PASSWORD FIELD WITH EYE ICON STYLING */
-        .password-wrapper {
-            position: relative;
+        .quiz-header {
             display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e2e8f0;
+            margin-bottom: 20px;
+        }
+
+        .quiz-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .sub-badge {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .question-box {
+            margin-bottom: 25px;
+        }
+
+        .question-text {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .options-grid {
+            display: grid;
+            gap: 12px;
+        }
+
+        .option-btn {
+            background: #fff;
+            border: 2px solid #cbd5e1;
+            padding: 14px 18px;
+            border-radius: 8px;
+            font-size: 15px;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .option-btn:hover {
+            border-color: var(--primary);
+            background-color: #f0f7ff;
+        }
+
+        .option-btn.correct {
+            background-color: #d4edda !important;
+            border-color: var(--success) !important;
+            color: #155724;
+            font-weight: bold;
+        }
+
+        .option-btn.wrong {
+            background-color: #f8d7da !important;
+            border-color: var(--danger) !important;
+            color: #721c24;
+            font-weight: bold;
+        }
+
+        .quiz-footer {
+            margin-top: 25px;
+            display: flex;
+            justify-content: space-between;
             align-items: center;
         }
 
-        .password-wrapper input {
-            padding-right: 40px;
-        }
-
-        .toggle-password-icon {
-            position: absolute;
-            right: 12px;
-            cursor: pointer;
-            color: #777;
-            font-size: 15px;
-            transition: color 0.2s ease;
-            user-select: none;
-        }
-
-        .toggle-password-icon:hover {
-            color: var(--primary, #007bff);
-        }
-
-        input {
-            width: 100%;
-            padding: 11px 14px;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            font-size: 14px;
-            outline: none;
-            transition: border-color 0.2s ease;
-        }
-        input:focus { border-color: var(--primary, #007bff); }
-
         .btn {
-            width: 100%;
-            padding: 12px;
-            background-color: var(--primary, #007bff);
+            padding: 10px 20px;
+            background-color: var(--primary);
             color: white;
             border: none;
             border-radius: 6px;
             font-weight: bold;
-            font-size: 16px;
+            font-size: 15px;
             cursor: pointer;
-            margin-top: 10px;
             transition: background 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
         }
-        .btn:hover { background-color: var(--primary-dark, #0056b3); }
 
-        .toggle-text {
+        .btn:hover { background-color: #0056b3; }
+
+        .loading-spinner {
             text-align: center;
-            margin-top: 18px;
-            font-size: 14px;
+            padding: 40px;
+            font-size: 18px;
             color: #666;
         }
-        .toggle-link {
-            color: var(--primary, #007bff);
-            cursor: pointer;
-            font-weight: bold;
-            text-decoration: underline;
-        }
 
-        .alert {
-            padding: 10px 14px;
-            border-radius: 6px;
-            margin-bottom: 15px;
-            font-size: 14px;
-            display: none;
+        .score-box {
+            text-align: center;
+            padding: 20px;
         }
-        .alert-danger { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-        .alert-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .score-box h2 { color: var(--primary); font-size: 28px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
     <div class="page-wrapper">
-        <div id="global-announce-bar" style="display:none;"></div>
         <header id="global-header"></header>
 
         <main class="main-content">
-            <div class="auth-card">
-                <h2 id="formTitle"><i class="fa-solid fa-lock"></i> Login to Account</h2>
-                
-                <div id="alertBox" class="alert"></div>
-
-                <!-- LOGIN FORM -->
-                <form id="loginForm">
-                    <div class="form-group">
-                        <label>Email Address:</label>
-                        <input type="email" id="loginEmail" placeholder="Enter your email..." required>
-                    </div>
-                    <div class="form-group">
-                        <label>Password:</label>
-                        <div class="password-wrapper">
-                            <input type="password" id="loginPassword" placeholder="Enter password..." required>
-                            <i class="fa-solid fa-eye toggle-password-icon" onclick="togglePasswordVisibility('loginPassword', this)"></i>
-                        </div>
-                    </div>
-                    <button type="submit" class="btn" id="loginBtn">
-                        <i class="fa-solid fa-right-to-bracket"></i> Login
-                    </button>
-                </form>
-
-                <!-- REGISTER FORM -->
-                <form id="registerForm" style="display: none;">
-                    <div class="form-group">
-                        <label>Full Name:</label>
-                        <input type="text" id="regName" placeholder="Enter full name..." required>
-                    </div>
-                    <div class="form-group">
-                        <label>Email Address:</label>
-                        <input type="email" id="regEmail" placeholder="Enter email address..." required>
-                    </div>
-                    <div class="form-group">
-                        <label>Password:</label>
-                        <div class="password-wrapper">
-                            <input type="password" id="regPassword" placeholder="Create a password..." required>
-                            <i class="fa-solid fa-eye toggle-password-icon" onclick="togglePasswordVisibility('regPassword', this)"></i>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Confirm Password:</label>
-                        <div class="password-wrapper">
-                            <input type="password" id="regConfirmPassword" placeholder="Re-enter password to confirm..." required>
-                            <i class="fa-solid fa-eye toggle-password-icon" onclick="togglePasswordVisibility('regConfirmPassword', this)"></i>
-                        </div>
-                    </div>
-                    <button type="submit" class="btn" id="regBtn" style="background-color: #28a745;">
-                        <i class="fa-solid fa-user-plus"></i> Register Account
-                    </button>
-                </form>
-
-                <div class="toggle-text" id="toggleMessage">
-                    Don't have an account? <span class="toggle-link" onclick="toggleForm('register')">Register Now</span>
+            <div class="quiz-card" id="quizContainer">
+                <div class="loading-spinner">
+                    <i class="fa-solid fa-spinner fa-spin fa-2x"></i>
+                    <p style="margin-top: 15px;">অ্যাক্সেস এবং কুইজ তথ্য লোড হচ্ছে...</p>
                 </div>
             </div>
         </main>
@@ -190,134 +173,172 @@
     <script src="global/global.js"></script>
 
     <script>
-        const AUTH_API = 'https://mosabber-quiz-app.onrender.com/api/auth';
+        const API_BASE = 'https://mosabber-quiz-app.onrender.com/api';
+        let currentQuestions = [];
+        let currentIndex = 0;
+        let score = 0;
 
-        function togglePasswordVisibility(inputId, icon) {
-            const inputField = document.getElementById(inputId);
-            if (inputField.type === "password") {
-                inputField.type = "text";
-                icon.classList.remove("fa-eye");
-                icon.classList.add("fa-eye-slash");
-            } else {
-                inputField.type = "password";
-                icon.classList.remove("fa-eye-slash");
-                icon.classList.add("fa-eye");
-            }
-        }
+        // 1. Check Authentication & System Roles/Subscription Access
+        async function initQuizAccess() {
+            const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
+            const quizContainer = document.getElementById('quizContainer');
 
-        window.addEventListener('DOMContentLoaded', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('action') === 'register' || urlParams.get('mode') === 'register') {
-                toggleForm('register');
-            }
-        });
-
-        function showAlert(msg, isSuccess = false) {
-            const alertBox = document.getElementById('alertBox');
-            alertBox.innerHTML = `${isSuccess ? '<i class="fa-solid fa-circle-check"></i>' : '<i class="fa-solid fa-circle-exclamation"></i>'} ${msg}`;
-            alertBox.className = `alert ${isSuccess ? 'alert-success' : 'alert-danger'}`;
-            alertBox.style.display = 'block';
-        }
-
-        function toggleForm(type) {
-            document.getElementById('alertBox').style.display = 'none';
-            if (type === 'register') {
-                document.getElementById('loginForm').style.display = 'none';
-                document.getElementById('registerForm').style.display = 'block';
-                document.getElementById('formTitle').innerHTML = '<i class="fa-solid fa-user-pen"></i> Register Account';
-                document.getElementById('toggleMessage').innerHTML = `Already have an account? <span class="toggle-link" onclick="toggleForm('login')">Login Here</span>`;
-            } else {
-                document.getElementById('registerForm').style.display = 'none';
-                document.getElementById('loginForm').style.display = 'block';
-                document.getElementById('formTitle').innerHTML = '<i class="fa-solid fa-lock"></i> Login to Account';
-                document.getElementById('toggleMessage').innerHTML = `Don't have an account? <span class="toggle-link" onclick="toggleForm('register')">Register Now</span>`;
-            }
-        }
-
-        // LOGIN SUBMIT
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('loginBtn');
-            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Authenticating...`;
-            btn.disabled = true;
-
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-
-            try {
-                const res = await fetch(`${AUTH_API}/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                });
-                const data = await res.json();
-
-                if (res.ok && (data.success || data.token)) {
-                    localStorage.setItem('token', data.token);
-                    localStorage.setItem('user', JSON.stringify(data.user));
-                    localStorage.setItem('quiz_token', data.token);
-                    localStorage.setItem('quiz_user', JSON.stringify(data.user));
-
-                    showAlert("Login Successful! Redirecting...", true);
-                    
-                    setTimeout(() => {
-                        if (data.user && (data.user.role === 'owner' || data.user.role === 'admin')) {
-                            window.location.href = 'dashboard.html';
-                        } else {
-                            window.location.href = 'profile.html';
-                        }
-                    }, 1000);
-                } else {
-                    showAlert(data.message || "Invalid login credentials!");
-                }
-            } catch (err) {
-                showAlert("Server connection error!");
-            } finally {
-                btn.innerHTML = `<i class="fa-solid fa-right-to-bracket"></i> Login`;
-                btn.disabled = false;
-            }
-        });
-
-        // REGISTER SUBMIT
-        document.getElementById('registerForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const name = document.getElementById('regName').value;
-            const email = document.getElementById('regEmail').value;
-            const password = document.getElementById('regPassword').value;
-            const confirmPassword = document.getElementById('regConfirmPassword').value;
-
-            if (password !== confirmPassword) {
-                showAlert("Passwords do not match! Please re-check.");
+            if (!token) {
+                window.location.href = 'login.html';
                 return;
             }
 
-            const btn = document.getElementById('regBtn');
-            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Creating Account...`;
-            btn.disabled = true;
-
             try {
-                const res = await fetch(`${AUTH_API}/register`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, email, password })
+                // Fetch User Details
+                const res = await fetch(`${API_BASE}/auth/me`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const data = await res.json();
 
-                if (res.ok && (data.success || data.token)) {
-                    showAlert("Registration successful! Please login below.", true);
-                    document.getElementById('registerForm').reset();
-                    setTimeout(() => toggleForm('login'), 1500);
+                if (res.ok && data.user) {
+                    const user = data.user;
+                    const sub = user.subscription || {};
+
+                    // Owner and Admin bypass plan restrictions completely
+                    const isSystemStaff = user.role === 'owner' || user.role === 'admin';
+                    const isSubscribedCustomer = sub.active && sub.endDate && new Date(sub.endDate) > new Date();
+
+                    if (!isSystemStaff && !isSubscribedCustomer) {
+                        quizContainer.innerHTML = `
+                            <div style="text-align:center; padding: 20px;">
+                                <i class="fa-solid fa-lock fa-3x" style="color: #dc3545; margin-bottom: 15px;"></i>
+                                <h2 style="color:#2c3e50;">সাবস্ক্রিপশন প্রয়োজন!</h2>
+                                <p style="color:#666; margin: 10px 0 20px;">কুইজে অংশ নিতে অ্যাক্টিভ সাবস্ক্রিপশন প্ল্যান প্রয়োজন।</p>
+                                <a href="profile.html" class="btn" style="text-decoration:none;">প্রোফাইল থেকে প্ল্যান নিশ্চিত করুন</a>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    // System Staff or Subscribed Customer -> Load Quiz Questions
+                    loadQuizQuestions();
+
                 } else {
-                    showAlert(data.message || "Registration failed!");
+                    window.location.href = 'login.html';
                 }
             } catch (err) {
-                showAlert("Server connection error!");
-            } finally {
-                btn.innerHTML = `<i class="fa-solid fa-user-plus"></i> Register Account`;
-                btn.disabled = false;
+                loadQuizQuestions();
             }
-        });
+        }
+
+        // 2. Load MCQ Questions
+        async function loadQuizQuestions() {
+            const quizContainer = document.getElementById('quizContainer');
+            const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
+
+            try {
+                const res = await fetch(`${API_BASE}/mcq`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+
+                if (res.ok && data.mcqs && data.mcqs.length > 0) {
+                    currentQuestions = data.mcqs;
+                } else {
+                    // Fallback Questions if database is empty
+                    currentQuestions = [
+                        {
+                            question: "বাংলাদেশের রাজধানী কোথায়?",
+                            options: ["চট্টগ্রাম", "ঢাকা", "সিলেট", "রাজশাহী"],
+                            correctAnswer: 1
+                        },
+                        {
+                            question: "কম্পিউটারের মস্তিষ্ক কাকে বলা হয়?",
+                            options: ["RAM", "Hard Disk", "CPU", "Monitor"],
+                            correctAnswer: 2
+                        }
+                    ];
+                }
+                renderQuestion();
+
+            } catch (err) {
+                quizContainer.innerHTML = `<p style="color:red; text-align:center;">প্রশ্ন লোড করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।</p>`;
+            }
+        }
+
+        // 3. Render Question UI
+        function renderQuestion() {
+            const quizContainer = document.getElementById('quizContainer');
+            
+            if (currentIndex >= currentQuestions.length) {
+                renderScore();
+                return;
+            }
+
+            const q = currentQuestions[currentIndex];
+
+            quizContainer.innerHTML = `
+                <div class="quiz-header">
+                    <span class="quiz-title"><i class="fa-solid fa-pen-to-square"></i> MCQ Practice</span>
+                    <span class="sub-badge"><i class="fa-solid fa-circle-check"></i> Full Access Active</span>
+                </div>
+
+                <div class="question-box">
+                    <div class="question-text">
+                        <b>প্রশ্ন ${currentIndex + 1}/${currentQuestions.length}:</b> ${q.question}
+                    </div>
+                    <div class="options-grid" id="optionsContainer">
+                        ${q.options.map((opt, idx) => `
+                            <button class="option-btn" onclick="selectOption(${idx}, ${q.correctAnswer})">
+                                <i class="fa-regular fa-circle"></i> ${opt}
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <div class="quiz-footer">
+                    <span>স্কোর: <b>${score}</b></span>
+                    <button class="btn" id="nextBtn" style="display:none;" onclick="nextQuestion()">পরবর্তী প্রশ্ন <i class="fa-solid fa-arrow-right"></i></button>
+                </div>
+            `;
+        }
+
+        // 4. Option Selection Logic
+        function selectOption(selectedIndex, correctIndex) {
+            const buttons = document.querySelectorAll('.option-btn');
+            buttons.forEach(btn => btn.disabled = true);
+
+            if (selectedIndex === correctIndex) {
+                buttons[selectedIndex].classList.add('correct');
+                buttons[selectedIndex].querySelector('i').className = 'fa-solid fa-circle-check';
+                score++;
+            } else {
+                buttons[selectedIndex].classList.add('wrong');
+                buttons[selectedIndex].querySelector('i').className = 'fa-solid fa-circle-xmark';
+                
+                if(buttons[correctIndex]) {
+                    buttons[correctIndex].classList.add('correct');
+                    buttons[correctIndex].querySelector('i').className = 'fa-solid fa-circle-check';
+                }
+            }
+
+            document.getElementById('nextBtn').style.display = 'inline-block';
+        }
+
+        function nextQuestion() {
+            currentIndex++;
+            renderQuestion();
+        }
+
+        // 5. Final Result Display
+        function renderScore() {
+            const quizContainer = document.getElementById('quizContainer');
+            quizContainer.innerHTML = `
+                <div class="score-box">
+                    <i class="fa-solid fa-trophy fa-3x" style="color:#ffc107; margin-bottom: 15px;"></i>
+                    <h2>কুইজ সম্পন্ন হয়েছে!</h2>
+                    <p style="font-size: 18px; color: #555;">আপনার মোট প্রাপ্ত নম্বর: <b>${score} / ${currentQuestions.length}</b></p>
+                    <button class="btn" style="margin-top: 20px;" onclick="location.reload()"><i class="fa-solid fa-rotate-right"></i> পুনরায় চেষ্টা করুন</button>
+                </div>
+            `;
+        }
+
+        window.onload = initQuizAccess;
     </script>
 </body>
 </html>
