@@ -27,6 +27,8 @@ mongoose.connect(MONGO_URI)
     .then(() => console.log('✅ Connected to MongoDB'))
     .catch(err => console.error('❌ MongoDB Connection Error:', err));
 
+// ------------------- MONGOOSE SCHEMAS & MODELS -------------------
+
 // Question Schema & Model
 const questionSchema = new mongoose.Schema({
     q: { type: String, required: true },
@@ -38,11 +40,96 @@ const questionSchema = new mongoose.Schema({
 
 const Question = mongoose.model('Question', questionSchema);
 
+// Layout Config Schema & Model (Header, Footer, Announcement & Copyright)
+const layoutConfigSchema = new mongoose.Schema({
+    announcement: {
+        text: String,
+        link: String
+    },
+    header: {
+        siteTitle: String,
+        logoUrl: String,
+        btnText: String,
+        btnLink: String,
+        menus: [
+            {
+                title: String,
+                url: String,
+                subMenus: [
+                    {
+                        title: String,
+                        url: String
+                    }
+                ]
+            }
+        ]
+    },
+    footer: {
+        col1Text: String,
+        col1Fb: String,
+        col1Yt: String,
+        col2Title: String,
+        col3Title: String,
+        col4Title: String
+    },
+    copyright: {
+        text: String
+    }
+}, { timestamps: true });
+
+const LayoutConfig = mongoose.model('LayoutConfig', layoutConfigSchema);
+
+
 // ------------------- AUTHENTICATION ROUTES -------------------
 app.use('/api/auth', authRoutes);
 
 // ------------------- HOME CONFIG ROUTES (Slider, Demo, Packages) -------------------
 app.use('/api/home-config', homeConfigRoutes);
+
+
+// ------------------- LAYOUT CONFIG ROUTES (Header, Footer, Announcement, Copyright) -------------------
+
+// 1. Get Layout Config (Public API - Used by config.js on all frontend pages)
+app.get('/api/layout-config', async (req, res) => {
+    try {
+        let config = await LayoutConfig.findOne();
+        if (!config) {
+            config = {}; // Return empty object if no data exists yet
+        }
+        res.json(config);
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// 2. Save/Update Layout Config (Owner and Admin only)
+app.post('/api/layout-config', verifyToken, authorizeRoles('owner', 'admin'), async (req, res) => {
+    try {
+        const { announcement, header, footer, copyright } = req.body;
+
+        let config = await LayoutConfig.findOne();
+
+        if (config) {
+            config.announcement = announcement;
+            config.header = header;
+            config.footer = footer;
+            config.copyright = copyright;
+            await config.save();
+        } else {
+            config = new LayoutConfig({ announcement, header, footer, copyright });
+            await config.save();
+        }
+
+        res.json({
+            success: true,
+            message: 'Layout configuration saved successfully!',
+            config
+        });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
 
 // Change Password API (Any Logged In User)
 app.put('/api/auth/change-password', verifyToken, async (req, res) => {

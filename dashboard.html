@@ -28,6 +28,7 @@
             --light: #f4f7f6;
             --gray-btn: #6c757d;
             --main-dash-btn: #28a745;
+            --purple-btn: #6f42c1;
         }
 
         * {
@@ -118,6 +119,15 @@
             background-color: #e08b38;
         }
 
+        .btn-layout-control {
+            background-color: var(--purple-btn);
+            color: white;
+        }
+
+        .btn-layout-control:hover {
+            background-color: #593196;
+        }
+
         .btn-outline {
             border: 1px solid white;
             color: white;
@@ -167,7 +177,7 @@
         /* Feature Grid */
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
             gap: 20px;
         }
 
@@ -234,9 +244,14 @@
             <i class="fa-solid fa-gauge-high"></i> অ্যাডমিন ড্যাশবোর্ড
         </div>
         <div class="nav-actions">
-            <!-- NEW BUTTON: Main Dashboard -->
+            <!-- Main Dashboard -->
             <a href="dashboard.html" class="btn btn-main-dash">
                 <i class="fa-solid fa-house"></i> Main Dashboard
+            </a>
+
+            <!-- Header & Footer Control -->
+            <a href="header-footer-dashboard.html" class="btn btn-layout-control">
+                <i class="fa-solid fa-window-restore"></i> Header & Footer
             </a>
 
             <!-- MCQ Dashboard -->
@@ -271,9 +286,12 @@
                     আপনার কুইজ প্ল্যাটফর্ম এবং ওয়েবসাইট কন্টেন্ট এক জায়গা থেকেই পরিবর্তন ও নিয়ন্ত্রণ করুন।
                 </p>
             </div>
-            <div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                 <a href="home-dashboard.html" class="btn btn-home-control">
-                    <i class="fa-solid fa-wand-magic-sparkles"></i> হোম পেজের কন্টেন্ট পরিবর্তন করুন
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> হোম পেজের কন্টেন্ট
+                </a>
+                <a href="header-footer-dashboard.html" class="btn btn-layout-control">
+                    <i class="fa-solid fa-sliders"></i> হেডার ও ফুটার
                 </a>
             </div>
         </div>
@@ -292,7 +310,19 @@
                 </a>
             </div>
 
-            <!-- 2. Question Management -->
+            <!-- 2. Header & Footer Control (NEW CARD) -->
+            <div class="card" style="border: 2px solid var(--purple-btn); background: #fcfaff;">
+                <div>
+                    <div class="card-icon" style="color: var(--purple-btn);"><i class="fa-solid fa-window-restore"></i></div>
+                    <h3>হেডার ও ফুটার কন্ট্রোল</h3>
+                    <p>ওয়েবসাইটের টপ অ্যানাউন্সমেন্ট বার, লোগো, নেভিগেশন মেনু এবং ফুটারের সোশ্যাল লিংকগুলো পরিচালনা করুন।</p>
+                </div>
+                <a href="header-footer-dashboard.html" class="btn btn-layout-control">
+                    <i class="fa-solid fa-gear"></i> হেডার-ফুটার এডিট
+                </a>
+            </div>
+
+            <!-- 3. Question Management -->
             <div class="card">
                 <div>
                     <div class="card-icon"><i class="fa-solid fa-file-circle-question"></i></div>
@@ -304,7 +334,7 @@
                 </a>
             </div>
 
-            <!-- 3. User Management -->
+            <!-- 4. User Management -->
             <div class="card">
                 <div>
                     <div class="card-icon" style="color: var(--secondary);"><i class="fa-solid fa-users-gear"></i></div>

@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Header & Footer Dashboard - TopMCQ</title>
+    
+    <!-- Instant Auth Check -->
+    <script>
+        (function checkAuth() {
+            const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
+            if (!token) {
+                window.location.replace('login.html');
+            }
+        })();
+    </script>
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #007bff;
+            --primary-dark: #0056b3;
+            --secondary: #17a2b8;
+            --warning: #ff9f43;
+            --danger: #dc3545;
+            --dark: #2c3e50;
+            --light: #f4f7f6;
+            --gray-btn: #6c757d;
+            --main-dash-btn: #28a745;
+            --purple-btn: #6f42c1;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--light); color: #333; }
+
+        /* TOP ALERT BANNER SYSTEM */
+        #topAlertBanner {
+            position: fixed; top: 0; left: 0; width: 100%; z-index: 9999; padding: 12px 30px; display: none;
+            justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            background-color: #ffffff; color: #2c3e50; font-weight: 600; font-size: 15px;
+            border-top: 16px solid #2a3c4d; border-bottom: 1px solid #e2e8f0; animation: slideDown 0.3s ease-in-out;
+        }
+        #topAlertBanner::before { content: ''; position: absolute; top: 0; left: 0; bottom: 0; width: 6px; background-color: var(--danger); }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-100%); } to { opacity: 1; transform: translateY(0); } }
+        #topAlertBanner.info::before { background-color: var(--primary); }
+        #topAlertBanner.success::before { background-color: var(--main-dash-btn); }
+        #topAlertBanner.warning::before { background-color: var(--warning); }
+        #topAlertBanner.danger::before { background-color: var(--danger); }
+
+        .alert-btns { display: flex; gap: 10px; }
+        .btn-alert { padding: 7px 18px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; font-size: 13px; }
+        .btn-alert-ok { background-color: var(--primary); color: white; }
+        .btn-alert-cancel { background-color: #e2e8f0; color: #4a5568; }
+
+        /* Navigation Bar */
+        .navbar { background-color: var(--dark); color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 25px; }
+        .navbar-brand { font-size: 22px; font-weight: bold; display: flex; align-items: center; gap: 10px; }
+        .nav-actions { display: flex; gap: 10px; align-items: center; }
+
+        .btn-nav { text-decoration: none; padding: 9px 16px; border-radius: 6px; font-size: 14px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; border: none; cursor: pointer; }
+        .btn-main-dash { background-color: var(--main-dash-btn); color: white; }
+        .btn-mcq-dash { background-color: var(--gray-btn); color: white; }
+        .btn-payment-users { background-color: var(--secondary); color: white; }
+        .btn-outline { border: 1px solid white; color: white; background: transparent; }
+        .btn-danger-nav { background-color: var(--danger); color: white; }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 25px 25px 25px; }
+        .section-card { background: white; padding: 25px 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid #e2e8f0; }
+        .section-card.announce-card { border-left: 6px solid var(--warning); }
+        .section-card.header-card { border-left: 6px solid var(--primary); }
+        .section-card.footer-card { border-left: 6px solid var(--secondary); }
+        .section-card.copy-card { border-left: 6px solid var(--purple-btn); }
+
+        .section-title { font-size: 20px; color: var(--dark); margin-bottom: 15px; display: flex; align-items: center; gap: 10px; padding-bottom: 10px; border-bottom: 1px dashed #e2e8f0; }
+
+        /* READ-ONLY CARD STYLE */
+        .read-box { 
+            background: #fdfdfd; 
+            border: 1px solid #ddd; 
+            padding: 20px; 
+            border-radius: 8px; 
+            margin-bottom: 15px; 
+            border-left: 5px solid #ffc107; 
+            transition: all 0.2s ease;
+        }
+
+        .read-title { font-size: 16px; font-weight: bold; color: #2c3e50; margin-bottom: 6px; }
+        .read-subtitle { font-size: 14px; color: #555; margin-bottom: 8px; }
+        .read-meta { font-size: 13px; color: #555; margin-bottom: 6px; }
+        .read-preview-text { font-size: 13px; color: #777; margin-bottom: 10px; }
+
+        .form-group { margin-bottom: 12px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; color: #555; font-size: 13px; }
+        input, textarea { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 5px; font-size: 14px; outline: none; background: white; font-family: inherit; }
+        input:focus, textarea:focus { border-color: var(--primary); }
+
+        .row { display: flex; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; align-items: center; }
+        .card-actions { display: flex; gap: 10px; margin-top: 15px; }
+
+        /* BUTTON STYLES */
+        .btn { padding: 8px 16px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-warning { background-color: #ffc107; color: #212529; }
+        .btn-warning:hover { background-color: #e0a800; }
+        .btn-danger { background-color: #dc3545; color: white; }
+        .btn-danger:hover { background-color: #c82333; }
+        .btn-submit { background-color: #28a745; color: white; }
+        .btn-submit:hover { background-color: #218838; }
+        .btn-secondary { background-color: #6c757d; color: white; }
+        .btn-secondary:hover { background-color: #5a6268; }
+        .btn-add { background: var(--main-dash-btn); color: white; border: none; padding: 10px 18px; border-radius: 5px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+    <div id="topAlertBanner">
+        <span id="alertMessage">Message here...</span>
+        <div class="alert-btns">
+            <button class="btn-alert btn-alert-ok" id="alertOkBtn">OK</button>
+            <button class="btn-alert btn-alert-cancel" id="alertCancelBtn" style="display:none;">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <div class="navbar">
+        <div class="navbar-brand"><i class="fa-solid fa-gauge-high"></i> অ্যাডমিন ড্যাশবোর্ড</div>
+        <div class="nav-actions">
+            <a href="dashboard.html" class="btn-nav btn-main-dash"><i class="fa-solid fa-house"></i> Main Dashboard</a>
+            <a href="quiz-dashboard.html" class="btn-nav btn-mcq-dash"><i class="fa-solid fa-pen-to-square"></i> MCQ Dashboard</a>
+            <a href="users.html" class="btn-nav btn-payment-users"><i class="fa-solid fa-credit-card"></i> Payment & Users</a>
+            <a href="index.html" class="btn-nav btn-outline" target="_blank"><i class="fa-solid fa-globe"></i> মূল ওয়েবসাইট</a>
+            <button class="btn-nav btn-danger-nav" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> লগআউট</button>
+        </div>
+    </div>
+
+    <div class="container">
+        
+        <!-- ১. ANNOUNCEMENT BAR CARD -->
+        <div class="section-card announce-card">
+            <div class="section-title"><i class="fa-solid fa-bullhorn" style="color: var(--warning);"></i> ১. অ্যানাউন্সমেন্ট বার (Notice Bar)</div>
+            <div id="announce-container"></div>
+        </div>
+
+        <!-- ২. HEADER SETTINGS CARD -->
+        <div class="section-card header-card">
+            <div class="section-title"><i class="fa-solid fa-window-maximize" style="color: var(--primary);"></i> ২. হেডার সেটিং (Logo, Title, Menu & Sub-menu)</div>
+            <div id="header-container"></div>
+        </div>
+
+        <!-- ৩. FOOTER SETTINGS CARD (4 COLUMNS) -->
+        <div class="section-card footer-card">
+            <div class="section-title"><i class="fa-solid fa-table-columns" style="color: var(--secondary);"></i> ৩. ফুটার সেটিং (৪ টি কলাম)</div>
+            <div id="footer-container"></div>
+        </div>
+
+        <!-- ৪. COPYRIGHT SETTINGS CARD -->
+        <div class="section-card copy-card">
+            <div class="section-title"><i class="fa-solid fa-copyright" style="color: var(--purple-btn);"></i> ৪. কপিরাইট সেকশন (Copyright Text)</div>
+            <div id="copyright-container"></div>
+        </div>
+
+    </div>
+
+    <script>
+        const LAYOUT_API_URL = 'https://mosabber-quiz-app.onrender.com/api/layout-config';
+
+        let announceInfo = null;
+        let headerInfo = null;
+        let footerInfo = null;
+        let copyrightInfo = null;
+
+        function showTopAlert(msg, type = 'info', isConfirm = false) {
+            return new Promise((resolve) => {
+                const banner = document.getElementById('topAlertBanner');
+                document.getElementById('alertMessage').innerHTML = msg;
+                banner.className = type;
+                banner.style.display = 'flex';
+
+                const okBtn = document.getElementById('alertOkBtn');
+                const cancelBtn = document.getElementById('alertCancelBtn');
+
+                if (isConfirm) {
+                    cancelBtn.style.display = 'inline-block';
+                } else {
+                    cancelBtn.style.display = 'none';
+                }
+
+                okBtn.onclick = () => { banner.style.display = 'none'; resolve(true); };
+                cancelBtn.onclick = () => { banner.style.display = 'none'; resolve(false); };
+
+                if (!isConfirm) {
+                    setTimeout(() => { banner.style.display = 'none'; resolve(true); }, 4000);
+                }
+            });
+        }
+
+        async function fetchLayoutConfig() {
+            try {
+                const res = await fetch(LAYOUT_API_URL);
+                const data = await res.json();
+
+                announceInfo = data.announcement || null;
+                headerInfo = data.header || null;
+                footerInfo = data.footer || null;
+                copyrightInfo = data.copyright || null;
+
+                renderAnnounceSection();
+                renderHeaderSection();
+                renderFooterSection();
+                renderCopyrightSection();
+            } catch (err) { 
+                console.error("Layout Config Fetch Error:", err); 
+            }
+        }
+
+        /* ================= 1. ANNOUNCEMENT BAR SECTION ================= */
+        function renderAnnounceSection() {
+            const container = document.getElementById('announce-container');
+            container.innerHTML = '';
+
+            if (announceInfo && (announceInfo.text || announceInfo.link)) {
+                container.innerHTML = `
+                    <div class="read-box" style="border-left: 5px solid #ff9f43;">
+                        <div class="read-title"><i class="fa-solid fa-bullhorn"></i> ${announceInfo.text || '(কোনো নোটিশ নেই)'}</div>
+                        <div class="read-subtitle"><b>লিংক (URL):</b> ${announceInfo.link || 'নাই'}</div>
+                        <div class="card-actions">
+                            <button class="btn btn-warning" onclick="editAnnounceSection()"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                            <button class="btn btn-danger" onclick="deleteAnnounceSection()"><i class="fa-solid fa-trash"></i> Delete</button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <button class="btn btn-add" onclick="editAnnounceSection(true)">
+                        <i class="fa-solid fa-plus"></i> অ্যানাউন্সমেন্ট যোগ করুন
+                    </button>
+                `;
+            }
+        }
+
+        function editAnnounceSection(isNew = false) {
+            const container = document.getElementById('announce-container');
+            const textVal = announceInfo ? announceInfo.text || '' : '';
+            const linkVal = announceInfo ? announceInfo.link || '' : '';
+
+            container.innerHTML = `
+                <div class="read-box" style="border-left: 5px solid #007bff; background: #ffffff;">
+                    <div style="font-weight: bold; margin-bottom: 12px; color: #007bff;">
+                        ${isNew ? 'নতুন অ্যানাউন্সমেন্ট যোগ করুন' : 'অ্যানাউন্সমেন্ট এডিট করুন'}
+                    </div>
+                    <div class="row">
+                        <div class="form-group" style="flex:2;">
+                            <label>নোটিশ টেক্সট:</label>
+                            <input type="text" id="announce-text-input" value="${textVal.replace(/"/g, '&quot;')}" placeholder="যেমন: নতুন কুইজ ব্যাচ শুরু হয়েছে!">
+                        </div>
+                        <div class="form-group" style="flex:1;">
+                            <label>নোটিশ লিংক (URL):</label>
+                            <input type="text" id="announce-link-input" value="${linkVal.replace(/"/g, '&quot;')}" placeholder="যেমন: #notice">
+                        </div>
+                    </div>
+                    <div class="card-actions" style="margin-top: 10px;">
+                        <button class="btn btn-submit" onclick="saveAnnounceSection()"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
+                        <button class="btn btn-secondary" onclick="renderAnnounceSection()"><i class="fa-solid fa-xmark"></i> Cancel</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function saveAnnounceSection() {
+            announceInfo = {
+                text: document.getElementById('announce-text-input').value,
+                link: document.getElementById('announce-link-input').value
+            };
+            await saveLayoutConfig();
+            renderAnnounceSection();
+        }
+
+        async function deleteAnnounceSection() {
+            if (await showTopAlert("আপনি কি নিশ্চিত যে অ্যানাউন্সমেন্ট মুছে ফেলতে চান?", 'danger', true)) {
+                announceInfo = null;
+                await saveLayoutConfig();
+                renderAnnounceSection();
+            }
+        }
+
+        /* ================= 2. HEADER SECTION (LOGO, MENU & SUBMENU) ================= */
+        function renderHeaderSection() {
+            const container = document.getElementById('header-container');
+            container.innerHTML = '';
+
+            if (headerInfo) {
+                const menusSummary = headerInfo.menus ? headerInfo.menus.map(m => {
+                    const subCount = m.subMenus ? ` (${m.subMenus.length} sub-menus)` : '';
+                    return `<b>${m.title}</b>${subCount}`;
+                }).join(' | ') : 'কোনো মেনু নেই';
+
+                container.innerHTML = `
+                    <div class="read-box" style="border-left: 5px solid #007bff;">
+                        <div class="read-title"><i class="fa-solid fa-heading"></i> টাইটেল: ${headerInfo.siteTitle || 'TopMCQ'}</div>
+                        <div class="read-subtitle"><b>Logo Image URL:</b> ${headerInfo.logoUrl || 'নাই'}</div>
+                        <div class="read-meta"><b>হেডার বাটন:</b> ${headerInfo.btnText || 'নাই'} (${headerInfo.btnLink || '#'})</div>
+                        <div class="read-preview-text"><b>মেনু তালিকা:</b> ${menusSummary}</div>
+                        <div class="card-actions">
+                            <button class="btn btn-warning" onclick="editHeaderSection()"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                            <button class="btn btn-danger" onclick="deleteHeaderSection()"><i class="fa-solid fa-trash"></i> Delete</button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <button class="btn btn-add" onclick="editHeaderSection(true)">
+                        <i class="fa-solid fa-plus"></i> হেডার তথ্য যোগ করুন
+                    </button>
+                `;
+            }
+        }
+
+        function editHeaderSection(isNew = false) {
+            const container = document.getElementById('header-container');
+            const siteTitle = headerInfo ? headerInfo.siteTitle || '' : 'TopMCQ';
+            const logoUrl = headerInfo ? headerInfo.logoUrl || '' : '';
+            const btnText = headerInfo ? headerInfo.btnText || '' : 'লগইন';
+            const btnLink = headerInfo ? headerInfo.btnLink || '' : 'login.html';
+            const menus = headerInfo ? headerInfo.menus || [] : [];
+
+            let menusHtml = '';
+            menus.forEach((m, idx) => {
+                let subMenusHtml = '';
+                if (m.subMenus) {
+                    m.subMenus.forEach((sm, smIdx) => {
+                        subMenusHtml += `
+                            <div class="row" style="margin-left: 20px; border-left: 2px solid var(--secondary); padding-left: 10px;">
+                                <input type="text" placeholder="সাব-মেনু টাইটেল" class="sub-menu-title-${idx}" value="${(sm.title || '').replace(/"/g, '&quot;')}">
+                                <input type="text" placeholder="সাব-মেনু URL" class="sub-menu-url-${idx}" value="${(sm.url || '').replace(/"/g, '&quot;')}">
+                            </div>
+                        `;
+                    });
+                }
+
+                menusHtml += `
+                    <div style="background: #f8fafc; padding: 12px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #cbd5e1;">
+                        <div class="row">
+                            <input type="text" placeholder="মেনু টাইটেল (যেমন: কুইজ)" class="header-menu-title" value="${(m.title || '').replace(/"/g, '&quot;')}">
+                            <input type="text" placeholder="মেনু URL (যেমন: quiz.html)" class="header-menu-url" value="${(m.url || '').replace(/"/g, '&quot;')}">
+                        </div>
+                        <div id="sub-menu-box-${idx}">
+                            ${subMenusHtml}
+                        </div>
+                        <button type="button" class="btn btn-secondary" style="font-size:11px; padding:4px 8px; margin-top:5px;" onclick="addSubMenuRow(${idx})">
+                            + সাব-মেনু যোগ করুন
+                        </button>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = `
+                <div class="read-box" style="border-left: 5px solid #007bff; background: #ffffff;">
+                    <div style="font-weight: bold; margin-bottom: 12px; color: #007bff;">
+                        ${isNew ? 'নতুন হেডার যোগ করুন' : 'হেডার সেটিং এডিট করুন'}
+                    </div>
+                    <div class="row">
+                        <div class="form-group" style="flex:1;">
+                            <label>সাইট টাইটেল (Site Title):</label>
+                            <input type="text" id="header-title-input" value="${siteTitle.replace(/"/g, '&quot;')}">
+                        </div>
+                        <div class="form-group" style="flex:1;">
+                            <label>লোগো ইমেজ URL (Logo URL):</label>
+                            <input type="text" id="header-logo-input" value="${logoUrl.replace(/"/g, '&quot;')}">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group" style="flex:1;">
+                            <label>বাটনের নাম (Action Button):</label>
+                            <input type="text" id="header-btn-text-input" value="${btnText.replace(/"/g, '&quot;')}">
+                        </div>
+                        <div class="form-group" style="flex:1;">
+                            <label>বাটনের লিংক (URL):</label>
+                            <input type="text" id="header-btn-link-input" value="${btnLink.replace(/"/g, '&quot;')}">
+                        </div>
+                    </div>
+
+                    <label style="margin-top: 15px;">মেনু ও সাব-মেনু সমূহ:</label>
+                    <div id="header-menus-wrapper">
+                        ${menusHtml}
+                    </div>
+                    <button type="button" class="btn btn-add" style="margin-top:5px; font-size:12px; padding:6px 12px;" onclick="addMainMenuRow()">
+                        + মূল মেনু যোগ করুন
+                    </button>
+
+                    <div class="card-actions" style="margin-top: 15px;">
+                        <button class="btn btn-submit" onclick="saveHeaderSection()"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
+                        <button class="btn btn-secondary" onclick="renderHeaderSection()"><i class="fa-solid fa-xmark"></i> Cancel</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function addMainMenuRow() {
+            const wrapper = document.getElementById('header-menus-wrapper');
+            const idx = wrapper.children.length;
+            const div = document.createElement('div');
+            div.style.cssText = "background: #f8fafc; padding: 12px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #cbd5e1;";
+            div.innerHTML = `
+                <div class="row">
+                    <input type="text" placeholder="মেনু টাইটেল" class="header-menu-title">
+                    <input type="text" placeholder="মেনু URL" class="header-menu-url">
+                </div>
+                <div id="sub-menu-box-${idx}"></div>
+                <button type="button" class="btn btn-secondary" style="font-size:11px; padding:4px 8px; margin-top:5px;" onclick="addSubMenuRow(${idx})">
+                    + সাব-মেনু যোগ করুন
+                </button>
+            `;
+            wrapper.appendChild(div);
+        }
+
+        function addSubMenuRow(idx) {
+            const box = document.getElementById(`sub-menu-box-${idx}`);
+            const div = document.createElement('div');
+            div.className = "row";
+            div.style.cssText = "margin-left: 20px; border-left: 2px solid var(--secondary); padding-left: 10px;";
+            div.innerHTML = `
+                <input type="text" placeholder="সাব-মেনু টাইটেল" class="sub-menu-title-${idx}">
+                <input type="text" placeholder="সাব-মেনু URL" class="sub-menu-url-${idx}">
+            `;
+            box.appendChild(div);
+        }
+
+        async function saveHeaderSection() {
+            const siteTitle = document.getElementById('header-title-input').value;
+            const logoUrl = document.getElementById('header-logo-input').value;
+            const btnText = document.getElementById('header-btn-text-input').value;
+            const btnLink = document.getElementById('header-btn-link-input').value;
+
+            const menuDivs = document.querySelectorAll('#header-menus-wrapper > div');
+            const menus = [];
+
+            menuDivs.forEach((mDiv, idx) => {
+                const title = mDiv.querySelector('.header-menu-title')?.value || '';
+                const url = mDiv.querySelector('.header-menu-url')?.value || '';
+
+                const subTitles = mDiv.querySelectorAll(`.sub-menu-title-${idx}`);
+                const subUrls = mDiv.querySelectorAll(`.sub-menu-url-${idx}`);
+                const subMenus = [];
+
+                subTitles.forEach((st, sIdx) => {
+                    if (st.value) {
+                        subMenus.push({ title: st.value, url: subUrls[sIdx]?.value || '' });
+                    }
+                });
+
+                if (title) {
+                    menus.push({ title, url, subMenus });
+                }
+            });
+
+            headerInfo = { siteTitle, logoUrl, btnText, btnLink, menus };
+            await saveLayoutConfig();
+            renderHeaderSection();
+        }
+
+        async function deleteHeaderSection() {
+            if (await showTopAlert("আপনি কি নিশ্চিত যে হেডারের সকল তথ্য মুছে ফেলতে চান?", 'danger', true)) {
+                headerInfo = null;
+                await saveLayoutConfig();
+                renderHeaderSection();
+            }
+        }
+
+        /* ================= 3. FOOTER SECTION (4 COLUMNS) ================= */
+        function renderFooterSection() {
+            const container = document.getElementById('footer-container');
+            container.innerHTML = '';
+
+            if (footerInfo) {
+                container.innerHTML = `
+                    <div class="read-box" style="border-left: 5px solid #17a2b8;">
+                        <div class="read-title"><i class="fa-solid fa-list-check"></i> ফুটার সেটিং (৪ টি কলাম সক্রিয়)</div>
+                        <div class="read-subtitle"><b>Col 1 (About):</b> ${footerInfo.col1Text || 'নাই'}</div>
+                        <div class="read-meta"><b>Col 2 Title:</b> ${footerInfo.col2Title || 'নাই'} | <b>Col 3 Title:</b> ${footerInfo.col3Title || 'নাই'} | <b>Col 4 Title:</b> ${footerInfo.col4Title || 'নাই'}</div>
+                        <div class="card-actions">
+                            <button class="btn btn-warning" onclick="editFooterSection()"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                            <button class="btn btn-danger" onclick="deleteFooterSection()"><i class="fa-solid fa-trash"></i> Delete</button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <button class="btn btn-add" onclick="editFooterSection(true)">
+                        <i class="fa-solid fa-plus"></i> ফুটার তথ্য যোগ করুন
+                    </button>
+                `;
+            }
+        }
+
+        function editFooterSection(isNew = false) {
+            const container = document.getElementById('footer-container');
+            const col1Text = footerInfo ? footerInfo.col1Text || '' : '';
+            const fb = footerInfo ? footerInfo.col1Fb || '' : '';
+            const yt = footerInfo ? footerInfo.col1Yt || '' : '';
+
+            const c2Title = footerInfo ? footerInfo.col2Title || '' : '';
+            const c3Title = footerInfo ? footerInfo.col3Title || '' : '';
+            const c4Title = footerInfo ? footerInfo.col4Title || '' : '';
+
+            container.innerHTML = `
+                <div class="read-box" style="border-left: 5px solid #007bff; background: #ffffff;">
+                    <div style="font-weight: bold; margin-bottom: 12px; color: #007bff;">
+                        ${isNew ? 'নতুন ফুটার যোগ করুন' : 'ফুটার এডিট করুন'}
+                    </div>
+
+                    <!-- Column 1 -->
+                    <div style="border: 1px solid #cbd5e1; padding: 10px; border-radius: 6px; margin-bottom: 10px;">
+                        <label style="color:var(--primary);">কলাম ১ (About & Social Links):</label>
+                        <textarea id="footer-col1-text" rows="2" placeholder="সাইট সম্পর্কে সংক্ষিপ্ত বিবরণ">${col1Text}</textarea>
+                        <div class="row" style="margin-top:5px;">
+                            <input type="text" id="footer-col1-fb" value="${fb.replace(/"/g, '&quot;')}" placeholder="Facebook Page URL">
+                            <input type="text" id="footer-col1-yt" value="${yt.replace(/"/g, '&quot;')}" placeholder="YouTube Channel URL">
+                        </div>
+                    </div>
+
+                    <!-- Column 2 -->
+                    <div style="border: 1px solid #cbd5e1; padding: 10px; border-radius: 6px; margin-bottom: 10px;">
+                        <label style="color:var(--primary);">কলাম ২ (Quick Links):</label>
+                        <input type="text" id="footer-col2-title" value="${c2Title.replace(/"/g, '&quot;')}" placeholder="কলাম ২ শিরোনাম (যেমন: প্রয়োজনীয় লিংক)">
+                    </div>
+
+                    <!-- Column 3 -->
+                    <div style="border: 1px solid #cbd5e1; padding: 10px; border-radius: 6px; margin-bottom: 10px;">
+                        <label style="color:var(--primary);">কলাম ৩ (Categories):</label>
+                        <input type="text" id="footer-col3-title" value="${c3Title.replace(/"/g, '&quot;')}" placeholder="কলাম ৩ শিরোনাম (যেমন: ক্যাটাগরি)">
+                    </div>
+
+                    <!-- Column 4 -->
+                    <div style="border: 1px solid #cbd5e1; padding: 10px; border-radius: 6px; margin-bottom: 10px;">
+                        <label style="color:var(--primary);">কলাম ৪ (Contact/Notice):</label>
+                        <input type="text" id="footer-col4-title" value="${c4Title.replace(/"/g, '&quot;')}" placeholder="কলাম ৪ শিরোনাম (যেমন: যোগাযোগ)">
+                    </div>
+
+                    <div class="card-actions" style="margin-top: 10px;">
+                        <button class="btn btn-submit" onclick="saveFooterSection()"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
+                        <button class="btn btn-secondary" onclick="renderFooterSection()"><i class="fa-solid fa-xmark"></i> Cancel</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function saveFooterSection() {
+            footerInfo = {
+                col1Text: document.getElementById('footer-col1-text').value,
+                col1Fb: document.getElementById('footer-col1-fb').value,
+                col1Yt: document.getElementById('footer-col1-yt').value,
+                col2Title: document.getElementById('footer-col2-title').value,
+                col3Title: document.getElementById('footer-col3-title').value,
+                col4Title: document.getElementById('footer-col4-title').value
+            };
+            await saveLayoutConfig();
+            renderFooterSection();
+        }
+
+        async function deleteFooterSection() {
+            if (await showTopAlert("আপনি কি নিশ্চিত যে ফুটারের সকল তথ্য মুছে ফেলতে চান?", 'danger', true)) {
+                footerInfo = null;
+                await saveLayoutConfig();
+                renderFooterSection();
+            }
+        }
+
+        /* ================= 4. COPYRIGHT SECTION ================= */
+        function renderCopyrightSection() {
+            const container = document.getElementById('copyright-container');
+            container.innerHTML = '';
+
+            if (copyrightInfo && copyrightInfo.text) {
+                container.innerHTML = `
+                    <div class="read-box" style="border-left: 5px solid #6f42c1;">
+                        <div class="read-title"><i class="fa-solid fa-copyright"></i> ${copyrightInfo.text}</div>
+                        <div class="card-actions">
+                            <button class="btn btn-warning" onclick="editCopyrightSection()"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                            <button class="btn btn-danger" onclick="deleteCopyrightSection()"><i class="fa-solid fa-trash"></i> Delete</button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <button class="btn btn-add" onclick="editCopyrightSection(true)">
+                        <i class="fa-solid fa-plus"></i> কপিরাইট টেক্সট যোগ করুন
+                    </button>
+                `;
+            }
+        }
+
+        function editCopyrightSection(isNew = false) {
+            const container = document.getElementById('copyright-container');
+            const copyText = copyrightInfo ? copyrightInfo.text || '' : '© 2026 TopMCQ. All rights reserved.';
+
+            container.innerHTML = `
+                <div class="read-box" style="border-left: 5px solid #007bff; background: #ffffff;">
+                    <div style="font-weight: bold; margin-bottom: 12px; color: #007bff;">
+                        ${isNew ? 'নতুন কপিরাইট যোগ করুন' : 'কপিরাইট টেক্সট এডিট করুন'}
+                    </div>
+                    <div class="form-group">
+                        <label>কপিরাইট টেক্সট:</label>
+                        <input type="text" id="copyright-text-input" value="${copyText.replace(/"/g, '&quot;')}">
+                    </div>
+                    <div class="card-actions" style="margin-top: 10px;">
+                        <button class="btn btn-submit" onclick="saveCopyrightSection()"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
+                        <button class="btn btn-secondary" onclick="renderCopyrightSection()"><i class="fa-solid fa-xmark"></i> Cancel</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function saveCopyrightSection() {
+            copyrightInfo = {
+                text: document.getElementById('copyright-text-input').value
+            };
+            await saveLayoutConfig();
+            renderCopyrightSection();
+        }
+
+        async function deleteCopyrightSection() {
+            if (await showTopAlert("আপনি কি নিশ্চিত যে কপিরাইট টেক্সট মুছে ফেলতে চান?", 'danger', true)) {
+                copyrightInfo = null;
+                await saveLayoutConfig();
+                renderCopyrightSection();
+            }
+        }
+
+        /* ================= SAVE ALL LAYOUT CONFIG TO BACKEND ================= */
+        async function saveLayoutConfig() {
+            const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
+            if (!token) { 
+                showTopAlert('অনুগ্রহ করে লগইন করুন!', 'warning'); 
+                return; 
+            }
+
+            try {
+                const res = await fetch(LAYOUT_API_URL, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json', 
+                        'Authorization': `Bearer ${token}` 
+                    },
+                    body: JSON.stringify({ 
+                        announcement: announceInfo,
+                        header: headerInfo,
+                        footer: footerInfo,
+                        copyright: copyrightInfo
+                    })
+                });
+
+                const result = await res.json();
+
+                if (res.ok) {
+                    showTopAlert('✅ সফলভাবে সেভ হয়েছে!', 'success');
+                    fetchLayoutConfig();
+                } else { 
+                    showTopAlert('❌ ' + (result.message || 'সেভ করতে ব্যর্থ হয়েছে!'), 'danger'); 
+                }
+            } catch (err) { 
+                console.error("Layout Save error:", err);
+                showTopAlert('সার্ভারে যোগাযোগ করতে সমস্যা হয়েছে!', 'danger'); 
+            }
+        }
+
+        async function logout() {
+            if (await showTopAlert('আপনি কি নিশ্চিত যে লগআউট করতে চান?', 'warning', true)) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                localStorage.removeItem('quiz_token');
+                localStorage.removeItem('quiz_user');
+                window.location.replace('login.html');
+            }
+        }
+
+        window.onload = fetchLayoutConfig;
+    </script>
+</body>
+</html>
