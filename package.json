@@ -1,9 +1,11 @@
 {
   "name": "mosabber-quiz-backend",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js",
+    "seed": "node seedUsers.js",
+    "build": "node seedUsers.js"
   },
   "keywords": [],
   "author": "",
