@@ -8,7 +8,7 @@
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- GLOBAL CSS LINK (Handles Announcement, Header, Navigation & Footer styles) -->
+    <!-- GLOBAL CSS LINK -->
     <link rel="stylesheet" href="global/global.css">
     
     <style>
@@ -121,7 +121,7 @@
                     <button type="submit" class="btn" id="loginBtn">🚀 Login</button>
                 </form>
 
-                <!-- REGISTER FORM (Hidden by default) -->
+                <!-- REGISTER FORM (With Double Password Check) -->
                 <form id="registerForm" style="display: none;">
                     <div class="form-group">
                         <label>Full Name:</label>
@@ -134,6 +134,11 @@
                     <div class="form-group">
                         <label>Password:</label>
                         <input type="password" id="regPassword" placeholder="Create a password..." required>
+                    </div>
+                    <!-- 2nd Time Re-submit Password Field -->
+                    <div class="form-group">
+                        <label>Confirm Password:</label>
+                        <input type="password" id="regConfirmPassword" placeholder="Re-enter password to confirm..." required>
                     </div>
                     <button type="submit" class="btn" id="regBtn" style="background-color: #28a745;">✨ Register Account</button>
                 </form>
@@ -148,7 +153,7 @@
         <footer id="global-footer"></footer>
     </div>
 
-    <!-- GLOBAL JS LINK (Handles Header, Navigation, Mobile Menu, Announce Bar & Footer SWR Rendering) -->
+    <!-- GLOBAL JS LINK -->
     <script src="global/global.js"></script>
 
     <!-- AUTHENTICATION LOGIC SCRIPT -->
@@ -196,7 +201,6 @@
                 const data = await res.json();
 
                 if (res.ok && (data.success || data.token)) {
-                    // Save using both 'token' and 'quiz_token' to support all pages seamlessly
                     localStorage.setItem('token', data.token);
                     localStorage.setItem('user', JSON.stringify(data.user));
                     localStorage.setItem('quiz_token', data.token);
@@ -222,16 +226,24 @@
             }
         });
 
-        // REGISTER SUBMIT
+        // REGISTER SUBMIT WITH DOUBLE-CHECK PASSWORD
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const btn = document.getElementById('regBtn');
-            btn.innerText = "Creating Account...";
-            btn.disabled = true;
-
+            
             const name = document.getElementById('regName').value;
             const email = document.getElementById('regEmail').value;
             const password = document.getElementById('regPassword').value;
+            const confirmPassword = document.getElementById('regConfirmPassword').value;
+
+            // Double Password Validation
+            if (password !== confirmPassword) {
+                showAlert("❌ Passwords do not match! Please re-check.");
+                return;
+            }
+
+            const btn = document.getElementById('regBtn');
+            btn.innerText = "Creating Account...";
+            btn.disabled = true;
 
             try {
                 const res = await fetch(`${AUTH_API}/register`, {
@@ -243,6 +255,7 @@
 
                 if (res.ok && (data.success || data.token)) {
                     showAlert("🎉 Registration successful! Please login below.", true);
+                    document.getElementById('registerForm').reset();
                     setTimeout(() => toggleForm('login'), 1500);
                 } else {
                     showAlert(data.message || "❌ Registration failed!");
