@@ -1,17 +1,26 @@
 // Global API Endpoint for Layout Configuration
 const LAYOUT_API_URL = 'https://mosabber-quiz-app.onrender.com/api/layout-config';
 
-// URL Helper Function to Fix Missing http/https
+// Smart URL Helper Function (Fixes internal vs external links issue)
 function formatURL(url) {
     if (!url || url === '#') return '#';
     url = url.trim();
+
+    // Internal routes / local files (e.g. index.html, /about, #section) should be returned directly
+    if (url.startsWith('/') || url.startsWith('#') || url.endsWith('.html') || !url.includes('.')) {
+        return url;
+    }
+
+    // External URLs with protocol
     if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('mailto:') || url.startsWith('tel:')) {
         return url;
     }
+
+    // Standard external domains like facebook.com or google.com
     return 'https://' + url;
 }
 
-// 1. Fetch & Cache Strategy (LocalStorage with Auto Sync)
+// Fetch & Render Layout Config
 async function loadLayoutConfig() {
     let cachedData = localStorage.getItem('layout_config_data');
     let config = cachedData ? JSON.parse(cachedData) : null;
@@ -20,7 +29,6 @@ async function loadLayoutConfig() {
         const res = await fetch(LAYOUT_API_URL);
         if (res.ok) {
             const freshData = await res.json();
-            
             if (!config || JSON.stringify(config) !== JSON.stringify(freshData)) {
                 localStorage.setItem('layout_config_data', JSON.stringify(freshData));
                 config = freshData;
@@ -36,16 +44,12 @@ async function loadLayoutConfig() {
     }
 }
 
-// 2. Master Render Function for Announcement, Header, SEO & Footer
 function renderLayout(data) {
     if (!data) return;
 
-    // A. Dynamic SEO Title & Favicon Update
+    // A. Dynamic SEO Title & Favicon
     if (data.header) {
-        if (data.header.seoTitle) {
-            document.title = data.header.seoTitle;
-        }
-
+        if (data.header.seoTitle) document.title = data.header.seoTitle;
         if (data.header.faviconUrl) {
             let favicon = document.querySelector("link[rel*='icon']");
             if (!favicon) {
@@ -57,7 +61,7 @@ function renderLayout(data) {
         }
     }
 
-    // B. Render Announcement Bar
+    // B. Announcement Bar
     if (data.announcement && data.announcement.text) {
         const announceContainer = document.getElementById('global-announce-bar');
         if (announceContainer) {
@@ -71,7 +75,7 @@ function renderLayout(data) {
         }
     }
 
-    // C. Render Header (Logo, Menu, Sub-menu & Button)
+    // C. Header with Mobile Menu Support
     if (data.header) {
         const headerContainer = document.getElementById('global-header');
         if (headerContainer) {
@@ -81,7 +85,8 @@ function renderLayout(data) {
             if (h.menus && Array.isArray(h.menus)) {
                 menusHtml = h.menus.map(m => {
                     let subHtml = '';
-                    if (m.subMenus && m.subMenus.length > 0) {
+                    const hasSub = m.subMenus && m.subMenus.length > 0;
+                    if (hasSub) {
                         subHtml = `
                             <ul class="dropdown-menu">
                                 ${m.subMenus.map(sm => `<li><a href="${formatURL(sm.url)}">${sm.title}</a></li>`).join('')}
@@ -89,8 +94,8 @@ function renderLayout(data) {
                         `;
                     }
                     return `
-                        <li class="nav-item ${m.subMenus && m.subMenus.length > 0 ? 'has-dropdown' : ''}">
-                            <a href="${formatURL(m.url)}">${m.title}</a>
+                        <li class="nav-item ${hasSub ? 'has-dropdown' : ''}">
+                            <a href="${formatURL(m.url)}" class="nav-link-main">${m.title} ${hasSub ? '<i class="fa-solid fa-angle-down drop-icon" style="font-size:12px; margin-left:3px;"></i>' : ''}</a>
                             ${subHtml}
                         </li>
                     `;
@@ -104,16 +109,25 @@ function renderLayout(data) {
                             ${h.logoUrl ? `<img src="${h.logoUrl}" alt="${h.siteTitle || 'Logo'}">` : `<h2>${h.siteTitle || 'TopMCQ'}</h2>`}
                         </a>
                     </div>
+
                     <nav class="site-nav">
                         <ul>${menusHtml}</ul>
+                        ${h.btnText ? `<div class="header-btn"><a href="${formatURL(h.btnLink)}" class="btn-primary-head">${h.btnText}</a></div>` : ''}
                     </nav>
-                    ${h.btnText ? `<div class="header-btn"><a href="${formatURL(h.btnLink)}" class="btn-primary-head">${h.btnText}</a></div>` : ''}
+
+                    <!-- Mobile Hamburger Button -->
+                    <button class="mobile-toggle-btn" id="mobile-toggle-btn" aria-label="Toggle Navigation">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
                 </div>
             `;
+
+            // Auto Attached Mobile Toggle Event Right After Header Generation
+            initMobileEvents();
         }
     }
 
-    // D. Render 4-Column Footer & Dynamic Social Links
+    // D. Footer
     if (data.footer || data.copyright) {
         const footerContainer = document.getElementById('global-footer');
         if (footerContainer) {
@@ -122,13 +136,12 @@ function renderLayout(data) {
 
             const generateLinksHtml = (links) => {
                 if (!links || links.length === 0) return '';
-                return `<ul>` + links.map(l => `<li><a href="${formatURL(l.url)}">${l.title}</a></li>`).join('') + `</ul>`;
+                return `<ul>` + links.map(l => `<li><a href="${formatURL(l.url)}"><i class="fa-solid fa-angle-right"></i> ${l.title}</a></li>`).join('') + `</ul>`;
             };
 
             footerContainer.innerHTML = `
                 <div class="footer-container">
                     <div class="footer-grid">
-                        <!-- Col 1: About & Dynamic Social Icons -->
                         <div class="footer-col">
                             <h4>আমাদের সম্পর্কে</h4>
                             <p>${f.col1Text || ''}</p>
@@ -141,27 +154,19 @@ function renderLayout(data) {
                                 ${f.col1Ln ? `<a href="${formatURL(f.col1Ln)}" target="_blank" title="LinkedIn" class="social-btn ln"><i class="fa-brands fa-linkedin-in"></i></a>` : ''}
                             </div>
                         </div>
-
-                        <!-- Col 2 -->
                         <div class="footer-col">
                             <h4>${f.col2Title || 'প্রয়োজনীয় লিংক'}</h4>
                             ${generateLinksHtml(f.col2Links)}
                         </div>
-
-                        <!-- Col 3 -->
                         <div class="footer-col">
                             <h4>${f.col3Title || 'ক্যাটাগরি'}</h4>
                             ${generateLinksHtml(f.col3Links)}
                         </div>
-
-                        <!-- Col 4 -->
                         <div class="footer-col">
                             <h4>${f.col4Title || 'যোগাযোগ'}</h4>
                             ${generateLinksHtml(f.col4Links)}
                         </div>
                     </div>
-
-                    <!-- Bottom Copyright Bar -->
                     <div class="footer-bottom">
                         <p>${c.text || '© 2026 TopMCQ. All rights reserved.'}</p>
                     </div>
@@ -171,5 +176,45 @@ function renderLayout(data) {
     }
 }
 
-// Auto Run on DOM Load
+// Global Mobile Menu Event Attachment
+function initMobileEvents() {
+    const toggleBtn = document.getElementById('mobile-toggle-btn');
+    const siteNav = document.querySelector('.site-nav');
+
+    if (toggleBtn && siteNav) {
+        toggleBtn.onclick = (e) => {
+            e.stopPropagation();
+            siteNav.classList.toggle('active');
+            const icon = toggleBtn.querySelector('i');
+            if (siteNav.classList.contains('active')) {
+                icon.className = 'fa-solid fa-xmark';
+            } else {
+                icon.className = 'fa-solid fa-bars';
+            }
+        };
+
+        document.onclick = (e) => {
+            if (!siteNav.contains(e.target) && !toggleBtn.contains(e.target)) {
+                siteNav.classList.remove('active');
+                const icon = toggleBtn.querySelector('i');
+                if (icon) icon.className = 'fa-solid fa-bars';
+            }
+        };
+    }
+
+    // Sub-menu Click Toggle on Mobile
+    const dropdownItems = document.querySelectorAll('.nav-item.has-dropdown');
+    dropdownItems.forEach(item => {
+        const link = item.querySelector('.nav-link-main');
+        if (link) {
+            link.onclick = (e) => {
+                if (window.innerWidth <= 768) {
+                    e.preventDefault();
+                    item.classList.toggle('show-mobile-dropdown');
+                }
+            };
+        }
+    });
+}
+
 document.addEventListener('DOMContentLoaded', loadLayoutConfig);
