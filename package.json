@@ -4,13 +4,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "seed": "node seedUsers.js",
-    "build": "node seedUsers.js"
+    "seed": "node seedUsers.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
