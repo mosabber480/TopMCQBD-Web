@@ -189,72 +189,77 @@
             }
 
             try {
-                // Fetch User Details
-                const res = await fetch(`${API_BASE}/auth/me`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const data = await res.json();
+                // LocalStorage check for fallback fast rendering
+                const userObj = JSON.parse(localStorage.getItem('user') || localStorage.getItem('quiz_user') || '{}');
+                const isSystemStaff = userObj.role === 'owner' || userObj.role === 'admin';
+                const sub = userObj.subscription || {};
+                const isSubscribedCustomer = sub.active && sub.endDate && new Date(sub.endDate) > new Date();
 
-                if (res.ok && data.user) {
-                    const user = data.user;
-                    const sub = user.subscription || {};
-
-                    // Owner and Admin bypass plan restrictions completely
-                    const isSystemStaff = user.role === 'owner' || user.role === 'admin';
-                    const isSubscribedCustomer = sub.active && sub.endDate && new Date(sub.endDate) > new Date();
-
-                    if (!isSystemStaff && !isSubscribedCustomer) {
-                        quizContainer.innerHTML = `
-                            <div style="text-align:center; padding: 20px;">
-                                <i class="fa-solid fa-lock fa-3x" style="color: #dc3545; margin-bottom: 15px;"></i>
-                                <h2 style="color:#2c3e50;">সাবস্ক্রিপশন প্রয়োজন!</h2>
-                                <p style="color:#666; margin: 10px 0 20px;">কুইজে অংশ নিতে অ্যাক্টিভ সাবস্ক্রিপশন প্ল্যান প্রয়োজন।</p>
-                                <a href="profile.html" class="btn" style="text-decoration:none;">প্রোফাইল থেকে প্ল্যান নিশ্চিত করুন</a>
-                            </div>
-                        `;
-                        return;
-                    }
-
-                    // System Staff or Subscribed Customer -> Load Quiz Questions
-                    loadQuizQuestions();
-
-                } else {
-                    window.location.href = 'login.html';
+                if (!isSystemStaff && !isSubscribedCustomer) {
+                    quizContainer.innerHTML = `
+                        <div style="text-align:center; padding: 20px;">
+                            <i class="fa-solid fa-lock fa-3x" style="color: #dc3545; margin-bottom: 15px;"></i>
+                            <h2 style="color:#2c3e50;">সাবস্ক্রিপশন প্রয়োজন!</h2>
+                            <p style="color:#666; margin: 10px 0 20px;">কুইজে অংশ নিতে অ্যাক্টিভ সাবস্ক্রিপশন প্ল্যান প্রয়োজন।</p>
+                            <a href="profile.html" class="btn" style="text-decoration:none;">প্রোফাইল থেকে প্ল্যান নিশ্চিত করুন</a>
+                        </div>
+                    `;
+                    return;
                 }
+
+                // System Staff or Subscribed Customer -> Load Quiz Questions
+                loadQuizQuestions();
+
             } catch (err) {
                 loadQuizQuestions();
             }
         }
 
-        // 2. Load MCQ Questions
+        // 2. Load MCQ Questions based on Category URL
         async function loadQuizQuestions() {
             const quizContainer = document.getElementById('quizContainer');
             const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
 
+            // URL থেকে ক্যাটাগরি ফিল্টার নেওয়া (যেমন: quiz.html?category=subjective/Zoology)
+            const urlParams = new URLSearchParams(window.location.search);
+            const category = urlParams.get('category') || '';
+
             try {
-                const res = await fetch(`${API_BASE}/mcq`, {
+                // Correct Backend API endpoint alignment
+                let endpoint = `${API_BASE}/questions`;
+                if (category) {
+                    endpoint += `?category=${encodeURIComponent(category)}`;
+                }
+
+                const res = await fetch(endpoint, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const data = await res.json();
 
-                if (res.ok && data.mcqs && data.mcqs.length > 0) {
-                    currentQuestions = data.mcqs;
-                } else {
-                    // Fallback Questions if database is empty
-                    currentQuestions = [
-                        {
-                            question: "বাংলাদেশের রাজধানী কোথায়?",
-                            options: ["চট্টগ্রাম", "ঢাকা", "সিলেট", "রাজশাহী"],
-                            correctAnswer: 1
-                        },
-                        {
-                            question: "কম্পিউটারের মস্তিষ্ক কাকে বলা হয়?",
-                            options: ["RAM", "Hard Disk", "CPU", "Monitor"],
-                            correctAnswer: 2
-                        }
-                    ];
+                let rawList = [];
+                if (Array.isArray(data)) {
+                    rawList = data;
+                } else if (data.mcqs && Array.isArray(data.mcqs)) {
+                    rawList = data.mcqs;
+                } else if (data.questions && Array.isArray(data.questions)) {
+                    rawList = data.questions;
                 }
-                renderQuestion();
+
+                if (res.ok && rawList.length > 0) {
+                    currentQuestions = rawList.map(q => ({
+                        question: q.q || q.question,
+                        options: q.options || [],
+                        correctAnswer: typeof q.ans !== 'undefined' ? q.ans : q.correctAnswer,
+                        explanation: q.explanation || ''
+                    }));
+                    renderQuestion();
+                } else {
+                    quizContainer.innerHTML = `<div style="text-align:center; padding:20px; color:#666;">
+                        <i class="fa-solid fa-folder-open fa-2x" style="margin-bottom:10px; color:#ffc107;"></i>
+                        <h3>কোনো প্রশ্ন পাওয়া যায়নি!</h3>
+                        <p>এই ক্যাটাগরিতে এখনো কোনো কুইজ যুক্ত করা হয়নি।</p>
+                    </div>`;
+                }
 
             } catch (err) {
                 quizContainer.innerHTML = `<p style="color:red; text-align:center;">প্রশ্ন লোড করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।</p>`;

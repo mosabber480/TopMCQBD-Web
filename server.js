@@ -275,8 +275,8 @@ app.delete('/api/users/:userId', verifyToken, authorizeRoles('owner'), async (re
 
 // ------------------- QUESTION API ENDPOINTS -------------------
 
-// 1. Get Questions
-app.get('/api/questions', async (req, res) => {
+// Helper Function for Questions Fetching
+const fetchQuestionsHandler = async (req, res) => {
     try {
         const { category } = req.query;
         let filter = {};
@@ -284,11 +284,15 @@ app.get('/api/questions', async (req, res) => {
             filter.category = new RegExp(`^${category}(/|$)`, 'i');
         }
         const questions = await Question.find(filter);
-        res.json(questions);
+        res.json({ success: true, mcqs: questions, questions });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ success: false, error: err.message });
     }
-});
+};
+
+// 1. Get Questions (/api/questions & /api/mcq support)
+app.get('/api/questions', fetchQuestionsHandler);
+app.get('/api/mcq', fetchQuestionsHandler);
 
 // 2. Add New Single Question
 app.post('/api/questions', verifyToken, authorizeRoles('owner', 'admin'), async (req, res) => {
@@ -446,9 +450,12 @@ app.post('/api/questions/upload-csv', verifyToken, authorizeRoles('owner', 'admi
 });
 
 // ------------------- FRONTEND FALLBACK ROUTE -------------------
-// Matches any route not handled by API and serves index.html
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+// Safe Catch-all middleware for non-API GET requests (Express 4.x & 5.x compatible)
+app.use((req, res, next) => {
+    if (req.method === 'GET' && !req.path.startsWith('/api')) {
+        return res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    }
+    res.status(404).json({ success: false, message: 'API Route not found' });
 });
 
 // Server Start
