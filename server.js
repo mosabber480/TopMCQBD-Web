@@ -27,7 +27,7 @@ app.use(express.static(__dirname));
 const upload = multer({ storage: multer.memoryStorage() });
 
 // MongoDB Connection Setup
-const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://admin:password@cluster0.mongodb.net/quizdb';
+const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://admin:password@cluster0.mongodb.net/quizDB';
 const PORT = process.env.PORT || 5000;
 
 mongoose.connect(MONGO_URI)
@@ -340,13 +340,17 @@ app.delete('/api/questions', verifyToken, authorizeRoles('owner', 'admin'), asyn
     }
 });
 
-// 6. Get Categories List
+// 6. Get Categories List (Updated for Frontend Compatibility)
 app.get('/api/categories', async (req, res) => {
     try {
         const categories = await Question.distinct('category');
-        res.json(categories);
+        res.json({
+            success: true,
+            categories: categories,
+            data: categories
+        });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ success: false, error: err.message });
     }
 });
 

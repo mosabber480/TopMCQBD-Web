@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MCQ Quiz Practice - TopMCQ</title>
+    <title>Dynamic Quiz - Practice</title>
     
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -14,336 +14,779 @@
     <style>
         :root {
             --primary: #007bff;
-            --success: #28a745;
-            --danger: #dc3545;
+            --primary-dark: #0056b3;
             --dark: #2c3e50;
             --light: #f8f9fa;
+            --gray: #6c757d;
+            --success: #28a745;
+            --danger: #dc3545;
         }
 
-        .page-wrapper {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f4f7f6;
+            color: #333;
+            line-height: 1.6;
         }
 
-        .main-content {
-            flex: 1;
-            padding: 30px 20px;
-            max-width: 800px;
+        /* Dynamic Announcement Bar Styling */
+        #global-announce-bar {
+            background: linear-gradient(90deg, #ff9f43, #ee5253);
+            color: #fff;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 8px 15px;
+            text-align: center;
+            position: relative;
+            z-index: 1001;
+        }
+        .announce-content a { color: #fff; margin-left: 10px; text-decoration: underline; font-weight: bold; }
+
+        /* Dynamic Header Styling */
+        #global-header {
+            background-color: #ffffff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        .header-wrapper {
+            max-width: 1200px;
             margin: 0 auto;
-            width: 100%;
-        }
-
-        .quiz-card {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            border: 1px solid #e2e8f0;
-        }
-
-        .quiz-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #e2e8f0;
-            margin-bottom: 20px;
+            padding: 15px 20px;
+        }
+        .site-logo a { font-size: 26px; font-weight: 800; color: var(--dark); text-decoration: none; display: flex; align-items: center; gap: 8px; }
+        .site-logo img { max-height: 40px; width: auto; }
+        .site-nav ul { display: flex; list-style: none; gap: 25px; align-items: center; }
+        .site-nav a { text-decoration: none; color: var(--dark); font-weight: 600; font-size: 15px; transition: color 0.2s ease; }
+        .site-nav a:hover { color: var(--primary); }
+        .btn-primary-head { background-color: var(--primary); color: white !important; padding: 9px 20px; border-radius: 6px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
+        .btn-primary-head:hover { background-color: var(--primary-dark); }
+
+        .nav-item { position: relative; }
+        .dropdown-menu { display: none; position: absolute; top: 100%; left: 0; background: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-radius: 6px; list-style: none; padding: 10px 0; min-width: 180px; z-index: 100; }
+        .nav-item:hover .dropdown-menu { display: block; }
+        .dropdown-menu li a { padding: 8px 15px; display: block; color: #333; font-size: 14px; }
+        .dropdown-menu li a:hover { background: #f4f7f6; color: var(--primary); }
+
+        /* Quiz Container */
+        .container {
+            max-width: 900px;
+            margin: 30px auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
         }
 
-        .quiz-title {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--dark);
-        }
-
-        .sub-badge {
-            background-color: #d4edda;
-            color: #155724;
-            padding: 5px 12px;
-            border-radius: 20px;
+        .btn-back {
+            position: absolute;
+            top: 0;
+            left: 0;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-bottom-right-radius: 6px;
+            border-top-left-radius: 8px;
             font-size: 13px;
             font-weight: bold;
-        }
-
-        .question-box {
-            margin-bottom: 25px;
-        }
-
-        .question-text {
-            font-size: 18px;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 15px;
-            line-height: 1.5;
-        }
-
-        .options-grid {
-            display: grid;
-            gap: 12px;
-        }
-
-        .option-btn {
-            background: #fff;
-            border: 2px solid #cbd5e1;
-            padding: 14px 18px;
-            border-radius: 8px;
-            font-size: 15px;
-            text-align: left;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-weight: 500;
-            display: flex;
+            display: inline-flex;
             align-items: center;
-            gap: 10px;
+            transition: background-color 0.2s ease;
+            z-index: 10;
         }
+        .btn-back:hover { background-color: #0056b3; color: white; }
 
-        .option-btn:hover {
-            border-color: var(--primary);
-            background-color: #f0f7ff;
-        }
+        h1, h2 { text-align: center; color: #2c3e50; margin-top: 10px; margin-bottom: 5px; }
 
-        .option-btn.correct {
-            background-color: #d4edda !important;
-            border-color: var(--success) !important;
-            color: #155724;
-            font-weight: bold;
-        }
-
-        .option-btn.wrong {
-            background-color: #f8d7da !important;
-            border-color: var(--danger) !important;
-            color: #721c24;
-            font-weight: bold;
-        }
-
-        .quiz-footer {
-            margin-top: 25px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            background-color: var(--primary);
+        .btn-reset {
+            background-color: #2ecc71;
             color: white;
             border: none;
-            border-radius: 6px;
+            padding: 6px 14px;
+            border-radius: 4px;
+            font-size: 13px;
             font-weight: bold;
-            font-size: 15px;
             cursor: pointer;
-            transition: background 0.2s ease;
+            transition: background-color 0.2s ease;
+        }
+        .btn-reset:hover { background-color: #27ae60; }
+
+        /* Floating Status Bar */
+        .floating-status-bar {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+            z-index: 1000;
         }
 
-        .btn:hover { background-color: #0056b3; }
-
-        .loading-spinner {
+        .timer-board {
+            background: #e74c3c;
+            color: white;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            min-width: 90px;
             text-align: center;
-            padding: 40px;
-            font-size: 18px;
-            color: #666;
+            transition: all 0.3s ease;
         }
 
-        .score-box {
+        .score-board {
+            background: #2ecc71;
+            color: white;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            min-width: 90px;
             text-align: center;
-            padding: 20px;
         }
-        .score-box h2 { color: var(--primary); font-size: 28px; margin-bottom: 10px; }
+
+        .header-info-bar { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; }
+        .exam-path { color: #7f8c8d; font-size: 14px; font-weight: 500; text-align: left; }
+        .negative-mark-note { color: #e74c3c; font-size: 13px; font-weight: 600; text-align: right; }
+
+        /* Controls Bar */
+        .controls-bar {
+            display: flex; justify-content: space-between; align-items: center; margin-top: 10px; margin-bottom: 20px;
+            background: #f8f9fa; padding: 8px 15px; border-radius: 6px; border: 1px solid #e9ecef; flex-wrap: wrap; gap: 12px;
+        }
+        .nav-actions { display: flex; align-items: center; gap: 10px; }
+        .right-controls-group { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
+        .filter-group { display: flex; align-items: center; gap: 6px; }
+        .select-dropdown { padding: 5px 8px; border-radius: 4px; border: 1px solid #ced4da; font-size: 13px; font-weight: 600; color: #2c3e50; background-color: #fff; cursor: pointer; outline: none; }
+        .select-dropdown:focus { border-color: #007bff; }
+
+        .switch-group { display: flex; align-items: center; gap: 12px; }
+        .switch-label { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #2c3e50; cursor: pointer; user-select: none; }
+        .switch { position: relative; display: inline-block; width: 36px; height: 20px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .3s; border-radius: 20px; }
+        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
+        input:checked + .slider { background-color: #007bff; }
+        input:checked + .slider:before { transform: translateX(16px); }
+
+        .color-dots-icon { display: inline-flex; align-items: center; gap: 3px; margin-left: 2px; }
+        .dot-red { width: 9px; height: 9px; background-color: #e74c3c; border-radius: 50%; }
+        .dot-green { width: 9px; height: 9px; background-color: #2ecc71; border-radius: 50%; }
+
+        /* Popup Notification */
+        .corner-popup { position: fixed; bottom: 25px; right: 25px; background: #ffffff; color: #2c3e50; padding: 16px 20px; border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); border-left: 5px solid #007bff; z-index: 2000; display: none; max-width: 320px; animation: slideInRight 0.3s ease-out; }
+        .corner-popup.warning { border-left-color: #f39c12; }
+        .corner-popup.danger { border-left-color: #e74c3c; }
+        .corner-popup h4 { margin: 0 0 6px 0; font-size: 15px; color: #2c3e50; }
+        .corner-popup p { margin: 0 0 12px 0; font-size: 13px; color: #555; line-height: 1.4; }
+        .popup-btn { background-color: #007bff; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; transition: background 0.2s ease; }
+        .popup-btn:hover { background-color: #0056b3; }
+
+        @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        /* Question & Option Styles */
+        .question-block { margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px dashed #ccc; }
+        .question-text { font-size: 17px; font-weight: 600; margin-bottom: 15px; color: #2c3e50; text-align: left; }
+        .options-container { margin-bottom: 15px; display: flex; flex-wrap: wrap; gap: 12px 20px; }
+        .option-btn { background: #f8f9fa; border: 1px solid #ced4da; padding: 10px 18px; border-radius: 4px; cursor: pointer; font-size: 15px; text-align: left; transition: all 0.2s ease; font-weight: normal; }
+        .option-btn:hover:not(.disabled) { background: #e2e6ea; border-color: #dae0e5; }
+        .option-btn.disabled { cursor: not-allowed; }
+
+        .correct { background-color: #2ecc71 !important; color: white !important; border-color: #27ae60 !important; }
+        .incorrect { background-color: #e74c3c !important; color: white !important; border-color: #c0392b !important; }
+        .neutral-selected { background-color: #ecf7fa !important; color: #000000 !important; border-color: #222 !important; font-weight: normal !important; }
+
+        .answer-text { font-weight: bold; color: #27ae60; margin-top: 10px; display: none; text-align: left; }
+        .explanation-text { font-size: 14px; color: #555; margin-top: 5px; display: none; background: #f9f9f9; padding: 8px 12px; border-left: 3px solid #17a2b8; border-radius: 4px; }
+        .result-section { text-align: center; margin-top: 40px; padding: 20px; background: #ecf0f1; border-radius: 8px; }
+        .detailed-stats { font-size: 14px; margin-bottom: 12px; color: #555; }
+        .correct-count { color: #2ecc71; font-weight: bold; }
+        .incorrect-count { color: #e74c3c; font-weight: bold; }
+        #final-score { font-size: 24px; color: #2c3e50; font-weight: bold; border-top: 2px solid #bdc3c7; padding-top: 10px; display: inline-block; }
+
+        /* Dynamic Footer Styling */
+        #global-footer { background-color: var(--dark); color: #ecf0f1; padding: 40px 20px 20px 20px; margin-top: 60px; }
+        .footer-container { max-width: 1200px; margin: 0 auto; }
+        .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 30px; margin-bottom: 30px; }
+        .footer-col h4 { font-size: 16px; margin-bottom: 15px; color: #ffffff; border-bottom: 2px solid var(--primary); padding-bottom: 6px; display: inline-block; }
+        .footer-col p { font-size: 14px; color: #bdc3c7; line-height: 1.6; }
+        .footer-social { margin-top: 15px; display: flex; gap: 12px; }
+        .footer-social a { color: white; font-size: 18px; background: rgba(255,255,255,0.1); width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 50%; text-decoration: none; }
+        .footer-social a:hover { background: var(--primary); }
+        .footer-bottom { text-align: center; padding-top: 20px; border-top: 1px solid #34495e; font-size: 13px; color: #95a5a6; }
+
+        @media (max-width: 768px) {
+            .header-wrapper { flex-direction: column; gap: 12px; }
+            .site-nav ul { gap: 15px; flex-wrap: wrap; justify-content: center; }
+            .floating-status-bar { top: 120px; right: 10px; gap: 6px; }
+            .timer-board, .score-board { padding: 6px 12px; font-size: 14px; min-width: 80px; }
+            .header-info-bar { flex-direction: column; align-items: flex-start; gap: 5px; }
+            .negative-mark-note { text-align: left; }
+            .controls-bar { flex-direction: column; align-items: flex-start; gap: 12px; }
+            .nav-actions { width: 100%; justify-content: flex-start; flex-wrap: wrap; }
+            .right-controls-group { width: 100%; flex-direction: column; align-items: flex-start; gap: 10px; }
+            .filter-group { width: 100%; }
+            .switch-group { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 10px; }
+            .options-container { flex-direction: column; gap: 10px; }
+            .option-btn { width: 100%; box-sizing: border-box; padding: 12px 15px; }
+            .corner-popup { bottom: 15px; right: 15px; left: 15px; max-width: none; }
+        }
     </style>
 </head>
 <body>
 
-    <div class="page-wrapper">
-        <header id="global-header"></header>
+<!-- DYNAMIC ANNOUNCEMENT BAR -->
+<div id="global-announce-bar" style="display:none;"></div>
 
-        <main class="main-content">
-            <div class="quiz-card" id="quizContainer">
-                <div class="loading-spinner">
-                    <i class="fa-solid fa-spinner fa-spin fa-2x"></i>
-                    <p style="margin-top: 15px;">অ্যাক্সেস এবং কুইজ তথ্য লোড হচ্ছে...</p>
-                </div>
+<!-- DYNAMIC HEADER -->
+<header id="global-header"></header>
+
+<!-- Floating Status Container (Timer & Score) -->
+<div class="floating-status-bar">
+    <div class="timer-board" id="timer-board-box"><span id="timer-display">00:00</span></div>
+    <div class="score-board">স্কোর: <span id="live-score">0</span></div>
+</div>
+
+<!-- Bottom Right Corner Toast Popup -->
+<div id="corner-popup" class="corner-popup">
+    <h4 id="popup-title">বিজ্ঞপ্তি</h4>
+    <p id="popup-msg"></p>
+    <div id="popup-action"></div>
+</div>
+
+<div class="container">
+    <a href="index.html" class="btn-back">⬅️ হোম পেজে ফিরে যান</a>
+
+    <h1 id="main-title">Dynamic Quiz Practice</h1>
+    <h2 id="topic-title">টপিক লোড হচ্ছে...</h2>
+    
+    <div class="header-info-bar">
+        <div id="category-path" class="exam-path"></div>
+        <div class="negative-mark-note">[ প্রতিটি ভুল উত্তরের জন্য ০.৫ নম্বর কাটা যাবে ]</div>
+    </div>
+    
+    <hr style="margin-top: 8px; border: 0; border-top: 1px solid #ccc;">
+
+    <div class="controls-bar">
+        <div class="nav-actions">
+            <button class="btn-reset" onclick="resetQuiz()">🔄 পুনরায় শুরু করুন</button>
+        </div>
+
+        <div class="right-controls-group">
+            <div class="filter-group">
+                <select id="range-select" class="select-dropdown" onchange="renderQuizUI()">
+                    <option value="all">সকল প্রশ্ন</option>
+                </select>
+                
+                <select id="limit-select" class="select-dropdown" onchange="updateRangeOptions()">
+                    <option value="all">সকল প্রশ্ন</option>
+                    <option value="20">20</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select>
             </div>
-        </main>
 
-        <footer id="global-footer"></footer>
+            <!-- Toggle Switches (Color, Correct Ans, Explanation, Time) -->
+            <div class="switch-group">
+                <label class="switch-label">
+                    <label class="switch">
+                        <input type="checkbox" id="toggle-color" checked>
+                        <span class="slider"></span>
+                    </label>
+                    <span class="color-dots-icon">
+                        <span class="dot-red"></span>
+                        <span class="dot-green"></span>
+                    </span>
+                </label>
+
+                <label class="switch-label">
+                    <label class="switch">
+                        <input type="checkbox" id="toggle-answer">
+                        <span class="slider"></span>
+                    </label>
+                    সঠিক উত্তর
+                </label>
+
+                <label class="switch-label">
+                    <label class="switch">
+                        <input type="checkbox" id="toggle-explanation" checked>
+                        <span class="slider"></span>
+                    </label>
+                    ব্যাখ্যা
+                </label>
+
+                <label class="switch-label">
+                    <label class="switch">
+                        <input type="checkbox" id="toggle-time">
+                        <span class="slider"></span>
+                    </label>
+                    সময়
+                </label>
+            </div>
+        </div>
     </div>
 
-    <script src="global/global.js"></script>
+    <div id="quiz-wrapper">
+        <p style="text-align:center; color:#888;"><i class="fa-solid fa-spinner fa-spin"></i> ডাটাবেজ থেকে কুইজের প্রশ্ন লোড হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন...</p>
+    </div>
 
-    <script>
-        const API_BASE = 'https://mosabber-quiz-app.onrender.com/api';
-        let currentQuestions = [];
-        let currentIndex = 0;
-        let score = 0;
+    <div class="result-section">
+        <h2>পরীক্ষার ফলাফল</h2>
+        <div class="detailed-stats">
+            সঠিক উত্তর: <span id="correct-count-display" class="correct-count">০</span> টি &nbsp;&nbsp;|&nbsp;&nbsp; ভুল উত্তর: <span id="incorrect-count-display" class="incorrect-count">০</span> টি
+        </div>
+        <div id="final-score">আপনার মোট প্রাপ্ত স্কোর: ০</div>
+    </div>
+</div>
 
-        // 1. Check Authentication & System Roles/Subscription Access
-        async function initQuizAccess() {
-            const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
-            const quizContainer = document.getElementById('quizContainer');
+<!-- DYNAMIC FOOTER -->
+<footer id="global-footer"></footer>
 
-            if (!token) {
-                window.location.href = 'login.html';
+<!-- CONFIG JS & GLOBAL JS SCRIPT -->
+<script src="config.js"></script>
+<script src="global/global.js"></script>
+
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentCategory = urlParams.get('category');
+
+    const API_BASE = 'https://mosabber-quiz-app.onrender.com/api';
+    const API_URL = currentCategory 
+        ? `${API_BASE}/questions?category=${encodeURIComponent(currentCategory)}`
+        : null;
+
+    let quizData = []; 
+    let answeredQuestions = {}; 
+    let score = 0;
+    let correctCount = 0;
+    let incorrectCount = 0;
+
+    let timerInterval = null;
+    let initialTotalSeconds = 0;
+    let totalSecondsLeft = 0;
+    let warningTriggered = false;
+
+    const quizWrapper = document.getElementById('quiz-wrapper');
+    const liveScoreDisplay = document.getElementById('live-score');
+    const timerDisplay = document.getElementById('timer-display');
+    const timerBoardBox = document.getElementById('timer-board-box');
+    const correctCountDisplay = document.getElementById('correct-count-display');
+    const incorrectCountDisplay = document.getElementById('incorrect-count-display');
+    const finalScoreDisplay = document.getElementById('final-score');
+
+    const toggleColor = document.getElementById('toggle-color');
+    const toggleAnswer = document.getElementById('toggle-answer');
+    const toggleExplanation = document.getElementById('toggle-explanation');
+    const toggleTime = document.getElementById('toggle-time');
+    const limitSelect = document.getElementById('limit-select');
+    const rangeSelect = document.getElementById('range-select');
+
+    const cornerPopup = document.getElementById('corner-popup');
+    const popupTitle = document.getElementById('popup-title');
+    const popupMsg = document.getElementById('popup-msg');
+    const popupAction = document.getElementById('popup-action');
+
+    function getBanglaLetter(index) {
+        const letters = ['ক', 'খ', 'গ', 'ঘ'];
+        return letters[index] || index;
+    }
+
+    toggleAnswer.addEventListener('change', updateVisibility);
+    toggleExplanation.addEventListener('change', updateVisibility);
+    toggleColor.addEventListener('change', updateOptionColors);
+
+    toggleTime.addEventListener('change', () => {
+        resetQuiz();
+    });
+
+    // Authentication and Subscription Access Guard
+    async function initQuizAccess() {
+        const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
+
+        if (!token) {
+            window.location.href = 'login.html';
+            return;
+        }
+
+        try {
+            const userObj = JSON.parse(localStorage.getItem('user') || localStorage.getItem('quiz_user') || '{}');
+            const isSystemStaff = userObj.role === 'owner' || userObj.role === 'admin';
+            const sub = userObj.subscription || {};
+            const isSubscribedCustomer = sub.active && sub.endDate && new Date(sub.endDate) > new Date();
+
+            if (!isSystemStaff && !isSubscribedCustomer) {
+                quizWrapper.innerHTML = `
+                    <div style="text-align:center; padding: 40px 20px;">
+                        <i class="fa-solid fa-lock fa-3x" style="color: #dc3545; margin-bottom: 15px;"></i>
+                        <h2 style="color:#2c3e50; margin-bottom:10px;">সাবস্ক্রিপশন প্রয়োজন!</h2>
+                        <p style="color:#666; margin-bottom: 20px;">কুইজে অংশ নিতে অ্যাক্টিভ সাবস্ক্রিপশন প্ল্যান প্রয়োজন।</p>
+                        <a href="profile.html" class="btn-primary-head" style="text-decoration:none;">প্রোফাইল থেকে প্ল্যান নিশ্চিত করুন</a>
+                    </div>
+                `;
                 return;
             }
 
-            try {
-                // LocalStorage check for fallback fast rendering
-                const userObj = JSON.parse(localStorage.getItem('user') || localStorage.getItem('quiz_user') || '{}');
-                const isSystemStaff = userObj.role === 'owner' || userObj.role === 'admin';
-                const sub = userObj.subscription || {};
-                const isSubscribedCustomer = sub.active && sub.endDate && new Date(sub.endDate) > new Date();
+            fetchQuestionsFromDB();
 
-                if (!isSystemStaff && !isSubscribedCustomer) {
-                    quizContainer.innerHTML = `
-                        <div style="text-align:center; padding: 20px;">
-                            <i class="fa-solid fa-lock fa-3x" style="color: #dc3545; margin-bottom: 15px;"></i>
-                            <h2 style="color:#2c3e50;">সাবস্ক্রিপশন প্রয়োজন!</h2>
-                            <p style="color:#666; margin: 10px 0 20px;">কুইজে অংশ নিতে অ্যাক্টিভ সাবস্ক্রিপশন প্ল্যান প্রয়োজন।</p>
-                            <a href="profile.html" class="btn" style="text-decoration:none;">প্রোফাইল থেকে প্ল্যান নিশ্চিত করুন</a>
-                        </div>
-                    `;
-                    return;
-                }
-
-                // System Staff or Subscribed Customer -> Load Quiz Questions
-                loadQuizQuestions();
-
-            } catch (err) {
-                loadQuizQuestions();
-            }
+        } catch (err) {
+            fetchQuestionsFromDB();
         }
+    }
 
-        // 2. Load MCQ Questions based on Category URL
-        async function loadQuizQuestions() {
-            const quizContainer = document.getElementById('quizContainer');
-            const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
+    function updateVisibility() {
+        Object.keys(answeredQuestions).forEach(qIndex => {
+            const ansElem = document.getElementById(`ans-text-${qIndex}`);
+            if (ansElem) {
+                ansElem.style.display = toggleAnswer.checked ? 'block' : 'none';
+            }
 
-            // URL থেকে ক্যাটাগরি ফিল্টার নেওয়া (যেমন: quiz.html?category=subjective/Zoology)
-            const urlParams = new URLSearchParams(window.location.search);
-            const category = urlParams.get('category') || '';
+            const expElem = document.getElementById(`exp-text-${qIndex}`);
+            if (expElem) {
+                expElem.style.display = toggleExplanation.checked ? 'block' : 'none';
+            }
+        });
+    }
 
-            try {
-                // Correct Backend API endpoint alignment
-                let endpoint = `${API_BASE}/questions`;
-                if (category) {
-                    endpoint += `?category=${encodeURIComponent(category)}`;
-                }
+    function updateOptionColors() {
+        Object.keys(answeredQuestions).forEach(qIndex => {
+            const selectedIndex = answeredQuestions[qIndex];
+            const currentQuestion = quizData[qIndex];
+            const qBlock = document.getElementById(`q-block-${qIndex}`);
 
-                const res = await fetch(endpoint, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const data = await res.json();
+            if (!qBlock || !currentQuestion) return;
 
-                let rawList = [];
-                if (Array.isArray(data)) {
-                    rawList = data;
-                } else if (data.mcqs && Array.isArray(data.mcqs)) {
-                    rawList = data.mcqs;
-                } else if (data.questions && Array.isArray(data.questions)) {
-                    rawList = data.questions;
-                }
+            const correctAnsIdx = typeof currentQuestion.ans !== 'undefined' ? currentQuestion.ans : currentQuestion.correctAnswer;
+            const allButtons = qBlock.querySelectorAll('.option-btn');
+            const selectedBtn = allButtons[selectedIndex];
+            const correctBtn = allButtons[correctAnsIdx];
 
-                if (res.ok && rawList.length > 0) {
-                    currentQuestions = rawList.map(q => ({
-                        question: q.q || q.question,
-                        options: q.options || [],
-                        correctAnswer: typeof q.ans !== 'undefined' ? q.ans : q.correctAnswer,
-                        explanation: q.explanation || ''
-                    }));
-                    renderQuestion();
+            allButtons.forEach(btn => {
+                btn.classList.remove('correct', 'incorrect', 'neutral-selected');
+            });
+
+            if (toggleColor.checked) {
+                if (selectedIndex === correctAnsIdx) {
+                    if (selectedBtn) selectedBtn.classList.add('correct');
                 } else {
-                    quizContainer.innerHTML = `<div style="text-align:center; padding:20px; color:#666;">
-                        <i class="fa-solid fa-folder-open fa-2x" style="margin-bottom:10px; color:#ffc107;"></i>
-                        <h3>কোনো প্রশ্ন পাওয়া যায়নি!</h3>
-                        <p>এই ক্যাটাগরিতে এখনো কোনো কুইজ যুক্ত করা হয়নি।</p>
-                    </div>`;
+                    if (selectedBtn) selectedBtn.classList.add('incorrect');
+                    if (correctBtn) correctBtn.classList.add('correct');
                 }
-
-            } catch (err) {
-                quizContainer.innerHTML = `<p style="color:red; text-align:center;">প্রশ্ন লোড করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।</p>`;
+            } else {
+                if (selectedBtn) selectedBtn.classList.add('neutral-selected');
             }
+        });
+    }
+
+    // ⚠️ FIXED: Updated to extract questions array correctly from backend object
+    async function fetchQuestionsFromDB() {
+        const topicTitle = document.getElementById('topic-title');
+        const categoryPath = document.getElementById('category-path');
+
+        if (!currentCategory) {
+            topicTitle.innerText = "কোনো ক্যাটাগরি সিলেক্ট করা হয়নি!";
+            quizWrapper.innerHTML = "<p style='text-align:center; color:red;'>অনুগ্রহ করে হোম পেজ থেকে একটি টপিক নির্বাচন করুন।</p>";
+            return;
         }
 
-        // 3. Render Question UI
-        function renderQuestion() {
-            const quizContainer = document.getElementById('quizContainer');
-            
-            if (currentIndex >= currentQuestions.length) {
-                renderScore();
+        const parts = currentCategory.split('/');
+        const mainCat = parts[0] || '';
+        const subCat = parts[1] || '';
+        const topic = parts[2] || subCat || mainCat;
+
+        topicTitle.innerText = `টপিক: ${topic.replace(/-/g, ' ')}`;
+        categoryPath.innerHTML = `📁 ${mainCat} &gt; ${subCat ? subCat + ' &gt; ' : ''}${topic}`;
+
+        try {
+            const token = localStorage.getItem('token') || localStorage.getItem('quiz_token') || '';
+            const headers = { 'Content-Type': 'application/json' };
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+
+            const res = await fetch(API_URL, { method: 'GET', headers: headers });
+            const data = await res.json();
+
+            let rawList = [];
+            if (Array.isArray(data)) {
+                rawList = data;
+            } else if (data.mcqs && Array.isArray(data.mcqs)) {
+                rawList = data.mcqs;
+            } else if (data.questions && Array.isArray(data.questions)) {
+                rawList = data.questions;
+            }
+
+            if (!res.ok || !Array.isArray(rawList)) {
+                throw new Error(data.message || "Failed to load questions");
+            }
+
+            quizData = rawList;
+
+            if (quizData.length === 0) {
+                quizWrapper.innerHTML = `<p style="text-align:center; color:#888;"><b>${topic}</b>-এর অধীনে কোনো প্রশ্ন পাওয়া যায়নি। ড্যাশবোর্ড থেকে প্রশ্ন যোগ করুন!</p>`;
                 return;
             }
 
-            const q = currentQuestions[currentIndex];
+            updateRangeOptions();
+        } catch (err) {
+            console.error("Fetch error:", err);
+            quizWrapper.innerHTML = `<p style='text-align:center; color:red;'>সার্ভার/ডাটাবেজ থেকে প্রশ্ন লোড করতে ব্যর্থ হয়েছে!</p>`;
+        }
+    }
 
-            quizContainer.innerHTML = `
-                <div class="quiz-header">
-                    <span class="quiz-title"><i class="fa-solid fa-pen-to-square"></i> MCQ Practice</span>
-                    <span class="sub-badge"><i class="fa-solid fa-circle-check"></i> Full Access Active</span>
-                </div>
+    function updateRangeOptions() {
+        const limitValue = limitSelect.value;
+        rangeSelect.innerHTML = "";
 
-                <div class="question-box">
-                    <div class="question-text">
-                        <b>প্রশ্ন ${currentIndex + 1}/${currentQuestions.length}:</b> ${q.question}
-                    </div>
-                    <div class="options-grid" id="optionsContainer">
-                        ${q.options.map((opt, idx) => `
-                            <button class="option-btn" onclick="selectOption(${idx}, ${q.correctAnswer})">
-                                <i class="fa-regular fa-circle"></i> ${opt}
-                            </button>
-                        `).join('')}
-                    </div>
-                </div>
+        if (limitValue === 'all' || !Array.isArray(quizData) || quizData.length === 0) {
+            const opt = document.createElement('option');
+            opt.value = 'all';
+            opt.innerText = (Array.isArray(quizData) && quizData.length > 0) ? `1-${quizData.length}` : `সকল প্রশ্ন`;
+            rangeSelect.appendChild(opt);
+        } else {
+            const chunkSize = parseInt(limitValue);
+            const totalQuestions = quizData.length;
 
-                <div class="quiz-footer">
-                    <span>স্কোর: <b>${score}</b></span>
-                    <button class="btn" id="nextBtn" style="display:none;" onclick="nextQuestion()">পরবর্তী প্রশ্ন <i class="fa-solid fa-arrow-right"></i></button>
-                </div>
-            `;
+            for (let start = 0; start < totalQuestions; start += chunkSize) {
+                let end = Math.min(start + chunkSize, totalQuestions);
+                const opt = document.createElement('option');
+                opt.value = `${start}-${end}`;
+                opt.innerText = `${start + 1}-${end}`;
+                rangeSelect.appendChild(opt);
+            }
         }
 
-        // 4. Option Selection Logic
-        function selectOption(selectedIndex, correctIndex) {
-            const buttons = document.querySelectorAll('.option-btn');
-            buttons.forEach(btn => btn.disabled = true);
+        renderQuizUI();
+    }
 
-            if (selectedIndex === correctIndex) {
-                buttons[selectedIndex].classList.add('correct');
-                buttons[selectedIndex].querySelector('i').className = 'fa-solid fa-circle-check';
-                score++;
-            } else {
-                buttons[selectedIndex].classList.add('wrong');
-                buttons[selectedIndex].querySelector('i').className = 'fa-solid fa-circle-xmark';
+    function renderQuizUI() {
+        quizWrapper.innerHTML = "";
+        hidePopup();
+        
+        if (!Array.isArray(quizData) || quizData.length === 0) {
+            return;
+        }
+
+        let displayData = [];
+        let startIndexOffset = 0;
+
+        const selectedRange = rangeSelect.value;
+
+        if (selectedRange === 'all') {
+            displayData = quizData;
+            startIndexOffset = 0;
+        } else {
+            const [start, end] = selectedRange.split('-').map(Number);
+            displayData = quizData.slice(start, end);
+            startIndexOffset = start;
+        }
+
+        if (toggleTime.checked) {
+            timerBoardBox.style.display = "block";
+            startTimer(displayData.length);
+        } else {
+            timerBoardBox.style.display = "none";
+            if (timerInterval) clearInterval(timerInterval);
+        }
+
+        displayData.forEach((item, relativeIndex) => {
+            const actualIndex = startIndexOffset + relativeIndex;
+
+            const qBlock = document.createElement('div');
+            qBlock.className = 'question-block';
+            qBlock.id = `q-block-${actualIndex}`;
+
+            const qText = document.createElement('div');
+            qText.className = 'question-text';
+            qText.innerText = `${actualIndex + 1}. ${item.q || item.question}`;
+            qBlock.appendChild(qText);
+
+            const optContainer = document.createElement('div');
+            optContainer.className = 'options-container';
+
+            const options = item.options || [];
+            options.forEach((opt, oIndex) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = `(${getBanglaLetter(oIndex)}) ${opt}`;
                 
-                if(buttons[correctIndex]) {
-                    buttons[correctIndex].classList.add('correct');
-                    buttons[correctIndex].querySelector('i').className = 'fa-solid fa-circle-check';
+                if (answeredQuestions[actualIndex] !== undefined) {
+                    btn.classList.add('disabled');
+                } else {
+                    btn.onclick = () => handleAnswer(btn, actualIndex, oIndex, optContainer);
                 }
+
+                optContainer.appendChild(btn);
+            });
+
+            qBlock.appendChild(optContainer);
+
+            const correctAnsIdx = typeof item.ans !== 'undefined' ? item.ans : item.correctAnswer;
+            const ansText = document.createElement('div');
+            ansText.className = 'answer-text';
+            ansText.id = `ans-text-${actualIndex}`;
+            ansText.innerText = `সঠিক উত্তর: (${getBanglaLetter(correctAnsIdx)}) ${options[correctAnsIdx] || ''}`;
+            qBlock.appendChild(ansText);
+
+            if (item.explanation && item.explanation.trim() !== '') {
+                const expText = document.createElement('div');
+                expText.className = 'explanation-text';
+                expText.id = `exp-text-${actualIndex}`;
+                expText.innerText = `ব্যাখ্যা: ${item.explanation}`;
+                qBlock.appendChild(expText);
             }
 
-            document.getElementById('nextBtn').style.display = 'inline-block';
+            quizWrapper.appendChild(qBlock);
+        });
+
+        updateVisibility();
+        updateOptionColors();
+    }
+
+    function startTimer(questionCount) {
+        if (timerInterval) clearInterval(timerInterval);
+
+        initialTotalSeconds = questionCount * 36;
+        totalSecondsLeft = initialTotalSeconds;
+        warningTriggered = false;
+
+        updateTimerDisplay();
+
+        const warningThreshold = Math.floor(initialTotalSeconds * 0.10);
+
+        timerInterval = setInterval(() => {
+            if (!toggleTime.checked) {
+                clearInterval(timerInterval);
+                return;
+            }
+
+            if (totalSecondsLeft <= 0) {
+                clearInterval(timerInterval);
+                timerDisplay.innerText = "00:00";
+                handleTimeOut();
+            } else {
+                totalSecondsLeft--;
+                updateTimerDisplay();
+
+                if (warningThreshold > 0 && totalSecondsLeft <= warningThreshold && !warningTriggered) {
+                    warningTriggered = true;
+                    show10PercentWarningPopup();
+                }
+            }
+        }, 1000);
+    }
+
+    function formatTime(totalSec) {
+        const minutes = Math.floor(totalSec / 60);
+        const seconds = totalSec % 60;
+        const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+        const formattedSeconds = seconds < 10 ? `0${seconds}` : seconds;
+        return { formattedMinutes, formattedSeconds, minutes, seconds };
+    }
+
+    function updateTimerDisplay() {
+        const { formattedMinutes, formattedSeconds } = formatTime(totalSecondsLeft);
+        timerDisplay.innerText = `${formattedMinutes}:${formattedSeconds}`;
+    }
+
+    function show10PercentWarningPopup() {
+        if (!toggleTime.checked) return;
+
+        const { minutes, seconds } = formatTime(totalSecondsLeft);
+        let timeStr = "";
+        if (minutes > 0) timeStr += `${minutes} মিনিট `;
+        if (seconds > 0) timeStr += `${seconds} সেকেন্ড`;
+
+        cornerPopup.className = "corner-popup warning";
+        popupTitle.innerText = "⚠️ সময় প্রায় শেষ!";
+        popupMsg.innerText = `আর মাত্র ${timeStr} বাকি আছে। দ্রুত উত্তর দিন!`;
+        popupAction.innerHTML = `<button class="popup-btn" onclick="hidePopup()">ঠিক আছে</button>`;
+        cornerPopup.style.display = "block";
+    }
+
+    function handleTimeOut() {
+        if (!toggleTime.checked) return;
+
+        disableAllButtonsOnTimeOut();
+        cornerPopup.className = "corner-popup danger";
+        popupTitle.innerText = "⏰ সময় শেষ!";
+        popupMsg.innerText = `আপনার নির্ধারিত সময় শেষ হয়ে গেছে। আপনার প্রাপ্ত স্কোর হলো: ${score}`;
+        popupAction.innerHTML = `<button class="popup-btn" onclick="resetQuiz()">🔄 পুনরায় শুরু করুন</button>`;
+        cornerPopup.style.display = "block";
+    }
+
+    function hidePopup() {
+        cornerPopup.style.display = "none";
+    }
+
+    function disableAllButtonsOnTimeOut() {
+        const allOptionBtns = document.querySelectorAll('.option-btn');
+        allOptionBtns.forEach(btn => {
+            btn.classList.add('disabled');
+            btn.onclick = null;
+        });
+    }
+
+    function handleAnswer(selectedBtn, qIndex, selectedIndex, optContainer) {
+        if (toggleTime.checked && totalSecondsLeft <= 0) return;
+
+        const currentQuestion = quizData[qIndex];
+        const correctAnsIdx = typeof currentQuestion.ans !== 'undefined' ? currentQuestion.ans : currentQuestion.correctAnswer;
+        const allButtons = optContainer.querySelectorAll('.option-btn');
+        
+        allButtons.forEach(btn => {
+            btn.classList.add('disabled');
+            btn.onclick = null;
+        });
+
+        answeredQuestions[qIndex] = selectedIndex;
+
+        updateOptionColors();
+
+        if (selectedIndex === correctAnsIdx) {
+            score += 1;
+            correctCount += 1;
+        } else {
+            score -= 0.5;
+            incorrectCount += 1;
         }
 
-        function nextQuestion() {
-            currentIndex++;
-            renderQuestion();
-        }
+        liveScoreDisplay.innerText = score;
+        correctCountDisplay.innerText = correctCount;
+        incorrectCountDisplay.innerText = incorrectCount;
+        finalScoreDisplay.innerText = `আপনার মোট প্রাপ্ত স্কোর: ${score}`;
 
-        // 5. Final Result Display
-        function renderScore() {
-            const quizContainer = document.getElementById('quizContainer');
-            quizContainer.innerHTML = `
-                <div class="score-box">
-                    <i class="fa-solid fa-trophy fa-3x" style="color:#ffc107; margin-bottom: 15px;"></i>
-                    <h2>কুইজ সম্পন্ন হয়েছে!</h2>
-                    <p style="font-size: 18px; color: #555;">আপনার মোট প্রাপ্ত নম্বর: <b>${score} / ${currentQuestions.length}</b></p>
-                    <button class="btn" style="margin-top: 20px;" onclick="location.reload()"><i class="fa-solid fa-rotate-right"></i> পুনরায় চেষ্টা করুন</button>
-                </div>
-            `;
-        }
+        updateVisibility();
+    }
 
-        window.onload = initQuizAccess;
-    </script>
+    function resetQuiz() {
+        score = 0;
+        correctCount = 0;
+        incorrectCount = 0;
+        answeredQuestions = {};
+
+        liveScoreDisplay.innerText = 0;
+        correctCountDisplay.innerText = 0;
+        incorrectCountDisplay.innerText = 0;
+        finalScoreDisplay.innerText = 'আপনার মোট প্রাপ্ত স্কোর: ০';
+
+        hidePopup();
+        renderQuizUI();
+    }
+
+    window.onload = initQuizAccess;
+</script>
+
 </body>
 </html>
