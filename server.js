@@ -20,8 +20,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
-// Serve Static Frontend Files from 'public' folder
-app.use(express.static(path.join(__dirname, 'public')));
+// Serve Static Frontend Files directly from root directory
+app.use(express.static(__dirname));
 
 // Multer Setup for Memory Storage
 const upload = multer({ storage: multer.memoryStorage() });
@@ -450,10 +450,10 @@ app.post('/api/questions/upload-csv', verifyToken, authorizeRoles('owner', 'admi
 });
 
 // ------------------- FRONTEND FALLBACK ROUTE -------------------
-// Safe Catch-all middleware for non-API GET requests (Express 4.x & 5.x compatible)
+// Safe Catch-all middleware for non-API GET requests
 app.use((req, res, next) => {
     if (req.method === 'GET' && !req.path.startsWith('/api')) {
-        return res.sendFile(path.join(__dirname, 'public', 'index.html'));
+        return res.sendFile(path.join(__dirname, 'index.html'));
     }
     res.status(404).json({ success: false, message: 'API Route not found' });
 });
