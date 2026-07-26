@@ -10,6 +10,7 @@
     --light: #f8f9fa;
     --gray: #6c757d;
     --accent: #ff9f43;
+    --danger: #dc3545;
 }
 
 * {
@@ -24,6 +25,62 @@ body {
     color: #333;
     line-height: 1.6;
 }
+
+/* ================= GLOBAL TOP ALERT BANNER SYSTEM ================= */
+#topAlertBanner {
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    z-index: 9999; 
+    padding: 12px 0; 
+    display: none;
+    justify-content: center; 
+    align-items: center; 
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    background-color: #ffffff; 
+    color: #2c3e50; 
+    font-weight: 600; 
+    font-size: 15px;
+    border-top: 16px solid #2a3c4d; 
+    border-bottom: 1px solid #e2e8f0; 
+    animation: slideDown 0.3s ease-in-out;
+}
+#topAlertBanner::before { 
+    content: ''; 
+    position: absolute; 
+    top: 0; 
+    left: 0; 
+    bottom: 0; 
+    width: 6px; 
+    background-color: var(--danger); 
+}
+@keyframes slideDown { 
+    from { opacity: 0; transform: translateY(-100%); } 
+    to { opacity: 1; transform: translateY(0); } 
+}
+
+#topAlertBanner.info::before { background-color: var(--primary); }
+#topAlertBanner.success::before { background-color: var(--secondary); }
+#topAlertBanner.warning::before { background-color: var(--accent); }
+#topAlertBanner.danger::before { background-color: var(--danger); }
+
+/* STRICT 1200PX INNER CONTAINER */
+.alert-container-inner {
+    max-width: 1200px;
+    width: 100%;
+    padding: 0 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.alert-btns { display: flex; gap: 10px; }
+.btn-alert { padding: 7px 18px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; font-size: 13px; }
+.btn-alert-ok { background-color: #28a745; color: white; }
+.btn-alert-ok:hover { background-color: #218838; }
+.btn-alert-cancel { background-color: var(--danger); color: white; }
+.btn-alert-cancel:hover { background-color: #c82333; }
 
 /* 1. Announcement Bar */
 #global-announce-bar {

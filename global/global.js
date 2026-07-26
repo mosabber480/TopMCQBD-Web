@@ -7,6 +7,62 @@ const DEFAULT_ANNOUNCEMENT = {
     link: ""
 };
 
+// ================= GLOBAL TOP ALERT SYSTEM INJECTION =================
+(function injectGlobalAlertHTML() {
+    window.addEventListener('DOMContentLoaded', () => {
+        if (!document.getElementById('topAlertBanner')) {
+            const alertDiv = document.createElement('div');
+            alertDiv.id = 'topAlertBanner';
+            alertDiv.innerHTML = `
+                <div class="alert-container-inner">
+                    <span id="alertMessage">Message here...</span>
+                    <div class="alert-btns">
+                        <button class="btn-alert btn-alert-ok" id="alertOkBtn">Yes</button>
+                        <button class="btn-alert btn-alert-cancel" id="alertCancelBtn" style="display:none;">No</button>
+                    </div>
+                </div>
+            `;
+            document.body.insertBefore(alertDiv, document.body.firstChild);
+        }
+    });
+})();
+
+// GLOBAL TOP ALERT FUNCTION (CALLABLE ANYWHERE)
+function showTopAlert(msg, type = 'info', isConfirm = false) {
+    return new Promise((resolve) => {
+        let banner = document.getElementById('topAlertBanner');
+        
+        // Fallback if banner element isn't ready in DOM
+        if (!banner) {
+            resolve(confirm(msg));
+            return;
+        }
+
+        document.getElementById('alertMessage').innerHTML = msg;
+        banner.className = type;
+        banner.style.display = 'flex';
+
+        const okBtn = document.getElementById('alertOkBtn');
+        const cancelBtn = document.getElementById('alertCancelBtn');
+
+        if (isConfirm) {
+            okBtn.innerText = "Yes";
+            cancelBtn.innerText = "No";
+            cancelBtn.style.display = 'inline-block';
+        } else {
+            okBtn.innerText = "OK";
+            cancelBtn.style.display = 'none';
+        }
+
+        okBtn.onclick = () => { banner.style.display = 'none'; resolve(true); };
+        cancelBtn.onclick = () => { banner.style.display = 'none'; resolve(false); };
+
+        if (!isConfirm) {
+            setTimeout(() => { banner.style.display = 'none'; resolve(true); }, 4000);
+        }
+    });
+}
+
 // Helper Function: Correct URL Formatter (Local vs External)
 function formatURL(url) {
     if (!url || url === '#') return '#';

@@ -36,8 +36,8 @@
 
         /* TOP ALERT BANNER SYSTEM */
         #topAlertBanner {
-            position: fixed; top: 0; left: 0; width: 100%; z-index: 9999; padding: 12px 30px; display: none;
-            justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            position: fixed; top: 0; left: 0; width: 100%; z-index: 9999; padding: 12px 0; display: none;
+            justify-content: center; align-items: center; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
             background-color: #ffffff; color: #2c3e50; font-weight: 600; font-size: 15px;
             border-top: 16px solid #2a3c4d; border-bottom: 1px solid #e2e8f0; animation: slideDown 0.3s ease-in-out;
         }
@@ -47,6 +47,15 @@
         #topAlertBanner.success::before { background-color: var(--main-dash-btn); }
         #topAlertBanner.warning::before { background-color: var(--warning); }
         #topAlertBanner.danger::before { background-color: var(--danger); }
+
+        .alert-container-inner {
+            max-width: 1200px;
+            width: 100%;
+            padding: 0 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
         .alert-btns { display: flex; gap: 10px; }
         .btn-alert { padding: 7px 18px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; font-size: 13px; }
@@ -152,16 +161,68 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            transition: border-top 0.1s ease, border-bottom 0.1s ease;
+        }
+
+        /* DRAG AND DROP & ARROW CONTROLS STYLES */
+        .draggable-box {
+            cursor: move;
+            transition: transform 0.15s ease, opacity 0.15s ease, border-top 0.1s ease, border-bottom 0.1s ease;
+        }
+        .draggable-box.dragging {
+            opacity: 0.4;
+            background: #eef6ff !important;
+        }
+        .drag-handle {
+            cursor: grab;
+            color: #888;
+            margin-right: 8px;
+            font-size: 16px;
+        }
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+
+        /* 2PX DROP INDICATOR LINE STYLES */
+        .drag-over-top {
+            border-top: 2px solid #007bff !important;
+        }
+        .drag-over-bottom {
+            border-bottom: 2px solid #007bff !important;
+        }
+        
+        .arrow-btn-group {
+            display: inline-flex;
+            flex-direction: column;
+            gap: 2px;
+            margin-right: 10px;
+        }
+        .btn-arrow {
+            background: #e2e8f0;
+            border: none;
+            color: #475569;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+            cursor: pointer;
+            line-height: 1;
+            transition: background 0.2s ease;
+        }
+        .btn-arrow:hover {
+            background: #007bff;
+            color: #ffffff;
         }
     </style>
 </head>
 <body>
 
     <div id="topAlertBanner">
-        <span id="alertMessage">Message here...</span>
-        <div class="alert-btns">
-            <button class="btn-alert btn-alert-ok" id="alertOkBtn">OK</button>
-            <button class="btn-alert btn-alert-cancel" id="alertCancelBtn" style="display:none;">Cancel</button>
+        <div class="alert-container-inner">
+            <span id="alertMessage">Message here...</span>
+            <div class="alert-btns">
+                <button class="btn-alert btn-alert-ok" id="alertOkBtn">Yes</button>
+                <button class="btn-alert btn-alert-cancel" id="alertCancelBtn" style="display:none;">No</button>
+            </div>
         </div>
     </div>
 
@@ -224,6 +285,9 @@
         let headerInfo = null;
         let footerInfo = null;
         let copyrightInfo = null;
+        
+        let isMenuReordered = false;
+        let isFooterReordered = {};
 
         function showTopAlert(msg, type = 'info', isConfirm = false) {
             return new Promise((resolve) => {
@@ -236,8 +300,11 @@
                 const cancelBtn = document.getElementById('alertCancelBtn');
 
                 if (isConfirm) {
+                    okBtn.innerText = "Yes";
+                    cancelBtn.innerText = "No";
                     cancelBtn.style.display = 'inline-block';
                 } else {
+                    okBtn.innerText = "OK";
                     cancelBtn.style.display = 'none';
                 }
 
@@ -259,6 +326,9 @@
                 headerInfo = data.header || null;
                 footerInfo = data.footer || null;
                 copyrightInfo = data.copyright || null;
+
+                isMenuReordered = false;
+                isFooterReordered = {};
 
                 renderAnnounceSection();
                 renderHeaderBrandSection();
@@ -447,17 +517,12 @@
             }
         }
 
-        /* ================= 2.2 HEADER MENU & SUB-MENU SECTION ================= */
+        /* ================= 2.2 HEADER MENU & SUB-MENU SECTION (WITH MANUAL SAVE & ARROW CONTROLS) ================= */
         function renderHeaderMenuCards() {
             const container = document.getElementById('header-menu-container');
             document.getElementById('new-menu-form-box').innerHTML = '';
             
-            const mainActionBar = document.getElementById('main-menu-action-bar');
-            mainActionBar.innerHTML = `
-                <button class="btn btn-add" id="add-menu-btn" onclick="showNewMenuForm()">
-                    <i class="fa-solid fa-plus"></i> মূল মেনু যোগ করুন
-                </button>
-            `;
+            updateMenuActionBar();
 
             container.innerHTML = '';
 
@@ -470,17 +535,26 @@
 
             menus.forEach((m, mIdx) => {
                 const card = document.createElement('div');
-                card.className = 'read-box';
+                card.className = 'read-box draggable-box main-menu-drag-item';
+                card.draggable = true;
+                card.dataset.index = mIdx;
                 card.id = `menu-card-${mIdx}`;
 
                 let subMenusHtml = '';
                 if (m.subMenus && m.subMenus.length > 0) {
                     subMenusHtml = `
-                        <div class="sub-menu-list">
+                        <div class="sub-menu-list sub-menu-drag-container" data-parent-index="${mIdx}">
                             <div style="font-size:12px; font-weight:bold; color:#555; margin-bottom:5px;">সাব-মেনু সমূহ:</div>
                             ${m.subMenus.map((sm, smIdx) => `
-                                <div class="sub-menu-item">
-                                    <span style="font-size:13px; color:#333;"><b>${sm.title}</b> <small style="color:#777;">(${sm.url || '#'})</small></span>
+                                <div class="sub-menu-item draggable-box sub-menu-drag-item" draggable="true" data-parent-index="${mIdx}" data-index="${smIdx}">
+                                    <span style="font-size:13px; color:#333; display:flex; align-items:center;">
+                                        <i class="fa-solid fa-grip-vertical drag-handle" title="মাউস চেপে পজিশন পরিবর্তন করুন"></i>
+                                        <div class="arrow-btn-group">
+                                            <button type="button" class="btn-arrow" onclick="moveSubMenuPosition(${mIdx}, ${smIdx}, 'up')" title="উপরে তুলুন">▲</button>
+                                            <button type="button" class="btn-arrow" onclick="moveSubMenuPosition(${mIdx}, ${smIdx}, 'down')" title="নিচে নামান">▼</button>
+                                        </div>
+                                        <b>${sm.title}</b> <small style="color:#777; margin-left:5px;">(${sm.url || '#'})</small>
+                                    </span>
                                     <div>
                                         <button class="btn btn-warning btn-sm" onclick="editSubMenuInline(${mIdx}, ${smIdx})"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
                                         <button class="btn btn-danger btn-sm" onclick="deleteSubMenu(${mIdx}, ${smIdx})"><i class="fa-solid fa-trash"></i> Delete</button>
@@ -494,8 +568,15 @@
                 card.innerHTML = `
                     <div class="card-header-flex">
                         <div>
-                            <div class="read-title"><i class="fa-solid fa-bars" style="color:#20c997;"></i> মেনু #${mIdx + 1}: ${m.title || '(নাম নেই)'}</div>
-                            <div class="read-subtitle"><b>URL:</b> ${m.url || '#'}</div>
+                            <div class="read-title" style="display:flex; align-items:center;">
+                                <i class="fa-solid fa-grip-vertical drag-handle" title="মাউস চেপে পজিশন পরিবর্তন করুন"></i>
+                                <div class="arrow-btn-group">
+                                    <button type="button" class="btn-arrow" onclick="moveMainMenuPosition(${mIdx}, 'up')" title="উপরে তুলুন">▲</button>
+                                    <button type="button" class="btn-arrow" onclick="moveMainMenuPosition(${mIdx}, 'down')" title="নিচে নামান">▼</button>
+                                </div>
+                                <i class="fa-solid fa-bars" style="color:#20c997; margin-right:6px;"></i> মেনু #${mIdx + 1}: ${m.title || '(নাম নেই)'}
+                            </div>
+                            <div class="read-subtitle" style="margin-left: 45px;"><b>URL:</b> ${m.url || '#'}</div>
                         </div>
                         <div class="card-actions">
                             <button class="btn btn-warning" onclick="editMainMenuInline(${mIdx})"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
@@ -510,11 +591,208 @@
                 `;
                 container.appendChild(card);
             });
+
+            initMenuDragAndDrop();
+        }
+
+        function updateMenuActionBar() {
+            const mainActionBar = document.getElementById('main-menu-action-bar');
+            let saveCancelBtns = '';
+            
+            if (isMenuReordered) {
+                saveCancelBtns = `
+                    <button class="btn btn-submit" onclick="saveReorderedMenu()"><i class="fa-solid fa-floppy-disk"></i> Save Menu</button>
+                    <button class="btn btn-secondary" onclick="cancelMenuReorder()"><i class="fa-solid fa-xmark"></i> Cancel</button>
+                `;
+            }
+
+            mainActionBar.innerHTML = `
+                <button class="btn btn-add" id="add-menu-btn" onclick="showNewMenuForm()">
+                    <i class="fa-solid fa-plus"></i> মূল মেনু যোগ করুন
+                </button>
+                ${saveCancelBtns}
+            `;
+        }
+
+        /* --- ARROW POSITION CONTROLS --- */
+        function moveMainMenuPosition(mIdx, direction) {
+            const list = headerInfo.menus;
+            if (direction === 'up' && mIdx > 0) {
+                const item = list.splice(mIdx, 1)[0];
+                list.splice(mIdx - 1, 0, item);
+                isMenuReordered = true;
+                renderHeaderMenuCards();
+            } else if (direction === 'down' && mIdx < list.length - 1) {
+                const item = list.splice(mIdx, 1)[0];
+                list.splice(mIdx + 1, 0, item);
+                isMenuReordered = true;
+                renderHeaderMenuCards();
+            }
+        }
+
+        function moveSubMenuPosition(mIdx, smIdx, direction) {
+            const list = headerInfo.menus[mIdx].subMenus;
+            if (direction === 'up' && smIdx > 0) {
+                const item = list.splice(smIdx, 1)[0];
+                list.splice(smIdx - 1, 0, item);
+                isMenuReordered = true;
+                renderHeaderMenuCards();
+            } else if (direction === 'down' && smIdx < list.length - 1) {
+                const item = list.splice(smIdx, 1)[0];
+                list.splice(smIdx + 1, 0, item);
+                isMenuReordered = true;
+                renderHeaderMenuCards();
+            }
+        }
+
+        /* --- DRAG AND DROP LOGIC (WITH 2PX LINE INDICATOR) --- */
+        function initMenuDragAndDrop() {
+            const container = document.getElementById('header-menu-container');
+
+            const clearIndicator = (el) => {
+                el.classList.remove('drag-over-top', 'drag-over-bottom');
+            };
+
+            // MAIN MENU DRAG
+            const mainItems = container.querySelectorAll('.main-menu-drag-item');
+            let draggedMainIdx = null;
+
+            mainItems.forEach(item => {
+                item.addEventListener('dragstart', (e) => {
+                    if (e.target.closest('.sub-menu-drag-item')) return;
+                    draggedMainIdx = parseInt(item.dataset.index);
+                    item.classList.add('dragging');
+                    e.dataTransfer.effectAllowed = 'move';
+                });
+
+                item.addEventListener('dragend', () => {
+                    item.classList.remove('dragging');
+                    clearIndicator(item);
+                });
+
+                item.addEventListener('dragover', (e) => {
+                    if (e.target.closest('.sub-menu-drag-item')) return;
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+
+                    const rect = item.getBoundingClientRect();
+                    const offset = e.clientY - rect.top;
+                    if (offset < rect.height / 2) {
+                        item.classList.add('drag-over-top');
+                        item.classList.remove('drag-over-bottom');
+                    } else {
+                        item.classList.add('drag-over-bottom');
+                        item.classList.remove('drag-over-top');
+                    }
+                });
+
+                item.addEventListener('dragleave', () => clearIndicator(item));
+
+                item.addEventListener('drop', (e) => {
+                    if (e.target.closest('.sub-menu-drag-item')) return;
+                    e.preventDefault();
+                    e.stopPropagation();
+                    clearIndicator(item);
+
+                    let targetMainIdx = parseInt(item.dataset.index);
+                    const rect = item.getBoundingClientRect();
+                    const offset = e.clientY - rect.top;
+                    if (offset >= rect.height / 2 && targetMainIdx < draggedMainIdx) {
+                        targetMainIdx++;
+                    }
+
+                    if (draggedMainIdx !== null && draggedMainIdx !== targetMainIdx) {
+                        const movedItem = headerInfo.menus.splice(draggedMainIdx, 1)[0];
+                        headerInfo.menus.splice(targetMainIdx, 0, movedItem);
+                        isMenuReordered = true;
+                        renderHeaderMenuCards();
+                    }
+                });
+            });
+
+            // SUB-MENU DRAG
+            const subContainers = container.querySelectorAll('.sub-menu-drag-container');
+            subContainers.forEach(subContainer => {
+                const subItems = subContainer.querySelectorAll('.sub-menu-drag-item');
+                let draggedSubIdx = null;
+                let parentIdx = null;
+
+                subItems.forEach(subItem => {
+                    subItem.addEventListener('dragstart', (e) => {
+                        e.stopPropagation();
+                        draggedSubIdx = parseInt(subItem.dataset.index);
+                        parentIdx = parseInt(subItem.dataset.parentIndex);
+                        subItem.classList.add('dragging');
+                        e.dataTransfer.effectAllowed = 'move';
+                    });
+
+                    subItem.addEventListener('dragend', (e) => {
+                        e.stopPropagation();
+                        subItem.classList.remove('dragging');
+                        clearIndicator(subItem);
+                    });
+
+                    subItem.addEventListener('dragover', (e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        e.dataTransfer.dropEffect = 'move';
+
+                        const rect = subItem.getBoundingClientRect();
+                        const offset = e.clientY - rect.top;
+                        if (offset < rect.height / 2) {
+                            subItem.classList.add('drag-over-top');
+                            subItem.classList.remove('drag-over-bottom');
+                        } else {
+                            subItem.classList.add('drag-over-bottom');
+                            subItem.classList.remove('drag-over-top');
+                        }
+                    });
+
+                    subItem.addEventListener('dragleave', (e) => {
+                        e.stopPropagation();
+                        clearIndicator(subItem);
+                    });
+
+                    subItem.addEventListener('drop', (e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        clearIndicator(subItem);
+
+                        let targetSubIdx = parseInt(subItem.dataset.index);
+                        const targetParentIdx = parseInt(subItem.dataset.parentIndex);
+
+                        const rect = subItem.getBoundingClientRect();
+                        const offset = e.clientY - rect.top;
+                        if (offset >= rect.height / 2 && targetSubIdx < draggedSubIdx) {
+                            targetSubIdx++;
+                        }
+
+                        if (parentIdx === targetParentIdx && draggedSubIdx !== null && draggedSubIdx !== targetSubIdx) {
+                            const subList = headerInfo.menus[parentIdx].subMenus;
+                            const movedSub = subList.splice(draggedSubIdx, 1)[0];
+                            subList.splice(targetSubIdx, 0, movedSub);
+                            isMenuReordered = true;
+                            renderHeaderMenuCards();
+                        }
+                    });
+                });
+            });
+        }
+
+        async function saveReorderedMenu() {
+            await saveLayoutConfig();
+            isMenuReordered = false;
+            renderHeaderMenuCards();
+        }
+
+        function cancelMenuReorder() {
+            fetchLayoutConfig();
         }
 
         function editMainMenuInline(mIdx) {
             const m = headerInfo.menus[mIdx];
             const card = document.getElementById(`menu-card-${mIdx}`);
+            card.draggable = false;
             card.style.borderLeft = "5px solid #007bff";
             card.style.background = "#ffffff";
 
@@ -645,6 +923,7 @@
             const targetItem = subItems[smIdx];
 
             if (targetItem) {
+                targetItem.draggable = false;
                 targetItem.style.display = "block";
                 targetItem.innerHTML = `
                     <div class="row" style="margin-bottom:5px;">
@@ -755,7 +1034,7 @@
             renderHeaderMenuCards();
         }
 
-        /* ================= 3. FOOTER SECTION (DYNAMIC READ-BOX CARDS FOR 4 COLUMNS) ================= */
+        /* ================= 3. FOOTER SECTION (WITH DRAG & DROP AND ARROW CONTROLS FOR LINKS) ================= */
         function renderFooterSectionCards() {
             const container = document.getElementById('footer-container');
             container.innerHTML = '';
@@ -826,11 +1105,18 @@
                 let linksHtml = '';
                 if (linksList.length > 0) {
                     linksHtml = `
-                        <div class="sub-menu-list">
-                            <div style="font-size:12px; font-weight:bold; color:#555; margin-bottom:5px;">লিংক সমূহ:</div>
+                        <div class="sub-menu-list footer-drag-container" data-col-id="${c.id}">
+                            <div style="font-size:12px; font-weight:bold; color:#555; margin-bottom:5px;">লিংক সমূহ (মাউস দিয়ে পজিশন ড্র্যাগ করা যাবে):</div>
                             ${linksList.map((lk, lkIdx) => `
-                                <div class="sub-menu-item">
-                                    <span style="font-size:13px; color:#333;"><b>${lk.title}</b> <small style="color:#777;">(${lk.url || '#'})</small></span>
+                                <div class="sub-menu-item draggable-box footer-drag-item" draggable="true" data-col-id="${c.id}" data-index="${lkIdx}">
+                                    <span style="font-size:13px; color:#333; display:flex; align-items:center;">
+                                        <i class="fa-solid fa-grip-vertical drag-handle" title="মাউস চেপে পজিশন পরিবর্তন করুন"></i>
+                                        <div class="arrow-btn-group">
+                                            <button type="button" class="btn-arrow" onclick="moveFooterLinkPosition(${c.id}, ${lkIdx}, 'up')" title="উপরে তুলুন">▲</button>
+                                            <button type="button" class="btn-arrow" onclick="moveFooterLinkPosition(${c.id}, ${lkIdx}, 'down')" title="নিচে নামান">▼</button>
+                                        </div>
+                                        <b>${lk.title}</b> <small style="color:#777; margin-left:5px;">(${lk.url || '#'})</small>
+                                    </span>
                                     <div>
                                         <button class="btn btn-warning btn-sm" onclick="editFooterLinkInline(${c.id}, ${lkIdx})"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
                                         <button class="btn btn-danger btn-sm" onclick="deleteFooterLink(${c.id}, ${lkIdx})"><i class="fa-solid fa-trash"></i> Delete</button>
@@ -838,6 +1124,14 @@
                                 </div>
                             `).join('')}
                         </div>
+                    `;
+                }
+
+                let saveCancelFooterBtns = '';
+                if (isFooterReordered[c.id]) {
+                    saveCancelFooterBtns = `
+                        <button class="btn btn-submit" onclick="saveReorderedFooterLinks(${c.id})"><i class="fa-solid fa-floppy-disk"></i> Save Footer Links</button>
+                        <button class="btn btn-secondary" onclick="cancelFooterReorder()"><i class="fa-solid fa-xmark"></i> Cancel</button>
                     `;
                 }
 
@@ -854,10 +1148,118 @@
                     <div id="add-footer-link-box-${c.id}"></div>
                     <div class="card-actions" style="margin-top: 10px;" id="footer-link-action-bar-${c.id}">
                         <button class="btn btn-info" onclick="showAddFooterLinkForm(${c.id})"><i class="fa-solid fa-plus"></i> লিংক যোগ করুন</button>
+                        ${saveCancelFooterBtns}
                     </div>
                 `;
                 container.appendChild(card);
             });
+
+            initFooterDragAndDrop();
+        }
+
+        /* --- FOOTER ARROW CONTROLS --- */
+        function moveFooterLinkPosition(colId, lkIdx, direction) {
+            const linksKey = `col${colId}Links`;
+            const list = footerInfo[linksKey];
+            if (direction === 'up' && lkIdx > 0) {
+                const item = list.splice(lkIdx, 1)[0];
+                list.splice(lkIdx - 1, 0, item);
+                isFooterReordered[colId] = true;
+                renderFooterSectionCards();
+            } else if (direction === 'down' && lkIdx < list.length - 1) {
+                const item = list.splice(lkIdx, 1)[0];
+                list.splice(lkIdx + 1, 0, item);
+                isFooterReordered[colId] = true;
+                renderFooterSectionCards();
+            }
+        }
+
+        /* --- FOOTER DRAG AND DROP CONTROLS (WITH 2PX LINE INDICATOR) --- */
+        function initFooterDragAndDrop() {
+            const container = document.getElementById('footer-container');
+            const dragContainers = container.querySelectorAll('.footer-drag-container');
+
+            const clearIndicator = (el) => {
+                el.classList.remove('drag-over-top', 'drag-over-bottom');
+            };
+
+            dragContainers.forEach(dragContainer => {
+                const dragItems = dragContainer.querySelectorAll('.footer-drag-item');
+                let draggedIdx = null;
+                let colId = null;
+
+                dragItems.forEach(item => {
+                    item.addEventListener('dragstart', (e) => {
+                        e.stopPropagation();
+                        draggedIdx = parseInt(item.dataset.index);
+                        colId = parseInt(item.dataset.colId);
+                        item.classList.add('dragging');
+                        e.dataTransfer.effectAllowed = 'move';
+                    });
+
+                    item.addEventListener('dragend', (e) => {
+                        e.stopPropagation();
+                        item.classList.remove('dragging');
+                        clearIndicator(item);
+                    });
+
+                    item.addEventListener('dragover', (e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        e.dataTransfer.dropEffect = 'move';
+
+                        const rect = item.getBoundingClientRect();
+                        const offset = e.clientY - rect.top;
+                        if (offset < rect.height / 2) {
+                            item.classList.add('drag-over-top');
+                            item.classList.remove('drag-over-bottom');
+                        } else {
+                            item.classList.add('drag-over-bottom');
+                            item.classList.remove('drag-over-top');
+                        }
+                    });
+
+                    item.addEventListener('dragleave', (e) => {
+                        e.stopPropagation();
+                        clearIndicator(item);
+                    });
+
+                    item.addEventListener('drop', (e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        clearIndicator(item);
+
+                        let targetIdx = parseInt(item.dataset.index);
+                        const targetColId = parseInt(item.dataset.colId);
+
+                        const rect = item.getBoundingClientRect();
+                        const offset = e.clientY - rect.top;
+                        if (offset >= rect.height / 2 && targetIdx < draggedIdx) {
+                            targetIdx++;
+                        }
+
+                        if (colId === targetColId && draggedIdx !== null && draggedIdx !== targetIdx) {
+                            const linksKey = `col${colId}Links`;
+                            const list = footerInfo[linksKey];
+                            const movedItem = list.splice(draggedIdx, 1)[0];
+                            list.splice(targetIdx, 0, movedItem);
+
+                            isFooterReordered[colId] = true;
+                            renderFooterSectionCards();
+                        }
+                    });
+                });
+            });
+        }
+
+        async function saveReorderedFooterLinks(colId) {
+            await saveLayoutConfig();
+            isFooterReordered[colId] = false;
+            renderFooterSectionCards();
+        }
+
+        function cancelFooterReorder() {
+            fetchLayoutConfig();
         }
 
         function editFooterCol1Inline() {
@@ -954,6 +1356,7 @@
             const targetItem = subItems[lkIdx];
 
             if (targetItem) {
+                targetItem.draggable = false;
                 targetItem.style.display = "block";
                 targetItem.innerHTML = `
                     <div class="row" style="margin-bottom:5px;">

@@ -17,6 +17,10 @@
 
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- GLOBAL CSS LINK -->
+    <link rel="stylesheet" href="global/global.css">
+
     <style>
         :root {
             --primary: #007bff;
@@ -37,37 +41,10 @@
             color: #333;
         }
 
-        #topAlertBanner {
-            position: fixed;
-            top: 0; left: 0; width: 100%; z-index: 9999; padding: 12px 30px;
-            display: none; justify-content: space-between; align-items: center;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15); background-color: #ffffff;
-            color: #2c3e50; font-weight: 600; font-size: 15px;
-            border-top: 16px solid #2a3c4d; border-bottom: 1px solid #e2e8f0;
-            animation: slideDown 0.3s ease-in-out;
+        /* OVERRIDE ALERT BANNER MAX-WIDTH FOR 1600PX CONTAINER */
+        .alert-container-inner {
+            max-width: 1600px !important;
         }
-
-        #topAlertBanner::before {
-            content: ''; position: absolute; top: 0; left: 0; bottom: 0;
-            width: 6px; background-color: var(--danger);
-        }
-
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-100%); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        #topAlertBanner.info::before { background-color: var(--primary); }
-        #topAlertBanner.success::before { background-color: var(--main-dash-btn); }
-        #topAlertBanner.warning::before { background-color: var(--warning); }
-        #topAlertBanner.danger::before { background-color: var(--danger); }
-
-        .alert-btns { display: flex; gap: 10px; }
-        .btn-alert { padding: 7px 18px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; font-size: 13px; transition: all 0.2s ease; }
-        .btn-alert-ok { background-color: var(--primary); color: white; }
-        .btn-alert-ok:hover { background-color: var(--primary-dark); }
-        .btn-alert-cancel { background-color: #e2e8f0; color: #4a5568; }
-        .btn-alert-cancel:hover { background-color: #cbd5e1; }
 
         .navbar { background-color: var(--dark); color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 25px; }
         .navbar-brand { font-size: 22px; font-weight: bold; display: flex; align-items: center; gap: 10px; }
@@ -122,8 +99,64 @@
         .inline-add-box { display: flex; gap: 8px; padding: 8px 12px; background: #eef6ff; border-radius: 5px; margin: 6px 0 8px 0; border: 1px solid #b6d4fe; }
         .edit-input { padding: 4px 8px; font-size: 14px; border: 1px solid #007bff; border-radius: 4px; width: auto; max-width: 200px; }
         .topic-header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .q-card { background: #fdfdfd; border: 1px solid #ddd; padding: 20px; border-radius: 8px; margin-bottom: 15px; border-left: 5px solid #ffc107; }
+        .q-card { background: #fdfdfd; border: 1px solid #ddd; padding: 20px; border-radius: 8px; margin-bottom: 15px; border-left: 5px solid #ffc107; transition: border 0.1s ease; }
         .q-actions { display: flex; gap: 10px; margin-top: 15px; }
+
+        /* DRAG AND DROP & ARROW CONTROLS STYLES */
+        .draggable-box {
+            cursor: move;
+            transition: transform 0.15s ease, opacity 0.15s ease, border-top 0.1s ease, border-bottom 0.1s ease;
+        }
+        .draggable-box.dragging {
+            opacity: 0.4;
+            background: #eef6ff !important;
+        }
+        .drag-handle {
+            cursor: grab;
+            color: #888;
+            margin-right: 8px;
+            font-size: 16px;
+        }
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+        
+        /* 2PX DROP INDICATOR LINE STYLES */
+        .drag-over-top {
+            border-top: 2px solid #007bff !important;
+        }
+        .drag-over-bottom {
+            border-bottom: 2px solid #007bff !important;
+        }
+
+        .arrow-btn-group {
+            display: inline-flex;
+            flex-direction: column;
+            gap: 2px;
+            margin-right: 10px;
+        }
+        .btn-arrow {
+            background: #e2e8f0;
+            border: none;
+            color: #475569;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+            cursor: pointer;
+            line-height: 1;
+            transition: background 0.2s ease;
+        }
+        .btn-arrow:hover {
+            background: #007bff;
+            color: #ffffff;
+        }
+
+        .bottom-action-bar {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-start;
+        }
 
         @media (max-width: 900px) {
             .options-grid { grid-template-columns: 1fr 1fr; }
@@ -139,14 +172,6 @@
     </style>
 </head>
 <body>
-
-    <div id="topAlertBanner">
-        <span id="alertMessage">Message here...</span>
-        <div class="alert-btns">
-            <button class="btn-alert btn-alert-ok" id="alertOkBtn">OK</button>
-            <button class="btn-alert btn-alert-cancel" id="alertCancelBtn" style="display:none;">Cancel</button>
-        </div>
-    </div>
 
     <div class="navbar">
         <div class="navbar-brand">
@@ -174,7 +199,7 @@
     <div class="container">
         <div class="box">
             <h3>📂 Manage Categories, Sub-Categories & Topics</h3>
-            <p style="color: #666; font-size: 14px;">Structure: <b>Main Category &gt; Sub-Category &gt; Topic</b>. Click on items to expand levels.</p>
+            <p style="color: #666; font-size: 14px; margin-bottom: 15px;">Structure: <b>Main Category &gt; Sub-Category &gt; Topic</b>. Click on items to expand levels.</p>
             
             <div class="cat-input-group">
                 <input type="text" id="newCatName" placeholder="Enter Main Category (e.g. prili, subjective)...">
@@ -184,6 +209,12 @@
             <ul class="tree-list" id="categoryTreeList">
                 <li>Loading Categories...</li>
             </ul>
+
+            <!-- SAVE & CANCEL BUTTONS AT THE BOTTOM OF CATEGORY TREE LIST -->
+            <div id="categorySaveActionBar" class="bottom-action-bar" style="display:none;">
+                <button class="btn btn-submit" style="width:auto;" onclick="saveCategoryReorder()"><i class="fa-solid fa-floppy-disk"></i> Save Order</button>
+                <button class="btn btn-secondary" style="width:auto;" onclick="cancelCategoryReorder()"><i class="fa-solid fa-xmark"></i> Cancel</button>
+            </div>
         </div>
 
         <div class="box">
@@ -216,8 +247,15 @@
                 </div>
                 <button id="deleteAllTopicQuestionsBtn" class="btn btn-danger" style="display:none;" onclick="deleteAllQuestionsInTopic()"></button>
             </div>
+            
             <div id="existingQuestionsContainer">
                 <p style="color:#888;">Select a category above to view and edit questions.</p>
+            </div>
+
+            <!-- SAVE & CANCEL BUTTONS AT THE BOTTOM OF EXISTING QUESTIONS CONTAINER -->
+            <div id="questionsSaveActionBar" class="bottom-action-bar" style="display:none;">
+                <button class="btn btn-submit" style="width:auto;" onclick="saveQuestionsReorder()"><i class="fa-solid fa-floppy-disk"></i> Save Questions Order</button>
+                <button class="btn btn-secondary" style="width:auto;" onclick="cancelQuestionsReorder()"><i class="fa-solid fa-xmark"></i> Cancel</button>
             </div>
         </div>
 
@@ -243,6 +281,9 @@
         </div>
     </div>
 
+    <!-- GLOBAL JS LINK -->
+    <script src="global/global.js"></script>
+
     <script>
         let mcqCount = 0;
         const API_URL = 'https://mosabber-quiz-app.onrender.com/api/questions';
@@ -250,44 +291,8 @@
 
         let categoryData = {};
         let loadedQuestions = [];
-
-        function showTopAlert(msg, type = 'info', isConfirm = false) {
-            return new Promise((resolve) => {
-                const banner = document.getElementById('topAlertBanner');
-                const msgSpan = document.getElementById('alertMessage');
-                const okBtn = document.getElementById('alertOkBtn');
-                const cancelBtn = document.getElementById('alertCancelBtn');
-
-                banner.className = type;
-                msgSpan.innerHTML = msg;
-                banner.style.display = 'flex';
-
-                if (isConfirm) {
-                    cancelBtn.style.display = 'inline-block';
-                    okBtn.innerText = 'OK';
-                } else {
-                    cancelBtn.style.display = 'none';
-                    okBtn.innerText = 'OK';
-                }
-
-                okBtn.onclick = function() {
-                    banner.style.display = 'none';
-                    resolve(true);
-                };
-
-                cancelBtn.onclick = function() {
-                    banner.style.display = 'none';
-                    resolve(false);
-                };
-
-                if (!isConfirm) {
-                    setTimeout(() => {
-                        banner.style.display = 'none';
-                        resolve(true);
-                    }, 4000);
-                }
-            });
-        }
+        let isCatReordered = false;
+        let isQReordered = false;
 
         function saveCategoryState() {
             localStorage.setItem('my_quiz_categories_backup', JSON.stringify(categoryData));
@@ -328,11 +333,18 @@
                     }
                 });
 
+                isCatReordered = false;
+                updateCatSaveBar();
                 saveCategoryState();
             } catch (err) {
                 console.error("Failed to load categories from API", err);
                 renderCategoryUI();
             }
+        }
+
+        function updateCatSaveBar() {
+            const bar = document.getElementById('categorySaveActionBar');
+            if (bar) bar.style.display = isCatReordered ? 'flex' : 'none';
         }
 
         function renderCategoryUI() {
@@ -350,22 +362,31 @@
                 return;
             }
 
-            mainCategories.forEach(main => {
+            mainCategories.forEach((main, mIdx) => {
                 const subCats = Object.keys(categoryData[main] || {});
                 const li = document.createElement('li');
-                li.className = 'tree-node';
+                li.className = 'tree-node draggable-box main-cat-drag-item';
+                li.draggable = true;
+                li.dataset.index = mIdx;
 
                 let subTreeHTML = '';
                 if(subCats.length > 0) {
-                    subCats.forEach(sub => {
+                    subCats.forEach((sub, sIdx) => {
                         const topics = categoryData[main][sub] || [];
                         let topicTreeHTML = '';
                         
                         if(topics.length > 0) {
-                            topics.forEach(topic => {
+                            topics.forEach((topic, tIdx) => {
                                 topicTreeHTML += `
-                                    <li class="topic-item" id="topic-node-${main}-${sub}-${topic}">
-                                        <span id="topic-title-${main}-${sub}-${topic}">📌 <b>${topic}</b></span>
+                                    <li class="topic-item draggable-box topic-drag-item" draggable="true" data-main="${main}" data-sub="${sub}" data-index="${tIdx}" id="topic-node-${main}-${sub}-${topic}">
+                                        <span id="topic-title-${main}-${sub}-${topic}" style="display:flex; align-items:center;">
+                                            <i class="fa-solid fa-grip-vertical drag-handle" title="মাউস দিয়ে সরান"></i>
+                                            <div class="arrow-btn-group">
+                                                <button type="button" class="btn-arrow" onclick="event.stopPropagation(); moveTopicPosition('${main}', '${sub}', ${tIdx}, 'up')" title="উপরে তুলুন">▲</button>
+                                                <button type="button" class="btn-arrow" onclick="event.stopPropagation(); moveTopicPosition('${main}', '${sub}', ${tIdx}, 'down')" title="নিচে নামান">▼</button>
+                                            </div>
+                                            📌 <b>${topic}</b>
+                                        </span>
                                         <div class="cat-actions" id="topic-actions-${main}-${sub}-${topic}">
                                             <button class="btn btn-warning" style="padding:1px 6px; font-size:10px;" onclick="event.stopPropagation(); enableInlineTopicRename('${main}', '${sub}', '${topic}')">✏️ Rename</button>
                                             <button class="btn btn-danger" style="padding:1px 6px; font-size:10px;" onclick="event.stopPropagation(); deleteTopic('${main}', '${sub}', '${topic}')">🗑️ Delete</button>
@@ -378,9 +399,16 @@
                         }
 
                         subTreeHTML += `
-                            <li class="tree-node">
+                            <li class="tree-node draggable-box sub-cat-drag-item" draggable="true" data-main="${main}" data-index="${sIdx}">
                                 <div class="sub-header" onclick="toggleTree('topic-list-${main}-${sub}')">
-                                    <span id="sub-title-${main}-${sub}">📂 <b>${sub}</b> <small style="color:#666;">(${topics.length} topics)</small></span>
+                                    <span id="sub-title-${main}-${sub}" style="display:flex; align-items:center;">
+                                        <i class="fa-solid fa-grip-vertical drag-handle" title="মাউস দিয়ে সরান"></i>
+                                        <div class="arrow-btn-group">
+                                            <button type="button" class="btn-arrow" onclick="event.stopPropagation(); moveSubCatPosition('${main}', ${sIdx}, 'up')" title="উপরে তুলুন">▲</button>
+                                            <button type="button" class="btn-arrow" onclick="event.stopPropagation(); moveSubCatPosition('${main}', ${sIdx}, 'down')" title="নিচে নামান">▼</button>
+                                        </div>
+                                        📂 <b>${sub}</b> <small style="color:#666; margin-left:5px;">(${topics.length} topics)</small>
+                                    </span>
                                     <div class="cat-actions" id="sub-actions-${main}-${sub}">
                                         <button class="btn btn-secondary" style="padding:2px 8px; font-size:11px;" onclick="event.stopPropagation(); showInlineAddTopic('${main}', '${sub}')">+ Add Topic</button>
                                         <button class="btn btn-warning" style="padding:2px 8px; font-size:11px;" onclick="event.stopPropagation(); enableInlineSubRename('${main}', '${sub}')">✏️ Rename</button>
@@ -388,7 +416,7 @@
                                     </div>
                                 </div>
                                 <div id="inline-topic-input-container-${main}-${sub}"></div>
-                                <ul class="topic-tree-list" id="topic-list-${main}-${sub}">
+                                <ul class="topic-tree-list topic-drag-container" data-main="${main}" data-sub="${sub}" id="topic-list-${main}-${sub}">
                                     ${topicTreeHTML}
                                 </ul>
                             </li>
@@ -400,7 +428,14 @@
 
                 li.innerHTML = `
                     <div class="cat-header" onclick="toggleTree('sub-list-${main}')">
-                        <span class="cat-title" id="cat-title-${main}">📁 <b>${main}</b> <small style="color:#666; font-weight:normal;">(${subCats.length} sub-categories)</small></span>
+                        <span class="cat-title" id="cat-title-${main}">
+                            <i class="fa-solid fa-grip-vertical drag-handle" title="মাউস দিয়ে সরান"></i>
+                            <div class="arrow-btn-group">
+                                <button type="button" class="btn-arrow" onclick="event.stopPropagation(); moveMainCatPosition(${mIdx}, 'up')" title="উপরে তুলুন">▲</button>
+                                <button type="button" class="btn-arrow" onclick="event.stopPropagation(); moveMainCatPosition(${mIdx}, 'down')" title="নিচে নামান">▼</button>
+                            </div>
+                            📁 <b>${main}</b> <small style="color:#666; font-weight:normal;">(${subCats.length} sub-categories)</small>
+                        </span>
                         <div class="cat-actions" id="cat-actions-${main}">
                             <button class="btn btn-secondary" style="padding:4px 10px; font-size:12px;" onclick="event.stopPropagation(); showInlineAddSub('${main}')">+ Add Sub-Cat</button>
                             <button class="btn btn-warning" style="padding:4px 10px; font-size:12px;" onclick="event.stopPropagation(); enableInlineCatRename('${main}')">✏️ Rename</button>
@@ -408,7 +443,7 @@
                         </div>
                     </div>
                     <div id="inline-sub-input-container-${main}"></div>
-                    <ul class="sub-tree-list" id="sub-list-${main}">
+                    <ul class="sub-tree-list sub-cat-drag-container" data-main="${main}" id="sub-list-${main}">
                         ${subTreeHTML}
                     </ul>
                 `;
@@ -417,7 +452,247 @@
                 mainSelect.add(new Option(main, main));
             });
 
+            initCatDragAndDrop();
             onMainCategoryChange();
+        }
+
+        /* --- CATEGORY ARROW & DRAG CONTROLS --- */
+        function moveMainCatPosition(mIdx, direction) {
+            const keys = Object.keys(categoryData);
+            if ((direction === 'up' && mIdx > 0) || (direction === 'down' && mIdx < keys.length - 1)) {
+                const targetIdx = direction === 'up' ? mIdx - 1 : mIdx + 1;
+                const newCatData = {};
+                
+                const temp = keys[mIdx];
+                keys[mIdx] = keys[targetIdx];
+                keys[targetIdx] = temp;
+
+                keys.forEach(k => { newCatData[k] = categoryData[k]; });
+                categoryData = newCatData;
+
+                isCatReordered = true;
+                updateCatSaveBar();
+                renderCategoryUI();
+            }
+        }
+
+        function moveSubCatPosition(main, sIdx, direction) {
+            const subCats = Object.keys(categoryData[main] || {});
+            if ((direction === 'up' && sIdx > 0) || (direction === 'down' && sIdx < subCats.length - 1)) {
+                const targetIdx = direction === 'up' ? sIdx - 1 : sIdx + 1;
+                const newSubData = {};
+
+                const temp = subCats[sIdx];
+                subCats[sIdx] = subCats[targetIdx];
+                subCats[targetIdx] = temp;
+
+                subCats.forEach(s => { newSubData[s] = categoryData[main][s]; });
+                categoryData[main] = newSubData;
+
+                isCatReordered = true;
+                updateCatSaveBar();
+                renderCategoryUI();
+                toggleTree(`sub-list-${main}`);
+            }
+        }
+
+        function moveTopicPosition(main, sub, tIdx, direction) {
+            const topics = categoryData[main][sub] || [];
+            if ((direction === 'up' && tIdx > 0) || (direction === 'down' && tIdx < topics.length - 1)) {
+                const targetIdx = direction === 'up' ? tIdx - 1 : tIdx + 1;
+                
+                const temp = topics[tIdx];
+                topics[tIdx] = topics[targetIdx];
+                topics[targetIdx] = temp;
+
+                isCatReordered = true;
+                updateCatSaveBar();
+                renderCategoryUI();
+                toggleTree(`sub-list-${main}`);
+                toggleTree(`topic-list-${main}-${sub}`);
+            }
+        }
+
+        function initCatDragAndDrop() {
+            const treeContainer = document.getElementById('categoryTreeList');
+
+            const clearIndicator = (el) => {
+                el.classList.remove('drag-over-top', 'drag-over-bottom');
+            };
+
+            // MAIN CATEGORY DRAG
+            let draggedMainIdx = null;
+            treeContainer.querySelectorAll('.main-cat-drag-item').forEach(item => {
+                item.addEventListener('dragstart', (e) => {
+                    if (e.target.closest('.sub-cat-drag-item') || e.target.closest('.topic-drag-item')) return;
+                    draggedMainIdx = parseInt(item.dataset.index);
+                    item.classList.add('dragging');
+                    e.dataTransfer.effectAllowed = 'move';
+                });
+                item.addEventListener('dragend', () => {
+                    item.classList.remove('dragging');
+                    clearIndicator(item);
+                });
+                item.addEventListener('dragover', (e) => {
+                    if (e.target.closest('.sub-cat-drag-item') || e.target.closest('.topic-drag-item')) return;
+                    e.preventDefault();
+                    const rect = item.getBoundingClientRect();
+                    const offset = e.clientY - rect.top;
+                    if (offset < rect.height / 2) {
+                        item.classList.add('drag-over-top');
+                        item.classList.remove('drag-over-bottom');
+                    } else {
+                        item.classList.add('drag-over-bottom');
+                        item.classList.remove('drag-over-top');
+                    }
+                });
+                item.addEventListener('dragleave', () => clearIndicator(item));
+                item.addEventListener('drop', (e) => {
+                    if (e.target.closest('.sub-cat-drag-item') || e.target.closest('.topic-drag-item')) return;
+                    e.preventDefault();
+                    e.stopPropagation();
+                    clearIndicator(item);
+
+                    let targetIdx = parseInt(item.dataset.index);
+                    const rect = item.getBoundingClientRect();
+                    const offset = e.clientY - rect.top;
+                    if (offset >= rect.height / 2 && targetIdx < draggedMainIdx) {
+                        targetIdx++;
+                    }
+
+                    if (draggedMainIdx !== null && draggedMainIdx !== targetIdx) {
+                        const keys = Object.keys(categoryData);
+                        const movedKey = keys.splice(draggedMainIdx, 1)[0];
+                        keys.splice(targetIdx, 0, movedKey);
+
+                        const newCatData = {};
+                        keys.forEach(k => { newCatData[k] = categoryData[k]; });
+                        categoryData = newCatData;
+
+                        isCatReordered = true;
+                        updateCatSaveBar();
+                        renderCategoryUI();
+                    }
+                });
+            });
+
+            // SUB CATEGORY DRAG
+            treeContainer.querySelectorAll('.sub-cat-drag-item').forEach(item => {
+                let draggedSubIdx = null;
+                item.addEventListener('dragstart', (e) => {
+                    if (e.target.closest('.topic-drag-item')) return;
+                    e.stopPropagation();
+                    draggedSubIdx = parseInt(item.dataset.index);
+                    item.classList.add('dragging');
+                });
+                item.addEventListener('dragend', (e) => { e.stopPropagation(); item.classList.remove('dragging'); clearIndicator(item); });
+                item.addEventListener('dragover', (e) => {
+                    if (e.target.closest('.topic-drag-item')) return;
+                    e.stopPropagation();
+                    e.preventDefault();
+                    const rect = item.getBoundingClientRect();
+                    const offset = e.clientY - rect.top;
+                    if (offset < rect.height / 2) {
+                        item.classList.add('drag-over-top');
+                        item.classList.remove('drag-over-bottom');
+                    } else {
+                        item.classList.add('drag-over-bottom');
+                        item.classList.remove('drag-over-top');
+                    }
+                });
+                item.addEventListener('dragleave', (e) => { e.stopPropagation(); clearIndicator(item); });
+                item.addEventListener('drop', (e) => {
+                    if (e.target.closest('.topic-drag-item')) return;
+                    e.stopPropagation();
+                    e.preventDefault();
+                    clearIndicator(item);
+
+                    let targetSubIdx = parseInt(item.dataset.index);
+                    const main = item.dataset.main;
+                    const rect = item.getBoundingClientRect();
+                    const offset = e.clientY - rect.top;
+                    if (offset >= rect.height / 2 && targetSubIdx < draggedSubIdx) {
+                        targetSubIdx++;
+                    }
+
+                    if (draggedSubIdx !== null && draggedSubIdx !== targetSubIdx) {
+                        const subCats = Object.keys(categoryData[main] || {});
+                        const movedSub = subCats.splice(draggedSubIdx, 1)[0];
+                        subCats.splice(targetSubIdx, 0, movedSub);
+
+                        const newSubData = {};
+                        subCats.forEach(s => { newSubData[s] = categoryData[main][s]; });
+                        categoryData[main] = newSubData;
+
+                        isCatReordered = true;
+                        updateCatSaveBar();
+                        renderCategoryUI();
+                        toggleTree(`sub-list-${main}`);
+                    }
+                });
+            });
+
+            // TOPIC DRAG
+            treeContainer.querySelectorAll('.topic-drag-item').forEach(item => {
+                let draggedTopicIdx = null;
+                item.addEventListener('dragstart', (e) => {
+                    e.stopPropagation();
+                    draggedTopicIdx = parseInt(item.dataset.index);
+                    item.classList.add('dragging');
+                });
+                item.addEventListener('dragend', (e) => { e.stopPropagation(); item.classList.remove('dragging'); clearIndicator(item); });
+                item.addEventListener('dragover', (e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    const rect = item.getBoundingClientRect();
+                    const offset = e.clientY - rect.top;
+                    if (offset < rect.height / 2) {
+                        item.classList.add('drag-over-top');
+                        item.classList.remove('drag-over-bottom');
+                    } else {
+                        item.classList.add('drag-over-bottom');
+                        item.classList.remove('drag-over-top');
+                    }
+                });
+                item.addEventListener('dragleave', (e) => { e.stopPropagation(); clearIndicator(item); });
+                item.addEventListener('drop', (e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    clearIndicator(item);
+
+                    let targetTopicIdx = parseInt(item.dataset.index);
+                    const main = item.dataset.main;
+                    const sub = item.dataset.sub;
+                    const rect = item.getBoundingClientRect();
+                    const offset = e.clientY - rect.top;
+                    if (offset >= rect.height / 2 && targetTopicIdx < draggedTopicIdx) {
+                        targetTopicIdx++;
+                    }
+
+                    if (draggedTopicIdx !== null && draggedTopicIdx !== targetTopicIdx) {
+                        const topics = categoryData[main][sub];
+                        const movedTopic = topics.splice(draggedTopicIdx, 1)[0];
+                        topics.splice(targetTopicIdx, 0, movedTopic);
+
+                        isCatReordered = true;
+                        updateCatSaveBar();
+                        renderCategoryUI();
+                        toggleTree(`sub-list-${main}`);
+                        toggleTree(`topic-list-${main}-${sub}`);
+                    }
+                });
+            });
+        }
+
+        function saveCategoryReorder() {
+            saveCategoryState();
+            isCatReordered = false;
+            updateCatSaveBar();
+            showTopAlert("✅ Category sequence saved successfully!", 'success');
+        }
+
+        function cancelCategoryReorder() {
+            loadCategories();
         }
 
         function toggleTree(elementId) {
@@ -663,7 +938,6 @@
             return path;
         }
 
-        // ⚠️ FIXED: Updated loadExistingQuestions to correctly read backend response
         async function loadExistingQuestions() {
             const targetCategoryPath = getSelectedCategoryPath();
             const container = document.getElementById('existingQuestionsContainer');
@@ -696,12 +970,19 @@
                     loadedQuestions = [];
                 }
 
+                isQReordered = false;
+                updateQSaveBar();
                 renderExistingQuestions();
             } catch (err) {
                 console.error("Load Questions Error:", err);
                 container.innerHTML = "<p style='color:red;'>Failed to load questions.</p>";
                 deleteAllBtn.style.display = "none";
             }
+        }
+
+        function updateQSaveBar() {
+            const bar = document.getElementById('questionsSaveActionBar');
+            if (bar) bar.style.display = isQReordered ? 'flex' : 'none';
         }
 
         function getBanglaLetter(index) {
@@ -726,11 +1007,24 @@
             container.innerHTML = "";
             loadedQuestions.forEach((q, index) => {
                 const card = document.createElement('div');
-                card.className = 'q-card';
+                card.className = 'q-card draggable-box q-card-drag-item';
+                card.draggable = true;
+                card.dataset.index = index;
                 card.id = `q-card-${q._id}`;
                 card.innerHTML = `
-                    <strong>Q${index + 1}:</strong> ${q.q}<br>
-                    <small style="color:#555; display:block; margin-top:4px;">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                        <div>
+                            <span style="display:flex; align-items:center;">
+                                <i class="fa-solid fa-grip-vertical drag-handle" title="মাউস দিয়ে পজিশন সরান"></i>
+                                <div class="arrow-btn-group">
+                                    <button type="button" class="btn-arrow" onclick="moveQuestionPosition(${index}, 'up')" title="উপরে তুলুন">▲</button>
+                                    <button type="button" class="btn-arrow" onclick="moveQuestionPosition(${index}, 'down')" title="নিচে নামান">▼</button>
+                                </div>
+                                <strong>Q${index + 1}:</strong> &nbsp;${q.q}
+                            </span>
+                        </div>
+                    </div>
+                    <small style="color:#555; display:block; margin-top:8px;">
                         <b>Options:</b> (ক) ${q.options[0]} | (খ) ${q.options[1]} | (গ) ${q.options[2]} | (ঘ) ${q.options[3]} 
                         <span style="color:#28a745; margin-left:10px;"><b>[ সঠিক উত্তর: (${getBanglaLetter(q.ans)}) ]</b></span>
                     </small>
@@ -742,6 +1036,86 @@
                 `;
                 container.appendChild(card);
             });
+
+            initQuestionsDragAndDrop();
+        }
+
+        /* --- QUESTIONS ARROW & DRAG CONTROLS --- */
+        function moveQuestionPosition(qIdx, direction) {
+            if ((direction === 'up' && qIdx > 0) || (direction === 'down' && qIdx < loadedQuestions.length - 1)) {
+                const targetIdx = direction === 'up' ? qIdx - 1 : qIdx + 1;
+                const temp = loadedQuestions[qIdx];
+                loadedQuestions[qIdx] = loadedQuestions[targetIdx];
+                loadedQuestions[targetIdx] = temp;
+
+                isQReordered = true;
+                updateQSaveBar();
+                renderExistingQuestions();
+            }
+        }
+
+        function initQuestionsDragAndDrop() {
+            const container = document.getElementById('existingQuestionsContainer');
+            let draggedQIdx = null;
+
+            const clearIndicator = (el) => {
+                el.classList.remove('drag-over-top', 'drag-over-bottom');
+            };
+
+            container.querySelectorAll('.q-card-drag-item').forEach(card => {
+                card.addEventListener('dragstart', (e) => {
+                    draggedQIdx = parseInt(card.dataset.index);
+                    card.classList.add('dragging');
+                    e.dataTransfer.effectAllowed = 'move';
+                });
+                card.addEventListener('dragend', () => {
+                    card.classList.remove('dragging');
+                    clearIndicator(card);
+                });
+                card.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    const rect = card.getBoundingClientRect();
+                    const offset = e.clientY - rect.top;
+                    if (offset < rect.height / 2) {
+                        card.classList.add('drag-over-top');
+                        card.classList.remove('drag-over-bottom');
+                    } else {
+                        card.classList.add('drag-over-bottom');
+                        card.classList.remove('drag-over-top');
+                    }
+                });
+                card.addEventListener('dragleave', () => clearIndicator(card));
+                card.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    clearIndicator(card);
+
+                    let targetIdx = parseInt(card.dataset.index);
+                    const rect = card.getBoundingClientRect();
+                    const offset = e.clientY - rect.top;
+                    if (offset >= rect.height / 2 && targetIdx < draggedQIdx) {
+                        targetIdx++;
+                    }
+
+                    if (draggedQIdx !== null && draggedQIdx !== targetIdx) {
+                        const movedQ = loadedQuestions.splice(draggedQIdx, 1)[0];
+                        loadedQuestions.splice(targetIdx, 0, movedQ);
+
+                        isQReordered = true;
+                        updateQSaveBar();
+                        renderExistingQuestions();
+                    }
+                });
+            });
+        }
+
+        function saveQuestionsReorder() {
+            isQReordered = false;
+            updateQSaveBar();
+            showTopAlert("✅ Questions order updated!", 'success');
+        }
+
+        function cancelQuestionsReorder() {
+            loadExistingQuestions();
         }
 
         async function deleteAllQuestionsInTopic() {
@@ -785,6 +1159,7 @@
             const q = loadedQuestions[index];
             const card = document.getElementById(`q-card-${id}`);
 
+            card.draggable = false;
             card.style.borderLeft = "6px solid #007bff";
             card.style.background = "#ffffff";
 

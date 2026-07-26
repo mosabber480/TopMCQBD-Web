@@ -17,6 +17,10 @@
 
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- GLOBAL CSS LINK -->
+    <link rel="stylesheet" href="global/global.css">
+
     <style>
         :root {
             --primary: #007bff;
@@ -32,25 +36,6 @@
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--light); color: #333; }
-
-        /* TOP ALERT BANNER SYSTEM */
-        #topAlertBanner {
-            position: fixed; top: 0; left: 0; width: 100%; z-index: 9999; padding: 12px 30px; display: none;
-            justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-            background-color: #ffffff; color: #2c3e50; font-weight: 600; font-size: 15px;
-            border-top: 16px solid #2a3c4d; border-bottom: 1px solid #e2e8f0; animation: slideDown 0.3s ease-in-out;
-        }
-        #topAlertBanner::before { content: ''; position: absolute; top: 0; left: 0; bottom: 0; width: 6px; background-color: var(--danger); }
-        @keyframes slideDown { from { opacity: 0; transform: translateY(-100%); } to { opacity: 1; transform: translateY(0); } }
-        #topAlertBanner.info::before { background-color: var(--primary); }
-        #topAlertBanner.success::before { background-color: var(--main-dash-btn); }
-        #topAlertBanner.warning::before { background-color: var(--warning); }
-        #topAlertBanner.danger::before { background-color: var(--danger); }
-
-        .alert-btns { display: flex; gap: 10px; }
-        .btn-alert { padding: 7px 18px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; font-size: 13px; }
-        .btn-alert-ok { background-color: var(--primary); color: white; }
-        .btn-alert-cancel { background-color: #e2e8f0; color: #4a5568; }
 
         /* Navigation Bar */
         .navbar { background-color: var(--dark); color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 25px; }
@@ -123,14 +108,6 @@
 </head>
 <body>
 
-    <div id="topAlertBanner">
-        <span id="alertMessage">Message here...</span>
-        <div class="alert-btns">
-            <button class="btn-alert btn-alert-ok" id="alertOkBtn">OK</button>
-            <button class="btn-alert btn-alert-cancel" id="alertCancelBtn" style="display:none;">Cancel</button>
-        </div>
-    </div>
-
     <div class="navbar">
         <div class="navbar-brand"><i class="fa-solid fa-gauge-high"></i> অ্যাডমিন ড্যাশবোর্ড</div>
         <div class="nav-actions">
@@ -199,6 +176,9 @@
         </div>
     </div>
 
+    <!-- GLOBAL JS LINK -->
+    <script src="global/global.js"></script>
+
     <script>
         const CONFIG_API_URL = 'https://mosabber-quiz-app.onrender.com/api/home-config';
         let sliderDataList = [];
@@ -207,31 +187,6 @@
 
         let demoHeaderInfo = null;
         let packageHeaderInfo = null;
-
-        function showTopAlert(msg, type = 'info', isConfirm = false) {
-            return new Promise((resolve) => {
-                const banner = document.getElementById('topAlertBanner');
-                document.getElementById('alertMessage').innerHTML = msg;
-                banner.className = type;
-                banner.style.display = 'flex';
-
-                const okBtn = document.getElementById('alertOkBtn');
-                const cancelBtn = document.getElementById('alertCancelBtn');
-
-                if (isConfirm) {
-                    cancelBtn.style.display = 'inline-block';
-                } else {
-                    cancelBtn.style.display = 'none';
-                }
-
-                okBtn.onclick = () => { banner.style.display = 'none'; resolve(true); };
-                cancelBtn.onclick = () => { banner.style.display = 'none'; resolve(false); };
-
-                if (!isConfirm) {
-                    setTimeout(() => { banner.style.display = 'none'; resolve(true); }, 4000);
-                }
-            });
-        }
 
         function showSaveBtn(sectionType) {
             const saveBtn = document.getElementById(`save-${sectionType}-btn`);
@@ -295,7 +250,6 @@
             container.innerHTML = '';
 
             if (info && (info.title || info.subtitle)) {
-                // slider-read-container এর .read-box ক্লাসের মতোই হুবহু ডিজাইন
                 container.innerHTML = `
                     <div class="read-box" id="${type}-header-card" style="border-left: 5px solid #17a2b8;">
                         <div class="read-title"><i class="fa-solid fa-heading" style="color: var(--secondary);"></i> ${info.title || '(টাইটেল নেই)'}</div>

@@ -14,7 +14,7 @@
     <style>
         /* PAGE SPECIFIC STYLES FOR ALL-MCQ */
         .container {
-            max-width: 900px;
+            max-width: 950px;
             margin: 35px auto;
             background: #ffffff;
             padding: 30px;
@@ -52,20 +52,17 @@
             font-weight: 700;
         }
 
-        .category-card { 
-            border: 1px solid #e2e8f0; 
+        /* 3-LEVEL CATEGORY ACCORDION CARD STYLES */
+        .main-category-card { 
+            border: 1px solid #cbd5e1; 
             border-radius: 8px; 
             margin-bottom: 20px; 
             background: #ffffff; 
             overflow: hidden; 
             box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-            transition: border-color 0.2s ease;
-        }
-        .category-card:hover {
-            border-color: #cbd5e1;
         }
 
-        .category-header { 
+        .main-category-header { 
             background: #f8fafc; 
             padding: 14px 20px; 
             font-size: 18px; 
@@ -74,23 +71,41 @@
             border-bottom: 1px solid #e2e8f0; 
             display: flex;
             align-items: center;
-            gap: 10px;
+            justify-content: space-between;
         }
 
-        .subcategory-list { 
-            padding: 18px 20px; 
+        .sub-category-block {
+            padding: 15px 20px;
+            border-bottom: 1px dashed #e2e8f0;
+        }
+        .sub-category-block:last-child {
+            border-bottom: none;
+        }
+
+        .sub-category-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .topic-btn-group { 
             display: flex; 
             flex-wrap: wrap; 
             gap: 10px; 
+            padding-left: 10px;
         }
 
-        .subcategory-btn { 
+        .topic-btn { 
             background-color: #f1f5f9; 
             color: #334155; 
             text-decoration: none; 
-            padding: 9px 16px; 
+            padding: 8px 14px; 
             border-radius: 6px; 
-            font-size: 14px; 
+            font-size: 13px; 
             font-weight: 600; 
             border: 1px solid #cbd5e1;
             transition: all 0.2s ease; 
@@ -99,7 +114,7 @@
             gap: 6px;
         }
 
-        .subcategory-btn:hover { 
+        .topic-btn:hover { 
             background-color: var(--primary); 
             color: #ffffff; 
             border-color: var(--primary);
@@ -122,10 +137,13 @@
                 font-size: 20px;
                 margin-top: 25px;
             }
-            .subcategory-list {
-                padding: 12px 15px;
+            .sub-category-block {
+                padding: 12px 10px;
             }
-            .subcategory-btn {
+            .topic-btn-group {
+                padding-left: 0;
+            }
+            .topic-btn {
                 width: 100%;
                 justify-content: center;
             }
@@ -156,7 +174,8 @@
 
     <!-- ALL MCQ CATEGORY FETCH SCRIPT -->
     <script>
-        const API_URL = 'https://mosabber-quiz-app.onrender.com/api/questions';
+        const QUESTIONS_API = 'https://mosabber-quiz-app.onrender.com/api/questions';
+        const CAT_API_URL = 'https://mosabber-quiz-app.onrender.com/api/categories';
 
         async function fetchCategories() {
             const wrapper = document.getElementById('category-wrapper');
@@ -166,61 +185,99 @@
                 const headers = { 'Content-Type': 'application/json' };
                 if (token) headers['Authorization'] = `Bearer ${token}`;
 
-                const res = await fetch(API_URL, { method: 'GET', headers: headers });
-                const data = await res.json();
+                // 1. Fetch categories from Category API and Questions API simultaneously
+                const [catRes, qRes] = await Promise.all([
+                    fetch(CAT_API_URL, { headers }).catch(() => null),
+                    fetch(QUESTIONS_API, { headers }).catch(() => null)
+                ]);
 
-                if (!res.ok || !Array.isArray(data)) {
-                    throw new Error("Failed to fetch questions");
+                const categoryTree = {}; // Structure: { MainCat: { SubCat: [Topic1, Topic2] } }
+
+                // Helper to safely populate nested tree
+                const addPathToTree = (pathStr) => {
+                    if (!pathStr || typeof pathStr !== 'string') return;
+                    const parts = pathStr.split('/').map(p => p.trim()).filter(Boolean);
+                    if (parts.length === 0) return;
+
+                    const mainCat = parts[0] || 'অন্যান্য';
+                    const subCat = parts[1] || mainCat;
+                    const topic = parts[2] || subCat;
+
+                    if (!categoryTree[mainCat]) categoryTree[mainCat] = {};
+                    if (!categoryTree[mainCat][subCat]) categoryTree[mainCat][subCat] = new Set();
+                    categoryTree[mainCat][subCat].add(topic);
+                };
+
+                // Process Category API data
+                if (catRes && catRes.ok) {
+                    const catData = await catRes.json();
+                    let rawCats = Array.isArray(catData) ? catData : (catData.categories || catData.data || []);
+                    rawCats.forEach(addPathToTree);
                 }
 
-                const groupedCategories = {};
-
-                data.forEach(item => {
-                    if (!item.category) return;
-                    
-                    const parts = item.category.split('/');
-                    const mainCat = parts[0]?.trim() || 'অন্যান্য';
-                    const subCat = parts[1]?.trim() || parts[0]?.trim();
-
-                    if (!groupedCategories[mainCat]) {
-                        groupedCategories[mainCat] = new Set();
-                    }
-                    groupedCategories[mainCat].add(subCat);
-                });
+                // Process Questions API data
+                if (qRes && qRes.ok) {
+                    const qData = await qRes.json();
+                    let rawQuestions = Array.isArray(qData) ? qData : (qData.mcqs || qData.questions || []);
+                    rawQuestions.forEach(q => {
+                        if (q.category) addPathToTree(q.category);
+                    });
+                }
 
                 wrapper.innerHTML = "";
 
-                if (Object.keys(groupedCategories).length === 0) {
+                const mainCategories = Object.keys(categoryTree);
+
+                if (mainCategories.length === 0) {
                     wrapper.innerHTML = `<p class="loading-text"><i class="fa-solid fa-circle-exclamation"></i> কোনো ক্যাটাগরি পাওয়া যায়নি!</p>`;
                     return;
                 }
 
-                Object.keys(groupedCategories).forEach(mainCat => {
-                    const card = document.createElement('div');
-                    card.className = 'category-card';
+                // Render 3-Level Hierarchy
+                mainCategories.forEach(mainCat => {
+                    const mainCard = document.createElement('div');
+                    mainCard.className = 'main-category-card';
 
-                    const header = document.createElement('div');
-                    header.className = 'category-header';
-                    header.innerHTML = `<i class="fa-solid fa-folder-open" style="color: var(--primary);"></i> ${mainCat}`;
-                    card.appendChild(header);
+                    const mainHeader = document.createElement('div');
+                    mainHeader.className = 'main-category-header';
+                    mainHeader.innerHTML = `<span><i class="fa-solid fa-folder-open" style="color: var(--primary); margin-right: 8px;"></i> ${mainCat}</span>`;
+                    mainCard.appendChild(mainHeader);
 
-                    const subList = document.createElement('div');
-                    subList.className = 'subcategory-list';
+                    const subCats = Object.keys(categoryTree[mainCat]);
 
-                    groupedCategories[mainCat].forEach(subCat => {
-                        const btn = document.createElement('a');
-                        btn.className = 'subcategory-btn';
-                        btn.innerHTML = `<i class="fa-regular fa-file-lines"></i> ${subCat}`;
-                        btn.href = `quiz.html?category=${encodeURIComponent(mainCat + '/' + subCat)}`;
-                        subList.appendChild(btn);
+                    subCats.forEach(subCat => {
+                        const subBlock = document.createElement('div');
+                        subBlock.className = 'sub-category-block';
+
+                        const subTitle = document.createElement('div');
+                        subTitle.className = 'sub-category-title';
+                        subTitle.innerHTML = `<i class="fa-solid fa-folder" style="color: #17a2b8;"></i> ${subCat}`;
+                        subBlock.appendChild(subTitle);
+
+                        const topicGroup = document.createElement('div');
+                        topicGroup.className = 'topic-btn-group';
+
+                        const topics = Array.from(categoryTree[mainCat][subCat]);
+
+                        topics.forEach(topic => {
+                            const btn = document.createElement('a');
+                            btn.className = 'topic-btn';
+                            btn.innerHTML = `<i class="fa-regular fa-file-lines"></i> ${topic}`;
+                            // Full Category Path: Main / Sub / Topic
+                            const fullCategoryPath = `${mainCat}/${subCat}/${topic}`;
+                            btn.href = `quiz.html?category=${encodeURIComponent(fullCategoryPath)}`;
+                            topicGroup.appendChild(btn);
+                        });
+
+                        subBlock.appendChild(topicGroup);
+                        mainCard.appendChild(subBlock);
                     });
 
-                    card.appendChild(subList);
-                    wrapper.appendChild(card);
+                    wrapper.appendChild(mainCard);
                 });
 
             } catch (err) {
-                console.error("Error loading categories:", err);
+                console.error("Error loading 3-level categories:", err);
                 wrapper.innerHTML = `<p style="text-align:center; color: var(--danger); padding: 30px;"><i class="fa-solid fa-triangle-exclamation"></i> ক্যাটাগরি ডাটা লোড করতে সমস্যা হয়েছে!</p>`;
             }
         }

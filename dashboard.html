@@ -17,6 +17,10 @@
 
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- GLOBAL CSS LINK -->
+    <link rel="stylesheet" href="global/global.css">
+
     <style>
         :root {
             --primary: #007bff;
@@ -352,6 +356,9 @@
         </div>
     </div>
 
+    <!-- GLOBAL JS LINK -->
+    <script src="global/global.js"></script>
+
     <!-- User Profile Loader & Logout Handler -->
     <script>
         window.addEventListener('DOMContentLoaded', () => {
@@ -361,8 +368,8 @@
             }
         });
 
-        function logout() {
-            if (confirm('আপনি কি নিশ্চিত যে লগআউট করতে চান?')) {
+        async function logout() {
+            if (await showTopAlert('আপনি কি নিশ্চিত যে লগআউট করতে চান?', 'warning', true)) {
                 localStorage.removeItem('token');
                 localStorage.removeItem('user');
                 localStorage.removeItem('quiz_token');
