@@ -24,6 +24,12 @@ const initialUsers = [
         email: 'admin2@example.com',
         password: 'adminpassword2',
         role: 'admin'
+    },
+    {
+        name: 'General User',
+        email: 'user@example.com',
+        password: 'userpassword123',
+        role: 'customer' // 'user' এর জায়গায় 'customer' ব্যবহার করা হয়েছে
     }
 ];
 
@@ -41,7 +47,7 @@ async function seedSystemUsers() {
         await User.deleteMany({});
         console.log('💥 All old users deleted successfully!');
 
-        // ২. শুধু Owner এবং Admins ইনসার্ট করা
+        // ২. নতুন ইউজারগণ ইনসার্ট করা
         for (const userData of initialUsers) {
             const salt = await bcrypt.genSalt(10);
             const hashedPassword = await bcrypt.hash(userData.password, salt);
