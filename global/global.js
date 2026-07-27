@@ -32,7 +32,6 @@ function showTopAlert(msg, type = 'info', isConfirm = false) {
     return new Promise((resolve) => {
         let banner = document.getElementById('topAlertBanner');
         
-        // Fallback if banner element isn't ready in DOM
         if (!banner) {
             resolve(confirm(msg));
             return;
@@ -81,22 +80,19 @@ function getAuthRedirectLink() {
     const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
     const userStr = localStorage.getItem('user') || localStorage.getItem('quiz_user');
     
-    // Check if currently inside pages or admin folder
-    const isSubFolder = window.location.pathname.includes('/pages/') || window.location.pathname.includes('/admin/');
-    const prefix = isSubFolder ? '../' : '';
-
+    // ফাইলগুলো এখন রুটে আছে, তাই অতিরিক্ত ফোল্ডার প্রিফিক্স প্রয়োজন নেই
     if (!token) {
-        return prefix + 'pages/login.html';
+        return 'login.html'; 
     }
     
     try {
         const user = JSON.parse(userStr || '{}');
         if (user && (user.role === 'owner' || user.role === 'admin')) {
-            return prefix + 'admin/dashboard.html';
+            return 'admin/dashboard.html';
         }
     } catch(e){}
     
-    return prefix + 'pages/profile.html';
+    return 'profile.html';
 }
 
 // Optimized Function: Load from Cache first, then Revalidate from Server (SWR)
@@ -134,9 +130,7 @@ async function renderGlobalLayout() {
 function applyLayoutToDOM(data) {
     if (!data) return;
 
-    // Detect SubFolder
-    const isSubFolder = window.location.pathname.includes('/pages/') || window.location.pathname.includes('/admin/');
-    const homePath = isSubFolder ? '../index.html' : 'index.html';
+    const homePath = 'index.html';
 
     // A. Dynamic SEO Title & Favicon
     if (data.header) {
@@ -197,21 +191,20 @@ function applyLayoutToDOM(data) {
 
         // Auth Status and Action Link
         const authLink = getAuthRedirectLink();
-        const isLoggedIn = !authLink.endsWith('login.html');
+        const isLoggedIn = !authLink.includes('login.html');
         const userStr = localStorage.getItem('user') || localStorage.getItem('quiz_user');
         let userName = 'লগইন';
         if (isLoggedIn) {
             try {
                 const user = JSON.parse(userStr || '{}');
-                if (user.name) userName = user.name.split(' ')[0]; // First Name
+                if (user.name) userName = user.name.split(' ')[0];
                 else userName = 'ড্যাশবোর্ড';
             } catch(e) { userName = 'ড্যাশবোর্ড'; }
         }
 
-        // Header Action Buttons (Fully Controlled from Dashboard Settings)
         let customBtnText = (h.btnText && h.btnText.trim()) ? h.btnText.trim() : 'যোগাযোগ করুন';
         let rawLink = (h.btnLink || '').trim();
-        let customBtnLink = (rawLink && !rawLink.endsWith('login.html')) ? formatURL(rawLink) : homePath + '#mission';
+        let customBtnLink = (rawLink && !rawLink.includes('login.html')) ? formatURL(rawLink) : homePath + '#mission';
 
         let headerBtnHTML = `
             <div class="header-btn-group">
