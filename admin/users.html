@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payment & User Management - TopMCQ</title>
     
-    <!-- Instant Auth Check (Updated path for Root login.html) -->
+    <!-- Instant Auth Check -->
     <script>
         (function checkAuth() {
             const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
@@ -74,6 +74,7 @@
         .badge-active { background-color: #d4edda; color: #155724; }
         .badge-expired { background-color: #f8d7da; color: #721c24; }
         .badge-owner { background-color: #cce5ff; color: #004085; }
+        .badge-requested { background-color: #007bff; color: white; }
 
         .plan-select { padding: 6px 10px; border-radius: 4px; border: 1px solid #ccc; font-size: 13px; }
         
@@ -81,6 +82,8 @@
         .btn-update { background-color: #28a745; }
         .btn-delete { background-color: #dc3545; }
         .btn-submit { background-color: #007bff; width: 100%; padding: 10px; font-size: 14px; }
+
+        .table-responsive { overflow-x: auto; }
 
         @media (max-width: 900px) {
             table { display: block; overflow-x: auto; }
@@ -99,24 +102,27 @@
             <h3><i class="fa-solid fa-users"></i> Registered Users & Subscription Plans</h3>
             <p style="color:#666; font-size:14px; margin-top: 5px;">Select a plan for any customer and click <b>Update Plan</b> to activate their subscription access.</p>
             
-            <table>
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>User Name</th>
-                        <th>Email</th>
-                        <th>Role</th>
-                        <th>Status</th>
-                        <th>Current Plan</th>
-                        <th>Expiry Date</th>
-                        <th>Action (Set Plan)</th>
-                        <th>Remove</th>
-                    </tr>
-                </thead>
-                <tbody id="userTableBody">
-                    <tr><td colspan="9" style="text-align:center;">Loading users...</td></tr>
-                </tbody>
-            </table>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>User Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Requested Plan</th>
+                            <th>Current Plan</th>
+                            <th>Expiry Date</th>
+                            <th>Action (Set Plan)</th>
+                            <th>Remove</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTableBody">
+                        <tr><td colspan="10" style="text-align:center;">Loading users...</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -138,7 +144,7 @@
                 const data = await res.json();
 
                 if (!data.success) {
-                    tableBody.innerHTML = `<tr><td colspan="9" style="color:red; text-align:center;">${data.message || 'Failed to load users'}</td></tr>`;
+                    tableBody.innerHTML = `<tr><td colspan="10" style="color:red; text-align:center;">${data.message || 'Failed to load users'}</td></tr>`;
                     return;
                 }
 
@@ -146,13 +152,24 @@
                 data.users.forEach((u, index) => {
                     const sub = u.subscription || {};
                     const isActive = sub.active && sub.endDate && new Date(sub.endDate) > new Date();
+                    const isRequested = u.requestedPlan && u.requestedPlan !== 'none';
                     
-                    const statusBadge = u.role === 'owner' || u.role === 'admin' 
-                        ? `<span class="badge badge-owner">${u.role.toUpperCase()}</span>`
-                        : (isActive 
-                            ? `<span class="badge badge-active">Active</span>` 
-                            : `<span class="badge badge-expired">Expired / Inactive</span>`);
+                    let statusBadge = '';
+                    if (u.role === 'owner' || u.role === 'admin') {
+                        statusBadge = `<span class="badge badge-owner">${u.role.toUpperCase()}</span>`;
+                    } else if (isRequested) {
+                        statusBadge = `<span class="badge badge-active" style="background:#ffc107; color:#212529;">Requested</span>`;
+                    } else if (isActive) {
+                        statusBadge = `<span class="badge badge-active">Active</span>`;
+                    } else {
+                        statusBadge = `<span class="badge badge-expired">Expired / Inactive</span>`;
+                    }
 
+                    const requestedPlanDisplay = isRequested
+                        ? `<span class="badge badge-requested">${u.requestedPlan}</span>`
+                        : `<span style="color:#888;">No Request</span>`;
+
+                    const defaultSelect = isRequested ? u.requestedPlan : (sub.plan || 'none');
                     const expiryDate = sub.endDate ? new Date(sub.endDate).toLocaleDateString() : 'N/A';
 
                     tableBody.innerHTML += `
@@ -162,18 +179,19 @@
                             <td>${u.email}</td>
                             <td><small>${u.role}</small></td>
                             <td>${statusBadge}</td>
+                            <td>${requestedPlanDisplay}</td>
                             <td><b>${sub.plan || 'none'}</b></td>
                             <td>${expiryDate}</td>
                             <td>
                                 ${u.role === 'customer' ? `
                                     <select class="plan-select" id="plan-${u._id}">
-                                        <option value="none" ${sub.plan === 'none' ? 'selected' : ''}>Cancel Plan</option>
-                                        <option value="1_month" ${sub.plan === '1_month' ? 'selected' : ''}>1 Month</option>
-                                        <option value="3_months" ${sub.plan === '3_months' ? 'selected' : ''}>3 Months</option>
-                                        <option value="6_months" ${sub.plan === '6_months' ? 'selected' : ''}>6 Months</option>
-                                        <option value="1_year" ${sub.plan === '1_year' ? 'selected' : ''}>1 Year</option>
-                                        <option value="2_years" ${sub.plan === '2_years' ? 'selected' : ''}>2 Years</option>
-                                        <option value="3_years" ${sub.plan === '3_years' ? 'selected' : ''}>3 Years</option>
+                                        <option value="none" ${defaultSelect === 'none' ? 'selected' : ''}>Cancel Plan</option>
+                                        <option value="1_month" ${defaultSelect === '1_month' ? 'selected' : ''}>1 Month</option>
+                                        <option value="3_months" ${defaultSelect === '3_months' ? 'selected' : ''}>3 Months</option>
+                                        <option value="6_months" ${defaultSelect === '6_months' ? 'selected' : ''}>6 Months</option>
+                                        <option value="1_year" ${defaultSelect === '1_year' ? 'selected' : ''}>1 Year</option>
+                                        <option value="2_years" ${defaultSelect === '2_years' ? 'selected' : ''}>2 Years</option>
+                                        <option value="3_years" ${defaultSelect === '3_years' ? 'selected' : ''}>3 Years</option>
                                     </select>
                                     <button class="btn-action btn-update" onclick="updateSubscription('${u._id}')">Save Plan</button>
                                 ` : '<small style="color:#888;">Full Access</small>'}
@@ -188,7 +206,7 @@
                 });
 
             } catch (err) {
-                tableBody.innerHTML = `<tr><td colspan="9" style="color:red; text-align:center;">Error fetching user list!</td></tr>`;
+                tableBody.innerHTML = `<tr><td colspan="10" style="color:red; text-align:center;">Error fetching user list!</td></tr>`;
             }
         }
 

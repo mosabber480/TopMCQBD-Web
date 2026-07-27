@@ -146,7 +146,7 @@
 
     <main class="packages-container" id="packagesWrapper">
         
-        <!-- PACKAGE 1: Basic Plan -->
+        <!-- PACKAGE 1: 1 Month Plan -->
         <div class="package-card">
             <div>
                 <h3 class="pkg-title">১ মাস মেয়াদী</h3>
@@ -162,7 +162,7 @@
             <button class="btn-buy" onclick="handlePackageBuy('1_month', this)">সাবস্ক্রাইব করুন</button>
         </div>
 
-        <!-- PACKAGE 2: Popular Plan -->
+        <!-- PACKAGE 2: 3 Months Plan (Popular) -->
         <div class="package-card popular">
             <span class="popular-badge">সবচেয়ে জনপ্রিয়</span>
             <div>
@@ -178,7 +178,7 @@
             <button class="btn-buy" onclick="handlePackageBuy('3_months', this)">সাবস্ক্রাইব করুন</button>
         </div>
 
-        <!-- PACKAGE 3: Long Term Plan -->
+        <!-- PACKAGE 3: 6 Months Plan -->
         <div class="package-card">
             <div>
                 <h3 class="pkg-title">৬ মাস মেয়াদী</h3>
@@ -193,6 +193,51 @@
             <button class="btn-buy" onclick="handlePackageBuy('6_months', this)">সাবস্ক্রাইব করুন</button>
         </div>
 
+        <!-- PACKAGE 4: 1 Year Plan -->
+        <div class="package-card">
+            <div>
+                <h3 class="pkg-title">১ বছর মেয়াদী</h3>
+                <div class="pkg-price">৳১৪৯৯ <span>/ ৩৬৫ দিন</span></div>
+                <ul class="pkg-features">
+                    <li><i class="fa-solid fa-circle-check"></i> আনলিমিটেড কুইজ এক্সেস</li>
+                    <li><i class="fa-solid fa-circle-check"></i> এক্সক্লুসিভ মডেল টেস্ট</li>
+                    <li><i class="fa-solid fa-circle-check"></i> জব সলিউশন আর্কাইভ</li>
+                    <li><i class="fa-solid fa-circle-check"></i> ২৪/৭ ডেডিকেটেড সাপোর্ট</li>
+                </ul>
+            </div>
+            <button class="btn-buy" onclick="handlePackageBuy('1_year', this)">সাবস্ক্রাইব করুন</button>
+        </div>
+
+        <!-- PACKAGE 5: 2 Years Plan -->
+        <div class="package-card">
+            <div>
+                <h3 class="pkg-title">২ বছর মেয়াদী</h3>
+                <div class="pkg-price">৳২৪৯৯ <span>/ ৭৩০ দিন</span></div>
+                <ul class="pkg-features">
+                    <li><i class="fa-solid fa-circle-check"></i> আনলিমিটেড কুইজ এক্সেস</li>
+                    <li><i class="fa-solid fa-circle-check"></i> সকল প্রিমিয়াম ফিচার</li>
+                    <li><i class="fa-solid fa-circle-check"></i> স্পেশাল প্রিপারেশন গাইডলাইন</li>
+                    <li><i class="fa-solid fa-circle-check"></i> এডভান্সড পারফরম্যান্স ট্র্যাকিং</li>
+                </ul>
+            </div>
+            <button class="btn-buy" onclick="handlePackageBuy('2_years', this)">সাবস্ক্রাইব করুন</button>
+        </div>
+
+        <!-- PACKAGE 6: 3 Years Plan -->
+        <div class="package-card">
+            <div>
+                <h3 class="pkg-title">৩ বছর মেয়াদী</h3>
+                <div class="pkg-price">৳৩৪৯৯ <span>/ ১০৯৫ দিন</span></div>
+                <ul class="pkg-features">
+                    <li><i class="fa-solid fa-circle-check"></i> আনলিমিটেড কুইজ এক্সেস</li>
+                    <li><i class="fa-solid fa-circle-check"></i> মেগা মডেল টেস্ট সাবস্ক্রিপশন</li>
+                    <li><i class="fa-solid fa-circle-check"></i> ক্যারিয়ার কাউন্সেলিং সাপোর্ট</li>
+                    <li><i class="fa-solid fa-circle-check"></i> ভিআইপি মেম্বারশিপ ব্যাজ</li>
+                </ul>
+            </div>
+            <button class="btn-buy" onclick="handlePackageBuy('3_years', this)">সাবস্ক্রাইব করুন</button>
+        </div>
+
     </main>
 
     <!-- DYNAMIC FOOTER CONTAINER -->
@@ -202,7 +247,10 @@
     <script src="global/global.js"></script>
 
     <script>
-        const API_BASE = 'https://mosabber-quiz-app.onrender.com/api';
+        // অটোমেটিক লোকাল ও লাইভ সার্ভার ডিটেক্ট করার লজিক
+        const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+            ? 'http://localhost:5000/api' 
+            : 'https://mosabber-quiz-app.onrender.com/api';
 
         async function handlePackageBuy(planType, buttonElement) {
             const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
@@ -220,7 +268,6 @@
             buttonElement.classList.add('loading-text');
 
             try {
-                // এই API টি আমরা আগামী ধাপে server.js এ তৈরি করব
                 const response = await fetch(`${API_BASE}/users/request-plan`, {
                     method: 'POST',
                     headers: {
@@ -234,6 +281,13 @@
 
                 if (response.ok && data.success) {
                     alert('আপনার প্যাকেজ রিকোয়েস্ট সফলভাবে গ্রহণ করা হয়েছে। পেমেন্ট সম্পন্ন হলে এডমিন আপনার একাউন্ট একটিভ করে দিবেন।');
+                    
+                    // প্রোফাইলে পেন্ডিং স্ট্যাটাস সাথে সাথে দেখানোর জন্য লোকাল স্টোরেজ আপডেট
+                    let currentUser = JSON.parse(localStorage.getItem('user') || localStorage.getItem('quiz_user') || '{}');
+                    currentUser.requestedPlan = planType;
+                    const storageKey = localStorage.getItem('quiz_user') ? 'quiz_user' : 'user';
+                    localStorage.setItem(storageKey, JSON.stringify(currentUser));
+
                     // সফল হলে তাকে তার ড্যাশবোর্ডে পাঠিয়ে দেওয়া
                     window.location.href = 'profile.html'; 
                 } else {

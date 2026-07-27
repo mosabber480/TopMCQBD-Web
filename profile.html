@@ -38,6 +38,7 @@
         .badge { display: inline-block; padding: 4px 12px; border-radius: 15px; font-weight: bold; font-size: 12px; }
         .badge-active { background-color: #d4edda; color: #155724; }
         .badge-expired { background-color: #f8d7da; color: #721c24; }
+        .badge-pending { background-color: #ffc107; color: #212529; }
 
         @media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; gap: 20px; } }
     </style>
@@ -51,11 +52,9 @@
             <!-- বাম কলাম -->
             <div>
                 <div class="box">
-                    <!-- My Profile এর জায়গায় ইউজার নেম বসানোর জন্য mainUserName আইডি যুক্ত করা হয়েছে -->
                     <h2 style="margin-top: 0; margin-bottom: 15px;"><i class="fa-solid fa-user"></i> <span id="mainUserName">Loading...</span></h2>
                     <p style="margin: 8px 0;"><strong>Name:</strong> <span id="userName">Loading...</span></p>
                     <p style="margin: 8px 0;"><strong>Email:</strong> <span id="userEmail">Loading...</span></p>
-                    <!-- স্ট্যাটাস ব্যাজটি ডানদিক থেকে এখানে ইমেইলের নিচে নিয়ে আসা হয়েছে -->
                     <p style="margin: 8px 0;"><strong>Status:</strong> <span id="userStatusBadge" class="badge">Checking...</span></p>
                 </div>
 
@@ -94,7 +93,13 @@
                 <div class="sub-box">
                     <h4 style="margin:0 0 10px 0; color:#007bff;"><i class="fa-solid fa-gem"></i> Subscription Status</h4>
                     <p style="margin: 5px 0;"><strong>Current Plan:</strong> <span id="subPlan">None</span></p>
-                    <!-- এখান থেকে Status সরিয়ে বামদিকে নেওয়া হয়েছে -->
+                    
+                    <!-- NEW: Pending Request Section -->
+                    <div id="pendingRequestWrapper" style="display: none; margin: 10px 0; padding: 10px; background: #fff8e1; border: 1px dashed #ffc107; border-radius: 4px;">
+                        <p style="margin: 0;"><strong>Pending Request:</strong> <span id="pendingPlanBadge" class="badge badge-pending">None</span></p>
+                        <small style="color: #856404; display: block; margin-top: 4px;"><i class="fa-solid fa-circle-info"></i> Your package request is waiting for admin approval.</small>
+                    </div>
+
                     <p style="margin: 5px 0;"><strong>Expiration Date:</strong> <span id="subExpiry">N/A</span></p>
                     <p style="margin: 5px 0;" id="remainingTimeWrapper"><strong>Remaining Time:</strong> <span id="subRemaining" style="color: #e67e22; font-weight: bold;">Checking...</span></p>
                 </div>
@@ -167,18 +172,23 @@
         
         const sub = user.subscription || {};
         const isSubActive = sub.active && sub.endDate && new Date(sub.endDate) > new Date();
+        const isRequested = user.requestedPlan && user.requestedPlan !== 'none';
+
         document.getElementById('subPlan').innerText = sub.plan ? sub.plan.replace('_', ' ').toUpperCase() : 'NO PLAN';
         
-        // স্ট্যাটাস আইডি এখন বামদিকের userStatusBadge কে পয়েন্ট করছে
+        // DOM Elements
         const statusElem = document.getElementById('userStatusBadge');
         const remainingWrapper = document.getElementById('remainingTimeWrapper');
         const remainingElem = document.getElementById('subRemaining');
+        const pendingWrapper = document.getElementById('pendingRequestWrapper');
+        const pendingPlanBadge = document.getElementById('pendingPlanBadge');
 
+        // Status Logic
         if (user.role === 'owner' || user.role === 'admin') {
             statusElem.innerText = 'FULL ACCESS';
             statusElem.className = 'badge badge-active';
             document.getElementById('subExpiry').innerText = 'Lifetime Access';
-            remainingWrapper.style.display = 'none'; // লাইফটাইম ইউজারদের জন্য রিমেইনিং টাইম লুকানো থাকবে
+            remainingWrapper.style.display = 'none'; 
         } else if (isSubActive) {
             statusElem.innerText = 'ACTIVE';
             statusElem.className = 'badge badge-active';
@@ -188,7 +198,19 @@
             statusElem.innerText = 'INACTIVE / EXPIRED';
             statusElem.className = 'badge badge-expired';
             document.getElementById('subExpiry').innerText = sub.endDate ? new Date(sub.endDate).toLocaleDateString() : 'N/A';
-            remainingWrapper.style.display = 'none'; // এক্সপায়ার্ড হলে রিমেইনিং টাইম লুকানো থাকবে
+            remainingWrapper.style.display = 'none'; 
+        }
+
+        // Pending Request Logic
+        if (isRequested) {
+            pendingWrapper.style.display = 'block';
+            pendingPlanBadge.innerText = user.requestedPlan.replace('_', ' ').toUpperCase();
+            
+            // If they don't have an active plan, update status badge to pending
+            if (user.role !== 'owner' && user.role !== 'admin' && !isSubActive) {
+                statusElem.innerText = 'PENDING APPROVAL';
+                statusElem.className = 'badge badge-pending';
+            }
         }
 
         document.getElementById('changePasswordForm').addEventListener('submit', async (e) => {

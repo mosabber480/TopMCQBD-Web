@@ -196,8 +196,10 @@ app.post('/api/users/request-plan', verifyToken, async (req, res) => {
     try {
         const { requestedPlan } = req.body;
         
-        // লগইন করা ইউজারের আইডি দিয়ে ডাটাবেজ থেকে তাকে খুঁজে বের করা
-        const user = await User.findById(req.user.id);
+        // 💡 FIX: টোকেন থেকে আইডিটি আরও সুরক্ষিতভাবে ধরার জন্য আপডেট করা হয়েছে
+        const userId = req.user.id || req.user._id; 
+        const user = await User.findById(userId);
+        
         if (!user) {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
