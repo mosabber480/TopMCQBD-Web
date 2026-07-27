@@ -47,31 +47,6 @@
             color: #333;
         }
 
-        /* Top Navbar */
-        .navbar {
-            background-color: var(--dark);
-            color: white;
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .navbar-brand {
-            font-size: 22px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .nav-actions {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
         /* Buttons */
         .btn {
             text-decoration: none;
@@ -85,33 +60,6 @@
             cursor: pointer;
             border: none;
             transition: all 0.2s ease;
-        }
-
-        .btn-main-dash {
-            background-color: var(--main-dash-btn);
-            color: white;
-        }
-
-        .btn-main-dash:hover {
-            background-color: #218838;
-        }
-
-        .btn-mcq-dash {
-            background-color: var(--gray-btn);
-            color: white;
-        }
-
-        .btn-mcq-dash:hover {
-            background-color: #5a6268;
-        }
-
-        .btn-payment-users {
-            background-color: var(--secondary);
-            color: white;
-        }
-
-        .btn-payment-users:hover {
-            background-color: #138496;
         }
 
         .btn-home-control {
@@ -132,29 +80,9 @@
             background-color: #593196;
         }
 
-        .btn-outline {
-            border: 1px solid white;
-            color: white;
-            background: transparent;
-        }
-
-        .btn-outline:hover {
-            background: white;
-            color: var(--dark);
-        }
-
-        .btn-danger {
-            background-color: var(--danger);
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background-color: #bd2130;
-        }
-
-        /* Main Container */
+        /* Main Container with Max-Width 1300px */
         .container {
-            max-width: 1200px;
+            max-width: 1300px;
             margin: 30px auto;
             padding: 0 20px;
         }
@@ -237,52 +165,13 @@
             .grid {
                 grid-template-columns: 1fr;
             }
-            .navbar {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
-            }
-            .nav-actions {
-                flex-wrap: wrap;
-                justify-content: center;
-            }
         }
     </style>
 </head>
 <body>
 
-    <!-- Navigation Bar -->
-    <div class="navbar">
-        <div class="navbar-brand">
-            <i class="fa-solid fa-gauge-high"></i> অ্যাডমিন ড্যাশবোর্ড
-        </div>
-        <div class="nav-actions">
-            <!-- Main Dashboard -->
-            <a href="dashboard.html" class="btn btn-main-dash">
-                <i class="fa-solid fa-house"></i> Main Dashboard
-            </a>
-
-            <!-- MCQ Dashboard -->
-            <a href="quiz-dashboard.html" class="btn btn-mcq-dash">
-                <i class="fa-solid fa-pen-to-square"></i> MCQ Dashboard
-            </a>
-
-            <!-- Payment & Users -->
-            <a href="users.html" class="btn btn-payment-users">
-                <i class="fa-solid fa-credit-card"></i> Payment & Users
-            </a>
-
-            <!-- Main Website Link -->
-            <a href="index.html" class="btn btn-outline" target="_blank">
-                <i class="fa-solid fa-globe"></i> মূল ওয়েবসাইট
-            </a>
-
-            <!-- Logout Button -->
-            <button class="btn btn-danger" onclick="logout()">
-                <i class="fa-solid fa-right-from-bracket"></i> লগআউট
-            </button>
-        </div>
-    </div>
+    <!-- Dynamic Admin Global Navigation Bar Container -->
+    <div id="admin-navbar-container"></div>
 
     <!-- Main Content -->
     <div class="container">
@@ -304,21 +193,9 @@
             </div>
         </div>
 
-        <!-- Dashboard Feature Grid (Max 3 Cards per row on Desktop) -->
+        <!-- Dashboard Feature Grid (Exact Custom Serial Order) -->
         <div class="grid">
-            <!-- 1. Home Page Control -->
-            <div class="card" style="border: 2px solid var(--warning); background: #fffdfa;">
-                <div>
-                    <div class="card-icon" style="color: var(--warning);"><i class="fa-solid fa-sliders"></i></div>
-                    <h3>হোম পেজ কন্ট্রোল</h3>
-                    <p>index.html পেজের স্লাইডার, ফ্রি ডেমো কুইজ লিংক এবং প্রিপারেশন প্যাকেজগুলো ডাটাবেজ থেকে নিয়ন্ত্রণ করুন।</p>
-                </div>
-                <a href="home-dashboard.html" class="btn btn-home-control">
-                    <i class="fa-solid fa-pen-to-square"></i> কন্টেন্ট এডিট করুন
-                </a>
-            </div>
-
-            <!-- 2. Header & Footer Control -->
+            <!-- ১. হেডার ও ফুটার কন্ট্রোল -->
             <div class="card" style="border: 2px solid var(--purple-btn); background: #fcfaff;">
                 <div>
                     <div class="card-icon" style="color: var(--purple-btn);"><i class="fa-solid fa-window-restore"></i></div>
@@ -330,7 +207,31 @@
                 </a>
             </div>
 
-            <!-- 3. Question Management -->
+            <!-- ২. হোম পেজ কন্ট্রোল -->
+            <div class="card" style="border: 2px solid var(--warning); background: #fffdfa;">
+                <div>
+                    <div class="card-icon" style="color: var(--warning);"><i class="fa-solid fa-sliders"></i></div>
+                    <h3>হোম পেজ কন্ট্রোল</h3>
+                    <p>index.html পেজের স্লাইডার, ফ্রি ডেমো কুইজ লিংক এবং প্রিপারেশন প্যাকেজগুলো ডাটাবেজ থেকে নিয়ন্ত্রণ করুন।</p>
+                </div>
+                <a href="home-dashboard.html" class="btn btn-home-control">
+                    <i class="fa-solid fa-pen-to-square"></i> কন্টেন্ট এডিট করুন
+                </a>
+            </div>
+
+            <!-- ৩. আমাদের সম্পর্কে -->
+            <div class="card" style="border: 2px solid #20c997; background: #f4fbf8;">
+                <div>
+                    <div class="card-icon" style="color: #20c997;"><i class="fa-solid fa-address-card"></i></div>
+                    <h3>আমাদের সম্পর্কে</h3>
+                    <p>about-us.html পেজে আপনার প্রতিষ্ঠানের লক্ষ্য, উদ্দেশ্য এবং বিশেষ সুবিধাসমূহ কাস্টমাইজ করুন।</p>
+                </div>
+                <a href="about-dashbaord.html" class="btn" style="background-color: #20c997; color: white;">
+                    <i class="fa-solid fa-pen-to-square"></i> পেজটি এডিট করুন
+                </a>
+            </div>
+
+            <!-- ৪. প্রশ্ন ব্যাংক ও কুইজ -->
             <div class="card" style="border: 2px solid var(--primary); background: #f4f8ff;">
                 <div>
                     <div class="card-icon" style="color: var(--primary);"><i class="fa-solid fa-file-circle-question"></i></div>
@@ -342,7 +243,19 @@
                 </a>
             </div>
 
-            <!-- 4. User Management -->
+            <!-- ৫. প্যাকেজসমূহ পেজ -->
+            <div class="card" style="border: 2px solid #6366f1; background: #f5f5fe;">
+                <div>
+                    <div class="card-icon" style="color: #6366f1;"><i class="fa-solid fa-box-open"></i></div>
+                    <h3>প্যাকেজসমূহ পেজ</h3>
+                    <p>packages.html পেজের সকল প্রিপারেশন প্যাকেজের তথ্য এডিট ও কাস্টমাইজ করুন।</p>
+                </div>
+                <a href="packages-dashboard.html" class="btn" style="background-color: #6366f1; color: white;">
+                    <i class="fa-solid fa-pen-to-square"></i> পেজটি এডিট করুন
+                </a>
+            </div>
+
+            <!-- ৬. ইউজার ও সাবস্ক্রিপশন -->
             <div class="card" style="border: 2px solid var(--secondary); background: #f2fafb;">
                 <div>
                     <div class="card-icon" style="color: var(--secondary);"><i class="fa-solid fa-users-gear"></i></div>
@@ -353,11 +266,24 @@
                     <i class="fa-solid fa-users"></i> ইউজারদের তালিকা
                 </a>
             </div>
+
+            <!-- ৭. রিফান্ড ও পেমেন্ট পলিসি -->
+            <div class="card" style="border: 2px solid #e83e8c; background: #fff9fc;">
+                <div>
+                    <div class="card-icon" style="color: #e83e8c;"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+                    <h3>রিফান্ড ও পেমেন্ট পলিসি</h3>
+                    <p>privacy-and-refund-policy.html পেজের পেমেন্ট ও রিফান্ড সংক্রান্ত নিয়মাবলী পরিবর্তন করুন।</p>
+                </div>
+                <a href="policy-dashboard.html" class="btn" style="background-color: #e83e8c; color: white;">
+                    <i class="fa-solid fa-pen-to-square"></i> পেজটি এডিট করুন
+                </a>
+            </div>
         </div>
     </div>
 
-    <!-- GLOBAL JS LINK -->
+    <!-- GLOBAL JS LINKS -->
     <script src="global/global.js"></script>
+    <script src="global/admin-global.js"></script>
 
     <!-- User Profile Loader & Logout Handler -->
     <script>

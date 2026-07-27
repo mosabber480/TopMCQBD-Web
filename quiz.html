@@ -34,17 +34,19 @@
         .quiz-section-wrapper {
             position: relative;
             width: 100%;
-            padding: 30px 10px;
+            max-width: 1300px;
+            margin: 30px auto;
+            padding: 0 20px;
         }
 
-        /* Quiz Main Container */
+        /* Quiz Main Container - MATCHES EXACT 1300PX ALIGNMENT WITH HEADER */
         .quiz-container {
-            max-width: 900px;
-            margin: 0 auto;
+            width: 100%;
             background: #fff;
             padding: 30px;
             border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
             position: relative;
             overflow: hidden;
         }
@@ -168,6 +170,8 @@
         #final-score { font-size: 24px; color: #2c3e50; font-weight: bold; border-top: 2px solid #bdc3c7; padding-top: 10px; display: inline-block; }
 
         @media (max-width: 768px) {
+            .quiz-section-wrapper { margin: 15px auto; padding: 0 10px; }
+            .quiz-container { padding: 15px; }
             .quiz-floating-status-bar { top: 80px; right: 10px; gap: 6px; }
             .quiz-timer-board, .quiz-score-board { padding: 6px 12px; font-size: 14px; min-width: 80px; }
             .quiz-header-info-bar { flex-direction: column; align-items: flex-start; gap: 5px; }

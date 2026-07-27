@@ -12,16 +12,21 @@
     <link rel="stylesheet" href="global/global.css">
     
     <style>
-        /* PAGE SPECIFIC STYLES FOR ALL-MCQ */
+        /* PAGE SPECIFIC STYLES FOR ALL-MCQ - EXACT 1300PX ALIGNMENT WITH HEADER */
         .container {
-            max-width: 950px;
-            margin: 35px auto;
+            max-width: 1300px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .all-mcq-card {
             background: #ffffff;
             padding: 30px;
             border-radius: 10px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
             position: relative;
             border: 1px solid #e2e8f0;
+            width: 100%;
         }
 
         .btn-home {
@@ -130,7 +135,10 @@
 
         @media (max-width: 768px) {
             .container {
-                margin: 20px 15px;
+                margin: 15px auto;
+                padding: 0 10px;
+            }
+            .all-mcq-card {
                 padding: 20px 15px;
             }
             .page-title {
@@ -158,11 +166,13 @@
 
     <!-- MAIN PAGE CONTENT -->
     <div class="container">
-        <a href="index.html" class="btn-home"><i class="fa-solid fa-arrow-left"></i> হোম পেজ</a>
-        <h1 class="page-title"><i class="fa-solid fa-layer-group" style="color: var(--primary);"></i> সকল কুইজ ক্যাটাগরি (All MCQ)</h1>
-        
-        <div id="category-wrapper">
-            <p class="loading-text"><i class="fa-solid fa-spinner fa-spin"></i> ক্যাটাগরি ডাটা লোড হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন...</p>
+        <div class="all-mcq-card">
+            <a href="index.html" class="btn-home"><i class="fa-solid fa-arrow-left"></i> হোম পেজ</a>
+            <h1 class="page-title"><i class="fa-solid fa-layer-group" style="color: var(--primary);"></i> সকল কুইজ ক্যাটাগরি (All MCQ)</h1>
+            
+            <div id="category-wrapper">
+                <p class="loading-text"><i class="fa-solid fa-spinner fa-spin"></i> ক্যাটাগরি ডাটা লোড হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন...</p>
+            </div>
         </div>
     </div>
 

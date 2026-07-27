@@ -38,8 +38,26 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--light); color: #333; }
 
-        /* Navigation Bar */
-        .navbar { background-color: var(--dark); color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 25px; }
+        /* Navigation Bar Wrapper */
+        .navbar-wrapper {
+            background-color: var(--dark);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+            width: 100%;
+        }
+
+        /* Navigation Bar with Max-Width 1300px */
+        .navbar { 
+            max-width: 1300px; 
+            margin: 0 auto; 
+            width: 100%; 
+            background-color: var(--dark); 
+            color: white; 
+            padding: 15px 30px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
         .navbar-brand { font-size: 22px; font-weight: bold; display: flex; align-items: center; gap: 10px; }
         .nav-actions { display: flex; gap: 10px; align-items: center; }
 
@@ -50,7 +68,7 @@
         .btn-outline { border: 1px solid white; color: white; background: transparent; }
         .btn-danger-nav { background-color: var(--danger); color: white; }
 
-        .container { max-width: 1200px; margin: 0 auto; padding: 0 25px 25px 25px; }
+        .container { max-width: 1300px; margin: 0 auto; padding: 0 25px 25px 25px; }
         .section-card { background: white; padding: 25px 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid #e2e8f0; }
         .section-card.slider-card { border-left: 6px solid var(--primary); }
         .section-card.demo-card { border-left: 6px solid var(--secondary); }
@@ -166,14 +184,17 @@
 </head>
 <body>
 
-    <div class="navbar">
-        <div class="navbar-brand"><i class="fa-solid fa-gauge-high"></i> অ্যাডমিন ড্যাশবোর্ড</div>
-        <div class="nav-actions">
-            <a href="dashboard.html" class="btn-nav btn-main-dash"><i class="fa-solid fa-house"></i> মূল ড্যাশবোর্ড</a>
-            <a href="quiz-dashboard.html" class="btn-nav btn-mcq-dash"><i class="fa-solid fa-pen-to-square"></i> MCQ ড্যাশবোর্ড</a>
-            <a href="users.html" class="btn-nav btn-payment-users"><i class="fa-solid fa-credit-card"></i> পেমেন্ট ও ব্যবহারকারী</a>
-            <a href="index.html" class="btn-nav btn-outline" target="_blank"><i class="fa-solid fa-globe"></i> মূল ওয়েবসাইট</a>
-            <button class="btn-nav btn-danger-nav" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> লগআউট</button>
+    <!-- Navigation Bar Wrapper -->
+    <div class="navbar-wrapper">
+        <div class="navbar">
+            <div class="navbar-brand"><i class="fa-solid fa-gauge-high"></i> অ্যাডমিন ড্যাশবোর্ড</div>
+            <div class="nav-actions">
+                <a href="dashboard.html" class="btn-nav btn-main-dash"><i class="fa-solid fa-house"></i> মূল ড্যাশবোর্ড</a>
+                <a href="quiz-dashboard.html" class="btn-nav btn-mcq-dash"><i class="fa-solid fa-pen-to-square"></i> MCQ ড্যাশবোর্ড</a>
+                <a href="users.html" class="btn-nav btn-payment-users"><i class="fa-solid fa-credit-card"></i> পেমেন্ট ও ব্যবহারকারী</a>
+                <a href="index.html" class="btn-nav btn-outline" target="_blank"><i class="fa-solid fa-globe"></i> মূল ওয়েবসাইট</a>
+                <button class="btn-nav btn-danger-nav" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> লগআউট</button>
+            </div>
         </div>
     </div>
 
@@ -330,8 +351,8 @@
                         <div class="read-title"><i class="fa-solid fa-heading" style="color: var(--secondary);"></i> ${info.title || '(টাইটেল নেই)'}</div>
                         <div class="read-subtitle"><b>সাব-টাইটেল:</b> ${info.subtitle || '(সাব-টাইটেল নেই)'}</div>
                         <div class="card-actions" style="margin-top: 10px;">
-                            <button class="btn btn-warning" onclick="editHeaderSection('${type}')"><i class="fa-solid fa-pen-to-square"></i> এডিট</button>
-                            <button class="btn btn-danger" onclick="deleteHeaderSection('${type}')"><i class="fa-solid fa-trash"></i> ডিলিট</button>
+                            <button class="btn btn-warning" onclick="editHeaderSection('${type}')"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                            <button class="btn btn-danger" onclick="deleteHeaderSection('${type}')"><i class="fa-solid fa-trash"></i> Delete</button>
                         </div>
                     </div>
                 `;
@@ -427,8 +448,8 @@
                             স্লাইডার #${index + 1}: ${s.title || '(টাইটেল নেই)'}
                         </div>
                         <div class="card-actions">
-                            <button class="btn btn-warning" onclick="enableInlineSliderEdit(${index})"><i class="fa-solid fa-pen-to-square"></i> এডিট</button>
-                            <button class="btn btn-danger" onclick="deleteSingleSlider(${index})"><i class="fa-solid fa-trash"></i> ডিলিট</button>
+                            <button class="btn btn-warning" onclick="enableInlineSliderEdit(${index})"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                            <button class="btn btn-danger" onclick="deleteSingleSlider(${index})"><i class="fa-solid fa-trash"></i> Delete</button>
                         </div>
                     </div>
                     <div class="read-subtitle"><b>সাব-টাইটেল:</b> ${s.subtitle || 'নাই'}</div>
@@ -571,8 +592,8 @@
                             ডেমো কুইজ #${index + 1}: ${d.title || '(নাম নেই)'}
                         </div>
                         <div class="card-actions">
-                            <button class="btn btn-warning" onclick="enableInlineDemoEdit(${index})"><i class="fa-solid fa-pen-to-square"></i> এডিট</button>
-                            <button class="btn btn-danger" onclick="deleteSingleDemo(${index})"><i class="fa-solid fa-trash"></i> ডিলিট</button>
+                            <button class="btn btn-warning" onclick="enableInlineDemoEdit(${index})"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                            <button class="btn btn-danger" onclick="deleteSingleDemo(${index})"><i class="fa-solid fa-trash"></i> Delete</button>
                         </div>
                     </div>
                     <div class="read-subtitle"><b>ব্যাজ:</b> ${d.badgeText || 'ফ্রি টেস্ট'}</div>
@@ -690,8 +711,8 @@
                             প্যাকেজ #${index + 1}: ${p.title || '(নাম নেই)'}
                         </div>
                         <div class="card-actions">
-                            <button class="btn btn-warning" onclick="enableInlinePackageEdit(${index})"><i class="fa-solid fa-pen-to-square"></i> এডিট</button>
-                            <button class="btn btn-danger" onclick="deleteSinglePackage(${index})"><i class="fa-solid fa-trash"></i> ডিলিট</button>
+                            <button class="btn btn-warning" onclick="enableInlinePackageEdit(${index})"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                            <button class="btn btn-danger" onclick="deleteSinglePackage(${index})"><i class="fa-solid fa-trash"></i> Delete</button>
                         </div>
                     </div>
                     <div class="read-subtitle"><b>মূল্য:</b> ${p.price || '৳০'} | <b>মেয়াদ:</b> ${p.duration || 'নাই'}</div>
@@ -799,7 +820,7 @@
             }
         }
 
-        /* ================= 4. MISSION & GOALS SECTION HANDLER (IMAGE LAYOUT SYNCED) ================= */
+        /* ================= 4. MISSION & GOALS SECTION HANDLER (ENGLISH BUTTONS) ================= */
         function renderMissionSection() {
             const container = document.getElementById('mission-container');
             container.innerHTML = '';
@@ -825,8 +846,8 @@
                             <b>${goalTitle}:</b> ${goalDesc}
                         </div>
                         <div class="card-actions" style="margin-top: 15px;">
-                            <button class="btn btn-warning" onclick="editMissionSection()"><i class="fa-solid fa-pen-to-square"></i> এডিট</button>
-                            <button class="btn btn-danger" onclick="deleteMissionSection()"><i class="fa-solid fa-trash"></i> ডিলিট</button>
+                            <button class="btn btn-warning" onclick="editMissionSection()"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                            <button class="btn btn-danger" onclick="deleteMissionSection()"><i class="fa-solid fa-trash"></i> Delete</button>
                         </div>
                     </div>
                 `;
@@ -887,8 +908,8 @@
                         </div>
                     </div>
                     <div class="card-actions" style="margin-top: 15px;">
-                        <button class="btn btn-submit" onclick="saveMissionSection()"><i class="fa-solid fa-floppy-disk"></i> পরিবর্তন সংরক্ষণ করুন</button>
-                        <button class="btn btn-secondary" onclick="renderMissionSection()"><i class="fa-solid fa-xmark"></i> বাতিল করুন</button>
+                        <button class="btn btn-submit" onclick="saveMissionSection()"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
+                        <button class="btn btn-secondary" onclick="renderMissionSection()"><i class="fa-solid fa-xmark"></i> Cancel</button>
                     </div>
                 </div>
             `;
@@ -927,8 +948,8 @@
             let reorderBtns = '';
             if (isReordered) {
                 reorderBtns = `
-                    <button class="btn btn-submit" onclick="saveReorderedSection('${type}')"><i class="fa-solid fa-floppy-disk"></i> অবস্থান সংরক্ষণ করুন</button>
-                    <button class="btn btn-secondary" onclick="fetchHomeConfig()"><i class="fa-solid fa-xmark"></i> বাতিল করুন</button>
+                    <button class="btn btn-submit" onclick="saveReorderedSection('${type}')"><i class="fa-solid fa-floppy-disk"></i> Save Order</button>
+                    <button class="btn btn-secondary" onclick="fetchHomeConfig()"><i class="fa-solid fa-xmark"></i> Cancel</button>
                 `;
             }
 

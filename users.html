@@ -41,70 +41,14 @@
             color: #333;
         }
 
-        /* OVERRIDE ALERT BANNER MAX-WIDTH FOR 1600PX CONTAINER */
+        /* OVERRIDE ALERT BANNER MAX-WIDTH FOR 1300PX CONTAINER */
         .alert-container-inner {
-            max-width: 1600px !important;
+            max-width: 1300px !important;
         }
 
-        /* Top Navbar */
-        .navbar {
-            background-color: var(--dark);
-            color: white;
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin-bottom: 25px;
-        }
-
-        .navbar-brand {
-            font-size: 22px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .nav-actions {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        /* Header Navigation Buttons */
-        .btn-nav {
-            text-decoration: none;
-            padding: 9px 16px;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            border: none;
-            transition: all 0.2s ease;
-        }
-
-        .btn-main-dash { background-color: var(--main-dash-btn); color: white; }
-        .btn-main-dash:hover { background-color: #218838; }
-
-        .btn-mcq-dash { background-color: var(--gray-btn); color: white; }
-        .btn-mcq-dash:hover { background-color: #5a6268; }
-
-        .btn-payment-users { background-color: var(--secondary); color: white; }
-        .btn-payment-users:hover { background-color: #138496; }
-
-        .btn-outline { border: 1px solid white; color: white; background: transparent; }
-        .btn-outline:hover { background: white; color: var(--dark); }
-
-        .btn-danger-nav { background-color: var(--danger); color: white; }
-        .btn-danger-nav:hover { background-color: #bd2130; }
-
-        /* Container */
+        /* Container with Max-Width 1300px */
         .container {
-            max-width: 1600px;
+            max-width: 1300px;
             margin: 0 auto;
             padding: 0 25px 25px 25px;
         }
@@ -147,45 +91,13 @@
         @media (max-width: 900px) {
             .grid-2 { grid-template-columns: 1fr; }
             table { display: block; overflow-x: auto; }
-            .navbar { flex-direction: column; gap: 15px; text-align: center; }
-            .nav-actions { flex-wrap: wrap; justify-content: center; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Top Navigation Bar -->
-    <div class="navbar">
-        <div class="navbar-brand">
-            <i class="fa-solid fa-gauge-high"></i> অ্যাডমিন ড্যাশবোর্ড
-        </div>
-        <div class="nav-actions">
-            <!-- Main Dashboard -->
-            <a href="dashboard.html" class="btn-nav btn-main-dash">
-                <i class="fa-solid fa-house"></i> Main Dashboard
-            </a>
-
-            <!-- MCQ Dashboard -->
-            <a href="quiz-dashboard.html" class="btn-nav btn-mcq-dash">
-                <i class="fa-solid fa-pen-to-square"></i> MCQ Dashboard
-            </a>
-
-            <!-- Payment & Users -->
-            <a href="users.html" class="btn-nav btn-payment-users">
-                <i class="fa-solid fa-credit-card"></i> Payment & Users
-            </a>
-
-            <!-- Main Website Link -->
-            <a href="index.html" class="btn-nav btn-outline" target="_blank">
-                <i class="fa-solid fa-globe"></i> মূল ওয়েবসাইট
-            </a>
-
-            <!-- Logout Button -->
-            <button class="btn-nav btn-danger-nav" onclick="logout()">
-                <i class="fa-solid fa-right-from-bracket"></i> লগআউট
-            </button>
-        </div>
-    </div>
+    <!-- Dynamic Admin Global Navigation Bar Container -->
+    <div id="admin-navbar-container"></div>
 
     <!-- Main Container -->
     <div class="container">
@@ -254,8 +166,9 @@
         </div>
     </div>
 
-    <!-- GLOBAL JS LINK -->
+    <!-- GLOBAL JS LINKS -->
     <script src="global/global.js"></script>
+    <script src="global/admin-global.js"></script>
 
     <script>
         const API_BASE = 'https://mosabber-quiz-app.onrender.com/api';

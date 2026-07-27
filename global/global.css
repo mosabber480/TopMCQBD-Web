@@ -4,13 +4,15 @@
 :root {
     --primary: #007bff;
     --primary-dark: #0056b3;
-    --secondary: #2ecc71;
-    --secondary-dark: #27ae60;
-    --dark: #2c3e50;
-    --light: #f8f9fa;
-    --gray: #6c757d;
-    --accent: #ff9f43;
+    --secondary: #17a2b8;
+    --warning: #ff9f43;
     --danger: #dc3545;
+    --dark: #2c3e50;
+    --light: #f4f7f6;
+    --gray-btn: #6c757d;
+    --main-dash-btn: #28a745;
+    --purple-btn: #6f42c1;
+    --accent: #ff9f43;
 }
 
 * {
@@ -21,12 +23,14 @@
 }
 
 body {
-    background-color: #f4f7f6;
+    background-color: var(--light);
     color: #333;
     line-height: 1.6;
 }
 
-/* ================= GLOBAL TOP ALERT BANNER SYSTEM ================= */
+/* ==========================================================================
+   GLOBAL TOP ALERT BANNER SYSTEM (STANDARDIZED TO 1300PX MAX-WIDTH)
+   ========================================================================== */
 #topAlertBanner {
     position: fixed; 
     top: 0; 
@@ -61,13 +65,13 @@ body {
 }
 
 #topAlertBanner.info::before { background-color: var(--primary); }
-#topAlertBanner.success::before { background-color: var(--secondary); }
-#topAlertBanner.warning::before { background-color: var(--accent); }
+#topAlertBanner.success::before { background-color: var(--main-dash-btn); }
+#topAlertBanner.warning::before { background-color: var(--warning); }
 #topAlertBanner.danger::before { background-color: var(--danger); }
 
-/* STRICT 1200PX INNER CONTAINER */
+/* STANDARDIZED 1300PX INNER CONTAINER */
 .alert-container-inner {
-    max-width: 1200px;
+    max-width: 1300px !important;
     width: 100%;
     padding: 0 25px;
     display: flex;
@@ -77,11 +81,96 @@ body {
 
 .alert-btns { display: flex; gap: 10px; }
 .btn-alert { padding: 7px 18px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; font-size: 13px; }
-.btn-alert-ok { background-color: #28a745; color: white; }
-.btn-alert-ok:hover { background-color: #218838; }
-.btn-alert-cancel { background-color: var(--danger); color: white; }
-.btn-alert-cancel:hover { background-color: #c82333; }
+.btn-alert-ok { background-color: var(--primary); color: white; }
+.btn-alert-cancel { background-color: #e2e8f0; color: #4a5568; }
 
+/* ==========================================================================
+   ADMIN DASHBOARD NAVIGATION BAR (STANDARDIZED TO 1300PX MAX-WIDTH)
+   ========================================================================== */
+.navbar-wrapper {
+    background-color: var(--dark);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 25px;
+    width: 100%;
+}
+
+.navbar {
+    max-width: 1300px;
+    margin: 0 auto;
+    width: 100%;
+    background-color: var(--dark);
+    color: white;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.navbar-brand {
+    font-size: 22px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.nav-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* Nav Action Buttons */
+.btn-nav {
+    text-decoration: none;
+    padding: 9px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+}
+
+.btn-main-dash { background-color: var(--main-dash-btn); color: white; }
+.btn-main-dash:hover { background-color: #218838; }
+
+.btn-mcq-dash { background-color: var(--gray-btn); color: white; }
+.btn-mcq-dash:hover { background-color: #5a6268; }
+
+.btn-payment-users { background-color: var(--secondary); color: white; }
+.btn-payment-users:hover { background-color: #138496; }
+
+.btn-outline { border: 1px solid white; color: white; background: transparent; }
+.btn-outline:hover { background: white; color: var(--dark); }
+
+.btn-danger-nav { background-color: var(--danger); color: white; }
+.btn-danger-nav:hover { background-color: #bd2130; }
+
+/* ==========================================================================
+   PAGE CONTAINER & GENERIC SECTION CARDS (1300PX MAX-WIDTH)
+   ========================================================================== */
+.container {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 0 25px 25px 25px;
+}
+
+.box, .section-card {
+    background: white;
+    padding: 25px 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    margin-bottom: 25px;
+    border: 1px solid #e2e8f0;
+}
+
+/* ==========================================================================
+   MAIN WEBSITE PUBLIC HEADER & FOOTER COMPONENTS
+   ========================================================================== */
 /* 1. Announcement Bar */
 #global-announce-bar {
     background: linear-gradient(90deg, #ff9f43, #ee5253);
@@ -100,7 +189,7 @@ body {
     font-weight: bold;
 }
 
-/* 2. Dynamic Header Styling */
+/* 2. Dynamic Main Site Header Styling */
 #global-header {
     background-color: #ffffff;
     box-shadow: 0 2px 10px rgba(0,0,0,0.08);
@@ -110,7 +199,7 @@ body {
 }
 
 .header-wrapper {
-    max-width: 1200px;
+    max-width: 1300px;
     margin: 0 auto;
     display: flex;
     justify-content: space-between;
@@ -155,7 +244,6 @@ body {
     padding: 0;
 }
 
-/* Main Nav Link Hover Line Animation */
 .site-nav ul li > a {
     text-decoration: none;
     color: var(--dark);
@@ -188,7 +276,6 @@ body {
 }
 .site-nav ul li > a:hover { color: var(--primary); }
 
-/* DESKTOP HEADER BUTTON GROUP DESIGN */
 .header-btn-group {
     flex-shrink: 0;
     display: flex;
@@ -257,7 +344,7 @@ body {
     padding: 6px;
 }
 
-/* STABLE DESKTOP DROPDOWN */
+/* Desktop Dropdown Menu */
 .nav-item { 
     position: relative; 
 }
@@ -296,7 +383,6 @@ body {
     border-bottom: none;
 }
 
-/* Sub-Menu Full Width Click + Text-Only Underline Animation */
 .dropdown-menu li a {
     padding: 10px 16px !important;
     display: block !important;
@@ -335,14 +421,14 @@ body {
     width: calc(100% - 32px);
 }
 
-/* DYNAMIC FOOTER STYLING */
+/* 3. Dynamic Footer Styling */
 #global-footer { 
     background-color: #1e293b; 
     color: #cbd5e1; 
     padding: 50px 20px 20px 20px; 
     margin-top: 60px; 
 }
-.footer-container { max-width: 1200px; margin: 0 auto; }
+.footer-container { max-width: 1300px; margin: 0 auto; }
 .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 30px; margin-bottom: 30px; }
 .footer-col h4 { font-size: 17px; margin-bottom: 15px; color: #ffffff; border-bottom: 2px solid var(--primary); padding-bottom: 6px; display: inline-block; font-weight: 700; }
 .footer-col p { font-size: 14px; color: #94a3b8; line-height: 1.6; }
@@ -385,7 +471,7 @@ body {
     color: #38bdf8 !important; 
 }
 
-/* Dynamic Social Media Buttons */
+/* Social Media Buttons */
 .footer-social { margin-top: 18px; display: flex; gap: 10px; flex-wrap: wrap; }
 .social-btn { 
     width: 38px; 
@@ -411,7 +497,21 @@ body {
 
 .footer-bottom { text-align: center; padding-top: 25px; border-top: 1px solid #334155; font-size: 13px; color: #64748b; }
 
-/* MOBILE RESPONSIVE STYLES */
+/* ==========================================================================
+   MOBILE RESPONSIVE STYLES
+   ========================================================================== */
+@media (max-width: 900px) {
+    .navbar {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    .nav-actions {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}
+
 @media (max-width: 768px) {
     .mobile-toggle-btn {
         display: block;
