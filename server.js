@@ -28,9 +28,6 @@ app.use(express.static(path.join(__dirname, 'pages')));
 app.use('/admin', express.static(path.join(__dirname, 'admin')));
 app.use('/global', express.static(path.join(__dirname, 'global')));
 
-// 3. Root Directory Fallback
-app.use(express.static(__dirname));
-
 // Multer Setup for Memory Storage
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -462,10 +459,23 @@ app.post('/api/questions/upload-csv', verifyToken, authorizeRoles('owner', 'admi
 });
 
 // ------------------- FRONTEND FALLBACK ROUTE -------------------
-// Safe Catch-all middleware for non-API GET requests (Serves index.html from /pages or root)
-app.use((req, res, next) => {
+
+// Root Path Handler
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'pages', 'index.html'));
+});
+
+// Safe Catch-all middleware for non-API GET requests
+app.use((req, res) => {
     if (req.method === 'GET' && !req.path.startsWith('/api')) {
-        return res.sendFile(path.join(__dirname, 'pages', 'index.html'));
+        const requestedPath = path.join(__dirname, 'pages', req.path);
+        
+        return res.sendFile(requestedPath, (err) => {
+            if (err) {
+                // ফাইল খুঁজে না পেলে index.html সার্ভ করবে
+                res.sendFile(path.join(__dirname, 'pages', 'index.html'));
+            }
+        });
     }
     res.status(404).json({ success: false, message: 'API Route not found' });
 });
