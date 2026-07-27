@@ -25,7 +25,7 @@ const homeConfigSchema = new mongoose.Schema({
         imageUrl: { type: String, default: '' },
         buyLink: { type: String, default: '' }
     }],
-    // 🌟 নতুন যুক্ত করা সেকশন হেডার অবজেক্টসমূহ
+    // 🌟 সেকশন হেডার অবজেক্টসমূহ
     demoSectionInfo: {
         title: { type: String, default: '' },
         subtitle: { type: String, default: '' }
@@ -33,6 +33,15 @@ const homeConfigSchema = new mongoose.Schema({
     packageSectionInfo: {
         title: { type: String, default: '' },
         subtitle: { type: String, default: '' }
+    },
+    // 🌟 নতুন যুক্ত করা মিশন ও লক্ষ্য সেকশন অবজেক্ট
+    missionSectionInfo: {
+        sectionTitle: { type: String, default: '' },
+        sectionSubtitle: { type: String, default: '' },
+        missionTitle: { type: String, default: '' },
+        missionDesc: { type: String, default: '' },
+        goalTitle: { type: String, default: '' },
+        goalDesc: { type: String, default: '' }
     }
 }, { timestamps: true });
 

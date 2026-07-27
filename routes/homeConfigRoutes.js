@@ -13,7 +13,15 @@ router.get('/', async (req, res) => {
                 demoQuizzes: [], 
                 packages: [], 
                 demoSectionInfo: { title: '', subtitle: '' },
-                packageSectionInfo: { title: '', subtitle: '' }
+                packageSectionInfo: { title: '', subtitle: '' },
+                missionSectionInfo: {
+                    sectionTitle: '',
+                    sectionSubtitle: '',
+                    missionTitle: '',
+                    missionDesc: '',
+                    goalTitle: '',
+                    goalDesc: ''
+                }
             };
         }
         res.status(200).json(config);
@@ -26,7 +34,14 @@ router.get('/', async (req, res) => {
 // POST /api/home-config (Owner & Admin only)
 router.post('/', verifyToken, authorizeRoles('owner', 'admin'), async (req, res) => {
     try {
-        const { sliders, demoQuizzes, packages, demoSectionInfo, packageSectionInfo } = req.body;
+        const { 
+            sliders, 
+            demoQuizzes, 
+            packages, 
+            demoSectionInfo, 
+            packageSectionInfo, 
+            missionSectionInfo 
+        } = req.body;
 
         let config = await HomeConfig.findOne();
         if (config) {
@@ -35,6 +50,14 @@ router.post('/', verifyToken, authorizeRoles('owner', 'admin'), async (req, res)
             config.packages = packages || [];
             config.demoSectionInfo = demoSectionInfo || { title: '', subtitle: '' };
             config.packageSectionInfo = packageSectionInfo || { title: '', subtitle: '' };
+            config.missionSectionInfo = missionSectionInfo || {
+                sectionTitle: '',
+                sectionSubtitle: '',
+                missionTitle: '',
+                missionDesc: '',
+                goalTitle: '',
+                goalDesc: ''
+            };
             await config.save();
         } else {
             config = await HomeConfig.create({
@@ -42,7 +65,15 @@ router.post('/', verifyToken, authorizeRoles('owner', 'admin'), async (req, res)
                 demoQuizzes: demoQuizzes || [],
                 packages: packages || [],
                 demoSectionInfo: demoSectionInfo || { title: '', subtitle: '' },
-                packageSectionInfo: packageSectionInfo || { title: '', subtitle: '' }
+                packageSectionInfo: packageSectionInfo || { title: '', subtitle: '' },
+                missionSectionInfo: missionSectionInfo || {
+                    sectionTitle: '',
+                    sectionSubtitle: '',
+                    missionTitle: '',
+                    missionDesc: '',
+                    goalTitle: '',
+                    goalDesc: ''
+                }
             });
         }
 

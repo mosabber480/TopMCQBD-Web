@@ -32,6 +32,7 @@
             --light: #f4f7f6;
             --gray-btn: #6c757d;
             --main-dash-btn: #28a745;
+            --purple-btn: #6f42c1;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -54,6 +55,7 @@
         .section-card.slider-card { border-left: 6px solid var(--primary); }
         .section-card.demo-card { border-left: 6px solid var(--secondary); }
         .section-card.package-card { border-left: 6px solid var(--warning); }
+        .section-card.mission-card { border-left: 6px solid var(--purple-btn); }
 
         .section-title { font-size: 20px; color: var(--dark); margin-bottom: 15px; display: flex; align-items: center; gap: 10px; padding-bottom: 10px; border-bottom: 1px dashed #e2e8f0; }
         .sub-header-title { font-size: 16px; font-weight: bold; color: var(--dark); margin: 15px 0 10px 0; display: flex; align-items: center; gap: 8px; }
@@ -69,7 +71,14 @@
             transition: all 0.2s ease;
         }
 
-        .read-title { font-size: 16px; font-weight: bold; color: #2c3e50; margin-bottom: 4px; }
+        .card-header-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .read-title { font-size: 16px; font-weight: bold; color: #2c3e50; margin-bottom: 4px; display: flex; align-items: center; }
         .read-subtitle { font-size: 14px; color: #555; margin-bottom: 8px; }
         .read-meta { font-size: 13px; color: #555; margin-bottom: 4px; }
         .read-preview-text { font-size: 13px; color: #777; margin-bottom: 10px; }
@@ -79,11 +88,11 @@
         
         .form-group { margin-bottom: 12px; }
         label { display: block; font-weight: bold; margin-bottom: 5px; color: #555; font-size: 13px; }
-        input { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 5px; font-size: 14px; outline: none; background: white; }
-        input:focus { border-color: var(--primary); }
+        input, textarea { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 5px; font-size: 14px; outline: none; background: white; font-family: inherit; }
+        input:focus, textarea:focus { border-color: var(--primary); }
 
-        .row { display: flex; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; align-items: center; }
-        .row input { flex: 1; min-width: 180px; }
+        .row { display: flex; gap: 15px; margin-bottom: 10px; flex-wrap: wrap; align-items: flex-start; }
+        .row .form-group { flex: 1; min-width: 250px; }
 
         .card-actions { display: flex; gap: 10px; margin-top: 15px; }
 
@@ -98,12 +107,61 @@
         .btn-secondary { background-color: #6c757d; color: white; }
         .btn-secondary:hover { background-color: #5a6268; }
 
-        .section-action-bar { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; }
+        .section-action-bar { display: flex; gap: 10px; align-items: center; margin-top: 15px; flex-wrap: wrap; }
         .btn-add { background: var(--main-dash-btn); color: white; border: none; padding: 10px 18px; border-radius: 5px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; font-size: 14px; }
         .btn-save-section { display: none; background: var(--primary); color: white; border: none; padding: 10px 22px; border-radius: 5px; cursor: pointer; font-weight: bold; align-items: center; gap: 8px; font-size: 14px; }
         .btn-save-section:hover { background-color: var(--primary-dark); }
         .btn-remove { background: #dc3545; color: white; border: none; padding: 10px 16px; border-radius: 5px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; }
         .btn-remove:hover { background: #c82333; }
+
+        /* DRAG AND DROP & ARROW CONTROLS STYLES */
+        .draggable-box {
+            cursor: move;
+            transition: transform 0.15s ease, opacity 0.15s ease, border-top 0.1s ease, border-bottom 0.1s ease;
+        }
+        .draggable-box.dragging {
+            opacity: 0.4;
+            background: #eef6ff !important;
+        }
+        .drag-handle {
+            cursor: grab;
+            color: #888;
+            margin-right: 8px;
+            font-size: 16px;
+        }
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+
+        /* 2PX DROP INDICATOR LINE STYLES */
+        .drag-over-top {
+            border-top: 2px solid #007bff !important;
+        }
+        .drag-over-bottom {
+            border-bottom: 2px solid #007bff !important;
+        }
+        
+        .arrow-btn-group {
+            display: inline-flex;
+            flex-direction: column;
+            gap: 2px;
+            margin-right: 10px;
+        }
+        .btn-arrow {
+            background: #e2e8f0;
+            border: none;
+            color: #475569;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+            cursor: pointer;
+            line-height: 1;
+            transition: background 0.2s ease;
+        }
+        .btn-arrow:hover {
+            background: #007bff;
+            color: #ffffff;
+        }
     </style>
 </head>
 <body>
@@ -111,9 +169,9 @@
     <div class="navbar">
         <div class="navbar-brand"><i class="fa-solid fa-gauge-high"></i> অ্যাডমিন ড্যাশবোর্ড</div>
         <div class="nav-actions">
-            <a href="dashboard.html" class="btn-nav btn-main-dash"><i class="fa-solid fa-house"></i> Main Dashboard</a>
-            <a href="quiz-dashboard.html" class="btn-nav btn-mcq-dash"><i class="fa-solid fa-pen-to-square"></i> MCQ Dashboard</a>
-            <a href="users.html" class="btn-nav btn-payment-users"><i class="fa-solid fa-credit-card"></i> Payment & Users</a>
+            <a href="dashboard.html" class="btn-nav btn-main-dash"><i class="fa-solid fa-house"></i> মূল ড্যাশবোর্ড</a>
+            <a href="quiz-dashboard.html" class="btn-nav btn-mcq-dash"><i class="fa-solid fa-pen-to-square"></i> MCQ ড্যাশবোর্ড</a>
+            <a href="users.html" class="btn-nav btn-payment-users"><i class="fa-solid fa-credit-card"></i> পেমেন্ট ও ব্যবহারকারী</a>
             <a href="index.html" class="btn-nav btn-outline" target="_blank"><i class="fa-solid fa-globe"></i> মূল ওয়েবসাইট</a>
             <button class="btn-nav btn-danger-nav" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> লগআউট</button>
         </div>
@@ -125,7 +183,7 @@
             <div class="section-title"><i class="fa-solid fa-images" style="color: var(--primary);"></i> ১. স্লাইডার সেকশন (Sliders)</div>
             <div id="slider-read-container"></div>
             <div id="slider-container"></div>
-            <div class="section-action-bar">
+            <div class="section-action-bar" id="slider-action-bar">
                 <button type="button" class="btn-add" onclick="addSliderRow();">
                     <i class="fa-solid fa-plus"></i> স্লাইডার যোগ করুন
                 </button>
@@ -145,7 +203,7 @@
             <div class="sub-header-title"><i class="fa-solid fa-list"></i> ডেমো কুইজের তালিকা:</div>
             <div id="demo-read-container"></div>
             <div id="demo-container"></div>
-            <div class="section-action-bar">
+            <div class="section-action-bar" id="demo-action-bar">
                 <button type="button" class="btn-add" onclick="addDemoRow();">
                     <i class="fa-solid fa-plus"></i> ডেমো কুইজ যোগ করুন
                 </button>
@@ -165,7 +223,7 @@
             <div class="sub-header-title"><i class="fa-solid fa-list"></i> প্যাকেজের তালিকা:</div>
             <div id="package-read-container"></div>
             <div id="package-container"></div>
-            <div class="section-action-bar">
+            <div class="section-action-bar" id="package-action-bar">
                 <button type="button" class="btn-add" onclick="addPackageRow();">
                     <i class="fa-solid fa-plus"></i> প্যাকেজ যোগ করুন
                 </button>
@@ -173,6 +231,12 @@
                     <i class="fa-solid fa-floppy-disk"></i> সেভ করুন
                 </button>
             </div>
+        </div>
+
+        <!-- ৪. MISSION & GOALS CARD -->
+        <div class="section-card mission-card" id="card-mission">
+            <div class="section-title"><i class="fa-solid fa-bullseye" style="color: var(--purple-btn);"></i> ৪. আমাদের মিশন ও লক্ষ্য (Mission & Goals)</div>
+            <div id="mission-container"></div>
         </div>
     </div>
 
@@ -187,6 +251,11 @@
 
         let demoHeaderInfo = null;
         let packageHeaderInfo = null;
+        let missionInfo = null;
+
+        let isSliderReordered = false;
+        let isDemoReordered = false;
+        let isPackageReordered = false;
 
         function showSaveBtn(sectionType) {
             const saveBtn = document.getElementById(`save-${sectionType}-btn`);
@@ -226,6 +295,11 @@
 
                 demoHeaderInfo = data.demoSectionInfo || null;
                 packageHeaderInfo = data.packageSectionInfo || null;
+                missionInfo = data.missionSectionInfo || null;
+
+                isSliderReordered = false;
+                isDemoReordered = false;
+                isPackageReordered = false;
 
                 renderSliderReadCards();
                 renderDemoReadCards();
@@ -233,6 +307,7 @@
 
                 renderHeaderSection('demo');
                 renderHeaderSection('package');
+                renderMissionSection();
 
                 document.getElementById('slider-container').innerHTML = '';
                 document.getElementById('demo-container').innerHTML = '';
@@ -255,8 +330,8 @@
                         <div class="read-title"><i class="fa-solid fa-heading" style="color: var(--secondary);"></i> ${info.title || '(টাইটেল নেই)'}</div>
                         <div class="read-subtitle"><b>সাব-টাইটেল:</b> ${info.subtitle || '(সাব-টাইটেল নেই)'}</div>
                         <div class="card-actions" style="margin-top: 10px;">
-                            <button class="btn btn-warning" onclick="editHeaderSection('${type}')"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-                            <button class="btn btn-danger" onclick="deleteHeaderSection('${type}')"><i class="fa-solid fa-trash"></i> Delete</button>
+                            <button class="btn btn-warning" onclick="editHeaderSection('${type}')"><i class="fa-solid fa-pen-to-square"></i> এডিট</button>
+                            <button class="btn btn-danger" onclick="deleteHeaderSection('${type}')"><i class="fa-solid fa-trash"></i> ডিলিট</button>
                         </div>
                     </div>
                 `;
@@ -292,8 +367,8 @@
                         </div>
                     </div>
                     <div class="card-actions" style="margin-top: 10px;">
-                        <button class="btn btn-submit" onclick="saveHeaderSection('${type}')"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
-                        <button class="btn btn-secondary" onclick="renderHeaderSection('${type}')"><i class="fa-solid fa-xmark"></i> Cancel</button>
+                        <button class="btn btn-submit" onclick="saveHeaderSection('${type}')"><i class="fa-solid fa-floppy-disk"></i> পরিবর্তন সংরক্ষণ করুন</button>
+                        <button class="btn btn-secondary" onclick="renderHeaderSection('${type}')"><i class="fa-solid fa-xmark"></i> বাতিল করুন</button>
                     </div>
                 </div>
             `;
@@ -329,59 +404,93 @@
         function renderSliderReadCards() {
             const container = document.getElementById('slider-read-container');
             container.innerHTML = '';
+            
+            updateSectionActionBar('slider');
+
             if (sliderDataList.length === 0) return;
 
             sliderDataList.forEach((s, index) => {
                 const card = document.createElement('div');
-                card.className = 'read-box';
+                card.className = 'read-box draggable-box slider-drag-item';
+                card.draggable = true;
+                card.dataset.index = index;
                 card.id = `slider-card-${index}`;
 
                 card.innerHTML = `
-                    <div class="read-title">স্লাইডার #${index + 1}: ${s.title || '(টাইটেল নেই)'}</div>
-                    <div class="read-subtitle"><b>Subtitle:</b> ${s.subtitle || 'None'}</div>
+                    <div class="card-header-flex">
+                        <div class="read-title">
+                            <i class="fa-solid fa-grip-vertical drag-handle" title="মাউস চেপে পজিশন পরিবর্তন করুন"></i>
+                            <div class="arrow-btn-group">
+                                <button type="button" class="btn-arrow" onclick="moveSliderPosition(${index}, 'up')" title="উপরে তুলুন">▲</button>
+                                <button type="button" class="btn-arrow" onclick="moveSliderPosition(${index}, 'down')" title="নিচে নামান">▼</button>
+                            </div>
+                            স্লাইডার #${index + 1}: ${s.title || '(টাইটেল নেই)'}
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn btn-warning" onclick="enableInlineSliderEdit(${index})"><i class="fa-solid fa-pen-to-square"></i> এডিট</button>
+                            <button class="btn btn-danger" onclick="deleteSingleSlider(${index})"><i class="fa-solid fa-trash"></i> ডিলিট</button>
+                        </div>
+                    </div>
+                    <div class="read-subtitle"><b>সাব-টাইটেল:</b> ${s.subtitle || 'নাই'}</div>
                     <div class="read-meta">
-                        <b>Image:</b> ${s.bgImage || 'images/slider-01.jpg'} | <b>Opacity:</b> ${s.bgOpacity !== undefined ? s.bgOpacity : '0.5'}
+                        <b>ইমেজ:</b> ${s.bgImage || 'images/slider-01.jpg'} | <b>অপাসিটি:</b> ${s.bgOpacity !== undefined ? s.bgOpacity : '0.5'}
                     </div>
                     <div class="read-preview-text">
-                        <b>Button 1:</b> ${s.btn1Text || '🚀 কুইজ শুরু করুন'} (${s.btn1Link || 'all-mcq.html'}) | 
-                        <b>Button 2:</b> ${s.btn2Text || 'ফ্রি ডেমো দেখুন'} (${s.btn2Link || '#demo'})
-                    </div>
-                    <div class="card-actions">
-                        <button class="btn btn-warning" onclick="enableInlineSliderEdit(${index})"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-                        <button class="btn btn-danger" onclick="deleteSingleSlider(${index})"><i class="fa-solid fa-trash"></i> Delete</button>
+                        <b>বাটন ১:</b> ${s.btn1Text || '🚀 কুইজ শুরু করুন'} (${s.btn1Link || 'all-mcq.html'}) | 
+                        <b>বাটন ২:</b> ${s.btn2Text || 'ফ্রি ডেমো দেখুন'} (${s.btn2Link || '#demo'})
                     </div>
                 `;
                 container.appendChild(card);
             });
+
+            initGenericDragAndDrop('slider-read-container', 'slider-drag-item', sliderDataList, () => {
+                isSliderReordered = true;
+                renderSliderReadCards();
+            });
+        }
+
+        function moveSliderPosition(index, direction) {
+            if (direction === 'up' && index > 0) {
+                const item = sliderDataList.splice(index, 1)[0];
+                sliderDataList.splice(index - 1, 0, item);
+                isSliderReordered = true;
+                renderSliderReadCards();
+            } else if (direction === 'down' && index < sliderDataList.length - 1) {
+                const item = sliderDataList.splice(index, 1)[0];
+                sliderDataList.splice(index + 1, 0, item);
+                isSliderReordered = true;
+                renderSliderReadCards();
+            }
         }
 
         function enableInlineSliderEdit(index) {
             const s = sliderDataList[index];
             const card = document.getElementById(`slider-card-${index}`);
+            card.draggable = false;
             card.style.borderLeft = "6px solid #007bff";
             card.style.background = "#ffffff";
 
             card.innerHTML = `
-                <div style="font-weight: bold; margin-bottom: 12px; color: #007bff;">Editing Slider #${index + 1}</div>
+                <div style="font-weight: bold; margin-bottom: 12px; color: #007bff;">স্লাইডার #${index + 1} এডিট করুন</div>
                 <div class="row">
-                    <div class="form-group" style="flex:1;"><label>টাইটেল (Title):</label><input type="text" id="edit-slide-title-${index}" value="${(s.title || '').replace(/"/g, '&quot;')}" required></div>
-                    <div class="form-group" style="flex:1;"><label>সাব-টাইটেল (Subtitle):</label><input type="text" id="edit-slide-subtitle-${index}" value="${(s.subtitle || '').replace(/"/g, '&quot;')}" required></div>
+                    <div class="form-group"><label>টাইটেল (Title):</label><input type="text" id="edit-slide-title-${index}" value="${(s.title || '').replace(/"/g, '&quot;')}" required></div>
+                    <div class="form-group"><label>সাব-টাইটেল (Subtitle):</label><input type="text" id="edit-slide-subtitle-${index}" value="${(s.subtitle || '').replace(/"/g, '&quot;')}" required></div>
                 </div>
                 <div class="row">
-                    <div class="form-group" style="flex:1;"><label>ইমেজ লিংক (Image URL):</label><input type="text" id="edit-slide-img-${index}" value="${(s.bgImage || 'images/slider-01.jpg').replace(/"/g, '&quot;')}"></div>
-                    <div class="form-group" style="flex:1;"><label>অপাসিটি (Opacity):</label><input type="number" step="0.1" min="0" max="1" id="edit-slide-opacity-${index}" value="${s.bgOpacity !== undefined ? s.bgOpacity : '0.5'}"></div>
+                    <div class="form-group"><label>ইমেজ লিংক (Image URL):</label><input type="text" id="edit-slide-img-${index}" value="${(s.bgImage || 'images/slider-01.jpg').replace(/"/g, '&quot;')}"></div>
+                    <div class="form-group"><label>অপাসিটি (Opacity):</label><input type="number" step="0.1" min="0" max="1" id="edit-slide-opacity-${index}" value="${s.bgOpacity !== undefined ? s.bgOpacity : '0.5'}"></div>
                 </div>
                 <div class="row">
-                    <div class="form-group" style="flex:1;"><label>বাটন ১ নাম:</label><input type="text" id="edit-slide-btn1-text-${index}" value="${(s.btn1Text || '').replace(/"/g, '&quot;')}"></div>
-                    <div class="form-group" style="flex:1;"><label>বাটন ১ লিংক (URL):</label><input type="text" id="edit-slide-btn1-link-${index}" value="${(s.btn1Link || '').replace(/"/g, '&quot;')}"></div>
+                    <div class="form-group"><label>বাটন ১ নাম:</label><input type="text" id="edit-slide-btn1-text-${index}" value="${(s.btn1Text || '').replace(/"/g, '&quot;')}"></div>
+                    <div class="form-group"><label>বাটন ১ লিংক (URL):</label><input type="text" id="edit-slide-btn1-link-${index}" value="${(s.btn1Link || '').replace(/"/g, '&quot;')}"></div>
                 </div>
                 <div class="row">
-                    <div class="form-group" style="flex:1;"><label>বাটন ২ নাম:</label><input type="text" id="edit-slide-btn2-text-${index}" value="${(s.btn2Text || '').replace(/"/g, '&quot;')}"></div>
-                    <div class="form-group" style="flex:1;"><label>বাটন ২ লিংক (URL):</label><input type="text" id="edit-slide-btn2-link-${index}" value="${(s.btn2Link || '').replace(/"/g, '&quot;')}"></div>
+                    <div class="form-group"><label>বাটন ২ নাম:</label><input type="text" id="edit-slide-btn2-text-${index}" value="${(s.btn2Text || '').replace(/"/g, '&quot;')}"></div>
+                    <div class="form-group"><label>বাটন ২ লিংক (URL):</label><input type="text" id="edit-slide-btn2-link-${index}" value="${(s.btn2Link || '').replace(/"/g, '&quot;')}"></div>
                 </div>
                 <div class="card-actions" style="margin-top: 10px;">
-                    <button class="btn btn-submit" onclick="saveInlineSliderEdit(${index})"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
-                    <button class="btn btn-secondary" onclick="renderSliderReadCards(); checkSaveBtnVisibility('slider');"><i class="fa-solid fa-xmark"></i> Cancel</button>
+                    <button class="btn btn-submit" onclick="saveInlineSliderEdit(${index})"><i class="fa-solid fa-floppy-disk"></i> পরিবর্তন সংরক্ষণ করুন</button>
+                    <button class="btn btn-secondary" onclick="renderSliderReadCards(); checkSaveBtnVisibility('slider');"><i class="fa-solid fa-xmark"></i> বাতিল করুন</button>
                 </div>
             `;
             showSaveBtn('slider');
@@ -439,46 +548,80 @@
         function renderDemoReadCards() {
             const container = document.getElementById('demo-read-container');
             container.innerHTML = '';
+
+            updateSectionActionBar('demo');
+
             if (demoDataList.length === 0) return;
 
             demoDataList.forEach((d, index) => {
                 const card = document.createElement('div');
-                card.className = 'read-box';
+                card.className = 'read-box draggable-box demo-drag-item';
+                card.draggable = true;
+                card.dataset.index = index;
                 card.id = `demo-card-${index}`;
 
                 card.innerHTML = `
-                    <div class="read-title">ডেমো কুইজ #${index + 1}: ${d.title || '(নাম নেই)'}</div>
-                    <div class="read-subtitle"><b>Badge:</b> ${d.badgeText || 'ফ্রি টেস্ট'}</div>
-                    <div class="read-meta"><b>Description:</b> ${d.desc || 'None'}</div>
-                    <div class="read-preview-text"><b>Quiz Link:</b> ${d.link || 'None'}</div>
-                    <div class="card-actions">
-                        <button class="btn btn-warning" onclick="enableInlineDemoEdit(${index})"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-                        <button class="btn btn-danger" onclick="deleteSingleDemo(${index})"><i class="fa-solid fa-trash"></i> Delete</button>
+                    <div class="card-header-flex">
+                        <div class="read-title">
+                            <i class="fa-solid fa-grip-vertical drag-handle" title="মাউস চেপে পজিশন পরিবর্তন করুন"></i>
+                            <div class="arrow-btn-group">
+                                <button type="button" class="btn-arrow" onclick="moveDemoPosition(${index}, 'up')" title="উপরে তুলুন">▲</button>
+                                <button type="button" class="btn-arrow" onclick="moveDemoPosition(${index}, 'down')" title="নিচে নামান">▼</button>
+                            </div>
+                            ডেমো কুইজ #${index + 1}: ${d.title || '(নাম নেই)'}
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn btn-warning" onclick="enableInlineDemoEdit(${index})"><i class="fa-solid fa-pen-to-square"></i> এডিট</button>
+                            <button class="btn btn-danger" onclick="deleteSingleDemo(${index})"><i class="fa-solid fa-trash"></i> ডিলিট</button>
+                        </div>
                     </div>
+                    <div class="read-subtitle"><b>ব্যাজ:</b> ${d.badgeText || 'ফ্রি টেস্ট'}</div>
+                    <div class="read-meta"><b>বিবরণ:</b> ${d.desc || 'নাই'}</div>
+                    <div class="read-preview-text"><b>কুইজ লিংক:</b> ${d.link || 'নাই'}</div>
                 `;
                 container.appendChild(card);
             });
+
+            initGenericDragAndDrop('demo-read-container', 'demo-drag-item', demoDataList, () => {
+                isDemoReordered = true;
+                renderDemoReadCards();
+            });
+        }
+
+        function moveDemoPosition(index, direction) {
+            if (direction === 'up' && index > 0) {
+                const item = demoDataList.splice(index, 1)[0];
+                demoDataList.splice(index - 1, 0, item);
+                isDemoReordered = true;
+                renderDemoReadCards();
+            } else if (direction === 'down' && index < demoDataList.length - 1) {
+                const item = demoDataList.splice(index, 1)[0];
+                demoDataList.splice(index + 1, 0, item);
+                isDemoReordered = true;
+                renderDemoReadCards();
+            }
         }
 
         function enableInlineDemoEdit(index) {
             const d = demoDataList[index];
             const card = document.getElementById(`demo-card-${index}`);
+            card.draggable = false;
             card.style.borderLeft = "6px solid #007bff";
             card.style.background = "#ffffff";
 
             card.innerHTML = `
-                <div style="font-weight: bold; margin-bottom: 12px; color: #007bff;">Editing Demo Quiz #${index + 1}</div>
+                <div style="font-weight: bold; margin-bottom: 12px; color: #007bff;">ডেমো কুইজ #${index + 1} এডিট করুন</div>
                 <div class="row">
-                    <div class="form-group" style="flex:1;"><label>কুইজ নাম:</label><input type="text" id="edit-demo-title-${index}" value="${(d.title || '').replace(/"/g, '&quot;')}" required></div>
-                    <div class="form-group" style="flex:1;"><label>ব্যাজ (যেমন: ফ্রি টেস্ট):</label><input type="text" id="edit-demo-badge-${index}" value="${(d.badgeText || 'ফ্রি টেস্ট').replace(/"/g, '&quot;')}"></div>
+                    <div class="form-group"><label>কুইজ নাম:</label><input type="text" id="edit-demo-title-${index}" value="${(d.title || '').replace(/"/g, '&quot;')}" required></div>
+                    <div class="form-group"><label>ব্যাজ (যেমন: ফ্রি টেস্ট):</label><input type="text" id="edit-demo-badge-${index}" value="${(d.badgeText || 'ফ্রি টেস্ট').replace(/"/g, '&quot;')}"></div>
                 </div>
                 <div class="row">
-                    <div class="form-group" style="flex:1;"><label>সংক্ষিপ্ত বিবরণ:</label><input type="text" id="edit-demo-desc-${index}" value="${(d.desc || '').replace(/"/g, '&quot;')}" required></div>
-                    <div class="form-group" style="flex:1;"><label>কুইজ লিংক (URL):</label><input type="text" id="edit-demo-link-${index}" value="${(d.link || '').replace(/"/g, '&quot;')}" required></div>
+                    <div class="form-group"><label>সংক্ষিপ্ত বিবরণ:</label><input type="text" id="edit-demo-desc-${index}" value="${(d.desc || '').replace(/"/g, '&quot;')}" required></div>
+                    <div class="form-group"><label>কুইজ লিংক (URL):</label><input type="text" id="edit-demo-link-${index}" value="${(d.link || '').replace(/"/g, '&quot;')}" required></div>
                 </div>
                 <div class="card-actions" style="margin-top: 10px;">
-                    <button class="btn btn-submit" onclick="saveInlineDemoEdit(${index})"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
-                    <button class="btn btn-secondary" onclick="renderDemoReadCards(); checkSaveBtnVisibility('demo');"><i class="fa-solid fa-xmark"></i> Cancel</button>
+                    <button class="btn btn-submit" onclick="saveInlineDemoEdit(${index})"><i class="fa-solid fa-floppy-disk"></i> পরিবর্তন সংরক্ষণ করুন</button>
+                    <button class="btn btn-secondary" onclick="renderDemoReadCards(); checkSaveBtnVisibility('demo');"><i class="fa-solid fa-xmark"></i> বাতিল করুন</button>
                 </div>
             `;
             showSaveBtn('demo');
@@ -524,50 +667,84 @@
         function renderPackageReadCards() {
             const container = document.getElementById('package-read-container');
             container.innerHTML = '';
+
+            updateSectionActionBar('package');
+
             if (packageDataList.length === 0) return;
 
             packageDataList.forEach((p, index) => {
                 const card = document.createElement('div');
-                card.className = 'read-box';
+                card.className = 'read-box draggable-box package-drag-item';
+                card.draggable = true;
+                card.dataset.index = index;
                 card.id = `package-card-${index}`;
 
                 card.innerHTML = `
-                    <div class="read-title">প্যাকেজ #${index + 1}: ${p.title || '(নাম নেই)'}</div>
-                    <div class="read-subtitle"><b>Price:</b> ${p.price || '৳০'} | <b>Duration:</b> ${p.duration || 'N/A'}</div>
-                    <div class="read-meta"><b>Description:</b> ${p.desc || 'None'}</div>
-                    <div class="read-preview-text"><b>Image URL:</b> ${p.imageUrl || 'None'} | <b>Buy Link:</b> ${p.buyLink || '#contact'}</div>
-                    <div class="card-actions">
-                        <button class="btn btn-warning" onclick="enableInlinePackageEdit(${index})"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-                        <button class="btn btn-danger" onclick="deleteSinglePackage(${index})"><i class="fa-solid fa-trash"></i> Delete</button>
+                    <div class="card-header-flex">
+                        <div class="read-title">
+                            <i class="fa-solid fa-grip-vertical drag-handle" title="মাউস চেপে পজিশন পরিবর্তন করুন"></i>
+                            <div class="arrow-btn-group">
+                                <button type="button" class="btn-arrow" onclick="movePackagePosition(${index}, 'up')" title="উপরে তুলুন">▲</button>
+                                <button type="button" class="btn-arrow" onclick="movePackagePosition(${index}, 'down')" title="নিচে নামান">▼</button>
+                            </div>
+                            প্যাকেজ #${index + 1}: ${p.title || '(নাম নেই)'}
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn btn-warning" onclick="enableInlinePackageEdit(${index})"><i class="fa-solid fa-pen-to-square"></i> এডিট</button>
+                            <button class="btn btn-danger" onclick="deleteSinglePackage(${index})"><i class="fa-solid fa-trash"></i> ডিলিট</button>
+                        </div>
                     </div>
+                    <div class="read-subtitle"><b>মূল্য:</b> ${p.price || '৳০'} | <b>মেয়াদ:</b> ${p.duration || 'নাই'}</div>
+                    <div class="read-meta"><b>বিবরণ:</b> ${p.desc || 'নাই'}</div>
+                    <div class="read-preview-text"><b>ইমেজ URL:</b> ${p.imageUrl || 'নাই'} | <b>বাই লিংক:</b> ${p.buyLink || '#contact'}</div>
                 `;
                 container.appendChild(card);
             });
+
+            initGenericDragAndDrop('package-read-container', 'package-drag-item', packageDataList, () => {
+                isPackageReordered = true;
+                renderPackageReadCards();
+            });
+        }
+
+        function movePackagePosition(index, direction) {
+            if (direction === 'up' && index > 0) {
+                const item = packageDataList.splice(index, 1)[0];
+                packageDataList.splice(index - 1, 0, item);
+                isPackageReordered = true;
+                renderPackageReadCards();
+            } else if (direction === 'down' && index < packageDataList.length - 1) {
+                const item = packageDataList.splice(index, 1)[0];
+                packageDataList.splice(index + 1, 0, item);
+                isPackageReordered = true;
+                renderPackageReadCards();
+            }
         }
 
         function enableInlinePackageEdit(index) {
             const p = packageDataList[index];
             const card = document.getElementById(`package-card-${index}`);
+            card.draggable = false;
             card.style.borderLeft = "6px solid #007bff";
             card.style.background = "#ffffff";
 
             card.innerHTML = `
-                <div style="font-weight: bold; margin-bottom: 12px; color: #007bff;">Editing Package #${index + 1}</div>
+                <div style="font-weight: bold; margin-bottom: 12px; color: #007bff;">প্যাকেজ #${index + 1} এডিট করুন</div>
                 <div class="row">
-                    <div class="form-group" style="flex:1;"><label>প্যাকেজের নাম:</label><input type="text" id="edit-pkg-title-${index}" value="${(p.title || '').replace(/"/g, '&quot;')}" required></div>
-                    <div class="form-group" style="flex:1;"><label>মূল্য (যেমন: ৳৪৯৯):</label><input type="text" id="edit-pkg-price-${index}" value="${(p.price || '').replace(/"/g, '&quot;')}" required></div>
-                    <div class="form-group" style="flex:1;"><label>মেয়াদ (যেমন: / ৬ মাস):</label><input type="text" id="edit-pkg-duration-${index}" value="${(p.duration || '').replace(/"/g, '&quot;')}" required></div>
+                    <div class="form-group"><label>প্যাকেজের নাম:</label><input type="text" id="edit-pkg-title-${index}" value="${(p.title || '').replace(/"/g, '&quot;')}" required></div>
+                    <div class="form-group"><label>মূল্য (যেমন: ৳৪৯৯):</label><input type="text" id="edit-pkg-price-${index}" value="${(p.price || '').replace(/"/g, '&quot;')}" required></div>
+                    <div class="form-group"><label>মেয়াদ (যেমন: / ৬ মাস):</label><input type="text" id="edit-pkg-duration-${index}" value="${(p.duration || '').replace(/"/g, '&quot;')}" required></div>
                 </div>
                 <div class="row">
-                    <div class="form-group" style="flex:1;"><label>সংক্ষিপ্ত বিবরণ:</label><input type="text" id="edit-pkg-desc-${index}" value="${(p.desc || '').replace(/"/g, '&quot;')}" required></div>
-                    <div class="form-group" style="flex:1;"><label>ইমেজ URL:</label><input type="text" id="edit-pkg-img-${index}" value="${(p.imageUrl || '').replace(/"/g, '&quot;')}"></div>
+                    <div class="form-group"><label>সংক্ষিপ্ত বিবরণ:</label><input type="text" id="edit-pkg-desc-${index}" value="${(p.desc || '').replace(/"/g, '&quot;')}" required></div>
+                    <div class="form-group"><label>ইমেজ URL:</label><input type="text" id="edit-pkg-img-${index}" value="${(p.imageUrl || '').replace(/"/g, '&quot;')}"></div>
                 </div>
                 <div class="row">
-                    <div class="form-group" style="flex:1;"><label>বাই লিংক (URL):</label><input type="text" id="edit-pkg-buylink-${index}" value="${(p.buyLink || '#contact').replace(/"/g, '&quot;')}"></div>
+                    <div class="form-group"><label>বাই লিংক (URL):</label><input type="text" id="edit-pkg-buylink-${index}" value="${(p.buyLink || '#contact').replace(/"/g, '&quot;')}"></div>
                 </div>
                 <div class="card-actions" style="margin-top: 10px;">
-                    <button class="btn btn-submit" onclick="saveInlinePackageEdit(${index})"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
-                    <button class="btn btn-secondary" onclick="renderPackageReadCards(); checkSaveBtnVisibility('package');"><i class="fa-solid fa-xmark"></i> Cancel</button>
+                    <button class="btn btn-submit" onclick="saveInlinePackageEdit(${index})"><i class="fa-solid fa-floppy-disk"></i> পরিবর্তন সংরক্ষণ করুন</button>
+                    <button class="btn btn-secondary" onclick="renderPackageReadCards(); checkSaveBtnVisibility('package');"><i class="fa-solid fa-xmark"></i> বাতিল করুন</button>
                 </div>
             `;
             showSaveBtn('package');
@@ -622,6 +799,222 @@
             }
         }
 
+        /* ================= 4. MISSION & GOALS SECTION HANDLER (IMAGE LAYOUT SYNCED) ================= */
+        function renderMissionSection() {
+            const container = document.getElementById('mission-container');
+            container.innerHTML = '';
+
+            const sectionTitle = missionInfo ? missionInfo.sectionTitle || 'আমাদের মিশন ও লক্ষ্য' : 'আমাদের মিশন ও লক্ষ্য';
+            const sectionSubtitle = missionInfo ? missionInfo.sectionSubtitle || 'শিক্ষার্থীদের সফলতা ও সঠিক প্রস্তুতির পথ সুগম করাই আমাদের উদ্দেশ্য' : 'শিক্ষার্থীদের সফলতা ও সঠিক প্রস্তুতির পথ সুগম করাই আমাদের উদ্দেশ্য';
+
+            const missionTitle = missionInfo ? missionInfo.missionTitle || 'আমাদের মিশন (Mission)' : 'আমাদের মিশন (Mission)';
+            const missionDesc = missionInfo ? missionInfo.missionDesc || 'বাংলাদেশের যেকোনো প্রান্তের শিক্ষার্থীদের কাছে মানসম্মত ও তথ্যসমৃদ্ধ প্রস্তুতিমূলক কুইজ পৌঁছে দেওয়া...' : 'বাংলাদেশের যেকোনো প্রান্তের শিক্ষার্থীদের কাছে মানসম্মত ও তথ্যসমৃদ্ধ প্রস্তুতিমূলক কুইজ পৌঁছে দেওয়া...';
+
+            const goalTitle = missionInfo ? missionInfo.goalTitle || 'আমাদের লক্ষ্য (Goal)' : 'আমাদের লক্ষ্য (Goal)';
+            const goalDesc = missionInfo ? missionInfo.goalDesc || 'একটি আধুনিক, সহজ ও কার্যকর লার্নিং প্ল্যাটফর্ম হিসেবে প্রতিটি প্রতিযোগিতামূলক পরীক্ষার পরীক্ষার্থীর প্রথম পছন্দ হয়ে ওঠা...' : 'একটি আধুনিক, সহজ ও কার্যকর লার্নিং প্ল্যাটফর্ম হিসেবে প্রতিটি প্রতিযোগিতামূলক পরীক্ষার পরীক্ষার্থীর প্রথম পছন্দ হয়ে ওঠা...';
+
+            if (missionInfo && (missionInfo.sectionTitle || missionInfo.missionDesc)) {
+                container.innerHTML = `
+                    <div class="read-box" style="border-left: 5px solid var(--purple-btn);">
+                        <div class="read-title"><i class="fa-solid fa-bullseye" style="color: var(--purple-btn);"></i> ${sectionTitle}</div>
+                        <div class="read-subtitle"><b>সেকশন সাব-টাইটেল:</b> ${sectionSubtitle}</div>
+                        <div class="read-meta" style="margin-top: 10px;">
+                            <b>${missionTitle}:</b> ${missionDesc}
+                        </div>
+                        <div class="read-meta" style="margin-top: 5px;">
+                            <b>${goalTitle}:</b> ${goalDesc}
+                        </div>
+                        <div class="card-actions" style="margin-top: 15px;">
+                            <button class="btn btn-warning" onclick="editMissionSection()"><i class="fa-solid fa-pen-to-square"></i> এডিট</button>
+                            <button class="btn btn-danger" onclick="deleteMissionSection()"><i class="fa-solid fa-trash"></i> ডিলিট</button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <button class="btn btn-add" onclick="editMissionSection(true)">
+                        <i class="fa-solid fa-plus"></i> মিশন ও লক্ষ্য তথ্য যোগ করুন
+                    </button>
+                `;
+            }
+        }
+
+        function editMissionSection(isNew = false) {
+            const container = document.getElementById('mission-container');
+
+            const sectionTitle = missionInfo ? missionInfo.sectionTitle || '' : 'আমাদের মিশন ও লক্ষ্য';
+            const sectionSubtitle = missionInfo ? missionInfo.sectionSubtitle || '' : 'শিক্ষার্থীদের সফলতা ও সঠিক প্রস্তুতির পথ সুগম করাই আমাদের উদ্দেশ্য';
+
+            const missionTitle = missionInfo ? missionInfo.missionTitle || '' : 'আমাদের মিশন (Mission)';
+            const missionDesc = missionInfo ? missionInfo.missionDesc || '' : 'বাংলাদেশের যেকোনো প্রান্তের শিক্ষার্থীদের কাছে মানসম্মত ও তথ্যসমৃদ্ধ প্রস্তুতিমূলক কুইজ পৌঁছে দেওয়া, যাতে তারা ঘরে বসেই রিয়েল-টাইম মূল্যায়নের মাধ্যমে নিজের আত্মবিশ্বাস বৃদ্ধি করতে পারে।';
+
+            const goalTitle = missionInfo ? missionInfo.goalTitle || '' : 'আমাদের লক্ষ্য (Goal)';
+            const goalDesc = missionInfo ? missionInfo.goalDesc || '' : 'একটি আধুনিক, সহজ ও কার্যকর লার্নিং প্ল্যাটফর্ম হিসেবে প্রতিটি প্রতিযোগিতামূলক পরীক্ষার পরীক্ষার্থীর প্রথম পছন্দ হয়ে ওঠা এবং ব্যাখ্যামূলক অনুশীলনের মাধ্যমে তাদের শতভাগ সাফল্য নিশ্চিত করা।';
+
+            container.innerHTML = `
+                <div class="read-box" style="border-left: 5px solid #007bff; background: #ffffff;">
+                    <div style="font-weight: bold; margin-bottom: 12px; color: #007bff; font-size: 16px;">
+                        ${isNew ? 'নতুন মিশন ও লক্ষ্য যোগ করুন' : 'মিশন ও লক্ষ্য এডিট করুন'}
+                    </div>
+                    <div class="row">
+                        <div class="form-group">
+                            <label>সেকশন টাইটেল:</label>
+                            <input type="text" id="mission-sec-title-input" value="${sectionTitle.replace(/"/g, '&quot;')}">
+                        </div>
+                        <div class="form-group">
+                            <label>সেকশন সাব-টাইটেল:</label>
+                            <input type="text" id="mission-sec-subtitle-input" value="${sectionSubtitle.replace(/"/g, '&quot;')}">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group">
+                            <label>মিশন টাইটেল:</label>
+                            <input type="text" id="mission-title-input" value="${missionTitle.replace(/"/g, '&quot;')}">
+                        </div>
+                        <div class="form-group">
+                            <label>মিশন বিস্তারিত বিবরণ:</label>
+                            <textarea id="mission-desc-input" rows="2">${missionDesc}</textarea>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group">
+                            <label>লক্ষ্য (Goal) টাইটেল:</label>
+                            <input type="text" id="goal-title-input" value="${goalTitle.replace(/"/g, '&quot;')}">
+                        </div>
+                        <div class="form-group">
+                            <label>লক্ষ্য (Goal) বিস্তারিত বিবরণ:</label>
+                            <textarea id="goal-desc-input" rows="2">${goalDesc}</textarea>
+                        </div>
+                    </div>
+                    <div class="card-actions" style="margin-top: 15px;">
+                        <button class="btn btn-submit" onclick="saveMissionSection()"><i class="fa-solid fa-floppy-disk"></i> পরিবর্তন সংরক্ষণ করুন</button>
+                        <button class="btn btn-secondary" onclick="renderMissionSection()"><i class="fa-solid fa-xmark"></i> বাতিল করুন</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function saveMissionSection() {
+            missionInfo = {
+                sectionTitle: document.getElementById('mission-sec-title-input').value,
+                sectionSubtitle: document.getElementById('mission-sec-subtitle-input').value,
+                missionTitle: document.getElementById('mission-title-input').value,
+                missionDesc: document.getElementById('mission-desc-input').value,
+                goalTitle: document.getElementById('goal-title-input').value,
+                goalDesc: document.getElementById('goal-desc-input').value
+            };
+            await saveHomeConfig();
+            renderMissionSection();
+        }
+
+        async function deleteMissionSection() {
+            if (await showTopAlert("আপনি কি নিশ্চিত যে মিশন ও লক্ষ্য মুছে ফেলতে চান?", 'danger', true)) {
+                missionInfo = null;
+                await saveHomeConfig();
+                renderMissionSection();
+            }
+        }
+
+        /* ================= DRAG AND DROP & ACTION BAR HELPERS ================= */
+        function updateSectionActionBar(type) {
+            const actionBar = document.getElementById(`${type}-action-bar`);
+            let isReordered = false;
+
+            if (type === 'slider') isReordered = isSliderReordered;
+            if (type === 'demo') isReordered = isDemoReordered;
+            if (type === 'package') isReordered = isPackageReordered;
+
+            let reorderBtns = '';
+            if (isReordered) {
+                reorderBtns = `
+                    <button class="btn btn-submit" onclick="saveReorderedSection('${type}')"><i class="fa-solid fa-floppy-disk"></i> অবস্থান সংরক্ষণ করুন</button>
+                    <button class="btn btn-secondary" onclick="fetchHomeConfig()"><i class="fa-solid fa-xmark"></i> বাতিল করুন</button>
+                `;
+            }
+
+            const labelMap = { slider: 'স্লাইডার', demo: 'ডেমো কুইজ', package: 'প্যাকেজ' };
+            const funcMap = { slider: 'addSliderRow', demo: 'addDemoRow', package: 'addPackageRow' };
+
+            actionBar.innerHTML = `
+                <button type="button" class="btn-add" onclick="${funcMap[type]}();">
+                    <i class="fa-solid fa-plus"></i> ${labelMap[type]} যোগ করুন
+                </button>
+                ${reorderBtns}
+                <button type="button" class="btn-save-section" id="save-${type}-btn" onclick="saveHomeConfig()">
+                    <i class="fa-solid fa-floppy-disk"></i> সেভ করুন
+                </button>
+            `;
+        }
+
+        async function saveReorderedSection(type) {
+            await saveHomeConfig();
+            if (type === 'slider') isSliderReordered = false;
+            if (type === 'demo') isDemoReordered = false;
+            if (type === 'package') isPackageReordered = false;
+            
+            if (type === 'slider') renderSliderReadCards();
+            if (type === 'demo') renderDemoReadCards();
+            if (type === 'package') renderPackageReadCards();
+        }
+
+        function initGenericDragAndDrop(containerId, itemClass, dataList, onReorderCallback) {
+            const container = document.getElementById(containerId);
+            const items = container.querySelectorAll(`.${itemClass}`);
+            let draggedIdx = null;
+
+            const clearIndicator = (el) => el.classList.remove('drag-over-top', 'drag-over-bottom');
+
+            items.forEach(item => {
+                item.addEventListener('dragstart', (e) => {
+                    draggedIdx = parseInt(item.dataset.index);
+                    item.classList.add('dragging');
+                    e.dataTransfer.effectAllowed = 'move';
+                });
+
+                item.addEventListener('dragend', () => {
+                    item.classList.remove('dragging');
+                    clearIndicator(item);
+                });
+
+                item.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+
+                    const rect = item.getBoundingClientRect();
+                    const offset = e.clientY - rect.top;
+                    if (offset < rect.height / 2) {
+                        item.classList.add('drag-over-top');
+                        item.classList.remove('drag-over-bottom');
+                    } else {
+                        item.classList.add('drag-over-bottom');
+                        item.classList.remove('drag-over-top');
+                    }
+                });
+
+                item.addEventListener('dragleave', () => clearIndicator(item));
+
+                item.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    clearIndicator(item);
+
+                    let targetIdx = parseInt(item.dataset.index);
+                    const rect = item.getBoundingClientRect();
+                    const offset = e.clientY - rect.top;
+
+                    if (offset >= rect.height / 2 && targetIdx < draggedIdx) {
+                        targetIdx++;
+                    }
+
+                    if (draggedIdx !== null && draggedIdx !== targetIdx) {
+                        const movedItem = dataList.splice(draggedIdx, 1)[0];
+                        dataList.splice(targetIdx, 0, movedItem);
+                        onReorderCallback();
+                    }
+                });
+            });
+        }
+
         /* ================= SAVE ALL CONFIG TO BACKEND ================= */
         async function saveHomeConfig() {
             const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
@@ -672,7 +1065,8 @@
                         demoQuizzes: finalDemoQuizzes, 
                         packages: finalPackages,
                         demoSectionInfo: demoHeaderInfo,
-                        packageSectionInfo: packageHeaderInfo
+                        packageSectionInfo: packageHeaderInfo,
+                        missionSectionInfo: missionInfo
                     })
                 });
 

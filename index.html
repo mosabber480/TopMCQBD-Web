@@ -97,20 +97,9 @@
     </section>
 
     <section class="section-container" id="mission">
-        <div class="mission-section">
-            <h2 class="section-title">আমাদের মিশন ও লক্ষ্য</h2>
-            <p class="section-subtitle">শিক্ষার্থীদের সফলতা ও সঠিক প্রস্তুতির পথ সুগম করাই আমাদের উদ্দেশ্য</p>
-
-            <div class="mission-grid">
-                <div class="mission-box">
-                    <h3><i class="fa-solid fa-bullseye"></i> আমাদের মিশন (Mission)</h3>
-                    <p>বাংলাদেশের যেকোনো প্রান্তের শিক্ষার্থীদের কাছে মানসম্মত ও তথ্যসমৃদ্ধ প্রস্তুতিমূলক কুইজ পৌঁছে দেওয়া, যাতে তারা ঘরে বসেই রিয়েল-টাইম মূল্যায়নের মাধ্যমে নিজের আত্মবিশ্বাস বৃদ্ধি করতে পারে।</p>
-                </div>
-                <div class="mission-box">
-                    <h3><i class="fa-solid fa-rocket"></i> আমাদের লক্ষ্য (Goal)</h3>
-                    <p>একটি আধুনিক, সহজ ও কার্যকর লার্নিং প্ল্যাটফর্ম হিসেবে প্রতিটি প্রতিযোগিতামূলক পরীক্ষার পরীক্ষার্থীর প্রথম পছন্দ হয়ে ওঠা এবং ব্যাখ্যামূলক অনুশীলনের মাধ্যমে তাদের শতভাগ সাফল্য নিশ্চিত করা।</p>
-                </div>
-            </div>
+        <!-- DYNAMIC MISSION & GOAL CONTAINER -->
+        <div class="mission-section" id="mission-wrapper">
+            <div class="loading-box"><i class="fa-solid fa-spinner fa-spin"></i> লোড হচ্ছে...</div>
         </div>
     </section>
 
@@ -131,6 +120,7 @@
                 const res = await fetch(API_URL);
                 const data = await res.json();
 
+                // 1. SLIDERS DYNAMIC LOAD
                 const sliderWrapper = document.getElementById('slider-wrapper');
                 const sliderDots = document.getElementById('slider-dots');
 
@@ -163,6 +153,7 @@
                     sliderWrapper.innerHTML = `<p style="text-align:center; padding: 40px; color:white;">কোনো স্লাইডার পাওয়া যায়নি।</p>`;
                 }
 
+                // 2. DEMO QUIZZES DYNAMIC LOAD
                 const demoTitleEl = document.getElementById('demo-section-title');
                 const demoSubEl = document.getElementById('demo-section-subtitle');
                 if (data.demoSectionInfo && data.demoSectionInfo.title) {
@@ -186,6 +177,7 @@
                     demoWrapper.innerHTML = `<p style="text-align:center;">কোনো ডেমো কুইজ পাওয়া যায়নি।</p>`;
                 }
 
+                // 3. PACKAGES DYNAMIC LOAD
                 const pkgTitleEl = document.getElementById('package-section-title');
                 const pkgSubEl = document.getElementById('package-section-subtitle');
                 if (data.packageSectionInfo && data.packageSectionInfo.title) {
@@ -208,6 +200,35 @@
                     `).join('');
                 } else {
                     pkgWrapper.innerHTML = `<p style="text-align:center;">কোনো প্যাকেজ পাওয়া যায়নি।</p>`;
+                }
+
+                // 4. MISSION & GOALS DYNAMIC LOAD
+                const missionWrapper = document.getElementById('mission-wrapper');
+                if (data.missionSectionInfo && (data.missionSectionInfo.sectionTitle || data.missionSectionInfo.missionDesc)) {
+                    const m = data.missionSectionInfo;
+                    document.getElementById('mission').style.display = 'block';
+                    missionWrapper.innerHTML = `
+                        <h2 class="section-title">${m.sectionTitle || 'আমাদের মিশন ও লক্ষ্য'}</h2>
+                        <p class="section-subtitle">${m.sectionSubtitle || ''}</p>
+
+                        <div class="mission-grid">
+                            ${m.missionTitle || m.missionDesc ? `
+                                <div class="mission-box">
+                                    <h3><i class="fa-solid fa-bullseye"></i> ${m.missionTitle || 'আমাদের মিশন (Mission)'}</h3>
+                                    <p>${m.missionDesc || ''}</p>
+                                </div>
+                            ` : ''}
+                            ${m.goalTitle || m.goalDesc ? `
+                                <div class="mission-box">
+                                    <h3><i class="fa-solid fa-rocket"></i> ${m.goalTitle || 'আমাদের লক্ষ্য (Goal)'}</h3>
+                                    <p>${m.goalDesc || ''}</p>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                } else {
+                    // ড্যাশবোর্ড থেকে মিশন ও লক্ষ্য মুছে ফেললে ফ্রন্টএন্ডে সেকশনটি হাইড হয়ে থাকবে
+                    document.getElementById('mission').style.display = 'none';
                 }
 
             } catch (err) {
