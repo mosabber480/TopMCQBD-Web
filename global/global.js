@@ -76,23 +76,27 @@ function formatURL(url) {
     return 'https://' + trimmed;
 }
 
-// Helper Function: Smart Auth Redirect based on Role & Token
+// Helper Function: Smart Auth Redirect based on Role, Token & Folder Structure
 function getAuthRedirectLink() {
     const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
     const userStr = localStorage.getItem('user') || localStorage.getItem('quiz_user');
     
+    // Check if currently inside pages or admin folder
+    const isSubFolder = window.location.pathname.includes('/pages/') || window.location.pathname.includes('/admin/');
+    const prefix = isSubFolder ? '../' : '';
+
     if (!token) {
-        return 'login.html';
+        return prefix + 'pages/login.html';
     }
     
     try {
         const user = JSON.parse(userStr || '{}');
         if (user && (user.role === 'owner' || user.role === 'admin')) {
-            return 'dashboard.html';
+            return prefix + 'admin/dashboard.html';
         }
     } catch(e){}
     
-    return 'profile.html';
+    return prefix + 'pages/profile.html';
 }
 
 // Optimized Function: Load from Cache first, then Revalidate from Server (SWR)
@@ -129,6 +133,10 @@ async function renderGlobalLayout() {
 // Function: Pure DOM Builder
 function applyLayoutToDOM(data) {
     if (!data) return;
+
+    // Detect SubFolder
+    const isSubFolder = window.location.pathname.includes('/pages/') || window.location.pathname.includes('/admin/');
+    const homePath = isSubFolder ? '../index.html' : 'index.html';
 
     // A. Dynamic SEO Title & Favicon
     if (data.header) {
@@ -189,7 +197,7 @@ function applyLayoutToDOM(data) {
 
         // Auth Status and Action Link
         const authLink = getAuthRedirectLink();
-        const isLoggedIn = authLink !== 'login.html';
+        const isLoggedIn = !authLink.endsWith('login.html');
         const userStr = localStorage.getItem('user') || localStorage.getItem('quiz_user');
         let userName = 'লগইন';
         if (isLoggedIn) {
@@ -203,7 +211,7 @@ function applyLayoutToDOM(data) {
         // Header Action Buttons (Fully Controlled from Dashboard Settings)
         let customBtnText = (h.btnText && h.btnText.trim()) ? h.btnText.trim() : 'যোগাযোগ করুন';
         let rawLink = (h.btnLink || '').trim();
-        let customBtnLink = (rawLink && rawLink !== 'login.html') ? formatURL(rawLink) : 'index.html#mission';
+        let customBtnLink = (rawLink && !rawLink.endsWith('login.html')) ? formatURL(rawLink) : homePath + '#mission';
 
         let headerBtnHTML = `
             <div class="header-btn-group">
@@ -219,7 +227,7 @@ function applyLayoutToDOM(data) {
         headerContainer.innerHTML = `
             <div class="header-wrapper">
                 <div class="site-logo">
-                    <a href="index.html">${logoHTML}</a>
+                    <a href="${homePath}">${logoHTML}</a>
                 </div>
                 
                 <button class="mobile-toggle-btn" id="mobile-toggle-btn" aria-label="Toggle Navigation">

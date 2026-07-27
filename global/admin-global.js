@@ -19,7 +19,7 @@ function renderAdminNavbar() {
                 <a href="users.html" class="btn-nav btn-payment-users">
                     <i class="fa-solid fa-credit-card"></i> Payment & Users
                 </a>
-                <a href="index.html" class="btn-nav btn-outline" target="_blank">
+                <a href="../index.html" class="btn-nav btn-outline" target="_blank">
                     <i class="fa-solid fa-globe"></i> মূল ওয়েবসাইট
                 </a>
                 <button class="btn-nav btn-danger-nav" onclick="logout()">

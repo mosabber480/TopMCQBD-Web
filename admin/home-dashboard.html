@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home Page Control Panel - TopMCQ</title>
     
-    <!-- Instant Auth Check -->
+    <!-- Instant Auth Check (Updated path for Root/Pages login.html) -->
     <script>
         (function checkAuth() {
             const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
             if (!token) {
-                window.location.replace('login.html');
+                window.location.replace('../login.html');
             }
         })();
     </script>
@@ -18,8 +18,8 @@
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- GLOBAL CSS LINK -->
-    <link rel="stylesheet" href="global/global.css">
+    <!-- GLOBAL CSS LINK (Updated path for /admin folder) -->
+    <link rel="stylesheet" href="../global/global.css">
 
     <style>
         :root {
@@ -192,7 +192,7 @@
                 <a href="dashboard.html" class="btn-nav btn-main-dash"><i class="fa-solid fa-house"></i> মূল ড্যাশবোর্ড</a>
                 <a href="quiz-dashboard.html" class="btn-nav btn-mcq-dash"><i class="fa-solid fa-pen-to-square"></i> MCQ ড্যাশবোর্ড</a>
                 <a href="users.html" class="btn-nav btn-payment-users"><i class="fa-solid fa-credit-card"></i> পেমেন্ট ও ব্যবহারকারী</a>
-                <a href="index.html" class="btn-nav btn-outline" target="_blank"><i class="fa-solid fa-globe"></i> মূল ওয়েবসাইট</a>
+                <a href="../index.html" class="btn-nav btn-outline" target="_blank"><i class="fa-solid fa-globe"></i> মূল ওয়েবসাইট</a>
                 <button class="btn-nav btn-danger-nav" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> লগআউট</button>
             </div>
         </div>
@@ -261,8 +261,8 @@
         </div>
     </div>
 
-    <!-- GLOBAL JS LINK -->
-    <script src="global/global.js"></script>
+    <!-- GLOBAL JS LINK (Updated path for /admin folder) -->
+    <script src="../global/global.js"></script>
 
     <script>
         const CONFIG_API_URL = 'https://mosabber-quiz-app.onrender.com/api/home-config';
@@ -1112,7 +1112,7 @@
                 localStorage.removeItem('user');
                 localStorage.removeItem('quiz_token');
                 localStorage.removeItem('quiz_user');
-                window.location.replace('login.html');
+                window.location.replace('../login.html');
             }
         }
 

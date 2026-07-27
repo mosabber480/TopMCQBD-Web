@@ -8,7 +8,7 @@
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- GLOBAL CSS LINK -->
+    <!-- GLOBAL CSS LINK (Root level path for /pages files) -->
     <link rel="stylesheet" href="global/global.css">
     
     <style>
@@ -35,7 +35,7 @@
             border-radius: 10px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.08);
             width: 100%;
-            max-width: 440px; /* সুন্দর ডিজাইনের জন্য নির্দিষ্ট কম উইডথ */
+            max-width: 440px;
             border: 1px solid #e2e8f0;
         }
 
@@ -190,6 +190,7 @@
         <footer id="global-footer"></footer>
     </div>
 
+    <!-- GLOBAL JS LINK (Root level path for /pages files) -->
     <script src="global/global.js"></script>
 
     <script>
@@ -265,7 +266,7 @@
                     
                     setTimeout(() => {
                         if (data.user && (data.user.role === 'owner' || data.user.role === 'admin')) {
-                            window.location.href = 'dashboard.html';
+                            window.location.href = 'admin/dashboard.html';
                         } else {
                             window.location.href = 'profile.html';
                         }

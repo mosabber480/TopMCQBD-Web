@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>প্রিপারেশন প্যাকেজসমূহ - TopMCQ</title>
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- GLOBAL CSS LINK (Root level path for /pages files) -->
+    <link rel="stylesheet" href="global/global.css">
+    
+    <style>
+        .page-banner {
+            background: linear-gradient(135deg, var(--dark, #2c3e50), #1a252f);
+            color: white;
+            padding: 50px 20px;
+            text-align: center;
+        }
+        .page-banner h1 { font-size: 32px; font-weight: 800; margin-bottom: 10px; }
+        .page-banner p { font-size: 16px; color: #cbd5e1; }
+
+        .packages-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        .package-card {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            padding: 30px 25px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .package-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .package-card.popular {
+            border: 2px solid var(--primary, #007bff);
+        }
+
+        .popular-badge {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary, #007bff);
+            color: white;
+            padding: 4px 14px;
+            font-size: 12px;
+            font-weight: 700;
+            border-radius: 20px;
+            text-transform: uppercase;
+        }
+
+        .pkg-title {
+            font-size: 22px;
+            color: var(--dark, #2c3e50);
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .pkg-price {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--primary, #007bff);
+            margin-bottom: 20px;
+        }
+
+        .pkg-price span {
+            font-size: 14px;
+            color: #718096;
+            font-weight: normal;
+        }
+
+        .pkg-features {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 25px 0;
+            text-align: left;
+        }
+
+        .pkg-features li {
+            font-size: 14px;
+            color: #4a5568;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .pkg-features li i {
+            color: #28a745;
+        }
+
+        .btn-buy {
+            background-color: var(--primary, #007bff);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-buy:hover {
+            background-color: var(--primary-dark, #0056b3);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- DYNAMIC GLOBAL LAYOUT CONTAINERS -->
+    <div id="global-announce-bar" style="display:none;"></div>
+    <header id="global-header"></header>
+
+    <div class="page-banner">
+        <h1>আমাদের প্রিপারেশন প্যাকেজসমূহ</h1>
+        <p>আপনার সুবিধামত প্যাকেজ বেছে নিয়ে আজই শুরু করুন সেরা কুইজ প্রস্তুতি</p>
+    </div>
+
+    <main class="packages-container" id="packagesWrapper">
+        
+        <!-- PACKAGE 1: Basic Plan -->
+        <div class="package-card">
+            <div>
+                <h3 class="pkg-title">১ মাস মেয়াদী</h3>
+                <div class="pkg-price">৳১৯৯ <span>/ ৩০ দিন</span></div>
+                <ul class="pkg-features">
+                    <li><i class="fa-solid fa-circle-check"></i> সকল বিষয়ের কুইজ এক্সেস</li>
+                    <li><i class="fa-solid fa-circle-check"></i> ব্যাখ্যামূলক সঠিক উত্তর</li>
+                    <li><i class="fa-solid fa-circle-check"></i> তাত্ক্ষণিক ফলাফল বিশ্লেষণ</li>
+                    <li><i class="fa-solid fa-circle-check"></i> ২৪/৭ ওয়েবসাইট সাপোর্ট</li>
+                </ul>
+            </div>
+            <a href="login.html" class="btn-buy" onclick="handlePackageBuy('1_month')">সাবস্ক্রাইব করুন</a>
+        </div>
+
+        <!-- PACKAGE 2: Popular Plan -->
+        <div class="package-card popular">
+            <span class="popular-badge">সবচেয়ে জনপ্রিয়</span>
+            <div>
+                <h3 class="pkg-title">৩ মাস মেয়াদী</h3>
+                <div class="pkg-price">৳৪৯৯ <span>/ ৯০ দিন</span></div>
+                <ul class="pkg-features">
+                    <li><i class="fa-solid fa-circle-check"></i> সকল বিষয়ের কুইজ এক্সেস</li>
+                    <li><i class="fa-solid fa-circle-check"></i> ব্যাখ্যামূলক সঠিক উত্তর</li>
+                    <li><i class="fa-solid fa-circle-check"></i> মডেল টেস্ট অনুশীলনের সুযোগ</li>
+                    <li><i class="fa-solid fa-circle-check"></i> নিয়মিত নতুন প্রশ্ন আপডেট</li>
+                </ul>
+            </div>
+            <a href="login.html" class="btn-buy" onclick="handlePackageBuy('3_month')">সাবস্ক্রাইব করুন</a>
+        </div>
+
+        <!-- PACKAGE 3: Long Term Plan -->
+        <div class="package-card">
+            <div>
+                <h3 class="pkg-title">৬ মাস মেয়াদী</h3>
+                <div class="pkg-price">৳৭৯৯ <span>/ ১৮০ দিন</span></div>
+                <ul class="pkg-features">
+                    <li><i class="fa-solid fa-circle-check"></i> আনলিমিটেড কুইজ এক্সেস</li>
+                    <li><i class="fa-solid fa-circle-check"></i> সকল মডেল টেস্ট ফ্রিতে</li>
+                    <li><i class="fa-solid fa-circle-check"></i> পার্সোনাল পারফরম্যান্স রিপোর্ট</li>
+                    <li><i class="fa-solid fa-circle-check"></i> প্রাইওরিটি হেল্পলাইন সাপোর্ট</li>
+                </ul>
+            </div>
+            <a href="login.html" class="btn-buy" onclick="handlePackageBuy('6_month')">সাবস্ক্রাইব করুন</a>
+        </div>
+
+    </main>
+
+    <!-- DYNAMIC FOOTER CONTAINER -->
+    <footer id="global-footer"></footer>
+
+    <!-- GLOBAL JS LINK (Root level path for /pages files) -->
+    <script src="global/global.js"></script>
+
+    <script>
+        function handlePackageBuy(planType) {
+            const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
+            if (token) {
+                // ইউজার লগইন থাকলে প্রফাইল পেজে নিয়ে যাবে
+                window.location.href = 'profile.html';
+            } else {
+                // লগইন না থাকলে লগইন পেজে নিয়ে যাবে
+                window.location.href = 'login.html';
+            }
+        }
+    </script>
+</body>
+</html>

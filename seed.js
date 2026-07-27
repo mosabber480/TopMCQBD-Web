@@ -107,7 +107,8 @@ const quizData = [
 const QuestionSchema = new mongoose.Schema({
     q: String,
     options: [String],
-    ans: Number
+    ans: Number,
+    category: { type: String, default: 'বাংলা/ব্যাকরণ/সন্ধি' }
 });
 
 const Question = mongoose.model('Question', QuestionSchema);
@@ -115,8 +116,14 @@ const Question = mongoose.model('Question', QuestionSchema);
 async function importData() {
     try {
         await mongoose.connect(process.env.MONGO_URI);
-        await Question.deleteMany(); // আগের পুরোনো থাকলে পরিষ্কার করবে
-        await Question.insertMany(quizData); // নতুন ১০০টি প্রশ্ন ঢোকাবে
+        await Question.deleteMany(); 
+        
+        const preparedData = quizData.map(item => ({
+            ...item,
+            category: 'বাংলা/ব্যাকরণ/সন্ধি'
+        }));
+
+        await Question.insertMany(preparedData); 
         console.log("Success: All 100 questions uploaded to Database!");
         process.exit();
     } catch (err) {

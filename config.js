@@ -47,6 +47,10 @@ async function loadLayoutConfig() {
 function renderLayout(data) {
     if (!data) return;
 
+    // 🌟 Check if current page is inside /pages/ or /admin/ subfolder
+    const isSubFolder = window.location.pathname.includes('/pages/') || window.location.pathname.includes('/admin/');
+    const homePath = isSubFolder ? '../index.html' : 'index.html';
+
     // A. Dynamic SEO Title & Favicon
     if (data.header) {
         if (data.header.seoTitle) document.title = data.header.seoTitle;
@@ -105,7 +109,7 @@ function renderLayout(data) {
             headerContainer.innerHTML = `
                 <div class="header-wrapper">
                     <div class="site-logo">
-                        <a href="index.html">
+                        <a href="${homePath}">
                             ${h.logoUrl ? `<img src="${h.logoUrl}" alt="${h.siteTitle || 'Logo'}">` : `<h2>${h.siteTitle || 'TopMCQ'}</h2>`}
                         </a>
                     </div>

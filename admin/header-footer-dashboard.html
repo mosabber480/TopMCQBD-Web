@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Header & Footer Dashboard - TopMCQ</title>
     
-    <!-- Instant Auth Check -->
+    <!-- Instant Auth Check (Updated path for Root/Pages login.html) -->
     <script>
         (function checkAuth() {
             const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
             if (!token) {
-                window.location.replace('login.html');
+                window.location.replace('../login.html');
             }
         })();
     </script>
@@ -18,8 +18,8 @@
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- GLOBAL CSS LINK -->
-    <link rel="stylesheet" href="global/global.css">
+    <!-- GLOBAL CSS LINK (Updated relative path from /admin folder) -->
+    <link rel="stylesheet" href="../global/global.css">
 
     <style>
         :root {
@@ -233,9 +233,9 @@
 
     </div>
 
-    <!-- GLOBAL JS LINKS -->
-    <script src="global/global.js"></script>
-    <script src="global/admin-global.js"></script>
+    <!-- GLOBAL JS LINKS (Updated relative paths from /admin folder) -->
+    <script src="../global/global.js"></script>
+    <script src="../global/admin-global.js"></script>
 
     <script>
         // Use window.LAYOUT_API_URL to prevent redeclaration SyntaxError
@@ -249,7 +249,7 @@
         let isMenuReordered = false;
         let isFooterReordered = {};
 
-        // GLOBAL LOGOUT FUNCTION
+        // GLOBAL LOGOUT FUNCTION (Updated path to redirect to root/pages login.html)
         async function logout() {
             const confirmLogout = await showTopAlert('আপনি কি নিশ্চিত যে লগআউট করতে চান?', 'warning', true);
             if (confirmLogout) {
@@ -257,7 +257,7 @@
                 localStorage.removeItem('quiz_user');
                 localStorage.removeItem('token');
                 localStorage.removeItem('user');
-                window.location.href = 'login.html';
+                window.location.href = '../login.html';
             }
         }
 

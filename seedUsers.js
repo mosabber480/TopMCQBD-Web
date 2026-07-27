@@ -29,7 +29,7 @@ const initialUsers = [
         name: 'General User',
         email: 'user@example.com',
         password: 'userpassword123',
-        role: 'customer' // 'user' এর জায়গায় 'customer' ব্যবহার করা হয়েছে
+        role: 'customer'
     }
 ];
 

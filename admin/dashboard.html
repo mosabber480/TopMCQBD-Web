@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>অ্যাডমিন ড্যাশবোর্ড - TopMCQ</title>
     
-    <!-- Instant Auth Check (No Popup Alert & Direct Redirect) -->
+    <!-- Instant Auth Check (Updated path for Root/Pages login.html) -->
     <script>
         (function checkAuth() {
             const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
             if (!token) {
-                window.location.replace('login.html');
+                window.location.replace('../login.html');
             }
         })();
     </script>
@@ -18,8 +18,8 @@
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- GLOBAL CSS LINK -->
-    <link rel="stylesheet" href="global/global.css">
+    <!-- GLOBAL CSS LINK (Updated path for /admin folder) -->
+    <link rel="stylesheet" href="../global/global.css">
 
     <style>
         :root {
@@ -281,9 +281,9 @@
         </div>
     </div>
 
-    <!-- GLOBAL JS LINKS -->
-    <script src="global/global.js"></script>
-    <script src="global/admin-global.js"></script>
+    <!-- GLOBAL JS LINKS (Updated paths for /admin folder) -->
+    <script src="../global/global.js"></script>
+    <script src="../global/admin-global.js"></script>
 
     <!-- User Profile Loader & Logout Handler -->
     <script>
@@ -300,7 +300,7 @@
                 localStorage.removeItem('user');
                 localStorage.removeItem('quiz_token');
                 localStorage.removeItem('quiz_user');
-                window.location.replace('login.html');
+                window.location.replace('../login.html');
             }
         }
     </script>

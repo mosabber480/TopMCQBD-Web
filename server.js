@@ -20,7 +20,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
-// Serve Static Frontend Files directly from root directory
+// ------------------- STATIC FILES & ROUTING SETUP -------------------
+// 1. Pages Directory (Mapped directly to ROOT '/' for clean SEO URLs)
+app.use(express.static(path.join(__dirname, 'pages')));
+
+// 2. Admin & Global Folders
+app.use('/admin', express.static(path.join(__dirname, 'admin')));
+app.use('/global', express.static(path.join(__dirname, 'global')));
+
+// 3. Root Directory Fallback
 app.use(express.static(__dirname));
 
 // Multer Setup for Memory Storage
@@ -454,10 +462,10 @@ app.post('/api/questions/upload-csv', verifyToken, authorizeRoles('owner', 'admi
 });
 
 // ------------------- FRONTEND FALLBACK ROUTE -------------------
-// Safe Catch-all middleware for non-API GET requests
+// Safe Catch-all middleware for non-API GET requests (Serves index.html from /pages or root)
 app.use((req, res, next) => {
     if (req.method === 'GET' && !req.path.startsWith('/api')) {
-        return res.sendFile(path.join(__dirname, 'index.html'));
+        return res.sendFile(path.join(__dirname, 'pages', 'index.html'));
     }
     res.status(404).json({ success: false, message: 'API Route not found' });
 });
