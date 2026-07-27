@@ -80,7 +80,6 @@ function getAuthRedirectLink() {
     const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
     const userStr = localStorage.getItem('user') || localStorage.getItem('quiz_user');
     
-    // ফাইলগুলো এখন রুটে আছে, তাই অতিরিক্ত ফোল্ডার প্রিফিক্স প্রয়োজন নেই
     if (!token) {
         return 'login.html'; 
     }
@@ -206,12 +205,13 @@ function applyLayoutToDOM(data) {
         let rawLink = (h.btnLink || '').trim();
         let customBtnLink = (rawLink && !rawLink.includes('login.html')) ? formatURL(rawLink) : homePath + '#mission';
 
+        // এখানে প্রোফাইল বাটনের ব্যাকগ্রাউন্ড কালো (black) এবং বর্ডার কালো করা হয়েছে
         let headerBtnHTML = `
             <div class="header-btn-group">
                 <a href="${customBtnLink}" class="btn-primary-head">
                     <i class="fa-solid fa-headset"></i> ${customBtnText}
                 </a>
-                <a href="${authLink}" class="btn-auth-head">
+                <a href="${authLink}" class="btn-auth-head" style="background-color: #1d283a !important; color: white !important; border: 1px solid #1d283a !important;">
                     <i class="fa-solid fa-circle-user"></i> ${userName}
                 </a>
             </div>

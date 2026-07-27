@@ -62,24 +62,6 @@
             transition: all 0.2s ease;
         }
 
-        .btn-home-control {
-            background-color: var(--warning);
-            color: white;
-        }
-
-        .btn-home-control:hover {
-            background-color: #e08b38;
-        }
-
-        .btn-layout-control {
-            background-color: var(--purple-btn);
-            color: white;
-        }
-
-        .btn-layout-control:hover {
-            background-color: #593196;
-        }
-
         /* Main Container with Max-Width 1300px */
         .container {
             max-width: 1300px;
@@ -183,12 +165,10 @@
                     আপনার কুইজ প্ল্যাটফর্ম এবং ওয়েবসাইট কন্টেন্ট এক জায়গা থেকেই পরিবর্তন ও নিয়ন্ত্রণ করুন।
                 </p>
             </div>
-            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <a href="home-dashboard.html" class="btn btn-home-control">
-                    <i class="fa-solid fa-sliders"></i> হোম পেজের কন্টেন্ট
-                </a>
-                <a href="header-footer-dashboard.html" class="btn btn-layout-control">
-                    <i class="fa-solid fa-window-restore"></i> হেডার ও ফুটার
+            <!-- নতুন অ্যাডমিন প্রোফাইল বাটন -->
+            <div>
+                <a href="admin-profile.html" class="btn" style="background-color: var(--dark); color: white;">
+                    <i class="fa-solid fa-user-shield"></i> অ্যাডমিন প্রোফাইল
                 </a>
             </div>
         </div>
@@ -202,7 +182,7 @@
                     <h3>হেডার ও ফুটার কন্ট্রোল</h3>
                     <p>ওয়েবসাইটের টপ অ্যানাউন্সমেন্ট বার, লোগো, নেভিগেশন মেনু এবং ফুটারের সোশ্যাল লিংকগুলো পরিচালনা করুন।</p>
                 </div>
-                <a href="header-footer-dashboard.html" class="btn btn-layout-control">
+                <a href="header-footer-dashboard.html" class="btn" style="background-color: var(--purple-btn); color: white;">
                     <i class="fa-solid fa-gear"></i> হেডার-ফুটার এডিট
                 </a>
             </div>
@@ -214,7 +194,7 @@
                     <h3>হোম পেজ কন্ট্রোল</h3>
                     <p>index.html পেজের স্লাইডার, ফ্রি ডেমো কুইজ লিংক এবং প্রিপারেশন প্যাকেজগুলো ডাটাবেজ থেকে নিয়ন্ত্রণ করুন।</p>
                 </div>
-                <a href="home-dashboard.html" class="btn btn-home-control">
+                <a href="home-dashboard.html" class="btn" style="background-color: var(--warning); color: white;">
                     <i class="fa-solid fa-pen-to-square"></i> কন্টেন্ট এডিট করুন
                 </a>
             </div>

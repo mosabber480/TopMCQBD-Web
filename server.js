@@ -209,6 +209,8 @@ app.put('/api/users/:userId/subscription', verifyToken, authorizeRoles('owner', 
         else if (plan === '6_months') endDate.setMonth(endDate.getMonth() + 6);
         else if (plan === '1_year') endDate.setFullYear(endDate.getFullYear() + 1);
         else if (plan === '2_years') endDate.setFullYear(endDate.getFullYear() + 2);
+        // এখানে 3_years এর জন্য ৩ বছর সময় যোগ করা হয়েছে
+        else if (plan === '3_years') endDate.setFullYear(endDate.getFullYear() + 3);
         else if (plan === 'none') {
             startDate = null;
             endDate = null;

@@ -25,7 +25,8 @@ const UserSchema = new mongoose.Schema({
     subscription: {
         plan: {
             type: String,
-            enum: ['none', '1_month', '3_months', '6_months', '1_year', '2_years'],
+            // এখানে '3_years' যুক্ত করা হয়েছে
+            enum: ['none', '1_month', '3_months', '6_months', '1_year', '2_years', '3_years'],
             default: 'none'
         },
         startDate: {

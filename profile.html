@@ -1,184 +1,223 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Profile & Subscription - MCQ Platform</title>
+    <title>My Profile - MCQ Platform</title>
     
-    <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- GLOBAL CSS LINK (Root level path for /pages files) -->
     <link rel="stylesheet" href="global/global.css">
-    
+
     <style>
-        * { box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background-color: #f4f7f6;
-            margin: 0;
-            padding: 0;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
+        .container { max-width: 1300px; margin: 40px auto; padding: 0 20px; width: 100%; }
+        /* কলামের মাঝের গ্যাপ ৮০px */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; } 
+        .box { background: white; padding: 25px 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid #e2e8f0; }
+        
+        .form-group { margin-bottom: 12px; position: relative; }
+        label { display: block; font-weight: bold; margin-bottom: 4px; font-size: 13px; color: #555; }
+        input { width: 100%; padding: 8px 35px 8px 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; box-sizing: border-box; }
+        .toggle-password { position: absolute; right: 10px; top: 32px; cursor: pointer; color: #888; }
+        
+        /* বাটন স্টাইল */
+        .btn-submit { background-color: #007bff; width: fit-content; min-width: 140px; padding: 10px 20px; font-size: 14px; border: none; border-radius: 4px; color: white; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        .btn-logout { background-color: #dc3545; color: white; width: fit-content; min-width: 140px; padding: 10px 20px; text-align: center; border-radius: 4px; text-decoration: none; font-weight: bold; font-size: 14px; border: none; cursor: pointer; display: inline-block; margin-top: 15px; }
+        .btn-quiz { background-color: #28a745; color: white; width: fit-content; min-width: 140px; padding: 10px 20px; text-align: center; border-radius: 4px; text-decoration: none; font-weight: bold; font-size: 14px; display: inline-block; }
 
-        .profile-container-wrapper {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 50px 20px;
-            width: 100%;
-            max-width: 1300px;
-            margin: 0 auto;
-        }
-
-        .profile-card {
-            background: white;
-            padding: 35px 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            width: 100%;
-            max-width: 520px;
+        /* সাবস্ক্রিপশন বক্সের স্টাইল */
+        .sub-box { 
+            background-color: white; 
+            padding: 15px 20px; 
+            border-radius: 6px; 
+            margin-bottom: 15px; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05); 
             border: 1px solid #e2e8f0;
+            border-left: 5px solid #007bff; 
         }
-
-        .profile-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 2px solid #f0f0f0;
-            padding-bottom: 15px;
-            margin-bottom: 20px;
-        }
-
-        .user-info p { margin: 8px 0; color: #555; font-size: 15px; }
-
-        .sub-box {
-            background-color: #f8f9fa;
-            border-left: 5px solid #007bff;
-            padding: 15px 20px;
-            border-radius: 6px;
-            margin-top: 20px;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 15px;
-            font-weight: bold;
-            font-size: 13px;
-        }
+        
+        .badge { display: inline-block; padding: 4px 12px; border-radius: 15px; font-weight: bold; font-size: 12px; }
         .badge-active { background-color: #d4edda; color: #155724; }
         .badge-expired { background-color: #f8d7da; color: #721c24; }
-        
-        .btn-group {
-            display: flex;
-            gap: 10px;
-            margin-top: 25px;
-        }
 
-        .btn {
-            flex: 1;
-            padding: 10px;
-            text-align: center;
-            border-radius: 5px;
-            font-weight: bold;
-            text-decoration: none;
-            border: none;
-            cursor: pointer;
-            font-size: 14px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-        }
-        .btn-quiz { background-color: #28a745; color: white; }
-        .btn-quiz:hover { background-color: #218838; }
-        .btn-logout { background-color: #dc3545; color: white; }
-        .btn-logout:hover { background-color: #c82333; }
+        @media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; gap: 20px; } }
     </style>
 </head>
 <body>
 
-    <!-- DYNAMIC GLOBAL LAYOUT CONTAINERS -->
-    <div id="global-announce-bar" style="display:none;"></div>
     <header id="global-header"></header>
 
-    <!-- MAIN PROFILE SECTION -->
-    <main class="profile-container-wrapper">
-        <div class="profile-card">
-            <div class="profile-header">
-                <h2 style="margin:0; color:#333;"><i class="fa-solid fa-user-gear" style="color:var(--primary);"></i> User Profile</h2>
-                <span id="roleBadge" class="badge" style="background:#e0e0e0;">Customer</span>
+    <div class="container">
+        <div class="grid-2">
+            <!-- বাম কলাম -->
+            <div>
+                <div class="box">
+                    <!-- My Profile এর জায়গায় ইউজার নেম বসানোর জন্য mainUserName আইডি যুক্ত করা হয়েছে -->
+                    <h2 style="margin-top: 0; margin-bottom: 15px;"><i class="fa-solid fa-user"></i> <span id="mainUserName">Loading...</span></h2>
+                    <p style="margin: 8px 0;"><strong>Name:</strong> <span id="userName">Loading...</span></p>
+                    <p style="margin: 8px 0;"><strong>Email:</strong> <span id="userEmail">Loading...</span></p>
+                    <!-- স্ট্যাটাস ব্যাজটি ডানদিক থেকে এখানে ইমেইলের নিচে নিয়ে আসা হয়েছে -->
+                    <p style="margin: 8px 0;"><strong>Status:</strong> <span id="userStatusBadge" class="badge">Checking...</span></p>
+                </div>
+
+                <!-- পাসওয়ার্ড ফর্ম (সব সময় ওপেন থাকবে) -->
+                <form id="changePasswordForm" class="box" style="border-left: 5px solid #ffc107;">
+                    <h3 style="margin-top: 0; margin-bottom: 15px; font-size: 18px; color: #333;">
+                        <i class="fa-solid fa-lock"></i> Change Password
+                    </h3>
+                    
+                    <div class="form-group">
+                        <label>Current Password:</label>
+                        <input type="password" id="oldPassword" required>
+                        <i class="fa-solid fa-eye toggle-password" onclick="togglePassword('oldPassword')"></i>
+                    </div>
+                    <div class="form-group">
+                        <label>New Password:</label>
+                        <input type="password" id="newPassword" required>
+                        <i class="fa-solid fa-eye toggle-password" onclick="togglePassword('newPassword')"></i>
+                    </div>
+                    <div class="form-group">
+                        <label>Confirm New Password:</label>
+                        <input type="password" id="confirmNewPassword" required>
+                        <i class="fa-solid fa-eye toggle-password" onclick="togglePassword('confirmNewPassword')"></i>
+                    </div>
+                    
+                    <div style="margin-top: 15px;">
+                        <button type="submit" class="btn-submit" style="background-color: #28a745; margin-top:0;">Update</button>
+                    </div>
+                </form>
+
+                <button class="btn-logout" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
             </div>
 
-            <div class="user-info">
-                <p><strong>Full Name:</strong> <span id="userName">Loading...</span></p>
-                <p><strong>Email Address:</strong> <span id="userEmail">Loading...</span></p>
-            </div>
-
-            <div class="sub-box">
-                <h3 style="margin-top:0; color:#007bff; font-size:16px;"><i class="fa-solid fa-gem"></i> Subscription Status</h3>
-                <p><strong>Current Plan:</strong> <span id="subPlan">None</span></p>
-                <p><strong>Status:</strong> <span id="subStatus" class="badge badge-expired">Checking...</span></p>
-                <p><strong>Expiration Date:</strong> <span id="subExpiry">N/A</span></p>
-            </div>
-
-            <div class="btn-group">
-                <a href="index.html" class="btn btn-quiz"><i class="fa-solid fa-play"></i> Start Practice</a>
-                <button class="btn btn-logout" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+            <!-- ডান কলাম -->
+            <div style="padding:0;">
+                <div class="sub-box">
+                    <h4 style="margin:0 0 10px 0; color:#007bff;"><i class="fa-solid fa-gem"></i> Subscription Status</h4>
+                    <p style="margin: 5px 0;"><strong>Current Plan:</strong> <span id="subPlan">None</span></p>
+                    <!-- এখান থেকে Status সরিয়ে বামদিকে নেওয়া হয়েছে -->
+                    <p style="margin: 5px 0;"><strong>Expiration Date:</strong> <span id="subExpiry">N/A</span></p>
+                    <p style="margin: 5px 0;" id="remainingTimeWrapper"><strong>Remaining Time:</strong> <span id="subRemaining" style="color: #e67e22; font-weight: bold;">Checking...</span></p>
+                </div>
+                <a href="index.html" class="btn-quiz"><i class="fa-solid fa-play"></i> Start Practice</a>
             </div>
         </div>
-    </main>
+    </div>
 
-    <!-- DYNAMIC FOOTER CONTAINER -->
     <footer id="global-footer"></footer>
 
-    <!-- GLOBAL JS LINK (Root level path for /pages files) -->
     <script src="global/global.js"></script>
-
-    <!-- PROFILE LOGIC -->
     <script>
+        const API_BASE = 'https://mosabber-quiz-app.onrender.com/api';
         const user = JSON.parse(localStorage.getItem('quiz_user') || localStorage.getItem('user'));
         const token = localStorage.getItem('quiz_token') || localStorage.getItem('token');
 
-        if (!token || !user) {
-            window.location.href = 'login.html';
-        } else {
-            document.getElementById('userName').innerText = user.name || 'N/A';
-            document.getElementById('userEmail').innerText = user.email || 'N/A';
-            document.getElementById('roleBadge').innerText = user.role ? user.role.toUpperCase() : 'CUSTOMER';
+        if (!token || !user) { window.location.href = 'login.html'; }
 
-            const sub = user.subscription || {};
-            const isSubActive = sub.active && sub.endDate && new Date(sub.endDate) > new Date();
-
-            document.getElementById('subPlan').innerText = sub.plan ? sub.plan.replace('_', ' ').toUpperCase() : 'NO PLAN';
-            
-            const statusElem = document.getElementById('subStatus');
-            if (user.role === 'owner' || user.role === 'admin') {
-                statusElem.innerText = 'FULL ACCESS';
-                statusElem.className = 'badge badge-active';
-                document.getElementById('subExpiry').innerText = 'Lifetime Access';
-            } else if (isSubActive) {
-                statusElem.innerText = 'ACTIVE';
-                statusElem.className = 'badge badge-active';
-                document.getElementById('subExpiry').innerText = new Date(sub.endDate).toLocaleDateString();
+        // পাসওয়ার্ড টগল ফাংশন
+        function togglePassword(id) {
+            const input = document.getElementById(id);
+            const icon = input.nextElementSibling;
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.replace("fa-eye", "fa-eye-slash");
             } else {
-                statusElem.innerText = 'INACTIVE / EXPIRED';
-                statusElem.className = 'badge badge-expired';
-                document.getElementById('subExpiry').innerText = sub.endDate ? new Date(sub.endDate).toLocaleDateString() : 'N/A';
+                input.type = "password";
+                icon.classList.replace("fa-eye-slash", "fa-eye");
             }
         }
+
+        // বাকি থাকা সময় ক্যালকুলেট করার ফাংশন
+        function getRemainingTime(endDateStr) {
+            const now = new Date();
+            const end = new Date(endDateStr);
+            if (end <= now) return 'Expired';
+
+            let years = end.getFullYear() - now.getFullYear();
+            let months = end.getMonth() - now.getMonth();
+            let days = end.getDate() - now.getDate();
+            let hours = end.getHours() - now.getHours();
+
+            if (hours < 0) {
+                hours += 24;
+                days--;
+            }
+            if (days < 0) {
+                const prevMonth = new Date(end.getFullYear(), end.getMonth(), 0);
+                days += prevMonth.getDate();
+                months--;
+            }
+            if (months < 0) {
+                months += 12;
+                years--;
+            }
+
+            let parts = [];
+            if (years > 0) parts.push(`${years} Year${years > 1 ? 's' : ''}`);
+            if (months > 0) parts.push(`${months} Month${months > 1 ? 's' : ''}`);
+            if (days > 0) parts.push(`${days} Day${days > 1 ? 's' : ''}`);
+            if (hours > 0) parts.push(`${hours} Hour${hours > 1 ? 's' : ''}`);
+
+            return parts.length > 0 ? parts.join(' ') : 'Less than 1 Hour';
+        }
+
+        // ইউজারের নাম হেডিং এবং নামের জায়গায় বসানো হচ্ছে
+        document.getElementById('mainUserName').innerText = user.name || 'User';
+        document.getElementById('userName').innerText = user.name || 'N/A';
+        document.getElementById('userEmail').innerText = user.email || 'N/A';
+        
+        const sub = user.subscription || {};
+        const isSubActive = sub.active && sub.endDate && new Date(sub.endDate) > new Date();
+        document.getElementById('subPlan').innerText = sub.plan ? sub.plan.replace('_', ' ').toUpperCase() : 'NO PLAN';
+        
+        // স্ট্যাটাস আইডি এখন বামদিকের userStatusBadge কে পয়েন্ট করছে
+        const statusElem = document.getElementById('userStatusBadge');
+        const remainingWrapper = document.getElementById('remainingTimeWrapper');
+        const remainingElem = document.getElementById('subRemaining');
+
+        if (user.role === 'owner' || user.role === 'admin') {
+            statusElem.innerText = 'FULL ACCESS';
+            statusElem.className = 'badge badge-active';
+            document.getElementById('subExpiry').innerText = 'Lifetime Access';
+            remainingWrapper.style.display = 'none'; // লাইফটাইম ইউজারদের জন্য রিমেইনিং টাইম লুকানো থাকবে
+        } else if (isSubActive) {
+            statusElem.innerText = 'ACTIVE';
+            statusElem.className = 'badge badge-active';
+            document.getElementById('subExpiry').innerText = new Date(sub.endDate).toLocaleDateString();
+            remainingElem.innerText = getRemainingTime(sub.endDate); 
+        } else {
+            statusElem.innerText = 'INACTIVE / EXPIRED';
+            statusElem.className = 'badge badge-expired';
+            document.getElementById('subExpiry').innerText = sub.endDate ? new Date(sub.endDate).toLocaleDateString() : 'N/A';
+            remainingWrapper.style.display = 'none'; // এক্সপায়ার্ড হলে রিমেইনিং টাইম লুকানো থাকবে
+        }
+
+        document.getElementById('changePasswordForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmNewPassword').value;
+
+            if (newPassword !== confirmPassword) {
+                showTopAlert('❌ নতুন পাসওয়ার্ড দুটি মিলছে না!', 'danger');
+                return;
+            }
+
+            const res = await fetch(`${API_BASE}/auth/change-password`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ 
+                    oldPassword: document.getElementById('oldPassword').value,
+                    newPassword: newPassword 
+                })
+            });
+            const data = await res.json();
+            if (data.success) { showTopAlert('✅ ' + data.message, 'success'); document.getElementById('changePasswordForm').reset(); }
+            else { showTopAlert('❌ ' + data.message, 'danger'); }
+        });
 
         async function logout() {
             const confirmLogout = await showTopAlert('আপনি কি নিশ্চিত যে লগআউট করতে চান?', 'warning', true);
             if (confirmLogout) {
-                localStorage.removeItem('quiz_token');
-                localStorage.removeItem('quiz_user');
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
+                localStorage.clear();
                 window.location.href = 'login.html';
             }
         }

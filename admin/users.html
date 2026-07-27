@@ -61,12 +61,6 @@
             margin-bottom: 25px; 
         }
 
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
         .form-group { margin-bottom: 12px; }
         label { display: block; font-weight: bold; margin-bottom: 4px; font-size: 13px; color: #555; }
         input { width: 100%; padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
@@ -89,7 +83,6 @@
         .btn-submit { background-color: #007bff; width: 100%; padding: 10px; font-size: 14px; }
 
         @media (max-width: 900px) {
-            .grid-2 { grid-template-columns: 1fr; }
             table { display: block; overflow-x: auto; }
         }
     </style>
@@ -101,48 +94,9 @@
 
     <!-- Main Container -->
     <div class="container">
-        <!-- Admin Tools (Owner Only Controls) -->
-        <div class="grid-2">
-            <!-- Create New Admin Section (Owner Only) -->
-            <div class="box" id="createAdminBox" style="display:none; border-left: 5px solid #007bff;">
-                <h3>➕ Create New Admin Account</h3>
-                <form id="createAdminForm">
-                    <div class="form-group">
-                        <label>Admin Name:</label>
-                        <input type="text" id="adminName" placeholder="Enter name" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Admin Email:</label>
-                        <input type="email" id="adminEmail" placeholder="Enter email" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Admin Password:</label>
-                        <input type="password" id="adminPassword" placeholder="Set password" required>
-                    </div>
-                    <button type="submit" class="btn-action btn-submit">Create Admin Account</button>
-                </form>
-            </div>
-
-            <!-- Change Own Password Section -->
-            <div class="box" style="border-left: 5px solid #ffc107;">
-                <h3>🔐 Change Your Password</h3>
-                <form id="changePasswordForm">
-                    <div class="form-group">
-                        <label>Current Password:</label>
-                        <input type="password" id="oldPassword" placeholder="Enter current password" required>
-                    </div>
-                    <div class="form-group">
-                        <label>New Password:</label>
-                        <input type="password" id="newPassword" placeholder="Enter new password" required>
-                    </div>
-                    <button type="submit" class="btn-action btn-submit" style="background-color: #ffc107; color:#212529;">Update Password</button>
-                </form>
-            </div>
-        </div>
-
         <!-- User Table Section -->
         <div class="box">
-            <h3>👥 Registered Users & Subscription Plans</h3>
+            <h3><i class="fa-solid fa-users"></i> Registered Users & Subscription Plans</h3>
             <p style="color:#666; font-size:14px; margin-top: 5px;">Select a plan for any customer and click <b>Update Plan</b> to activate their subscription access.</p>
             
             <table>
@@ -174,11 +128,6 @@
         const API_BASE = 'https://mosabber-quiz-app.onrender.com/api';
         const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
         const currentUser = JSON.parse(localStorage.getItem('user') || localStorage.getItem('quiz_user') || '{}');
-
-        // Show Create Admin Box only to Owner
-        if (currentUser.role === 'owner') {
-            document.getElementById('createAdminBox').style.display = 'block';
-        }
 
         async function loadUsers() {
             const tableBody = document.getElementById('userTableBody');
@@ -224,6 +173,8 @@
                                         <option value="6_months" ${sub.plan === '6_months' ? 'selected' : ''}>6 Months</option>
                                         <option value="1_year" ${sub.plan === '1_year' ? 'selected' : ''}>1 Year</option>
                                         <option value="2_years" ${sub.plan === '2_years' ? 'selected' : ''}>2 Years</option>
+                                        <!-- 3 Years অপশনটি নিচে যুক্ত করা হয়েছে -->
+                                        <option value="3_years" ${sub.plan === '3_years' ? 'selected' : ''}>3 Years</option>
                                     </select>
                                     <button class="btn-action btn-update" onclick="updateSubscription('${u._id}')">Save Plan</button>
                                 ` : '<small style="color:#888;">Full Access</small>'}
@@ -286,62 +237,6 @@
                 showTopAlert("❌ Error deleting user!", 'danger');
             }
         }
-
-        // CREATE ADMIN SUBMIT
-        document.getElementById('createAdminForm')?.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const name = document.getElementById('adminName').value;
-            const email = document.getElementById('adminEmail').value;
-            const password = document.getElementById('adminPassword').value;
-
-            try {
-                const res = await fetch(`${API_BASE}/users/create-admin`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ name, email, password })
-                });
-                const data = await res.json();
-                if (data.success) {
-                    showTopAlert(`🎉 ${data.message}`, 'success');
-                    document.getElementById('createAdminForm').reset();
-                    loadUsers();
-                } else {
-                    showTopAlert(`❌ Error: ${data.message}`, 'danger');
-                }
-            } catch (err) {
-                showTopAlert("❌ Error creating admin!", 'danger');
-            }
-        });
-
-        // CHANGE PASSWORD SUBMIT
-        document.getElementById('changePasswordForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const oldPassword = document.getElementById('oldPassword').value;
-            const newPassword = document.getElementById('newPassword').value;
-
-            try {
-                const res = await fetch(`${API_BASE}/auth/change-password`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ oldPassword, newPassword })
-                });
-                const data = await res.json();
-                if (data.success) {
-                    showTopAlert(`✅ ${data.message}`, 'success');
-                    document.getElementById('changePasswordForm').reset();
-                } else {
-                    showTopAlert(`❌ Password change failed: ${data.message}`, 'danger');
-                }
-            } catch (err) {
-                showTopAlert("❌ Error changing password!", 'danger');
-            }
-        });
 
         // Custom Logout function
         async function logout() {
