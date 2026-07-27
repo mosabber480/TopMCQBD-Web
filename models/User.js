@@ -25,10 +25,16 @@ const UserSchema = new mongoose.Schema({
     subscription: {
         plan: {
             type: String,
-            // এখানে '3_years' যুক্ত করা হয়েছে
             enum: ['none', '1_month', '3_months', '6_months', '1_year', '2_years', '3_years'],
             default: 'none'
         },
+        // --- নতুন যুক্ত করা অংশ: কাস্টমারের রিকোয়েস্ট করা প্যাকেজ সেভ করার জন্য ---
+        requestedPlan: {
+            type: String,
+            enum: ['none', '1_month', '3_months', '6_months', '1_year', '2_years', '3_years'],
+            default: 'none'
+        },
+        // ----------------------------------------------------------------------
         startDate: {
             type: Date,
             default: null

@@ -191,6 +191,27 @@ app.get('/api/users', verifyToken, authorizeRoles('owner', 'admin'), async (req,
     }
 });
 
+// NEW API: Request a Subscription Plan (For any logged in customer)
+app.post('/api/users/request-plan', verifyToken, async (req, res) => {
+    try {
+        const { requestedPlan } = req.body;
+        
+        // লগইন করা ইউজারের আইডি দিয়ে ডাটাবেজ থেকে তাকে খুঁজে বের করা
+        const user = await User.findById(req.user.id);
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        // তার requestedPlan ফিল্ড আপডেট করা
+        user.requestedPlan = requestedPlan;
+        await user.save();
+
+        res.json({ success: true, message: 'Plan request submitted successfully!' });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
 // Update Subscription Plan (Owner and Admin only)
 app.put('/api/users/:userId/subscription', verifyToken, authorizeRoles('owner', 'admin'), async (req, res) => {
     try {
@@ -209,7 +230,6 @@ app.put('/api/users/:userId/subscription', verifyToken, authorizeRoles('owner', 
         else if (plan === '6_months') endDate.setMonth(endDate.getMonth() + 6);
         else if (plan === '1_year') endDate.setFullYear(endDate.getFullYear() + 1);
         else if (plan === '2_years') endDate.setFullYear(endDate.getFullYear() + 2);
-        // এখানে 3_years এর জন্য ৩ বছর সময় যোগ করা হয়েছে
         else if (plan === '3_years') endDate.setFullYear(endDate.getFullYear() + 3);
         else if (plan === 'none') {
             startDate = null;
@@ -222,6 +242,9 @@ app.put('/api/users/:userId/subscription', verifyToken, authorizeRoles('owner', 
             endDate: endDate,
             active: plan !== 'none'
         };
+
+        // এডমিন যখন প্ল্যান আপডেট করে দেবে, তখন পেন্ডিং রিকোয়েস্ট ক্লিয়ার হয়ে যাবে
+        user.requestedPlan = 'none';
 
         await user.save();
 

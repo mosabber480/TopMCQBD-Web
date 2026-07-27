@@ -50,7 +50,7 @@
         .container {
             max-width: 1300px;
             margin: 0 auto;
-            padding: 0 25px 25px 25px;
+            padding: 25px;
         }
 
         .box { 
@@ -108,7 +108,7 @@
                         <th>Role</th>
                         <th>Status</th>
                         <th>Current Plan</th>
-                        <th>Validity Expiry Date</th>
+                        <th>Expiry Date</th>
                         <th>Action (Set Plan)</th>
                         <th>Remove</th>
                     </tr>
@@ -173,7 +173,6 @@
                                         <option value="6_months" ${sub.plan === '6_months' ? 'selected' : ''}>6 Months</option>
                                         <option value="1_year" ${sub.plan === '1_year' ? 'selected' : ''}>1 Year</option>
                                         <option value="2_years" ${sub.plan === '2_years' ? 'selected' : ''}>2 Years</option>
-                                        <!-- 3 Years অপশনটি নিচে যুক্ত করা হয়েছে -->
                                         <option value="3_years" ${sub.plan === '3_years' ? 'selected' : ''}>3 Years</option>
                                     </select>
                                     <button class="btn-action btn-update" onclick="updateSubscription('${u._id}')">Save Plan</button>
@@ -181,7 +180,7 @@
                             </td>
                             <td>
                                 ${currentUser.role === 'owner' && u.role !== 'owner' ? `
-                                    <button class="btn-action btn-delete" onclick="deleteUser('${u._id}', '${u.name}')">🗑️ Delete</button>
+                                    <button class="btn-action btn-delete" onclick="deleteUser('${u._id}', '${u.name}')">Delete</button>
                                 ` : '<small style="color:#aaa;">N/A</small>'}
                             </td>
                         </tr>
@@ -213,7 +212,7 @@
                     showTopAlert(`❌ Failed: ${data.message}`, 'danger');
                 }
             } catch (err) {
-                showTopAlert("❌ Error updating plan!", 'danger');
+                showTopAlert(`❌ Error updating plan!`, 'danger');
             }
         }
 
@@ -234,7 +233,7 @@
                     showTopAlert(`❌ Delete failed: ${data.message}`, 'danger');
                 }
             } catch (err) {
-                showTopAlert("❌ Error deleting user!", 'danger');
+                showTopAlert(`❌ Error deleting user!`, 'danger');
             }
         }
 

@@ -125,6 +125,12 @@
         .btn-buy:hover {
             background-color: var(--primary-dark, #0056b3);
         }
+        
+        /* Loading Text Style */
+        .loading-text {
+            opacity: 0.7;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
@@ -152,7 +158,8 @@
                     <li><i class="fa-solid fa-circle-check"></i> ২৪/৭ ওয়েবসাইট সাপোর্ট</li>
                 </ul>
             </div>
-            <a href="login.html" class="btn-buy" onclick="handlePackageBuy('1_month')">সাবস্ক্রাইব করুন</a>
+            <!-- Data Attribute '1_month' is matching with DB Enum -->
+            <button class="btn-buy" onclick="handlePackageBuy('1_month', this)">সাবস্ক্রাইব করুন</button>
         </div>
 
         <!-- PACKAGE 2: Popular Plan -->
@@ -168,7 +175,7 @@
                     <li><i class="fa-solid fa-circle-check"></i> নিয়মিত নতুন প্রশ্ন আপডেট</li>
                 </ul>
             </div>
-            <a href="login.html" class="btn-buy" onclick="handlePackageBuy('3_month')">সাবস্ক্রাইব করুন</a>
+            <button class="btn-buy" onclick="handlePackageBuy('3_months', this)">সাবস্ক্রাইব করুন</button>
         </div>
 
         <!-- PACKAGE 3: Long Term Plan -->
@@ -183,7 +190,7 @@
                     <li><i class="fa-solid fa-circle-check"></i> প্রাইওরিটি হেল্পলাইন সাপোর্ট</li>
                 </ul>
             </div>
-            <a href="login.html" class="btn-buy" onclick="handlePackageBuy('6_month')">সাবস্ক্রাইব করুন</a>
+            <button class="btn-buy" onclick="handlePackageBuy('6_months', this)">সাবস্ক্রাইব করুন</button>
         </div>
 
     </main>
@@ -195,14 +202,49 @@
     <script src="global/global.js"></script>
 
     <script>
-        function handlePackageBuy(planType) {
+        const API_BASE = 'https://mosabber-quiz-app.onrender.com/api';
+
+        async function handlePackageBuy(planType, buttonElement) {
             const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
-            if (token) {
-                // ইউজার লগইন থাকলে প্রফাইল পেজে নিয়ে যাবে
-                window.location.href = 'profile.html';
-            } else {
-                // লগইন না থাকলে লগইন পেজে নিয়ে যাবে
+            
+            // ১. যদি লগইন করা না থাকে
+            if (!token) {
+                alert('প্যাকেজটি কিনতে আপনাকে প্রথমে লগইন করতে হবে।');
                 window.location.href = 'login.html';
+                return;
+            }
+
+            // ২. লগইন করা থাকলে ব্যাকএন্ডে রিকোয়েস্ট পাঠানো
+            const originalText = buttonElement.innerText;
+            buttonElement.innerText = 'অপেক্ষা করুন...';
+            buttonElement.classList.add('loading-text');
+
+            try {
+                // এই API টি আমরা আগামী ধাপে server.js এ তৈরি করব
+                const response = await fetch(`${API_BASE}/users/request-plan`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ requestedPlan: planType })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    alert('আপনার প্যাকেজ রিকোয়েস্ট সফলভাবে গ্রহণ করা হয়েছে। পেমেন্ট সম্পন্ন হলে এডমিন আপনার একাউন্ট একটিভ করে দিবেন।');
+                    // সফল হলে তাকে তার ড্যাশবোর্ডে পাঠিয়ে দেওয়া
+                    window.location.href = 'profile.html'; 
+                } else {
+                    alert(data.message || 'রিকোয়েস্ট পাঠাতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+                }
+            } catch (error) {
+                console.error('Error requesting plan:', error);
+                alert('সার্ভারে সমস্যা হচ্ছে। দয়া করে একটু পর আবার চেষ্টা করুন।');
+            } finally {
+                buttonElement.innerText = originalText;
+                buttonElement.classList.remove('loading-text');
             }
         }
     </script>

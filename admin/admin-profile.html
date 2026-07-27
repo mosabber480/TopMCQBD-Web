@@ -30,7 +30,29 @@
         .profile-avatar { width: 100px; height: 100px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 40px; color: #64748b; margin: 0 auto 15px; }
         .info-row { display: grid; grid-template-columns: 1fr 2fr; gap: 10px; padding: 10px 0; border-bottom: 1px solid #eee; }
         
-        @media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } }
+        /* User Table Styles */
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #e0e0e0; }
+        th { background-color: #f8f9fa; color: #333; font-weight: bold; }
+        tr:hover { background-color: #f1f5f9; }
+
+        .badge { padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; }
+        .badge-active { background-color: #d4edda; color: #155724; }
+        .badge-expired { background-color: #f8d7da; color: #721c24; }
+        .badge-requested { background-color: #007bff; color: white; }
+
+        .plan-select { padding: 6px 10px; border-radius: 4px; border: 1px solid #ccc; font-size: 13px; }
+        
+        .btn-action { padding: 6px 12px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; font-size: 12px; color: white; }
+        .btn-update { background-color: #28a745; }
+        .btn-delete { background-color: #dc3545; }
+
+        .table-responsive { overflow-x: auto; }
+
+        @media (max-width: 900px) { 
+            .grid-2 { grid-template-columns: 1fr; } 
+            table { display: block; overflow-x: auto; }
+        }
     </style>
 </head>
 <body>
@@ -38,7 +60,9 @@
     <div id="admin-navbar-container"></div>
 
     <div class="container">
+        <!-- Profile Info & Settings Grid -->
         <div class="grid-2">
+            <!-- Profile Info Box -->
             <div class="box">
                 <div class="profile-header">
                     <div class="profile-avatar"><i class="fa-solid fa-user-shield"></i></div>
@@ -50,6 +74,7 @@
                 <button class="btn-submit" style="background:#dc3545; margin-top:20px;" onclick="logout()">Logout</button>
             </div>
 
+            <!-- Forms Box -->
             <div>
                 <div class="box" id="createAdminBox" style="display:none; border-left: 5px solid #007bff;">
                     <h3>➕ Create New Admin</h3>
@@ -88,6 +113,32 @@
                 </div>
             </div>
         </div>
+
+        <!-- Pending Users Table Section -->
+        <div class="box" style="margin-top: 25px; border-top: 5px solid #dc3545;">
+            <h3><i class="fa-solid fa-user-clock"></i> Pending & Cancelled Users</h3>
+            <p style="color:#666; font-size:14px; margin-top: 5px;">Customers waiting for subscription approval or whose access has been cancelled/expired.</p>
+            
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>User Name</th>
+                            <th>Email</th>
+                            <th>Status</th>
+                            <th>Requested Plan</th>
+                            <th>Action (Set Plan)</th>
+                            <th>Remove</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pendingUserTableBody">
+                        <tr><td colspan="7" style="text-align:center;">Loading users...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
     </div>
 
     <script src="../global/global.js"></script>
@@ -165,6 +216,133 @@
             if (data.success) { showTopAlert('✅ ' + data.message, 'success'); document.getElementById('changePasswordForm').reset(); }
             else { showTopAlert('❌ ' + data.message, 'danger'); }
         });
+
+        // ==========================================
+        // PENDING / INACTIVE USERS LOGIC
+        // ==========================================
+        async function loadPendingUsers() {
+            const tableBody = document.getElementById('pendingUserTableBody');
+            try {
+                const res = await fetch(`${API_BASE}/users`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+
+                if (!data.success) {
+                    tableBody.innerHTML = `<tr><td colspan="7" style="color:red; text-align:center;">${data.message || 'Failed to load users'}</td></tr>`;
+                    return;
+                }
+
+                tableBody.innerHTML = '';
+                
+                // শুধুমাত্র কাস্টমার যাদের plan 'none', subscription active নয়, অথবা যারা নতুন প্যাকেজ রিকোয়েস্ট করেছে
+                const pendingUsers = data.users.filter(u => 
+                    u.role === 'customer' && (!u.subscription || u.subscription.plan === 'none' || u.subscription.active === false || (u.requestedPlan && u.requestedPlan !== 'none'))
+                );
+
+                if(pendingUsers.length === 0){
+                    tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#28a745; font-weight:bold;">🎉 No pending users. Everyone has an active subscription!</td></tr>`;
+                    return;
+                }
+
+                pendingUsers.forEach((u, index) => {
+                    const sub = u.subscription || {};
+                    const isRequested = u.requestedPlan && u.requestedPlan !== 'none';
+                    
+                    // স্ট্যাটাস ব্যাজ
+                    const statusBadge = isRequested 
+                        ? `<span class="badge badge-active" style="background:#ffc107; color:#212529;">Requested</span>`
+                        : `<span class="badge badge-expired">Pending / Inactive</span>`;
+                    
+                    // রিকোয়েস্ট করা প্ল্যানের নাম দেখানো
+                    const requestedPlanDisplay = isRequested
+                        ? `<span class="badge badge-requested">${u.requestedPlan}</span>`
+                        : `<span style="color:#888;">No Request</span>`;
+
+                    // ড্রপডাউনে ডিফল্ট সিলেক্ট ভ্যালু নির্ধারণ (রিকোয়েস্ট থাকলে সেটা, না থাকলে কারেন্ট প্ল্যান)
+                    const defaultSelect = isRequested ? u.requestedPlan : (sub.plan || 'none');
+
+                    tableBody.innerHTML += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td><b>${u.name}</b></td>
+                            <td>${u.email}</td>
+                            <td>${statusBadge}</td>
+                            <td>${requestedPlanDisplay}</td>
+                            <td>
+                                <select class="plan-select" id="plan-${u._id}">
+                                    <option value="none" ${defaultSelect === 'none' ? 'selected' : ''}>Cancel Plan</option>
+                                    <option value="1_month" ${defaultSelect === '1_month' ? 'selected' : ''}>1 Month</option>
+                                    <option value="3_months" ${defaultSelect === '3_months' ? 'selected' : ''}>3 Months</option>
+                                    <option value="6_months" ${defaultSelect === '6_months' ? 'selected' : ''}>6 Months</option>
+                                    <option value="1_year" ${defaultSelect === '1_year' ? 'selected' : ''}>1 Year</option>
+                                    <option value="2_years" ${defaultSelect === '2_years' ? 'selected' : ''}>2 Years</option>
+                                    <option value="3_years" ${defaultSelect === '3_years' ? 'selected' : ''}>3 Years</option>
+                                </select>
+                                <button class="btn-action btn-update" onclick="updateSubscription('${u._id}')">Save Plan</button>
+                            </td>
+                            <td>
+                                ${currentUser.role === 'owner' ? `
+                                    <button class="btn-action btn-delete" onclick="deleteUser('${u._id}', '${u.name}')">Delete</button>
+                                ` : '<small style="color:#aaa;">N/A</small>'}
+                            </td>
+                        </tr>
+                    `;
+                });
+
+            } catch (err) {
+                tableBody.innerHTML = `<tr><td colspan="7" style="color:red; text-align:center;">Error fetching user list!</td></tr>`;
+            }
+        }
+
+        async function updateSubscription(userId) {
+            const selectedPlan = document.getElementById(`plan-${userId}`).value;
+            try {
+                const res = await fetch(`${API_BASE}/users/${userId}/subscription`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ plan: selectedPlan })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    showTopAlert(`✅ ${data.message}`, 'success');
+                    loadPendingUsers(); // Reload table after update
+                } else {
+                    showTopAlert(`❌ Failed: ${data.message}`, 'danger');
+                }
+            } catch (err) {
+                showTopAlert(`❌ Error updating plan!`, 'danger');
+            }
+        }
+
+        async function deleteUser(userId, userName) {
+            const confirmed = await showTopAlert(`Are you sure you want to delete user '${userName}'?`, 'danger', true);
+            if (!confirmed) return;
+
+            try {
+                const res = await fetch(`${API_BASE}/users/${userId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showTopAlert(`✅ ${data.message}`, 'success');
+                    loadPendingUsers();
+                } else {
+                    showTopAlert(`❌ Delete failed: ${data.message}`, 'danger');
+                }
+            } catch (err) {
+                showTopAlert(`❌ Error deleting user!`, 'danger');
+            }
+        }
+
+        // On window load, fetch pending users
+        window.addEventListener('DOMContentLoaded', loadPendingUsers);
+
     </script>
 </body>
 </html>
