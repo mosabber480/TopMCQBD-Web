@@ -1,1 +1,58 @@
-<!--  start soon  --->
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Packages Dashboard - TopMCQ</title>
+    
+    <!-- Instant Auth Check (Updated path for Root login.html) -->
+    <script>
+        (function checkAuth() {
+            const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
+            if (!token) {
+                window.location.replace('../login.html');
+            }
+        })();
+    </script>
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- GLOBAL CSS LINK -->
+    <link rel="stylesheet" href="../global/global.css">
+
+    <style>
+        .container { max-width: 1300px; margin: 0 auto; padding: 25px; }
+        .box { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+    </style>
+</head>
+<body>
+
+    <!-- Dynamic Admin Global Navigation Bar Container -->
+    <div id="admin-navbar-container"></div>
+
+    <div class="container">
+        <div class="box">
+            <h1>Packages Dashboard</h1>
+            <p>আপনার প্যাকেজ ম্যানেজমেন্টের কনটেন্ট এখানে আপডেট করার ব্যবস্থা শীঘ্রই যুক্ত করা হবে।</p>
+        </div>
+    </div>
+
+    <!-- GLOBAL JS LINKS -->
+    <script src="../global/global.js"></script>
+    <script src="../global/admin-global.js"></script>
+
+    <script>
+        // Logout Function
+        async function logout() {
+            if (await showTopAlert('আপনি কি নিশ্চিত যে লগআউট করতে চান?', 'warning', true)) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                localStorage.removeItem('quiz_token');
+                localStorage.removeItem('quiz_user');
+                window.location.replace('../login.html');
+            }
+        }
+    </script>
+</body>
+</html>
