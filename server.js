@@ -21,10 +21,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
 // ------------------- STATIC FILES & ROUTING SETUP -------------------
-// 1. Pages Directory (Mapped directly to ROOT '/' for clean SEO URLs)
-app.use(express.static(path.join(__dirname, 'pages')));
+// 1. Project Root Directory (Serves HTML, CSS, JS directly from main folder)
+app.use(express.static(__dirname));
 
-// 2. Admin & Global Folders
+// 2. Admin & Global Sub-folders
 app.use('/admin', express.static(path.join(__dirname, 'admin')));
 app.use('/global', express.static(path.join(__dirname, 'global')));
 
@@ -460,20 +460,20 @@ app.post('/api/questions/upload-csv', verifyToken, authorizeRoles('owner', 'admi
 
 // ------------------- FRONTEND FALLBACK ROUTE -------------------
 
-// Root Path Handler
+// Root Path Handler (Serves index.html from main project folder)
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'pages', 'index.html'));
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 // Safe Catch-all middleware for non-API GET requests
 app.use((req, res) => {
     if (req.method === 'GET' && !req.path.startsWith('/api')) {
-        const requestedPath = path.join(__dirname, 'pages', req.path);
+        const requestedPath = path.join(__dirname, req.path);
         
         return res.sendFile(requestedPath, (err) => {
             if (err) {
-                // ফাইল খুঁজে না পেলে index.html সার্ভ করবে
-                res.sendFile(path.join(__dirname, 'pages', 'index.html'));
+                // ফাইল না পেলে index.html-এ নিয়ে যাবে
+                res.sendFile(path.join(__dirname, 'index.html'));
             }
         });
     }
