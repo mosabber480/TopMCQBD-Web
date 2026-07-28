@@ -22,13 +22,11 @@ const UserSchema = new mongoose.Schema({
         enum: ['owner', 'admin', 'customer'],
         default: 'customer'
     },
-    // --- ফিক্স: requestedPlan কে subscription এর বাইরে (রুট লেভেলে) রাখা হলো ---
     requestedPlan: {
         type: String,
         enum: ['none', '1_month', '3_months', '6_months', '1_year', '2_years', '3_years'],
         default: 'none'
     },
-    // ----------------------------------------------------------------------
     subscription: {
         plan: {
             type: String,
@@ -47,6 +45,11 @@ const UserSchema = new mongoose.Schema({
             type: Boolean,
             default: false
         }
+    },
+    // 💡 নতুন যোগ করা হলো: লগইনের সময় সেভ করার জন্য
+    lastLogin: {
+        type: Date,
+        default: null
     }
 }, { timestamps: true });
 

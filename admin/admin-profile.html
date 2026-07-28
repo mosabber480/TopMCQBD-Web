@@ -17,20 +17,23 @@
 
     <style>
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .box { background: white; padding: 25px 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 25px; }
+        .box { background: white; padding: 25px 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 20px; }
         .form-group { margin-bottom: 12px; position: relative; }
         label { display: block; font-weight: bold; margin-bottom: 4px; font-size: 13px; color: #555; }
         input { width: 100%; padding: 8px 35px 8px 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; box-sizing: border-box; }
         
-        /* Eye Icon Style */
         .toggle-password { position: absolute; right: 10px; top: 32px; cursor: pointer; color: #888; }
         
         .btn-submit { background-color: #007bff; width: 100%; padding: 10px; font-size: 14px; border: none; border-radius: 4px; color: white; cursor: pointer; font-weight: bold; }
-        .profile-header { text-align: center; margin-bottom: 30px; }
-        .profile-avatar { width: 100px; height: 100px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 40px; color: #64748b; margin: 0 auto 15px; }
-        .info-row { display: grid; grid-template-columns: 1fr 2fr; gap: 10px; padding: 10px 0; border-bottom: 1px solid #eee; }
+        .profile-header { text-align: center; margin-bottom: 20px; }
+        .profile-avatar { width: 80px; height: 80px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 30px; color: #64748b; margin: 0 auto 15px; }
+        .info-row { display: grid; grid-template-columns: 1fr 2fr; gap: 10px; padding: 8px 0; border-bottom: 1px solid #eee; }
         
-        /* User Table Styles */
+        .stat-box-container { display: flex; gap: 15px; justify-content: space-around; }
+        .stat-item { text-align: center; }
+        .stat-item h4 { margin: 0; font-size: 20px; }
+        .stat-item p { margin: 0; font-size: 11px; color: #666; font-weight: bold; }
+
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #e0e0e0; }
         th { background-color: #f8f9fa; color: #333; font-weight: bold; }
@@ -42,17 +45,22 @@
         .badge-requested { background-color: #007bff; color: white; }
 
         .plan-select { padding: 6px 10px; border-radius: 4px; border: 1px solid #ccc; font-size: 13px; }
-        
         .btn-action { padding: 6px 12px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; font-size: 12px; color: white; }
         .btn-update { background-color: #28a745; }
         .btn-delete { background-color: #dc3545; }
-
         .table-responsive { overflow-x: auto; }
 
-        @media (max-width: 900px) { 
-            .grid-2 { grid-template-columns: 1fr; } 
-            table { display: block; overflow-x: auto; }
-        }
+        .logout-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 9999; opacity: 0; visibility: hidden; transition: 0.3s; backdrop-filter: blur(3px); }
+        .logout-modal-overlay.active { opacity: 1; visibility: visible; }
+        .logout-modal { background: white; padding: 35px 40px; border-radius: 12px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); transform: translateY(-20px); transition: 0.3s; max-width: 400px; width: 90%; }
+        .logout-modal-overlay.active .logout-modal { transform: translateY(0); }
+        .logout-icon { font-size: 45px; color: #dc3545; margin-bottom: 15px; }
+        .logout-actions { display: flex; gap: 15px; justify-content: center; margin-top: 25px; }
+        .logout-btn-cancel, .logout-btn-confirm { padding: 10px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; flex: 1; }
+        .logout-btn-cancel { background: #e2e8f0; }
+        .logout-btn-confirm { background: #dc3545; color: white; }
+
+        @media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -60,85 +68,91 @@
     <div id="admin-navbar-container"></div>
 
     <div class="container">
-        <!-- Profile Info & Settings Grid -->
         <div class="grid-2">
-            <!-- Profile Info Box -->
-            <div class="box">
-                <div class="profile-header">
-                    <div class="profile-avatar"><i class="fa-solid fa-user-shield"></i></div>
-                    <h2 id="userName">Loading...</h2>
-                    <p id="userRole" style="color: #666;"></p>
-                </div>
-                <div class="info-row"><span style="font-weight:bold;">Email:</span> <span id="userEmail">Loading...</span></div>
-                <div class="info-row"><span style="font-weight:bold;">Joined:</span> <span id="userCreatedAt">N/A</span></div>
-                <button class="btn-submit" style="background:#dc3545; margin-top:20px;" onclick="logout()">Logout</button>
-            </div>
-
-            <!-- Forms Box -->
             <div>
-                <div class="box" id="createAdminBox" style="display:none; border-left: 5px solid #007bff;">
-                    <h3>➕ Create New Admin</h3>
-                    <form id="createAdminForm">
-                        <div class="form-group"><label>Name:</label><input type="text" id="adminName" required></div>
-                        <div class="form-group"><label>Email:</label><input type="email" id="adminEmail" required></div>
-                        <div class="form-group">
-                            <label>Password:</label>
-                            <input type="password" id="adminPassword" required>
-                            <i class="fa-solid fa-eye toggle-password" onclick="togglePassword('adminPassword')"></i>
-                        </div>
-                        <button type="submit" class="btn-submit">Create Admin Account</button>
-                    </form>
+                <div class="box">
+                    <div class="profile-header">
+                        <div class="profile-avatar"><i class="fa-solid fa-user-shield"></i></div>
+                        <h2 id="userName" style="margin-bottom: 5px;">Loading...</h2>
+                        <p id="userRole" style="color: #666; margin: 0;"></p>
+                    </div>
+                    <div class="info-row"><span style="font-weight:bold;">Email:</span> <span id="userEmail">Loading...</span></div>
+                    <div class="info-row"><span style="font-weight:bold;">Joined:</span> <span id="userCreatedAt">N/A</span></div>
+                    <button type="button" class="btn-submit" style="background:#dc3545; margin-top:20px;" onclick="openLogoutModal()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
                 </div>
 
                 <div class="box" style="border-left: 5px solid #ffc107;">
                     <h3><i class="fa-solid fa-lock"></i> Change Password</h3>
                     <form id="changePasswordForm">
-                        <div class="form-group">
-                            <label>Current Password:</label>
-                            <input type="password" id="oldPassword" required>
-                            <i class="fa-solid fa-eye toggle-password" onclick="togglePassword('oldPassword')"></i>
-                        </div>
-                        <div class="form-group">
-                            <label>New Password:</label>
-                            <input type="password" id="newPassword" required>
-                            <i class="fa-solid fa-eye toggle-password" onclick="togglePassword('newPassword')"></i>
-                        </div>
-                        <div class="form-group">
-                            <label>Confirm New Password:</label>
-                            <input type="password" id="confirmNewPassword" required>
-                            <i class="fa-solid fa-eye toggle-password" onclick="togglePassword('confirmNewPassword')"></i>
-                        </div>
+                        <div class="form-group"><label>Current Password:</label><input type="password" id="oldPassword" required><i class="fa-solid fa-eye toggle-password" onclick="togglePassword('oldPassword')"></i></div>
+                        <div class="form-group"><label>New Password:</label><input type="password" id="newPassword" required><i class="fa-solid fa-eye toggle-password" onclick="togglePassword('newPassword')"></i></div>
+                        <div class="form-group"><label>Confirm New Password:</label><input type="password" id="confirmNewPassword" required><i class="fa-solid fa-eye toggle-password" onclick="togglePassword('confirmNewPassword')"></i></div>
                         <button type="submit" class="btn-submit" style="background-color: #ffc107; color:#212529;">Update Password</button>
+                    </form>
+                </div>
+            </div>
+
+            <div>
+                <div class="box" style="border-left: 5px solid #28a745;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h3 style="margin: 0;"><i class="fa-solid fa-chart-line"></i> Platform Overview</h3>
+                        <span style="font-size: 13px; font-weight: bold; background: #e2e8f0; padding: 5px 12px; border-radius: 15px; color: #555;">
+                            Total Users: <span id="totalUsersCount" style="color: #007bff; font-size: 15px; margin-left: 2px;">0</span>
+                        </span>
+                    </div>
+
+                    <div class="stat-box-container" style="margin-top: 20px;">
+                        <div class="stat-item"><h4 style="color:#28a745;" id="activeCount">0</h4><p>Active Users</p></div>
+                        <div class="stat-item"><h4 style="color:#ffc107;" id="pendingCount">0</h4><p>Requests</p></div>
+                        <div class="stat-item"><h4 style="color:#dc3545;" id="cancelledCount">0</h4><p>Inactive</p></div>
+                    </div>
+                </div>
+
+                <!-- Login Analytics Box -->
+                <div class="box" style="border-left: 5px solid #6f42c1;">
+                    <h3><i class="fa-solid fa-chart-pie"></i> Login Analytics</h3>
+                    <div class="stat-box-container" style="margin-top: 15px;">
+                        <div class="stat-item"><h4 style="color:#6f42c1;" id="todayLogins">0</h4><p>Today's Logins</p></div>
+                        <div class="stat-item"><h4 style="color:#6f42c1;" id="sevenDayLogins">0</h4><p>Last 7 Days</p></div>
+                        <div class="stat-item"><h4 style="color:#6f42c1;" id="thirtyDayLogins">0</h4><p>Last 1 Month</p></div>
+                    </div>
+                </div>
+
+                <div class="box" id="createAdminBox" style="display:none; border-left: 5px solid #007bff;">
+                    <h3><i class="fa-solid fa-user-plus"></i> Create New Admin</h3>
+                    <form id="createAdminForm">
+                        <div class="form-group"><label>Name:</label><input type="text" id="adminName" required></div>
+                        <div class="form-group"><label>Email:</label><input type="email" id="adminEmail" required></div>
+                        <div class="form-group"><label>Password:</label><input type="password" id="adminPassword" required><i class="fa-solid fa-eye toggle-password" onclick="togglePassword('adminPassword')"></i></div>
+                        <button type="submit" class="btn-submit">Create Admin Account</button>
                     </form>
                 </div>
             </div>
         </div>
 
-        <!-- Pending Users Table Section -->
         <div class="box" style="margin-top: 25px; border-top: 5px solid #dc3545;">
             <h3><i class="fa-solid fa-user-clock"></i> Pending & Cancelled Users</h3>
-            <p style="color:#666; font-size:14px; margin-top: 5px;">Customers waiting for subscription approval or whose access has been cancelled/expired.</p>
-            
             <div class="table-responsive">
                 <table>
                     <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>User Name</th>
-                            <th>Email</th>
-                            <th>Status</th>
-                            <th>Requested Plan</th>
-                            <th>Action (Set Plan)</th>
-                            <th>Remove</th>
-                        </tr>
+                        <tr><th>#</th><th>User Name</th><th>Email</th><th>Status</th><th>Requested Plan</th><th>Action</th><th>Remove</th></tr>
                     </thead>
-                    <tbody id="pendingUserTableBody">
-                        <tr><td colspan="7" style="text-align:center;">Loading users...</td></tr>
-                    </tbody>
+                    <tbody id="pendingUserTableBody"><tr><td colspan="7" style="text-align:center;">Loading users...</td></tr></tbody>
                 </table>
             </div>
         </div>
+    </div>
 
+    <div class="logout-modal-overlay" id="logoutModal">
+        <div class="logout-modal">
+            <i class="fa-solid fa-right-from-bracket logout-icon"></i>
+            <h3>লগআউট নিশ্চিত করুন</h3>
+            <p>আপনি কি নিশ্চিত যে আপনি আপনার অ্যাডমিন একাউন্ট থেকে লগআউট করতে চান?</p>
+            <div class="logout-actions">
+                <button class="logout-btn-cancel" onclick="closeLogoutModal()">বাতিল করুন</button>
+                <button class="logout-btn-confirm" onclick="confirmLogout()">লগআউট</button>
+            </div>
+        </div>
     </div>
 
     <script src="../global/global.js"></script>
@@ -148,25 +162,15 @@
         const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
         const currentUser = JSON.parse(localStorage.getItem('user') || localStorage.getItem('quiz_user') || '{}');
 
-        // পাসওয়ার্ড ভিউ টগল ফাংশন
+        function openLogoutModal() { document.getElementById('logoutModal').classList.add('active'); }
+        function closeLogoutModal() { document.getElementById('logoutModal').classList.remove('active'); }
+        function confirmLogout() { localStorage.clear(); window.location.replace('../login.html'); }
+        
         function togglePassword(id) {
             const input = document.getElementById(id);
             const icon = input.nextElementSibling;
-            if (input.type === "password") {
-                input.type = "text";
-                icon.classList.replace("fa-eye", "fa-eye-slash");
-            } else {
-                input.type = "password";
-                icon.classList.replace("fa-eye-slash", "fa-eye");
-            }
-        }
-
-        async function logout() {
-            const isConfirmed = await showTopAlert('আপনি কি নিশ্চিত যে লগআউট করতে চান?', 'warning', true);
-            if (isConfirmed) {
-                localStorage.clear();
-                window.location.replace('../login.html');
-            }
+            if (input.type === "password") { input.type = "text"; icon.classList.replace("fa-eye", "fa-eye-slash"); }
+            else { input.type = "password"; icon.classList.replace("fa-eye-slash", "fa-eye"); }
         }
 
         if (currentUser.name) {
@@ -178,171 +182,95 @@
 
         if (currentUser.role === 'owner') { document.getElementById('createAdminBox').style.display = 'block'; }
 
-        document.getElementById('createAdminForm')?.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const res = await fetch(`${API_BASE}/users/create-admin`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({ 
-                    name: document.getElementById('adminName').value,
-                    email: document.getElementById('adminEmail').value,
-                    password: document.getElementById('adminPassword').value 
-                })
-            });
-            const data = await res.json();
-            if (data.success) { showTopAlert('✅ ' + data.message, 'success'); document.getElementById('createAdminForm').reset(); }
-            else { showTopAlert('❌ ' + data.message, 'danger'); }
-        });
-
-        document.getElementById('changePasswordForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const newPassword = document.getElementById('newPassword').value;
-            const confirmPassword = document.getElementById('confirmNewPassword').value;
-
-            if (newPassword !== confirmPassword) {
-                showTopAlert('❌ নতুন পাসওয়ার্ড দুটি মিলছে না!', 'danger');
-                return;
-            }
-
-            const res = await fetch(`${API_BASE}/auth/change-password`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({ 
-                    oldPassword: document.getElementById('oldPassword').value,
-                    newPassword: newPassword 
-                })
-            });
-            const data = await res.json();
-            if (data.success) { showTopAlert('✅ ' + data.message, 'success'); document.getElementById('changePasswordForm').reset(); }
-            else { showTopAlert('❌ ' + data.message, 'danger'); }
-        });
-
-        // ==========================================
-        // PENDING / INACTIVE USERS LOGIC
-        // ==========================================
-        async function loadPendingUsers() {
+        async function loadStatsAndUsers() {
             const tableBody = document.getElementById('pendingUserTableBody');
             try {
-                const res = await fetch(`${API_BASE}/users`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                // 💡 Cache-buster '?t=' যোগ করা হয়েছে যাতে ব্রাউজার সবসময় নতুন ডাটা নেয়[cite: 18]
+                const res = await fetch(`${API_BASE}/users?t=${new Date().getTime()}`, { 
+                    headers: { 'Authorization': `Bearer ${token}` } 
                 });
                 const data = await res.json();
+                if (!data.success) return;
 
-                if (!data.success) {
-                    tableBody.innerHTML = `<tr><td colspan="7" style="color:red; text-align:center;">${data.message || 'Failed to load users'}</td></tr>`;
-                    return;
-                }
+                let active = 0; let pending = 0; let inactive = 0; let totalUsers = 0;
+                let todayLogins = 0; let last7Days = 0; let last30Days = 0;
+                const now = new Date();
+
+                data.users.forEach(u => {
+                    if (u.role === 'customer') {
+                        totalUsers++; 
+                        const sub = u.subscription || {};
+                        const isActive = sub.active && sub.endDate && new Date(sub.endDate) > new Date();
+                        const isRequested = u.requestedPlan && u.requestedPlan !== 'none';
+                        
+                        if (isRequested) pending++;
+                        else if (isActive) active++;
+                        else inactive++;
+                    }
+
+                    if(u.lastLogin) {
+                        const lastLoginDate = new Date(u.lastLogin);
+                        // চেক করা হচ্ছে আজকের তারিখের সাথে মেলে কিনা[cite: 18]
+                        if (lastLoginDate.toDateString() === now.toDateString()) {
+                            todayLogins++;
+                        }
+
+                        const diffTime = Math.abs(now - lastLoginDate);
+                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                        if(diffDays <= 7) last7Days++;
+                        if(diffDays <= 30) last30Days++;
+                    }
+                });
+                
+                // ড্যাশবোর্ডে ডাটা আপডেট
+                document.getElementById('totalUsersCount').innerText = totalUsers;
+                document.getElementById('activeCount').innerText = active;
+                document.getElementById('pendingCount').innerText = pending;
+                document.getElementById('cancelledCount').innerText = inactive;
+                
+                document.getElementById('todayLogins').innerText = todayLogins;
+                document.getElementById('sevenDayLogins').innerText = last7Days;
+                document.getElementById('thirtyDayLogins').innerText = last30Days;
 
                 tableBody.innerHTML = '';
+                const pendingUsers = data.users.filter(u => u.role === 'customer' && (!u.subscription || u.subscription.plan === 'none' || u.subscription.active === false || (u.requestedPlan && u.requestedPlan !== 'none')));
                 
-                // শুধুমাত্র কাস্টমার যাদের plan 'none', subscription active নয়, অথবা যারা নতুন প্যাকেজ রিকোয়েস্ট করেছে
-                const pendingUsers = data.users.filter(u => 
-                    u.role === 'customer' && (!u.subscription || u.subscription.plan === 'none' || u.subscription.active === false || (u.requestedPlan && u.requestedPlan !== 'none'))
-                );
-
-                if(pendingUsers.length === 0){
-                    tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#28a745; font-weight:bold;">🎉 No pending users. Everyone has an active subscription!</td></tr>`;
-                    return;
-                }
+                if(pendingUsers.length === 0){ tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#28a745; font-weight:bold;">🎉 No pending users.</td></tr>`; return; }
 
                 pendingUsers.forEach((u, index) => {
-                    const sub = u.subscription || {};
                     const isRequested = u.requestedPlan && u.requestedPlan !== 'none';
-                    
-                    // স্ট্যাটাস ব্যাজ
-                    const statusBadge = isRequested 
-                        ? `<span class="badge badge-active" style="background:#ffc107; color:#212529;">Requested</span>`
-                        : `<span class="badge badge-expired">Pending / Inactive</span>`;
-                    
-                    // রিকোয়েস্ট করা প্ল্যানের নাম দেখানো
-                    const requestedPlanDisplay = isRequested
-                        ? `<span class="badge badge-requested">${u.requestedPlan}</span>`
-                        : `<span style="color:#888;">No Request</span>`;
-
-                    // ড্রপডাউনে ডিফল্ট সিলেক্ট ভ্যালু নির্ধারণ (রিকোয়েস্ট থাকলে সেটা, না থাকলে কারেন্ট প্ল্যান)
-                    const defaultSelect = isRequested ? u.requestedPlan : (sub.plan || 'none');
-
-                    tableBody.innerHTML += `
-                        <tr>
-                            <td>${index + 1}</td>
-                            <td><b>${u.name}</b></td>
-                            <td>${u.email}</td>
-                            <td>${statusBadge}</td>
-                            <td>${requestedPlanDisplay}</td>
-                            <td>
-                                <select class="plan-select" id="plan-${u._id}">
-                                    <option value="none" ${defaultSelect === 'none' ? 'selected' : ''}>Cancel Plan</option>
-                                    <option value="1_month" ${defaultSelect === '1_month' ? 'selected' : ''}>1 Month</option>
-                                    <option value="3_months" ${defaultSelect === '3_months' ? 'selected' : ''}>3 Months</option>
-                                    <option value="6_months" ${defaultSelect === '6_months' ? 'selected' : ''}>6 Months</option>
-                                    <option value="1_year" ${defaultSelect === '1_year' ? 'selected' : ''}>1 Year</option>
-                                    <option value="2_years" ${defaultSelect === '2_years' ? 'selected' : ''}>2 Years</option>
-                                    <option value="3_years" ${defaultSelect === '3_years' ? 'selected' : ''}>3 Years</option>
-                                </select>
-                                <button class="btn-action btn-update" onclick="updateSubscription('${u._id}')">Save Plan</button>
-                            </td>
-                            <td>
-                                ${currentUser.role === 'owner' ? `
-                                    <button class="btn-action btn-delete" onclick="deleteUser('${u._id}', '${u.name}')">Delete</button>
-                                ` : '<small style="color:#aaa;">N/A</small>'}
-                            </td>
-                        </tr>
-                    `;
+                    const statusBadge = isRequested ? `<span class="badge badge-active" style="background:#ffc107; color:#212529;">Requested</span>` : `<span class="badge badge-expired">Pending</span>`;
+                    const defaultSelect = isRequested ? u.requestedPlan : (u.subscription?.plan || 'none');
+                    tableBody.innerHTML += `<tr>
+                        <td>${index + 1}</td><td><b>${u.name}</b></td><td>${u.email}</td><td>${statusBadge}</td><td>${u.requestedPlan || 'None'}</td>
+                        <td>
+                            <select class="plan-select" id="plan-${u._id}"><option value="none" ${defaultSelect === 'none' ? 'selected' : ''}>Cancel</option><option value="1_month" ${defaultSelect === '1_month' ? 'selected' : ''}>1 Month</option><option value="3_months" ${defaultSelect === '3_months' ? 'selected' : ''}>3 Months</option><option value="6_months" ${defaultSelect === '6_months' ? 'selected' : ''}>6 Months</option><option value="1_year" ${defaultSelect === '1_year' ? 'selected' : ''}>1 Year</option></select>
+                            <button class="btn-action btn-update" onclick="updateSubscription('${u._id}')">Save</button>
+                        </td>
+                        <td>${currentUser.role === 'owner' ? `<button class="btn-action btn-delete" onclick="deleteUser('${u._id}', '${u.name}')">Delete</button>` : '<small>N/A</small>'}</td>
+                    </tr>`;
                 });
-
-            } catch (err) {
-                tableBody.innerHTML = `<tr><td colspan="7" style="color:red; text-align:center;">Error fetching user list!</td></tr>`;
-            }
+            } catch (err) { console.error(err); }
         }
 
         async function updateSubscription(userId) {
             const selectedPlan = document.getElementById(`plan-${userId}`).value;
-            try {
-                const res = await fetch(`${API_BASE}/users/${userId}/subscription`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ plan: selectedPlan })
-                });
-
-                const data = await res.json();
-                if (data.success) {
-                    showTopAlert(`✅ ${data.message}`, 'success');
-                    loadPendingUsers(); // Reload table after update
-                } else {
-                    showTopAlert(`❌ Failed: ${data.message}`, 'danger');
-                }
-            } catch (err) {
-                showTopAlert(`❌ Error updating plan!`, 'danger');
-            }
+            const res = await fetch(`${API_BASE}/users/${userId}/subscription`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ plan: selectedPlan }) });
+            const data = await res.json();
+            if (data.success) { showTopAlert(`✅ ${data.message}`, 'success'); loadStatsAndUsers(); }
+            else { showTopAlert(`❌ Failed: ${data.message}`, 'danger'); }
         }
 
         async function deleteUser(userId, userName) {
             const confirmed = await showTopAlert(`Are you sure you want to delete user '${userName}'?`, 'danger', true);
             if (!confirmed) return;
-
-            try {
-                const res = await fetch(`${API_BASE}/users/${userId}`, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const data = await res.json();
-                if (data.success) {
-                    showTopAlert(`✅ ${data.message}`, 'success');
-                    loadPendingUsers();
-                } else {
-                    showTopAlert(`❌ Delete failed: ${data.message}`, 'danger');
-                }
-            } catch (err) {
-                showTopAlert(`❌ Error deleting user!`, 'danger');
-            }
+            const res = await fetch(`${API_BASE}/users/${userId}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+            const data = await res.json();
+            if (data.success) { showTopAlert(`✅ ${data.message}`, 'success'); loadStatsAndUsers(); }
+            else { showTopAlert(`❌ Delete failed: ${data.message}`, 'danger'); }
         }
 
-        // On window load, fetch pending users
-        window.addEventListener('DOMContentLoaded', loadPendingUsers);
-
+        window.addEventListener('DOMContentLoaded', loadStatsAndUsers);
     </script>
 </body>
 </html>
