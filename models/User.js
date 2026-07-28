@@ -46,7 +46,6 @@ const UserSchema = new mongoose.Schema({
             default: false
         }
     },
-    // 💡 নতুন যোগ করা হলো: লগইনের সময় সেভ করার জন্য
     lastLogin: {
         type: Date,
         default: null

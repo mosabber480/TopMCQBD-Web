@@ -7,7 +7,6 @@ const User = require('../models/User');
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey_quizapp';
 
 // 1. REGISTER API
-// ... (রেজিস্টার এপিআই আগের মতোই থাকবে) ...
 router.post('/register', async (req, res) => {
     try {
         const { name, email, password, role } = req.body;
@@ -30,7 +29,7 @@ router.post('/register', async (req, res) => {
     }
 });
 
-// 2. LOGIN API (💡 এখানে আপডেট করা হয়েছে)
+// 2. LOGIN API (💡 আপডেট করা হয়েছে)
 router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -54,7 +53,7 @@ router.post('/login', async (req, res) => {
             }
         }
 
-        // 💡 আপডেট: সফল লগইনের পর lastLogin এ বর্তমান সময় সেভ করা
+        // 💡 সফল লগইনের পর lastLogin এ বর্তমান সময় সেভ করা
         user.lastLogin = new Date();
         await user.save();
 
