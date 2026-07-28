@@ -39,7 +39,7 @@
             padding: 0 20px;
         }
 
-        /* Quiz Main Container - MATCHES EXACT 1300PX ALIGNMENT WITH HEADER */
+        /* Quiz Main Container */
         .quiz-container {
             width: 100%;
             background: #fff;
@@ -63,13 +63,16 @@
             font-weight: bold;
             cursor: pointer;
             transition: background-color 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
         }
         .quiz-btn-reset:hover { background-color: #27ae60; }
 
         /* Floating Status Bar */
         .quiz-floating-status-bar {
             position: fixed;
-            top: 100px;
+            top: 126px;
             right: 20px;
             display: flex;
             flex-direction: column;
@@ -112,20 +115,21 @@
             display: flex; justify-content: space-between; align-items: center; margin-top: 10px; margin-bottom: 20px;
             background: #f8f9fa; padding: 8px 15px; border-radius: 6px; border: 1px solid #e9ecef; flex-wrap: wrap; gap: 12px;
         }
-        .quiz-nav-actions { display: flex; align-items: center; gap: 10px; }
+        .quiz-nav-actions { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
         .quiz-right-controls-group { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
         .quiz-filter-group { display: flex; align-items: center; gap: 6px; }
         .quiz-select-dropdown { padding: 5px 8px; border-radius: 4px; border: 1px solid #ced4da; font-size: 13px; font-weight: 600; color: #2c3e50; background-color: #fff; cursor: pointer; outline: none; }
         .quiz-select-dropdown:focus { border-color: #007bff; }
 
         .quiz-switch-group { display: flex; align-items: center; gap: 12px; }
-        .quiz-switch-label { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #2c3e50; cursor: pointer; user-select: none; }
+        .quiz-switch-label { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #2c3e50; cursor: pointer; user-select: none; transition: opacity 0.2s ease; }
         .quiz-switch { position: relative; display: inline-block; width: 36px; height: 20px; }
         .quiz-switch input { opacity: 0; width: 0; height: 0; }
         .quiz-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .3s; border-radius: 20px; }
         .quiz-slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
         input:checked + .quiz-slider { background-color: #007bff; }
         input:checked + .quiz-slider:before { transform: translateX(16px); }
+        input:disabled + .quiz-slider { cursor: not-allowed; background-color: #e2e8f0; }
 
         .quiz-color-dots-icon { display: inline-flex; align-items: center; gap: 3px; margin-left: 2px; }
         .quiz-dot-red { width: 9px; height: 9px; background-color: #e74c3c; border-radius: 50%; }
@@ -142,8 +146,6 @@
         #popup-action { display: flex; gap: 8px; flex-wrap: wrap; }
         .quiz-popup-btn { background-color: #007bff; color: white; border: none; padding: 8px 14px; border-radius: 4px; font-size: 13px; font-weight: bold; cursor: pointer; transition: background 0.2s ease; margin-top: 5px; display: inline-flex; align-items: center; gap: 6px; }
         .quiz-popup-btn:hover { background-color: #0056b3; }
-        
-        /* Green Background for "ঠিক আছে" (Okay) Button */
         .quiz-popup-close-btn { background-color: #28a745 !important; }
         .quiz-popup-close-btn:hover { background-color: #218838 !important; }
 
@@ -159,7 +161,7 @@
 
         .correct { background-color: #2ecc71 !important; color: white !important; border-color: #27ae60 !important; }
         .incorrect { background-color: #e74c3c !important; color: white !important; border-color: #c0392b !important; }
-        .neutral-selected { background-color: #ecf7fa !important; color: #000000 !important; border-color: #222 !important; font-weight: normal !important; }
+        .neutral-selected { background-color: #f8f9fa !important; color: #000000 !important; border-color: #222 !important; font-weight: normal !important; }
 
         .quiz-answer-text { font-weight: bold; color: #27ae60; margin-top: 10px; display: none; text-align: left; }
         .quiz-explanation-text { font-size: 14px; color: #555; margin-top: 5px; display: none; background: #f9f9f9; padding: 8px 12px; border-left: 3px solid #17a2b8; border-radius: 4px; }
@@ -199,7 +201,7 @@
         <!-- Floating Status Container (Timer & Score) -->
         <div class="quiz-floating-status-bar">
             <div class="quiz-timer-board" id="timer-board-box"><span id="timer-display">00:00</span></div>
-            <div class="quiz-score-board">স্কোর: <span id="live-score">0</span></div>
+            <div class="quiz-score-board" id="score-board-box">স্কোর: <span id="live-score">0</span></div>
         </div>
 
         <!-- Bottom Right Corner Toast Popup -->
@@ -222,7 +224,16 @@
 
             <div class="quiz-controls-bar">
                 <div class="quiz-nav-actions">
-                    <button class="quiz-btn-reset" onclick="resetQuiz()">🔄 পুনরায় শুরু করুন</button>
+                    <button class="quiz-btn-reset" onclick="resetQuiz()"><i class="fa-solid fa-rotate-right"></i> পুনরায় শুরু করুন</button>
+                    
+                    <!-- NEW READ SWITCH -->
+                    <label class="quiz-switch-label" style="background: #e2e8f0; padding: 4px 12px; border-radius: 20px; font-weight: 700; margin-left: 5px;">
+                        <label class="quiz-switch">
+                            <input type="checkbox" id="toggle-read">
+                            <span class="quiz-slider"></span>
+                        </label>
+                        আগে পড়ুন
+                    </label>
                 </div>
 
                 <div class="quiz-right-controls-group">
@@ -240,7 +251,7 @@
                         </select>
                     </div>
 
-                    <!-- Toggle Switches (Color, Correct Ans, Explanation, Time) -->
+                    <!-- Toggle Switches -->
                     <div class="quiz-switch-group">
                         <label class="quiz-switch-label">
                             <label class="quiz-switch">
@@ -269,12 +280,20 @@
                             ব্যাখ্যা
                         </label>
 
-                        <label class="quiz-switch-label">
+                        <label class="quiz-switch-label" id="time-switch-container">
                             <label class="quiz-switch">
                                 <input type="checkbox" id="toggle-time">
                                 <span class="quiz-slider"></span>
                             </label>
                             সময়
+                        </label>
+                        
+                        <label class="quiz-switch-label" id="score-switch-container">
+                            <label class="quiz-switch">
+                                <input type="checkbox" id="toggle-score" checked>
+                                <span class="quiz-slider"></span>
+                            </label>
+                            স্কোর
                         </label>
                     </div>
                 </div>
@@ -317,6 +336,7 @@
         let score = 0;
         let correctCount = 0;
         let incorrectCount = 0;
+        let isReadMode = false;
 
         let timerInterval = null;
         let initialTotalSeconds = 0;
@@ -327,14 +347,18 @@
         const liveScoreDisplay = document.getElementById('live-score');
         const timerDisplay = document.getElementById('timer-display');
         const timerBoardBox = document.getElementById('timer-board-box');
+        const scoreBoardBox = document.getElementById('score-board-box');
         const correctCountDisplay = document.getElementById('correct-count-display');
         const incorrectCountDisplay = document.getElementById('incorrect-count-display');
         const finalScoreDisplay = document.getElementById('final-score');
 
+        const toggleRead = document.getElementById('toggle-read');
         const toggleColor = document.getElementById('toggle-color');
         const toggleAnswer = document.getElementById('toggle-answer');
         const toggleExplanation = document.getElementById('toggle-explanation');
         const toggleTime = document.getElementById('toggle-time');
+        const toggleScore = document.getElementById('toggle-score');
+
         const limitSelect = document.getElementById('limit-select');
         const rangeSelect = document.getElementById('range-select');
 
@@ -348,12 +372,57 @@
             return letters[index] || index;
         }
 
+        // Toggle Event Listeners
         toggleAnswer.addEventListener('change', updateVisibility);
         toggleExplanation.addEventListener('change', updateVisibility);
         toggleColor.addEventListener('change', updateOptionColors);
 
         toggleTime.addEventListener('change', () => {
-            resetQuiz();
+            if(!isReadMode) resetQuiz();
+        });
+
+        toggleScore.addEventListener('change', () => {
+            if(!isReadMode) {
+                scoreBoardBox.style.display = toggleScore.checked ? 'block' : 'none';
+            }
+        });
+
+        // READ MODE EVENT LISTENER
+        toggleRead.addEventListener('change', () => {
+            isReadMode = toggleRead.checked;
+            
+            if (isReadMode) {
+                // Disable Time and Score switches visually and functionally
+                toggleTime.disabled = true;
+                toggleScore.disabled = true;
+                toggleTime.checked = false;
+                toggleScore.checked = false;
+                document.getElementById('time-switch-container').style.opacity = '0.5';
+                document.getElementById('score-switch-container').style.opacity = '0.5';
+                
+                // Hide floating boards
+                timerBoardBox.style.display = "none";
+                scoreBoardBox.style.display = "none";
+                if (timerInterval) clearInterval(timerInterval);
+                
+                // Enable Color and Explanation, Disable Correct Answer text
+                toggleColor.checked = true;
+                toggleExplanation.checked = true;
+                toggleAnswer.checked = false;
+                
+                // Re-render UI to display as reading material
+                renderQuizUI();
+            } else {
+                // Enable Time and Score switches
+                toggleTime.disabled = false;
+                toggleScore.disabled = false;
+                toggleScore.checked = true; // Default back to showing score
+                document.getElementById('time-switch-container').style.opacity = '1';
+                document.getElementById('score-switch-container').style.opacity = '1';
+                
+                // Reset quiz to normal practice mode
+                resetQuiz();
+            }
         });
 
         // Authentication and Subscription Access Guard
@@ -391,22 +460,26 @@
         }
 
         function updateVisibility() {
-            Object.keys(answeredQuestions).forEach(qIndex => {
+            displayQuestions.forEach((_, i) => {
+                const qIndex = (rangeSelect.value === 'all' ? 0 : parseInt(rangeSelect.value.split('-')[0])) + i;
                 const ansElem = document.getElementById(`ans-text-${qIndex}`);
-                if (ansElem) {
-                    ansElem.style.display = toggleAnswer.checked ? 'block' : 'none';
-                }
-
                 const expElem = document.getElementById(`exp-text-${qIndex}`);
-                if (expElem) {
-                    expElem.style.display = toggleExplanation.checked ? 'block' : 'none';
+                
+                const shouldShow = isReadMode || answeredQuestions[qIndex] !== undefined;
+
+                if (shouldShow) {
+                    if (ansElem) ansElem.style.display = toggleAnswer.checked ? 'block' : 'none';
+                    if (expElem) expElem.style.display = toggleExplanation.checked ? 'block' : 'none';
+                } else {
+                    if (ansElem) ansElem.style.display = 'none';
+                    if (expElem) expElem.style.display = 'none';
                 }
             });
         }
 
         function updateOptionColors() {
-            Object.keys(answeredQuestions).forEach(qIndex => {
-                const selectedIndex = answeredQuestions[qIndex];
+            displayQuestions.forEach((_, i) => {
+                const qIndex = (rangeSelect.value === 'all' ? 0 : parseInt(rangeSelect.value.split('-')[0])) + i;
                 const currentQuestion = quizData[qIndex];
                 const qBlock = document.getElementById(`q-block-${qIndex}`);
 
@@ -414,22 +487,40 @@
 
                 const correctAnsIdx = typeof currentQuestion.ans !== 'undefined' ? currentQuestion.ans : currentQuestion.correctAnswer;
                 const allButtons = qBlock.querySelectorAll('.quiz-option-btn');
-                const selectedBtn = allButtons[selectedIndex];
-                const correctBtn = allButtons[correctAnsIdx];
 
+                // Clear previous colors
                 allButtons.forEach(btn => {
                     btn.classList.remove('correct', 'incorrect', 'neutral-selected');
                 });
 
-                if (toggleColor.checked) {
-                    if (selectedIndex === correctAnsIdx) {
-                        if (selectedBtn) selectedBtn.classList.add('correct');
-                    } else {
-                        if (selectedBtn) selectedBtn.classList.add('incorrect');
-                        if (correctBtn) correctBtn.classList.add('correct');
+                if (isReadMode) {
+                    const correctBtn = allButtons[correctAnsIdx];
+                    if (correctBtn) {
+                        if (toggleColor.checked) {
+                            correctBtn.classList.add('correct');
+                        } else {
+                            // When color is toggled off in Read Mode, show the neutral selection style
+                            correctBtn.classList.add('neutral-selected');
+                        }
                     }
                 } else {
-                    if (selectedBtn) selectedBtn.classList.add('neutral-selected');
+                    const selectedIndex = answeredQuestions[qIndex];
+                    if (selectedIndex !== undefined) {
+                        const selectedBtn = allButtons[selectedIndex];
+                        const correctBtn = allButtons[correctAnsIdx];
+
+                        if (toggleColor.checked) {
+                            if (selectedIndex === correctAnsIdx) {
+                                if (selectedBtn) selectedBtn.classList.add('correct');
+                            } else {
+                                if (selectedBtn) selectedBtn.classList.add('incorrect');
+                                if (correctBtn) correctBtn.classList.add('correct');
+                            }
+                        } else {
+                            // When color is toggled off in normal Mode, show the neutral selection style on selected answer
+                            if (selectedBtn) selectedBtn.classList.add('neutral-selected');
+                        }
+                    }
                 }
             });
         }
@@ -444,7 +535,6 @@
                 return;
             }
 
-            // Parse Category Path levels (Main Category > Sub-Category > Topic)
             const parts = currentCategory.split('/').map(p => p.trim()).filter(Boolean);
             const mainCat = parts[0] || '';
             const subCat = parts[1] || '';
@@ -536,7 +626,6 @@
             }
 
             let startIndexOffset = 0;
-
             const selectedRange = rangeSelect.value;
 
             if (selectedRange === 'all') {
@@ -548,7 +637,10 @@
                 startIndexOffset = start;
             }
 
-            if (toggleTime.checked) {
+            // Handle Score & Time Visibility
+            scoreBoardBox.style.display = (toggleScore.checked && !isReadMode) ? "block" : "none";
+
+            if (toggleTime.checked && !isReadMode) {
                 timerBoardBox.style.display = "block";
                 startTimer(displayQuestions.length);
             } else {
@@ -577,7 +669,9 @@
                     btn.className = 'quiz-option-btn';
                     btn.innerText = `(${getBanglaLetter(oIndex)}) ${opt}`;
                     
-                    if (answeredQuestions[actualIndex] !== undefined) {
+                    if (isReadMode) {
+                        btn.classList.add('disabled');
+                    } else if (answeredQuestions[actualIndex] !== undefined) {
                         btn.classList.add('disabled');
                     } else {
                         btn.onclick = () => handleAnswer(btn, actualIndex, oIndex, optContainer);
@@ -622,7 +716,7 @@
             const warningThreshold = Math.floor(initialTotalSeconds * 0.10);
 
             timerInterval = setInterval(() => {
-                if (!toggleTime.checked) {
+                if (!toggleTime.checked || isReadMode) {
                     clearInterval(timerInterval);
                     return;
                 }
@@ -657,7 +751,7 @@
         }
 
         function show10PercentWarningPopup() {
-            if (!toggleTime.checked) return;
+            if (!toggleTime.checked || isReadMode) return;
 
             const { minutes, seconds } = formatTime(totalSecondsLeft);
             let timeStr = "";
@@ -672,11 +766,10 @@
         }
 
         function handleTimeOut() {
-            if (!toggleTime.checked) return;
+            if (!toggleTime.checked || isReadMode) return;
 
             disableAllButtonsOnTimeOut();
 
-            // Calculate Percentage of correct answers
             const totalCount = displayQuestions.length || 1;
             const percentage = ((correctCount / totalCount) * 100).toFixed(0);
 
@@ -694,11 +787,9 @@
             cornerPopup.style.display = "block";
         }
 
-        // Popup for Quiz Completion (When all loaded questions are answered)
         function showCompletionPopup() {
             if (timerInterval) clearInterval(timerInterval);
 
-            // Calculate Percentage of correct answers
             const totalCount = displayQuestions.length || 1;
             const percentage = ((correctCount / totalCount) * 100).toFixed(0);
 
@@ -729,7 +820,7 @@
         }
 
         function handleAnswer(selectedBtn, qIndex, selectedIndex, optContainer) {
-            if (toggleTime.checked && totalSecondsLeft <= 0) return;
+            if ((toggleTime.checked && totalSecondsLeft <= 0) || isReadMode) return;
 
             const currentQuestion = quizData[qIndex];
             const correctAnsIdx = typeof currentQuestion.ans !== 'undefined' ? currentQuestion.ans : currentQuestion.correctAnswer;
@@ -759,13 +850,22 @@
 
             updateVisibility();
 
-            // Check if user answered ALL questions loaded on screen
             if (Object.keys(answeredQuestions).length === displayQuestions.length) {
                 showCompletionPopup();
             }
         }
 
         function resetQuiz() {
+            if (isReadMode) {
+                toggleRead.checked = false;
+                isReadMode = false;
+                toggleTime.disabled = false;
+                toggleScore.disabled = false;
+                document.getElementById('time-switch-container').style.opacity = '1';
+                document.getElementById('score-switch-container').style.opacity = '1';
+                toggleScore.checked = true;
+            }
+
             score = 0;
             correctCount = 0;
             incorrectCount = 0;
