@@ -58,7 +58,7 @@
                     <p style="margin: 8px 0;"><strong>Status:</strong> <span id="userStatusBadge" class="badge">Checking...</span></p>
                 </div>
 
-                <!-- পাসওয়ার্ড ফর্ম (সব সময় ওপেন থাকবে) -->
+                <!-- পাসওয়ার্ড ফর্ম -->
                 <form id="changePasswordForm" class="box" style="border-left: 5px solid #ffc107;">
                     <h3 style="margin-top: 0; margin-bottom: 15px; font-size: 18px; color: #333;">
                         <i class="fa-solid fa-lock"></i> Change Password
@@ -92,9 +92,9 @@
             <div style="padding:0;">
                 <div class="sub-box">
                     <h4 style="margin:0 0 10px 0; color:#007bff;"><i class="fa-solid fa-gem"></i> Subscription Status</h4>
-                    <p style="margin: 5px 0;"><strong>Current Plan:</strong> <span id="subPlan">None</span></p>
+                    <p style="margin: 5px 0;"><strong>Current Plan:</strong> <span id="subPlan" style="font-weight:bold;">আপনার কোনো প্যাকেজ সিলেক্ট করা নাই</span></p>
                     
-                    <!-- NEW: Pending Request Section -->
+                    <!-- Pending Request Section -->
                     <div id="pendingRequestWrapper" style="display: none; margin: 10px 0; padding: 10px; background: #fff8e1; border: 1px dashed #ffc107; border-radius: 4px;">
                         <p style="margin: 0;"><strong>Pending Request:</strong> <span id="pendingPlanBadge" class="badge badge-pending">None</span></p>
                         <small style="color: #856404; display: block; margin-top: 4px;"><i class="fa-solid fa-circle-info"></i> Your package request is waiting for admin approval.</small>
@@ -112,13 +112,15 @@
 
     <script src="global/global.js"></script>
     <script>
-        const API_BASE = 'https://mosabber-quiz-app.onrender.com/api';
+        const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+            ? 'http://localhost:5000/api' 
+            : 'https://mosabber-quiz-app.onrender.com/api';
+
         const user = JSON.parse(localStorage.getItem('quiz_user') || localStorage.getItem('user'));
         const token = localStorage.getItem('quiz_token') || localStorage.getItem('token');
 
         if (!token || !user) { window.location.href = 'login.html'; }
 
-        // পাসওয়ার্ড টগল ফাংশন
         function togglePassword(id) {
             const input = document.getElementById(id);
             const icon = input.nextElementSibling;
@@ -131,7 +133,6 @@
             }
         }
 
-        // বাকি থাকা সময় ক্যালকুলেট করার ফাংশন
         function getRemainingTime(endDateStr) {
             const now = new Date();
             const end = new Date(endDateStr);
@@ -142,19 +143,9 @@
             let days = end.getDate() - now.getDate();
             let hours = end.getHours() - now.getHours();
 
-            if (hours < 0) {
-                hours += 24;
-                days--;
-            }
-            if (days < 0) {
-                const prevMonth = new Date(end.getFullYear(), end.getMonth(), 0);
-                days += prevMonth.getDate();
-                months--;
-            }
-            if (months < 0) {
-                months += 12;
-                years--;
-            }
+            if (hours < 0) { hours += 24; days--; }
+            if (days < 0) { const prevMonth = new Date(end.getFullYear(), end.getMonth(), 0); days += prevMonth.getDate(); months--; }
+            if (months < 0) { months += 12; years--; }
 
             let parts = [];
             if (years > 0) parts.push(`${years} Year${years > 1 ? 's' : ''}`);
@@ -165,7 +156,7 @@
             return parts.length > 0 ? parts.join(' ') : 'Less than 1 Hour';
         }
 
-        // ইউজারের নাম হেডিং এবং নামের জায়গায় বসানো হচ্ছে
+        // ইউজার ডেটা সেট করা
         document.getElementById('mainUserName').innerText = user.name || 'User';
         document.getElementById('userName').innerText = user.name || 'N/A';
         document.getElementById('userEmail').innerText = user.email || 'N/A';
@@ -174,7 +165,14 @@
         const isSubActive = sub.active && sub.endDate && new Date(sub.endDate) > new Date();
         const isRequested = user.requestedPlan && user.requestedPlan !== 'none';
 
-        document.getElementById('subPlan').innerText = sub.plan ? sub.plan.replace('_', ' ').toUpperCase() : 'NO PLAN';
+        // কারেন্ট প্ল্যান চেক
+        if (sub.plan && sub.plan !== 'none') {
+            document.getElementById('subPlan').innerText = sub.plan.replace('_', ' ').toUpperCase();
+            document.getElementById('subPlan').style.color = "#28a745";
+        } else {
+            document.getElementById('subPlan').innerText = 'আপনার কোনো প্যাকেজ সিলেক্ট করা নাই';
+            document.getElementById('subPlan').style.color = "#dc3545";
+        }
         
         // DOM Elements
         const statusElem = document.getElementById('userStatusBadge');
@@ -206,7 +204,6 @@
             pendingWrapper.style.display = 'block';
             pendingPlanBadge.innerText = user.requestedPlan.replace('_', ' ').toUpperCase();
             
-            // If they don't have an active plan, update status badge to pending
             if (user.role !== 'owner' && user.role !== 'admin' && !isSubActive) {
                 statusElem.innerText = 'PENDING APPROVAL';
                 statusElem.className = 'badge badge-pending';

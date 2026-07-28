@@ -160,7 +160,10 @@ app.put('/api/auth/change-password', verifyToken, async (req, res) => {
     try {
         const { oldPassword, newPassword } = req.body;
 
-        const user = await User.findById(req.user.id);
+        // 💡 FIX: req.user.userId যোগ করা হয়েছে
+        const userId = req.user.id || req.user._id || req.user.userId;
+        const user = await User.findById(userId);
+        
         if (!user) {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
@@ -191,13 +194,30 @@ app.get('/api/users', verifyToken, authorizeRoles('owner', 'admin'), async (req,
     }
 });
 
+// NEW API: Get Current Logged-in User Profile Data
+app.get('/api/users/me', verifyToken, async (req, res) => {
+    try {
+        // 💡 FIX: req.user.userId যোগ করা হয়েছে
+        const userId = req.user.id || req.user._id || req.user.userId;
+        const user = await User.findById(userId).select('-password');
+        
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+        
+        res.json({ success: true, user });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
 // NEW API: Request a Subscription Plan (For any logged in customer)
 app.post('/api/users/request-plan', verifyToken, async (req, res) => {
     try {
         const { requestedPlan } = req.body;
         
-        // 💡 FIX: টোকেন থেকে আইডিটি আরও সুরক্ষিতভাবে ধরার জন্য আপডেট করা হয়েছে
-        const userId = req.user.id || req.user._id; 
+        // 💡 FIX: req.user.userId যোগ করা হয়েছে
+        const userId = req.user.id || req.user._id || req.user.userId; 
         const user = await User.findById(userId);
         
         if (!user) {

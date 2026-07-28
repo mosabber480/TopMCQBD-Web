@@ -22,19 +22,19 @@ const UserSchema = new mongoose.Schema({
         enum: ['owner', 'admin', 'customer'],
         default: 'customer'
     },
+    // --- ফিক্স: requestedPlan কে subscription এর বাইরে (রুট লেভেলে) রাখা হলো ---
+    requestedPlan: {
+        type: String,
+        enum: ['none', '1_month', '3_months', '6_months', '1_year', '2_years', '3_years'],
+        default: 'none'
+    },
+    // ----------------------------------------------------------------------
     subscription: {
         plan: {
             type: String,
             enum: ['none', '1_month', '3_months', '6_months', '1_year', '2_years', '3_years'],
             default: 'none'
         },
-        // --- নতুন যুক্ত করা অংশ: কাস্টমারের রিকোয়েস্ট করা প্যাকেজ সেভ করার জন্য ---
-        requestedPlan: {
-            type: String,
-            enum: ['none', '1_month', '3_months', '6_months', '1_year', '2_years', '3_years'],
-            default: 'none'
-        },
-        // ----------------------------------------------------------------------
         startDate: {
             type: Date,
             default: null

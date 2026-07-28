@@ -79,7 +79,8 @@ router.post('/login', async (req, res) => {
                 name: user.name,
                 email: user.email,
                 role: user.role,
-                subscription: user.subscription
+                subscription: user.subscription,
+                requestedPlan: user.requestedPlan // 💡 আপডেট: রেসপন্সে এটি যুক্ত করা হয়েছে
             }
         });
     } catch (err) {
