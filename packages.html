@@ -12,28 +12,48 @@
     <link rel="stylesheet" href="global/global.css">
     
     <style>
+        /* Banner Container Adjustment */
         .page-banner {
             background: linear-gradient(135deg, var(--dark, #2c3e50), #1a252f);
             color: white;
-            padding: 50px 20px;
+            padding: 60px 20px;
             text-align: center;
+        }
+        .banner-content {
+            max-width: 1300px;
+            margin: 0 auto;
         }
         .page-banner h1 { font-size: 32px; font-weight: 800; margin-bottom: 10px; }
         .page-banner p { font-size: 16px; color: #cbd5e1; }
 
+        /* Packages Container Adjustment - Exactly 3 columns on Desktop */
         .packages-container {
-            max-width: 1200px;
-            margin: 40px auto;
+            max-width: 1300px;
+            margin: 96px auto; 
             padding: 0 20px;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 25px;
+            grid-template-columns: repeat(3, 1fr); /* ডেক্সটপে ৩টি বক্স */
+            gap: 46px 42px;
         }
 
+        /* Responsive Settings for Tablet & Mobile */
+        @media (max-width: 992px) {
+            .packages-container {
+                grid-template-columns: repeat(2, 1fr); /* ট্যাবলেটে ২টি বক্স */
+            }
+        }
+
+        @media (max-width: 768px) {
+            .packages-container {
+                grid-template-columns: 1fr; /* মোবাইলে ১টি বক্স */
+            }
+        }
+
+        /* Dynamic Color Integration */
         .package-card {
-            background: white;
+            background: var(--theme-bg, white);
             border-radius: 12px;
-            border: 1px solid #e2e8f0;
+            border: 2px solid var(--theme-color, #e2e8f0);
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
             padding: 30px 25px;
             text-align: center;
@@ -49,16 +69,12 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
 
-        .package-card.popular {
-            border: 2px solid var(--primary, #007bff);
-        }
-
         .popular-badge {
             position: absolute;
             top: -12px;
             left: 50%;
             transform: translateX(-50%);
-            background: var(--primary, #007bff);
+            background: var(--theme-color, #007bff);
             color: white;
             padding: 4px 14px;
             font-size: 12px;
@@ -77,7 +93,7 @@
         .pkg-price {
             font-size: 32px;
             font-weight: 800;
-            color: var(--primary, #007bff);
+            color: var(--theme-color, #007bff);
             margin-bottom: 20px;
         }
 
@@ -90,7 +106,7 @@
         .pkg-features {
             list-style: none;
             padding: 0;
-            margin: 0 0 25px 0;
+            margin: 0 0 15px 0;
             text-align: left;
         }
 
@@ -106,9 +122,19 @@
         .pkg-features li i {
             color: #28a745;
         }
+        
+        .pkg-note {
+            font-size: 12.5px;
+            color: #64748b;
+            text-align: left;
+            margin-bottom: 25px;
+            padding-top: 12px;
+            border-top: 1px dashed #cbd5e1;
+            line-height: 1.5;
+        }
 
         .btn-buy {
-            background-color: var(--primary, #007bff);
+            background-color: var(--theme-color, #007bff);
             color: white;
             border: none;
             padding: 12px 20px;
@@ -117,13 +143,13 @@
             font-weight: 700;
             cursor: pointer;
             width: 100%;
-            transition: background 0.2s ease;
+            transition: opacity 0.2s ease;
             text-decoration: none;
             display: inline-block;
         }
 
         .btn-buy:hover {
-            background-color: var(--primary-dark, #0056b3);
+            opacity: 0.85;
         }
         
         .loading-text {
@@ -138,99 +164,124 @@
     <header id="global-header"></header>
 
     <div class="page-banner">
-        <h1>আমাদের প্রিপারেশন প্যাকেজসমূহ</h1>
-        <p>আপনার সুবিধামত প্যাকেজ বেছে নিয়ে আজই শুরু করুন সেরা কুইজ প্রস্তুতি</p>
+        <div class="banner-content">
+            <h1>আমাদের প্রিপারেশন প্যাকেজসমূহ</h1>
+            <p>আপনার সুবিধামত প্যাকেজ বেছে নিয়ে আজই শুরু করুন সেরা কুইজ প্রস্তুতি</p>
+        </div>
     </div>
 
     <main class="packages-container" id="packagesWrapper">
         
-        <!-- PACKAGE 1: 1 Month Plan -->
-        <div class="package-card">
+        <!-- PACKAGE 1 -->
+        <div class="package-card" style="--theme-color: #6f42c1; --theme-bg: #fcfaff;">
+		   <span class="popular-badge">শুরু</span>
             <div>
                 <h3 class="pkg-title">১ মাস মেয়াদী</h3>
-                <div class="pkg-price">৳১৯৯ <span>/ ৩০ দিন</span></div>
+                <div class="pkg-price">৳১০ <span>/ ৩০ দিন</span></div>
                 <ul class="pkg-features">
-                    <li><i class="fa-solid fa-circle-check"></i> সকল বিষয়ের কুইজ এক্সেস</li>
-                    <li><i class="fa-solid fa-circle-check"></i> ব্যাখ্যামূলক সঠিক উত্তর</li>
-                    <li><i class="fa-solid fa-circle-check"></i> তাত্ক্ষণিক ফলাফল বিশ্লেষণ</li>
-                    <li><i class="fa-solid fa-circle-check"></i> ২৪/৭ ওয়েবসাইট সাপোর্ট</li>
+                    <li><i class="fa-solid fa-circle-check"></i> সকল বিষয়ের পূর্ণ অ্যাক্সেস</li>
+                    <li><i class="fa-solid fa-circle-check"></i> সকল মডেল টেস্ট</li>
+                    <li><i class="fa-solid fa-circle-check"></i> ব্যাখ্যাসহ সঠিক উত্তর</li>
+                    <li><i class="fa-solid fa-circle-check"></i> নতুন প্রশ্ন নিয়মিত আপডেট</li>
+                    <li><i class="fa-solid fa-circle-check"></i> পারফরম্যান্স রিপোর্ট</li>
+                    <li><i class="fa-solid fa-circle-check"></i> মোবাইল ও কম্পিউটার থেকে ব্যবহার</li>
                 </ul>
+                <p class="pkg-note">পার্থক্য শুধুমাত্র সাবস্ক্রিপশনের মেয়াদে। সকল প্ল্যানে একই সুবিধা পাওয়া যাবে।</p>
             </div>
             <button class="btn-buy" onclick="handlePackageBuy('1_month', this)">সাবস্ক্রাইব করুন</button>
         </div>
 
-        <!-- PACKAGE 2: 3 Months Plan (Popular) -->
-        <div class="package-card popular">
-            <span class="popular-badge">সবচেয়ে জনপ্রিয়</span>
+        <!-- PACKAGE 2 -->
+        <div class="package-card" style="--theme-color: #fd7e14; --theme-bg: #fffdfa;">
+            <span class="popular-badge">জনপ্রিয়</span>
             <div>
                 <h3 class="pkg-title">৩ মাস মেয়াদী</h3>
-                <div class="pkg-price">৳৪৯৯ <span>/ ৯০ দিন</span></div>
+                <div class="pkg-price">৳২০ <span>/ ৯০ দিন</span></div>
                 <ul class="pkg-features">
-                    <li><i class="fa-solid fa-circle-check"></i> সকল বিষয়ের কুইজ এক্সেস</li>
-                    <li><i class="fa-solid fa-circle-check"></i> ব্যাখ্যামূলক সঠিক উত্তর</li>
-                    <li><i class="fa-solid fa-circle-check"></i> মডেল টেস্ট অনুশীলনের সুযোগ</li>
-                    <li><i class="fa-solid fa-circle-check"></i> নিয়মিত নতুন প্রশ্ন আপডেট</li>
+                    <li><i class="fa-solid fa-circle-check"></i> সকল বিষয়ের পূর্ণ অ্যাক্সেস</li>
+                    <li><i class="fa-solid fa-circle-check"></i> সকল মডেল টেস্ট</li>
+                    <li><i class="fa-solid fa-circle-check"></i> ব্যাখ্যাসহ সঠিক উত্তর</li>
+                    <li><i class="fa-solid fa-circle-check"></i> নতুন প্রশ্ন নিয়মিত আপডেট</li>
+                    <li><i class="fa-solid fa-circle-check"></i> পারফরম্যান্স রিপোর্ট</li>
+                    <li><i class="fa-solid fa-circle-check"></i> মোবাইল ও কম্পিউটার থেকে ব্যবহার</li>
                 </ul>
+                <p class="pkg-note">পার্থক্য শুধুমাত্র সাবস্ক্রিপশনের মেয়াদে। সকল প্ল্যানে একই সুবিধা পাওয়া যাবে।</p>
             </div>
             <button class="btn-buy" onclick="handlePackageBuy('3_months', this)">সাবস্ক্রাইব করুন</button>
         </div>
 
-        <!-- PACKAGE 3: 6 Months Plan -->
-        <div class="package-card">
+        <!-- PACKAGE 3 -->
+        <div class="package-card" style="--theme-color: #20c997; --theme-bg: #f4fbf8;">
+		   <span class="popular-badge">সবচেয়ে জনপ্রিয়</span>
             <div>
                 <h3 class="pkg-title">৬ মাস মেয়াদী</h3>
-                <div class="pkg-price">৳৭৯৯ <span>/ ১৮০ দিন</span></div>
+                <div class="pkg-price">৳৩০ <span>/ ১৮০ দিন</span></div>
                 <ul class="pkg-features">
-                    <li><i class="fa-solid fa-circle-check"></i> আনলিমিটেড কুইজ এক্সেস</li>
-                    <li><i class="fa-solid fa-circle-check"></i> সকল মডেল টেস্ট ফ্রিতে</li>
-                    <li><i class="fa-solid fa-circle-check"></i> পার্সোনাল পারফরম্যান্স রিপোর্ট</li>
-                    <li><i class="fa-solid fa-circle-check"></i> প্রাইওরিটি হেল্পলাইন সাপোর্ট</li>
+                    <li><i class="fa-solid fa-circle-check"></i> সকল বিষয়ের পূর্ণ অ্যাক্সেস</li>
+                    <li><i class="fa-solid fa-circle-check"></i> সকল মডেল টেস্ট</li>
+                    <li><i class="fa-solid fa-circle-check"></i> ব্যাখ্যাসহ সঠিক উত্তর</li>
+                    <li><i class="fa-solid fa-circle-check"></i> নতুন প্রশ্ন নিয়মিত আপডেট</li>
+                    <li><i class="fa-solid fa-circle-check"></i> পারফরম্যান্স রিপোর্ট</li>
+                    <li><i class="fa-solid fa-circle-check"></i> মোবাইল ও কম্পিউটার থেকে ব্যবহার</li>
                 </ul>
+                <p class="pkg-note">পার্থক্য শুধুমাত্র সাবস্ক্রিপশনের মেয়াদে। সকল প্ল্যানে একই সুবিধা পাওয়া যাবে।</p>
             </div>
             <button class="btn-buy" onclick="handlePackageBuy('6_months', this)">সাবস্ক্রাইব করুন</button>
         </div>
 
-        <!-- PACKAGE 4: 1 Year Plan -->
-        <div class="package-card">
+        <!-- PACKAGE 4 -->
+        <div class="package-card" style="--theme-color: #007bff; --theme-bg: #f4f8ff;">
+		   <span class="popular-badge">সাশ্রয়ী</span>
             <div>
                 <h3 class="pkg-title">১ বছর মেয়াদী</h3>
-                <div class="pkg-price">৳১৪৯৯ <span>/ ৩৬৫ দিন</span></div>
+                <div class="pkg-price">৳৫০ <span>/ ৩৬৫ দিন</span></div>
                 <ul class="pkg-features">
-                    <li><i class="fa-solid fa-circle-check"></i> আনলিমিটেড কুইজ এক্সেস</li>
-                    <li><i class="fa-solid fa-circle-check"></i> এক্সক্লুসিভ মডেল টেস্ট</li>
-                    <li><i class="fa-solid fa-circle-check"></i> জব সলিউশন আর্কাইভ</li>
-                    <li><i class="fa-solid fa-circle-check"></i> ২৪/৭ ডেডিকেটেড সাপোর্ট</li>
+                    <li><i class="fa-solid fa-circle-check"></i> সকল বিষয়ের পূর্ণ অ্যাক্সেস</li>
+                    <li><i class="fa-solid fa-circle-check"></i> সকল মডেল টেস্ট</li>
+                    <li><i class="fa-solid fa-circle-check"></i> ব্যাখ্যাসহ সঠিক উত্তর</li>
+                    <li><i class="fa-solid fa-circle-check"></i> নতুন প্রশ্ন নিয়মিত আপডেট</li>
+                    <li><i class="fa-solid fa-circle-check"></i> পারফরম্যান্স রিপোর্ট</li>
+                    <li><i class="fa-solid fa-circle-check"></i> মোবাইল ও কম্পিউটার থেকে ব্যবহার</li>
                 </ul>
+                <p class="pkg-note">পার্থক্য শুধুমাত্র সাবস্ক্রিপশনের মেয়াদে। সকল প্ল্যানে একই সুবিধা পাওয়া যাবে।</p>
             </div>
             <button class="btn-buy" onclick="handlePackageBuy('1_year', this)">সাবস্ক্রাইব করুন</button>
         </div>
 
-        <!-- PACKAGE 5: 2 Years Plan -->
-        <div class="package-card">
+        <!-- PACKAGE 5 -->
+        <div class="package-card" style="--theme-color: #6366f1; --theme-bg: #f5f5fe;">
+		   <span class="popular-badge">বেশি সাশ্রয়</span>
             <div>
                 <h3 class="pkg-title">২ বছর মেয়াদী</h3>
-                <div class="pkg-price">৳২৪৯৯ <span>/ ৭৩০ দিন</span></div>
+                <div class="pkg-price">৳৮0 <span>/ ৭৩০ দিন</span></div>
                 <ul class="pkg-features">
-                    <li><i class="fa-solid fa-circle-check"></i> আনলিমিটেড কুইজ এক্সেস</li>
-                    <li><i class="fa-solid fa-circle-check"></i> সকল প্রিমিয়াম ফিচার</li>
-                    <li><i class="fa-solid fa-circle-check"></i> স্পেশাল প্রিপারেশন গাইডলাইন</li>
-                    <li><i class="fa-solid fa-circle-check"></i> এডভান্সড পারফরম্যান্স ট্র্যাকিং</li>
+                    <li><i class="fa-solid fa-circle-check"></i> সকল বিষয়ের পূর্ণ অ্যাক্সেস</li>
+                    <li><i class="fa-solid fa-circle-check"></i> সকল মডেল টেস্ট</li>
+                    <li><i class="fa-solid fa-circle-check"></i> ব্যাখ্যাসহ সঠিক উত্তর</li>
+                    <li><i class="fa-solid fa-circle-check"></i> নতুন প্রশ্ন নিয়মিত আপডেট</li>
+                    <li><i class="fa-solid fa-circle-check"></i> পারফরম্যান্স রিপোর্ট</li>
+                    <li><i class="fa-solid fa-circle-check"></i> মোবাইল ও কম্পিউটার থেকে ব্যবহার</li>
                 </ul>
+                <p class="pkg-note">পার্থক্য শুধুমাত্র সাবস্ক্রিপশনের মেয়াদে। সকল প্ল্যানে একই সুবিধা পাওয়া যাবে।</p>
             </div>
             <button class="btn-buy" onclick="handlePackageBuy('2_years', this)">সাবস্ক্রাইব করুন</button>
         </div>
 
-        <!-- PACKAGE 6: 3 Years Plan -->
-        <div class="package-card">
+        <!-- PACKAGE 6 -->
+        <div class="package-card" style="--theme-color: #17a2b8; --theme-bg: #f2fafb;">
+		   <span class="popular-badge">সর্বোচ্চ সাশ্রয়</span>
             <div>
                 <h3 class="pkg-title">৩ বছর মেয়াদী</h3>
-                <div class="pkg-price">৳৩৪৯৯ <span>/ ১০৯৫ দিন</span></div>
+                <div class="pkg-price">৳১০০ <span>/ ১০৯৫ দিন</span></div>
                 <ul class="pkg-features">
-                    <li><i class="fa-solid fa-circle-check"></i> আনলিমিটেড কুইজ এক্সেস</li>
-                    <li><i class="fa-solid fa-circle-check"></i> মেগা মডেল টেস্ট সাবস্ক্রিপশন</li>
-                    <li><i class="fa-solid fa-circle-check"></i> ক্যারিয়ার কাউন্সেলিং সাপোর্ট</li>
-                    <li><i class="fa-solid fa-circle-check"></i> ভিআইপি মেম্বারশিপ ব্যাজ</li>
+                    <li><i class="fa-solid fa-circle-check"></i> সকল বিষয়ের পূর্ণ অ্যাক্সেস</li>
+                    <li><i class="fa-solid fa-circle-check"></i> সকল মডেল টেস্ট</li>
+                    <li><i class="fa-solid fa-circle-check"></i> ব্যাখ্যাসহ সঠিক উত্তর</li>
+                    <li><i class="fa-solid fa-circle-check"></i> নতুন প্রশ্ন নিয়মিত আপডেট</li>
+                    <li><i class="fa-solid fa-circle-check"></i> পারফরম্যান্স রিপোর্ট</li>
+                    <li><i class="fa-solid fa-circle-check"></i> মোবাইল ও কম্পিউটার থেকে ব্যবহার</li>
                 </ul>
+                <p class="pkg-note">পার্থক্য শুধুমাত্র সাবস্ক্রিপশনের মেয়াদে। সকল প্ল্যানে একই সুবিধা পাওয়া যাবে।</p>
             </div>
             <button class="btn-buy" onclick="handlePackageBuy('3_years', this)">সাবস্ক্রাইব করুন</button>
         </div>
