@@ -79,30 +79,25 @@ const layoutConfigSchema = new mongoose.Schema({
         ]
     },
     footer: {
+        columns: Array, // <--- Dynamic Drag & Drop Columns Array
         col1Text: String,
-        col1Fb: String, // Facebook
-        col1Yt: String, // YouTube
-        col1Wa: String, // WhatsApp
-        col1Tw: String, // Twitter / X
-        col1Tg: String, // Telegram
-        col1Ln: String, // LinkedIn
+        col1Fb: String,
+        col1Yt: String,
+        col1Wa: String,
+        col1Tw: String,
+        col1Tg: String,
+        col1Ln: String,
         col2Title: String,
-        col2Links: [
-            { title: String, url: String }
-        ],
+        col2Links: [ { title: String, url: String } ],
         col3Title: String,
-        col3Links: [
-            { title: String, url: String }
-        ],
+        col3Links: [ { title: String, url: String } ],
         col4Title: String,
-        col4Links: [
-            { title: String, url: String }
-        ]
+        col4Links: [ { title: String, url: String } ]
     },
     copyright: {
         text: String
     }
-}, { timestamps: true });
+}, { timestamps: true, strict: false });
 
 const LayoutConfig = mongoose.model('LayoutConfig', layoutConfigSchema);
 
@@ -160,7 +155,6 @@ app.put('/api/auth/change-password', verifyToken, async (req, res) => {
     try {
         const { oldPassword, newPassword } = req.body;
 
-        // 💡 FIX: req.user.userId যোগ করা হয়েছে
         const userId = req.user.id || req.user._id || req.user.userId;
         const user = await User.findById(userId);
         
@@ -194,10 +188,9 @@ app.get('/api/users', verifyToken, authorizeRoles('owner', 'admin'), async (req,
     }
 });
 
-// NEW API: Get Current Logged-in User Profile Data
+// Get Current Logged-in User Profile Data
 app.get('/api/users/me', verifyToken, async (req, res) => {
     try {
-        // 💡 FIX: req.user.userId যোগ করা হয়েছে
         const userId = req.user.id || req.user._id || req.user.userId;
         const user = await User.findById(userId).select('-password');
         
@@ -211,12 +204,11 @@ app.get('/api/users/me', verifyToken, async (req, res) => {
     }
 });
 
-// NEW API: Request a Subscription Plan (For any logged in customer)
+// Request a Subscription Plan (For any logged in customer)
 app.post('/api/users/request-plan', verifyToken, async (req, res) => {
     try {
         const { requestedPlan } = req.body;
         
-        // 💡 FIX: req.user.userId যোগ করা হয়েছে
         const userId = req.user.id || req.user._id || req.user.userId; 
         const user = await User.findById(userId);
         
@@ -224,7 +216,6 @@ app.post('/api/users/request-plan', verifyToken, async (req, res) => {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
 
-        // তার requestedPlan ফিল্ড আপডেট করা
         user.requestedPlan = requestedPlan;
         await user.save();
 
@@ -265,7 +256,6 @@ app.put('/api/users/:userId/subscription', verifyToken, authorizeRoles('owner', 
             active: plan !== 'none'
         };
 
-        // এডমিন যখন প্ল্যান আপডেট করে দেবে, তখন পেন্ডিং রিকোয়েস্ট ক্লিয়ার হয়ে যাবে
         user.requestedPlan = 'none';
 
         await user.save();
@@ -392,7 +382,7 @@ app.delete('/api/questions', verifyToken, authorizeRoles('owner', 'admin'), asyn
     }
 });
 
-// 6. Get Categories List (Updated for Frontend Compatibility)
+// 6. Get Categories List
 app.get('/api/categories', async (req, res) => {
     try {
         const categories = await Question.distinct('category');
@@ -519,7 +509,6 @@ app.use((req, res) => {
         
         return res.sendFile(requestedPath, (err) => {
             if (err) {
-                // ফাইল না পেলে index.html-এ নিয়ে যাবে
                 res.sendFile(path.join(__dirname, 'index.html'));
             }
         });

@@ -147,7 +147,7 @@ function applyLayoutToDOM(data) {
 
     const homePath = 'index.html';
 
-    // A. Dynamic Favicon (SEO Title removed as per user request to manage it in index.html)
+    // A. Dynamic Favicon
     if (data.header) {
         if (data.header.faviconUrl) {
             let faviconUrlFormatted = formatURL(data.header.faviconUrl);
@@ -232,7 +232,6 @@ function applyLayoutToDOM(data) {
             } catch(e) { userName = 'ড্যাশবোর্ড'; }
         }
 
-        // 🌟 NEW LOGIC: Dynamic Header Button Visibility
         let customBtnHTML = '';
         if (h.btnText && h.btnText.trim()) {
             let customBtnText = h.btnText.trim();
@@ -275,7 +274,7 @@ function applyLayoutToDOM(data) {
         initMobileNav();
     }
 
-    // D. Footer & Copyright
+    // D. Footer & Copyright (Dynamic Drag & Drop Columns Support)
     const footerContainer = document.getElementById('global-footer');
     if (footerContainer && (data.footer || data.copyright)) {
         const f = data.footer || {};
@@ -286,33 +285,48 @@ function applyLayoutToDOM(data) {
             return `<ul>` + links.map(l => `<li><a href="${formatURL(l.url)}"><i class="fa-solid fa-angle-right"></i> ${l.title}</a></li>`).join('') + `</ul>`;
         };
 
+        // Data Migration / Fallback for older layouts
+        let columnsData = f.columns;
+        if (!columnsData || !Array.isArray(columnsData)) {
+            columnsData = [
+                { type: 'info', title: 'আমাদের সম্পর্কে', text: f.col1Text || '', fb: f.col1Fb, yt: f.col1Yt, wa: f.col1Wa, tw: f.col1Tw, tg: f.col1Tg, ln: f.col1Ln },
+                { type: 'links', title: f.col2Title || 'প্রয়োজনীয় লিংক', links: f.col2Links || [] },
+                { type: 'links', title: f.col3Title || 'ক্যাটাগরি', links: f.col3Links || [] },
+                { type: 'links', title: f.col4Title || 'যোগাযোগ', links: f.col4Links || [] }
+            ];
+        }
+
+        // Generate HTML dynamically based on columns array
+        const columnsHTML = columnsData.map(col => {
+            if (col.type === 'info') {
+                return `
+                    <div class="footer-col">
+                        <h4>${col.title || 'আমাদের সম্পর্কে'}</h4>
+                        <p>${col.text || ''}</p>
+                        <div class="footer-social">
+                            ${col.fb ? `<a href="${formatURL(col.fb)}" target="_blank" title="Facebook" class="social-btn fb"><i class="fa-brands fa-facebook-f"></i></a>` : ''}
+                            ${col.yt ? `<a href="${formatURL(col.yt)}" target="_blank" title="YouTube" class="social-btn yt"><i class="fa-brands fa-youtube"></i></a>` : ''}
+                            ${col.wa ? `<a href="${formatURL(col.wa)}" target="_blank" title="WhatsApp" class="social-btn wa"><i class="fa-brands fa-whatsapp"></i></a>` : ''}
+                            ${col.tw ? `<a href="${formatURL(col.tw)}" target="_blank" title="Twitter / X" class="social-btn tw"><i class="fa-brands fa-x-twitter"></i></a>` : ''}
+                            ${col.tg ? `<a href="${formatURL(col.tg)}" target="_blank" title="Telegram" class="social-btn tg"><i class="fa-brands fa-telegram"></i></a>` : ''}
+                            ${col.ln ? `<a href="${formatURL(col.ln)}" target="_blank" title="LinkedIn" class="social-btn ln"><i class="fa-brands fa-linkedin-in"></i></a>` : ''}
+                        </div>
+                    </div>
+                `;
+            } else {
+                return `
+                    <div class="footer-col">
+                        <h4>${col.title || 'প্রয়োজনীয় লিংক'}</h4>
+                        ${generateLinksHtml(col.links)}
+                    </div>
+                `;
+            }
+        }).join('');
+
         footerContainer.innerHTML = `
             <div class="footer-container">
                 <div class="footer-grid">
-                    <div class="footer-col">
-                        <h4>আমাদের সম্পর্কে</h4>
-                        <p>${f.col1Text || ''}</p>
-                        <div class="footer-social">
-                            ${f.col1Fb ? `<a href="${formatURL(f.col1Fb)}" target="_blank" title="Facebook" class="social-btn fb"><i class="fa-brands fa-facebook-f"></i></a>` : ''}
-                            ${f.col1Yt ? `<a href="${formatURL(f.col1Yt)}" target="_blank" title="YouTube" class="social-btn yt"><i class="fa-brands fa-youtube"></i></a>` : ''}
-                            ${f.col1Wa ? `<a href="${formatURL(f.col1Wa)}" target="_blank" title="WhatsApp" class="social-btn wa"><i class="fa-brands fa-whatsapp"></i></a>` : ''}
-                            ${f.col1Tw ? `<a href="${formatURL(f.col1Tw)}" target="_blank" title="Twitter / X" class="social-btn tw"><i class="fa-brands fa-x-twitter"></i></a>` : ''}
-                            ${f.col1Tg ? `<a href="${formatURL(f.col1Tg)}" target="_blank" title="Telegram" class="social-btn tg"><i class="fa-brands fa-telegram"></i></a>` : ''}
-                            ${f.col1Ln ? `<a href="${formatURL(f.col1Ln)}" target="_blank" title="LinkedIn" class="social-btn ln"><i class="fa-brands fa-linkedin-in"></i></a>` : ''}
-                        </div>
-                    </div>
-                    <div class="footer-col">
-                        <h4>${f.col2Title || 'প্রয়োজনীয় লিংক'}</h4>
-                        ${generateLinksHtml(f.col2Links)}
-                    </div>
-                    <div class="footer-col">
-                        <h4>${f.col3Title || 'ক্যাটাগরি'}</h4>
-                        ${generateLinksHtml(f.col3Links)}
-                    </div>
-                    <div class="footer-col">
-                        <h4>${f.col4Title || 'যোগাযোগ'}</h4>
-                        ${generateLinksHtml(f.col4Links)}
-                    </div>
+                    ${columnsHTML}
                 </div>
                 <div class="footer-bottom">
                     <p>${c.text || '© ' + new Date().getFullYear() + ' TopMCQ. All rights reserved.'}</p>

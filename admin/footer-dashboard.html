@@ -57,7 +57,7 @@
         .section-card.footer-card { border-left: 6px solid var(--secondary); }
         .section-card.copy-card { border-left: 6px solid var(--purple-btn); }
 
-        .section-title { font-size: 20px; color: var(--dark); margin-bottom: 15px; display: flex; align-items: center; gap: 10px; padding-bottom: 10px; border-bottom: 1px dashed #e2e8f0; }
+        .section-title { font-size: 20px; color: var(--dark); margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; padding-bottom: 10px; border-bottom: 1px dashed #e2e8f0; }
 
         /* READ-ONLY CARD STYLE */
         .read-box { 
@@ -77,7 +77,7 @@
             margin-bottom: 10px;
         }
 
-        .read-title { font-size: 16px; font-weight: bold; color: #2c3e50; margin-bottom: 4px; }
+        .read-title { font-size: 16px; font-weight: bold; color: #2c3e50; margin-bottom: 4px; display: flex; align-items: center; gap: 8px;}
         .read-subtitle { font-size: 14px; color: #555; margin-bottom: 8px; }
         .read-meta { font-size: 13px; color: #555; margin-bottom: 6px; }
         .read-preview-text { font-size: 13px; color: #777; margin-bottom: 10px; }
@@ -158,6 +158,13 @@
             cursor: grabbing;
         }
 
+         /* COLUMN DRAG STYLES */
+         .col-drag-item { transition: border-top 0.1s ease, border-bottom 0.1s ease; }
+        .dragging-col { opacity: 0.5; background: #f8f9fa !important; }
+        .col-drag-handle { cursor: grab; color: #888; font-size: 18px; margin-right: 10px; transition: color 0.2s; }
+        .col-drag-handle:hover { color: #007bff; }
+        .col-drag-handle:active { cursor: grabbing; }
+
         /* 2PX DROP INDICATOR LINE STYLES */
         .drag-over-top {
             border-top: 2px solid #007bff !important;
@@ -196,9 +203,18 @@
 
     <div class="container">
         
-        <!-- ৩. FOOTER SETTINGS CARD (4 COLUMNS) -->
+        <!-- ৩. FOOTER SETTINGS CARD (DYNAMIC COLUMNS) -->
         <div class="section-card footer-card">
-            <div class="section-title"><i class="fa-solid fa-table-columns" style="color: var(--secondary);"></i> ৩. ফুটার সেটিং (৪ টি কলাম)</div>
+            <div class="section-title">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <i class="fa-solid fa-table-columns" style="color: var(--secondary);"></i> ৩. ফুটার সেটিং (Drag & Drop Columns)
+                </div>
+                 <div style="display:flex; gap:10px;">
+                    <!-- অ্যাড কলাম বাটন -->
+                    <button class="btn btn-info btn-sm" onclick="addNewColumn('info')"><i class="fa-solid fa-plus"></i> Info Column যোগ</button>
+                    <button class="btn btn-add btn-sm" onclick="addNewColumn('links')"><i class="fa-solid fa-plus"></i> Links Column যোগ</button>
+                </div>
+            </div>
             <div id="footer-container"></div>
         </div>
 
@@ -244,8 +260,18 @@
                 // announcement/header o memory te rakha hocche jate save korar somoy data na hariye jay
                 announceInfo = data.announcement || null;
                 headerInfo = data.header || null;
-                footerInfo = data.footer || null;
+                footerInfo = data.footer || {};
                 copyrightInfo = data.copyright || null;
+
+                // Migrate data if it uses the old hardcoded structure
+                if (!footerInfo.columns) {
+                    footerInfo.columns = [
+                        { type: 'info', title: 'সাইট তথ্য ও সোশাল লিংক', text: footerInfo.col1Text || 'TopMCQ অনলাইন কুইজ প্ল্যাটফর্ম।', fb: footerInfo.col1Fb || '', yt: footerInfo.col1Yt || '', wa: footerInfo.col1Wa || '', tw: footerInfo.col1Tw || '', tg: footerInfo.col1Tg || '', ln: footerInfo.col1Ln || '' },
+                        { type: 'links', title: footerInfo.col2Title || 'প্রয়োজনীয় লিংক', links: footerInfo.col2Links || [] },
+                        { type: 'links', title: footerInfo.col3Title || 'ক্যাটাগরি', links: footerInfo.col3Links || [] },
+                        { type: 'links', title: footerInfo.col4Title || 'যোগাযোগ', links: footerInfo.col4Links || [] }
+                    ];
+                }
 
                 isFooterReordered = {};
 
@@ -260,137 +286,183 @@
             const container = document.getElementById('footer-container');
             container.innerHTML = '';
 
-            if (!footerInfo) {
-                footerInfo = {};
-            }
-
-            footerInfo.col1Text = footerInfo.col1Text || 'TopMCQ অনলাইন কুইজ প্ল্যাটফর্ম।';
-            footerInfo.col1Fb = footerInfo.col1Fb || '';
-            footerInfo.col1Yt = footerInfo.col1Yt || '';
-            footerInfo.col1Wa = footerInfo.col1Wa || '';
-            footerInfo.col1Tw = footerInfo.col1Tw || '';
-            footerInfo.col1Tg = footerInfo.col1Tg || '';
-            footerInfo.col1Ln = footerInfo.col1Ln || '';
-
-            footerInfo.col2Title = footerInfo.col2Title || 'প্রয়োজনীয় লিংক';
-            footerInfo.col2Links = footerInfo.col2Links || [];
-            footerInfo.col3Title = footerInfo.col3Title || 'ক্যাটাগরি';
-            footerInfo.col3Links = footerInfo.col3Links || [];
-            footerInfo.col4Title = footerInfo.col4Title || 'যোগাযোগ';
-            footerInfo.col4Links = footerInfo.col4Links || [];
-
-            // Active Social Links Preview Text
-            let activeSocials = [];
-            if (footerInfo.col1Fb) activeSocials.push('Facebook');
-            if (footerInfo.col1Yt) activeSocials.push('YouTube');
-            if (footerInfo.col1Wa) activeSocials.push('WhatsApp');
-            if (footerInfo.col1Tw) activeSocials.push('Twitter');
-            if (footerInfo.col1Tg) activeSocials.push('Telegram');
-            if (footerInfo.col1Ln) activeSocials.push('LinkedIn');
-
-            const socialPreview = activeSocials.length > 0 ? activeSocials.join(', ') : 'কোনো সোশ্যাল লিংক যুক্ত করা হয়নি';
-
-            // Column 1 Card
-            const card1 = document.createElement('div');
-            card1.className = 'read-box';
-            card1.style.borderLeft = "5px solid #17a2b8";
-            card1.id = 'footer-col-1-box';
-            card1.innerHTML = `
-                <div class="card-header-flex">
-                    <div>
-                        <div class="read-title"><i class="fa-solid fa-circle-info" style="color:#17a2b8;"></i> কলাম ১: সাইট তথ্য ও সোশাল লিংক (Col 1)</div>
-                        <div class="read-subtitle"><b>About Text:</b> ${footerInfo.col1Text}</div>
-                        <div class="read-meta"><b>Active Social Links:</b> ${socialPreview}</div>
-                    </div>
-                    <div class="card-actions">
-                        <button class="btn btn-warning" onclick="editFooterCol1Inline()"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-                    </div>
-                </div>
-            `;
-            container.appendChild(card1);
-
-            // Columns 2, 3, 4 Cards
-            const cols = [
-                { id: 2, titleKey: 'col2Title', linksKey: 'col2Links', defaultTitle: 'প্রয়োজনীয় লিংক' },
-                { id: 3, titleKey: 'col3Title', linksKey: 'col3Links', defaultTitle: 'ক্যাটাগরি' },
-                { id: 4, titleKey: 'col4Title', linksKey: 'col4Links', defaultTitle: 'যোগাযোগ' }
-            ];
-
-            cols.forEach(c => {
+            footerInfo.columns.forEach((col, colIdx) => {
                 const card = document.createElement('div');
-                card.className = 'read-box';
+                card.className = 'read-box col-drag-item';
                 card.style.borderLeft = "5px solid #17a2b8";
-                card.id = `footer-col-${c.id}-box`;
+                card.draggable = true;
+                card.dataset.colIdx = colIdx;
 
-                const linksList = footerInfo[c.linksKey] || [];
-                let linksHtml = '';
-                if (linksList.length > 0) {
-                    linksHtml = `
-                        <div class="sub-menu-list footer-drag-container" data-col-id="${c.id}">
-                            <div style="font-size:12px; font-weight:bold; color:#555; margin-bottom:5px;">লিংক সমূহ (মাউস দিয়ে পজিশন ড্র্যাগ করা যাবে):</div>
-                            ${linksList.map((lk, lkIdx) => `
-                                <div class="sub-menu-item draggable-box footer-drag-item" draggable="true" data-col-id="${c.id}" data-index="${lkIdx}">
-                                    <span style="font-size:13px; color:#333; display:flex; align-items:center;">
-                                        <i class="fa-solid fa-grip-vertical drag-handle" title="মাউস চেপে পজিশন পরিবর্তন করুন"></i>
-                                        <div class="arrow-btn-group">
-                                            <button type="button" class="btn-arrow" onclick="moveFooterLinkPosition(${c.id}, ${lkIdx}, 'up')" title="উপরে তুলুন">▲</button>
-                                            <button type="button" class="btn-arrow" onclick="moveFooterLinkPosition(${c.id}, ${lkIdx}, 'down')" title="নিচে নামান">▼</button>
-                                        </div>
-                                        <b>${lk.title}</b> <small style="color:#777; margin-left:5px;">(${lk.url || '#'})</small>
-                                    </span>
-                                    <div>
-                                        <button class="btn btn-warning btn-sm" onclick="editFooterLinkInline(${c.id}, ${lkIdx})"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-                                        <button class="btn btn-danger btn-sm" onclick="deleteFooterLink(${c.id}, ${lkIdx})"><i class="fa-solid fa-trash"></i> Delete</button>
-                                    </div>
+                if (col.type === 'info') {
+                     // Active Social Links Preview Text
+                    let activeSocials = [];
+                    if (col.fb) activeSocials.push('Facebook');
+                    if (col.yt) activeSocials.push('YouTube');
+                    if (col.wa) activeSocials.push('WhatsApp');
+                    if (col.tw) activeSocials.push('Twitter');
+                    if (col.tg) activeSocials.push('Telegram');
+                    if (col.ln) activeSocials.push('LinkedIn');
+
+                    const socialPreview = activeSocials.length > 0 ? activeSocials.join(', ') : 'কোনো সোশ্যাল লিংক যুক্ত করা হয়নি';
+
+                    card.innerHTML = `
+                        <div class="card-header-flex">
+                            <div>
+                                <div class="read-title">
+                                    <i class="fa-solid fa-grip-vertical col-drag-handle" title="কলামের পজিশন পরিবর্তন করতে ড্র্যাগ করুন"></i>
+                                    <i class="fa-solid fa-circle-info" style="color:#17a2b8;"></i> ${col.title}
                                 </div>
-                            `).join('')}
+                                <div class="read-subtitle"><b>About Text:</b> ${col.text}</div>
+                                <div class="read-meta"><b>Active Social Links:</b> ${socialPreview}</div>
+                            </div>
+                            <div class="card-actions">
+                                <button class="btn btn-warning" onclick="editFooterInfoInline(${colIdx})"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                                 <button class="btn btn-danger" onclick="deleteFooterColumn(${colIdx})"><i class="fa-solid fa-trash"></i> Delete Column</button>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    const linksList = col.links || [];
+                    let linksHtml = '';
+                    if (linksList.length > 0) {
+                        linksHtml = `
+                            <div class="sub-menu-list footer-drag-container" data-col-idx="${colIdx}">
+                                <div style="font-size:12px; font-weight:bold; color:#555; margin-bottom:5px;">লিংক সমূহ (মাউস দিয়ে পজিশন ড্র্যাগ করা যাবে):</div>
+                                ${linksList.map((lk, lkIdx) => `
+                                    <div class="sub-menu-item draggable-box footer-drag-item" draggable="true" data-col-idx="${colIdx}" data-index="${lkIdx}">
+                                        <span style="font-size:13px; color:#333; display:flex; align-items:center;">
+                                            <i class="fa-solid fa-grip-vertical drag-handle" title="মাউস চেপে পজিশন পরিবর্তন করুন"></i>
+                                            <div class="arrow-btn-group">
+                                                <button type="button" class="btn-arrow" onclick="moveFooterLinkPosition(${colIdx}, ${lkIdx}, 'up')" title="উপরে তুলুন">▲</button>
+                                                <button type="button" class="btn-arrow" onclick="moveFooterLinkPosition(${colIdx}, ${lkIdx}, 'down')" title="নিচে নামান">▼</button>
+                                            </div>
+                                            <b>${lk.title}</b> <small style="color:#777; margin-left:5px;">(${lk.url || '#'})</small>
+                                        </span>
+                                        <div>
+                                            <button class="btn btn-warning btn-sm" onclick="editFooterLinkInline(${colIdx}, ${lkIdx})"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                                            <button class="btn btn-danger btn-sm" onclick="deleteFooterLink(${colIdx}, ${lkIdx})"><i class="fa-solid fa-trash"></i> Delete</button>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `;
+                    }
+
+                    let saveCancelFooterBtns = '';
+                    if (isFooterReordered[colIdx]) {
+                        saveCancelFooterBtns = `
+                            <button class="btn btn-submit" onclick="saveReorderedFooterLinks(${colIdx})"><i class="fa-solid fa-floppy-disk"></i> Save Footer Links</button>
+                            <button class="btn btn-secondary" onclick="cancelFooterReorder()"><i class="fa-solid fa-xmark"></i> Cancel</button>
+                        `;
+                    }
+
+                    card.innerHTML = `
+                        <div class="card-header-flex">
+                            <div>
+                                <div class="read-title">
+                                    <i class="fa-solid fa-grip-vertical col-drag-handle" title="কলামের পজিশন পরিবর্তন করতে ড্র্যাগ করুন"></i>
+                                    <i class="fa-solid fa-list" style="color:#17a2b8;"></i> ${col.title}
+                                </div>
+                            </div>
+                            <div class="card-actions">
+                                <button class="btn btn-warning" onclick="editFooterTitleInline(${colIdx})"><i class="fa-solid fa-pen-to-square"></i> Edit Title</button>
+                                <button class="btn btn-danger" onclick="deleteFooterColumn(${colIdx})"><i class="fa-solid fa-trash"></i> Delete Column</button>
+                            </div>
+                        </div>
+                        ${linksHtml}
+                        <div id="add-footer-link-box-${colIdx}"></div>
+                        <div class="card-actions" style="margin-top: 10px;" id="footer-link-action-bar-${colIdx}">
+                            <button class="btn btn-info" onclick="showAddFooterLinkForm(${colIdx})"><i class="fa-solid fa-plus"></i> লিংক যোগ করুন</button>
+                            ${saveCancelFooterBtns}
                         </div>
                     `;
                 }
-
-                let saveCancelFooterBtns = '';
-                if (isFooterReordered[c.id]) {
-                    saveCancelFooterBtns = `
-                        <button class="btn btn-submit" onclick="saveReorderedFooterLinks(${c.id})"><i class="fa-solid fa-floppy-disk"></i> Save Footer Links</button>
-                        <button class="btn btn-secondary" onclick="cancelFooterReorder()"><i class="fa-solid fa-xmark"></i> Cancel</button>
-                    `;
-                }
-
-                card.innerHTML = `
-                    <div class="card-header-flex">
-                        <div>
-                            <div class="read-title"><i class="fa-solid fa-list" style="color:#17a2b8;"></i> কলাম ${c.id}: ${footerInfo[c.titleKey] || c.defaultTitle}</div>
-                        </div>
-                        <div class="card-actions">
-                            <button class="btn btn-warning" onclick="editFooterTitleInline(${c.id})"><i class="fa-solid fa-pen-to-square"></i> Edit Title</button>
-                        </div>
-                    </div>
-                    ${linksHtml}
-                    <div id="add-footer-link-box-${c.id}"></div>
-                    <div class="card-actions" style="margin-top: 10px;" id="footer-link-action-bar-${c.id}">
-                        <button class="btn btn-info" onclick="showAddFooterLinkForm(${c.id})"><i class="fa-solid fa-plus"></i> লিংক যোগ করুন</button>
-                        ${saveCancelFooterBtns}
-                    </div>
-                `;
                 container.appendChild(card);
             });
-
+            initColumnDragAndDrop();
             initFooterDragAndDrop();
         }
 
+        /* --- ADD/DELETE COLUMN CONTROLS --- */
+        function addNewColumn(type) {
+            if(type === 'info') {
+                footerInfo.columns.push({ type: 'info', title: 'নতুন তথ্য কলাম', text: 'সাইট সম্পর্কিত তথ্য...', fb: '', yt: '', wa: '', tw: '', tg: '', ln: '' });
+            } else {
+                footerInfo.columns.push({ type: 'links', title: 'নতুন লিংক কলাম', links: [] });
+            }
+            saveLayoutConfig(); 
+        }
+
+        async function deleteFooterColumn(colIdx) {
+            if (await showTopAlert("পুরো কলামটি মুছে ফেলতে চান?", 'danger', true)) {
+                footerInfo.columns.splice(colIdx, 1);
+                await saveLayoutConfig();
+            }
+        }
+
+         /* --- COLUMN DRAG AND DROP CONTROLS --- */
+         function initColumnDragAndDrop() {
+            const colItems = document.querySelectorAll('.col-drag-item');
+            let draggedColIdx = null;
+
+            colItems.forEach(item => {
+                item.addEventListener('dragstart', (e) => {
+                    if (e.target.classList.contains('footer-drag-item')) return; 
+                    draggedColIdx = parseInt(item.dataset.colIdx);
+                    item.classList.add('dragging-col');
+                    e.dataTransfer.effectAllowed = 'move';
+                });
+
+                item.addEventListener('dragend', () => {
+                    item.classList.remove('dragging-col');
+                    colItems.forEach(el => el.classList.remove('drag-over-top', 'drag-over-bottom'));
+                });
+
+                item.addEventListener('dragover', (e) => {
+                    if (!document.querySelector('.dragging-col')) return; 
+                    e.preventDefault(); e.stopPropagation();
+                    e.dataTransfer.dropEffect = 'move';
+                    const rect = item.getBoundingClientRect();
+                    if ((e.clientY - rect.top) < rect.height / 2) {
+                        item.classList.add('drag-over-top'); item.classList.remove('drag-over-bottom');
+                    } else {
+                        item.classList.add('drag-over-bottom'); item.classList.remove('drag-over-top');
+                    }
+                });
+
+                item.addEventListener('dragleave', () => item.classList.remove('drag-over-top', 'drag-over-bottom'));
+
+                item.addEventListener('drop', async (e) => {
+                    if (!document.querySelector('.dragging-col')) return;
+                    e.preventDefault(); e.stopPropagation();
+                    item.classList.remove('drag-over-top', 'drag-over-bottom');
+                    
+                    let targetColIdx = parseInt(item.dataset.colIdx);
+                    const rect = item.getBoundingClientRect();
+                    if ((e.clientY - rect.top) >= rect.height / 2 && targetColIdx < draggedColIdx) targetColIdx++;
+                    
+                    if (draggedColIdx !== null && draggedColIdx !== targetColIdx) {
+                        const movedCol = footerInfo.columns.splice(draggedColIdx, 1)[0];
+                        footerInfo.columns.splice(targetColIdx, 0, movedCol);
+                        renderFooterSectionCards();
+                        await saveLayoutConfig(); 
+                    }
+                });
+            });
+        }
+
         /* --- FOOTER ARROW CONTROLS --- */
-        function moveFooterLinkPosition(colId, lkIdx, direction) {
-            const linksKey = `col${colId}Links`;
-            const list = footerInfo[linksKey];
+        function moveFooterLinkPosition(colIdx, lkIdx, direction) {
+            const list = footerInfo.columns[colIdx].links;
             if (direction === 'up' && lkIdx > 0) {
                 const item = list.splice(lkIdx, 1)[0];
                 list.splice(lkIdx - 1, 0, item);
-                isFooterReordered[colId] = true;
+                isFooterReordered[colIdx] = true;
                 renderFooterSectionCards();
             } else if (direction === 'down' && lkIdx < list.length - 1) {
                 const item = list.splice(lkIdx, 1)[0];
                 list.splice(lkIdx + 1, 0, item);
-                isFooterReordered[colId] = true;
+                isFooterReordered[colIdx] = true;
                 renderFooterSectionCards();
             }
         }
@@ -407,13 +479,13 @@
             dragContainers.forEach(dragContainer => {
                 const dragItems = dragContainer.querySelectorAll('.footer-drag-item');
                 let draggedIdx = null;
-                let colId = null;
+                let colIdx = null;
 
                 dragItems.forEach(item => {
                     item.addEventListener('dragstart', (e) => {
                         e.stopPropagation();
                         draggedIdx = parseInt(item.dataset.index);
-                        colId = parseInt(item.dataset.colId);
+                        colIdx = parseInt(item.dataset.colIdx);
                         item.classList.add('dragging');
                         e.dataTransfer.effectAllowed = 'move';
                     });
@@ -451,7 +523,7 @@
                         clearIndicator(item);
 
                         let targetIdx = parseInt(item.dataset.index);
-                        const targetColId = parseInt(item.dataset.colId);
+                        const targetColIdx = parseInt(item.dataset.colIdx);
 
                         const rect = item.getBoundingClientRect();
                         const offset = e.clientY - rect.top;
@@ -459,13 +531,12 @@
                             targetIdx++;
                         }
 
-                        if (colId === targetColId && draggedIdx !== null && draggedIdx !== targetIdx) {
-                            const linksKey = `col${colId}Links`;
-                            const list = footerInfo[linksKey];
+                        if (colIdx === targetColIdx && draggedIdx !== null && draggedIdx !== targetIdx) {
+                            const list = footerInfo.columns[colIdx].links;
                             const movedItem = list.splice(draggedIdx, 1)[0];
                             list.splice(targetIdx, 0, movedItem);
 
-                            isFooterReordered[colId] = true;
+                            isFooterReordered[colIdx] = true;
                             renderFooterSectionCards();
                         }
                     });
@@ -473,106 +544,114 @@
             });
         }
 
-        async function saveReorderedFooterLinks(colId) {
+        async function saveReorderedFooterLinks(colIdx) {
             await saveLayoutConfig();
-            isFooterReordered[colId] = false;
+            isFooterReordered[colIdx] = false;
             renderFooterSectionCards();
         }
 
         function cancelFooterReorder() {
             fetchLayoutConfig();
         }
-
-        function editFooterCol1Inline() {
-            const card = document.getElementById('footer-col-1-box');
+        
+        /* --- Info Type Column Edit --- */
+        function editFooterInfoInline(colIdx) {
+            const col = footerInfo.columns[colIdx];
+            const card = document.querySelectorAll('.col-drag-item')[colIdx];
             card.style.background = "#ffffff";
+            card.draggable = false;
             card.innerHTML = `
-                <div style="font-weight: bold; margin-bottom: 10px; color: #17a2b8;">কলাম ১ এডিট করুন</div>
+                <div style="font-weight: bold; margin-bottom: 10px; color: #17a2b8;">সাইট তথ্য এডিট করুন</div>
+                <div class="form-group">
+                    <label>কলাম টাইটেল:</label>
+                    <input type="text" id="edit-info-title-${colIdx}" value="${(col.title || '').replace(/"/g, '&quot;')}">
+                </div>
                 <div class="form-group">
                     <label>সাইট সম্পর্কে বিবরণ:</label>
-                    <textarea id="edit-col1-text" rows="2">${footerInfo.col1Text || ''}</textarea>
+                    <textarea id="edit-info-text-${colIdx}" rows="2">${col.text || ''}</textarea>
                 </div>
                 <div class="row">
                     <div class="form-group" style="flex:1;">
                         <label><i class="fa-brands fa-facebook" style="color:#1877f2;"></i> Facebook Page URL:</label>
-                        <input type="text" id="edit-col1-fb" value="${(footerInfo.col1Fb || '').replace(/"/g, '&quot;')}" placeholder="যেমন: https://facebook.com/yourpage">
+                        <input type="text" id="edit-info-fb-${colIdx}" value="${(col.fb || '').replace(/"/g, '&quot;')}" placeholder="যেমন: https://facebook.com/yourpage">
                     </div>
                     <div class="form-group" style="flex:1;">
                         <label><i class="fa-brands fa-youtube" style="color:#ff0000;"></i> YouTube Channel URL:</label>
-                        <input type="text" id="edit-col1-yt" value="${(footerInfo.col1Yt || '').replace(/"/g, '&quot;')}" placeholder="যেমন: https://youtube.com/@yourchannel">
+                        <input type="text" id="edit-info-yt-${colIdx}" value="${(col.yt || '').replace(/"/g, '&quot;')}" placeholder="যেমন: https://youtube.com/@yourchannel">
                     </div>
                 </div>
                 <div class="row">
                     <div class="form-group" style="flex:1;">
                         <label><i class="fa-brands fa-whatsapp" style="color:#25d366;"></i> WhatsApp Link / Number:</label>
-                        <input type="text" id="edit-col1-wa" value="${(footerInfo.col1Wa || '').replace(/"/g, '&quot;')}" placeholder="যেমন: https://wa.me/8801700000000">
+                        <input type="text" id="edit-info-wa-${colIdx}" value="${(col.wa || '').replace(/"/g, '&quot;')}" placeholder="যেমন: https://wa.me/8801700000000">
                     </div>
                     <div class="form-group" style="flex:1;">
                         <label><i class="fa-brands fa-x-twitter" style="color:#000000;"></i> Twitter / X Profile URL:</label>
-                        <input type="text" id="edit-col1-tw" value="${(footerInfo.col1Tw || '').replace(/"/g, '&quot;')}" placeholder="যেমন: https://x.com/yourprofile">
+                        <input type="text" id="edit-info-tw-${colIdx}" value="${(col.tw || '').replace(/"/g, '&quot;')}" placeholder="যেমন: https://x.com/yourprofile">
                     </div>
                 </div>
                 <div class="row">
                     <div class="form-group" style="flex:1;">
                         <label><i class="fa-brands fa-telegram" style="color:#0088cc;"></i> Telegram Channel / Link:</label>
-                        <input type="text" id="edit-col1-tg" value="${(footerInfo.col1Tg || '').replace(/"/g, '&quot;')}" placeholder="যেমন: https://t.me/yourchannel">
+                        <input type="text" id="edit-info-tg-${colIdx}" value="${(col.tg || '').replace(/"/g, '&quot;')}" placeholder="যেমন: https://t.me/yourchannel">
                     </div>
                     <div class="form-group" style="flex:1;">
                         <label><i class="fa-brands fa-linkedin" style="color:#0a66c2;"></i> LinkedIn Profile / Page URL:</label>
-                        <input type="text" id="edit-col1-ln" value="${(footerInfo.col1Ln || '').replace(/"/g, '&quot;')}" placeholder="যেমন: https://linkedin.com/in/yourprofile">
+                        <input type="text" id="edit-info-ln-${colIdx}" value="${(col.ln || '').replace(/"/g, '&quot;')}" placeholder="যেমন: https://linkedin.com/in/yourprofile">
                     </div>
                 </div>
                 <div class="card-actions" style="margin-top: 10px;">
-                    <button class="btn btn-submit" onclick="saveFooterCol1Inline()"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
+                    <button class="btn btn-submit" onclick="saveFooterInfoInline(${colIdx})"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
                     <button class="btn btn-secondary" onclick="renderFooterSectionCards()"><i class="fa-solid fa-xmark"></i> Cancel</button>
                 </div>
             `;
         }
 
-        async function saveFooterCol1Inline() {
-            footerInfo.col1Text = document.getElementById('edit-col1-text').value;
-            footerInfo.col1Fb = document.getElementById('edit-col1-fb').value;
-            footerInfo.col1Yt = document.getElementById('edit-col1-yt').value;
-            footerInfo.col1Wa = document.getElementById('edit-col1-wa').value;
-            footerInfo.col1Tw = document.getElementById('edit-col1-tw').value;
-            footerInfo.col1Tg = document.getElementById('edit-col1-tg').value;
-            footerInfo.col1Ln = document.getElementById('edit-col1-ln').value;
+        async function saveFooterInfoInline(colIdx) {
+            const col = footerInfo.columns[colIdx];
+            col.title = document.getElementById(`edit-info-title-${colIdx}`).value;
+            col.text = document.getElementById(`edit-info-text-${colIdx}`).value;
+            col.fb = document.getElementById(`edit-info-fb-${colIdx}`).value;
+            col.yt = document.getElementById(`edit-info-yt-${colIdx}`).value;
+            col.wa = document.getElementById(`edit-info-wa-${colIdx}`).value;
+            col.tw = document.getElementById(`edit-info-tw-${colIdx}`).value;
+            col.tg = document.getElementById(`edit-info-tg-${colIdx}`).value;
+            col.ln = document.getElementById(`edit-info-ln-${colIdx}`).value;
 
             await saveLayoutConfig();
             renderFooterSectionCards();
         }
 
-        function editFooterTitleInline(colId) {
-            const card = document.getElementById(`footer-col-${colId}-box`);
-            const titleKey = `col${colId}Title`;
+        /* --- Links Type Column Edit --- */
+        function editFooterTitleInline(colIdx) {
+            const col = footerInfo.columns[colIdx];
+            const card = document.querySelectorAll('.col-drag-item')[colIdx];
             card.style.background = "#ffffff";
             card.innerHTML = `
-                <div style="font-weight: bold; margin-bottom: 10px; color: #17a2b8;">কলাম ${colId} টাইটেল এডিট করুন</div>
+                <div style="font-weight: bold; margin-bottom: 10px; color: #17a2b8;">কলাম টাইটেল এডিট করুন</div>
                 <div class="form-group">
                     <label>কলাম টাইটেল:</label>
-                    <input type="text" id="edit-col-title-${colId}" value="${(footerInfo[titleKey] || '').replace(/"/g, '&quot;')}">
+                    <input type="text" id="edit-col-title-${colIdx}" value="${(col.title || '').replace(/"/g, '&quot;')}">
                 </div>
                 <div class="card-actions">
-                    <button class="btn btn-submit" onclick="saveFooterTitleInline(${colId})"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
+                    <button class="btn btn-submit" onclick="saveFooterTitleInline(${colIdx})"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
                     <button class="btn btn-secondary" onclick="renderFooterSectionCards()"><i class="fa-solid fa-xmark"></i> Cancel</button>
                 </div>
             `;
         }
 
-        async function saveFooterTitleInline(colId) {
-            const titleKey = `col${colId}Title`;
-            footerInfo[titleKey] = document.getElementById(`edit-col-title-${colId}`).value;
+        async function saveFooterTitleInline(colIdx) {
+            footerInfo.columns[colIdx].title = document.getElementById(`edit-col-title-${colIdx}`).value;
             await saveLayoutConfig();
             renderFooterSectionCards();
         }
 
         /* --- Footer Link Inline Edit --- */
-        function editFooterLinkInline(colId, lkIdx) {
-            const linksKey = `col${colId}Links`;
-            const lk = footerInfo[linksKey][lkIdx];
+        function editFooterLinkInline(colIdx, lkIdx) {
+            const lk = footerInfo.columns[colIdx].links[lkIdx];
             renderFooterSectionCards();
 
-            const card = document.getElementById(`footer-col-${colId}-box`);
+            const card = document.querySelectorAll('.col-drag-item')[colIdx];
             const subItems = card.querySelectorAll('.sub-menu-item');
             const targetItem = subItems[lkIdx];
 
@@ -581,28 +660,27 @@
                 targetItem.style.display = "block";
                 targetItem.innerHTML = `
                     <div class="row" style="margin-bottom:5px;">
-                        <input type="text" id="edit-fl-title-${colId}-${lkIdx}" value="${(lk.title || '').replace(/"/g, '&quot;')}" style="flex:1;">
-                        <input type="text" id="edit-fl-url-${colId}-${lkIdx}" value="${(lk.url || '').replace(/"/g, '&quot;')}" style="flex:1;">
+                        <input type="text" id="edit-fl-title-${colIdx}-${lkIdx}" value="${(lk.title || '').replace(/"/g, '&quot;')}" style="flex:1;">
+                        <input type="text" id="edit-fl-url-${colIdx}-${lkIdx}" value="${(lk.url || '').replace(/"/g, '&quot;')}" style="flex:1;">
                     </div>
                     <div class="card-actions" style="margin-top:5px;">
-                        <button class="btn btn-submit btn-sm" onclick="saveFooterLinkInline(${colId}, ${lkIdx})"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+                        <button class="btn btn-submit btn-sm" onclick="saveFooterLinkInline(${colIdx}, ${lkIdx})"><i class="fa-solid fa-floppy-disk"></i> Save</button>
                         <button class="btn btn-secondary btn-sm" onclick="renderFooterSectionCards()"><i class="fa-solid fa-xmark"></i> Cancel</button>
                     </div>
                 `;
             }
         }
 
-        async function saveFooterLinkInline(colId, lkIdx) {
-            const linksKey = `col${colId}Links`;
-            footerInfo[linksKey][lkIdx].title = document.getElementById(`edit-fl-title-${colId}-${lkIdx}`).value;
-            footerInfo[linksKey][lkIdx].url = document.getElementById(`edit-fl-url-${colId}-${lkIdx}`).value;
+        async function saveFooterLinkInline(colIdx, lkIdx) {
+            footerInfo.columns[colIdx].links[lkIdx].title = document.getElementById(`edit-fl-title-${colIdx}-${lkIdx}`).value;
+            footerInfo.columns[colIdx].links[lkIdx].url = document.getElementById(`edit-fl-url-${colIdx}-${lkIdx}`).value;
             await saveLayoutConfig();
             renderFooterSectionCards();
         }
 
-        function showAddFooterLinkForm(colId) {
-            const container = document.getElementById(`add-footer-link-box-${colId}`);
-            const actionBar = document.getElementById(`footer-link-action-bar-${colId}`);
+        function showAddFooterLinkForm(colIdx) {
+            const container = document.getElementById(`add-footer-link-box-${colIdx}`);
+            const actionBar = document.getElementById(`footer-link-action-bar-${colIdx}`);
             if (!container) return;
 
             let formWrapper = container.querySelector('.new-footer-link-form-wrapper');
@@ -619,7 +697,7 @@
 
                 if (actionBar && !actionBar.querySelector('.btn-submit')) {
                     actionBar.innerHTML += `
-                        <button class="btn btn-submit" onclick="saveAllNewFooterLinks(${colId})"><i class="fa-solid fa-floppy-disk"></i> Save Links</button>
+                        <button class="btn btn-submit" onclick="saveAllNewFooterLinks(${colIdx})"><i class="fa-solid fa-floppy-disk"></i> Save Links</button>
                         <button class="btn btn-secondary" onclick="renderFooterSectionCards()"><i class="fa-solid fa-xmark"></i> Cancel</button>
                     `;
                 }
@@ -632,14 +710,14 @@
             rowDiv.innerHTML = `
                 <input type="text" class="new-fl-title" placeholder="লিংক টাইটেল (যেমন: প্রাইভেসি পলিসি)" style="flex:1;">
                 <input type="text" class="new-fl-url" placeholder="URL (যেমন: privacy.html)" style="flex:1;">
-                <button type="button" class="btn-icon-danger" onclick="removeNewFooterLinkRow(this, ${colId})" title="মুছে ফেলুন">
+                <button type="button" class="btn-icon-danger" onclick="removeNewFooterLinkRow(this, ${colIdx})" title="মুছে ফেলুন">
                     <i class="fa-solid fa-trash"></i>
                 </button>
             `;
             rowsContainer.appendChild(rowDiv);
         }
 
-        function removeNewFooterLinkRow(btn, colId) {
+        function removeNewFooterLinkRow(btn, colIdx) {
             const row = btn.closest('.new-footer-link-row');
             if (row) {
                 const rowsContainer = row.parentElement;
@@ -650,8 +728,8 @@
             }
         }
 
-        async function saveAllNewFooterLinks(colId) {
-            const container = document.getElementById(`add-footer-link-box-${colId}`);
+        async function saveAllNewFooterLinks(colIdx) {
+            const container = document.getElementById(`add-footer-link-box-${colIdx}`);
             if (!container) return;
 
             const rows = container.querySelectorAll('.new-footer-link-row');
@@ -660,18 +738,13 @@
                 return;
             }
 
-            const linksKey = `col${colId}Links`;
-            if (!footerInfo[linksKey]) {
-                footerInfo[linksKey] = [];
-            }
-
             let addedCount = 0;
             rows.forEach(row => {
                 const title = row.querySelector('.new-fl-title')?.value.trim();
                 const url = row.querySelector('.new-fl-url')?.value.trim();
 
                 if (title) {
-                    footerInfo[linksKey].push({ title, url: url || '#' });
+                    footerInfo.columns[colIdx].links.push({ title, url: url || '#' });
                     addedCount++;
                 }
             });
@@ -685,10 +758,9 @@
             renderFooterSectionCards();
         }
 
-        async function deleteFooterLink(colId, lkIdx) {
-            const linksKey = `col${colId}Links`;
+        async function deleteFooterLink(colIdx, lkIdx) {
             if (await showTopAlert("আপনি কি নিশ্চিত যে এই লিংকটি মুছে ফেলতে চান?", 'danger', true)) {
-                footerInfo[linksKey].splice(lkIdx, 1);
+                footerInfo.columns[colIdx].links.splice(lkIdx, 1);
                 await saveLayoutConfig();
                 renderFooterSectionCards();
             }
