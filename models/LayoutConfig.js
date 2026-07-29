@@ -30,7 +30,9 @@ const layoutConfigSchema = new mongoose.Schema({
         columns: { type: Array, default: [] }
     },
     copyright: {
-        text: String
+        text: String,
+        // 👈 নতুন কপিরাইট লিংকগুলোর (FAQ, Terms) ডাটা সেভ করার জন্য এই ফিল্ডটি যোগ করা হলো
+        links: { type: Array, default: [] } 
     }
 }, { 
     timestamps: true, 

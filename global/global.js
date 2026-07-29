@@ -67,27 +67,18 @@ function formatURL(url) {
     if (!url || url === '#') return '#';
     let trimmed = url.trim();
     
-    // 1. যদি আগে থেকেই ভ্যালিড প্রোটোকল থাকে
     if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('//') || trimmed.startsWith('mailto:') || trimmed.startsWith('tel:')) {
         return trimmed;
     }
-    
-    // 2. যদি ইন্টারনাল পেজ লিঙ্ক বা হ্যাশ লিঙ্ক হয়
     if (trimmed.startsWith('#') || trimmed.startsWith('/') || trimmed.endsWith('.html')) {
         return trimmed;
     }
-    
-    // 3. যদি লোকাল ফোল্ডার পাথ হয় (যেমন: images/logo.png, assets/style.css, ../images/icon.ico)
     if (trimmed.startsWith('images/') || trimmed.startsWith('assets/') || trimmed.startsWith('../') || trimmed.startsWith('./')) {
         return trimmed;
     }
-
-    // 4. যদি শুধু একটি শব্দ হয় (ডট নেই), তবে এটিকে লোকাল পাথ হিসেবে ধরে নেওয়া
     if (!trimmed.includes('.')) {
         return trimmed;
     }
-
-    // 5. উপরের কোনোটিই না হলে এবং ডট (.) থাকলে, এক্সটারনাল ডোমেইন ধরে https:// যুক্ত করা (যেমন: google.com)
     return 'https://' + trimmed;
 }
 
@@ -96,9 +87,7 @@ function getAuthRedirectLink() {
     const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
     const userStr = localStorage.getItem('user') || localStorage.getItem('quiz_user');
     
-    if (!token) {
-        return 'login.html'; 
-    }
+    if (!token) return 'login.html'; 
     
     try {
         const user = JSON.parse(userStr || '{}');
@@ -151,8 +140,6 @@ function applyLayoutToDOM(data) {
     if (data.header) {
         if (data.header.faviconUrl) {
             let faviconUrlFormatted = formatURL(data.header.faviconUrl);
-            
-            // Handle correct relative path for favicon if loading from admin or other subfolders
             if (window.location.pathname.includes('/admin/')) {
                 if (faviconUrlFormatted.startsWith('images/')) {
                     faviconUrlFormatted = '../' + faviconUrlFormatted;
@@ -188,7 +175,6 @@ function applyLayoutToDOM(data) {
     if (headerContainer && data.header) {
         const h = data.header;
         
-        // Handle correct relative path for Logo
         let logoUrlFormatted = h.logoUrl ? formatURL(h.logoUrl) : '';
         if (window.location.pathname.includes('/admin/') && logoUrlFormatted.startsWith('images/')) {
             logoUrlFormatted = '../' + logoUrlFormatted;
@@ -219,7 +205,6 @@ function applyLayoutToDOM(data) {
             }).join('');
         }
 
-        // Auth Status and Action Link
         const authLink = getAuthRedirectLink();
         const isLoggedIn = !authLink.includes('login.html');
         const userStr = localStorage.getItem('user') || localStorage.getItem('quiz_user');
@@ -285,7 +270,6 @@ function applyLayoutToDOM(data) {
             return `<ul>` + links.map(l => `<li><a href="${formatURL(l.url)}"><i class="fa-solid fa-angle-right"></i> ${l.title}</a></li>`).join('') + `</ul>`;
         };
 
-        // Data Migration / Fallback for older layouts
         let columnsData = f.columns;
         if (!columnsData || !Array.isArray(columnsData)) {
             columnsData = [
@@ -296,7 +280,6 @@ function applyLayoutToDOM(data) {
             ];
         }
 
-        // Generate HTML dynamically based on columns array
         const columnsHTML = columnsData.map(col => {
             if (col.type === 'info') {
                 return `
@@ -323,13 +306,25 @@ function applyLayoutToDOM(data) {
             }
         }).join('');
 
+        // ================= COPYRIGHT TEXT & LINKS LOGIC =================
+        let copyTextValue = c.text !== undefined ? c.text : '© ' + new Date().getFullYear() + ' TopMCQ. All rights reserved.';
+        let copyTextHtml = copyTextValue ? `<div class="footer-copy-text">${copyTextValue}</div>` : '';
+
+        let copyLinksHtml = '';
+        if (c.links && c.links.length > 0) {
+            // Join links with " | " separator
+            const linksA = c.links.map(l => `<a href="${formatURL(l.url)}">${l.title}</a>`).join('<span class="sep"> | </span>');
+            copyLinksHtml = `<div class="footer-copy-links">${linksA}</div>`;
+        }
+
         footerContainer.innerHTML = `
             <div class="footer-container">
                 <div class="footer-grid">
                     ${columnsHTML}
                 </div>
                 <div class="footer-bottom">
-                    <p>${c.text || '© ' + new Date().getFullYear() + ' TopMCQ. All rights reserved.'}</p>
+                    ${copyTextHtml}
+                    ${copyLinksHtml}
                 </div>
             </div>
         `;

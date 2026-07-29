@@ -498,7 +498,45 @@ body {
 .social-btn.tg { background: #0088cc; }
 .social-btn.ln { background: #0a66c2; }
 
-.footer-bottom { text-align: center; padding-top: 25px; border-top: 1px solid #334155; font-size: 13px; color: #64748b; }
+/* ================= FOOTER BOTTOM (COPYRIGHT & LINKS) ================= */
+.footer-bottom { 
+    position: relative;
+    padding-top: 25px; 
+    border-top: 1px solid #334155; 
+    font-size: 13px; 
+    color: #64748b; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 40px;
+}
+
+.footer-copy-text {
+    flex: 1;
+    text-align: center;
+}
+
+.footer-copy-links {
+    position: absolute;
+    right: 0;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.footer-copy-links a {
+    color: #cbd5e1;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.footer-copy-links a:hover {
+    color: #38bdf8;
+}
+
+.footer-copy-links .sep {
+    color: #475569;
+}
 
 /* ==========================================================================
    MOBILE RESPONSIVE STYLES
@@ -611,5 +649,18 @@ body {
     .footer-grid {
         grid-template-columns: 1fr;
         gap: 25px;
+    }
+
+    /* Mobile Adjustments for Footer Bottom */
+    .footer-bottom {
+        flex-direction: column;
+        gap: 12px;
+        padding-bottom: 20px;
+        position: static;
+    }
+    .footer-copy-links {
+        position: static;
+        justify-content: center;
+        flex-wrap: wrap;
     }
 }
