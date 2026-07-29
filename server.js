@@ -11,6 +11,7 @@ const User = require('./models/User');
 const HomeConfig = require('./models/HomeConfig'); 
 const authRoutes = require('./routes/auth');
 const homeConfigRoutes = require('./routes/homeConfigRoutes'); 
+const layoutRoutes = require('./routes/layoutRoutes');
 const { verifyToken, authorizeRoles } = require('./middleware/authMiddleware');
 
 const app = express();
@@ -52,55 +53,6 @@ const questionSchema = new mongoose.Schema({
 
 const Question = mongoose.model('Question', questionSchema);
 
-// Layout Config Schema & Model (Header, Footer, Announcement, Copyright & SEO)
-const layoutConfigSchema = new mongoose.Schema({
-    announcement: {
-        text: String,
-        link: String
-    },
-    header: {
-        siteTitle: String,
-        logoUrl: String,
-        seoTitle: String,
-        faviconUrl: String,
-        btnText: String,
-        btnLink: String,
-        menus: [
-            {
-                title: String,
-                url: String,
-                subMenus: [
-                    {
-                        title: String,
-                        url: String
-                    }
-                ]
-            }
-        ]
-    },
-    footer: {
-        columns: Array, // <--- Dynamic Drag & Drop Columns Array
-        col1Text: String,
-        col1Fb: String,
-        col1Yt: String,
-        col1Wa: String,
-        col1Tw: String,
-        col1Tg: String,
-        col1Ln: String,
-        col2Title: String,
-        col2Links: [ { title: String, url: String } ],
-        col3Title: String,
-        col3Links: [ { title: String, url: String } ],
-        col4Title: String,
-        col4Links: [ { title: String, url: String } ]
-    },
-    copyright: {
-        text: String
-    }
-}, { timestamps: true, strict: false });
-
-const LayoutConfig = mongoose.model('LayoutConfig', layoutConfigSchema);
-
 // ------------------- AUTHENTICATION ROUTES -------------------
 app.use('/api/auth', authRoutes);
 
@@ -108,47 +60,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/home-config', homeConfigRoutes);
 
 // ------------------- LAYOUT CONFIG ROUTES -------------------
-
-// Get Layout Config (Public API)
-app.get('/api/layout-config', async (req, res) => {
-    try {
-        let config = await LayoutConfig.findOne();
-        if (!config) {
-            config = {};
-        }
-        res.json(config);
-    } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
-    }
-});
-
-// Save/Update Layout Config (Owner and Admin only)
-app.post('/api/layout-config', verifyToken, authorizeRoles('owner', 'admin'), async (req, res) => {
-    try {
-        const { announcement, header, footer, copyright } = req.body;
-
-        let config = await LayoutConfig.findOne();
-
-        if (config) {
-            config.announcement = announcement;
-            config.header = header;
-            config.footer = footer;
-            config.copyright = copyright;
-            await config.save();
-        } else {
-            config = new LayoutConfig({ announcement, header, footer, copyright });
-            await config.save();
-        }
-
-        res.json({
-            success: true,
-            message: 'Layout configuration saved successfully!',
-            config
-        });
-    } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
-    }
-});
+// এখন models/LayoutConfig.js আর routes/layoutRoutes.js আসলেই ব্যবহার হচ্ছে
+app.use('/api', layoutRoutes);
 
 // Change Password API (Any Logged In User)
 app.put('/api/auth/change-password', verifyToken, async (req, res) => {
