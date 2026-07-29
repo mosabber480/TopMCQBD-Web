@@ -1,60 +1,43 @@
-const mongoose = require('mongoose');
+const express = require('express');
+const router = express.Router();
+const LayoutConfig = require('../models/LayoutConfig');
+const { verifyToken, authorizeRoles } = require('../middleware/authMiddleware'); // সিকিউরিটি মিডলওয়্যার ইমপোর্ট করা হলো
 
-const layoutConfigSchema = new mongoose.Schema({
-    announcement: {
-        text: String,
-        link: String
-    },
-    header: {
-        siteTitle: String,
-        logoUrl: String,
-        seoTitle: String,
-        faviconUrl: String,
-        btnText: String,
-        btnLink: String,
-        menus: [
-            {
-                title: String,
-                url: String,
-                subMenus: [
-                    {
-                        title: String,
-                        url: String
-                    }
-                ]
-            }
-        ]
-    },
-    footer: {
-        columns: { type: Array, default: [] }, // 👈 নতুন ডাইনামিক ড্র্যাগ অ্যান্ড ড্রপ কলাম ডাটা সেভ করার জন্য
-        
-        // পুরনো ডেটা যাতে হারিয়ে না যায় (Backward Compatibility) তার জন্য নিচের ফিল্ডগুলো রেখে দেওয়া হলো:
-        col1Text: String,
-        col1Fb: String,
-        col1Yt: String,
-        col1Wa: String, // 👈 WhatsApp Link
-        col1Tw: String, // 👈 Twitter / X Link
-        col1Tg: String, // 👈 Telegram Link
-        col1Ln: String, // 👈 LinkedIn Link
-        col2Title: String,
-        col2Links: [
-            { title: String, url: String }
-        ],
-        col3Title: String,
-        col3Links: [
-            { title: String, url: String }
-        ],
-        col4Title: String,
-        col4Links: [
-            { title: String, url: String }
-        ]
-    },
-    copyright: {
-        text: String
+// GET Layout Data (Public API - যে কেউ দেখতে পারবে)
+router.get('/layout-config', async (req, res) => {
+    try {
+        let config = await LayoutConfig.findOne();
+        if (!config) {
+            config = {};
+        }
+        res.json(config);
+    } catch (err) {
+        res.status(500).json({ message: 'Server error', error: err.message });
     }
-}, { 
-    timestamps: true, 
-    strict: false // 👈 strict: false করে দেওয়া হয়েছে যাতে নতুন কলামের ভেতরের ডাটা স্ট্রাকচার সেভ হতে কোনো সমস্যা না হয়
 });
 
-module.exports = mongoose.model('LayoutConfig', layoutConfigSchema);
+// POST/SAVE Layout Data (Admin Dashboard - শুধুমাত্র অ্যাডমিন/ওনার সেভ করতে পারবে)
+router.post('/layout-config', verifyToken, authorizeRoles('owner', 'admin'), async (req, res) => {
+    try {
+        const { announcement, header, footer, copyright } = req.body;
+
+        let config = await LayoutConfig.findOne();
+
+        if (config) {
+            config.announcement = announcement;
+            config.header = header;
+            config.footer = footer;
+            config.copyright = copyright;
+            await config.save();
+        } else {
+            config = new LayoutConfig({ announcement, header, footer, copyright });
+            await config.save();
+        }
+
+        res.json({ message: 'Layout configuration saved successfully!', config });
+    } catch (err) {
+        res.status(500).json({ message: 'Save failed', error: err.message });
+    }
+});
+
+module.exports = router;
