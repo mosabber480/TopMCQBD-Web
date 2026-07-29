@@ -273,6 +273,11 @@
                     ];
                 }
 
+                // পুরনো (legacy) col1Text, col2Links, col3Links, col4Links ইত্যাদি ফিল্ড বাদ দিয়ে
+                // শুধু dynamic "columns" রেখে footerInfo ক্লিন করে দেওয়া হচ্ছে, যাতে Save করার সময়
+                // পুরনো খালি ফিল্ডগুলো আবার DB-তে ফেরত সেভ না হয়
+                footerInfo = { columns: footerInfo.columns };
+
                 isFooterReordered = {};
 
                 renderFooterSectionCards();
