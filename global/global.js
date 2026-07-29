@@ -307,11 +307,15 @@ function applyLayoutToDOM(data) {
         }).join('');
 
         // ================= COPYRIGHT TEXT & LINKS LOGIC =================
+        let hasLinks = c.links && c.links.length > 0;
         let copyTextValue = c.text !== undefined ? c.text : '© ' + new Date().getFullYear() + ' TopMCQ. All rights reserved.';
-        let copyTextHtml = copyTextValue ? `<div class="footer-copy-text">${copyTextValue}</div>` : '';
+        
+        // 🌟 লজিক: লিংক থাকলে টেক্সট লেফটে (text-left), না থাকলে সেন্টারে (text-center)
+        let textAlignmentClass = hasLinks ? 'text-left' : 'text-center';
+        let copyTextHtml = copyTextValue ? `<div class="footer-copy-text ${textAlignmentClass}">${copyTextValue}</div>` : '';
 
         let copyLinksHtml = '';
-        if (c.links && c.links.length > 0) {
+        if (hasLinks) {
             // Join links with " | " separator
             const linksA = c.links.map(l => `<a href="${formatURL(l.url)}">${l.title}</a>`).join('<span class="sep"> | </span>');
             copyLinksHtml = `<div class="footer-copy-links">${linksA}</div>`;

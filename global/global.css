@@ -424,15 +424,43 @@ body {
     width: calc(100% - 32px);
 }
 
-/* 3. Dynamic Footer Styling */
+/* ==========================================================================
+   3. Dynamic Footer Styling (NEW FLEXBOX LAYOUT FOR PERFECT ALIGNMENT)
+   ========================================================================== */
 #global-footer { 
     background-color: #1e293b; 
     color: #cbd5e1; 
     padding: 50px 20px 20px 20px; 
     margin-top: 60px; 
 }
-.footer-container { max-width: 1300px; margin: 0 auto; }
-.footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 30px; margin-bottom: 30px; }
+.footer-container { 
+    max-width: 1300px; 
+    margin: 0 auto; 
+}
+
+/* 🌟 Updated Footer Grid (Flexbox Logic for no right space) */
+.footer-grid { 
+    display: flex; 
+    flex-wrap: wrap; 
+    justify-content: space-between; /* প্রথমটা বামে, শেষেরটা ডানে রাখবে */
+    gap: 30px; 
+    margin-bottom: 30px; 
+}
+.footer-col { 
+    flex: 1 1 200px; /* ডিফল্টভাবে সমান জায়গা নেবে এবং মোবাইলে নিচে নিচে যাবে */
+}
+
+/* ডেস্কটপ ভিউতে (900px এর উপরে) স্পেস ফিক্স */
+@media (min-width: 900px) {
+    .footer-col:first-child {
+        flex: 1.5 1 250px; /* প্রথম কলাম (Info) একটু বেশি জায়গা নেবে */
+        max-width: 380px; 
+    }
+    .footer-col:last-child {
+        flex: 0 1 auto; /* শেষ কলাম ঠিক তার ভেতরের কনটেন্ট অনুযায়ী জায়গা নেবে, ফলে ডানদিকে কোনো ফাঁকা জায়গা থাকবে না */
+    }
+}
+
 .footer-col h4 { font-size: 17px; margin-bottom: 15px; color: #ffffff; border-bottom: 2px solid var(--primary); padding-bottom: 6px; display: inline-block; font-weight: 700; }
 .footer-col p { font-size: 14px; color: #94a3b8; line-height: 1.6; }
 
@@ -500,28 +528,32 @@ body {
 
 /* ================= FOOTER BOTTOM (COPYRIGHT & LINKS) ================= */
 .footer-bottom { 
-    position: relative;
+    display: flex;
+    align-items: center;
     padding-top: 25px; 
     border-top: 1px solid #334155; 
     font-size: 13px; 
     color: #64748b; 
-    display: flex;
-    justify-content: center;
-    align-items: center;
     min-height: 40px;
 }
 
 .footer-copy-text {
     flex: 1;
+}
+
+/* ডায়নামিক এলাইনমেন্ট (JS থেকে আসা ক্লাস) */
+.footer-copy-text.text-left {
+    text-align: left;
+}
+.footer-copy-text.text-center {
     text-align: center;
 }
 
 .footer-copy-links {
-    position: absolute;
-    right: 0;
     display: flex;
     gap: 10px;
     align-items: center;
+    justify-content: flex-end;
 }
 
 .footer-copy-links a {
@@ -656,10 +688,15 @@ body {
         flex-direction: column;
         gap: 12px;
         padding-bottom: 20px;
-        position: static;
     }
+    
+    /* মোবাইলে সবসময় সেন্টারে থাকবে (লিংক থাকুক বা না থাকুক) */
+    .footer-copy-text.text-left,
+    .footer-copy-text.text-center {
+        text-align: center;
+    }
+    
     .footer-copy-links {
-        position: static;
         justify-content: center;
         flex-wrap: wrap;
     }
