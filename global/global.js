@@ -66,12 +66,28 @@ function showTopAlert(msg, type = 'info', isConfirm = false) {
 function formatURL(url) {
     if (!url || url === '#') return '#';
     let trimmed = url.trim();
+    
+    // 1. যদি আগে থেকেই ভ্যালিড প্রোটোকল থাকে
     if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('//') || trimmed.startsWith('mailto:') || trimmed.startsWith('tel:')) {
         return trimmed;
     }
-    if (trimmed.startsWith('#') || trimmed.startsWith('/') || trimmed.endsWith('.html') || !trimmed.includes('.')) {
+    
+    // 2. যদি ইন্টারনাল পেজ লিঙ্ক বা হ্যাশ লিঙ্ক হয়
+    if (trimmed.startsWith('#') || trimmed.startsWith('/') || trimmed.endsWith('.html')) {
         return trimmed;
     }
+    
+    // 3. যদি লোকাল ফোল্ডার পাথ হয় (যেমন: images/logo.png, assets/style.css, ../images/icon.ico)
+    if (trimmed.startsWith('images/') || trimmed.startsWith('assets/') || trimmed.startsWith('../') || trimmed.startsWith('./')) {
+        return trimmed;
+    }
+
+    // 4. যদি শুধু একটি শব্দ হয় (ডট নেই), তবে এটিকে লোকাল পাথ হিসেবে ধরে নেওয়া
+    if (!trimmed.includes('.')) {
+        return trimmed;
+    }
+
+    // 5. উপরের কোনোটিই না হলে এবং ডট (.) থাকলে, এক্সটারনাল ডোমেইন ধরে https:// যুক্ত করা (যেমন: google.com)
     return 'https://' + trimmed;
 }
 
@@ -131,17 +147,25 @@ function applyLayoutToDOM(data) {
 
     const homePath = 'index.html';
 
-    // A. Dynamic SEO Title & Favicon
+    // A. Dynamic Favicon (SEO Title removed as per user request to manage it in index.html)
     if (data.header) {
-        if (data.header.seoTitle) document.title = data.header.seoTitle;
         if (data.header.faviconUrl) {
+            let faviconUrlFormatted = formatURL(data.header.faviconUrl);
+            
+            // Handle correct relative path for favicon if loading from admin or other subfolders
+            if (window.location.pathname.includes('/admin/')) {
+                if (faviconUrlFormatted.startsWith('images/')) {
+                    faviconUrlFormatted = '../' + faviconUrlFormatted;
+                }
+            }
+
             let favicon = document.querySelector("link[rel*='icon']");
             if (!favicon) {
                 favicon = document.createElement('link');
                 favicon.rel = 'shortcut icon';
                 document.getElementsByTagName('head')[0].appendChild(favicon);
             }
-            favicon.href = formatURL(data.header.faviconUrl);
+            favicon.href = faviconUrlFormatted;
         }
     }
 
@@ -163,8 +187,15 @@ function applyLayoutToDOM(data) {
     const headerContainer = document.getElementById('global-header');
     if (headerContainer && data.header) {
         const h = data.header;
-        let logoHTML = h.logoUrl 
-            ? `<img src="${h.logoUrl}" alt="${h.siteTitle || 'TopMCQ'}">` 
+        
+        // Handle correct relative path for Logo
+        let logoUrlFormatted = h.logoUrl ? formatURL(h.logoUrl) : '';
+        if (window.location.pathname.includes('/admin/') && logoUrlFormatted.startsWith('images/')) {
+            logoUrlFormatted = '../' + logoUrlFormatted;
+        }
+
+        let logoHTML = logoUrlFormatted 
+            ? `<img src="${logoUrlFormatted}" alt="${h.siteTitle || 'TopMCQ'}">` 
             : `<i class="fa-solid fa-book-open" style="color:var(--primary);"></i> ${h.siteTitle || 'TopMCQ'}`;
 
         let navItemsHTML = '';
@@ -220,7 +251,7 @@ function applyLayoutToDOM(data) {
         headerContainer.innerHTML = `
             <div class="header-wrapper">
                 <div class="site-logo">
-                    <a href="${homePath}">${logoHTML}</a>
+                    <a href="${window.location.pathname.includes('/admin/') ? '../' + homePath : homePath}">${logoHTML}</a>
                 </div>
                 
                 <button class="mobile-toggle-btn" id="mobile-toggle-btn" aria-label="Toggle Navigation">

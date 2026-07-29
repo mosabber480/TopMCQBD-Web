@@ -203,7 +203,7 @@
 
         <!-- ২.১ LOGO, TITLE, SEO & FAVICON CARD -->
         <div class="section-card header-card">
-            <div class="section-title"><i class="fa-solid fa-id-card" style="color: var(--primary);"></i> ২.১ লোগো, টাইটেল, SEO ও ফেভিকন সেটিং</div>
+            <div class="section-title"><i class="fa-solid fa-id-card" style="color: var(--primary);"></i> ২.১ লোগো, টাইটেল ও ফেভিকন সেটিং</div>
             <div id="header-brand-container"></div>
         </div>
 
@@ -359,11 +359,10 @@
             const container = document.getElementById('header-brand-container');
             container.innerHTML = '';
 
-            if (headerInfo && (headerInfo.siteTitle || headerInfo.logoUrl || headerInfo.seoTitle || headerInfo.faviconUrl)) {
+            if (headerInfo && (headerInfo.siteTitle || headerInfo.logoUrl || headerInfo.faviconUrl)) {
                 container.innerHTML = `
                     <div class="read-box" style="border-left: 5px solid #007bff;">
                         <div class="read-title"><i class="fa-solid fa-heading"></i> টাইটেল: ${headerInfo.siteTitle || 'TopMCQ'}</div>
-                        <div class="read-subtitle"><b>SEO টাইটেল:</b> ${headerInfo.seoTitle || 'TopMCQ - সেরা অনলাইন কুইজ প্ল্যাটফর্ম'}</div>
                         <div class="read-meta"><b>Logo URL:</b> ${headerInfo.logoUrl || 'নাই'} | <b>Favicon URL:</b> ${headerInfo.faviconUrl || 'নাই'}</div>
                         <div class="read-preview-text"><b>হেডার বাটন:</b> ${headerInfo.btnText || 'নাই'} (${headerInfo.btnLink || '#'})</div>
                         <div class="card-actions">
@@ -375,7 +374,7 @@
             } else {
                 container.innerHTML = `
                     <button class="btn btn-add" onclick="editHeaderBrandSection(true)">
-                        <i class="fa-solid fa-plus"></i> ব্রান্ড ও SEO তথ্য যোগ করুন
+                        <i class="fa-solid fa-plus"></i> ব্রান্ড তথ্য যোগ করুন
                     </button>
                 `;
             }
@@ -385,7 +384,6 @@
             const container = document.getElementById('header-brand-container');
             const siteTitle = headerInfo ? headerInfo.siteTitle || '' : 'TopMCQ';
             const logoUrl = headerInfo ? headerInfo.logoUrl || '' : '';
-            const seoTitle = headerInfo ? headerInfo.seoTitle || '' : 'TopMCQ - সেরা অনলাইন কুইজ প্ল্যাটফর্ম';
             const faviconUrl = headerInfo ? headerInfo.faviconUrl || '' : '';
             const btnText = headerInfo ? headerInfo.btnText || '' : 'লগইন';
             const btnLink = headerInfo ? headerInfo.btnLink || '' : 'login.html';
@@ -393,7 +391,7 @@
             container.innerHTML = `
                 <div class="read-box" style="border-left: 5px solid #007bff; background: #ffffff;">
                     <div style="font-weight: bold; margin-bottom: 12px; color: #007bff;">
-                        ${isNew ? 'নতুন ব্রান্ড ও SEO তথ্য যোগ করুন' : 'ব্রান্ড ও SEO সেটিং এডিট করুন'}
+                        ${isNew ? 'নতুন ব্রান্ড তথ্য যোগ করুন' : 'ব্রান্ড সেটিং এডিট করুন'}
                     </div>
                     <div class="row">
                         <div class="form-group" style="flex:1;">
@@ -407,12 +405,11 @@
                     </div>
                     <div class="row">
                         <div class="form-group" style="flex:1;">
-                            <label>SEO টাইটেল (Browser Meta Title):</label>
-                            <input type="text" id="brand-seo-title-input" value="${seoTitle.replace(/"/g, '&quot;')}" placeholder="যেমন: TopMCQ - সেরা প্রস্তুতি">
-                        </div>
-                        <div class="form-group" style="flex:1;">
                             <label>ফেভিকন URL (Favicon Icon URL):</label>
                             <input type="text" id="brand-favicon-input" value="${faviconUrl.replace(/"/g, '&quot;')}" placeholder="যেমন: images/favicon.ico">
+                        </div>
+                        <div class="form-group" style="flex:1;">
+                            &nbsp;
                         </div>
                     </div>
                     <div class="row">
@@ -437,7 +434,6 @@
             if (!headerInfo) headerInfo = {};
             headerInfo.siteTitle = document.getElementById('brand-title-input').value;
             headerInfo.logoUrl = document.getElementById('brand-logo-input').value;
-            headerInfo.seoTitle = document.getElementById('brand-seo-title-input').value;
             headerInfo.faviconUrl = document.getElementById('brand-favicon-input').value;
             headerInfo.btnText = document.getElementById('brand-btn-text-input').value;
             headerInfo.btnLink = document.getElementById('brand-btn-link-input').value;
@@ -447,11 +443,10 @@
         }
 
         async function deleteHeaderBrandSection() {
-            if (await showTopAlert("আপনি কি নিশ্চিত যে ব্রান্ড ও SEO তথ্য মুছে ফেলতে চান?", 'danger', true)) {
+            if (await showTopAlert("আপনি কি নিশ্চিত যে ব্রান্ড তথ্য মুছে ফেলতে চান?", 'danger', true)) {
                 if (headerInfo) {
                     delete headerInfo.siteTitle;
                     delete headerInfo.logoUrl;
-                    delete headerInfo.seoTitle;
                     delete headerInfo.faviconUrl;
                     delete headerInfo.btnText;
                     delete headerInfo.btnLink;

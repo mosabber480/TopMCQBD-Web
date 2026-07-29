@@ -44,6 +44,7 @@
         .section-card.demo-card { border-left: 6px solid var(--secondary); }
         .section-card.package-card { border-left: 6px solid var(--warning); }
         .section-card.mission-card { border-left: 6px solid var(--purple-btn); }
+        .section-card.seo-card { border-left: 6px solid #e83e8c; }
 
         .section-title { font-size: 20px; color: var(--dark); margin-bottom: 15px; display: flex; align-items: center; gap: 10px; padding-bottom: 10px; border-bottom: 1px dashed #e2e8f0; }
         .sub-header-title { font-size: 16px; font-weight: bold; color: var(--dark); margin: 15px 0 10px 0; display: flex; align-items: center; gap: 8px; }
@@ -158,6 +159,13 @@
     <div id="admin-navbar-container"></div>
 
     <div class="container" style="margin-top: 30px;">
+        
+        <!-- ০. SEO SETTINGS CARD -->
+        <div class="section-card seo-card" id="card-seo">
+            <div class="section-title"><i class="fa-solid fa-magnifying-glass" style="color: #e83e8c;"></i> হোম পেজ SEO সেটিংস</div>
+            <div id="seo-read-container"></div>
+        </div>
+
         <!-- ১. SLIDERS MANAGER CARD -->
         <div class="section-card slider-card" id="card-slider">
             <div class="section-title"><i class="fa-solid fa-images" style="color: var(--primary);"></i> ১. স্লাইডার সেকশন (Sliders)</div>
@@ -226,6 +234,8 @@
 
     <script>
         const CONFIG_API_URL = 'https://mosabber-quiz-app.onrender.com/api/home-config';
+        
+        let seoInfo = { title: '', description: '' }; // SEO Object
         let sliderDataList = [];
         let demoDataList = [];
         let packageDataList = [];
@@ -270,6 +280,10 @@
                 const res = await fetch(CONFIG_API_URL);
                 const data = await res.json();
 
+                // Load SEO Info
+                seoInfo.title = data.seoTitle || '';
+                seoInfo.description = data.seoDescription || '';
+
                 sliderDataList = data.sliders || [];
                 demoDataList = data.demoQuizzes || [];
                 packageDataList = data.packages || [];
@@ -282,6 +296,7 @@
                 isDemoReordered = false;
                 isPackageReordered = false;
 
+                renderSeoSection();
                 renderSliderReadCards();
                 renderDemoReadCards();
                 renderPackageReadCards();
@@ -296,6 +311,76 @@
 
                 hideAllSaveBtns();
             } catch (err) { console.error("Config fetch failed:", err); }
+        }
+
+        /* ================= 0. SEO SECTION HANDLER ================= */
+        function renderSeoSection() {
+            const container = document.getElementById(`seo-read-container`);
+            container.innerHTML = '';
+
+            if (seoInfo.title || seoInfo.description) {
+                container.innerHTML = `
+                    <div class="read-box" style="border-left: 5px solid #e83e8c;">
+                        <div class="read-title"><i class="fa-solid fa-heading" style="color: #e83e8c;"></i> ${seoInfo.title || '(টাইটেল নেই)'}</div>
+                        <div class="read-subtitle" style="margin-top: 5px;"><b>Meta Description:</b> ${seoInfo.description || '(ডেসক্রিপশন নেই)'}</div>
+                        <div class="card-actions" style="margin-top: 10px;">
+                            <button class="btn btn-warning" onclick="editSeoSection()"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                            <button class="btn btn-danger" onclick="deleteSeoSection()"><i class="fa-solid fa-trash"></i> Delete</button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <button class="btn btn-add" style="margin-bottom: 15px;" onclick="editSeoSection(true)">
+                        <i class="fa-solid fa-plus"></i> SEO টাইটেল ও ডেসক্রিপশন যোগ করুন
+                    </button>
+                `;
+            }
+        }
+
+        function editSeoSection(isNew = false) {
+            const container = document.getElementById(`seo-read-container`);
+            
+            container.innerHTML = `
+                <div class="read-box" style="border-left: 5px solid #007bff; background: #ffffff;">
+                    <div style="font-weight: bold; margin-bottom: 12px; color: #007bff;">
+                        ${isNew ? 'নতুন SEO টাইটেল ও ডেসক্রিপশন যোগ করুন' : 'SEO টাইটেল ও ডেসক্রিপশন এডিট করুন'}
+                    </div>
+                    <div class="row">
+                        <div class="form-group" style="flex:1;">
+                            <label>Home Meta Title (SEO):</label>
+                            <input type="text" id="home-seo-title-input" value="${seoInfo.title.replace(/"/g, '&quot;')}" placeholder="যেমন: TopMCQ - সেরা অনলাইন কুইজ প্ল্যাটফর্ম">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group" style="flex:1;">
+                            <label>Home Meta Description (SEO):</label>
+                            <textarea id="home-seo-desc-input" rows="2" placeholder="যেমন: TopMCQ-তে সেরা সব কুইজ দিয়ে আপনার প্রস্তুতি যাচাই করুন...">${seoInfo.description}</textarea>
+                        </div>
+                    </div>
+                    <div class="card-actions" style="margin-top: 10px;">
+                        <button class="btn btn-submit" onclick="saveSeoSection()"><i class="fa-solid fa-floppy-disk"></i> পরিবর্তন সংরক্ষণ করুন</button>
+                        <button class="btn btn-secondary" onclick="renderSeoSection()"><i class="fa-solid fa-xmark"></i> বাতিল করুন</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function saveSeoSection() {
+            seoInfo.title = document.getElementById('home-seo-title-input').value;
+            seoInfo.description = document.getElementById('home-seo-desc-input').value;
+            
+            await saveHomeConfig();
+            renderSeoSection();
+        }
+
+        async function deleteSeoSection() {
+            if (await showTopAlert("আপনি কি নিশ্চিত যে SEO টাইটেল ও ডেসক্রিপশন মুছে ফেলতে চান?", 'danger', true)) {
+                seoInfo.title = '';
+                seoInfo.description = '';
+                await saveHomeConfig();
+                renderSeoSection();
+            }
         }
 
         /* ================= SECTION HEADER (TITLE & SUBTITLE) HANDLER ================= */
@@ -827,7 +912,7 @@
             const sectionSubtitle = missionInfo ? missionInfo.sectionSubtitle || '' : 'শিক্ষার্থীদের সফলতা ও সঠিক প্রস্তুতির পথ সুগম করাই আমাদের উদ্দেশ্য';
 
             const missionTitle = missionInfo ? missionInfo.missionTitle || '' : 'আমাদের মিশন (Mission)';
-            const missionDesc = missionInfo ? missionInfo.missionDesc || '' : 'বাংলাদেশের যেকোনো প্রান্তের শিক্ষার্থীদের কাছে মানসম্মত ও তথ্যসমৃদ্ধ প্রস্তুতিমূলক কুইজ পৌঁছে দেওয়া, যাতে তারা ঘরে বসেই রিয়েল-টাইম মূল্যায়নের মাধ্যমে নিজের আত্মবিশ্বাস বৃদ্ধি করতে পারে।';
+            const missionDesc = missionInfo ? missionInfo.missionDesc || '' : 'বাংলাদেশের যেকোনো প্রান্তের শিক্ষার্থীদের কাছে মানসম্মত ও তথ্যসমৃদ্ধ প্রস্তুতিমূলক কুইজ পৌঁছে দেওয়া, যাতে তারা ঘরে বসেই রিয়ে-টাইম মূল্যায়নের মাধ্যমে নিজের আত্মবিশ্বাস বৃদ্ধি করতে পারে।';
 
             const goalTitle = missionInfo ? missionInfo.goalTitle || '' : 'আমাদের লক্ষ্য (Goal)';
             const goalDesc = missionInfo ? missionInfo.goalDesc || '' : 'একটি আধুনিক, সহজ ও কার্যকর লার্নিং প্ল্যাটফর্ম হিসেবে প্রতিটি প্রতিযোগিতামূলক পরীক্ষার পরীক্ষার্থীর প্রথম পছন্দ হয়ে ওঠা এবং ব্যাখ্যামূলক অনুশীলনের মাধ্যমে তাদের শতভাগ সাফল্য নিশ্চিত করা।';
@@ -1045,6 +1130,8 @@
                         sliders: finalSliders, 
                         demoQuizzes: finalDemoQuizzes, 
                         packages: finalPackages,
+                        seoTitle: seoInfo.title,
+                        seoDescription: seoInfo.description,
                         demoSectionInfo: demoHeaderInfo,
                         packageSectionInfo: packageHeaderInfo,
                         missionSectionInfo: missionInfo

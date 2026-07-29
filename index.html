@@ -12,6 +12,11 @@
     <link rel="stylesheet" href="global/global.css">
     
     <style>
+        /* ভেরিয়েবল ডিফাইন করা হলো যাতে এরর না আসে */
+        :root {
+            --secondary-dark: #27ae60; /* এখানে আপনার পছন্দমতো ডার্ক কালার কোডটি দিতে পারেন */
+        }
+
         /* এখানে শুধু index.html পেজের নিজস্ব স্লাইডার বা কন্টেন্টের CSS থাকবে */
         .slider-section {
             position: relative;
@@ -34,8 +39,11 @@
         .slide h1 { font-size: 34px; margin-bottom: 15px; color: #ffffff; font-weight: 800; }
         .slide p { font-size: 18px; color: #ecf0f1; margin-bottom: 30px; max-width: 700px; }
         .slide-btns { display: flex; gap: 15px; flex-wrap: wrap; }
-        .btn-main { background-color: var(--secondary); color: white; text-decoration: none; padding: 12px 26px; border-radius: 6px; font-weight: bold; font-size: 15px; display: inline-flex; align-items: center; gap: 8px; }
+        
+        /* UPDATED BUTTON STYLE */
+        .btn-main { background-color: var(--secondary); color: white; text-decoration: none; padding: 12px 26px; border-radius: 6px; font-weight: bold; font-size: 15px; display: inline-flex; align-items: center; gap: 8px; transition: background-color 0.3s ease; }
         .btn-main:hover { background-color: var(--secondary-dark); }
+        
         .btn-secondary { background-color: rgba(255, 255, 255, 0.15); color: white; text-decoration: none; padding: 12px 26px; border-radius: 6px; font-weight: bold; font-size: 15px; border: 2px solid white; display: inline-flex; align-items: center; gap: 8px; backdrop-filter: blur(5px); }
         .btn-secondary:hover { background-color: white; color: var(--dark); }
         .slider-dots { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 10; }
@@ -68,11 +76,9 @@
 </head>
 <body>
 
-    <!-- DYNAMIC GLOBAL LAYOUT CONTAINERS -->
     <div id="global-announce-bar" style="display:none;"></div>
     <header id="global-header"></header>
 
-    <!-- PAGE CONTENT (Hero Slider, Demo, Packages, Mission) -->
     <section class="slider-section">
         <div class="slider-wrapper" id="slider-wrapper">
             <div class="loading-box"><i class="fa-solid fa-spinner fa-spin"></i> ডাটা লোড হচ্ছে...</div>
@@ -97,19 +103,15 @@
     </section>
 
     <section class="section-container" id="mission">
-        <!-- DYNAMIC MISSION & GOAL CONTAINER -->
         <div class="mission-section" id="mission-wrapper">
             <div class="loading-box"><i class="fa-solid fa-spinner fa-spin"></i> লোড হচ্ছে...</div>
         </div>
     </section>
 
-    <!-- DYNAMIC FOOTER CONTAINER -->
     <footer id="global-footer"></footer>
 
-    <!-- GLOBAL JS LINK (Handles Header, Footer, Mobile Nav and Announce Bar) -->
     <script src="global/global.js"></script>
 
-    <!-- PAGE SPECIFIC SCRIPT -->
     <script>
         const API_URL = 'https://mosabber-quiz-app.onrender.com/api/home-config';
         let slideIndex = 0;
@@ -120,7 +122,22 @@
                 const res = await fetch(API_URL);
                 const data = await res.json();
 
-                // 1. SLIDERS DYNAMIC LOAD
+                // --- SEO Title & Description Setup ---
+                if (data.seoTitle) {
+                    document.title = data.seoTitle;
+                }
+
+                if (data.seoDescription) {
+                    let metaDesc = document.querySelector('meta[name="description"]');
+                    if (!metaDesc) {
+                        metaDesc = document.createElement('meta');
+                        metaDesc.name = "description";
+                        document.getElementsByTagName('head')[0].appendChild(metaDesc);
+                    }
+                    metaDesc.content = data.seoDescription;
+                }
+                // --------------------------------------
+
                 const sliderWrapper = document.getElementById('slider-wrapper');
                 const sliderDots = document.getElementById('slider-dots');
 
@@ -153,7 +170,6 @@
                     sliderWrapper.innerHTML = `<p style="text-align:center; padding: 40px; color:white;">কোনো স্লাইডার পাওয়া যায়নি।</p>`;
                 }
 
-                // 2. DEMO QUIZZES DYNAMIC LOAD
                 const demoTitleEl = document.getElementById('demo-section-title');
                 const demoSubEl = document.getElementById('demo-section-subtitle');
                 if (data.demoSectionInfo && data.demoSectionInfo.title) {
@@ -177,7 +193,6 @@
                     demoWrapper.innerHTML = `<p style="text-align:center;">কোনো ডেমো কুইজ পাওয়া যায়নি।</p>`;
                 }
 
-                // 3. PACKAGES DYNAMIC LOAD
                 const pkgTitleEl = document.getElementById('package-section-title');
                 const pkgSubEl = document.getElementById('package-section-subtitle');
                 if (data.packageSectionInfo && data.packageSectionInfo.title) {
@@ -202,7 +217,6 @@
                     pkgWrapper.innerHTML = `<p style="text-align:center;">কোনো প্যাকেজ পাওয়া যায়নি।</p>`;
                 }
 
-                // 4. MISSION & GOALS DYNAMIC LOAD
                 const missionWrapper = document.getElementById('mission-wrapper');
                 if (data.missionSectionInfo && (data.missionSectionInfo.sectionTitle || data.missionSectionInfo.missionDesc)) {
                     const m = data.missionSectionInfo;
@@ -227,7 +241,6 @@
                         </div>
                     `;
                 } else {
-                    // ড্যাশবোর্ড থেকে মিশন ও লক্ষ্য মুছে ফেললে ফ্রন্টএন্ডে সেকশনটি হাইড হয়ে থাকবে
                     document.getElementById('mission').style.display = 'none';
                 }
 

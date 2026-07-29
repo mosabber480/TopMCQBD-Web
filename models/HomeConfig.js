@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
 
 const homeConfigSchema = new mongoose.Schema({
+    // 🌟 SEO মেটা ডেটা (নতুন যুক্ত করা হয়েছে)
+    seoTitle: { type: String, default: '' },
+    seoDescription: { type: String, default: '' },
+
     sliders: [{
         title: { type: String, default: '' },
         subtitle: { type: String, default: '' },

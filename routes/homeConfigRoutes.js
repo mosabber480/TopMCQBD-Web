@@ -9,6 +9,8 @@ router.get('/', async (req, res) => {
         let config = await HomeConfig.findOne();
         if (!config) {
             config = { 
+                seoTitle: '', // নতুন যুক্ত করা হয়েছে
+                seoDescription: '', // নতুন যুক্ত করা হয়েছে
                 sliders: [], 
                 demoQuizzes: [], 
                 packages: [], 
@@ -35,6 +37,8 @@ router.get('/', async (req, res) => {
 router.post('/', verifyToken, authorizeRoles('owner', 'admin'), async (req, res) => {
     try {
         const { 
+            seoTitle, // নতুন যুক্ত করা হয়েছে
+            seoDescription, // নতুন যুক্ত করা হয়েছে
             sliders, 
             demoQuizzes, 
             packages, 
@@ -45,6 +49,8 @@ router.post('/', verifyToken, authorizeRoles('owner', 'admin'), async (req, res)
 
         let config = await HomeConfig.findOne();
         if (config) {
+            config.seoTitle = seoTitle || ''; // আপডেট করা হচ্ছে
+            config.seoDescription = seoDescription || ''; // আপডেট করা হচ্ছে
             config.sliders = sliders || [];
             config.demoQuizzes = demoQuizzes || [];
             config.packages = packages || [];
@@ -61,6 +67,8 @@ router.post('/', verifyToken, authorizeRoles('owner', 'admin'), async (req, res)
             await config.save();
         } else {
             config = await HomeConfig.create({
+                seoTitle: seoTitle || '', // নতুন ক্রিয়েট করার সময় যুক্ত হচ্ছে
+                seoDescription: seoDescription || '', // নতুন ক্রিয়েট করার সময় যুক্ত হচ্ছে
                 sliders: sliders || [],
                 demoQuizzes: demoQuizzes || [],
                 packages: packages || [],
