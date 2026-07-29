@@ -232,16 +232,23 @@ function applyLayoutToDOM(data) {
             } catch(e) { userName = 'ড্যাশবোর্ড'; }
         }
 
-        let customBtnText = (h.btnText && h.btnText.trim()) ? h.btnText.trim() : 'যোগাযোগ করুন';
-        let rawLink = (h.btnLink || '').trim();
-        let customBtnLink = (rawLink && !rawLink.includes('login.html')) ? formatURL(rawLink) : homePath + '#mission';
-
-        // এখানে প্রোফাইল বাটনের ব্যাকগ্রাউন্ড কালো (black) এবং বর্ডার কালো করা হয়েছে
-        let headerBtnHTML = `
-            <div class="header-btn-group">
+        // 🌟 NEW LOGIC: Dynamic Header Button Visibility
+        let customBtnHTML = '';
+        if (h.btnText && h.btnText.trim()) {
+            let customBtnText = h.btnText.trim();
+            let rawLink = (h.btnLink || '').trim();
+            let customBtnLink = (rawLink && !rawLink.includes('login.html')) ? formatURL(rawLink) : homePath + '#mission';
+            
+            customBtnHTML = `
                 <a href="${customBtnLink}" class="btn-primary-head">
                     <i class="fa-solid fa-headset"></i> ${customBtnText}
                 </a>
+            `;
+        }
+
+        let headerBtnHTML = `
+            <div class="header-btn-group">
+                ${customBtnHTML}
                 <a href="${authLink}" class="btn-auth-head" style="background-color: #1d283a !important; color: white !important; border: 1px solid #1d283a !important;">
                     <i class="fa-solid fa-circle-user"></i> ${userName}
                 </a>

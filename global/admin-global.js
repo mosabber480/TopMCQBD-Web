@@ -21,9 +21,14 @@ function renderAdminNavbar() {
                     <i class="fa-solid fa-globe"></i> মূল ওয়েবসাইট
                 </a>
                 
-                <!-- ২. Header & Footer (Purple) -->
-                <a href="header-footer-dashboard.html" class="btn-nav" style="background-color: var(--purple-btn); color: white;">
-                    <i class="fa-solid fa-window-restore"></i> Header & Footer
+                <!-- ২.১ Header (Purple) -->
+                <a href="header-dashboard.html" class="btn-nav" style="background-color: var(--purple-btn); color: white;">
+                    <i class="fa-solid fa-window-restore"></i> Header
+                </a>
+
+                <!-- ২.২ Footer (Teal) -->
+                <a href="footer-dashboard.html" class="btn-nav" style="background-color: var(--secondary); color: white;">
+                    <i class="fa-solid fa-table-columns"></i> Footer
                 </a>
 
                 <!-- ৩. MCQ Dashboard (Primary) -->

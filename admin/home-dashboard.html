@@ -321,7 +321,7 @@
             if (seoInfo.title || seoInfo.description) {
                 container.innerHTML = `
                     <div class="read-box" style="border-left: 5px solid #e83e8c;">
-                        <div class="read-title"><i class="fa-solid fa-heading" style="color: #e83e8c;"></i> ${seoInfo.title || '(টাইটেল নেই)'}</div>
+                        <div class="read-title">${seoInfo.title || '(টাইটেল নেই)'}</div>
                         <div class="read-subtitle" style="margin-top: 5px;"><b>Meta Description:</b> ${seoInfo.description || '(ডেসক্রিপশন নেই)'}</div>
                         <div class="card-actions" style="margin-top: 10px;">
                             <button class="btn btn-warning" onclick="editSeoSection()"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
