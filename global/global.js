@@ -282,8 +282,9 @@ function applyLayoutToDOM(data) {
 
         const columnsHTML = columnsData.map(col => {
             if (col.type === 'info') {
+                // 🌟 এখানে info-col ক্লাসটি যুক্ত করা হয়েছে
                 return `
-                    <div class="footer-col">
+                    <div class="footer-col info-col">
                         <h4>${col.title || 'আমাদের সম্পর্কে'}</h4>
                         <p>${col.text || ''}</p>
                         <div class="footer-social">
@@ -310,13 +311,11 @@ function applyLayoutToDOM(data) {
         let hasLinks = c.links && c.links.length > 0;
         let copyTextValue = c.text !== undefined ? c.text : '© ' + new Date().getFullYear() + ' TopMCQ. All rights reserved.';
         
-        // 🌟 লজিক: লিংক থাকলে টেক্সট লেফটে (text-left), না থাকলে সেন্টারে (text-center)
         let textAlignmentClass = hasLinks ? 'text-left' : 'text-center';
         let copyTextHtml = copyTextValue ? `<div class="footer-copy-text ${textAlignmentClass}">${copyTextValue}</div>` : '';
 
         let copyLinksHtml = '';
         if (hasLinks) {
-            // Join links with " | " separator
             const linksA = c.links.map(l => `<a href="${formatURL(l.url)}">${l.title}</a>`).join('<span class="sep"> | </span>');
             copyLinksHtml = `<div class="footer-copy-links">${linksA}</div>`;
         }
