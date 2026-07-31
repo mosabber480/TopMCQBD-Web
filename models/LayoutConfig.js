@@ -1,47 +1,45 @@
-const express = require('express');
-const router = express.Router();
-const LayoutConfig = require('../models/LayoutConfig');
-const { verifyToken, authorizeRoles } = require('../middleware/authMiddleware'); // সিকিউরিটি মিডলওয়্যার ইমপোর্ট করা হলো
+const mongoose = require('mongoose');
 
-// GET Layout Data (Public API - যে কেউ দেখতে পারবে)
-router.get('/layout-config', async (req, res) => {
-    try {
-        let config = await LayoutConfig.findOne();
-        if (!config) {
-            config = {};
-        }
-        res.json(config);
-    } catch (err) {
-        res.status(500).json({ message: 'Server error', error: err.message });
+const layoutConfigSchema = new mongoose.Schema({
+    announcement: {
+        text: String,
+        link: String
+    },
+    header: {
+        siteTitle: String,
+        logoUrl: String,
+        seoTitle: String,
+        faviconUrl: String,
+        btnText: String,
+        btnLink: String,
+        menus: [
+            {
+                title: String,
+                url: String,
+                isMegaMenu: { type: Boolean, default: false }, 
+                megaMenuId: String, // 🌟 কোন মেগা মেনু সিলেক্ট করা হয়েছে তার ID সেভ করার জন্য
+                subMenus: [
+                    {
+                        title: String,
+                        url: String
+                    }
+                ]
+            }
+        ],
+        megaMenus: { type: Array, default: [] } // 🌟 একাধিক মেগা মেনুর লেআউট সেভ করার জন্য নতুন অ্যারে
+    },
+    footer: {
+        // এখন শুধু dynamic drag & drop কলাম ডাটা এখানে সেভ হয়, পুরনো col1-col4 fields বাদ দেওয়া হয়েছে
+        columns: { type: Array, default: [] }
+    },
+    copyright: {
+        text: String,
+        // 👈 নতুন কপিরাইট লিংকগুলোর (FAQ, Terms) ডাটা সেভ করার জন্য এই ফিল্ডটি যোগ করা হলো
+        links: { type: Array, default: [] } 
     }
+}, { 
+    timestamps: true, 
+    strict: false // 👈 strict: false করে দেওয়া হয়েছে যাতে নতুন কলামের ভেতরের ডাটা স্ট্রাকচার সেভ হতে কোনো সমস্যা না হয়
 });
 
-// POST/SAVE Layout Data (Admin Dashboard - শুধুমাত্র অ্যাডমিন/ওনার সেভ করতে পারবে)
-router.post('/layout-config', verifyToken, authorizeRoles('owner', 'admin'), async (req, res) => {
-    try {
-        const { announcement, header, footer, copyright } = req.body;
-
-        let config = await LayoutConfig.findOne();
-
-        if (config) {
-            config.announcement = announcement;
-            config.header = header;
-            config.footer = footer;
-            config.copyright = copyright;
-            
-            // 🌟 Legacy Data Cleanup: ডাটাবেস থেকে পুরনো megaMenuColumns চিরতরে মুছে ফেলার কমান্ড
-            config.set('header.megaMenuColumns', undefined, { strict: false });
-
-            await config.save();
-        } else {
-            config = new LayoutConfig({ announcement, header, footer, copyright });
-            await config.save();
-        }
-
-        res.json({ message: 'Layout configuration saved successfully!', config });
-    } catch (err) {
-        res.status(500).json({ message: 'Save failed', error: err.message });
-    }
-});
-
-module.exports = router;
+module.exports = mongoose.model('LayoutConfig', layoutConfigSchema);

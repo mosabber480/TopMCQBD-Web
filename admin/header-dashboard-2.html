@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Header Dashboard - TopMCQ</title>
+    
+    <!-- Instant Auth Check (Updated path for Root login.html) -->
+    <script>
+        (function checkAuth() {
+            const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
+            if (!token) {
+                window.location.replace('../login.html');
+            }
+        })();
+    </script>
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- GLOBAL CSS LINK -->
+    <link rel="stylesheet" href="../global/global.css">
+
+    <style>
+        :root {
+            --primary: #007bff;
+            --primary-dark: #0056b3;
+            --secondary: #17a2b8;
+            --warning: #ff9f43;
+            --danger: #dc3545;
+            --dark: #2c3e50;
+            --light: #f4f7f6;
+            --gray-btn: #6c757d;
+            --main-dash-btn: #28a745;
+            --purple-btn: #6f42c1;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--light); color: #333; }
+
+        /* OVERRIDE ALERT BANNER MAX-WIDTH FOR 1300PX CONTAINER */
+        .alert-container-inner {
+            max-width: 1300px !important;
+            width: 100%;
+            padding: 0 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .container { max-width: 1300px; margin: 0 auto; padding: 0 25px 25px 25px; }
+        .section-card { background: white; padding: 25px 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid #e2e8f0; }
+        .section-card.announce-card { border-left: 6px solid var(--warning); }
+        .section-card.header-card { border-left: 6px solid var(--primary); }
+        .section-card.header-btn-card { border-left: 6px solid #e83e8c; }
+        .section-card.menu-card { border-left: 6px solid #20c997; }
+        .section-card.footer-card { border-left: 6px solid var(--secondary); }
+        .section-card.copy-card { border-left: 6px solid var(--purple-btn); }
+
+        .section-title { font-size: 20px; color: var(--dark); margin-bottom: 15px; display: flex; align-items: center; gap: 10px; padding-bottom: 10px; border-bottom: 1px dashed #e2e8f0; }
+
+        /* READ-ONLY CARD STYLE */
+        .read-box { 
+            background: #fdfdfd; 
+            border: 1px solid #ddd; 
+            padding: 20px; 
+            border-radius: 8px; 
+            margin-bottom: 15px; 
+            border-left: 5px solid #20c997; 
+            transition: all 0.2s ease;
+        }
+
+        .card-header-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .read-title { font-size: 16px; font-weight: bold; color: #2c3e50; margin-bottom: 4px; }
+        .read-subtitle { font-size: 14px; color: #555; margin-bottom: 8px; }
+        .read-meta { font-size: 13px; color: #555; margin-bottom: 6px; }
+        .read-preview-text { font-size: 13px; color: #777; margin-bottom: 10px; }
+
+        .form-group { margin-bottom: 12px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; color: #555; font-size: 13px; }
+        input, textarea { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 5px; font-size: 14px; outline: none; background: white; font-family: inherit; }
+        input:focus, textarea:focus { border-color: var(--primary); }
+
+        .row { display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: nowrap; align-items: center; }
+        .card-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+        /* BUTTON STYLES */
+        .btn { padding: 8px 16px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-sm { padding: 6px 12px; font-size: 12px; }
+        .btn-warning { background-color: #ffc107; color: #212529; }
+        .btn-warning:hover { background-color: #e0a800; }
+        .btn-danger { background-color: #dc3545; color: white; }
+        .btn-danger:hover { background-color: #c82333; }
+        .btn-submit { background-color: #28a745; color: white; }
+        .btn-submit:hover { background-color: #218838; }
+        .btn-secondary { background-color: #6c757d; color: white; }
+        .btn-secondary:hover { background-color: #5a6268; }
+        .btn-info { background-color: #17a2b8; color: white; }
+        .btn-info:hover { background-color: #138496; }
+        .btn-add { background: var(--main-dash-btn); color: white; border: none; padding: 10px 18px; border-radius: 5px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; font-size: 14px; }
+
+        .btn-icon-danger {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 38px;
+        }
+        .btn-icon-danger:hover { background-color: #c82333; }
+
+        .sub-menu-list {
+            margin-top: 10px;
+            padding-left: 15px;
+            border-left: 3px solid #17a2b8;
+            margin-bottom: 12px;
+        }
+        .sub-menu-item {
+            background: #ffffff;
+            padding: 8px 12px;
+            border: 1px dashed #cbd5e1;
+            border-radius: 5px;
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: border-top 0.1s ease, border-bottom 0.1s ease;
+        }
+
+        /* DRAG AND DROP & ARROW CONTROLS STYLES */
+        .draggable-box {
+            cursor: move;
+            transition: transform 0.15s ease, opacity 0.15s ease, border-top 0.1s ease, border-bottom 0.1s ease;
+        }
+        .draggable-box.dragging {
+            opacity: 0.4;
+            background: #eef6ff !important;
+        }
+        .drag-handle {
+            cursor: grab;
+            color: #888;
+            margin-right: 8px;
+            font-size: 16px;
+        }
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+
+        /* 2PX DROP INDICATOR LINE STYLES */
+        .drag-over-top {
+            border-top: 2px solid #007bff !important;
+        }
+        .drag-over-bottom {
+            border-bottom: 2px solid #007bff !important;
+        }
+        
+        .arrow-btn-group {
+            display: inline-flex;
+            flex-direction: column;
+            gap: 2px;
+            margin-right: 10px;
+        }
+        .btn-arrow {
+            background: #e2e8f0;
+            border: none;
+            color: #475569;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+            cursor: pointer;
+            line-height: 1;
+            transition: background 0.2s ease;
+        }
+        .btn-arrow:hover {
+            background: #007bff;
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Dynamic Admin Global Navigation Bar Container -->
+    <div id="admin-navbar-container"></div>
+
+    <div class="container">
+        
+        <!-- ১. ANNOUNCEMENT BAR CARD -->
+        <div class="section-card announce-card">
+            <div class="section-title"><i class="fa-solid fa-bullhorn" style="color: var(--warning);"></i> ১. অ্যানাউন্সমেন্ট বার (Notice Bar)</div>
+            <div id="announce-container"></div>
+        </div>
+
+        <!-- ২.১ LOGO, TITLE, & FAVICON CARD -->
+        <div class="section-card header-card">
+            <div class="section-title"><i class="fa-solid fa-id-card" style="color: var(--primary);"></i> ২.১ লোগো, টাইটেল ও ফেভিকন সেটিং</div>
+            <div id="header-brand-container"></div>
+        </div>
+
+        <!-- ২.২ HEADER BUTTON CARD -->
+        <div class="section-card header-btn-card">
+            <div class="section-title"><i class="fa-solid fa-link" style="color: #e83e8c;"></i> ২.২ হেডার বাটন সেটিং</div>
+            <div id="header-btn-container"></div>
+        </div>
+
+        <!-- ২.৩ MENU & SUB-MENU CARD -->
+        <div class="section-card menu-card">
+            <div class="section-title"><i class="fa-solid fa-bars-staggered" style="color: #20c997;"></i> ২.৩ নেভিগেশন মেনু ও সাব-মেনু সেটিং</div>
+            <div id="header-menu-container"></div>
+            <div id="new-menu-form-box"></div>
+            <div class="card-actions" style="margin-top:10px;" id="main-menu-action-bar">
+                <button class="btn btn-add" id="add-menu-btn" onclick="showNewMenuForm()">
+                    <i class="fa-solid fa-plus"></i> মূল মেনু যোগ করুন
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- GLOBAL JS LINKS -->
+    <script src="../global/global.js"></script>
+    <script src="../global/admin-global.js"></script>
+
+    <script>
+        // Use window.LAYOUT_API_URL to prevent redeclaration SyntaxError
+        window.LAYOUT_API_URL = window.LAYOUT_API_URL || 'https://mosabber-quiz-app.onrender.com/api/layout-config';
+
+        let announceInfo = null;
+        let headerInfo = null;
+        let footerInfo = null;
+        let copyrightInfo = null;
+        
+        let isMenuReordered = false;
+        let isFooterReordered = {};
+
+        // GLOBAL LOGOUT FUNCTION
+        async function logout() {
+            const confirmLogout = await showTopAlert('আপনি কি নিশ্চিত যে লগআউট করতে চান?', 'warning', true);
+            if (confirmLogout) {
+                localStorage.removeItem('quiz_token');
+                localStorage.removeItem('quiz_user');
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = '../login.html';
+            }
+        }
+        async function fetchLayoutConfig() {
+            try {
+                const res = await fetch(window.LAYOUT_API_URL);
+                const data = await res.json();
+
+                announceInfo = data.announcement || null;
+                headerInfo = data.header || null;
+                // footer/copyright o memory te rakha hocche jate save korar somoy data na hariye jay
+                footerInfo = data.footer || null;
+                copyrightInfo = data.copyright || null;
+
+                isMenuReordered = false;
+
+                renderAnnounceSection();
+                renderHeaderBrandSection();
+                renderHeaderBtnSection(); // 🌟 New Header Button Section Render Call
+                renderHeaderMenuCards();
+            } catch (err) { 
+                console.error("Layout Config Fetch Error:", err); 
+            }
+        }
+        /* ================= 1. ANNOUNCEMENT BAR SECTION ================= */
+        function renderAnnounceSection() {
+            const container = document.getElementById('announce-container');
+            container.innerHTML = '';
+
+            if (announceInfo && (announceInfo.text || announceInfo.link)) {
+                container.innerHTML = `
+                    <div class="read-box" style="border-left: 5px solid #ff9f43;">
+                        <div class="read-title"><i class="fa-solid fa-bullhorn"></i> ${announceInfo.text || '(কোনো নোটিশ নেই)'}</div>
+                        <div class="read-subtitle"><b>লিংক (URL):</b> ${announceInfo.link || 'নাই'}</div>
+                        <div class="card-actions">
+                            <button class="btn btn-warning" onclick="editAnnounceSection()"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                            <button class="btn btn-danger" onclick="deleteAnnounceSection()"><i class="fa-solid fa-trash"></i> Delete</button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <button class="btn btn-add" onclick="editAnnounceSection(true)">
+                        <i class="fa-solid fa-plus"></i> অ্যানাউন্সমেন্ট যোগ করুন
+                    </button>
+                `;
+            }
+        }
+
+        function editAnnounceSection(isNew = false) {
+            const container = document.getElementById('announce-container');
+            const textVal = announceInfo ? announceInfo.text || '' : '';
+            const linkVal = announceInfo ? announceInfo.link || '' : '';
+
+            container.innerHTML = `
+                <div class="read-box" style="border-left: 5px solid #007bff; background: #ffffff;">
+                    <div style="font-weight: bold; margin-bottom: 12px; color: #007bff;">
+                        ${isNew ? 'নতুন অ্যানাউন্সমেন্ট যোগ করুন' : 'অ্যানাউন্সমেন্ট এডিট করুন'}
+                    </div>
+                    <div class="row">
+                        <div class="form-group" style="flex:2;">
+                            <label>নোটিশ টেক্সট:</label>
+                            <input type="text" id="announce-text-input" value="${textVal.replace(/"/g, '&quot;')}" placeholder="যেমন: নতুন কুইজ ব্যাচ শুরু হয়েছে!">
+                        </div>
+                        <div class="form-group" style="flex:1;">
+                            <label>নোটিশ লিংক (URL):</label>
+                            <input type="text" id="announce-link-input" value="${linkVal.replace(/"/g, '&quot;')}" placeholder="যেমন: #notice">
+                        </div>
+                    </div>
+                    <div class="card-actions" style="margin-top: 10px;">
+                        <button class="btn btn-submit" onclick="saveAnnounceSection()"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
+                        <button class="btn btn-secondary" onclick="renderAnnounceSection()"><i class="fa-solid fa-xmark"></i> Cancel</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function saveAnnounceSection() {
+            announceInfo = {
+                text: document.getElementById('announce-text-input').value,
+                link: document.getElementById('announce-link-input').value
+            };
+            await saveLayoutConfig();
+            renderAnnounceSection();
+        }
+
+        async function deleteAnnounceSection() {
+            if (await showTopAlert("আপনি কি নিশ্চিত যে অ্যানাউন্সমেন্ট মুছে ফেলতে চান?", 'danger', true)) {
+                announceInfo = null;
+                await saveLayoutConfig();
+                renderAnnounceSection();
+            }
+        }
+
+        /* ================= 2.1 HEADER BRANDING (LOGO, TITLE, FAVICON) ================= */
+        function renderHeaderBrandSection() {
+            const container = document.getElementById('header-brand-container');
+            container.innerHTML = '';
+
+            if (headerInfo && (headerInfo.siteTitle || headerInfo.logoUrl || headerInfo.faviconUrl)) {
+                container.innerHTML = `
+                    <div class="read-box" style="border-left: 5px solid #007bff;">
+                        <div class="read-title"><i class="fa-solid fa-pager" style="color: #007bff;"></i> সাইট টাইটেল: ${headerInfo.siteTitle || 'TopMCQ'}</div>
+                        <div class="read-meta" style="margin-top: 5px;"><b>Logo URL:</b> ${headerInfo.logoUrl || 'নাই'} | <b>Favicon URL:</b> ${headerInfo.faviconUrl || 'নাই'}</div>
+                        <div class="card-actions" style="margin-top: 10px;">
+                            <button class="btn btn-warning" onclick="editHeaderBrandSection()"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                            <button class="btn btn-danger" onclick="deleteHeaderBrandSection()"><i class="fa-solid fa-trash"></i> Delete</button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <button class="btn btn-add" onclick="editHeaderBrandSection(true)">
+                        <i class="fa-solid fa-plus"></i> ব্রান্ড তথ্য যোগ করুন
+                    </button>
+                `;
+            }
+        }
+
+        function editHeaderBrandSection(isNew = false) {
+            const container = document.getElementById('header-brand-container');
+            const siteTitle = headerInfo ? headerInfo.siteTitle || '' : 'TopMCQ';
+            const logoUrl = headerInfo ? headerInfo.logoUrl || '' : '';
+            const faviconUrl = headerInfo ? headerInfo.faviconUrl || '' : '';
+
+            container.innerHTML = `
+                <div class="read-box" style="border-left: 5px solid #007bff; background: #ffffff;">
+                    <div style="font-weight: bold; margin-bottom: 12px; color: #007bff;">
+                        ${isNew ? 'নতুন ব্রান্ড তথ্য যোগ করুন' : 'ব্রান্ড সেটিং এডিট করুন'}
+                    </div>
+                    <div class="row">
+                        <div class="form-group" style="flex:1;">
+                            <label>লোগো টাইটেল (Site Title):</label>
+                            <input type="text" id="brand-title-input" value="${siteTitle.replace(/"/g, '&quot;')}" placeholder="যেমন: TopMCQ">
+                        </div>
+                        <div class="form-group" style="flex:1;">
+                            <label>লোগো ইমেজ URL (Logo Image URL):</label>
+                            <input type="text" id="brand-logo-input" value="${logoUrl.replace(/"/g, '&quot;')}" placeholder="যেমন: images/logo.png">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group" style="flex:1;">
+                            <label>ফেভিকন URL (Favicon Icon URL):</label>
+                            <input type="text" id="brand-favicon-input" value="${faviconUrl.replace(/"/g, '&quot;')}" placeholder="যেমন: images/favicon.ico">
+                        </div>
+                        <div class="form-group" style="flex:1;">
+                            &nbsp;
+                        </div>
+                    </div>
+                    <div class="card-actions" style="margin-top: 10px;">
+                        <button class="btn btn-submit" onclick="saveHeaderBrandSection()"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
+                        <button class="btn btn-secondary" onclick="renderHeaderBrandSection()"><i class="fa-solid fa-xmark"></i> Cancel</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function saveHeaderBrandSection() {
+            if (!headerInfo) headerInfo = {};
+            headerInfo.siteTitle = document.getElementById('brand-title-input').value;
+            headerInfo.logoUrl = document.getElementById('brand-logo-input').value;
+            headerInfo.faviconUrl = document.getElementById('brand-favicon-input').value;
+
+            await saveLayoutConfig();
+            renderHeaderBrandSection();
+        }
+
+        async function deleteHeaderBrandSection() {
+            if (await showTopAlert("আপনি কি নিশ্চিত যে ব্রান্ড তথ্য মুছে ফেলতে চান?", 'danger', true)) {
+                if (headerInfo) {
+                    delete headerInfo.siteTitle;
+                    delete headerInfo.logoUrl;
+                    delete headerInfo.faviconUrl;
+                }
+                await saveLayoutConfig();
+                renderHeaderBrandSection();
+            }
+        }
+
+        /* ================= 2.2 HEADER BUTTON SECTION (NEW IDENTICAL STYLE) ================= */
+        function renderHeaderBtnSection() {
+            const container = document.getElementById('header-btn-container');
+            container.innerHTML = '';
+
+            if (headerInfo && (headerInfo.btnText || headerInfo.btnLink)) {
+                container.innerHTML = `
+                    <div class="read-box" style="border-left: 5px solid #e83e8c;">
+                        <div class="read-title"><i class="fa-solid fa-square-arrow-up-right" style="color: #e83e8c;"></i> হেডার বাটন</div>
+                        <div class="read-meta" style="margin-top: 5px;"><b>বাটন টেক্সট:</b> ${headerInfo.btnText || '(নাই)'} | <b>বাটন লিংক (URL):</b> ${headerInfo.btnLink || '(নাই)'}</div>
+                        <div class="card-actions" style="margin-top: 10px;">
+                            <button class="btn btn-warning" onclick="editHeaderBtnSection()"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                            <button class="btn btn-danger" onclick="deleteHeaderBtnSection()"><i class="fa-solid fa-trash"></i> Delete</button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <button class="btn btn-add" style="margin-bottom: 15px;" onclick="editHeaderBtnSection(true)">
+                        <i class="fa-solid fa-plus"></i> হেডার বাটন যোগ করুন
+                    </button>
+                `;
+            }
+        }
+
+        function editHeaderBtnSection(isNew = false) {
+            const container = document.getElementById('header-btn-container');
+            const btnText = headerInfo ? headerInfo.btnText || '' : 'যোগাযোগ';
+            const btnLink = headerInfo ? headerInfo.btnLink || '' : 'contact.html';
+
+            container.innerHTML = `
+                <div class="read-box" style="border-left: 5px solid #007bff; background: #ffffff;">
+                    <div style="font-weight: bold; margin-bottom: 12px; color: #007bff;">
+                        ${isNew ? 'নতুন হেডার বাটন যোগ করুন' : 'হেডার বাটন এডিট করুন'}
+                    </div>
+                    <div class="row">
+                        <div class="form-group" style="flex:1;">
+                            <label>হেডার বাটন টেক্সট:</label>
+                            <input type="text" id="header-btn-text-input" value="${btnText.replace(/"/g, '&quot;')}" placeholder="যেমন: যোগাযোগ">
+                        </div>
+                        <div class="form-group" style="flex:1;">
+                            <label>হেডার বাটন লিংক (URL):</label>
+                            <input type="text" id="header-btn-link-input" value="${btnLink.replace(/"/g, '&quot;')}" placeholder="যেমন: contact.html">
+                        </div>
+                    </div>
+                    <div class="card-actions" style="margin-top: 10px;">
+                        <button class="btn btn-submit" onclick="saveHeaderBtnSection()"><i class="fa-solid fa-floppy-disk"></i> পরিবর্তন সংরক্ষণ করুন</button>
+                        <button class="btn btn-secondary" onclick="renderHeaderBtnSection()"><i class="fa-solid fa-xmark"></i> বাতিল করুন</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function saveHeaderBtnSection() {
+            if (!headerInfo) headerInfo = {};
+            headerInfo.btnText = document.getElementById('header-btn-text-input').value;
+            headerInfo.btnLink = document.getElementById('header-btn-link-input').value;
+
+            await saveLayoutConfig();
+            renderHeaderBtnSection();
+        }
+
+        async function deleteHeaderBtnSection() {
+            if (await showTopAlert("আপনি কি নিশ্চিত যে হেডার বাটন তথ্য মুছে ফেলতে চান?", 'danger', true)) {
+                if (headerInfo) {
+                    delete headerInfo.btnText;
+                    delete headerInfo.btnLink;
+                }
+                await saveLayoutConfig();
+                renderHeaderBtnSection();
+            }
+        }
+
+        /* ================= 2.3 HEADER MENU & SUB-MENU SECTION (WITH MANUAL SAVE & ARROW CONTROLS) ================= */
+        function renderHeaderMenuCards() {
+            const container = document.getElementById('header-menu-container');
+            document.getElementById('new-menu-form-box').innerHTML = '';
+            
+            updateMenuActionBar();
+
+            container.innerHTML = '';
+
+            const menus = (headerInfo && headerInfo.menus) ? headerInfo.menus : [];
+
+            if (menus.length === 0) {
+                container.innerHTML = `<p style="color:#777; margin-bottom:12px;">কোনো নেভিগেশন মেনু তৈরি করা হয়নি।</p>`;
+                return;
+            }
+
+            menus.forEach((m, mIdx) => {
+                const card = document.createElement('div');
+                card.className = 'read-box draggable-box main-menu-drag-item';
+                card.draggable = true;
+                card.dataset.index = mIdx;
+                card.id = `menu-card-${mIdx}`;
+
+                let subMenusHtml = '';
+                if (m.subMenus && m.subMenus.length > 0) {
+                    subMenusHtml = `
+                        <div class="sub-menu-list sub-menu-drag-container" data-parent-index="${mIdx}">
+                            <div style="font-size:12px; font-weight:bold; color:#555; margin-bottom:5px;">সাব-মেনু সমূহ:</div>
+                            ${m.subMenus.map((sm, smIdx) => `
+                                <div class="sub-menu-item draggable-box sub-menu-drag-item" draggable="true" data-parent-index="${mIdx}" data-index="${smIdx}">
+                                    <span style="font-size:13px; color:#333; display:flex; align-items:center;">
+                                        <i class="fa-solid fa-grip-vertical drag-handle" title="মাউস চেপে পজিশন পরিবর্তন করুন"></i>
+                                        <div class="arrow-btn-group">
+                                            <button type="button" class="btn-arrow" onclick="moveSubMenuPosition(${mIdx}, ${smIdx}, 'up')" title="উপরে তুলুন">▲</button>
+                                            <button type="button" class="btn-arrow" onclick="moveSubMenuPosition(${mIdx}, ${smIdx}, 'down')" title="নিচে নামান">▼</button>
+                                        </div>
+                                        <b>${sm.title}</b> <small style="color:#777; margin-left:5px;">(${sm.url || '#'})</small>
+                                    </span>
+                                    <div>
+                                        <button class="btn btn-warning btn-sm" onclick="editSubMenuInline(${mIdx}, ${smIdx})"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                                        <button class="btn btn-danger btn-sm" onclick="deleteSubMenu(${mIdx}, ${smIdx})"><i class="fa-solid fa-trash"></i> Delete</button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                }
+
+                card.innerHTML = `
+                    <div class="card-header-flex">
+                        <div>
+                            <div class="read-title" style="display:flex; align-items:center;">
+                                <i class="fa-solid fa-grip-vertical drag-handle" title="মাউস চেপে পজিশন পরিবর্তন করুন"></i>
+                                <div class="arrow-btn-group">
+                                    <button type="button" class="btn-arrow" onclick="moveMainMenuPosition(${mIdx}, 'up')" title="উপরে তুলুন">▲</button>
+                                    <button type="button" class="btn-arrow" onclick="moveMainMenuPosition(${mIdx}, 'down')" title="নিচে নামান">▼</button>
+                                </div>
+                                <i class="fa-solid fa-bars" style="color:#20c997; margin-right:6px;"></i> মেনু #${mIdx + 1}: ${m.title || '(নাম নেই)'}
+                            </div>
+                            <div class="read-subtitle" style="margin-left: 45px;"><b>URL:</b> ${m.url || '#'}</div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn btn-warning" onclick="editMainMenuInline(${mIdx})"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                            <button class="btn btn-danger" onclick="deleteMainMenu(${mIdx})"><i class="fa-solid fa-trash"></i> Delete</button>
+                        </div>
+                    </div>
+                    ${subMenusHtml}
+                    <div id="add-submenu-box-${mIdx}"></div>
+                    <div class="card-actions" style="margin-top: 10px;" id="submenu-action-bar-${mIdx}">
+                        <button class="btn btn-info" onclick="showAddSubMenuForm(${mIdx})"><i class="fa-solid fa-plus"></i> সাব-মেনু যোগ করুন</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+
+            initMenuDragAndDrop();
+        }
+
+        function updateMenuActionBar() {
+            const mainActionBar = document.getElementById('main-menu-action-bar');
+            let saveCancelBtns = '';
+            
+            if (isMenuReordered) {
+                saveCancelBtns = `
+                    <button class="btn btn-submit" onclick="saveReorderedMenu()"><i class="fa-solid fa-floppy-disk"></i> Save Menu</button>
+                    <button class="btn btn-secondary" onclick="cancelMenuReorder()"><i class="fa-solid fa-xmark"></i> Cancel</button>
+                `;
+            }
+
+            mainActionBar.innerHTML = `
+                <button class="btn btn-add" id="add-menu-btn" onclick="showNewMenuForm()">
+                    <i class="fa-solid fa-plus"></i> মূল মেনু যোগ করুন
+                </button>
+                ${saveCancelBtns}
+            `;
+        }
+
+        /* --- ARROW POSITION CONTROLS --- */
+        function moveMainMenuPosition(mIdx, direction) {
+            const list = headerInfo.menus;
+            if (direction === 'up' && mIdx > 0) {
+                const item = list.splice(mIdx, 1)[0];
+                list.splice(mIdx - 1, 0, item);
+                isMenuReordered = true;
+                renderHeaderMenuCards();
+            } else if (direction === 'down' && mIdx < list.length - 1) {
+                const item = list.splice(mIdx, 1)[0];
+                list.splice(mIdx + 1, 0, item);
+                isMenuReordered = true;
+                renderHeaderMenuCards();
+            }
+        }
+
+        function moveSubMenuPosition(mIdx, smIdx, direction) {
+            const list = headerInfo.menus[mIdx].subMenus;
+            if (direction === 'up' && smIdx > 0) {
+                const item = list.splice(smIdx, 1)[0];
+                list.splice(smIdx - 1, 0, item);
+                isMenuReordered = true;
+                renderHeaderMenuCards();
+            } else if (direction === 'down' && smIdx < list.length - 1) {
+                const item = list.splice(smIdx, 1)[0];
+                list.splice(smIdx + 1, 0, item);
+                isMenuReordered = true;
+                renderHeaderMenuCards();
+            }
+        }
+
+        /* --- DRAG AND DROP LOGIC (WITH 2PX LINE INDICATOR) --- */
+        function initMenuDragAndDrop() {
+            const container = document.getElementById('header-menu-container');
+
+            const clearIndicator = (el) => {
+                el.classList.remove('drag-over-top', 'drag-over-bottom');
+            };
+
+            // MAIN MENU DRAG
+            const mainItems = container.querySelectorAll('.main-menu-drag-item');
+            let draggedMainIdx = null;
+
+            mainItems.forEach(item => {
+                item.addEventListener('dragstart', (e) => {
+                    if (e.target.closest('.sub-menu-drag-item')) return;
+                    draggedMainIdx = parseInt(item.dataset.index);
+                    item.classList.add('dragging');
+                    e.dataTransfer.effectAllowed = 'move';
+                });
+
+                item.addEventListener('dragend', () => {
+                    item.classList.remove('dragging');
+                    clearIndicator(item);
+                });
+
+                item.addEventListener('dragover', (e) => {
+                    if (e.target.closest('.sub-menu-drag-item')) return;
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+
+                    const rect = item.getBoundingClientRect();
+                    const offset = e.clientY - rect.top;
+                    if (offset < rect.height / 2) {
+                        item.classList.add('drag-over-top');
+                        item.classList.remove('drag-over-bottom');
+                    } else {
+                        item.classList.add('drag-over-bottom');
+                        item.classList.remove('drag-over-top');
+                    }
+                });
+
+                item.addEventListener('dragleave', () => clearIndicator(item));
+
+                item.addEventListener('drop', (e) => {
+                    if (e.target.closest('.sub-menu-drag-item')) return;
+                    e.preventDefault();
+                    e.stopPropagation();
+                    clearIndicator(item);
+
+                    let targetMainIdx = parseInt(item.dataset.index);
+                    const rect = item.getBoundingClientRect();
+                    const offset = e.clientY - rect.top;
+                    if (offset >= rect.height / 2 && targetMainIdx < draggedMainIdx) {
+                        targetMainIdx++;
+                    }
+
+                    if (draggedMainIdx !== null && draggedMainIdx !== targetMainIdx) {
+                        const movedItem = headerInfo.menus.splice(draggedMainIdx, 1)[0];
+                        headerInfo.menus.splice(targetMainIdx, 0, movedItem);
+                        isMenuReordered = true;
+                        renderHeaderMenuCards();
+                    }
+                });
+            });
+
+            // SUB-MENU DRAG
+            const subContainers = container.querySelectorAll('.sub-menu-drag-container');
+            subContainers.forEach(subContainer => {
+                const subItems = subContainer.querySelectorAll('.sub-menu-drag-item');
+                let draggedSubIdx = null;
+                let parentIdx = null;
+
+                subItems.forEach(subItem => {
+                    subItem.addEventListener('dragstart', (e) => {
+                        e.stopPropagation();
+                        draggedSubIdx = parseInt(subItem.dataset.index);
+                        parentIdx = parseInt(subItem.dataset.parentIndex);
+                        subItem.classList.add('dragging');
+                        e.dataTransfer.effectAllowed = 'move';
+                    });
+
+                    subItem.addEventListener('dragend', (e) => {
+                        e.stopPropagation();
+                        subItem.classList.remove('dragging');
+                        clearIndicator(subItem);
+                    });
+
+                    subItem.addEventListener('dragover', (e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        e.dataTransfer.dropEffect = 'move';
+
+                        const rect = subItem.getBoundingClientRect();
+                        const offset = e.clientY - rect.top;
+                        if (offset < rect.height / 2) {
+                            subItem.classList.add('drag-over-top');
+                            subItem.classList.remove('drag-over-bottom');
+                        } else {
+                            subItem.classList.add('drag-over-bottom');
+                            subItem.classList.remove('drag-over-top');
+                        }
+                    });
+
+                    subItem.addEventListener('dragleave', (e) => {
+                        e.stopPropagation();
+                        clearIndicator(subItem);
+                    });
+
+                    subItem.addEventListener('drop', (e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        clearIndicator(subItem);
+
+                        let targetSubIdx = parseInt(subItem.dataset.index);
+                        const targetParentIdx = parseInt(subItem.dataset.parentIndex);
+
+                        const rect = subItem.getBoundingClientRect();
+                        const offset = e.clientY - rect.top;
+                        if (offset >= rect.height / 2 && targetSubIdx < draggedSubIdx) {
+                            targetSubIdx++;
+                        }
+
+                        if (parentIdx === targetParentIdx && draggedSubIdx !== null && draggedSubIdx !== targetSubIdx) {
+                            const subList = headerInfo.menus[parentIdx].subMenus;
+                            const movedSub = subList.splice(draggedSubIdx, 1)[0];
+                            subList.splice(targetSubIdx, 0, movedSub);
+                            isMenuReordered = true;
+                            renderHeaderMenuCards();
+                        }
+                    });
+                });
+            });
+        }
+
+        async function saveReorderedMenu() {
+            await saveLayoutConfig();
+            isMenuReordered = false;
+            renderHeaderMenuCards();
+        }
+
+        function cancelMenuReorder() {
+            fetchLayoutConfig();
+        }
+
+        function editMainMenuInline(mIdx) {
+            const m = headerInfo.menus[mIdx];
+            const card = document.getElementById(`menu-card-${mIdx}`);
+            card.draggable = false;
+            card.style.borderLeft = "5px solid #007bff";
+            card.style.background = "#ffffff";
+
+            card.innerHTML = `
+                <div style="font-weight: bold; margin-bottom: 10px; color: #007bff;">মেনু #${mIdx + 1} এডিট করুন</div>
+                <div class="row">
+                    <div class="form-group" style="flex:1;">
+                        <label>মেনু টাইটেল:</label>
+                        <input type="text" id="edit-menu-title-${mIdx}" value="${(m.title || '').replace(/"/g, '&quot;')}">
+                    </div>
+                    <div class="form-group" style="flex:1;">
+                        <label>মেনু URL:</label>
+                        <input type="text" id="edit-menu-url-${mIdx}" value="${(m.url || '').replace(/"/g, '&quot;')}">
+                    </div>
+                </div>
+                <div class="card-actions">
+                    <button class="btn btn-submit" onclick="saveMainMenuInline(${mIdx})"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
+                    <button class="btn btn-secondary" onclick="renderHeaderMenuCards()"><i class="fa-solid fa-xmark"></i> Cancel</button>
+                </div>
+            `;
+        }
+
+        async function saveMainMenuInline(mIdx) {
+            headerInfo.menus[mIdx].title = document.getElementById(`edit-menu-title-${mIdx}`).value;
+            headerInfo.menus[mIdx].url = document.getElementById(`edit-menu-url-${mIdx}`).value;
+            await saveLayoutConfig();
+            renderHeaderMenuCards();
+        }
+
+        async function deleteMainMenu(mIdx) {
+            if (await showTopAlert("আপনি কি নিশ্চিত যে এই মেনুটি মুছে ফেলতে চান?", 'danger', true)) {
+                headerInfo.menus.splice(mIdx, 1);
+                await saveLayoutConfig();
+                renderHeaderMenuCards();
+            }
+        }
+
+        function showAddSubMenuForm(mIdx) {
+            const container = document.getElementById(`add-submenu-box-${mIdx}`);
+            const actionBar = document.getElementById(`submenu-action-bar-${mIdx}`);
+            if (!container) return;
+
+            let formWrapper = container.querySelector('.new-submenu-form-wrapper');
+
+            if (!formWrapper) {
+                formWrapper = document.createElement('div');
+                formWrapper.className = 'new-submenu-form-wrapper';
+                formWrapper.style.cssText = "margin-top:10px; background:#f8fafc; padding:12px; border-radius:6px; border:1px solid #cbd5e1;";
+                formWrapper.innerHTML = `
+                    <div style="font-weight:bold; font-size:13px; color:#17a2b8; margin-bottom:10px;">নতুন সাব-মেনু যোগ করুন:</div>
+                    <div class="new-submenu-rows-container"></div>
+                `;
+                container.appendChild(formWrapper);
+
+                if (actionBar && !actionBar.querySelector('.btn-submit')) {
+                    actionBar.innerHTML += `
+                        <button class="btn btn-submit" onclick="saveAllNewSubMenus(${mIdx})"><i class="fa-solid fa-floppy-disk"></i> Save Sub-Menu</button>
+                        <button class="btn btn-secondary" onclick="renderHeaderMenuCards()"><i class="fa-solid fa-xmark"></i> Cancel</button>
+                    `;
+                }
+            }
+
+            const rowsContainer = formWrapper.querySelector('.new-submenu-rows-container');
+            const rowDiv = document.createElement('div');
+            rowDiv.className = 'row new-submenu-row';
+            rowDiv.style.cssText = 'margin-bottom:8px; display:flex; gap:10px; align-items:center;';
+            rowDiv.innerHTML = `
+                <input type="text" class="new-sm-title" placeholder="সাব-মেনু টাইটেল" style="flex:1;">
+                <input type="text" class="new-sm-url" placeholder="সাব-মেনু URL" style="flex:1;">
+                <button type="button" class="btn-icon-danger" onclick="removeNewSubMenuRow(this, ${mIdx})" title="মুছে ফেলুন">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            `;
+            rowsContainer.appendChild(rowDiv);
+        }
+
+        function removeNewSubMenuRow(btn, mIdx) {
+            const row = btn.closest('.new-submenu-row');
+            if (row) {
+                const rowsContainer = row.parentElement;
+                row.remove();
+                if (rowsContainer && rowsContainer.children.length === 0) {
+                    renderHeaderMenuCards();
+                }
+            }
+        }
+
+        async function saveAllNewSubMenus(mIdx) {
+            const container = document.getElementById(`add-submenu-box-${mIdx}`);
+            if (!container) return;
+
+            const rows = container.querySelectorAll('.new-submenu-row');
+            if (rows.length === 0) {
+                showTopAlert("কমপক্ষে একটি সাব-মেনু পূরণ করুন!", "warning");
+                return;
+            }
+
+            if (!headerInfo.menus[mIdx].subMenus) {
+                headerInfo.menus[mIdx].subMenus = [];
+            }
+
+            let addedCount = 0;
+            rows.forEach(row => {
+                const title = row.querySelector('.new-sm-title')?.value.trim();
+                const url = row.querySelector('.new-sm-url')?.value.trim();
+
+                if (title) {
+                    headerInfo.menus[mIdx].subMenus.push({ title, url: url || '#' });
+                    addedCount++;
+                }
+            });
+
+            if (addedCount === 0) {
+                showTopAlert("সাব-মেনু টাইটেল প্রদান করুন!", "warning");
+                return;
+            }
+
+            await saveLayoutConfig();
+            renderHeaderMenuCards();
+        }
+
+        function editSubMenuInline(mIdx, smIdx) {
+            const sm = headerInfo.menus[mIdx].subMenus[smIdx];
+            renderHeaderMenuCards(); 
+
+            const card = document.getElementById(`menu-card-${mIdx}`);
+            const subItems = card.querySelectorAll('.sub-menu-item');
+            const targetItem = subItems[smIdx];
+
+            if (targetItem) {
+                targetItem.draggable = false;
+                targetItem.style.display = "block";
+                targetItem.innerHTML = `
+                    <div class="row" style="margin-bottom:5px;">
+                        <input type="text" id="edit-sm-title-${mIdx}-${smIdx}" value="${(sm.title || '').replace(/"/g, '&quot;')}" style="flex:1;">
+                        <input type="text" id="edit-sm-url-${mIdx}-${smIdx}" value="${(sm.url || '').replace(/"/g, '&quot;')}" style="flex:1;">
+                    </div>
+                    <div class="card-actions" style="margin-top:5px;">
+                        <button class="btn btn-submit btn-sm" onclick="saveSubMenuInline(${mIdx}, ${smIdx})"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+                        <button class="btn btn-secondary btn-sm" onclick="renderHeaderMenuCards()"><i class="fa-solid fa-xmark"></i> Cancel</button>
+                    </div>
+                `;
+            }
+        }
+
+        async function saveSubMenuInline(mIdx, smIdx) {
+            headerInfo.menus[mIdx].subMenus[smIdx].title = document.getElementById(`edit-sm-title-${mIdx}-${smIdx}`).value;
+            headerInfo.menus[mIdx].subMenus[smIdx].url = document.getElementById(`edit-sm-url-${mIdx}-${smIdx}`).value;
+            await saveLayoutConfig();
+            renderHeaderMenuCards();
+        }
+
+        async function deleteSubMenu(mIdx, smIdx) {
+            if (await showTopAlert("আপনি কি নিশ্চিত যে এই সাব-মেনুটি মুছে ফেলতে চান?", 'danger', true)) {
+                headerInfo.menus[mIdx].subMenus.splice(smIdx, 1);
+                await saveLayoutConfig();
+                renderHeaderMenuCards();
+            }
+        }
+
+        function showNewMenuForm() {
+            const formBox = document.getElementById('new-menu-form-box');
+            const mainActionBar = document.getElementById('main-menu-action-bar');
+
+            let formWrapper = formBox.querySelector('.new-main-menu-wrapper');
+
+            if (!formWrapper) {
+                formWrapper = document.createElement('div');
+                formWrapper.className = 'new-main-menu-wrapper read-box';
+                formWrapper.style.cssText = "border-left: 5px solid #28a745; background: #ffffff; margin-top:15px;";
+                formWrapper.innerHTML = `
+                    <div style="font-weight: bold; margin-bottom: 12px; color: #28a745;">নতুন মূল মেনু যোগ করুন</div>
+                    <div class="new-main-menu-rows-container"></div>
+                `;
+                formBox.appendChild(formWrapper);
+
+                if (mainActionBar && !mainActionBar.querySelector('.btn-submit')) {
+                    mainActionBar.innerHTML += `
+                        <button class="btn btn-submit" onclick="saveAllNewMainMenus()"><i class="fa-solid fa-floppy-disk"></i> Save Menu</button>
+                        <button class="btn btn-secondary" onclick="renderHeaderMenuCards()"><i class="fa-solid fa-xmark"></i> Cancel</button>
+                    `;
+                }
+            }
+
+            const rowsContainer = formWrapper.querySelector('.new-main-menu-rows-container');
+            const rowDiv = document.createElement('div');
+            rowDiv.className = 'row new-main-menu-row';
+            rowDiv.style.cssText = 'margin-bottom:8px; display:flex; gap:10px; align-items:center;';
+            rowDiv.innerHTML = `
+                <input type="text" class="new-mm-title" placeholder="যেমন: সাধারণ জ্ঞান" style="flex:1;">
+                <input type="text" class="new-mm-url" placeholder="যেমন: general-knowledge.html" style="flex:1;">
+                <button type="button" class="btn-icon-danger" onclick="removeNewMainMenuRow(this)" title="মুছে ফেলুন">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            `;
+            rowsContainer.appendChild(rowDiv);
+        }
+
+        function removeNewMainMenuRow(btn) {
+            const row = btn.closest('.new-main-menu-row');
+            if (row) {
+                const rowsContainer = row.parentElement;
+                row.remove();
+                if (rowsContainer && rowsContainer.children.length === 0) {
+                    renderHeaderMenuCards();
+                }
+            }
+        }
+
+        async function saveAllNewMainMenus() {
+            const formBox = document.getElementById('new-menu-form-box');
+            const rows = formBox.querySelectorAll('.new-main-menu-row');
+
+            if (rows.length === 0) {
+                showTopAlert("কমপক্ষে একটি মূল মেনু পূরণ করুন!", "warning");
+                return;
+            }
+
+            if (!headerInfo) headerInfo = {};
+            if (!headerInfo.menus) headerInfo.menus = [];
+
+            let addedCount = 0;
+            rows.forEach(row => {
+                const title = row.querySelector('.new-mm-title')?.value.trim();
+                const url = row.querySelector('.new-mm-url')?.value.trim();
+
+                if (title) {
+                    headerInfo.menus.push({ title, url: url || '#', subMenus: [] });
+                    addedCount++;
+                }
+            });
+
+            if (addedCount === 0) {
+                showTopAlert("মেনু টাইটেল প্রদান করুন!", "warning");
+                return;
+            }
+
+            await saveLayoutConfig();
+            renderHeaderMenuCards();
+        }
+
+        /* ================= SAVE ALL LAYOUT CONFIG TO BACKEND ================= */
+        async function saveLayoutConfig() {
+            const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
+            if (!token) { 
+                showTopAlert('অনুগ্রহ করে লগইন করুন!', 'warning'); 
+                return; 
+            }
+
+            try {
+                const res = await fetch(window.LAYOUT_API_URL, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json', 
+                        'Authorization': `Bearer ${token}` 
+                    },
+                    body: JSON.stringify({ 
+                        announcement: announceInfo,
+                        header: headerInfo,
+                        footer: footerInfo,
+                        copyright: copyrightInfo
+                    })
+                });
+
+                const result = await res.json();
+
+                if (res.ok) {
+                    showTopAlert('✅ সফলভাবে সেভ হয়েছে!', 'success');
+                    fetchLayoutConfig();
+                } else { 
+                    showTopAlert('❌ ' + (result.message || 'সেভ করতে ব্যর্থ হয়েছে!'), 'danger'); 
+                }
+            } catch (err) { 
+                console.error("Layout Save error:", err);
+                showTopAlert('সার্ভারে যোগাযোগ করতে সমস্যা হয়েছে!', 'danger'); 
+            }
+        }
+
+        // DOMContentLoaded Event Listener to ensure initial data loads properly
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchLayoutConfig();
+        });
+    </script>
+</body>
+</html>

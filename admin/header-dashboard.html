@@ -78,8 +78,6 @@
         .btn-info { background-color: #17a2b8; color: white; }
         .btn-info:hover { background-color: #138496; }
         .btn-add { background: var(--main-dash-btn); color: white; border: none; padding: 10px 18px; border-radius: 5px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; font-size: 14px; }
-        .btn-purple { background-color: #6f42c1; color: white; border: none; transition: background 0.2s; }
-        .btn-purple:hover { background-color: #59339d; color: white; }
 
         .btn-icon-danger { background-color: #dc3545; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-size: 13px; transition: background 0.2s ease; display: inline-flex; align-items: center; justify-content: center; height: 38px; }
         .btn-icon-danger:hover { background-color: #c82333; }
@@ -154,6 +152,8 @@
         let headerInfo = null;
         let footerInfo = null;
         let copyrightInfo = null;
+        
+        let isMenuReordered = false;
 
         async function logout() {
             const confirmLogout = await showTopAlert('আপনি কি নিশ্চিত যে লগআউট করতে চান?', 'warning', true);
@@ -176,14 +176,10 @@
                 footerInfo = data.footer || null;
                 copyrightInfo = data.copyright || null;
 
-                // 🌟 CLEANUP LEGACY DATA (Removing old megaMenuColumns if it exists)
-                if (headerInfo.hasOwnProperty('megaMenuColumns')) {
-                    delete headerInfo.megaMenuColumns;
-                }
-
-                // Ensure arrays exist
                 if (!headerInfo.menus) headerInfo.menus = [];
                 if (!headerInfo.megaMenus) headerInfo.megaMenus = [];
+
+                isMenuReordered = false;
 
                 renderAnnounceSection();
                 renderHeaderBrandSection();
@@ -378,7 +374,7 @@
                                     </div>
                                     <div class="card-actions">
                                         <button class="btn btn-warning btn-sm" onclick="renameMegaColTitleInline(${mIdx}, ${cIdx})"><i class="fa-solid fa-pen-to-square"></i> Edit Title</button>
-                                        <button class="btn btn-danger btn-sm" onclick="deleteMegaCol(${mIdx}, ${cIdx})"><i class="fa-solid fa-trash"></i> Delete Column </button>
+                                        <button class="btn btn-danger btn-sm" onclick="deleteMegaCol(${mIdx}, ${cIdx})"><i class="fa-solid fa-trash"></i> Delete Col</button>
                                     </div>
                                 </div>
                                 <div style="margin-left:30px; padding-left:10px; margin-bottom:10px; margin-top:5px;">${linksListHtml}</div>
@@ -554,7 +550,6 @@
             col.title = document.getElementById(`edit-mega-info-title-${mIdx}-${cIdx}`).value;
             col.text = document.getElementById(`edit-mega-info-text-${mIdx}-${cIdx}`).value;
             
-            // Delete old legacy fields if any exists in db
             delete col.fb; delete col.yt; delete col.wa; delete col.tw; delete col.tg; delete col.ln;
 
             await saveLayoutConfig();
@@ -658,6 +653,7 @@
                 let actionButtonsHtml = '';
 
                 if (hasMega) {
+                    // Scenario A: Mega Menu Connected
                     const linkedMega = (headerInfo.megaMenus || []).find(x => x.id === m.megaMenuId);
                     const megaName = linkedMega ? linkedMega.title : '<span style="color:red;">(মেগা মেনু পাওয়া যায়নি)</span>';
                     
@@ -669,8 +665,9 @@
                                 <button class="btn btn-danger btn-sm" onclick="removeMegaMenuConnection(${mIdx})"><i class="fa-solid fa-trash"></i> কানেকশন মুছুন</button>
                             </div>
                         </div>`;
-                    actionButtonsHtml = '';
+                    actionButtonsHtml = ''; // Hide both add buttons when connected
                 } else if (hasSub) {
+                    // Scenario B: Has Sub-Menus
                     contentHtml = `
                         <div class="sub-menu-list">
                             <div style="font-size:12px; font-weight:bold; color:#555; margin-bottom:5px;">সাধারণ সাব-মেনু সমূহ:</div>
@@ -690,12 +687,14 @@
                                 </div>
                             `).join('')}
                         </div>`;
+                    // Only sub-menu button is shown (Mega Menu button removed)
                     actionButtonsHtml = `<button class="btn btn-info btn-sm" onclick="showSubMenuAddForm(${mIdx})"><i class="fa-solid fa-plus"></i> সাব-মেনু যোগ করুন</button>`;
                 } else {
+                    // Scenario C: Empty (Neither Sub-Menu nor Mega Menu -> Show BOTH Buttons)
                     contentHtml = `<p style="color:#888; font-size:13px; font-style:italic; margin-bottom:10px;">কোনো সাব-মেনু বা মেগা মেনু যুক্ত নেই।</p>`;
                     actionButtonsHtml = `
                         <button class="btn btn-info btn-sm" onclick="showSubMenuAddForm(${mIdx})"><i class="fa-solid fa-plus"></i> সাব-মেনু যোগ করুন</button>
-                        <button class="btn btn-purple btn-sm" onclick="showConnectMegaMenuForm(${mIdx})"><i class="fa-solid fa-layer-group"></i> মেগা মেনু কানেক্ট করুন</button>
+                        <button class="btn btn-purple btn-sm" style="background:#6f42c1; color:white;" onclick="showConnectMegaMenuForm(${mIdx})"><i class="fa-solid fa-layer-group"></i> মেগা মেনু কানেক্ট করুন</button>
                     `;
                 }
 
@@ -782,7 +781,7 @@
             if (selectedId) {
                 headerInfo.menus[mIdx].isMegaMenu = true;
                 headerInfo.menus[mIdx].megaMenuId = selectedId;
-                headerInfo.menus[mIdx].subMenus = []; 
+                headerInfo.menus[mIdx].subMenus = []; // Clear sub-menus when mega-menu is selected
                 await saveLayoutConfig();
                 renderHeaderMenuCards();
             }
@@ -793,7 +792,7 @@
                 headerInfo.menus[mIdx].isMegaMenu = false;
                 headerInfo.menus[mIdx].megaMenuId = null;
                 await saveLayoutConfig();
-                renderHeaderMenuCards(); 
+                renderHeaderMenuCards(); // Resets UI and shows BOTH buttons
             }
         }
 
@@ -896,7 +895,6 @@
                     <button class="btn btn-secondary btn-sm" onclick="renderHeaderMenuCards()"><i class="fa-solid fa-xmark"></i> Cancel</button>
                 </div>
             `;
-            document.getElementById(`menu-action-bar-${mIdx}`).style.display = 'none';
         }
         
         async function saveNewSubMenu(mIdx) {
@@ -914,7 +912,7 @@
         async function deleteSubMenu(mIdx, smIdx) { 
             headerInfo.menus[mIdx].subMenus.splice(smIdx, 1); 
             await saveLayoutConfig(); 
-            renderHeaderMenuCards(); 
+            renderHeaderMenuCards(); // Automatically re-evaluates and shows BOTH buttons if last sub-menu is deleted!
         }
 
         function editSubMenuInline(mIdx, smIdx) {
@@ -944,6 +942,7 @@
             await saveLayoutConfig(); 
             renderHeaderMenuCards(); 
         }
+
 
         /* ================= SAVE ALL ================= */
         async function saveLayoutConfig() {

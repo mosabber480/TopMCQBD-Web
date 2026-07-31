@@ -442,12 +442,7 @@ body {
         gap: 30px; align-items: start;
         max-width: 1300px; margin: 0 auto; /* To align with header max-width */
     }
-    
-    /* 🌟 Updated Hover Logic Here */
-    .nav-item.has-mega-menu:hover > .mega-menu,
-    .mega-menu:hover { 
-        display: block !important; 
-    }
+    .nav-item.has-mega-menu:hover > .mega-menu { display: block !important; }
     
     .mega-col-title {
         font-size: 16px; font-weight: bold; color: var(--primary-dark);
