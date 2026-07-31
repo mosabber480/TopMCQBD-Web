@@ -170,7 +170,7 @@ function applyLayoutToDOM(data) {
         `;
     }
 
-    // C. Header & Navigation
+    // C. Header & Navigation (🌟 Updated for Multiple Mega Menus via megaMenuId)
     const headerContainer = document.getElementById('global-header');
     if (headerContainer && data.header) {
         const h = data.header;
@@ -187,18 +187,54 @@ function applyLayoutToDOM(data) {
         let navItemsHTML = '';
         if (h.menus && h.menus.length > 0) {
             navItemsHTML = h.menus.map(item => {
-                const hasSub = item.subMenus && item.subMenus.length > 0;
+                const isMega = item.isMegaMenu === true; 
+                const hasRegularSub = !isMega && item.subMenus && item.subMenus.length > 0;
                 let subMenuHTML = '';
-                if (hasSub) {
+
+                // 🌟 Multiple Mega Menu Mapping Logic
+                if (isMega && item.megaMenuId) {
+                    const targetMega = (h.megaMenus || []).find(m => m.id === item.megaMenuId);
+                    if (targetMega && targetMega.columns && targetMega.columns.length > 0) {
+                        const colsHtml = targetMega.columns.map(col => {
+                            if (col.type === 'info') {
+                                return `
+                                    <div class="mega-col mega-info-col">
+                                        <h4 class="mega-col-title">${col.title || 'তথ্য'}</h4>
+                                        <p style="font-size:14px; color:#555; margin-bottom:15px; line-height:1.6;">${col.text || ''}</p>
+                                        <div class="mega-social">
+                                            ${col.fb ? `<a href="${formatURL(col.fb)}" target="_blank" class="fb"><i class="fa-brands fa-facebook-f"></i></a>` : ''}
+                                            ${col.yt ? `<a href="${formatURL(col.yt)}" target="_blank" class="yt"><i class="fa-brands fa-youtube"></i></a>` : ''}
+                                            ${col.wa ? `<a href="${formatURL(col.wa)}" target="_blank" class="wa"><i class="fa-brands fa-whatsapp"></i></a>` : ''}
+                                            ${col.tw ? `<a href="${formatURL(col.tw)}" target="_blank" class="tw"><i class="fa-brands fa-x-twitter"></i></a>` : ''}
+                                            ${col.tg ? `<a href="${formatURL(col.tg)}" target="_blank" class="tg"><i class="fa-brands fa-telegram"></i></a>` : ''}
+                                            ${col.ln ? `<a href="${formatURL(col.ln)}" target="_blank" class="ln"><i class="fa-brands fa-linkedin-in"></i></a>` : ''}
+                                        </div>
+                                    </div>
+                                `;
+                            } else {
+                                return `
+                                    <div class="mega-col mega-links-col">
+                                        <h4 class="mega-col-title">${col.title || 'লিংক'}</h4>
+                                        <div class="mega-col-links">
+                                            ${(col.links || []).map(lk => `<a href="${formatURL(lk.url)}"><i class="fa-solid fa-angle-right" style="font-size:10px; margin-right:5px; color:var(--primary);"></i> ${lk.title}</a>`).join('')}
+                                        </div>
+                                    </div>
+                                `;
+                            }
+                        }).join('');
+                        subMenuHTML = `<div class="mega-menu"><div class="mega-grid-container">${colsHtml}</div></div>`;
+                    }
+                } else if (hasRegularSub) {
                     subMenuHTML = `
                         <ul class="dropdown-menu">
                             ${item.subMenus.map(sub => `<li><a href="${formatURL(sub.url)}">${sub.title}</a></li>`).join('')}
                         </ul>
                     `;
                 }
+                
                 return `
-                    <li class="nav-item ${hasSub ? 'has-dropdown' : ''}">
-                        <a href="${formatURL(item.url)}" class="dropdown-toggle-link">${item.title} ${hasSub ? '<i class="fa-solid fa-chevron-down" style="font-size:11px; margin-left:3px;"></i>' : ''}</a>
+                    <li class="nav-item ${(hasRegularSub || isMega) ? 'has-dropdown' : ''} ${isMega ? 'has-mega-menu' : ''}">
+                        <a href="${formatURL(item.url)}" class="dropdown-toggle-link">${item.title} ${(hasRegularSub || isMega) ? '<i class="fa-solid fa-chevron-down" style="font-size:11px; margin-left:3px;"></i>' : ''}</a>
                         ${subMenuHTML}
                     </li>
                 `;
@@ -282,7 +318,6 @@ function applyLayoutToDOM(data) {
 
         const columnsHTML = columnsData.map(col => {
             if (col.type === 'info') {
-                // 🌟 এখানে info-col ক্লাসটি যুক্ত করা হয়েছে
                 return `
                     <div class="footer-col info-col">
                         <h4>${col.title || 'আমাদের সম্পর্কে'}</h4>
