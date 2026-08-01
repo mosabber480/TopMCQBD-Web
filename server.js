@@ -29,10 +29,10 @@ app.use(express.static(__dirname));
 app.use('/admin', express.static(path.join(__dirname, 'admin')));
 app.use('/global', express.static(path.join(__dirname, 'global')));
 
-// 3. External API Routes Setup (Missing routes added)
+// 3. External API Routes Setup (Fixed Mount Paths)
 app.use('/api/auth', authRoutes);
 app.use('/api/home-config', homeConfigRoutes);
-app.use('/api/layout', layoutRoutes);
+app.use('/api', layoutRoutes); // <--- এখানেই মূল ফিক্সটি করা হয়েছে
 
 // Multer Setup for Memory Storage
 const upload = multer({ storage: multer.memoryStorage() });
