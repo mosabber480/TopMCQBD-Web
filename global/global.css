@@ -428,6 +428,25 @@ body {
    MEGA MENU STYLES (UPDATED FOR MULTIPLE COLUMNS)
    ========================================================================== */
 @media (min-width: 769px) {
+    /* --- Hover-gap fix ---
+       .mega-menu is positioned relative to #global-header (because the
+       has-mega-menu <li> is forced to position:static below), so it starts
+       exactly at the header's outer bottom edge. But header-wrapper's own
+       vertical padding + align-items:center meant the <li>'s hoverable box
+       stopped well ABOVE that edge, creating a dead zone the mouse had to
+       cross -> :hover was lost -> menu hid before the cursor arrived.
+       Fix: stretch the whole nav column so the <li> (and its hover box)
+       fills the header edge-to-edge, with zero gap before the mega menu. */
+    .header-wrapper {
+        align-items: stretch;
+        padding-top: 0;
+        padding-bottom: 0;
+        min-height: 64px;
+    }
+    .site-nav { align-items: stretch; }
+    .site-nav ul { align-items: stretch; }
+    .site-nav ul li > a { height: 100%; }
+
     .site-nav ul li.has-mega-menu { position: static; }
     .mega-menu {
         display: none !important;
@@ -442,7 +461,12 @@ body {
         gap: 30px; align-items: start;
         max-width: 1300px; margin: 0 auto; /* To align with header max-width */
     }
-    .nav-item.has-mega-menu:hover > .mega-menu { display: block !important; }
+    
+    /* 🌟 Updated Hover Logic Here */
+    .nav-item.has-mega-menu:hover > .mega-menu,
+    .mega-menu:hover { 
+        display: block !important; 
+    }
     
     .mega-col-title {
         font-size: 16px; font-weight: bold; color: var(--primary-dark);
