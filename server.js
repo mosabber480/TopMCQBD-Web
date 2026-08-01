@@ -29,6 +29,11 @@ app.use(express.static(__dirname));
 app.use('/admin', express.static(path.join(__dirname, 'admin')));
 app.use('/global', express.static(path.join(__dirname, 'global')));
 
+// 3. External API Routes Setup (Missing routes added)
+app.use('/api/auth', authRoutes);
+app.use('/api/home-config', homeConfigRoutes);
+app.use('/api/layout', layoutRoutes);
+
 // Multer Setup for Memory Storage
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -155,7 +160,7 @@ app.post('/api/users/request-plan', verifyToken, async (req, res) => {
 
         // ---- Server-side এ আবার একবার validate করা, যাতে frontend bypass করে ভুল action না পাঠাতে পারে ----
         if (action === 'renew' && !isSubActive) {
-            return res.status(400).json({ success: false, message: 'আপনার কোনো Active subscription নেই, তাই Renew request পাঠানো যাবে না।' });
+            return res.status(400).json({ success: false, message: 'আপনার কোনো Active subscription নেই, তাই Renew request পাঠানো যাবে ঘন।' });
         }
         if (action !== 'renew' && isSubActive) {
             return res.status(400).json({ success: false, message: 'আপনার Active subscription আছে। শুধু মেয়াদ বাড়ানোর (renew) রিকোয়েস্ট পাঠানো যাবে।' });
@@ -213,7 +218,6 @@ app.post('/api/users/request-plan', verifyToken, async (req, res) => {
 });
 
 // 💡 Approve a specific Pending Request (Owner and Admin only)
-// endDate সবসময় বর্তমান endDate (active থাকলে) বা আজকের তারিখ (না থাকলে) থেকে যোগ হয় — তাই renew ও একাধিক Add approve করলে দুই ক্ষেত্রেই মেয়াদ স্ট্যাক হয়ে যায়
 app.put('/api/users/:userId/pending-requests/:requestId/approve', verifyToken, authorizeRoles('owner', 'admin'), async (req, res) => {
     try {
         const user = await User.findById(req.params.userId);
@@ -281,7 +285,7 @@ app.put('/api/users/:userId/pending-requests/:requestId/reject', verifyToken, au
     }
 });
 
-// Update Subscription Plan Directly (Owner and Admin only) — ম্যানুয়াল override, pending queue না ঘেঁটেই সরাসরি plan সেট করার জন্য
+// Update Subscription Plan Directly (Owner and Admin only)
 app.put('/api/users/:userId/subscription', verifyToken, authorizeRoles('owner', 'admin'), async (req, res) => {
     try {
         const { plan } = req.body;
