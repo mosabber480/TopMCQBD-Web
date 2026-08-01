@@ -10,7 +10,6 @@
 
     <style>
         .container { max-width: 1300px; margin: 40px auto; padding: 0 20px; width: 100%; }
-        /* কলামের মাঝের গ্যাপ ৮০px */
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; } 
         .box { background: white; padding: 25px 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid #e2e8f0; }
         
@@ -19,12 +18,10 @@
         input { width: 100%; padding: 8px 35px 8px 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; box-sizing: border-box; }
         .toggle-password { position: absolute; right: 10px; top: 32px; cursor: pointer; color: #888; }
         
-        /* বাটন স্টাইল */
         .btn-submit { background-color: #007bff; width: fit-content; min-width: 140px; padding: 10px 20px; font-size: 14px; border: none; border-radius: 4px; color: white; cursor: pointer; font-weight: bold; margin-top: 10px; }
         .btn-logout { background-color: #dc3545; color: white; width: fit-content; min-width: 140px; padding: 10px 20px; text-align: center; border-radius: 4px; text-decoration: none; font-weight: bold; font-size: 14px; border: none; cursor: pointer; display: inline-block; margin-top: 15px; }
         .btn-quiz { background-color: #28a745; color: white; width: fit-content; min-width: 140px; padding: 10px 20px; text-align: center; border-radius: 4px; text-decoration: none; font-weight: bold; font-size: 14px; display: inline-block; }
 
-        /* সাবস্ক্রিপশন বক্সের স্টাইল */
         .sub-box { 
             background-color: white; 
             padding: 15px 20px; 
@@ -39,15 +36,16 @@
         .badge-active { background-color: #d4edda; color: #155724; }
         .badge-expired { background-color: #f8d7da; color: #721c24; }
         .badge-pending { background-color: #ffc107; color: #212529; }
+        .badge-rejected { background-color: #f8d7da; color: #721c24; }
+        .badge-type { background-color: #e2e8f0; color: #333; }
 
-        /* লিংক বাটন স্টাইল - বর্ডার রেডিয়াস বাড়ানো হয়েছে (Pill Shape) */
         .plan-link-btn { 
             display: inline-flex; 
             align-items: center;
             background-color: #007bff; 
             color: white !important; 
             padding: 3px 12px; 
-            border-radius: 30px; /* 6 Months ব্যাজের মতো স্টাইল */
+            border-radius: 30px;
             text-decoration: none; 
             font-size: 12px; 
             font-weight: bold; 
@@ -66,7 +64,39 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.15);
         }
 
-        /* প্রফেশনাল লগআউট পপআপ (Modal) স্টাইল */
+        /* একাধিক pending request কার্ড আকারে দেখানোর জন্য */
+        .pending-request-card {
+            margin: 10px 0;
+            padding: 12px 15px;
+            background: #fff8e1;
+            border: 1px dashed #ffc107;
+            border-radius: 6px;
+        }
+        .pending-request-card.rejected {
+            background: #fdf2f2;
+            border: 1px dashed #dc3545;
+        }
+        .pending-request-card .prc-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 6px;
+        }
+        .pending-request-card .prc-plan {
+            font-weight: bold;
+            font-size: 14px;
+            color: #333;
+        }
+        .pending-request-card .prc-info {
+            font-size: 12.5px;
+            color: #555;
+            line-height: 1.8;
+            margin: 0;
+        }
+        .pending-request-card .prc-info span { color: #222; font-weight: 600; }
+
         .logout-modal-overlay {
             position: fixed;
             top: 0;
@@ -165,7 +195,6 @@
                     <p style="margin: 8px 0;"><strong>Status:</strong> <span id="userStatusBadge" class="badge"></span></p>
                 </div>
 
-                <!-- পাসওয়ার্ড ফর্ম -->
                 <form id="changePasswordForm" class="box" style="border-left: 5px solid #ffc107;">
                     <h3 style="margin-top: 0; margin-bottom: 15px; font-size: 18px; color: #333;">
                         <i class="fa-solid fa-lock"></i> Change Password
@@ -192,7 +221,6 @@
                     </div>
                 </form>
 
-                <!-- লগআউট বাটনটি এখন কাস্টম পপআপ ওপেন করবে -->
                 <button class="btn-logout" type="button" onclick="openLogoutModal()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
             </div>
 
@@ -201,22 +229,23 @@
                 <div class="sub-box">
                     <h4 style="margin:0 0 10px 0; color:#007bff;"><i class="fa-solid fa-gem"></i> Subscription Status</h4>
                     <p style="margin: 5px 0; line-height: 2;"><strong>Current Plan:</strong> <span id="subPlan" style="font-weight:bold;"></span></p>
-                    
-                    <!-- Pending Request Section -->
-                    <div id="pendingRequestWrapper" style="display: none; margin: 10px 0; padding: 10px; background: #fff8e1; border: 1px dashed #ffc107; border-radius: 4px;">
-                        <p style="margin: 0;"><strong>Pending Request:</strong> <span id="pendingPlanBadge" class="badge badge-pending"></span></p>
-                        <small style="color: #856404; display: block; margin-top: 4px;"><i class="fa-solid fa-circle-info"></i> Your package request is waiting for admin approval.</small>
-                    </div>
 
                     <p style="margin: 5px 0;"><strong>Expiration Date:</strong> <span id="subExpiry"></span></p>
                     <p style="margin: 5px 0;" id="remainingTimeWrapper"><strong>Remaining Time:</strong> <span id="subRemaining" style="color: #e67e22; font-weight: bold;"></span></p>
+
+                    <!-- একাধিক Pending Request-এর লিস্ট এখানে JS দিয়ে রেন্ডার হবে -->
+                    <div id="pendingRequestsWrapper" style="display: none; margin-top: 12px;">
+                        <p style="margin: 0 0 4px 0; font-weight: bold; font-size: 13px; color: #555;">
+                            <i class="fa-solid fa-clock-rotate-left"></i> Your Requests:
+                        </p>
+                        <div id="pendingRequestsList"></div>
+                    </div>
                 </div>
                 <a href="index.html" class="btn-quiz"><i class="fa-solid fa-play"></i> Start Practice</a>
             </div>
         </div>
     </div>
 
-    <!-- কাস্টম লগআউট পপআপ (Modal) -->
     <div class="logout-modal-overlay" id="logoutModal">
         <div class="logout-modal">
             <i class="fa-solid fa-right-from-bracket logout-icon"></i>
@@ -277,6 +306,54 @@
             return parts.length > 0 ? parts.join(' ') : 'Less than 1 Hour';
         }
 
+        function planLabel(plan) {
+            return (plan || '').replace('_', ' ').toUpperCase();
+        }
+
+        function typeLabel(type) {
+            if (type === 'renew') return 'মেয়াদ বৃদ্ধি (Renew)';
+            if (type === 'add') return 'অতিরিক্ত যোগ (Add)';
+            return 'নতুন রিকোয়েস্ট';
+        }
+
+        function methodLabel(method) {
+            return method === 'bkash' ? 'বিকাশ' : method === 'nagad' ? 'নগদ' : method;
+        }
+
+        // একাধিক pending request কার্ড আকারে রেন্ডার করা
+        function renderPendingRequests(pendingRequests) {
+            const wrapper = document.getElementById('pendingRequestsWrapper');
+            const list = document.getElementById('pendingRequestsList');
+            list.innerHTML = '';
+
+            if (!pendingRequests || pendingRequests.length === 0) {
+                wrapper.style.display = 'none';
+                return;
+            }
+
+            wrapper.style.display = 'block';
+
+            pendingRequests.forEach((reqItem) => {
+                const isRejected = reqItem.status === 'rejected';
+                const card = document.createElement('div');
+                card.className = 'pending-request-card' + (isRejected ? ' rejected' : '');
+
+                card.innerHTML = `
+                    <div class="prc-top">
+                        <span class="prc-plan">${planLabel(reqItem.plan)}</span>
+                        <span class="badge ${isRejected ? 'badge-rejected' : 'badge-pending'}">${isRejected ? 'Rejected' : 'Pending'}</span>
+                    </div>
+                    <p class="prc-info">
+                        <span class="badge badge-type" style="margin-bottom:4px; display:inline-block;">${typeLabel(reqItem.type)}</span><br>
+                        ফোন: <span>${reqItem.phone}</span> &nbsp;|&nbsp; ট্রানজেকশন আইডি: <span>${reqItem.transactionId}</span> &nbsp;|&nbsp; মাধ্যম: <span>${methodLabel(reqItem.paymentMethod)}</span><br>
+                        পাঠানো হয়েছে: <span>${new Date(reqItem.requestedAt).toLocaleString()}</span>
+                        ${isRejected && reqItem.rejectionReason ? `<br><span style="color:#dc3545;">কারণ: ${reqItem.rejectionReason}</span>` : ''}
+                    </p>
+                `;
+                list.appendChild(card);
+            });
+        }
+
         function renderProfileUI() {
             document.getElementById('mainUserName').innerText = user.name || 'User';
             document.getElementById('userName').innerText = user.name || 'N/A';
@@ -284,16 +361,17 @@
             
             const sub = user.subscription || {};
             const isSubActive = sub.active && sub.endDate && new Date(sub.endDate) > new Date();
-            const isRequested = user.requestedPlan && user.requestedPlan !== 'none';
+            const pendingRequests = user.pendingRequests || [];
+            const activePendingCount = pendingRequests.filter(r => r.status === 'pending').length;
+            const hasActivePending = activePendingCount > 0;
             const subPlanElem = document.getElementById('subPlan');
 
             if (sub.plan && sub.plan !== 'none') {
-                subPlanElem.innerHTML = sub.plan.replace('_', ' ').toUpperCase();
+                subPlanElem.innerHTML = planLabel(sub.plan);
                 subPlanElem.style.color = "#28a745";
-            } else if (isRequested) {
-                const requestedPlanName = user.requestedPlan.replace('_', ' ').toUpperCase();
-                subPlanElem.innerHTML = `আপনি ${requestedPlanName} প্যাকেজ সিলেক্ট করেছেন, এডমিন অ্যাপ্রুভালের জন্য অপেক্ষা করুন। <a href="contact.html" class="plan-link-btn">Contact Us <i class="fa-solid fa-arrow-right"></i></a>`;
-                subPlanElem.style.color = "#856404"; 
+            } else if (hasActivePending) {
+                subPlanElem.innerHTML = `আপনার ${activePendingCount} টি রিকোয়েস্ট এডমিন অ্যাপ্রুভালের অপেক্ষায় আছে। <a href="contact.html" class="plan-link-btn">Contact Us <i class="fa-solid fa-arrow-right"></i></a>`;
+                subPlanElem.style.color = "#856404";
             } else {
                 subPlanElem.innerHTML = `আপনার কোনো প্যাকেজ সিলেক্ট করা নাই। <a href="packages.html" class="plan-link-btn">Choose a package <i class="fa-solid fa-arrow-right"></i></a>`;
                 subPlanElem.style.color = "#dc3545";
@@ -302,10 +380,7 @@
             const statusElem = document.getElementById('userStatusBadge');
             const remainingWrapper = document.getElementById('remainingTimeWrapper');
             const remainingElem = document.getElementById('subRemaining');
-            const pendingWrapper = document.getElementById('pendingRequestWrapper');
-            const pendingPlanBadge = document.getElementById('pendingPlanBadge');
 
-            pendingWrapper.style.display = 'none';
             remainingWrapper.style.display = 'block';
 
             if (user.role === 'owner' || user.role === 'admin') {
@@ -325,15 +400,13 @@
                 remainingWrapper.style.display = 'none'; 
             }
 
-            if (isRequested) {
-                pendingWrapper.style.display = 'block';
-                pendingPlanBadge.innerText = user.requestedPlan.replace('_', ' ').toUpperCase();
-                
-                if (user.role !== 'owner' && user.role !== 'admin' && !isSubActive) {
-                    statusElem.innerText = 'PENDING APPROVAL';
-                    statusElem.className = 'badge badge-pending';
-                }
+            // Active subscription থাকলেও pending (renew) request থাকতে পারে, তাই badge শুধু inactive অবস্থায় override হবে
+            if (hasActivePending && user.role !== 'owner' && user.role !== 'admin' && !isSubActive) {
+                statusElem.innerText = 'PENDING APPROVAL';
+                statusElem.className = 'badge badge-pending';
             }
+
+            renderPendingRequests(pendingRequests);
         }
 
         if(user) {
@@ -368,7 +441,7 @@
             const confirmPassword = document.getElementById('confirmNewPassword').value;
 
             if (newPassword !== confirmPassword) {
-                showTopAlert('❌ নতুন পাসওয়ার্ড দুটি মিলছে না!', 'danger');
+                showTopAlert('❌ নতুন পাসওয়ার্ড দুটি মিলছে না!', 'danger');
                 return;
             }
 
@@ -385,7 +458,6 @@
             else { showTopAlert('❌ ' + data.message, 'danger'); }
         });
 
-        // কাস্টম লগআউট পপআপ লজিক
         function openLogoutModal() {
             document.getElementById('logoutModal').classList.add('active');
         }

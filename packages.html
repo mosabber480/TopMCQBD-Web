@@ -156,6 +156,82 @@
             opacity: 0.7;
             pointer-events: none;
         }
+
+        /* ===================== MODALS ===================== */
+        .pkg-modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.55);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.25s ease, visibility 0.25s ease;
+            backdrop-filter: blur(3px);
+            padding: 15px;
+        }
+        .pkg-modal-overlay.active { opacity: 1; visibility: visible; }
+        .pkg-modal {
+            background: white;
+            padding: 30px 28px;
+            border-radius: 12px;
+            max-width: 420px;
+            width: 100%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transform: translateY(-15px);
+            transition: transform 0.25s ease;
+        }
+        .pkg-modal-overlay.active .pkg-modal { transform: translateY(0); }
+        .pkg-modal h3 {
+            font-size: 19px;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .pkg-modal p.desc {
+            font-size: 13.5px;
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .pkg-modal .choice-btns { display: flex; flex-direction: column; gap: 10px; }
+        .pkg-modal .choice-btn {
+            padding: 12px 15px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            background: #f8f9fa;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: left;
+            color: #2c3e50;
+            transition: 0.2s;
+        }
+        .pkg-modal .choice-btn:hover { background: #eef2f7; }
+        .pkg-modal .choice-btn.primary { background: #007bff; color: white; border-color: #007bff; }
+        .pkg-modal .choice-btn.primary:hover { background: #0056b3; }
+        .pkg-modal .choice-btn small { display: block; font-weight: normal; margin-top: 3px; opacity: 0.85; }
+        .pkg-modal .choice-btn.cancel { background: none; border: none; color: #888; text-align: center; font-weight: normal; }
+
+        .pkg-modal .form-group { margin-bottom: 14px; text-align: left; }
+        .pkg-modal label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 13px; color: #444; }
+        .pkg-modal input, .pkg-modal select {
+            width: 100%; padding: 9px 12px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px; box-sizing: border-box;
+        }
+        .pkg-modal .modal-actions { display: flex; gap: 10px; margin-top: 18px; }
+        .pkg-modal .modal-actions button {
+            flex: 1; padding: 10px; border-radius: 6px; border: none; font-weight: bold; font-size: 14px; cursor: pointer;
+        }
+        .pkg-modal .btn-cancel-modal { background: #e2e8f0; color: #475569; }
+        .pkg-modal .btn-submit-modal { background: #28a745; color: white; }
+        .selected-plan-note {
+            background: #f4f8ff; border: 1px dashed #007bff; border-radius: 6px;
+            padding: 8px 12px; font-size: 13px; margin-bottom: 16px; color: #2c3e50;
+        }
     </style>
 </head>
 <body>
@@ -166,7 +242,7 @@
     <div class="page-banner">
         <div class="banner-content">
             <h1>আমাদের প্রিপারেশন প্যাকেজসমূহ</h1>
-            <p>আপনার সুবিধামত প্যাকেজ বেছে নিয়ে আজই শুরু করুন সেরা কুইজ প্রস্তুতি</p>
+            <p>আপনার সুবিধামত প্যাকেজ বেছে নিয়ে আজই শুরু করুন সেরা কুইজ প্রস্তুতি</p>
         </div>
     </div>
 
@@ -176,7 +252,7 @@
         <div class="package-card" style="--theme-color: #6f42c1; --theme-bg: #fcfaff;">
 		   <span class="popular-badge">শুরু</span>
             <div>
-                <h3 class="pkg-title">১ মাস মেয়াদী</h3>
+                <h3 class="pkg-title">১ মাস মেয়াদী</h3>
                 <div class="pkg-price">৳১০ <span>/ ৩০ দিন</span></div>
                 <ul class="pkg-features">
                     <li><i class="fa-solid fa-circle-check"></i> সকল বিষয়ের পূর্ণ অ্যাক্সেস</li>
@@ -195,7 +271,7 @@
         <div class="package-card" style="--theme-color: #fd7e14; --theme-bg: #fffdfa;">
             <span class="popular-badge">জনপ্রিয়</span>
             <div>
-                <h3 class="pkg-title">৩ মাস মেয়াদী</h3>
+                <h3 class="pkg-title">৩ মাস মেয়াদী</h3>
                 <div class="pkg-price">৳২০ <span>/ ৯০ দিন</span></div>
                 <ul class="pkg-features">
                     <li><i class="fa-solid fa-circle-check"></i> সকল বিষয়ের পূর্ণ অ্যাক্সেস</li>
@@ -214,7 +290,7 @@
         <div class="package-card" style="--theme-color: #20c997; --theme-bg: #f4fbf8;">
 		   <span class="popular-badge">সবচেয়ে জনপ্রিয়</span>
             <div>
-                <h3 class="pkg-title">৬ মাস মেয়াদী</h3>
+                <h3 class="pkg-title">৬ মাস মেয়াদী</h3>
                 <div class="pkg-price">৳৩০ <span>/ ১৮০ দিন</span></div>
                 <ul class="pkg-features">
                     <li><i class="fa-solid fa-circle-check"></i> সকল বিষয়ের পূর্ণ অ্যাক্সেস</li>
@@ -233,7 +309,7 @@
         <div class="package-card" style="--theme-color: #007bff; --theme-bg: #f4f8ff;">
 		   <span class="popular-badge">সাশ্রয়ী</span>
             <div>
-                <h3 class="pkg-title">১ বছর মেয়াদী</h3>
+                <h3 class="pkg-title">১ বছর মেয়াদী</h3>
                 <div class="pkg-price">৳৫০ <span>/ ৩৬৫ দিন</span></div>
                 <ul class="pkg-features">
                     <li><i class="fa-solid fa-circle-check"></i> সকল বিষয়ের পূর্ণ অ্যাক্সেস</li>
@@ -252,7 +328,7 @@
         <div class="package-card" style="--theme-color: #6366f1; --theme-bg: #f5f5fe;">
 		   <span class="popular-badge">বেশি সাশ্রয়</span>
             <div>
-                <h3 class="pkg-title">২ বছর মেয়াদী</h3>
+                <h3 class="pkg-title">২ বছর মেয়াদী</h3>
                 <div class="pkg-price">৳৮0 <span>/ ৭৩০ দিন</span></div>
                 <ul class="pkg-features">
                     <li><i class="fa-solid fa-circle-check"></i> সকল বিষয়ের পূর্ণ অ্যাক্সেস</li>
@@ -271,7 +347,7 @@
         <div class="package-card" style="--theme-color: #17a2b8; --theme-bg: #f2fafb;">
 		   <span class="popular-badge">সর্বোচ্চ সাশ্রয়</span>
             <div>
-                <h3 class="pkg-title">৩ বছর মেয়াদী</h3>
+                <h3 class="pkg-title">৩ বছর মেয়াদী</h3>
                 <div class="pkg-price">৳১০০ <span>/ ১০৯৫ দিন</span></div>
                 <ul class="pkg-features">
                     <li><i class="fa-solid fa-circle-check"></i> সকল বিষয়ের পূর্ণ অ্যাক্সেস</li>
@@ -288,6 +364,69 @@
 
     </main>
 
+    <!-- ===================== CHOICE MODAL (Change vs Add, শুধু pending থাকলে দেখাবে) ===================== -->
+    <div class="pkg-modal-overlay" id="choiceModalOverlay">
+        <div class="pkg-modal">
+            <h3><i class="fa-solid fa-circle-info" style="color:#ffc107;"></i> আপনার একটা রিকোয়েস্ট Pending আছে</h3>
+            <p class="desc" id="choiceModalDesc"></p>
+            <div class="choice-btns">
+                <button class="choice-btn primary" id="choiceAddBtn">
+                    এই প্যাকেজটাও Add করুন
+                    <small>আগের রিকোয়েস্টের সাথে এটাও যোগ হবে (অ্যাপ্রুভ হলে মেয়াদ একসাথে যোগ হবে)</small>
+                </button>
+                <button class="choice-btn" id="choiceChangeBtn">
+                    সর্বশেষ রিকোয়েস্ট পরিবর্তন করুন
+                    <small>আগের সর্বশেষ রিকোয়েস্টটা মুছে এই প্যাকেজ দিয়ে বদলে যাবে</small>
+                </button>
+                <button class="choice-btn cancel" id="choiceCancelBtn">বাতিল করুন</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== ACTIVE PLAN CONFIRM MODAL ===================== -->
+    <div class="pkg-modal-overlay" id="activeConfirmOverlay">
+        <div class="pkg-modal">
+            <h3><i class="fa-solid fa-gem" style="color:#28a745;"></i> আপনার প্যাকেজ ইতিমধ্যে Active আছে</h3>
+            <p class="desc" id="activeConfirmDesc"></p>
+            <div class="choice-btns">
+                <button class="choice-btn primary" id="activeConfirmYesBtn">
+                    হ্যাঁ, মেয়াদ বাড়ানোর রিকোয়েস্ট পাঠান
+                </button>
+                <button class="choice-btn cancel" id="activeConfirmNoBtn">না, থাক</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== PAYMENT INFO MODAL ===================== -->
+    <div class="pkg-modal-overlay" id="paymentModalOverlay">
+        <div class="pkg-modal">
+            <h3><i class="fa-solid fa-money-bill-wave" style="color:#007bff;"></i> পেমেন্ট তথ্য দিন</h3>
+            <div class="selected-plan-note" id="paymentPlanNote"></div>
+            <form id="paymentForm">
+                <div class="form-group">
+                    <label>যে নাম্বার থেকে পেমেন্ট করেছেন:</label>
+                    <input type="text" id="payPhone" placeholder="যেমনঃ 017XXXXXXXX" required>
+                </div>
+                <div class="form-group">
+                    <label>Transaction ID:</label>
+                    <input type="text" id="payTrxId" placeholder="যেমনঃ 8N7A2K1XYZ" required>
+                </div>
+                <div class="form-group">
+                    <label>পেমেন্ট মাধ্যম:</label>
+                    <select id="payMethod" required>
+                        <option value="">নির্বাচন করুন</option>
+                        <option value="bkash">বিকাশ (Bkash)</option>
+                        <option value="nagad">নগদ (Nagad)</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel-modal" id="paymentCancelBtn">বাতিল</button>
+                    <button type="submit" class="btn-submit-modal" id="paymentSubmitBtn">রিকোয়েস্ট পাঠান</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <footer id="global-footer"></footer>
 
     <script src="global/global.js"></script>
@@ -296,6 +435,29 @@
         const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
             ? 'http://localhost:5000/api' 
             : 'https://mosabber-quiz-app.onrender.com/api';
+
+        // এই তিনটা modal-এর overlay/open/close নিয়ন্ত্রণের জন্য ছোট হেল্পার
+        function openModal(id) { document.getElementById(id).classList.add('active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+        function planLabelBn(plan) { return (plan || '').replace('_', ' ').toUpperCase(); }
+
+        // পুরো ফ্লো-জুড়ে যা যা মনে রাখতে হবে (কোন প্ল্যান ক্লিক হয়েছে, action কী হবে, change হলে কোন request id)
+        let pendingFlow = {
+            plan: null,
+            action: null,   // 'new' | 'add' | 'change' | 'renew'
+            requestId: null // শুধু 'change'-এর জন্য দরকার
+        };
+
+        async function fetchCurrentUserState() {
+            const token = localStorage.getItem('quiz_token') || localStorage.getItem('token');
+            const res = await fetch(`${API_BASE}/users/me`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (!data.success) throw new Error(data.message || 'Failed to fetch user state');
+            return data.user;
+        }
 
         async function handlePackageBuy(planType, buttonElement) {
             const token = localStorage.getItem('quiz_token') || localStorage.getItem('token');
@@ -307,8 +469,96 @@
             }
 
             const originalText = buttonElement.innerText;
-            buttonElement.innerText = 'অপেক্ষা করুন...';
+            buttonElement.innerText = 'যাচাই করা হচ্ছে...';
             buttonElement.classList.add('loading-text');
+
+            try {
+                const user = await fetchCurrentUserState();
+
+                const sub = user.subscription || {};
+                const isSubActive = sub.active && sub.endDate && new Date(sub.endDate) > new Date();
+                const pending = (user.pendingRequests || []).filter(r => r.status === 'pending');
+
+                if (isSubActive) {
+                    // ------- Active plan থাকলে সরাসরি প্যাকেজ পরিবর্তন করতে দেওয়া হবে না, শুধু Renew request -------
+                    document.getElementById('activeConfirmDesc').innerText =
+                        `আপনার বর্তমানে ${planLabelBn(sub.plan)} প্ল্যান একটিভ আছে, যার মেয়াদ শেষ হবে ${new Date(sub.endDate).toLocaleDateString()} তারিখে। ` +
+                        `আপনি কি এই মেয়াদের উপর ${planLabelBn(planType)} প্ল্যান যোগ করার (মেয়াদ বাড়ানোর) রিকোয়েস্ট পাঠাতে চান?`;
+
+                    openModal('activeConfirmOverlay');
+
+                    document.getElementById('activeConfirmYesBtn').onclick = () => {
+                        closeModal('activeConfirmOverlay');
+                        pendingFlow = { plan: planType, action: 'renew', requestId: null };
+                        openPaymentModal();
+                    };
+                    document.getElementById('activeConfirmNoBtn').onclick = () => closeModal('activeConfirmOverlay');
+
+                } else if (pending.length > 0) {
+                    // ------- Active নেই, কিন্তু আগে থেকে Pending request আছে -------
+                    const lastPending = pending[pending.length - 1];
+                    document.getElementById('choiceModalDesc').innerHTML =
+                        `আপনার সর্বশেষ Pending রিকোয়েস্ট: <b>${planLabelBn(lastPending.plan)}</b>। ` +
+                        `এখন <b>${planLabelBn(planType)}</b> প্যাকেজের জন্য আপনি কী করতে চান?`;
+
+                    openModal('choiceModalOverlay');
+
+                    document.getElementById('choiceAddBtn').onclick = () => {
+                        closeModal('choiceModalOverlay');
+                        pendingFlow = { plan: planType, action: 'add', requestId: null };
+                        openPaymentModal();
+                    };
+                    document.getElementById('choiceChangeBtn').onclick = () => {
+                        closeModal('choiceModalOverlay');
+                        pendingFlow = { plan: planType, action: 'change', requestId: lastPending._id };
+                        openPaymentModal();
+                    };
+                    document.getElementById('choiceCancelBtn').onclick = () => closeModal('choiceModalOverlay');
+
+                } else {
+                    // ------- একদম নতুন রিকোয়েস্ট -------
+                    pendingFlow = { plan: planType, action: 'new', requestId: null };
+                    openPaymentModal();
+                }
+
+            } catch (error) {
+                console.error('Error checking user state:', error);
+                await showTopAlert('❌ আপনার তথ্য যাচাই করতে সমস্যা হচ্ছে। দয়া করে আবার চেষ্টা করুন।', 'danger');
+            } finally {
+                buttonElement.innerText = originalText;
+                buttonElement.classList.remove('loading-text');
+            }
+        }
+
+        function openPaymentModal() {
+            document.getElementById('paymentPlanNote').innerHTML =
+                `আপনি সিলেক্ট করেছেন: <b>${planLabelBn(pendingFlow.plan)}</b> প্যাকেজ`;
+            document.getElementById('paymentForm').reset();
+            openModal('paymentModalOverlay');
+        }
+
+        document.getElementById('paymentCancelBtn').addEventListener('click', () => {
+            closeModal('paymentModalOverlay');
+            pendingFlow = { plan: null, action: null, requestId: null };
+        });
+
+        document.getElementById('paymentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = localStorage.getItem('quiz_token') || localStorage.getItem('token');
+            const submitBtn = document.getElementById('paymentSubmitBtn');
+
+            const phone = document.getElementById('payPhone').value.trim();
+            const transactionId = document.getElementById('payTrxId').value.trim();
+            const paymentMethod = document.getElementById('payMethod').value;
+
+            if (!phone || !transactionId || !paymentMethod) {
+                await showTopAlert('দয়া করে সব তথ্য পূরণ করুন।', 'warning');
+                return;
+            }
+
+            const originalText = submitBtn.innerText;
+            submitBtn.innerText = 'পাঠানো হচ্ছে...';
+            submitBtn.disabled = true;
 
             try {
                 const response = await fetch(`${API_BASE}/users/request-plan`, {
@@ -317,32 +567,39 @@
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     },
-                    body: JSON.stringify({ requestedPlan: planType })
+                    body: JSON.stringify({
+                        plan: pendingFlow.plan,
+                        action: pendingFlow.action,
+                        requestId: pendingFlow.requestId,
+                        phone,
+                        transactionId,
+                        paymentMethod
+                    })
                 });
 
                 const data = await response.json();
 
                 if (response.ok && data.success) {
-                    await showTopAlert('✅ আপনার প্যাকেজ রিকোয়েস্ট সফলভাবে গ্রহণ করা হয়েছে। পেমেন্ট সম্পন্ন হলে এডমিন আপনার একাউন্ট একটিভ করে দিবেন।', 'success');
-                    
-                    const storageKey = localStorage.getItem('quiz_user') ? 'quiz_user' : 'user';
-                    let currentUser = JSON.parse(localStorage.getItem(storageKey) || '{}');
-                    
-                    currentUser.requestedPlan = planType;
-                    localStorage.setItem(storageKey, JSON.stringify(currentUser));
+                    closeModal('paymentModalOverlay');
+                    await showTopAlert('✅ আপনার প্যাকেজ রিকোয়েস্ট সফলভাবে গ্রহণ করা হয়েছে। পেমেন্ট যাচাই করে এডমিন আপনার একাউন্ট একটিভ করে দিবেন।', 'success');
 
-                    window.location.href = 'profile.html'; 
+                    if (data.user) {
+                        const storageKey = localStorage.getItem('quiz_user') ? 'quiz_user' : 'user';
+                        localStorage.setItem(storageKey, JSON.stringify(data.user));
+                    }
+
+                    window.location.href = 'profile.html';
                 } else {
-                    await showTopAlert('❌ ' + (data.message || 'রিকোয়েস্ট পাঠাতে সমস্যা হয়েছে। আবার চেষ্টা করুন।'), 'danger');
+                    await showTopAlert('❌ ' + (data.message || 'রিকোয়েস্ট পাঠাতে সমস্যা হয়েছে। আবার চেষ্টা করুন।'), 'danger');
                 }
             } catch (error) {
                 console.error('Error requesting plan:', error);
-                await showTopAlert('❌ সার্ভারে সমস্যা হচ্ছে। দয়া করে একটু পর আবার চেষ্টা করুন।', 'danger');
+                await showTopAlert('❌ সার্ভারে সমস্যা হচ্ছে। দয়া করে একটু পর আবার চেষ্টা করুন।', 'danger');
             } finally {
-                buttonElement.innerText = originalText;
-                buttonElement.classList.remove('loading-text');
+                submitBtn.innerText = originalText;
+                submitBtn.disabled = false;
             }
-        }
+        });
     </script>
 </body>
 </html>

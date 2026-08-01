@@ -29,7 +29,7 @@ router.post('/register', async (req, res) => {
     }
 });
 
-// 2. LOGIN API (💡 আপডেট করা হয়েছে)
+// 2. LOGIN API (💡 আপডেট করা হয়েছে)
 router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -40,24 +40,25 @@ router.post('/login', async (req, res) => {
             return res.status(400).json({ success: false, message: 'Invalid Email or Password' });
         }
 
-        // পাসওয়ার্ড সিকিউরলি ম্যাচ করা
+        // পাসওয়ার্ড সিকিউরলি ম্যাচ করা
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res.status(400).json({ success: false, message: 'Invalid Email or Password' });
         }
 
-        // সাবস্ক্রিপশনের মেয়াদ শেষ হয়েছে কিনা চেক করা
+        // সাবস্ক্রিপশনের মেয়াদ শেষ হয়েছে কিনা চেক করা
         if (user.subscription && user.subscription.active && user.subscription.endDate) {
             if (new Date() > new Date(user.subscription.endDate)) {
                 user.subscription.active = false;
             }
         }
 
-        // 💡 সফল লগইনের পর lastLogin এ বর্তমান সময় সেভ করা
+        // 💡 সফল লগইনের পর lastLogin এ বর্তমান সময় সেভ করা
         user.lastLogin = new Date();
         await user.save();
 
         // JWT টোকেন জেনারেট করা
+        // 💡 pendingRequests আর payload-এ রাখা হচ্ছে না — টোকেন ছোট রাখতে, বরং প্রতিবার /users/me দিয়ে লাইভ ডাটা আনা হবে
         const payload = {
             userId: user._id,
             role: user.role,
@@ -75,7 +76,8 @@ router.post('/login', async (req, res) => {
                 email: user.email,
                 role: user.role,
                 subscription: user.subscription,
-                requestedPlan: user.requestedPlan
+                // 💡 পুরনো একক requestedPlan-এর বদলে এখন পুরো pending request array পাঠানো হচ্ছে
+                pendingRequests: user.pendingRequests
             }
         });
     } catch (err) {

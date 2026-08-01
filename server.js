@@ -53,15 +53,22 @@ const questionSchema = new mongoose.Schema({
 
 const Question = mongoose.model('Question', questionSchema);
 
-// ------------------- AUTHENTICATION ROUTES -------------------
-app.use('/api/auth', authRoutes);
+// ------------------- SUBSCRIPTION HELPER -------------------
 
-// ------------------- HOME CONFIG ROUTES -------------------
-app.use('/api/home-config', homeConfigRoutes);
+const VALID_PLANS = ['1_month', '3_months', '6_months', '1_year', '2_years', '3_years'];
 
-// ------------------- LAYOUT CONFIG ROUTES -------------------
-// এখন models/LayoutConfig.js আর routes/layoutRoutes.js আসলেই ব্যবহার হচ্ছে
-app.use('/api', layoutRoutes);
+// 💡 কোনো একটা তারিখের উপর plan-এর মেয়াদ যোগ করার হেল্পার ফাংশন
+// (renew বা একাধিক approve stacking — দুই ক্ষেত্রেই এটাই ব্যবহার হবে)
+function addPlanDuration(baseDate, plan) {
+    const d = new Date(baseDate);
+    if (plan === '1_month') d.setMonth(d.getMonth() + 1);
+    else if (plan === '3_months') d.setMonth(d.getMonth() + 3);
+    else if (plan === '6_months') d.setMonth(d.getMonth() + 6);
+    else if (plan === '1_year') d.setFullYear(d.getFullYear() + 1);
+    else if (plan === '2_years') d.setFullYear(d.getFullYear() + 2);
+    else if (plan === '3_years') d.setFullYear(d.getFullYear() + 3);
+    return d;
+}
 
 // Change Password API (Any Logged In User)
 app.put('/api/auth/change-password', verifyToken, async (req, res) => {
@@ -117,28 +124,164 @@ app.get('/api/users/me', verifyToken, async (req, res) => {
     }
 });
 
-// Request a Subscription Plan (For any logged in customer)
+// 💡 Request a Subscription Plan (নতুন redesign — action ভিত্তিক: new / add / change / renew)
 app.post('/api/users/request-plan', verifyToken, async (req, res) => {
     try {
-        const { requestedPlan } = req.body;
-        
-        const userId = req.user.id || req.user._id || req.user.userId; 
+        const { plan, action, requestId, phone, transactionId, paymentMethod } = req.body;
+
+        // ---- বেসিক validation ----
+        if (!plan || !action || !phone || !transactionId || !paymentMethod) {
+            return res.status(400).json({ success: false, message: 'সব তথ্য (plan, action, phone, transactionId, paymentMethod) দেওয়া বাধ্যতামূলক।' });
+        }
+        if (!VALID_PLANS.includes(plan)) {
+            return res.status(400).json({ success: false, message: 'সঠিক প্যাকেজ নির্বাচন করুন।' });
+        }
+        if (!['new', 'add', 'change', 'renew'].includes(action)) {
+            return res.status(400).json({ success: false, message: 'সঠিক action দেওয়া হয়নি।' });
+        }
+        if (!['bkash', 'nagad'].includes(paymentMethod)) {
+            return res.status(400).json({ success: false, message: 'পেমেন্ট মাধ্যম বিকাশ অথবা নগদ হতে হবে।' });
+        }
+
+        const userId = req.user.id || req.user._id || req.user.userId;
         const user = await User.findById(userId);
-        
         if (!user) {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
 
-        user.requestedPlan = requestedPlan;
+        const isSubActive = user.subscription && user.subscription.active &&
+            user.subscription.endDate && new Date(user.subscription.endDate) > new Date();
+        const pendingCount = user.pendingRequests.filter(r => r.status === 'pending').length;
+
+        // ---- Server-side এ আবার একবার validate করা, যাতে frontend bypass করে ভুল action না পাঠাতে পারে ----
+        if (action === 'renew' && !isSubActive) {
+            return res.status(400).json({ success: false, message: 'আপনার কোনো Active subscription নেই, তাই Renew request পাঠানো যাবে না।' });
+        }
+        if (action !== 'renew' && isSubActive) {
+            return res.status(400).json({ success: false, message: 'আপনার Active subscription আছে। শুধু মেয়াদ বাড়ানোর (renew) রিকোয়েস্ট পাঠানো যাবে।' });
+        }
+        if (action === 'new' && pendingCount > 0) {
+            return res.status(400).json({ success: false, message: 'আপনার আগে থেকে একটা Pending request আছে। এই প্যাকেজটা Add করুন অথবা আগেরটা Change করুন।' });
+        }
+        if ((action === 'add' || action === 'change') && pendingCount === 0) {
+            return res.status(400).json({ success: false, message: 'আপনার কোনো Pending request নেই।' });
+        }
+
+        if (action === 'change') {
+            if (!requestId) {
+                return res.status(400).json({ success: false, message: 'কোন রিকোয়েস্টটা পরিবর্তন করতে চান তা উল্লেখ করা হয়নি।' });
+            }
+            const target = user.pendingRequests.id(requestId);
+            if (!target || target.status !== 'pending') {
+                return res.status(404).json({ success: false, message: 'Pending request খুঁজে পাওয়া যায়নি।' });
+            }
+            target.plan = plan;
+            target.phone = phone;
+            target.transactionId = transactionId;
+            target.paymentMethod = paymentMethod;
+            target.requestedAt = new Date();
+        } else {
+            // 'new' | 'add' | 'renew' — সব ক্ষেত্রেই নতুন entry array-তে push হবে
+            user.pendingRequests.push({
+                plan,
+                type: action, // 'new' | 'add' | 'renew'
+                phone,
+                transactionId,
+                paymentMethod,
+                status: 'pending',
+                requestedAt: new Date()
+            });
+        }
+
         await user.save();
 
-        res.json({ success: true, message: 'Plan request submitted successfully!' });
+        res.json({
+            success: true,
+            message: 'Plan request submitted successfully!',
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                subscription: user.subscription,
+                pendingRequests: user.pendingRequests
+            }
+        });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
     }
 });
 
-// Update Subscription Plan (Owner and Admin only)
+// 💡 Approve a specific Pending Request (Owner and Admin only)
+// endDate সবসময় বর্তমান endDate (active থাকলে) বা আজকের তারিখ (না থাকলে) থেকে যোগ হয় — তাই renew ও একাধিক Add approve করলে দুই ক্ষেত্রেই মেয়াদ স্ট্যাক হয়ে যায়
+app.put('/api/users/:userId/pending-requests/:requestId/approve', verifyToken, authorizeRoles('owner', 'admin'), async (req, res) => {
+    try {
+        const user = await User.findById(req.params.userId);
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        const request = user.pendingRequests.id(req.params.requestId);
+        if (!request || request.status !== 'pending') {
+            return res.status(404).json({ success: false, message: 'Pending request খুঁজে পাওয়া যায়নি।' });
+        }
+
+        const now = new Date();
+        const hasFutureEndDate = user.subscription && user.subscription.active &&
+            user.subscription.endDate && new Date(user.subscription.endDate) > now;
+
+        const baseDate = hasFutureEndDate ? new Date(user.subscription.endDate) : now;
+        const newEndDate = addPlanDuration(baseDate, request.plan);
+
+        user.subscription = {
+            plan: request.plan,
+            startDate: (user.subscription && user.subscription.startDate) ? user.subscription.startDate : now,
+            endDate: newEndDate,
+            active: true
+        };
+
+        // Approve হওয়া request-টা array থেকে সরিয়ে ফেলা হচ্ছে; বাকি pending request গুলো (থাকলে) অক্ষত থাকবে
+        user.pendingRequests.pull({ _id: request._id });
+
+        await user.save();
+
+        res.json({
+            success: true,
+            message: `${request.plan} প্ল্যান অনুমোদন করা হয়েছে। নতুন মেয়াদ শেষ হবে ${newEndDate.toLocaleDateString()} তারিখে।`,
+            subscription: user.subscription,
+            pendingRequests: user.pendingRequests
+        });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// 💡 Reject a specific Pending Request (Owner and Admin only)
+app.put('/api/users/:userId/pending-requests/:requestId/reject', verifyToken, authorizeRoles('owner', 'admin'), async (req, res) => {
+    try {
+        const { reason } = req.body;
+        const user = await User.findById(req.params.userId);
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        const request = user.pendingRequests.id(req.params.requestId);
+        if (!request || request.status !== 'pending') {
+            return res.status(404).json({ success: false, message: 'Pending request খুঁজে পাওয়া যায়নি।' });
+        }
+
+        request.status = 'rejected';
+        request.rejectionReason = reason || 'পেমেন্ট তথ্য সঠিক নয়।';
+
+        await user.save();
+
+        res.json({ success: true, message: 'Request reject করা হয়েছে।', pendingRequests: user.pendingRequests });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// Update Subscription Plan Directly (Owner and Admin only) — ম্যানুয়াল override, pending queue না ঘেঁটেই সরাসরি plan সেট করার জন্য
 app.put('/api/users/:userId/subscription', verifyToken, authorizeRoles('owner', 'admin'), async (req, res) => {
     try {
         const { plan } = req.body;
@@ -168,8 +311,6 @@ app.put('/api/users/:userId/subscription', verifyToken, authorizeRoles('owner', 
             endDate: endDate,
             active: plan !== 'none'
         };
-
-        user.requestedPlan = 'none';
 
         await user.save();
 
