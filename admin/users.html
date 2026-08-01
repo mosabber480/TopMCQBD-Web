@@ -66,7 +66,7 @@
         input { width: 100%; padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
 
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #e0e0e0; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #e0e0e0; vertical-align: top; }
         th { background-color: #f8f9fa; color: #333; font-weight: bold; }
         tr:hover { background-color: #f1f5f9; }
 
@@ -75,6 +75,7 @@
         .badge-expired { background-color: #f8d7da; color: #721c24; }
         .badge-owner { background-color: #cce5ff; color: #004085; }
         .badge-requested { background-color: #007bff; color: white; }
+        .badge-type { background-color: #e2e8f0; color: #333; font-size: 10.5px; }
 
         .plan-select { padding: 6px 10px; border-radius: 4px; border: 1px solid #ccc; font-size: 13px; }
         
@@ -84,6 +85,25 @@
         .btn-submit { background-color: #007bff; width: 100%; padding: 10px; font-size: 14px; }
 
         .table-responsive { overflow-x: auto; }
+
+        /* একাধিক Pending Request কার্ড আকারে দেখানোর জন্য */
+        .pr-card {
+            background: #fff8e1;
+            border: 1px solid #ffe58a;
+            border-radius: 6px;
+            padding: 8px 10px;
+            margin-bottom: 8px;
+            min-width: 230px;
+        }
+        .pr-card.rejected { background: #fdf2f2; border-color: #f3b8bd; }
+        .pr-card .pr-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+        .pr-card .pr-plan { font-weight: bold; font-size: 13px; color: #333; }
+        .pr-card .pr-info { font-size: 11.5px; color: #555; line-height: 1.7; }
+        .pr-card .pr-info b { color: #222; }
+        .pr-card .pr-actions { margin-top: 6px; display: flex; gap: 6px; }
+        .btn-approve { background-color: #28a745; padding: 4px 10px; font-size: 11px; }
+        .btn-reject { background-color: #dc3545; padding: 4px 10px; font-size: 11px; }
+        .no-request-text { color: #888; font-size: 12.5px; }
 
         @media (max-width: 900px) {
             table { display: block; overflow-x: auto; }
@@ -100,7 +120,7 @@
         <!-- User Table Section -->
         <div class="box">
             <h3><i class="fa-solid fa-users"></i> Registered Users & Subscription Plans</h3>
-            <p style="color:#666; font-size:14px; margin-top: 5px;">Select a plan for any customer and click <b>Update Plan</b> to activate their subscription access.</p>
+            <p style="color:#666; font-size:14px; margin-top: 5px;">প্রতিটা Pending রিকোয়েস্টের Payment তথ্য যাচাই করে Approve/Reject করুন, অথবা নিচের ড্রপডাউন দিয়ে সরাসরি প্ল্যান বসিয়ে দিন (Manual Override)।</p>
             
             <div class="table-responsive">
                 <table>
@@ -111,10 +131,10 @@
                             <th>Email</th>
                             <th>Role</th>
                             <th>Status</th>
-                            <th>Requested Plan</th>
+                            <th>Pending Requests (Payment Info)</th>
                             <th>Current Plan</th>
                             <th>Expiry Date</th>
-                            <th>Action (Set Plan)</th>
+                            <th>Manual Override</th>
                             <th>Remove</th>
                         </tr>
                     </thead>
@@ -135,6 +155,47 @@
         const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
         const currentUser = JSON.parse(localStorage.getItem('user') || localStorage.getItem('quiz_user') || '{}');
 
+        function planLabel(plan) { return (plan || '').replace('_', ' ').toUpperCase(); }
+        function typeLabel(type) {
+            if (type === 'renew') return 'Renew';
+            if (type === 'add') return 'Add';
+            return 'New';
+        }
+        function methodLabel(method) { return method === 'bkash' ? 'বিকাশ' : method === 'nagad' ? 'নগদ' : method; }
+
+        // একজন ইউজারের সব pending/rejected request কার্ড আকারে বানানো
+        function buildPendingRequestsCell(u) {
+            const requests = u.pendingRequests || [];
+            if (requests.length === 0) {
+                return '<span class="no-request-text">No Request</span>';
+            }
+
+            return requests.map(r => {
+                const isRejected = r.status === 'rejected';
+                return `
+                    <div class="pr-card ${isRejected ? 'rejected' : ''}">
+                        <div class="pr-top">
+                            <span class="pr-plan">${planLabel(r.plan)}</span>
+                            <span class="badge badge-type">${typeLabel(r.type)}</span>
+                        </div>
+                        <div class="pr-info">
+                            ফোন: <b>${r.phone}</b><br>
+                            Trx ID: <b>${r.transactionId}</b><br>
+                            মাধ্যম: <b>${methodLabel(r.paymentMethod)}</b><br>
+                            পাঠানো হয়েছে: <b>${new Date(r.requestedAt).toLocaleString()}</b>
+                            ${isRejected ? `<br><span style="color:#dc3545;">Rejected: ${r.rejectionReason || ''}</span>` : ''}
+                        </div>
+                        ${!isRejected ? `
+                            <div class="pr-actions">
+                                <button class="btn-action btn-approve" onclick="approveRequest('${u._id}', '${r._id}')">Approve</button>
+                                <button class="btn-action btn-reject" onclick="rejectRequest('${u._id}', '${r._id}')">Reject</button>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
         async function loadUsers() {
             const tableBody = document.getElementById('userTableBody');
             try {
@@ -152,24 +213,20 @@
                 data.users.forEach((u, index) => {
                     const sub = u.subscription || {};
                     const isActive = sub.active && sub.endDate && new Date(sub.endDate) > new Date();
-                    const isRequested = u.requestedPlan && u.requestedPlan !== 'none';
-                    
+                    const pendingCount = (u.pendingRequests || []).filter(r => r.status === 'pending').length;
+
                     let statusBadge = '';
                     if (u.role === 'owner' || u.role === 'admin') {
                         statusBadge = `<span class="badge badge-owner">${u.role.toUpperCase()}</span>`;
-                    } else if (isRequested) {
-                        statusBadge = `<span class="badge badge-active" style="background:#ffc107; color:#212529;">Requested</span>`;
+                    } else if (pendingCount > 0) {
+                        statusBadge = `<span class="badge badge-active" style="background:#ffc107; color:#212529;">${pendingCount} Requested</span>`;
                     } else if (isActive) {
                         statusBadge = `<span class="badge badge-active">Active</span>`;
                     } else {
                         statusBadge = `<span class="badge badge-expired">Expired / Inactive</span>`;
                     }
 
-                    const requestedPlanDisplay = isRequested
-                        ? `<span class="badge badge-requested">${u.requestedPlan}</span>`
-                        : `<span style="color:#888;">No Request</span>`;
-
-                    const defaultSelect = isRequested ? u.requestedPlan : (sub.plan || 'none');
+                    const defaultSelect = sub.plan || 'none';
                     const expiryDate = sub.endDate ? new Date(sub.endDate).toLocaleDateString() : 'N/A';
 
                     tableBody.innerHTML += `
@@ -179,7 +236,7 @@
                             <td>${u.email}</td>
                             <td><small>${u.role}</small></td>
                             <td>${statusBadge}</td>
-                            <td>${requestedPlanDisplay}</td>
+                            <td>${buildPendingRequestsCell(u)}</td>
                             <td><b>${sub.plan || 'none'}</b></td>
                             <td>${expiryDate}</td>
                             <td>
@@ -210,6 +267,55 @@
             }
         }
 
+        // নির্দিষ্ট একটা Pending Request Approve করা
+        async function approveRequest(userId, requestId) {
+            const confirmed = await showTopAlert('এই রিকোয়েস্টটা Approve করলে ইউজারের মেয়াদ যোগ হয়ে যাবে। নিশ্চিত?', 'success', true);
+            if (!confirmed) return;
+
+            try {
+                const res = await fetch(`${API_BASE}/users/${userId}/pending-requests/${requestId}/approve`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showTopAlert(`✅ ${data.message}`, 'success');
+                    loadUsers();
+                } else {
+                    showTopAlert(`❌ Failed: ${data.message}`, 'danger');
+                }
+            } catch (err) {
+                showTopAlert(`❌ Error approving request!`, 'danger');
+            }
+        }
+
+        // নির্দিষ্ট একটা Pending Request Reject করা (কারণসহ)
+        async function rejectRequest(userId, requestId) {
+            const reason = prompt('Reject করার কারণ লিখুন (ইউজার এটা দেখতে পাবে):', 'পেমেন্ট তথ্য সঠিক নয়।');
+            if (reason === null) return; // Cancel চাপলে কিছু হবে না
+
+            try {
+                const res = await fetch(`${API_BASE}/users/${userId}/pending-requests/${requestId}/reject`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ reason })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showTopAlert(`✅ ${data.message}`, 'success');
+                    loadUsers();
+                } else {
+                    showTopAlert(`❌ Failed: ${data.message}`, 'danger');
+                }
+            } catch (err) {
+                showTopAlert(`❌ Error rejecting request!`, 'danger');
+            }
+        }
+
+        // Manual Override — ড্রপডাউন থেকে সরাসরি প্ল্যান বসানো (pending queue না ঘেঁটেই)
         async function updateSubscription(userId) {
             const selectedPlan = document.getElementById(`plan-${userId}`).value;
             try {
