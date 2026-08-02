@@ -32,7 +32,7 @@ const PendingRequestSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['pending', 'rejected'],
+        enum: ['pending', 'approved', 'rejected'],
         default: 'pending'
     },
     rejectionReason: {

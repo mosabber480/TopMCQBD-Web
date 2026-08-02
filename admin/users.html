@@ -63,7 +63,7 @@
 
         .form-group { margin-bottom: 12px; }
         label { display: block; font-weight: bold; margin-bottom: 4px; font-size: 13px; color: #555; }
-        input { width: 100%; padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+        input, select { width: 100%; padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; box-sizing: border-box; }
 
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #e0e0e0; vertical-align: top; }
@@ -82,31 +82,72 @@
         .btn-action { padding: 6px 12px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; font-size: 12px; color: white; }
         .btn-update { background-color: #28a745; }
         .btn-delete { background-color: #dc3545; }
+        .btn-edit { background-color: #007bff; }
+        .btn-cancel-small { background-color: #6c757d; }
         .btn-submit { background-color: #007bff; width: 100%; padding: 10px; font-size: 14px; }
 
         .table-responsive { overflow-x: auto; }
 
-        /* একাধিক Pending Request কার্ড আকারে দেখানোর জন্য */
-        .pr-card {
-            background: #fff8e1;
-            border: 1px solid #ffe58a;
-            border-radius: 6px;
-            padding: 8px 10px;
-            margin-bottom: 8px;
-            min-width: 230px;
+        .user-name-link { cursor: pointer; color: #007bff; text-decoration: underline; }
+        .user-name-link:hover { color: #0056b3; }
+        .btn-view-history { background-color: #17a2b8; margin-top: 6px; font-size: 11px; padding: 4px 10px; }
+
+        /* Manual Override কলামের ভিউ/এডিট অংশ */
+        .override-plan-text { font-weight: bold; color: #28a745; margin-bottom: 6px; }
+        .override-actions { display: flex; gap: 6px; }
+        .override-edit-box { display: none; }
+
+        /* ===================== HISTORY MODAL ===================== */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.55);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 9999; opacity: 0; visibility: hidden;
+            transition: opacity 0.25s ease, visibility 0.25s ease;
+            backdrop-filter: blur(3px);
+            padding: 15px;
         }
-        .pr-card.rejected { background: #fdf2f2; border-color: #f3b8bd; }
-        .pr-card .pr-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
-        .pr-card .pr-plan { font-weight: bold; font-size: 13px; color: #333; }
-        .pr-card .pr-info { font-size: 11.5px; color: #555; line-height: 1.7; }
-        .pr-card .pr-info b { color: #222; }
-        .pr-card .pr-actions { margin-top: 6px; display: flex; gap: 6px; }
-        .btn-approve { background-color: #28a745; padding: 4px 10px; font-size: 11px; }
-        .btn-reject { background-color: #dc3545; padding: 4px 10px; font-size: 11px; }
-        .no-request-text { color: #888; font-size: 12.5px; }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        .modal-box {
+            background: white; padding: 25px 28px; border-radius: 12px;
+            max-width: 720px; width: 100%; max-height: 85vh; overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .modal-box .modal-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 15px; padding-bottom: 12px; border-bottom: 1px solid #e2e8f0;
+        }
+        .modal-box .modal-header h3 { font-size: 18px; color: #2c3e50; }
+        .modal-close-btn { background: none; border: none; font-size: 22px; cursor: pointer; color: #888; }
+        .modal-close-btn:hover { color: #333; }
+
+        .add-payment-form {
+            display: none;
+            background: #f4f8ff; border: 1px dashed #007bff; border-radius: 8px;
+            padding: 15px; margin-bottom: 18px;
+        }
+        .add-payment-form .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        .add-payment-form .modal-actions { display: flex; gap: 10px; margin-top: 8px; }
+        .add-payment-form .modal-actions button { flex: 1; padding: 9px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; }
+
+        .history-entry {
+            background: #fff8e1; border: 1px solid #ffe58a; border-radius: 8px;
+            padding: 12px 15px; margin-bottom: 12px;
+        }
+        .history-entry.rejected { background: #fdf2f2; border-color: #f3b8bd; }
+        .history-entry.approved { background: #f0faf4; border-color: #a8e6b8; }
+        .history-entry .he-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 6px; }
+        .history-entry .he-plan { font-weight: bold; font-size: 15px; color: #333; }
+        .history-entry .he-info { font-size: 12.5px; color: #555; line-height: 1.9; }
+        .history-entry .he-info b { color: #222; }
+        .history-entry .he-actions { margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap; }
+        .history-entry .he-edit-form { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; }
+        .history-entry .he-edit-form .full-width { grid-column: 1 / -1; }
+        .no-history-text { color: #888; font-size: 13.5px; text-align: center; padding: 20px 0; }
 
         @media (max-width: 900px) {
             table { display: block; overflow-x: auto; }
+            .add-payment-form .form-row, .history-entry .he-edit-form { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -120,7 +161,7 @@
         <!-- User Table Section -->
         <div class="box">
             <h3><i class="fa-solid fa-users"></i> Registered Users & Subscription Plans</h3>
-            <p style="color:#666; font-size:14px; margin-top: 5px;">প্রতিটা Pending রিকোয়েস্টের Payment তথ্য যাচাই করে Approve/Reject করুন, অথবা নিচের ড্রপডাউন দিয়ে সরাসরি প্ল্যান বসিয়ে দিন (Manual Override)।</p>
+            <p style="color:#666; font-size:14px; margin-top: 5px;">কাস্টমারের নামে বা "View History" বাটনে ক্লিক করে তার পুরো Payment History দেখুন, Edit/Delete/Approve/Reject করুন। অথবা "Manual Override" দিয়ে সরাসরি প্ল্যান বসিয়ে দিন।</p>
             
             <div class="table-responsive">
                 <table>
@@ -131,7 +172,7 @@
                             <th>Email</th>
                             <th>Role</th>
                             <th>Status</th>
-                            <th>Pending Requests (Payment Info)</th>
+                            <th>Payment History</th>
                             <th>Current Plan</th>
                             <th>Expiry Date</th>
                             <th>Manual Override</th>
@@ -146,6 +187,68 @@
         </div>
     </div>
 
+    <!-- ===================== HISTORY MODAL ===================== -->
+    <div class="modal-overlay" id="historyModalOverlay">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 id="historyModalTitle"><i class="fa-solid fa-clock-rotate-left"></i> Payment History</h3>
+                <button class="modal-close-btn" onclick="closeHistoryModal()">&times;</button>
+            </div>
+
+            <button class="btn-action btn-update" style="margin-bottom: 15px;" onclick="toggleAddForm()">
+                <i class="fa-solid fa-plus"></i> Add New Payment Record
+            </button>
+
+            <!-- নতুন Payment Record যোগ করার ফর্ম -->
+            <div class="add-payment-form" id="addPaymentForm">
+                <div class="form-row">
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label>প্যাকেজ</label>
+                        <select id="addPlan">
+                            <option value="1_month">1 Month</option>
+                            <option value="3_months">3 Months</option>
+                            <option value="6_months">6 Months</option>
+                            <option value="1_year">1 Year</option>
+                            <option value="2_years">2 Years</option>
+                            <option value="3_years">3 Years</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label>Status</label>
+                        <select id="addStatus">
+                            <option value="approved">Active (Approved)</option>
+                            <option value="pending">Pending</option>
+                            <option value="rejected">Rejected</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label>ফোন নাম্বার</label>
+                        <input type="text" id="addPhone" placeholder="017XXXXXXXX">
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label>Transaction ID</label>
+                        <input type="text" id="addTrxId" placeholder="Transaction ID">
+                    </div>
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                    <label>পেমেন্ট মাধ্যম</label>
+                    <select id="addMethod">
+                        <option value="bkash">বিকাশ (Bkash)</option>
+                        <option value="nagad">নগদ (Nagad)</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel-small" style="color:white;" onclick="toggleAddForm()">বাতিল</button>
+                    <button type="button" class="btn-update" style="color:white;" onclick="submitAddPayment()">Save Record</button>
+                </div>
+            </div>
+
+            <div id="historyList"></div>
+        </div>
+    </div>
+
     <!-- GLOBAL JS LINKS -->
     <script src="../global/global.js"></script>
     <script src="../global/admin-global.js"></script>
@@ -155,46 +258,17 @@
         const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
         const currentUser = JSON.parse(localStorage.getItem('user') || localStorage.getItem('quiz_user') || '{}');
 
+        let usersCache = [];        // সব ইউজারের সর্বশেষ ডাটা এখানে ক্যাশ থাকে (মডাল রেন্ডারে বারবার fetch এড়াতে)
+        let currentHistoryUserId = null;
+
         function planLabel(plan) { return (plan || '').replace('_', ' ').toUpperCase(); }
         function typeLabel(type) {
             if (type === 'renew') return 'Renew';
             if (type === 'add') return 'Add';
+            if (type === 'manual') return 'Manual (Admin)';
             return 'New';
         }
         function methodLabel(method) { return method === 'bkash' ? 'বিকাশ' : method === 'nagad' ? 'নগদ' : method; }
-
-        // একজন ইউজারের সব pending/rejected request কার্ড আকারে বানানো
-        function buildPendingRequestsCell(u) {
-            const requests = u.pendingRequests || [];
-            if (requests.length === 0) {
-                return '<span class="no-request-text">No Request</span>';
-            }
-
-            return requests.map(r => {
-                const isRejected = r.status === 'rejected';
-                return `
-                    <div class="pr-card ${isRejected ? 'rejected' : ''}">
-                        <div class="pr-top">
-                            <span class="pr-plan">${planLabel(r.plan)}</span>
-                            <span class="badge badge-type">${typeLabel(r.type)}</span>
-                        </div>
-                        <div class="pr-info">
-                            ফোন: <b>${r.phone}</b><br>
-                            Trx ID: <b>${r.transactionId}</b><br>
-                            মাধ্যম: <b>${methodLabel(r.paymentMethod)}</b><br>
-                            পাঠানো হয়েছে: <b>${new Date(r.requestedAt).toLocaleString()}</b>
-                            ${isRejected ? `<br><span style="color:#dc3545;">Rejected: ${r.rejectionReason || ''}</span>` : ''}
-                        </div>
-                        ${!isRejected ? `
-                            <div class="pr-actions">
-                                <button class="btn-action btn-approve" onclick="approveRequest('${u._id}', '${r._id}')">Approve</button>
-                                <button class="btn-action btn-reject" onclick="rejectRequest('${u._id}', '${r._id}')">Reject</button>
-                            </div>
-                        ` : ''}
-                    </div>
-                `;
-            }).join('');
-        }
 
         async function loadUsers() {
             const tableBody = document.getElementById('userTableBody');
@@ -209,11 +283,14 @@
                     return;
                 }
 
+                usersCache = data.users;
                 tableBody.innerHTML = '';
-                data.users.forEach((u, index) => {
+
+                usersCache.forEach((u, index) => {
                     const sub = u.subscription || {};
                     const isActive = sub.active && sub.endDate && new Date(sub.endDate) > new Date();
                     const pendingCount = (u.pendingRequests || []).filter(r => r.status === 'pending').length;
+                    const totalRecords = (u.pendingRequests || []).length;
 
                     let statusBadge = '';
                     if (u.role === 'owner' || u.role === 'admin') {
@@ -229,20 +306,21 @@
                     const defaultSelect = sub.plan || 'none';
                     const expiryDate = sub.endDate ? new Date(sub.endDate).toLocaleDateString() : 'N/A';
 
-                    tableBody.innerHTML += `
-                        <tr>
-                            <td>${index + 1}</td>
-                            <td><b>${u.name}</b></td>
-                            <td>${u.email}</td>
-                            <td><small>${u.role}</small></td>
-                            <td>${statusBadge}</td>
-                            <td>${buildPendingRequestsCell(u)}</td>
-                            <td><b>${sub.plan || 'none'}</b></td>
-                            <td>${expiryDate}</td>
-                            <td>
-                                ${u.role === 'customer' ? `
+                    // ---- Manual Override সেল: Active থাকলে প্ল্যান নাম + Edit/Cancel, নাহলে dropdown + Save Plan ----
+                    let overrideCell = '<small style="color:#888;">Full Access</small>';
+                    if (u.role === 'customer') {
+                        if (isActive) {
+                            overrideCell = `
+                                <div class="override-view-box" id="override-view-${u._id}">
+                                    <div class="override-plan-text">${planLabel(sub.plan)}</div>
+                                    <div class="override-actions">
+                                        <button class="btn-action btn-edit" onclick="toggleOverrideEdit('${u._id}')">Edit</button>
+                                        <button class="btn-action btn-delete" onclick="cancelActivePlan('${u._id}')">Cancel</button>
+                                    </div>
+                                </div>
+                                <div class="override-edit-box" id="override-edit-${u._id}">
                                     <select class="plan-select" id="plan-${u._id}">
-                                        <option value="none" ${defaultSelect === 'none' ? 'selected' : ''}>Cancel Plan</option>
+                                        <option value="none">Cancel Plan</option>
                                         <option value="1_month" ${defaultSelect === '1_month' ? 'selected' : ''}>1 Month</option>
                                         <option value="3_months" ${defaultSelect === '3_months' ? 'selected' : ''}>3 Months</option>
                                         <option value="6_months" ${defaultSelect === '6_months' ? 'selected' : ''}>6 Months</option>
@@ -250,9 +328,45 @@
                                         <option value="2_years" ${defaultSelect === '2_years' ? 'selected' : ''}>2 Years</option>
                                         <option value="3_years" ${defaultSelect === '3_years' ? 'selected' : ''}>3 Years</option>
                                     </select>
-                                    <button class="btn-action btn-update" onclick="updateSubscription('${u._id}')">Save Plan</button>
-                                ` : '<small style="color:#888;">Full Access</small>'}
+                                    <div class="override-actions" style="margin-top:6px;">
+                                        <button class="btn-action btn-update" onclick="updateSubscription('${u._id}')">Save Plan</button>
+                                        <button class="btn-action btn-cancel-small" onclick="toggleOverrideEdit('${u._id}')">Back</button>
+                                    </div>
+                                </div>
+                            `;
+                        } else {
+                            overrideCell = `
+                                <select class="plan-select" id="plan-${u._id}">
+                                    <option value="none" ${defaultSelect === 'none' ? 'selected' : ''}>Cancel Plan</option>
+                                    <option value="1_month" ${defaultSelect === '1_month' ? 'selected' : ''}>1 Month</option>
+                                    <option value="3_months" ${defaultSelect === '3_months' ? 'selected' : ''}>3 Months</option>
+                                    <option value="6_months" ${defaultSelect === '6_months' ? 'selected' : ''}>6 Months</option>
+                                    <option value="1_year" ${defaultSelect === '1_year' ? 'selected' : ''}>1 Year</option>
+                                    <option value="2_years" ${defaultSelect === '2_years' ? 'selected' : ''}>2 Years</option>
+                                    <option value="3_years" ${defaultSelect === '3_years' ? 'selected' : ''}>3 Years</option>
+                                </select>
+                                <button class="btn-action btn-update" onclick="updateSubscription('${u._id}')">Save Plan</button>
+                            `;
+                        }
+                    }
+
+                    tableBody.innerHTML += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>
+                                <b class="user-name-link" onclick="openHistoryModal('${u._id}')">${u.name}</b>
                             </td>
+                            <td>${u.email}</td>
+                            <td><small>${u.role}</small></td>
+                            <td>${statusBadge}</td>
+                            <td>
+                                ${totalRecords > 0 ? `<span>${totalRecords} Record${totalRecords > 1 ? 's' : ''}</span>` : '<span style="color:#888;">No Record</span>'}
+                                <br>
+                                <button class="btn-action btn-view-history" onclick="openHistoryModal('${u._id}')">View History</button>
+                            </td>
+                            <td><b>${sub.plan || 'none'}</b></td>
+                            <td>${expiryDate}</td>
+                            <td>${overrideCell}</td>
                             <td>
                                 ${currentUser.role === 'owner' && u.role !== 'owner' ? `
                                     <button class="btn-action btn-delete" onclick="deleteUser('${u._id}', '${u.name}')">Delete</button>
@@ -262,8 +376,241 @@
                     `;
                 });
 
+                // মডাল খোলা অবস্থায় থাকলে (refresh-এর পর) সেটাও নতুন ডাটা দিয়ে re-render
+                if (currentHistoryUserId) {
+                    renderHistoryModal();
+                }
+
             } catch (err) {
                 tableBody.innerHTML = `<tr><td colspan="10" style="color:red; text-align:center;">Error fetching user list!</td></tr>`;
+            }
+        }
+
+        // ===================== MANUAL OVERRIDE ভিউ/এডিট টগল =====================
+        function toggleOverrideEdit(userId) {
+            const viewBox = document.getElementById(`override-view-${userId}`);
+            const editBox = document.getElementById(`override-edit-${userId}`);
+            const isEditing = editBox.style.display === 'block';
+            editBox.style.display = isEditing ? 'none' : 'block';
+            viewBox.style.display = isEditing ? 'block' : 'none';
+        }
+
+        async function cancelActivePlan(userId) {
+            const confirmed = await showTopAlert('এই ইউজারের Active প্ল্যান বাতিল করতে চান?', 'danger', true);
+            if (!confirmed) return;
+            await updateSubscriptionWithPlan(userId, 'none');
+        }
+
+        // Manual Override — ড্রপডাউন থেকে সরাসরি প্ল্যান বসানো (pending queue না ঘেঁটেই)
+        async function updateSubscription(userId) {
+            const selectedPlan = document.getElementById(`plan-${userId}`).value;
+            await updateSubscriptionWithPlan(userId, selectedPlan);
+        }
+
+        async function updateSubscriptionWithPlan(userId, plan) {
+            try {
+                const res = await fetch(`${API_BASE}/users/${userId}/subscription`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ plan })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    showTopAlert(`✅ ${data.message}`, 'success');
+                    loadUsers();
+                } else {
+                    showTopAlert(`❌ Failed: ${data.message}`, 'danger');
+                }
+            } catch (err) {
+                showTopAlert(`❌ Error updating plan!`, 'danger');
+            }
+        }
+
+        // ===================== HISTORY MODAL =====================
+        function openHistoryModal(userId) {
+            currentHistoryUserId = userId;
+            document.getElementById('addPaymentForm').style.display = 'none';
+            renderHistoryModal();
+            document.getElementById('historyModalOverlay').classList.add('active');
+        }
+
+        function closeHistoryModal() {
+            document.getElementById('historyModalOverlay').classList.remove('active');
+            currentHistoryUserId = null;
+        }
+
+        function renderHistoryModal() {
+            const user = usersCache.find(u => u._id === currentHistoryUserId);
+            const listEl = document.getElementById('historyList');
+            if (!user) { listEl.innerHTML = ''; return; }
+
+            document.getElementById('historyModalTitle').innerHTML =
+                `<i class="fa-solid fa-clock-rotate-left"></i> ${user.name} — Payment History`;
+
+            const requests = [...(user.pendingRequests || [])].sort((a, b) => new Date(b.requestedAt) - new Date(a.requestedAt));
+
+            if (requests.length === 0) {
+                listEl.innerHTML = '<p class="no-history-text">এখনো কোনো Payment Record নেই।</p>';
+                return;
+            }
+
+            listEl.innerHTML = requests.map(r => {
+                const isRejected = r.status === 'rejected';
+                const isApproved = r.status === 'approved';
+                const isPending = r.status === 'pending';
+                const cardClass = isRejected ? 'rejected' : (isApproved ? 'approved' : '');
+                const statusLabel = isRejected ? 'Rejected' : (isApproved ? 'Active' : 'Pending');
+                const badgeClass = isRejected ? 'badge-expired' : (isApproved ? 'badge-active' : 'badge-requested');
+
+                return `
+                    <div class="history-entry ${cardClass}" id="he-${r._id}">
+                        <div class="he-top">
+                            <span class="he-plan">${planLabel(r.plan)}</span>
+                            <span class="badge ${badgeClass}">${statusLabel}</span>
+                        </div>
+                        <div class="he-info" id="he-view-${r._id}">
+                            <span class="badge badge-type">${typeLabel(r.type)}</span><br>
+                            ফোন: <b>${r.phone}</b> &nbsp;|&nbsp; Trx ID: <b>${r.transactionId}</b> &nbsp;|&nbsp; মাধ্যম: <b>${methodLabel(r.paymentMethod)}</b><br>
+                            তারিখ: <b>${new Date(r.requestedAt).toLocaleString()}</b>
+                            ${isRejected && r.rejectionReason ? `<br><span style="color:#dc3545;">Rejected কারণ: ${r.rejectionReason}</span>` : ''}
+                        </div>
+
+                        <div class="he-edit-form" id="he-edit-${r._id}" style="display:none;">
+                            <select id="he-plan-${r._id}">
+                                <option value="1_month" ${r.plan === '1_month' ? 'selected' : ''}>1 Month</option>
+                                <option value="3_months" ${r.plan === '3_months' ? 'selected' : ''}>3 Months</option>
+                                <option value="6_months" ${r.plan === '6_months' ? 'selected' : ''}>6 Months</option>
+                                <option value="1_year" ${r.plan === '1_year' ? 'selected' : ''}>1 Year</option>
+                                <option value="2_years" ${r.plan === '2_years' ? 'selected' : ''}>2 Years</option>
+                                <option value="3_years" ${r.plan === '3_years' ? 'selected' : ''}>3 Years</option>
+                            </select>
+                            <select id="he-method-${r._id}">
+                                <option value="bkash" ${r.paymentMethod === 'bkash' ? 'selected' : ''}>বিকাশ</option>
+                                <option value="nagad" ${r.paymentMethod === 'nagad' ? 'selected' : ''}>নগদ</option>
+                            </select>
+                            <input type="text" id="he-phone-${r._id}" value="${r.phone}" placeholder="ফোন নাম্বার">
+                            <input type="text" id="he-trx-${r._id}" value="${r.transactionId}" placeholder="Transaction ID">
+                            <div class="full-width" style="display:flex; gap:6px;">
+                                <button class="btn-action btn-update" onclick="saveEditEntry('${r._id}')">Save</button>
+                                <button class="btn-action btn-cancel-small" onclick="cancelEditEntry('${r._id}')">বাতিল</button>
+                            </div>
+                        </div>
+
+                        <div class="he-actions" id="he-actions-${r._id}">
+                            ${isPending ? `
+                                <button class="btn-action btn-update" onclick="approveRequest('${currentHistoryUserId}', '${r._id}')">Approve</button>
+                                <button class="btn-action btn-delete" onclick="rejectRequest('${currentHistoryUserId}', '${r._id}')">Reject</button>
+                            ` : ''}
+                            <button class="btn-action btn-edit" onclick="startEditEntry('${r._id}')">Edit</button>
+                            <button class="btn-action btn-delete" onclick="deleteEntry('${r._id}')">Delete</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function startEditEntry(requestId) {
+            document.getElementById(`he-view-${requestId}`).style.display = 'none';
+            document.getElementById(`he-actions-${requestId}`).style.display = 'none';
+            document.getElementById(`he-edit-${requestId}`).style.display = 'grid';
+        }
+
+        function cancelEditEntry(requestId) {
+            renderHistoryModal(); // সহজভাবে পুরো লিস্ট আবার রেন্ডার করে edit mode বাতিল করা
+        }
+
+        async function saveEditEntry(requestId) {
+            const plan = document.getElementById(`he-plan-${requestId}`).value;
+            const paymentMethod = document.getElementById(`he-method-${requestId}`).value;
+            const phone = document.getElementById(`he-phone-${requestId}`).value.trim();
+            const transactionId = document.getElementById(`he-trx-${requestId}`).value.trim();
+
+            if (!phone || !transactionId) {
+                showTopAlert('ফোন নাম্বার ও Transaction ID দিতে হবে।', 'warning');
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_BASE}/users/${currentHistoryUserId}/pending-requests/${requestId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ plan, paymentMethod, phone, transactionId })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showTopAlert(`✅ ${data.message}`, 'success');
+                    loadUsers();
+                } else {
+                    showTopAlert(`❌ ${data.message}`, 'danger');
+                }
+            } catch (err) {
+                showTopAlert('❌ Error updating record!', 'danger');
+            }
+        }
+
+        async function deleteEntry(requestId) {
+            const confirmed = await showTopAlert('এই Payment Record-টা স্থায়ীভাবে মুছে ফেলতে চান?', 'danger', true);
+            if (!confirmed) return;
+
+            try {
+                const res = await fetch(`${API_BASE}/users/${currentHistoryUserId}/pending-requests/${requestId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showTopAlert(`✅ ${data.message}`, 'success');
+                    loadUsers();
+                } else {
+                    showTopAlert(`❌ ${data.message}`, 'danger');
+                }
+            } catch (err) {
+                showTopAlert('❌ Error deleting record!', 'danger');
+            }
+        }
+
+        function toggleAddForm() {
+            const form = document.getElementById('addPaymentForm');
+            const isOpen = form.style.display === 'block';
+            form.style.display = isOpen ? 'none' : 'block';
+            if (!isOpen) {
+                document.getElementById('addPhone').value = '';
+                document.getElementById('addTrxId').value = '';
+            }
+        }
+
+        async function submitAddPayment() {
+            const plan = document.getElementById('addPlan').value;
+            const status = document.getElementById('addStatus').value;
+            const phone = document.getElementById('addPhone').value.trim();
+            const transactionId = document.getElementById('addTrxId').value.trim();
+            const paymentMethod = document.getElementById('addMethod').value;
+
+            if (!phone || !transactionId) {
+                showTopAlert('ফোন নাম্বার ও Transaction ID দিতে হবে।', 'warning');
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_BASE}/users/${currentHistoryUserId}/pending-requests`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ plan, status, phone, transactionId, paymentMethod })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showTopAlert(`✅ ${data.message}`, 'success');
+                    toggleAddForm();
+                    loadUsers();
+                } else {
+                    showTopAlert(`❌ ${data.message}`, 'danger');
+                }
+            } catch (err) {
+                showTopAlert('❌ Error adding record!', 'danger');
             }
         }
 
@@ -312,31 +659,6 @@
                 }
             } catch (err) {
                 showTopAlert(`❌ Error rejecting request!`, 'danger');
-            }
-        }
-
-        // Manual Override — ড্রপডাউন থেকে সরাসরি প্ল্যান বসানো (pending queue না ঘেঁটেই)
-        async function updateSubscription(userId) {
-            const selectedPlan = document.getElementById(`plan-${userId}`).value;
-            try {
-                const res = await fetch(`${API_BASE}/users/${userId}/subscription`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ plan: selectedPlan })
-                });
-
-                const data = await res.json();
-                if (data.success) {
-                    showTopAlert(`✅ ${data.message}`, 'success');
-                    loadUsers();
-                } else {
-                    showTopAlert(`❌ Failed: ${data.message}`, 'danger');
-                }
-            } catch (err) {
-                showTopAlert(`❌ Error updating plan!`, 'danger');
             }
         }
 

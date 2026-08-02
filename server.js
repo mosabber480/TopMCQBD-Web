@@ -244,8 +244,9 @@ app.put('/api/users/:userId/pending-requests/:requestId/approve', verifyToken, a
             active: true
         };
 
-        // Approve হওয়া request-টা array থেকে সরিয়ে ফেলা হচ্ছে; বাকি pending request গুলো (থাকলে) অক্ষত থাকবে
-        user.pendingRequests.pull({ _id: request._id });
+        // 💡 Approve হওয়া request-টা এখন আর মুছে ফেলা হচ্ছে না — status 'approved' করে রেখে দেওয়া হচ্ছে,
+        // যাতে profile.html-এর Payment History-তে এটা "Active" হিসেবে দেখা যায়। বাকি pending request (থাকলে) অক্ষত থাকবে।
+        request.status = 'approved';
 
         await user.save();
 

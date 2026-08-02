@@ -76,6 +76,10 @@
             background: #fdf2f2;
             border: 1px dashed #dc3545;
         }
+        .pending-request-card.approved {
+            background: #f0faf4;
+            border: 1px dashed #28a745;
+        }
         .pending-request-card .prc-top {
             display: flex;
             align-items: center;
@@ -234,14 +238,14 @@
                     <p style="margin: 5px 0;" id="remainingTimeWrapper"><strong>Remaining Time:</strong> <span id="subRemaining" style="color: #e67e22; font-weight: bold;"></span></p>
 
                     <!-- একাধিক Pending Request-এর লিস্ট এখানে JS দিয়ে রেন্ডার হবে -->
-                    <div id="pendingRequestsWrapper" style="display: none; margin-top: 12px;">
-                        <p style="margin: 0 0 4px 0; font-weight: bold; font-size: 13px; color: #555;">
-                            <i class="fa-solid fa-clock-rotate-left"></i> Your Requests:
-                        </p>
-                        <div id="pendingRequestsList"></div>
-                    </div>
                 </div>
                 <a href="index.html" class="btn-quiz"><i class="fa-solid fa-play"></i> Start Practice</a>
+
+                <!-- 💡 Payment History বক্স — ইউজারের সব প্যাকেজ রিকোয়েস্ট (Active/Pending/Rejected) এখানে দেখাবে -->
+                <div class="sub-box" id="paymentHistoryWrapper" style="display: none; margin-top: 15px;">
+                    <h4 style="margin:0 0 10px 0; color:#007bff;"><i class="fa-solid fa-clock-rotate-left"></i> Payment History</h4>
+                    <div id="pendingRequestsList"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -320,9 +324,9 @@
             return method === 'bkash' ? 'বিকাশ' : method === 'nagad' ? 'নগদ' : method;
         }
 
-        // একাধিক pending request কার্ড আকারে রেন্ডার করা
+        // 💡 সব প্যাকেজ রিকোয়েস্ট (Active/Pending/Rejected) — Payment History বক্সে কার্ড আকারে রেন্ডার করা
         function renderPendingRequests(pendingRequests) {
-            const wrapper = document.getElementById('pendingRequestsWrapper');
+            const wrapper = document.getElementById('paymentHistoryWrapper');
             const list = document.getElementById('pendingRequestsList');
             list.innerHTML = '';
 
@@ -333,20 +337,28 @@
 
             wrapper.style.display = 'block';
 
-            pendingRequests.forEach((reqItem) => {
+            // নতুন থেকে পুরনো ক্রমে সাজানো
+            const sorted = [...pendingRequests].sort((a, b) => new Date(b.requestedAt) - new Date(a.requestedAt));
+
+            sorted.forEach((reqItem) => {
                 const isRejected = reqItem.status === 'rejected';
+                const isApproved = reqItem.status === 'approved';
+                const statusClass = isRejected ? 'rejected' : (isApproved ? 'approved' : '');
+                const badgeClass = isRejected ? 'badge-rejected' : (isApproved ? 'badge-active' : 'badge-pending');
+                const statusText = isRejected ? 'Rejected' : (isApproved ? 'Active' : 'Pending');
+
                 const card = document.createElement('div');
-                card.className = 'pending-request-card' + (isRejected ? ' rejected' : '');
+                card.className = 'pending-request-card' + (statusClass ? ' ' + statusClass : '');
 
                 card.innerHTML = `
                     <div class="prc-top">
                         <span class="prc-plan">${planLabel(reqItem.plan)}</span>
-                        <span class="badge ${isRejected ? 'badge-rejected' : 'badge-pending'}">${isRejected ? 'Rejected' : 'Pending'}</span>
+                        <span class="badge ${badgeClass}">${statusText}</span>
                     </div>
                     <p class="prc-info">
                         <span class="badge badge-type" style="margin-bottom:4px; display:inline-block;">${typeLabel(reqItem.type)}</span><br>
                         ফোন: <span>${reqItem.phone}</span> &nbsp;|&nbsp; ট্রানজেকশন আইডি: <span>${reqItem.transactionId}</span> &nbsp;|&nbsp; মাধ্যম: <span>${methodLabel(reqItem.paymentMethod)}</span><br>
-                        পাঠানো হয়েছে: <span>${new Date(reqItem.requestedAt).toLocaleString()}</span>
+                        তারিখ: <span>${new Date(reqItem.requestedAt).toLocaleString()}</span>
                         ${isRejected && reqItem.rejectionReason ? `<br><span style="color:#dc3545;">কারণ: ${reqItem.rejectionReason}</span>` : ''}
                     </p>
                 `;
