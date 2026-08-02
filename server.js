@@ -32,7 +32,7 @@ app.use('/global', express.static(path.join(__dirname, 'global')));
 // 3. External API Routes Setup (Fixed Mount Paths)
 app.use('/api/auth', authRoutes);
 app.use('/api/home-config', homeConfigRoutes);
-app.use('/api', layoutRoutes); // <--- এখানেই মূল ফিক্সটি করা হয়েছে
+app.use('/api', layoutRoutes); 
 
 // Multer Setup for Memory Storage
 const upload = multer({ storage: multer.memoryStorage() });
@@ -63,7 +63,6 @@ const Question = mongoose.model('Question', questionSchema);
 const VALID_PLANS = ['1_month', '3_months', '6_months', '1_year', '2_years', '3_years'];
 
 // 💡 কোনো একটা তারিখের উপর plan-এর মেয়াদ যোগ করার হেল্পার ফাংশন
-// (renew বা একাধিক approve stacking — দুই ক্ষেত্রেই এটাই ব্যবহার হবে)
 function addPlanDuration(baseDate, plan) {
     const d = new Date(baseDate);
     if (plan === '1_month') d.setMonth(d.getMonth() + 1);
@@ -129,12 +128,11 @@ app.get('/api/users/me', verifyToken, async (req, res) => {
     }
 });
 
-// 💡 Request a Subscription Plan (নতুন redesign — action ভিত্তিক: new / add / change / renew)
+// Request a Subscription Plan
 app.post('/api/users/request-plan', verifyToken, async (req, res) => {
     try {
         const { plan, action, requestId, phone, transactionId, paymentMethod } = req.body;
 
-        // ---- বেসিক validation ----
         if (!plan || !action || !phone || !transactionId || !paymentMethod) {
             return res.status(400).json({ success: false, message: 'সব তথ্য (plan, action, phone, transactionId, paymentMethod) দেওয়া বাধ্যতামূলক।' });
         }
@@ -158,7 +156,6 @@ app.post('/api/users/request-plan', verifyToken, async (req, res) => {
             user.subscription.endDate && new Date(user.subscription.endDate) > new Date();
         const pendingCount = user.pendingRequests.filter(r => r.status === 'pending').length;
 
-        // ---- Server-side এ আবার একবার validate করা, যাতে frontend bypass করে ভুল action না পাঠাতে পারে ----
         if (action === 'renew' && !isSubActive) {
             return res.status(400).json({ success: false, message: 'আপনার কোনো Active subscription নেই, তাই Renew request পাঠানো যাবে ঘন।' });
         }
@@ -186,10 +183,9 @@ app.post('/api/users/request-plan', verifyToken, async (req, res) => {
             target.paymentMethod = paymentMethod;
             target.requestedAt = new Date();
         } else {
-            // 'new' | 'add' | 'renew' — সব ক্ষেত্রেই নতুন entry array-তে push হবে
             user.pendingRequests.push({
                 plan,
-                type: action, // 'new' | 'add' | 'renew'
+                type: action,
                 phone,
                 transactionId,
                 paymentMethod,
@@ -217,7 +213,7 @@ app.post('/api/users/request-plan', verifyToken, async (req, res) => {
     }
 });
 
-// 💡 NEW: Edit/Update Payment History Record
+// Edit/Update Payment History Record
 app.put('/api/users/:userId/pending-requests/:requestId', verifyToken, authorizeRoles('owner', 'admin'), async (req, res) => {
     try {
         const { plan, paymentMethod, phone, transactionId } = req.body;
@@ -239,7 +235,7 @@ app.put('/api/users/:userId/pending-requests/:requestId', verifyToken, authorize
     }
 });
 
-// 💡 NEW: Delete Payment History Record
+// Delete Payment History Record
 app.delete('/api/users/:userId/pending-requests/:requestId', verifyToken, authorizeRoles('owner', 'admin'), async (req, res) => {
     try {
         const user = await User.findById(req.params.userId);
@@ -273,15 +269,19 @@ app.put('/api/users/:userId/pending-requests/:requestId/approve', verifyToken, a
         const baseDate = hasFutureEndDate ? new Date(user.subscription.endDate) : now;
         const newEndDate = addPlanDuration(baseDate, request.plan);
 
+        // 💡 NEW LOGIC: Stacking plan name ONLY if currently active & not expired
+        let newPlanName = request.plan;
+        if (hasFutureEndDate && user.subscription.plan && user.subscription.plan !== 'none') {
+            newPlanName = user.subscription.plan + ' + ' + request.plan;
+        }
+
         user.subscription = {
-            plan: request.plan,
-            startDate: (user.subscription && user.subscription.startDate) ? user.subscription.startDate : now,
+            plan: newPlanName, // 💡 Updated string
+            startDate: (user.subscription && user.subscription.startDate && hasFutureEndDate) ? user.subscription.startDate : now,
             endDate: newEndDate,
             active: true
         };
 
-        // 💡 Approve হওয়া request-টা এখন আর মুছে ফেলা হচ্ছে না — status 'approved' করে রেখে দেওয়া হচ্ছে,
-        // যাতে profile.html-এর Payment History-তে এটা "Active" হিসেবে দেখা যায়। বাকি pending request (থাকলে) অক্ষত থাকবে।
         request.status = 'approved';
 
         await user.save();
@@ -297,7 +297,7 @@ app.put('/api/users/:userId/pending-requests/:requestId/approve', verifyToken, a
     }
 });
 
-// 💡 Reject a specific Pending Request (Owner and Admin only)
+// Reject a specific Pending Request (Owner and Admin only)
 app.put('/api/users/:userId/pending-requests/:requestId/reject', verifyToken, authorizeRoles('owner', 'admin'), async (req, res) => {
     try {
         const { reason } = req.body;
@@ -322,7 +322,7 @@ app.put('/api/users/:userId/pending-requests/:requestId/reject', verifyToken, au
     }
 });
 
-// 💡 Update Subscription Plan Directly (Manual Override with Custom Support)
+// Update Subscription Plan Directly (Manual Override with Custom Support)
 app.put('/api/users/:userId/subscription', verifyToken, authorizeRoles('owner', 'admin'), async (req, res) => {
     try {
         const { plan, customName, years, months, days } = req.body;

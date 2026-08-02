@@ -64,7 +64,6 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.15);
         }
 
-        /* একাধিক pending request কার্ড আকারে দেখানোর জন্য */
         .pending-request-card {
             margin: 10px 0;
             padding: 12px 15px;
@@ -322,15 +321,12 @@
             return method === 'bkash' ? 'বিকাশ' : method === 'nagad' ? 'ন নগদ' : method;
         }
 
-        // 💡 Current Plan (যেমন: 3 MONTHS + 6 MONTHS) ক্যালকুলেট করার ফাংশন
+        // 💡 UPDATED: Current Plan Logic - Read directly from Database
         function getDisplayPlan(userObj) {
             const sub = userObj.subscription || {};
-            const approvedReqs = (userObj.pendingRequests || []).filter(r => r.status === 'approved');
             
             if (sub.active && sub.endDate && new Date(sub.endDate) > new Date()) {
-                if (approvedReqs.length > 0) {
-                    return approvedReqs.map(r => planLabel(r.plan)).join(' + ');
-                }
+                // Return exactly what the database has saved
                 return planLabel(sub.plan);
             }
             return 'None';
@@ -388,7 +384,6 @@
             const hasActivePending = activePendingCount > 0;
             const subPlanElem = document.getElementById('subPlan');
 
-            // 💡 Updated Current Plan Logic Integration
             const displayPlanText = getDisplayPlan(user);
 
             if (displayPlanText !== 'None') {
