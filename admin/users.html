@@ -38,7 +38,17 @@
         label { display: block; font-weight: bold; margin-bottom: 4px; font-size: 13px; color: #555; }
         input, select { width: 100%; padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; box-sizing: border-box; }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        /* Search & Filter Controls CSS */
+        .controls-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 15px; flex-wrap: wrap; background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; }
+        .search-box { flex: 1; min-width: 250px; position: relative; }
+        .search-box input { width: 100%; padding: 10px 15px 10px 35px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; outline: none; }
+        .search-box input:focus { border-color: #007bff; box-shadow: 0 0 0 3px rgba(0,123,255,0.1); }
+        .search-box i { position: absolute; left: 13px; top: 13px; color: #888; }
+        .filter-box { min-width: 220px; }
+        .filter-box select { width: 100%; padding: 10px 15px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; cursor: pointer; background: white; font-weight: bold; color: #444; outline: none; }
+        .filter-box select:focus { border-color: #007bff; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 5px; }
         th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #e0e0e0; vertical-align: top; }
         th { background-color: #f8f9fa; color: #333; font-weight: bold; }
         tr:hover { background-color: #f1f5f9; }
@@ -47,17 +57,20 @@
         .badge-active { background-color: #d4edda; color: #155724; }
         .badge-expired { background-color: #f8d7da; color: #721c24; }
         .badge-owner { background-color: #cce5ff; color: #004085; }
-        .badge-requested { background-color: #007bff; color: white; }
+        .badge-requested { background-color: #ffc107; color: #212529; }
         .badge-type { background-color: #e2e8f0; color: #333; font-size: 10.5px; }
 
         .plan-select { padding: 6px 10px; border-radius: 4px; border: 1px solid #ccc; font-size: 13px; }
         
-        .btn-action { padding: 6px 12px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; font-size: 12px; color: white; }
+        .btn-action { padding: 6px 12px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; font-size: 12px; color: white; transition: 0.2s; }
         .btn-update { background-color: #28a745; }
+        .btn-update:hover { background-color: #218838; }
         .btn-delete { background-color: #dc3545; }
+        .btn-delete:hover { background-color: #c82333; }
         .btn-edit { background-color: #007bff; }
+        .btn-edit:hover { background-color: #0069d9; }
         .btn-cancel-small { background-color: #6c757d; }
-        .btn-submit { background-color: #007bff; width: 100%; padding: 10px; font-size: 14px; }
+        .btn-cancel-small:hover { background-color: #5a6268; }
 
         .table-responsive { overflow-x: auto; }
 
@@ -77,21 +90,38 @@
         .add-payment-form { background: #f4f8ff; border: 1px dashed #007bff; border-radius: 8px; padding: 15px; margin-bottom: 18px; }
         .add-payment-form .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
         
-        .history-entry { background: #fff8e1; border: 1px solid #ffe58a; border-radius: 8px; padding: 12px 15px; margin-bottom: 12px; }
+        .history-entry { background: #fff8e1; border: 1px solid #ffe58a; border-radius: 8px; padding: 12px 15px; margin-bottom: 12px; transition: 0.3s ease; }
+        .history-entry:hover { box-shadow: 0 4px 8px rgba(0,0,0,0.05); }
         .history-entry.rejected { background: #fdf2f2; border-color: #f3b8bd; }
         .history-entry.approved { background: #f0faf4; border-color: #a8e6b8; }
-        .history-entry .he-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 6px; }
+        .history-entry .he-top { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; }
         .history-entry .he-plan { font-weight: bold; font-size: 15px; color: #333; }
-        .history-entry .he-info { font-size: 12.5px; color: #555; line-height: 1.9; }
-        .history-entry .he-info b { color: #222; }
-        .history-entry .he-actions { margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap; }
+        
+        .he-body-wrap {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-top: 8px;
+        }
+
+        .history-entry .he-info { font-size: 13px; color: #555; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; line-height: 1.5; flex: 1; }
+        .history-entry .he-actions { display: flex; gap: 6px; flex-wrap: wrap; flex-shrink: 0; }
+        
         .history-entry .he-edit-form { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; }
         .history-entry .he-edit-form .full-width { grid-column: 1 / -1; }
-        .no-history-text { color: #888; font-size: 13.5px; text-align: center; padding: 20px 0; }
+        
+        .no-history-text { color: #888; font-size: 13.5px; text-align: center; }
+        .empty-state-container { position: relative; display: flex; align-items: center; min-height: 40px; margin-bottom: 5px; }
+        .empty-state-btn { position: absolute; left: 0; z-index: 2; }
+        .empty-state-text { width: 100%; text-align: center; z-index: 1; }
 
         @media (max-width: 900px) {
             table { display: block; overflow-x: auto; }
             .add-payment-form .form-row, .history-entry .he-edit-form { grid-template-columns: 1fr; }
+            .he-body-wrap { flex-direction: column; align-items: flex-start; gap: 10px; }
+            .empty-state-container { flex-direction: column; align-items: flex-start; gap: 10px; }
+            .empty-state-btn { position: static; }
         }
     </style>
 </head>
@@ -102,8 +132,24 @@
     <div class="container">
         <div class="box">
             <h3><i class="fa-solid fa-users"></i> Registered Users & Subscription Plans</h3>
-            <p style="color:#666; font-size:14px; margin-top: 5px;">কাস্টমারের নামে বা "View History" বাটনে ক্লিক করে তার পুরো Payment History ড্রপডাউনে দেখুন।</p>
+            <p style="color:#666; font-size:14px; margin-top: 5px;">নতুন রিকোয়েস্ট আসলে তা সরাসরি ইউজারের নামের নিচেই দেখাবে। নিচে ফিল্টার এবং সার্চ ব্যবহার করে ইউজার খুঁজে বের করুন।</p>
             
+            <div class="controls-bar">
+                <div class="search-box">
+                    <i class="fa-solid fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Search by Name or Email..." onkeyup="applyFilters()">
+                </div>
+                <div class="filter-box">
+                    <select id="statusFilter" onchange="applyFilters()">
+                        <option value="all">All Users Status</option>
+                        <option value="pending">Pending Request</option>
+                        <option value="active">Active Subscription</option>
+                        <option value="expired">Expired / Inactive</option>
+                        <option value="admin">Owner / Admin</option>
+                    </select>
+                </div>
+            </div>
+
             <div class="table-responsive">
                 <table>
                     <thead>
@@ -140,6 +186,30 @@
         let usersCache = [];        
         let currentOpenUserId = null; 
 
+        // 💡 Remaining Time Calculator Helper Function
+        function getRemainingTime(endDateStr) {
+            const now = new Date();
+            const end = new Date(endDateStr);
+            if (end <= now) return 'Expired';
+
+            let years = end.getFullYear() - now.getFullYear();
+            let months = end.getMonth() - now.getMonth();
+            let days = end.getDate() - now.getDate();
+            let hours = end.getHours() - now.getHours();
+
+            if (hours < 0) { hours += 24; days--; }
+            if (days < 0) { const prevMonth = new Date(end.getFullYear(), end.getMonth(), 0); days += prevMonth.getDate(); months--; }
+            if (months < 0) { months += 12; years--; }
+
+            let parts = [];
+            if (years > 0) parts.push(`${years} Year${years > 1 ? 's' : ''}`);
+            if (months > 0) parts.push(`${months} Month${months > 1 ? 's' : ''}`);
+            if (days > 0) parts.push(`${days} Day${days > 1 ? 's' : ''}`);
+            if (hours > 0) parts.push(`${hours} Hour${hours > 1 ? 's' : ''}`);
+
+            return parts.length > 0 ? parts.join(' ') : 'Less than 1 Hour';
+        }
+
         function planLabel(plan) { return (plan || '').replace('_', ' ').toUpperCase(); }
         function typeLabel(type) {
             if (type === 'renew') return 'Renew';
@@ -149,7 +219,6 @@
         }
         function methodLabel(method) { return method === 'bkash' ? 'বিকাশ' : method === 'nagad' ? 'নগদ' : method; }
 
-        // Current Plan Calculator
         function getDisplayPlan(userObj) {
             const sub = userObj.subscription || {};
             const approvedReqs = (userObj.pendingRequests || []).filter(r => r.status === 'approved');
@@ -177,60 +246,93 @@
                 }
 
                 usersCache = data.users;
-                tableBody.innerHTML = '';
+                applyFilters();
 
-                usersCache.forEach((u, index) => {
-                    const sub = u.subscription || {};
-                    const isActive = sub.active && sub.endDate && new Date(sub.endDate) > new Date();
-                    const pendingCount = (u.pendingRequests || []).filter(r => r.status === 'pending').length;
-                    const totalRecords = (u.pendingRequests || []).length;
+            } catch (err) {
+                tableBody.innerHTML = `<tr><td colspan="10" style="color:red; text-align:center;">Error fetching user list!</td></tr>`;
+            }
+        }
 
-                    let statusBadge = '';
-                    if (u.role === 'owner' || u.role === 'admin') {
-                        statusBadge = `<span class="badge badge-owner">${u.role.toUpperCase()}</span>`;
-                    } else if (pendingCount > 0) {
-                        statusBadge = `<span class="badge badge-active" style="background:#ffc107; color:#212529;">${pendingCount} Requested</span>`;
-                    } else if (isActive) {
-                        statusBadge = `<span class="badge badge-active">Active</span>`;
-                    } else {
-                        statusBadge = `<span class="badge badge-expired">Expired / Inactive</span>`;
+        function applyFilters() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+
+            const filteredUsers = usersCache.filter(u => {
+                const nameMatch = (u.name || '').toLowerCase().includes(query);
+                const emailMatch = (u.email || '').toLowerCase().includes(query);
+                const matchesSearch = nameMatch || emailMatch;
+
+                const sub = u.subscription || {};
+                const isActive = sub.active && sub.endDate && new Date(sub.endDate) > new Date();
+                const pendingCount = (u.pendingRequests || []).filter(r => r.status === 'pending').length;
+                const isAdmin = u.role === 'owner' || u.role === 'admin';
+
+                let userStatusCategory = 'expired';
+                if (isAdmin) userStatusCategory = 'admin';
+                else if (pendingCount > 0) userStatusCategory = 'pending';
+                else if (isActive) userStatusCategory = 'active';
+
+                const matchesStatus = (statusFilter === 'all' || userStatusCategory === statusFilter);
+
+                return matchesSearch && matchesStatus;
+            });
+
+            renderTable(filteredUsers);
+        }
+
+        function renderTable(usersToRender) {
+            const tableBody = document.getElementById('userTableBody');
+            tableBody.innerHTML = '';
+
+            if (usersToRender.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding: 25px; color: #888;"><b>কোনো ইউজার পাওয়া যায়নি!</b></td></tr>`;
+                return;
+            }
+
+            usersToRender.forEach((u, index) => {
+                const sub = u.subscription || {};
+                const isActive = sub.active && sub.endDate && new Date(sub.endDate) > new Date();
+                const pendingCount = (u.pendingRequests || []).filter(r => r.status === 'pending').length;
+                const totalRecords = (u.pendingRequests || []).length;
+
+                let statusBadge = '';
+                if (u.role === 'owner' || u.role === 'admin') {
+                    statusBadge = `<span class="badge badge-owner">${u.role.toUpperCase()}</span>`;
+                } else if (pendingCount > 0) {
+                    statusBadge = `<span class="badge badge-requested">${pendingCount} Requested</span>`;
+                } else if (isActive) {
+                    statusBadge = `<span class="badge badge-active">Active</span>`;
+                } else {
+                    statusBadge = `<span class="badge badge-expired">Expired / Inactive</span>`;
+                }
+
+                const displayPlanText = getDisplayPlan(u); 
+                const defaultSelect = sub.plan || 'none';
+                const expiryDate = sub.endDate ? new Date(sub.endDate).toLocaleDateString() : 'N/A';
+
+                // 💡 NEW: Calculate and Format Remaining Time for Current Plan Column
+                let remainingTimeHTML = '';
+                if (isActive && u.role !== 'owner' && u.role !== 'admin') {
+                    const remainingText = getRemainingTime(sub.endDate);
+                    if (remainingText !== 'Expired') {
+                        remainingTimeHTML = `<br><span style="color: #e67e22; font-size: 12px; font-weight: normal; display: inline-block; margin-top: 4px;">Remaining Time: ${remainingText}</span>`;
                     }
+                }
 
-                    const displayPlanText = getDisplayPlan(u); 
-                    const defaultSelect = sub.plan || 'none';
-                    const expiryDate = sub.endDate ? new Date(sub.endDate).toLocaleDateString() : 'N/A';
-
-                    let overrideCell = '<small style="color:#888;">Full Access</small>';
-                    if (u.role === 'customer') {
-                        if (isActive) {
-                            overrideCell = `
-                                <div class="override-view-box" id="override-view-${u._id}">
-                                    <div class="override-plan-text">${displayPlanText}</div>
-                                    <div class="override-actions">
-                                        <button class="btn-action btn-edit" onclick="toggleOverrideEdit('${u._id}')">Edit</button>
-                                        <button class="btn-action btn-delete" onclick="cancelActivePlan('${u._id}')">Cancel</button>
-                                    </div>
+                let overrideCell = '<small style="color:#888;">Full Access</small>';
+                if (u.role === 'customer') {
+                    if (isActive) {
+                        overrideCell = `
+                            <div class="override-view-box" id="override-view-${u._id}">
+                                <div class="override-plan-text">${displayPlanText}</div>
+                                <div class="override-actions">
+                                    <button class="btn-action btn-edit" onclick="toggleOverrideEdit('${u._id}')">Edit</button>
+                                    <button class="btn-action btn-delete" onclick="cancelActivePlan('${u._id}')">Cancel</button>
                                 </div>
-                                <div class="override-edit-box" id="override-edit-${u._id}">
-                                    <select class="plan-select" id="plan-${u._id}">
-                                        <option value="none">Cancel Plan</option>
-                                        <option value="1_month" ${defaultSelect === '1_month' ? 'selected' : ''}>1 Month</option>
-                                        <option value="3_months" ${defaultSelect === '3_months' ? 'selected' : ''}>3 Months</option>
-                                        <option value="6_months" ${defaultSelect === '6_months' ? 'selected' : ''}>6 Months</option>
-                                        <option value="1_year" ${defaultSelect === '1_year' ? 'selected' : ''}>1 Year</option>
-                                        <option value="2_years" ${defaultSelect === '2_years' ? 'selected' : ''}>2 Years</option>
-                                        <option value="3_years" ${defaultSelect === '3_years' ? 'selected' : ''}>3 Years</option>
-                                    </select>
-                                    <div class="override-actions" style="margin-top:6px;">
-                                        <button class="btn-action btn-update" onclick="updateSubscription('${u._id}')">Save Plan</button>
-                                        <button class="btn-action btn-cancel-small" onclick="toggleOverrideEdit('${u._id}')">Back</button>
-                                    </div>
-                                </div>
-                            `;
-                        } else {
-                            overrideCell = `
+                            </div>
+                            <div class="override-edit-box" id="override-edit-${u._id}">
                                 <select class="plan-select" id="plan-${u._id}">
-                                    <option value="none" ${defaultSelect === 'none' ? 'selected' : ''}>Cancel Plan</option>
+                                    <option value="none">Cancel Plan</option>
                                     <option value="1_month" ${defaultSelect === '1_month' ? 'selected' : ''}>1 Month</option>
                                     <option value="3_months" ${defaultSelect === '3_months' ? 'selected' : ''}>3 Months</option>
                                     <option value="6_months" ${defaultSelect === '6_months' ? 'selected' : ''}>6 Months</option>
@@ -238,53 +340,278 @@
                                     <option value="2_years" ${defaultSelect === '2_years' ? 'selected' : ''}>2 Years</option>
                                     <option value="3_years" ${defaultSelect === '3_years' ? 'selected' : ''}>3 Years</option>
                                 </select>
-                                <button class="btn-action btn-update" onclick="updateSubscription('${u._id}')" style="margin-top:6px;">Save Plan</button>
-                            `;
-                        }
+                                <div class="override-actions" style="margin-top:6px;">
+                                    <button class="btn-action btn-update" onclick="updateSubscription('${u._id}')">Save</button>
+                                    <button class="btn-action btn-cancel-small" onclick="toggleOverrideEdit('${u._id}')">Back</button>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        overrideCell = `
+                            <select class="plan-select" id="plan-${u._id}">
+                                <option value="none" ${defaultSelect === 'none' ? 'selected' : ''}>Cancel Plan</option>
+                                <option value="1_month" ${defaultSelect === '1_month' ? 'selected' : ''}>1 Month</option>
+                                <option value="3_months" ${defaultSelect === '3_months' ? 'selected' : ''}>3 Months</option>
+                                <option value="6_months" ${defaultSelect === '6_months' ? 'selected' : ''}>6 Months</option>
+                                <option value="1_year" ${defaultSelect === '1_year' ? 'selected' : ''}>1 Year</option>
+                                <option value="2_years" ${defaultSelect === '2_years' ? 'selected' : ''}>2 Years</option>
+                                <option value="3_years" ${defaultSelect === '3_years' ? 'selected' : ''}>3 Years</option>
+                            </select>
+                            <button class="btn-action btn-update" onclick="updateSubscription('${u._id}')" style="margin-top:6px;">Save Plan</button>
+                        `;
                     }
-
-                    // Main Table Row & Hidden Dropdown Row
-                    tableBody.innerHTML += `
-                        <tr>
-                            <td>${index + 1}</td>
-                            <td>
-                                <b class="user-name-link" onclick="toggleHistoryDropdown('${u._id}')">${u.name}</b>
-                            </td>
-                            <td>${u.email}</td>
-                            <td><small>${u.role}</small></td>
-                            <td>${statusBadge}</td>
-                            <td>
-                                ${totalRecords > 0 ? `<span>${totalRecords} Record${totalRecords > 1 ? 's' : ''}</span>` : '<span style="color:#888;">No Record</span>'}
-                                <br>
-                                <button class="btn-action btn-view-history" onclick="toggleHistoryDropdown('${u._id}')">
-                                    ${currentOpenUserId === u._id ? 'Close History' : 'View History'}
-                                </button>
-                            </td>
-                            <td><b>${displayPlanText}</b></td>
-                            <td>${expiryDate}</td>
-                            <td>${overrideCell}</td>
-                            <td>
-                                ${currentUser.role === 'owner' && u.role !== 'owner' ? `
-                                    <button class="btn-action btn-delete" onclick="deleteUser('${u._id}', '${u.name}')">Delete</button>
-                                ` : '<small style="color:#aaa;">N/A</small>'}
-                            </td>
-                        </tr>
-                        <tr class="history-row" id="history-row-${u._id}" style="display: ${currentOpenUserId === u._id ? 'table-row' : 'none'};">
-                            <td colspan="10" style="padding: 0;">
-                                <div id="history-container-${u._id}"></div>
-                            </td>
-                        </tr>
-                    `;
-                });
-
-                if (currentOpenUserId) {
-                    renderHistoryContent(currentOpenUserId);
                 }
 
-            } catch (err) {
-                tableBody.innerHTML = `<tr><td colspan="10" style="color:red; text-align:center;">Error fetching user list!</td></tr>`;
-            }
+                let pendingAlertHTML = '';
+                const pendingReqsForAlert = (u.pendingRequests || []).filter(r => r.status === 'pending');
+                
+                if (pendingReqsForAlert.length > 0) {
+                    pendingAlertHTML = pendingReqsForAlert.map(pr => `
+                        <tr style="background-color: #fffaf0; border-bottom: 2px solid #e0e0e0;">
+                            <td colspan="10" style="padding: 12px 15px; border-left: 4px solid #ffc107;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                                    <div style="font-size: 13px; display: flex; align-items: center; flex-wrap: wrap; gap: 8px;">
+                                        <span class="badge" style="background:#ffc107; color:#212529;"><i class="fa-solid fa-bell"></i> New Request</span>
+                                        <strong style="color:#333; font-size: 14px;">${planLabel(pr.plan)}</strong>
+                                        <span class="badge badge-type">${typeLabel(pr.type)}</span>
+                                        <span style="color:#ccc;">|</span> ফোন: <b>${pr.phone}</b>
+                                        <span style="color:#ccc;">|</span> Trx: <b>${pr.transactionId}</b>
+                                        <span style="color:#ccc;">|</span> মাধ্যম: <b>${methodLabel(pr.paymentMethod)}</b>
+                                        <span style="color:#ccc;">|</span> তারিখ: <b>${new Date(pr.requestedAt).toLocaleString()}</b>
+                                    </div>
+                                    <div style="display: flex; gap: 6px;">
+                                        <button class="btn-action btn-update" onclick="approveRequest('${u._id}', '${pr._id}')"><i class="fa-solid fa-check"></i> Approve</button>
+                                        <button class="btn-action btn-delete" onclick="rejectRequest('${u._id}', '${pr._id}')"><i class="fa-solid fa-xmark"></i> Reject</button>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+
+                tableBody.innerHTML += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td><b class="user-name-link" onclick="toggleHistoryDropdown('${u._id}')">${u.name}</b></td>
+                        <td>${u.email}</td>
+                        <td><small>${u.role}</small></td>
+                        <td>${statusBadge}</td>
+                        <td>
+                            ${totalRecords > 0 ? `<span>${totalRecords} Record${totalRecords > 1 ? 's' : ''}</span>` : '<span style="color:#888;">No Record</span>'}
+                            <br>
+                            <button class="btn-action btn-view-history" id="btn-history-${u._id}" onclick="toggleHistoryDropdown('${u._id}')">
+                                ${currentOpenUserId === u._id ? 'Close History' : 'View History'}
+                            </button>
+                        </td>
+                        <td>
+                            <b>${displayPlanText}</b>
+                            ${remainingTimeHTML} <!-- 💡 Added Remaining Time HTML -->
+                        </td>
+                        <td>${expiryDate}</td>
+                        <td>${overrideCell}</td>
+                        <td>
+                            ${currentUser.role === 'owner' && u.role !== 'owner' ? `
+                                <button class="btn-action btn-delete" onclick="deleteUser('${u._id}', '${u.name}')">Delete</button>
+                            ` : '<small style="color:#aaa;">N/A</small>'}
+                        </td>
+                    </tr>
+                    ${pendingAlertHTML}
+                    <tr class="history-row" id="history-row-${u._id}" style="display: ${currentOpenUserId === u._id ? 'table-row' : 'none'};">
+                        <td colspan="10" style="padding: 0;">
+                            <div id="history-container-${u._id}"></div>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            if (currentOpenUserId) { renderHistoryContent(currentOpenUserId); }
         }
+
+        function toggleHistoryDropdown(userId) {
+            const targetRow = document.getElementById(`history-row-${userId}`);
+            const currentBtn = document.getElementById(`btn-history-${userId}`);
+
+            if (currentOpenUserId === userId) {
+                targetRow.style.display = 'none';
+                if(currentBtn) currentBtn.innerHTML = 'View History';
+                currentOpenUserId = null;
+                return;
+            }
+
+            if (currentOpenUserId) {
+                const prevRow = document.getElementById(`history-row-${currentOpenUserId}`);
+                const prevBtn = document.getElementById(`btn-history-${currentOpenUserId}`);
+                if (prevRow) prevRow.style.display = 'none';
+                if (prevBtn) prevBtn.innerHTML = 'View History';
+            }
+
+            currentOpenUserId = userId;
+            renderHistoryContent(userId); 
+            targetRow.style.display = 'table-row';
+            if(currentBtn) currentBtn.innerHTML = 'Close History';
+        }
+
+        function renderHistoryContent(userId) {
+            const user = usersCache.find(u => u._id === userId);
+            const container = document.getElementById(`history-container-${userId}`);
+            if (!user || !container) return;
+
+            const requests = [...(user.pendingRequests || [])].sort((a, b) => new Date(b.requestedAt) - new Date(a.requestedAt));
+
+            const addBtnHtml = `
+                <button class="btn-action btn-update" style="margin-top: 0px;" onclick="toggleAddForm('${userId}')">
+                    <i class="fa-solid fa-plus"></i> Add New Payment Record
+                </button>
+            `;
+
+            const addFormHtml = `
+                <div class="add-payment-form" id="addPaymentForm-${userId}" style="display:none; margin-top: 15px;">
+                    <div class="form-row">
+                        <div>
+                            <label>প্যাকেজ</label>
+                            <select id="addPlan-${userId}">
+                                <option value="1_month">1 Month</option>
+                                <option value="3_months">3 Months</option>
+                                <option value="6_months">6 Months</option>
+                                <option value="1_year">1 Year</option>
+                                <option value="2_years">2 Years</option>
+                                <option value="3_years">3 Years</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Status</label>
+                            <select id="addStatus-${userId}">
+                                <option value="approved">Active (Approved)</option>
+                                <option value="pending">Pending</option>
+                                <option value="rejected">Rejected</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div>
+                            <label>ফোন নাম্বার</label>
+                            <input type="text" id="addPhone-${userId}" placeholder="017XXXXXXXX">
+                        </div>
+                        <div>
+                            <label>Transaction ID</label>
+                            <input type="text" id="addTrxId-${userId}" placeholder="Transaction ID">
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <label>পেমেন্ট মাধ্যম</label>
+                        <select id="addMethod-${userId}">
+                            <option value="bkash">বিকাশ (Bkash)</option>
+                            <option value="nagad">ন নগদ (Nagad)</option>
+                        </select>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button type="button" class="btn-action btn-cancel-small" style="flex:1; padding:10px;" onclick="toggleAddForm('${userId}')">বাতিল</button>
+                        <button type="button" class="btn-action btn-update" style="flex:1; padding:10px;" onclick="submitAddPayment('${userId}')">Save Record</button>
+                    </div>
+                </div>
+            `;
+
+            let contentHTML = '';
+
+            if (requests.length === 0) {
+                contentHTML = `
+                    <div class="empty-state-container">
+                        <div class="empty-state-btn">
+                            ${addBtnHtml}
+                        </div>
+                        <div id="historyList-${userId}" class="empty-state-text">
+                            <p class="no-history-text" style="margin: 0; padding: 0;">এখনো কোনো Payment Record নেই।</p>
+                        </div>
+                    </div>
+                    ${addFormHtml}
+                `;
+            } else {
+                let historyListHtml = requests.map(r => {
+                    const isRejected = r.status === 'rejected';
+                    const isApproved = r.status === 'approved';
+                    const isPending = r.status === 'pending';
+                    const cardClass = isRejected ? 'rejected' : (isApproved ? 'approved' : '');
+                    const statusLabel = isRejected ? 'Rejected' : (isApproved ? 'Active' : 'Pending');
+                    const badgeClass = isRejected ? 'badge-expired' : (isApproved ? 'badge-active' : 'badge-requested');
+
+                    return `
+                        <div class="history-entry ${cardClass}" id="he-${r._id}">
+                            <div class="he-top">
+                                <span class="he-plan">${planLabel(r.plan)}</span>
+                                <span class="badge ${badgeClass}">${statusLabel}</span>
+                            </div>
+                            
+                            <div class="he-body-wrap" id="he-view-${r._id}">
+                                <div class="he-info">
+                                    <span class="badge badge-type">${typeLabel(r.type)}</span>
+                                    <span style="color:#ccc;">|</span>
+                                    ফোন: <b>${r.phone}</b>
+                                    <span style="color:#ccc;">|</span>
+                                    Trx ID: <b>${r.transactionId}</b>
+                                    <span style="color:#ccc;">|</span>
+                                    মাধ্যম: <b>${methodLabel(r.paymentMethod)}</b>
+                                    <span style="color:#ccc;">|</span>
+                                    তারিখ: <b>${new Date(r.requestedAt).toLocaleString()}</b>
+                                    ${isRejected && r.rejectionReason ? `<span style="color:#ccc;">|</span> <span style="color:#dc3545; font-weight:bold;">কারণ: ${r.rejectionReason}</span>` : ''}
+                                </div>
+
+                                <div class="he-actions">
+                                    ${isPending ? `
+                                        <button class="btn-action btn-update" onclick="approveRequest('${userId}', '${r._id}')">Approve</button>
+                                        <button class="btn-action btn-delete" onclick="rejectRequest('${userId}', '${r._id}')">Reject</button>
+                                    ` : ''}
+                                    <button class="btn-action btn-edit" onclick="startEditEntry('${r._id}')">Edit</button>
+                                    <button class="btn-action btn-delete" onclick="deleteEntry('${userId}', '${r._id}')">Delete</button>
+                                </div>
+                            </div>
+
+                            <div class="he-edit-form" id="he-edit-${r._id}" style="display:none;">
+                                <select id="he-plan-${r._id}">
+                                    <option value="1_month" ${r.plan === '1_month' ? 'selected' : ''}>1 Month</option>
+                                    <option value="3_months" ${r.plan === '3_months' ? 'selected' : ''}>3 Months</option>
+                                    <option value="6_months" ${r.plan === '6_months' ? 'selected' : ''}>6 Months</option>
+                                    <option value="1_year" ${r.plan === '1_year' ? 'selected' : ''}>1 Year</option>
+                                    <option value="2_years" ${r.plan === '2_years' ? 'selected' : ''}>2 Years</option>
+                                    <option value="3_years" ${r.plan === '3_years' ? 'selected' : ''}>3 Years</option>
+                                </select>
+                                <select id="he-method-${r._id}">
+                                    <option value="bkash" ${r.paymentMethod === 'bkash' ? 'selected' : ''}>বিকাশ</option>
+                                    <option value="nagad" ${r.paymentMethod === 'nagad' ? 'selected' : ''}>নগদ</option>
+                                </select>
+                                <input type="text" id="he-phone-${r._id}" value="${r.phone}" placeholder="ফোন নাম্বার">
+                                <input type="text" id="he-trx-${r._id}" value="${r.transactionId}" placeholder="Transaction ID">
+                                <div class="full-width" style="display:flex; gap:6px;">
+                                    <button class="btn-action btn-update" onclick="saveEditEntry('${userId}', '${r._id}')">Save</button>
+                                    <button class="btn-action btn-cancel-small" onclick="cancelEditEntry('${userId}')">বাতিল</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                contentHTML = `
+                    <div id="historyList-${userId}" style="margin-bottom: 15px;">
+                        ${historyListHtml}
+                    </div>
+                    ${addBtnHtml}
+                    ${addFormHtml}
+                `;
+            }
+
+            container.innerHTML = `
+                <div class="history-container-inner">
+                    <div class="history-header">
+                        <h4 style="margin:0; color:#007bff;"><i class="fa-solid fa-clock-rotate-left"></i> Payment History for ${user.name}</h4>
+                        <button class="btn-action btn-cancel-small" onclick="toggleHistoryDropdown('${userId}')"><i class="fa-solid fa-xmark"></i> Close History</button>
+                    </div>
+                    ${contentHTML}
+                </div>
+            `;
+        }
+
+        // ==========================================
+        // Other Operations Functions
+        // ==========================================
 
         function toggleOverrideEdit(userId) {
             const viewBox = document.getElementById(`override-view-${userId}`);
@@ -309,167 +636,17 @@
             try {
                 const res = await fetch(`${API_BASE}/users/${userId}/subscription`, {
                     method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify({ plan })
                 });
-
                 const data = await res.json();
-                if (data.success) {
-                    showTopAlert(`✅ ${data.message}`, 'success');
-                    loadUsers();
-                } else {
-                    showTopAlert(`❌ Failed: ${data.message}`, 'danger');
-                }
-            } catch (err) {
-                showTopAlert(`❌ Error updating plan!`, 'danger');
-            }
-        }
-
-        function toggleHistoryDropdown(userId) {
-            if (currentOpenUserId === userId) {
-                currentOpenUserId = null; // Close current
-                loadUsers();
-            } else {
-                currentOpenUserId = userId; // Open new
-                loadUsers();
-            }
-        }
-
-        function renderHistoryContent(userId) {
-            const user = usersCache.find(u => u._id === userId);
-            const container = document.getElementById(`history-container-${userId}`);
-            if (!user || !container) return;
-
-            const requests = [...(user.pendingRequests || [])].sort((a, b) => new Date(b.requestedAt) - new Date(a.requestedAt));
-
-            let historyListHtml = '';
-            if (requests.length === 0) {
-                historyListHtml = '<p class="no-history-text">এখনো কোনো Payment Record নেই।</p>';
-            } else {
-                historyListHtml = requests.map(r => {
-                    const isRejected = r.status === 'rejected';
-                    const isApproved = r.status === 'approved';
-                    const isPending = r.status === 'pending';
-                    const cardClass = isRejected ? 'rejected' : (isApproved ? 'approved' : '');
-                    const statusLabel = isRejected ? 'Rejected' : (isApproved ? 'Active' : 'Pending');
-                    const badgeClass = isRejected ? 'badge-expired' : (isApproved ? 'badge-active' : 'badge-requested');
-
-                    return `
-                        <div class="history-entry ${cardClass}" id="he-${r._id}">
-                            <div class="he-top">
-                                <span class="he-plan">${planLabel(r.plan)}</span>
-                                <span class="badge ${badgeClass}">${statusLabel}</span>
-                            </div>
-                            <div class="he-info" id="he-view-${r._id}">
-                                <span class="badge badge-type">${typeLabel(r.type)}</span><br>
-                                ফোন: <b>${r.phone}</b> &nbsp;|&nbsp; Trx ID: <b>${r.transactionId}</b> &nbsp;|&nbsp; মাধ্যম: <b>${methodLabel(r.paymentMethod)}</b><br>
-                                তারিখ: <b>${new Date(r.requestedAt).toLocaleString()}</b>
-                                ${isRejected && r.rejectionReason ? `<br><span style="color:#dc3545;">Rejected কারণ: ${r.rejectionReason}</span>` : ''}
-                            </div>
-
-                            <div class="he-edit-form" id="he-edit-${r._id}" style="display:none;">
-                                <select id="he-plan-${r._id}">
-                                    <option value="1_month" ${r.plan === '1_month' ? 'selected' : ''}>1 Month</option>
-                                    <option value="3_months" ${r.plan === '3_months' ? 'selected' : ''}>3 Months</option>
-                                    <option value="6_months" ${r.plan === '6_months' ? 'selected' : ''}>6 Months</option>
-                                    <option value="1_year" ${r.plan === '1_year' ? 'selected' : ''}>1 Year</option>
-                                    <option value="2_years" ${r.plan === '2_years' ? 'selected' : ''}>2 Years</option>
-                                    <option value="3_years" ${r.plan === '3_years' ? 'selected' : ''}>3 Years</option>
-                                </select>
-                                <select id="he-method-${r._id}">
-                                    <option value="bkash" ${r.paymentMethod === 'bkash' ? 'selected' : ''}>বিকাশ</option>
-                                    <option value="nagad" ${r.paymentMethod === 'nagad' ? 'selected' : ''}>নগদ</option>
-                                </select>
-                                <input type="text" id="he-phone-${r._id}" value="${r.phone}" placeholder="ফোন নাম্বার">
-                                <input type="text" id="he-trx-${r._id}" value="${r.transactionId}" placeholder="Transaction ID">
-                                <div class="full-width" style="display:flex; gap:6px;">
-                                    <button class="btn-action btn-update" onclick="saveEditEntry('${userId}', '${r._id}')">Save</button>
-                                    <button class="btn-action btn-cancel-small" onclick="cancelEditEntry('${userId}')">বাতিল</button>
-                                </div>
-                            </div>
-
-                            <div class="he-actions" id="he-actions-${r._id}">
-                                ${isPending ? `
-                                    <button class="btn-action btn-update" onclick="approveRequest('${userId}', '${r._id}')">Approve</button>
-                                    <button class="btn-action btn-delete" onclick="rejectRequest('${userId}', '${r._id}')">Reject</button>
-                                ` : ''}
-                                <button class="btn-action btn-edit" onclick="startEditEntry('${r._id}')">Edit</button>
-                                <button class="btn-action btn-delete" onclick="deleteEntry('${userId}', '${r._id}')">Delete</button>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-            }
-
-            container.innerHTML = `
-                <div class="history-container-inner">
-                    <div class="history-header">
-                        <h4 style="margin:0; color:#007bff;"><i class="fa-solid fa-clock-rotate-left"></i> Payment History for ${user.name}</h4>
-                        <button class="btn-action btn-cancel-small" onclick="toggleHistoryDropdown('${userId}')"><i class="fa-solid fa-xmark"></i> Close History</button>
-                    </div>
-
-                    <button class="btn-action btn-update" style="margin-bottom: 15px;" onclick="toggleAddForm('${userId}')">
-                        <i class="fa-solid fa-plus"></i> Add New Payment Record
-                    </button>
-
-                    <div class="add-payment-form" id="addPaymentForm-${userId}" style="display:none;">
-                        <div class="form-row">
-                            <div>
-                                <label>প্যাকেজ</label>
-                                <select id="addPlan-${userId}">
-                                    <option value="1_month">1 Month</option>
-                                    <option value="3_months">3 Months</option>
-                                    <option value="6_months">6 Months</option>
-                                    <option value="1_year">1 Year</option>
-                                    <option value="2_years">2 Years</option>
-                                    <option value="3_years">3 Years</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label>Status</label>
-                                <select id="addStatus-${userId}">
-                                    <option value="approved">Active (Approved)</option>
-                                    <option value="pending">Pending</option>
-                                    <option value="rejected">Rejected</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div>
-                                <label>ফোন নাম্বার</label>
-                                <input type="text" id="addPhone-${userId}" placeholder="017XXXXXXXX">
-                            </div>
-                            <div>
-                                <label>Transaction ID</label>
-                                <input type="text" id="addTrxId-${userId}" placeholder="Transaction ID">
-                            </div>
-                        </div>
-                        <div style="margin-bottom: 10px;">
-                            <label>পেমেন্ট মাধ্যম</label>
-                            <select id="addMethod-${userId}">
-                                <option value="bkash">বিকাশ (Bkash)</option>
-                                <option value="nagad">নগদ (Nagad)</option>
-                            </select>
-                        </div>
-                        <div style="display: flex; gap: 10px;">
-                            <button type="button" class="btn-action btn-cancel-small" style="flex:1; padding:10px;" onclick="toggleAddForm('${userId}')">বাতিল</button>
-                            <button type="button" class="btn-action btn-update" style="flex:1; padding:10px;" onclick="submitAddPayment('${userId}')">Save Record</button>
-                        </div>
-                    </div>
-
-                    <div id="historyList-${userId}">
-                        ${historyListHtml}
-                    </div>
-                </div>
-            `;
+                if (data.success) { showTopAlert(`✅ ${data.message}`, 'success'); loadUsers(); } 
+                else { showTopAlert(`❌ Failed: ${data.message}`, 'danger'); }
+            } catch (err) { showTopAlert(`❌ Error updating plan!`, 'danger'); }
         }
 
         function startEditEntry(requestId) {
             document.getElementById(`he-view-${requestId}`).style.display = 'none';
-            document.getElementById(`he-actions-${requestId}`).style.display = 'none';
             document.getElementById(`he-edit-${requestId}`).style.display = 'grid';
         }
 
