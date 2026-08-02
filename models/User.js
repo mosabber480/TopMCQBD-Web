@@ -3,8 +3,7 @@ const mongoose = require('mongoose');
 // একটা একটা Pending Request-এর Schema (একাধিক request একসাথে থাকতে পারবে)
 const PendingRequestSchema = new mongoose.Schema({
     plan: {
-        type: String,
-        enum: ['1_month', '3_months', '6_months', '1_year', '2_years', '3_years'],
+        type: String, // 💡 enum রিমুভ করা হয়েছে যাতে কাস্টম প্যাকেজের নাম সেভ করা যায়
         required: true
     },
     // 'new'   -> কোনো active/pending প্ল্যান ছাড়াই প্রথম রিকোয়েস্ট
@@ -74,8 +73,7 @@ const UserSchema = new mongoose.Schema({
     },
     subscription: {
         plan: {
-            type: String,
-            enum: ['none', '1_month', '3_months', '6_months', '1_year', '2_years', '3_years'],
+            type: String, // 💡 enum রিমুভ করা হয়েছে যাতে কাস্টম প্যাকেজের নাম সেভ করা যায়
             default: 'none'
         },
         startDate: {

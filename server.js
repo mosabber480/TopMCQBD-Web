@@ -217,6 +217,42 @@ app.post('/api/users/request-plan', verifyToken, async (req, res) => {
     }
 });
 
+// 💡 NEW: Edit/Update Payment History Record
+app.put('/api/users/:userId/pending-requests/:requestId', verifyToken, authorizeRoles('owner', 'admin'), async (req, res) => {
+    try {
+        const { plan, paymentMethod, phone, transactionId } = req.body;
+        const user = await User.findById(req.params.userId);
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+        const request = user.pendingRequests.id(req.params.requestId);
+        if (!request) return res.status(404).json({ success: false, message: 'Record not found' });
+
+        if (plan) request.plan = plan;
+        if (paymentMethod) request.paymentMethod = paymentMethod;
+        if (phone) request.phone = phone;
+        if (transactionId) request.transactionId = transactionId;
+
+        await user.save();
+        res.json({ success: true, message: 'Payment record updated successfully!' });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// 💡 NEW: Delete Payment History Record
+app.delete('/api/users/:userId/pending-requests/:requestId', verifyToken, authorizeRoles('owner', 'admin'), async (req, res) => {
+    try {
+        const user = await User.findById(req.params.userId);
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+        user.pendingRequests.pull(req.params.requestId);
+        await user.save();
+        res.json({ success: true, message: 'Payment record deleted successfully!' });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
 // 💡 Approve a specific Pending Request (Owner and Admin only)
 app.put('/api/users/:userId/pending-requests/:requestId/approve', verifyToken, authorizeRoles('owner', 'admin'), async (req, res) => {
     try {
@@ -286,10 +322,10 @@ app.put('/api/users/:userId/pending-requests/:requestId/reject', verifyToken, au
     }
 });
 
-// Update Subscription Plan Directly (Owner and Admin only)
+// 💡 Update Subscription Plan Directly (Manual Override with Custom Support)
 app.put('/api/users/:userId/subscription', verifyToken, authorizeRoles('owner', 'admin'), async (req, res) => {
     try {
-        const { plan } = req.body;
+        const { plan, customName, years, months, days } = req.body;
         const user = await User.findById(req.params.userId);
 
         if (!user) {
@@ -298,8 +334,14 @@ app.put('/api/users/:userId/subscription', verifyToken, authorizeRoles('owner', 
 
         let startDate = new Date();
         let endDate = new Date();
+        let finalPlanName = plan;
 
-        if (plan === '1_month') endDate.setMonth(endDate.getMonth() + 1);
+        if (plan === 'custom') {
+            endDate.setFullYear(endDate.getFullYear() + (parseInt(years) || 0));
+            endDate.setMonth(endDate.getMonth() + (parseInt(months) || 0));
+            endDate.setDate(endDate.getDate() + (parseInt(days) || 0));
+            finalPlanName = customName || 'Custom Package';
+        } else if (plan === '1_month') endDate.setMonth(endDate.getMonth() + 1);
         else if (plan === '3_months') endDate.setMonth(endDate.getMonth() + 3);
         else if (plan === '6_months') endDate.setMonth(endDate.getMonth() + 6);
         else if (plan === '1_year') endDate.setFullYear(endDate.getFullYear() + 1);
@@ -311,7 +353,7 @@ app.put('/api/users/:userId/subscription', verifyToken, authorizeRoles('owner', 
         }
 
         user.subscription = {
-            plan: plan,
+            plan: finalPlanName,
             startDate: startDate,
             endDate: endDate,
             active: plan !== 'none'
@@ -321,7 +363,7 @@ app.put('/api/users/:userId/subscription', verifyToken, authorizeRoles('owner', 
 
         res.json({
             success: true,
-            message: `Subscription plan updated to ${plan}`,
+            message: `Subscription plan updated to ${finalPlanName}`,
             subscription: user.subscription
         });
 

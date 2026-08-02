@@ -310,7 +310,6 @@
                 const defaultSelect = sub.plan || 'none';
                 const expiryDate = sub.endDate ? new Date(sub.endDate).toLocaleDateString() : 'N/A';
 
-                // 💡 NEW: Calculate and Format Remaining Time for Current Plan Column
                 let remainingTimeHTML = '';
                 if (isActive && u.role !== 'owner' && u.role !== 'admin') {
                     const remainingText = getRemainingTime(sub.endDate);
@@ -318,6 +317,29 @@
                         remainingTimeHTML = `<br><span style="color: #e67e22; font-size: 12px; font-weight: normal; display: inline-block; margin-top: 4px;">Remaining Time: ${remainingText}</span>`;
                     }
                 }
+
+                // 💡 Custom Date Manual Override Form HTML
+                const currentCustomName = defaultSelect !== 'none' && !['1_month','3_months','6_months','1_year','2_years','3_years'].includes(defaultSelect) ? defaultSelect : '';
+                const isCustomActive = currentCustomName ? 'selected' : '';
+
+                const overrideDropdownHTML = `
+                    <select class="plan-select" id="plan-${u._id}" onchange="toggleCustomFields('${u._id}')">
+                        <option value="none" ${defaultSelect === 'none' ? 'selected' : ''}>Cancel Plan</option>
+                        <option value="1_month" ${defaultSelect === '1_month' ? 'selected' : ''}>1 Month</option>
+                        <option value="3_months" ${defaultSelect === '3_months' ? 'selected' : ''}>3 Months</option>
+                        <option value="6_months" ${defaultSelect === '6_months' ? 'selected' : ''}>6 Months</option>
+                        <option value="1_year" ${defaultSelect === '1_year' ? 'selected' : ''}>1 Year</option>
+                        <option value="2_years" ${defaultSelect === '2_years' ? 'selected' : ''}>2 Years</option>
+                        <option value="3_years" ${defaultSelect === '3_years' ? 'selected' : ''}>3 Years</option>
+                        <option value="custom" ${isCustomActive}>Custom Plan</option>
+                    </select>
+                    <div id="custom-fields-${u._id}" style="display: ${isCustomActive ? 'flex' : 'none'}; flex-wrap: wrap; gap: 4px; margin-top: 6px;">
+                        <input type="text" id="custom-name-${u._id}" placeholder="Plan Name (e.g. Custom Package)" value="${currentCustomName}" style="width: 100%; padding: 5px; font-size: 12px; border:1px solid #ccc; border-radius:4px;">
+                        <input type="number" id="custom-y-${u._id}" placeholder="Years" min="0" style="width: 30%; flex: 1; padding: 5px; font-size: 12px; border:1px solid #ccc; border-radius:4px;">
+                        <input type="number" id="custom-m-${u._id}" placeholder="Months" min="0" style="width: 30%; flex: 1; padding: 5px; font-size: 12px; border:1px solid #ccc; border-radius:4px;">
+                        <input type="number" id="custom-d-${u._id}" placeholder="Days" min="0" style="width: 30%; flex: 1; padding: 5px; font-size: 12px; border:1px solid #ccc; border-radius:4px;">
+                    </div>
+                `;
 
                 let overrideCell = '<small style="color:#888;">Full Access</small>';
                 if (u.role === 'customer') {
@@ -331,15 +353,7 @@
                                 </div>
                             </div>
                             <div class="override-edit-box" id="override-edit-${u._id}">
-                                <select class="plan-select" id="plan-${u._id}">
-                                    <option value="none">Cancel Plan</option>
-                                    <option value="1_month" ${defaultSelect === '1_month' ? 'selected' : ''}>1 Month</option>
-                                    <option value="3_months" ${defaultSelect === '3_months' ? 'selected' : ''}>3 Months</option>
-                                    <option value="6_months" ${defaultSelect === '6_months' ? 'selected' : ''}>6 Months</option>
-                                    <option value="1_year" ${defaultSelect === '1_year' ? 'selected' : ''}>1 Year</option>
-                                    <option value="2_years" ${defaultSelect === '2_years' ? 'selected' : ''}>2 Years</option>
-                                    <option value="3_years" ${defaultSelect === '3_years' ? 'selected' : ''}>3 Years</option>
-                                </select>
+                                ${overrideDropdownHTML}
                                 <div class="override-actions" style="margin-top:6px;">
                                     <button class="btn-action btn-update" onclick="updateSubscription('${u._id}')">Save</button>
                                     <button class="btn-action btn-cancel-small" onclick="toggleOverrideEdit('${u._id}')">Back</button>
@@ -348,15 +362,7 @@
                         `;
                     } else {
                         overrideCell = `
-                            <select class="plan-select" id="plan-${u._id}">
-                                <option value="none" ${defaultSelect === 'none' ? 'selected' : ''}>Cancel Plan</option>
-                                <option value="1_month" ${defaultSelect === '1_month' ? 'selected' : ''}>1 Month</option>
-                                <option value="3_months" ${defaultSelect === '3_months' ? 'selected' : ''}>3 Months</option>
-                                <option value="6_months" ${defaultSelect === '6_months' ? 'selected' : ''}>6 Months</option>
-                                <option value="1_year" ${defaultSelect === '1_year' ? 'selected' : ''}>1 Year</option>
-                                <option value="2_years" ${defaultSelect === '2_years' ? 'selected' : ''}>2 Years</option>
-                                <option value="3_years" ${defaultSelect === '3_years' ? 'selected' : ''}>3 Years</option>
-                            </select>
+                            ${overrideDropdownHTML}
                             <button class="btn-action btn-update" onclick="updateSubscription('${u._id}')" style="margin-top:6px;">Save Plan</button>
                         `;
                     }
@@ -405,7 +411,7 @@
                         </td>
                         <td>
                             <b>${displayPlanText}</b>
-                            ${remainingTimeHTML} <!-- 💡 Added Remaining Time HTML -->
+                            ${remainingTimeHTML}
                         </td>
                         <td>${expiryDate}</td>
                         <td>${overrideCell}</td>
@@ -425,6 +431,13 @@
             });
 
             if (currentOpenUserId) { renderHistoryContent(currentOpenUserId); }
+        }
+
+        // 💡 Function to Toggle Custom Input Fields
+        window.toggleCustomFields = function(userId) {
+            const val = document.getElementById(`plan-${userId}`).value;
+            const fields = document.getElementById(`custom-fields-${userId}`);
+            if(fields) fields.style.display = val === 'custom' ? 'flex' : 'none';
         }
 
         function toggleHistoryDropdown(userId) {
@@ -458,25 +471,15 @@
 
             const requests = [...(user.pendingRequests || [])].sort((a, b) => new Date(b.requestedAt) - new Date(a.requestedAt));
 
-            const addBtnHtml = `
-                <button class="btn-action btn-update" style="margin-top: 0px;" onclick="toggleAddForm('${userId}')">
-                    <i class="fa-solid fa-plus"></i> Add New Payment Record
-                </button>
-            `;
+            const addBtnHtml = `<button class="btn-action btn-update" style="margin-top: 0px;" onclick="toggleAddForm('${userId}')"><i class="fa-solid fa-plus"></i> Add New Payment Record</button>`;
 
             const addFormHtml = `
                 <div class="add-payment-form" id="addPaymentForm-${userId}" style="display:none; margin-top: 15px;">
                     <div class="form-row">
                         <div>
-                            <label>প্যাকেজ</label>
-                            <select id="addPlan-${userId}">
-                                <option value="1_month">1 Month</option>
-                                <option value="3_months">3 Months</option>
-                                <option value="6_months">6 Months</option>
-                                <option value="1_year">1 Year</option>
-                                <option value="2_years">2 Years</option>
-                                <option value="3_years">3 Years</option>
-                            </select>
+                            <label>প্যাকেজ নাম (যে কোনো কিছু)</label>
+                            <!-- 💡 Dropdown Removed. Added Text Input -->
+                            <input type="text" id="addPlan-${userId}" placeholder="e.g. 3_months বা Custom">
                         </div>
                         <div>
                             <label>Status</label>
@@ -488,20 +491,14 @@
                         </div>
                     </div>
                     <div class="form-row">
-                        <div>
-                            <label>ফোন নাম্বার</label>
-                            <input type="text" id="addPhone-${userId}" placeholder="017XXXXXXXX">
-                        </div>
-                        <div>
-                            <label>Transaction ID</label>
-                            <input type="text" id="addTrxId-${userId}" placeholder="Transaction ID">
-                        </div>
+                        <div><label>ফোন নাম্বার</label><input type="text" id="addPhone-${userId}" placeholder="017XXXXXXXX"></div>
+                        <div><label>Transaction ID</label><input type="text" id="addTrxId-${userId}" placeholder="Transaction ID"></div>
                     </div>
                     <div style="margin-bottom: 10px;">
                         <label>পেমেন্ট মাধ্যম</label>
                         <select id="addMethod-${userId}">
                             <option value="bkash">বিকাশ (Bkash)</option>
-                            <option value="nagad">ন নগদ (Nagad)</option>
+                            <option value="nagad">নগদ (Nagad)</option>
                         </select>
                     </div>
                     <div style="display: flex; gap: 10px;">
@@ -516,12 +513,8 @@
             if (requests.length === 0) {
                 contentHTML = `
                     <div class="empty-state-container">
-                        <div class="empty-state-btn">
-                            ${addBtnHtml}
-                        </div>
-                        <div id="historyList-${userId}" class="empty-state-text">
-                            <p class="no-history-text" style="margin: 0; padding: 0;">এখনো কোনো Payment Record নেই।</p>
-                        </div>
+                        <div class="empty-state-btn">${addBtnHtml}</div>
+                        <div id="historyList-${userId}" class="empty-state-text"><p class="no-history-text" style="margin: 0; padding: 0;">এখনো কোনো Payment Record নেই।</p></div>
                     </div>
                     ${addFormHtml}
                 `;
@@ -543,37 +536,24 @@
                             
                             <div class="he-body-wrap" id="he-view-${r._id}">
                                 <div class="he-info">
-                                    <span class="badge badge-type">${typeLabel(r.type)}</span>
-                                    <span style="color:#ccc;">|</span>
-                                    ফোন: <b>${r.phone}</b>
-                                    <span style="color:#ccc;">|</span>
-                                    Trx ID: <b>${r.transactionId}</b>
-                                    <span style="color:#ccc;">|</span>
-                                    মাধ্যম: <b>${methodLabel(r.paymentMethod)}</b>
-                                    <span style="color:#ccc;">|</span>
+                                    <span class="badge badge-type">${typeLabel(r.type)}</span><span style="color:#ccc;">|</span>
+                                    ফোন: <b>${r.phone}</b><span style="color:#ccc;">|</span>
+                                    Trx ID: <b>${r.transactionId}</b><span style="color:#ccc;">|</span>
+                                    মাধ্যম: <b>${methodLabel(r.paymentMethod)}</b><span style="color:#ccc;">|</span>
                                     তারিখ: <b>${new Date(r.requestedAt).toLocaleString()}</b>
                                     ${isRejected && r.rejectionReason ? `<span style="color:#ccc;">|</span> <span style="color:#dc3545; font-weight:bold;">কারণ: ${r.rejectionReason}</span>` : ''}
                                 </div>
-
                                 <div class="he-actions">
-                                    ${isPending ? `
-                                        <button class="btn-action btn-update" onclick="approveRequest('${userId}', '${r._id}')">Approve</button>
-                                        <button class="btn-action btn-delete" onclick="rejectRequest('${userId}', '${r._id}')">Reject</button>
-                                    ` : ''}
+                                    ${isPending ? `<button class="btn-action btn-update" onclick="approveRequest('${userId}', '${r._id}')">Approve</button>
+                                                   <button class="btn-action btn-delete" onclick="rejectRequest('${userId}', '${r._id}')">Reject</button>` : ''}
                                     <button class="btn-action btn-edit" onclick="startEditEntry('${r._id}')">Edit</button>
                                     <button class="btn-action btn-delete" onclick="deleteEntry('${userId}', '${r._id}')">Delete</button>
                                 </div>
                             </div>
 
                             <div class="he-edit-form" id="he-edit-${r._id}" style="display:none;">
-                                <select id="he-plan-${r._id}">
-                                    <option value="1_month" ${r.plan === '1_month' ? 'selected' : ''}>1 Month</option>
-                                    <option value="3_months" ${r.plan === '3_months' ? 'selected' : ''}>3 Months</option>
-                                    <option value="6_months" ${r.plan === '6_months' ? 'selected' : ''}>6 Months</option>
-                                    <option value="1_year" ${r.plan === '1_year' ? 'selected' : ''}>1 Year</option>
-                                    <option value="2_years" ${r.plan === '2_years' ? 'selected' : ''}>2 Years</option>
-                                    <option value="3_years" ${r.plan === '3_years' ? 'selected' : ''}>3 Years</option>
-                                </select>
+                                <!-- 💡 Dropdown Removed. Added Text Input -->
+                                <input type="text" id="he-plan-${r._id}" value="${r.plan}" placeholder="Package Name (e.g. 1_month or Custom Name)">
                                 <select id="he-method-${r._id}">
                                     <option value="bkash" ${r.paymentMethod === 'bkash' ? 'selected' : ''}>বিকাশ</option>
                                     <option value="nagad" ${r.paymentMethod === 'nagad' ? 'selected' : ''}>নগদ</option>
@@ -589,13 +569,7 @@
                     `;
                 }).join('');
 
-                contentHTML = `
-                    <div id="historyList-${userId}" style="margin-bottom: 15px;">
-                        ${historyListHtml}
-                    </div>
-                    ${addBtnHtml}
-                    ${addFormHtml}
-                `;
+                contentHTML = `<div id="historyList-${userId}" style="margin-bottom: 15px;">${historyListHtml}</div>${addBtnHtml}${addFormHtml}`;
             }
 
             container.innerHTML = `
@@ -624,20 +598,36 @@
         async function cancelActivePlan(userId) {
             const confirmed = await showTopAlert('এই ইউজারের Active প্ল্যান বাতিল করতে চান?', 'danger', true);
             if (!confirmed) return;
-            await updateSubscriptionWithPlan(userId, 'none');
-        }
-
-        async function updateSubscription(userId) {
-            const selectedPlan = document.getElementById(`plan-${userId}`).value;
-            await updateSubscriptionWithPlan(userId, selectedPlan);
-        }
-
-        async function updateSubscriptionWithPlan(userId, plan) {
+            
             try {
                 const res = await fetch(`${API_BASE}/users/${userId}/subscription`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify({ plan })
+                    body: JSON.stringify({ plan: 'none' })
+                });
+                const data = await res.json();
+                if (data.success) { showTopAlert(`✅ ${data.message}`, 'success'); loadUsers(); } 
+                else { showTopAlert(`❌ Failed: ${data.message}`, 'danger'); }
+            } catch (err) { showTopAlert(`❌ Error updating plan!`, 'danger'); }
+        }
+
+        // 💡 Update Subscription Handling (Including Custom Logic)
+        async function updateSubscription(userId) {
+            const plan = document.getElementById(`plan-${userId}`).value;
+            let payload = { plan };
+
+            if (plan === 'custom') {
+                payload.customName = document.getElementById(`custom-name-${userId}`).value;
+                payload.years = document.getElementById(`custom-y-${userId}`).value;
+                payload.months = document.getElementById(`custom-m-${userId}`).value;
+                payload.days = document.getElementById(`custom-d-${userId}`).value;
+            }
+
+            try {
+                const res = await fetch(`${API_BASE}/users/${userId}/subscription`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify(payload)
                 });
                 const data = await res.json();
                 if (data.success) { showTopAlert(`✅ ${data.message}`, 'success'); loadUsers(); } 
@@ -663,12 +653,12 @@
         }
 
         async function saveEditEntry(userId, requestId) {
-            const plan = document.getElementById(`he-plan-${requestId}`).value;
+            const plan = document.getElementById(`he-plan-${requestId}`).value.trim();
             const paymentMethod = document.getElementById(`he-method-${requestId}`).value;
             const phone = document.getElementById(`he-phone-${requestId}`).value.trim();
             const transactionId = document.getElementById(`he-trx-${requestId}`).value.trim();
 
-            if (!phone || !transactionId) { showTopAlert('ফোন নাম্বার ও Transaction ID দিতে হবে।', 'warning'); return; }
+            if (!phone || !transactionId || !plan) { showTopAlert('প্ল্যান, ফোন নাম্বার ও Transaction ID দিতে হবে।', 'warning'); return; }
 
             try {
                 const res = await fetch(`${API_BASE}/users/${userId}/pending-requests/${requestId}`, {
@@ -698,13 +688,13 @@
         }
 
         async function submitAddPayment(userId) {
-            const plan = document.getElementById(`addPlan-${userId}`).value;
+            const plan = document.getElementById(`addPlan-${userId}`).value.trim();
             const status = document.getElementById(`addStatus-${userId}`).value;
             const phone = document.getElementById(`addPhone-${userId}`).value.trim();
             const transactionId = document.getElementById(`addTrxId-${userId}`).value.trim();
             const paymentMethod = document.getElementById(`addMethod-${userId}`).value;
 
-            if (!phone || !transactionId) { showTopAlert('ফোন নাম্বার ও Transaction ID দিতে হবে।', 'warning'); return; }
+            if (!phone || !transactionId || !plan) { showTopAlert('প্ল্যান, ফোন নাম্বার ও Transaction ID দিতে হবে।', 'warning'); return; }
 
             try {
                 const res = await fetch(`${API_BASE}/users/${userId}/pending-requests`, {
