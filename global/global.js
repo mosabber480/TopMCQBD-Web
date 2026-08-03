@@ -170,7 +170,7 @@ function applyLayoutToDOM(data) {
         `;
     }
 
-    // C. Header & Navigation (🌟 Updated for Multiple Mega Menus via megaMenuId)
+    // C. Header & Navigation
     const headerContainer = document.getElementById('global-header');
     if (headerContainer && data.header) {
         const h = data.header;
@@ -191,7 +191,6 @@ function applyLayoutToDOM(data) {
                 const hasRegularSub = !isMega && item.subMenus && item.subMenus.length > 0;
                 let subMenuHTML = '';
 
-                // 🌟 Multiple Mega Menu Mapping Logic
                 if (isMega && item.megaMenuId) {
                     const targetMega = (h.megaMenus || []).find(m => m.id === item.megaMenuId);
                     if (targetMega && targetMega.columns && targetMega.columns.length > 0) {
@@ -295,7 +294,7 @@ function applyLayoutToDOM(data) {
         initMobileNav();
     }
 
-    // D. Footer & Copyright (Dynamic Drag & Drop Columns Support)
+    // D. Footer & Copyright
     const footerContainer = document.getElementById('global-footer');
     if (footerContainer && (data.footer || data.copyright)) {
         const f = data.footer || {};
@@ -342,10 +341,8 @@ function applyLayoutToDOM(data) {
             }
         }).join('');
 
-        // ================= COPYRIGHT TEXT & LINKS LOGIC =================
         let hasLinks = c.links && c.links.length > 0;
         let copyTextValue = c.text !== undefined ? c.text : '© ' + new Date().getFullYear() + ' TopMCQ. All rights reserved.';
-        
         let textAlignmentClass = hasLinks ? 'text-left' : 'text-center';
         let copyTextHtml = copyTextValue ? `<div class="footer-copy-text ${textAlignmentClass}">${copyTextValue}</div>` : '';
 
@@ -369,25 +366,30 @@ function applyLayoutToDOM(data) {
     }
 }
 
-// Function: Mobile Navigation Toggles (💡 UPDATED FOR SCROLL LOCK)
+// Function: Mobile Navigation Toggles (💡 JS EXACT HEIGHT CALCULATION)
 function initMobileNav() {
     const toggleBtn = document.getElementById('mobile-toggle-btn');
     const siteNav = document.getElementById('site-nav');
+    const header = document.getElementById('global-header');
 
     if (toggleBtn && siteNav) {
         toggleBtn.onclick = (e) => {
             e.stopPropagation();
             siteNav.classList.toggle('active');
             const icon = toggleBtn.querySelector('i');
-            if (icon) {
-                icon.className = siteNav.classList.contains('active') ? 'fa-solid fa-xmark' : 'fa-solid fa-bars';
-            }
             
-            // 💡 NEW: মেনু ওপেন হলে ব্যাকগ্রাউন্ড/বডি স্ক্রল লক করে দেওয়া হলো
             if (siteNav.classList.contains('active')) {
-                document.body.style.overflow = 'hidden';
+                if(icon) icon.className = 'fa-solid fa-xmark';
+                document.body.style.overflow = 'hidden'; // Lock Body Scroll
+                
+                // 💡 NEW: JS দিয়ে নিখুঁত হাইট বের করা হচ্ছে (iPhone Address Bar Fix)
+                const headerHeight = header ? header.offsetHeight : 65;
+                const exactHeight = window.innerHeight - headerHeight;
+                siteNav.style.maxHeight = exactHeight + 'px';
             } else {
+                if(icon) icon.className = 'fa-solid fa-bars';
                 document.body.style.overflow = '';
+                siteNav.style.maxHeight = ''; // Reset
             }
         };
 
@@ -396,9 +398,8 @@ function initMobileNav() {
                 siteNav.classList.remove('active');
                 const icon = toggleBtn.querySelector('i');
                 if (icon) icon.className = 'fa-solid fa-bars';
-                
-                // 💡 NEW: মেনু ক্লোজ হলে ব্যাকগ্রাউন্ড/বডি স্ক্রল আবার আনলক করা হলো
                 document.body.style.overflow = '';
+                siteNav.style.maxHeight = ''; // Reset
             }
         };
 

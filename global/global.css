@@ -29,7 +29,7 @@ body {
 }
 
 /* ==========================================================================
-   GLOBAL TOP ALERT BANNER SYSTEM (STANDARDIZED TO 1300PX MAX-WIDTH)
+   GLOBAL TOP ALERT BANNER SYSTEM
    ========================================================================== */
 #topAlertBanner {
     position: fixed; 
@@ -69,7 +69,6 @@ body {
 #topAlertBanner.warning::before { background-color: var(--warning); }
 #topAlertBanner.danger::before { background-color: var(--danger); }
 
-/* STANDARDIZED 1300PX INNER CONTAINER */
 .alert-container-inner {
     max-width: 1300px !important;
     width: 100%;
@@ -85,7 +84,7 @@ body {
 .btn-alert-cancel { background-color: #e2e8f0; color: #4a5568; }
 
 /* ==========================================================================
-   ADMIN DASHBOARD NAVIGATION BAR (STANDARDIZED TO 1300PX MAX-WIDTH)
+   ADMIN DASHBOARD NAVIGATION BAR
    ========================================================================== */
 .navbar-wrapper {
     background-color: var(--dark);
@@ -123,7 +122,6 @@ body {
     justify-content: flex-end;
 }
 
-/* Nav Action Buttons */
 .btn-nav {
     text-decoration: none;
     padding: 9px 16px;
@@ -154,7 +152,7 @@ body {
 .btn-danger-nav:hover { background-color: #bd2130; }
 
 /* ==========================================================================
-   PAGE CONTAINER & GENERIC SECTION CARDS (1300PX MAX-WIDTH)
+   PAGE CONTAINER & GENERIC SECTION CARDS
    ========================================================================== */
 .container {
     max-width: 1300px;
@@ -425,18 +423,9 @@ body {
 }
 
 /* ==========================================================================
-   MEGA MENU STYLES (UPDATED FOR MULTIPLE COLUMNS)
+   MEGA MENU STYLES
    ========================================================================== */
 @media (min-width: 769px) {
-    /* --- Hover-gap fix ---
-       .mega-menu is positioned relative to #global-header (because the
-       has-mega-menu <li> is forced to position:static below), so it starts
-       exactly at the header's outer bottom edge. But header-wrapper's own
-       vertical padding + align-items:center meant the <li>'s hoverable box
-       stopped well ABOVE that edge, creating a dead zone the mouse had to
-       cross -> :hover was lost -> menu hid before the cursor arrived.
-       Fix: stretch the whole nav column so the <li> (and its hover box)
-       fills the header edge-to-edge, with zero gap before the mega menu. */
     .header-wrapper {
         align-items: stretch;
         padding-top: 0;
@@ -459,10 +448,9 @@ body {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
         gap: 30px; align-items: start;
-        max-width: 1300px; margin: 0 auto; /* To align with header max-width */
+        max-width: 1300px; margin: 0 auto; 
     }
     
-    /* 🌟 Updated Hover Logic Here */
     .nav-item.has-mega-menu:hover > .mega-menu,
     .mega-menu:hover { 
         display: block !important; 
@@ -473,7 +461,6 @@ body {
         margin-bottom: 12px; border-bottom: 2px solid #e2e8f0; padding-bottom: 6px;
     }
     
-    /* Styles specifically for Links Column in Mega Menu */
     .mega-links-col .mega-col-links { display: flex; flex-direction: column; gap: 8px; }
     .mega-links-col a {
         color: #2c3e50; text-decoration: none; font-size: 14px; font-weight: 500;
@@ -486,7 +473,6 @@ body {
     }
     .mega-links-col a:hover i { color: #ffffff !important; }
 
-    /* Mega Menu Info & Social Styles */
     .mega-social { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
     .mega-social a {
         width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
@@ -502,7 +488,6 @@ body {
     .mega-social a:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
 }
 
-/* Mobile View Mega Menu */
 @media (max-width: 768px) {
     .mega-menu { display: none; background: #f8fafc; padding: 15px; border-radius: 6px; margin-top: 5px; }
     .mega-grid-container { display: flex; flex-direction: column; gap: 15px; }
@@ -523,7 +508,7 @@ body {
 }
 
 /* ==========================================================================
-   3. Dynamic Footer Styling (NEW FLEXBOX LAYOUT FOR PERFECT ALIGNMENT)
+   3. Dynamic Footer Styling
    ========================================================================== */
 #global-footer { 
     background-color: #1e293b; 
@@ -536,7 +521,6 @@ body {
     margin: 0 auto; 
 }
 
-/* 🌟 Updated Footer Grid */
 .footer-grid { 
     display: flex; 
     flex-wrap: wrap; 
@@ -548,18 +532,14 @@ body {
     flex: 1 1 200px; 
 }
 
-/* ডেস্কটপ ভিউতে (900px এর উপরে) স্পেস ফিক্স */
 @media (min-width: 900px) {
     .footer-col:first-child {
         flex: 1.5 1 250px; 
         max-width: 380px; 
     }
-    
-    /* 🌟 Info কলামের ডানপাশে মার্জিন দিয়ে পারফেক্ট স্পেস তৈরি করা হলো */
     .footer-col.info-col {
         margin-right: 100px; 
     }
-
     .footer-col:last-child {
         flex: 0 1 auto; 
     }
@@ -606,7 +586,6 @@ body {
     color: #38bdf8 !important; 
 }
 
-/* Social Media Buttons */
 .footer-social { margin-top: 18px; display: flex; gap: 10px; flex-wrap: wrap; }
 .social-btn { 
     width: 38px; 
@@ -630,7 +609,6 @@ body {
 .social-btn.tg { background: #0088cc; }
 .social-btn.ln { background: #0a66c2; }
 
-/* ================= FOOTER BOTTOM (COPYRIGHT & LINKS) ================= */
 .footer-bottom { 
     display: flex;
     align-items: center;
@@ -645,7 +623,6 @@ body {
     flex: 1;
 }
 
-/* ডায়নামিক এলাইনমেন্ট (JS থেকে আসা ক্লাস) */
 .footer-copy-text.text-left {
     text-align: left;
 }
@@ -703,11 +680,14 @@ body {
         left: 0;
         box-shadow: 0 12px 25px rgba(0,0,0,0.12);
         border-top: 1px solid #f1f5f9;
-        padding: 12px 20px 18px 20px;
+        
+        /* 💡 NEW: JS exact height, adding safe area padding specifically for iPhone */
+        padding: 15px 20px calc(20px + env(safe-area-inset-bottom)) 20px;
         z-index: 1000;
         text-align: left;
-        max-height: calc(100vh - 65px);
+        
         overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
     .site-nav.active {
@@ -771,7 +751,9 @@ body {
         width: 100%;
         margin-top: 12px;
         margin-left: 0;
-        padding-top: 12px;
+        padding-top: 15px;
+        /* 💡 NEW: Space for iPhone Safe Area */
+        margin-bottom: calc(20px + env(safe-area-inset-bottom));
         border-top: 1px solid #f1f5f9;
         display: flex;
         justify-content: flex-start;
@@ -789,14 +771,12 @@ body {
         gap: 25px;
     }
 
-    /* Mobile Adjustments for Footer Bottom */
     .footer-bottom {
         flex-direction: column;
         gap: 12px;
         padding-bottom: 20px;
     }
     
-    /* মোবাইলে সবসময় সেন্টারে থাকবে (লিংক থাকুক বা না থাকুক) */
     .footer-copy-text.text-left,
     .footer-copy-text.text-center {
         text-align: center;
