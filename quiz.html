@@ -165,11 +165,64 @@
 
         .quiz-answer-text { font-weight: bold; color: #27ae60; margin-top: 10px; display: none; text-align: left; }
         .quiz-explanation-text { font-size: 14px; color: #555; margin-top: 5px; display: none; background: #f9f9f9; padding: 8px 12px; border-left: 3px solid #17a2b8; border-radius: 4px; }
-        .quiz-result-section { text-align: center; margin-top: 40px; padding: 20px; background: #ecf0f1; border-radius: 8px; }
-        .quiz-detailed-stats { font-size: 14px; margin-bottom: 12px; color: #555; }
+        .quiz-result-section { text-align: center; margin-top: 40px; padding: 25px; background: #ecf0f1; border-radius: 8px; }
+        .quiz-detailed-stats { font-size: 15px; margin-bottom: 10px; color: #555; }
         .quiz-correct-count { color: #2ecc71; font-weight: bold; }
         .quiz-incorrect-count { color: #e74c3c; font-weight: bold; }
-        #final-score { font-size: 24px; color: #2c3e50; font-weight: bold; border-top: 2px solid #bdc3c7; padding-top: 10px; display: inline-block; }
+        
+        #final-score { font-size: 26px; color: #2c3e50; font-weight: bold; display: inline-block; margin-top: 5px; }
+
+        /* 💡 PROGRESS BAR STYLES */
+        .quiz-progress-bar-container {
+            width: 100%;
+            max-width: 600px;
+            height: 18px;
+            background-color: #e2e8f0;
+            border-radius: 12px;
+            margin: 15px auto 8px auto;
+            display: flex;
+            overflow: hidden;
+            border: 1px solid #ced4da;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .quiz-progress-correct {
+            background-color: #2ecc71;
+            height: 100%;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 11px; font-weight: bold;
+            transition: width 0.4s ease;
+        }
+        .quiz-progress-incorrect {
+            background-color: #e74c3c;
+            height: 100%;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 11px; font-weight: bold;
+            transition: width 0.4s ease;
+        }
+        .quiz-progress-unanswered {
+            background-color: #95a5a6;
+            height: 100%;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 11px; font-weight: bold;
+            transition: width 0.4s ease;
+        }
+
+        /* Hover Tooltip Details */
+        #progress-tooltip {
+            position: fixed;
+            display: none;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            z-index: 9999;
+            pointer-events: none;
+            white-space: nowrap;
+            font-weight: bold;
+            transform: translate(-50%, -130%);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
 
         @media (max-width: 768px) {
             .quiz-section-wrapper { margin: 15px auto; padding: 0 10px; }
@@ -186,6 +239,7 @@
             .quiz-options-container { flex-direction: column; gap: 10px; }
             .quiz-option-btn { width: 100%; box-sizing: border-box; padding: 12px 15px; }
             .quiz-corner-popup { bottom: 15px; right: 15px; left: 15px; max-width: none; }
+            .quiz-detailed-stats { font-size: 13px; }
         }
     </style>
 </head>
@@ -210,6 +264,9 @@
             <p id="popup-msg"></p>
             <div id="popup-action"></div>
         </div>
+
+        <!-- Progress Hover Tooltip -->
+        <div id="progress-tooltip"></div>
 
         <div class="quiz-container">
             <h1 id="main-title">Dynamic Quiz Practice</h1>
@@ -306,8 +363,20 @@
             <div class="quiz-result-section">
                 <h2>পরীক্ষার ফলাফল</h2>
                 <div class="quiz-detailed-stats">
-                    সঠিক উত্তর: <span id="correct-count-display" class="quiz-correct-count">০</span> টি &nbsp;&nbsp;|&nbsp;&nbsp; ভুল উত্তর: <span id="incorrect-count-display" class="quiz-incorrect-count">০</span> টি
+                    সঠিক উত্তর: <span id="correct-count-display" class="quiz-correct-count">০</span> টি 
+                    &nbsp;&nbsp;|&nbsp;&nbsp; 
+                    ভুল উত্তর: <span id="incorrect-count-display" class="quiz-incorrect-count">০</span> টি 
+                    <span id="unanswered-text-container">&nbsp;&nbsp;|&nbsp;&nbsp; 
+                    উত্তর দেওয়া হয়নি: <span id="unanswered-count-display" style="color: #7f8c8d; font-weight: bold;">০</span> টি</span>
                 </div>
+                
+                <!-- PROGRESS BAR UI -->
+                <div class="quiz-progress-bar-container" id="quiz-progress-bar">
+                    <div id="progress-correct" class="quiz-progress-correct" style="width: 0%;"></div>
+                    <div id="progress-incorrect" class="quiz-progress-incorrect" style="width: 0%;"></div>
+                    <div id="progress-unanswered" class="quiz-progress-unanswered" style="width: 100%;">100%</div>
+                </div>
+
                 <div id="final-score">আপনার মোট প্রাপ্ত স্কোর: ০</div>
             </div>
         </div>
@@ -348,9 +417,17 @@
         const timerDisplay = document.getElementById('timer-display');
         const timerBoardBox = document.getElementById('timer-board-box');
         const scoreBoardBox = document.getElementById('score-board-box');
+        
         const correctCountDisplay = document.getElementById('correct-count-display');
         const incorrectCountDisplay = document.getElementById('incorrect-count-display');
+        const unansweredCountDisplay = document.getElementById('unanswered-count-display');
         const finalScoreDisplay = document.getElementById('final-score');
+        
+        const progressCorrect = document.getElementById('progress-correct');
+        const progressIncorrect = document.getElementById('progress-incorrect');
+        const progressUnanswered = document.getElementById('progress-unanswered');
+        const progressBarContainer = document.getElementById('quiz-progress-bar');
+        const progressTooltip = document.getElementById('progress-tooltip');
 
         const toggleRead = document.getElementById('toggle-read');
         const toggleColor = document.getElementById('toggle-color');
@@ -424,6 +501,55 @@
                 resetQuiz();
             }
         });
+
+        // 💡 Tooltip Logic setup (Removed onclick popup logic)
+        function setupProgressTooltip(elem, text) {
+            elem.onmouseenter = (e) => {
+                progressTooltip.style.display = 'block';
+                progressTooltip.innerText = text;
+                progressTooltip.style.left = e.clientX + 'px';
+                progressTooltip.style.top = e.clientY + 'px';
+            };
+            elem.onmousemove = (e) => {
+                progressTooltip.style.left = e.clientX + 'px';
+                progressTooltip.style.top = e.clientY + 'px';
+            };
+            elem.onmouseleave = () => {
+                progressTooltip.style.display = 'none';
+            };
+        }
+
+        // 💡 UPDATE PROGRESS BAR FUNCTION
+        function updateProgressBar() {
+            const total = displayQuestions.length;
+            if (total === 0 || isReadMode) {
+                progressBarContainer.style.display = 'none';
+                document.getElementById('unanswered-text-container').style.display = 'none';
+                return;
+            }
+            
+            progressBarContainer.style.display = 'flex';
+            document.getElementById('unanswered-text-container').style.display = 'inline';
+
+            const unansweredCount = total - (correctCount + incorrectCount);
+            unansweredCountDisplay.innerText = unansweredCount;
+
+            const correctPct = (correctCount / total) * 100;
+            const incorrectPct = (incorrectCount / total) * 100;
+            const unansweredPct = (unansweredCount / total) * 100;
+
+            progressCorrect.style.width = `${correctPct}%`;
+            progressCorrect.innerText = correctPct > 4 ? `${Math.round(correctPct)}%` : '';
+            setupProgressTooltip(progressCorrect, `সঠিক উত্তর: ${Math.round(correctPct)}%`);
+
+            progressIncorrect.style.width = `${incorrectPct}%`;
+            progressIncorrect.innerText = incorrectPct > 4 ? `${Math.round(incorrectPct)}%` : '';
+            setupProgressTooltip(progressIncorrect, `ভুল উত্তর: ${Math.round(incorrectPct)}%`);
+
+            progressUnanswered.style.width = `${unansweredPct}%`;
+            progressUnanswered.innerText = unansweredPct > 4 ? `${Math.round(unansweredPct)}%` : '';
+            setupProgressTooltip(progressUnanswered, `উত্তর দেওয়া হয়নি: ${Math.round(unansweredPct)}%`);
+        }
 
         // Authentication and Subscription Access Guard
         async function initQuizAccess() {
@@ -499,7 +625,6 @@
                         if (toggleColor.checked) {
                             correctBtn.classList.add('correct');
                         } else {
-                            // When color is toggled off in Read Mode, show the neutral selection style
                             correctBtn.classList.add('neutral-selected');
                         }
                     }
@@ -517,7 +642,6 @@
                                 if (correctBtn) correctBtn.classList.add('correct');
                             }
                         } else {
-                            // When color is toggled off in normal Mode, show the neutral selection style on selected answer
                             if (selectedBtn) selectedBtn.classList.add('neutral-selected');
                         }
                     }
@@ -700,6 +824,17 @@
                 quizWrapper.appendChild(qBlock);
             });
 
+            // Reset scores internally when range is changed
+            score = 0;
+            correctCount = 0;
+            incorrectCount = 0;
+            answeredQuestions = {};
+            liveScoreDisplay.innerText = 0;
+            correctCountDisplay.innerText = 0;
+            incorrectCountDisplay.innerText = 0;
+            finalScoreDisplay.innerText = 'আপনার মোট প্রাপ্ত স্কোর: ০';
+            
+            updateProgressBar();
             updateVisibility();
             updateOptionColors();
         }
@@ -772,11 +907,12 @@
 
             const totalCount = displayQuestions.length || 1;
             const percentage = ((correctCount / totalCount) * 100).toFixed(0);
+            const unansweredCount = totalCount - (correctCount + incorrectCount);
 
             cornerPopup.className = "quiz-corner-popup danger";
             popupTitle.innerHTML = `<i class="fa-solid fa-clock" style="color:#e74c3c;"></i> সময় শেষ!`;
             popupMsg.innerHTML = `
-                <b>সঠিক উত্তর:</b> ${correctCount} টি &nbsp;|&nbsp; <b>ভুল উত্তর:</b> ${incorrectCount} টি <br>
+                <b>সঠিক উত্তর:</b> ${correctCount} টি &nbsp;|&nbsp; <b>ভুল উত্তর:</b> ${incorrectCount} টি &nbsp;|&nbsp; <b>উত্তর দেওয়া হয়নি:</b> ${unansweredCount} টি<br>
                 <b>সঠিক উত্তরের হার:</b> ${percentage}% <br>
                 <b>প্রাপ্ত মোট স্কোর:</b> ${score}
             `;
@@ -848,6 +984,7 @@
             incorrectCountDisplay.innerText = incorrectCount;
             finalScoreDisplay.innerText = `আপনার মোট প্রাপ্ত স্কোর: ${score}`;
 
+            updateProgressBar();
             updateVisibility();
 
             if (Object.keys(answeredQuestions).length === displayQuestions.length) {
