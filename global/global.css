@@ -681,8 +681,8 @@ body {
         box-shadow: 0 12px 25px rgba(0,0,0,0.12);
         border-top: 1px solid #f1f5f9;
         
-        /* 💡 NEW: JS exact height, adding safe area padding specifically for iPhone */
-        padding: 15px 20px calc(20px + env(safe-area-inset-bottom)) 20px;
+        /* 💡 স্বাভাবিক অবস্থায় কোনো অতিরিক্ত প্যাডিং নেই */
+        padding: 15px 20px 20px 20px;
         z-index: 1000;
         text-align: left;
         
@@ -752,8 +752,7 @@ body {
         margin-top: 12px;
         margin-left: 0;
         padding-top: 15px;
-        /* 💡 NEW: Space for iPhone Safe Area */
-        margin-bottom: calc(20px + env(safe-area-inset-bottom));
+        margin-bottom: 15px; 
         border-top: 1px solid #f1f5f9;
         display: flex;
         justify-content: flex-start;

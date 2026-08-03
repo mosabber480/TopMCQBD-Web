@@ -27,7 +27,7 @@ const DEFAULT_ANNOUNCEMENT = {
     });
 })();
 
-// GLOBAL TOP ALERT FUNCTION (CALLABLE ANYWHERE)
+// GLOBAL TOP ALERT FUNCTION
 function showTopAlert(msg, type = 'info', isConfirm = false) {
     return new Promise((resolve) => {
         let banner = document.getElementById('topAlertBanner');
@@ -62,53 +62,33 @@ function showTopAlert(msg, type = 'info', isConfirm = false) {
     });
 }
 
-// Helper Function: Correct URL Formatter (Local vs External)
 function formatURL(url) {
     if (!url || url === '#') return '#';
     let trimmed = url.trim();
-    
-    if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('//') || trimmed.startsWith('mailto:') || trimmed.startsWith('tel:')) {
-        return trimmed;
-    }
-    if (trimmed.startsWith('#') || trimmed.startsWith('/') || trimmed.endsWith('.html')) {
-        return trimmed;
-    }
-    if (trimmed.startsWith('images/') || trimmed.startsWith('assets/') || trimmed.startsWith('../') || trimmed.startsWith('./')) {
-        return trimmed;
-    }
-    if (!trimmed.includes('.')) {
-        return trimmed;
-    }
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('//') || trimmed.startsWith('mailto:') || trimmed.startsWith('tel:')) return trimmed;
+    if (trimmed.startsWith('#') || trimmed.startsWith('/') || trimmed.endsWith('.html')) return trimmed;
+    if (trimmed.startsWith('images/') || trimmed.startsWith('assets/') || trimmed.startsWith('../') || trimmed.startsWith('./')) return trimmed;
+    if (!trimmed.includes('.')) return trimmed;
     return 'https://' + trimmed;
 }
 
-// Helper Function: Smart Auth Redirect based on Role, Token & Folder Structure
 function getAuthRedirectLink() {
     const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
     const userStr = localStorage.getItem('user') || localStorage.getItem('quiz_user');
-    
     if (!token) return 'login.html'; 
-    
     try {
         const user = JSON.parse(userStr || '{}');
-        if (user && (user.role === 'owner' || user.role === 'admin')) {
-            return 'admin/dashboard.html';
-        }
+        if (user && (user.role === 'owner' || user.role === 'admin')) return 'admin/dashboard.html';
     } catch(e){}
-    
     return 'profile.html';
 }
 
-// Optimized Function: Load from Cache first, then Revalidate from Server (SWR)
 async function renderGlobalLayout() {
     let cachedData = localStorage.getItem('layout_config_data');
     let config = cachedData ? JSON.parse(cachedData) : null;
 
-    if (!config) {
-        config = { announcement: DEFAULT_ANNOUNCEMENT };
-    } else if (!config.announcement || !config.announcement.text) {
-        config.announcement = DEFAULT_ANNOUNCEMENT;
-    }
+    if (!config) config = { announcement: DEFAULT_ANNOUNCEMENT };
+    else if (!config.announcement || !config.announcement.text) config.announcement = DEFAULT_ANNOUNCEMENT;
 
     applyLayoutToDOM(config);
 
@@ -116,10 +96,7 @@ async function renderGlobalLayout() {
         const response = await fetch(LAYOUT_API_URL);
         if (response.ok) {
             const freshData = await response.json();
-            if (!freshData.announcement || !freshData.announcement.text) {
-                freshData.announcement = DEFAULT_ANNOUNCEMENT;
-            }
-
+            if (!freshData.announcement || !freshData.announcement.text) freshData.announcement = DEFAULT_ANNOUNCEMENT;
             if (JSON.stringify(config) !== JSON.stringify(freshData)) {
                 localStorage.setItem('layout_config_data', JSON.stringify(freshData));
                 applyLayoutToDOM(freshData);
@@ -130,36 +107,28 @@ async function renderGlobalLayout() {
     }
 }
 
-// Function: Pure DOM Builder
 function applyLayoutToDOM(data) {
     if (!data) return;
-
     const homePath = 'index.html';
 
-    // A. Dynamic Favicon
-    if (data.header) {
-        if (data.header.faviconUrl) {
-            let faviconUrlFormatted = formatURL(data.header.faviconUrl);
-            if (window.location.pathname.includes('/admin/')) {
-                if (faviconUrlFormatted.startsWith('images/')) {
-                    faviconUrlFormatted = '../' + faviconUrlFormatted;
-                }
-            }
-
-            let favicon = document.querySelector("link[rel*='icon']");
-            if (!favicon) {
-                favicon = document.createElement('link');
-                favicon.rel = 'shortcut icon';
-                document.getElementsByTagName('head')[0].appendChild(favicon);
-            }
-            favicon.href = faviconUrlFormatted;
+    // A. Favicon
+    if (data.header && data.header.faviconUrl) {
+        let faviconUrlFormatted = formatURL(data.header.faviconUrl);
+        if (window.location.pathname.includes('/admin/')) {
+            if (faviconUrlFormatted.startsWith('images/')) faviconUrlFormatted = '../' + faviconUrlFormatted;
         }
+        let favicon = document.querySelector("link[rel*='icon']");
+        if (!favicon) {
+            favicon = document.createElement('link');
+            favicon.rel = 'shortcut icon';
+            document.getElementsByTagName('head')[0].appendChild(favicon);
+        }
+        favicon.href = faviconUrlFormatted;
     }
 
     // B. Announcement Bar
     const announceBar = document.getElementById('global-announce-bar');
     const announceInfo = (data.announcement && data.announcement.text) ? data.announcement : DEFAULT_ANNOUNCEMENT;
-
     if (announceBar && announceInfo && announceInfo.text) {
         announceBar.style.display = 'block';
         announceBar.innerHTML = `
@@ -170,11 +139,10 @@ function applyLayoutToDOM(data) {
         `;
     }
 
-    // C. Header & Navigation
+    // C. Header
     const headerContainer = document.getElementById('global-header');
     if (headerContainer && data.header) {
         const h = data.header;
-        
         let logoUrlFormatted = h.logoUrl ? formatURL(h.logoUrl) : '';
         if (window.location.pathname.includes('/admin/') && logoUrlFormatted.startsWith('images/')) {
             logoUrlFormatted = '../' + logoUrlFormatted;
@@ -366,11 +334,28 @@ function applyLayoutToDOM(data) {
     }
 }
 
-// Function: Mobile Navigation Toggles (💡 JS EXACT HEIGHT CALCULATION)
+// Function: Mobile Navigation Toggles (💡 JS DYNAMIC PADDING CALCULATION)
 function initMobileNav() {
     const toggleBtn = document.getElementById('mobile-toggle-btn');
     const siteNav = document.getElementById('site-nav');
     const header = document.getElementById('global-header');
+
+    // 💡 ফাংশন: স্ক্রল হলে ডায়নামিক প্যাডিং অ্যাড করা
+    function updateNavState() {
+        if (siteNav && siteNav.classList.contains('active')) {
+            const headerHeight = header ? header.offsetHeight : 65;
+            const availableHeight = window.innerHeight - headerHeight;
+            siteNav.style.maxHeight = availableHeight + 'px';
+            
+            // 💡 কন্টেন্ট কতটুকু জায়গা নিচ্ছে তা চেক করার জন্য আগে প্যাডিং রিসেট করা হচ্ছে
+            siteNav.style.paddingBottom = '20px';
+            
+            // যদি কন্টেন্টের হাইট এভেইলেবল হাইটের চেয়ে বেশি হয়, তার মানে স্ক্রল হচ্ছে
+            if (siteNav.scrollHeight > availableHeight) {
+                siteNav.style.paddingBottom = '120px'; // স্ক্রল হলে নিচের বারের জন্য এক্সট্রা প্যাডিং
+            }
+        }
+    }
 
     if (toggleBtn && siteNav) {
         toggleBtn.onclick = (e) => {
@@ -381,17 +366,16 @@ function initMobileNav() {
             if (siteNav.classList.contains('active')) {
                 if(icon) icon.className = 'fa-solid fa-xmark';
                 document.body.style.overflow = 'hidden'; // Lock Body Scroll
-                
-                // 💡 NEW: JS দিয়ে নিখুঁত হাইট বের করা হচ্ছে (iPhone Address Bar Fix)
-                const headerHeight = header ? header.offsetHeight : 65;
-                const exactHeight = window.innerHeight - headerHeight;
-                siteNav.style.maxHeight = exactHeight + 'px';
+                updateNavState(); // 💡 ডায়নামিক হাইট ও প্যাডিং আপডেট
             } else {
                 if(icon) icon.className = 'fa-solid fa-bars';
                 document.body.style.overflow = '';
                 siteNav.style.maxHeight = ''; // Reset
+                siteNav.style.paddingBottom = ''; // Reset
             }
         };
+
+        window.addEventListener('resize', updateNavState);
 
         document.onclick = (e) => {
             if (!siteNav.contains(e.target) && !toggleBtn.contains(e.target)) {
@@ -400,6 +384,7 @@ function initMobileNav() {
                 if (icon) icon.className = 'fa-solid fa-bars';
                 document.body.style.overflow = '';
                 siteNav.style.maxHeight = ''; // Reset
+                siteNav.style.paddingBottom = ''; // Reset
             }
         };
 
@@ -411,6 +396,9 @@ function initMobileNav() {
                     if (navItem && navItem.classList.contains('has-dropdown')) {
                         e.preventDefault();
                         navItem.classList.toggle('show-mobile-dropdown');
+                        
+                        // 💡 সাব-মেনু ওপেন/ক্লোজ হলে হাইট পরিবর্তন হয়, তাই একটু ডিলিট করে পুনরায় আপডেট কল করা হলো
+                        setTimeout(updateNavState, 50); 
                     }
                 }
             };
