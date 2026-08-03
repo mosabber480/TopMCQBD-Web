@@ -706,6 +706,8 @@ body {
         padding: 12px 20px 18px 20px;
         z-index: 1000;
         text-align: left;
+        max-height: calc(100vh - 65px);
+        overflow-y: auto;
     }
 
     .site-nav.active {

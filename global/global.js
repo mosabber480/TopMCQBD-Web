@@ -369,7 +369,7 @@ function applyLayoutToDOM(data) {
     }
 }
 
-// Function: Mobile Navigation Toggles
+// Function: Mobile Navigation Toggles (💡 UPDATED FOR SCROLL LOCK)
 function initMobileNav() {
     const toggleBtn = document.getElementById('mobile-toggle-btn');
     const siteNav = document.getElementById('site-nav');
@@ -382,6 +382,13 @@ function initMobileNav() {
             if (icon) {
                 icon.className = siteNav.classList.contains('active') ? 'fa-solid fa-xmark' : 'fa-solid fa-bars';
             }
+            
+            // 💡 NEW: মেনু ওপেন হলে ব্যাকগ্রাউন্ড/বডি স্ক্রল লক করে দেওয়া হলো
+            if (siteNav.classList.contains('active')) {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = '';
+            }
         };
 
         document.onclick = (e) => {
@@ -389,6 +396,9 @@ function initMobileNav() {
                 siteNav.classList.remove('active');
                 const icon = toggleBtn.querySelector('i');
                 if (icon) icon.className = 'fa-solid fa-bars';
+                
+                // 💡 NEW: মেনু ক্লোজ হলে ব্যাকগ্রাউন্ড/বডি স্ক্রল আবার আনলক করা হলো
+                document.body.style.overflow = '';
             }
         };
 
