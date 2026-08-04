@@ -17,6 +17,10 @@
 
     <style>
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        
+        /* সাইডবার লেআউট যেন ঠিক থাকে তার জন্য container এর স্পেসিং যোগ করা হলো */
+        .container { margin-top: 30px; margin-bottom: 30px; padding: 0 25px 25px 25px; }
+
         .box { background: white; padding: 25px 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 20px; }
         .form-group { margin-bottom: 12px; position: relative; }
         label { display: block; font-weight: bold; margin-bottom: 4px; font-size: 13px; color: #555; }
@@ -50,16 +54,6 @@
         .btn-delete { background-color: #dc3545; }
         .table-responsive { overflow-x: auto; }
 
-        .logout-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 9999; opacity: 0; visibility: hidden; transition: 0.3s; backdrop-filter: blur(3px); }
-        .logout-modal-overlay.active { opacity: 1; visibility: visible; }
-        .logout-modal { background: white; padding: 35px 40px; border-radius: 12px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); transform: translateY(-20px); transition: 0.3s; max-width: 400px; width: 90%; }
-        .logout-modal-overlay.active .logout-modal { transform: translateY(0); }
-        .logout-icon { font-size: 45px; color: #dc3545; margin-bottom: 15px; }
-        .logout-actions { display: flex; gap: 15px; justify-content: center; margin-top: 25px; }
-        .logout-btn-cancel, .logout-btn-confirm { padding: 10px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; flex: 1; }
-        .logout-btn-cancel { background: #e2e8f0; }
-        .logout-btn-confirm { background: #dc3545; color: white; }
-
         @media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } }
     </style>
 </head>
@@ -78,7 +72,8 @@
                     </div>
                     <div class="info-row"><span style="font-weight:bold;">Email:</span> <span id="userEmail">Loading...</span></div>
                     <div class="info-row"><span style="font-weight:bold;">Joined:</span> <span id="userCreatedAt">N/A</span></div>
-                    <button type="button" class="btn-submit" style="background:#dc3545; margin-top:20px;" onclick="openLogoutModal()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+                    <!-- ডুপ্লিকেট পপআপের বদলে সেন্ট্রাল logout() কল করা হলো -->
+                    <button type="button" class="btn-submit" style="background:#dc3545; margin-top:20px;" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
                 </div>
 
                 <div class="box" style="border-left: 5px solid #ffc107;">
@@ -143,28 +138,12 @@
         </div>
     </div>
 
-    <div class="logout-modal-overlay" id="logoutModal">
-        <div class="logout-modal">
-            <i class="fa-solid fa-right-from-bracket logout-icon"></i>
-            <h3>লগআউট নিশ্চিত করুন</h3>
-            <p>আপনি কি নিশ্চিত যে আপনি আপনার অ্যাডমিন একাউন্ট থেকে লগআউট করতে চান?</p>
-            <div class="logout-actions">
-                <button class="logout-btn-cancel" onclick="closeLogoutModal()">বাতিল করুন</button>
-                <button class="logout-btn-confirm" onclick="confirmLogout()">লগআউট</button>
-            </div>
-        </div>
-    </div>
-
     <script src="../global/global.js"></script>
     <script src="../global/admin-global.js"></script>
     <script>
         const API_BASE = 'https://mosabber-quiz-app.onrender.com/api';
         const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
         const currentUser = JSON.parse(localStorage.getItem('user') || localStorage.getItem('quiz_user') || '{}');
-
-        function openLogoutModal() { document.getElementById('logoutModal').classList.add('active'); }
-        function closeLogoutModal() { document.getElementById('logoutModal').classList.remove('active'); }
-        function confirmLogout() { localStorage.clear(); window.location.replace('../login.html'); }
         
         function togglePassword(id) {
             const input = document.getElementById(id);
@@ -185,7 +164,7 @@
         async function loadStatsAndUsers() {
             const tableBody = document.getElementById('pendingUserTableBody');
             try {
-                // 💡 Cache-buster '?t=' যোগ করা হয়েছে যাতে ব্রাউজার সবসময় নতুন ডাটা নেয়[cite: 18]
+                // 💡 Cache-buster '?t=' যোগ করা হয়েছে যাতে ব্রাউজার সবসময় নতুন ডাটা নেয়
                 const res = await fetch(`${API_BASE}/users?t=${new Date().getTime()}`, { 
                     headers: { 'Authorization': `Bearer ${token}` } 
                 });
@@ -210,7 +189,7 @@
 
                     if(u.lastLogin) {
                         const lastLoginDate = new Date(u.lastLogin);
-                        // চেক করা হচ্ছে আজকের তারিখের সাথে মেলে কিনা[cite: 18]
+                        // চেক করা হচ্ছে আজকের তারিখের সাথে মেলে কিনা
                         if (lastLoginDate.toDateString() === now.toDateString()) {
                             todayLogins++;
                         }

@@ -22,7 +22,8 @@
     <link rel="stylesheet" href="../global/global.css">
 
     <style>
-        .container { max-width: 1300px; margin: 0 auto; padding: 25px; }
+        /* max-width & margin: auto সরানো হয়েছে যাতে global.css এর sidebar layout ঠিকমতো কাজ করে */
+        .container { margin-top: 30px; margin-bottom: 30px; padding: 0 25px 25px 25px; }
         .box { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
     </style>
 </head>
@@ -42,17 +43,9 @@
     <script src="../global/global.js"></script>
     <script src="../global/admin-global.js"></script>
 
+    <!-- logout() ফাংশনটি admin-global.js থেকে কল হবে তাই এখান থেকে রিমুভ করা হয়েছে -->
     <script>
-        // Logout Function
-        async function logout() {
-            if (await showTopAlert('আপনি কি নিশ্চিত যে লগআউট করতে চান?', 'warning', true)) {
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
-                localStorage.removeItem('quiz_token');
-                localStorage.removeItem('quiz_user');
-                window.location.replace('../login.html');
-            }
-        }
+        // আপনার পেজের অন্যান্য কাস্টম JS কোড এখানে থাকবে
     </script>
 </body>
 </html>

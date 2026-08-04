@@ -46,7 +46,9 @@
             max-width: 1300px !important;
         }
 
-        .container { max-width: 1300px; margin: 0 auto; padding: 0 25px 25px 25px; }
+        /* max-width & margin: auto সরানো হয়েছে যাতে global.css এর sidebar layout ঠিকমতো কাজ করে */
+        .container { margin-top: 30px; margin-bottom: 30px; padding: 0 25px 25px 25px; }
+
         .box { background: white; padding: 25px 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 25px; }
         h2, h3 { color: #333; margin-top: 0; }
         .form-group { margin-bottom: 15px; }
@@ -1370,18 +1372,6 @@
                 showTopAlert(`Added ${successCount} questions, but encountered issues.`, 'danger');
             }
         });
-
-        // GLOBAL LOGOUT FUNCTION
-        async function logout() {
-            const confirmed = await showTopAlert('আপনি কি নিশ্চিত যে লগআউট করতে চান?', 'warning', true);
-            if (confirmed) {
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
-                localStorage.removeItem('quiz_token');
-                localStorage.removeItem('quiz_user');
-                window.location.replace('../login.html');
-            }
-        }
 
         window.onload = function() { 
             loadCategories();

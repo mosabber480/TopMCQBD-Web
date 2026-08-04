@@ -30,7 +30,9 @@
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--light); color: #333; }
 
         .alert-container-inner { max-width: 1300px !important; }
-        .container { max-width: 1900px; margin: 0 auto; padding: 25px; }
+        
+        /* max-width & margin: auto সরানো হয়েছে যাতে global.css এর sidebar layout ঠিকমতো কাজ করে */
+        .container { margin-top: 30px; margin-bottom: 30px; padding: 0 25px 25px 25px; }
 
         .box { background: white; padding: 25px 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 25px; }
 
@@ -496,7 +498,7 @@
                         <label>পেমেন্ট মাধ্যম</label>
                         <select id="addMethod-${userId}">
                             <option value="bkash">বিকাশ (Bkash)</option>
-                            <option value="nagad">নগদ (Nagad)</option>
+                            <option value="nagad">ন নগদ (Nagad)</option>
                         </select>
                     </div>
                     <div style="display: flex; gap: 10px;">
@@ -753,14 +755,6 @@
                 if (data.success) { showTopAlert(`✅ ${data.message}`, 'success'); loadUsers(); } 
                 else { showTopAlert(`❌ Delete failed: ${data.message}`, 'danger'); }
             } catch (err) { showTopAlert(`❌ Error deleting user!`, 'danger'); }
-        }
-
-        async function logout() {
-            const confirmed = await showTopAlert('আপনি কি নিশ্চিত যে লগআউট করতে চান?', 'warning', true);
-            if (confirmed) {
-                localStorage.clear();
-                window.location.replace('../login.html');
-            }
         }
 
         window.onload = loadUsers;
