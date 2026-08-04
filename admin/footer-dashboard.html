@@ -36,7 +36,7 @@
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--light); color: #333; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--light); color: #333; padding-bottom: 80px; }
 
         .alert-container-inner { max-width: 1300px !important; width: 100%; padding: 0 25px; display: flex; justify-content: space-between; align-items: center; }
         .container { max-width: 1300px; margin: 0 auto; padding: 0 25px 25px 25px; }
@@ -80,26 +80,42 @@
         .btn-icon-danger:hover { background-color: #c82333; }
 
         .sub-menu-list { margin-top: 10px; padding-left: 15px; border-left: 3px solid #17a2b8; margin-bottom: 12px; }
-        .sub-menu-item { background: #ffffff; padding: 8px 12px; border: 1px dashed #cbd5e1; border-radius: 5px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; transition: border-top 0.1s ease, border-bottom 0.1s ease; }
+        .sub-menu-item { background: #ffffff; padding: 8px 12px; border: 1px dashed #cbd5e1; border-radius: 5px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
 
-        /* DRAG & DROP STYLES */
-        .draggable-box { cursor: move; transition: transform 0.15s ease, opacity 0.15s ease, border-top 0.1s ease, border-bottom 0.1s ease; }
-        .draggable-box.dragging { opacity: 0.4; background: #eef6ff !important; }
-        .drag-handle { cursor: grab; color: #888; margin-right: 8px; font-size: 16px; }
-        .drag-handle:active { cursor: grabbing; }
+        /* ====== ARROWS & DRAG HANDLES ====== */
+        .drag-handle, .col-drag-handle {
+            cursor: grab; color: #475569; background: #f1f5f9; border: 1px solid #cbd5e1;
+            border-radius: 4px; padding: 4px 6px; font-size: 13px; margin-right: 6px;
+            display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s ease;
+        }
+        .col-drag-handle { font-size: 16px; padding: 6px 8px; }
+        .drag-handle:hover, .col-drag-handle:hover { background: var(--primary); color: #ffffff; border-color: var(--primary); }
+        .drag-handle:active, .col-drag-handle:active { cursor: grabbing; }
 
-        .col-drag-item { transition: border-top 0.1s ease, border-bottom 0.1s ease; }
-        .dragging-col { opacity: 0.5; background: #f8f9fa !important; }
-        .col-drag-handle { cursor: grab; color: #888; font-size: 18px; margin-right: 10px; transition: color 0.2s; }
-        .col-drag-handle:hover { color: #007bff; }
-        .col-drag-handle:active { cursor: grabbing; }
-
-        .drag-over-top { border-top: 2px solid #007bff !important; }
-        .drag-over-bottom { border-bottom: 2px solid #007bff !important; }
-        
         .arrow-btn-group { display: inline-flex; flex-direction: column; gap: 2px; margin-right: 10px; }
         .btn-arrow { background: #e2e8f0; border: none; color: #475569; padding: 2px 6px; border-radius: 3px; font-size: 10px; cursor: pointer; line-height: 1; transition: background 0.2s ease; }
         .btn-arrow:hover { background: #007bff; color: #ffffff; }
+
+        /* ====== DRAG & DROP WITH 2PX INDICATORS ====== */
+        .col-drag-item, .footer-drag-item, .copy-drag-item { position: relative; transition: opacity 0.15s ease; }
+        .dragging-col, .dragging { opacity: 0.4; background: #eef6ff !important; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        
+        .drag-over-top::before {
+            content: ''; position: absolute; top: -3px; left: 0; width: 100%; height: 3px;
+            background-color: var(--primary); z-index: 100; border-radius: 2px;
+        }
+        .drag-over-bottom::after {
+            content: ''; position: absolute; bottom: -3px; left: 0; width: 100%; height: 3px;
+            background-color: var(--primary); z-index: 100; border-radius: 2px;
+        }
+
+        /* ====== REORDER ACTION BAR ====== */
+        #reorder-action-bar {
+            display: none; position: fixed; bottom: 0; left: 0; width: 100%; background: #2c3e50;
+            padding: 15px; border-top: 4px solid #ffc107; z-index: 9999; box-shadow: 0 -5px 15px rgba(0,0,0,0.2);
+            justify-content: center; align-items: center; gap: 20px; animation: slideUp 0.3s ease;
+        }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -134,6 +150,15 @@
         </div>
     </div>
 
+    <!-- Drag & Drop Save Action Bar -->
+    <div id="reorder-action-bar">
+        <span style="color: #ffffff; font-weight: bold; font-size: 15px;">
+            আপনি ক্রম পরিবর্তন করেছেন। সেভ করতে বোতাম চাপুন।
+        </span>
+        <button class="btn btn-submit" style="padding: 10px 20px; font-size:14px;" onclick="saveReorderedLayout()"><i class="fa-solid fa-floppy-disk"></i> পরিবর্তন সেভ করুন</button>
+        <button class="btn btn-danger" style="padding: 10px 15px; font-size:14px;" onclick="cancelReorder()"><i class="fa-solid fa-xmark"></i> বাতিল করুন</button>
+    </div>
+
     <!-- GLOBAL JS LINKS -->
     <script src="../global/global.js"></script>
     <script src="../global/admin-global.js"></script>
@@ -146,9 +171,7 @@
         let footerInfo = null;
         let copyrightInfo = null;
         
-        let isFooterReordered = {};
-        let isColumnReordered = false;
-        let isCopyrightLinkReordered = false;
+        let hasPendingReorder = false;
 
         async function logout() {
             const confirmLogout = await showTopAlert('আপনি কি নিশ্চিত যে লগআউট করতে চান?', 'warning', true);
@@ -170,7 +193,6 @@
                 headerInfo = data.header || null;
                 footerInfo = data.footer || {};
                 
-                // Ensure copyright object exists with a links array
                 copyrightInfo = data.copyright || { text: '© 2026 TopMCQ. All rights reserved.', links: [] };
                 if (!copyrightInfo.links) {
                     copyrightInfo.links = [];
@@ -185,11 +207,7 @@
                     ];
                 }
 
-                footerInfo = { columns: footerInfo.columns };
-
-                isFooterReordered = {};
-                isColumnReordered = false;
-                isCopyrightLinkReordered = false;
+                hideGlobalSaveBar();
 
                 renderFooterSectionCards();
                 renderCopyrightSection();
@@ -198,7 +216,28 @@
             }
         }
 
-        /* ================= 3. FOOTER SECTION ================= */
+        /* ================= TRIGGER GLOBAL SAVE BAR ================= */
+        function triggerGlobalSaveBar() {
+            hasPendingReorder = true;
+            document.getElementById('reorder-action-bar').style.display = 'flex';
+        }
+
+        function hideGlobalSaveBar() {
+            hasPendingReorder = false;
+            document.getElementById('reorder-action-bar').style.display = 'none';
+        }
+
+        async function saveReorderedLayout() {
+            await saveLayoutConfig();
+            hideGlobalSaveBar();
+        }
+
+        function cancelReorder() {
+            hideGlobalSaveBar();
+            fetchLayoutConfig(); // Refetch to discard changes
+        }
+
+        /* ================= 3. FOOTER SECTION RENDER ================= */
         function renderFooterSectionCards() {
             const container = document.getElementById('footer-container');
             container.innerHTML = '';
@@ -248,7 +287,7 @@
                             <div class="sub-menu-list footer-drag-container" data-col-idx="${colIdx}">
                                 <div style="font-size:12px; font-weight:bold; color:#555; margin-bottom:5px;">লিংক সমূহ (মাউস দিয়ে পজিশন ড্র্যাগ করা যাবে):</div>
                                 ${linksList.map((lk, lkIdx) => `
-                                    <div class="sub-menu-item draggable-box footer-drag-item" draggable="true" data-col-idx="${colIdx}" data-index="${lkIdx}">
+                                    <div class="sub-menu-item footer-drag-item" draggable="true" data-col-idx="${colIdx}" data-index="${lkIdx}">
                                         <span style="font-size:13px; color:#333; display:flex; align-items:center;">
                                             <i class="fa-solid fa-grip-vertical drag-handle" title="মাউস চেপে পজিশন পরিবর্তন করুন"></i>
                                             <div class="arrow-btn-group">
@@ -264,14 +303,6 @@
                                     </div>
                                 `).join('')}
                             </div>
-                        `;
-                    }
-
-                    let saveCancelFooterBtns = '';
-                    if (isFooterReordered[colIdx]) {
-                        saveCancelFooterBtns = `
-                            <button class="btn btn-submit" onclick="saveReorderedFooterLinks(${colIdx})"><i class="fa-solid fa-floppy-disk"></i> Save Footer Links</button>
-                            <button class="btn btn-secondary" onclick="cancelFooterReorder()"><i class="fa-solid fa-xmark"></i> Cancel</button>
                         `;
                     }
 
@@ -296,65 +327,70 @@
                         <div id="add-footer-link-box-${colIdx}"></div>
                         <div class="card-actions" style="margin-top: 10px;" id="footer-link-action-bar-${colIdx}">
                             <button class="btn btn-info" onclick="showAddFooterLinkForm(${colIdx})"><i class="fa-solid fa-plus"></i> লিংক যোগ করুন</button>
-                            ${saveCancelFooterBtns}
                         </div>
                     `;
                 }
                 container.appendChild(card);
             });
 
-            if (isColumnReordered) {
-                const saveActionDiv = document.createElement('div');
-                saveActionDiv.style.cssText = "margin-top: 25px; padding-top: 20px; border-top: 2px dashed #cbd5e1; display: flex; justify-content: flex-start; gap: 12px;";
-                saveActionDiv.innerHTML = `
-                    <button class="btn btn-submit" onclick="saveReorderedColumns()"><i class="fa-solid fa-floppy-disk"></i> কলামের নতুন পজিশন সেভ করুন</button>
-                    <button class="btn btn-secondary" onclick="cancelColumnReorder()"><i class="fa-solid fa-xmark"></i> পরিবর্তন বাতিল করুন</button>
-                `;
-                container.appendChild(saveActionDiv);
-            }
-
             initColumnDragAndDrop();
             initFooterDragAndDrop();
         }
 
-        function addNewColumn(type) {
-            if(type === 'info') {
-                footerInfo.columns.push({ type: 'info', title: 'নতুন তথ্য কলাম', text: 'সাইট সম্পর্কিত তথ্য...', fb: '', yt: '', wa: '', tw: '', tg: '', ln: '' });
-            } else {
-                footerInfo.columns.push({ type: 'links', title: 'নতুন লিংক কলাম', links: [] });
-            }
-            saveLayoutConfig(); 
-        }
-
-        async function deleteFooterColumn(colIdx) {
-            if (await showTopAlert("পুরো কলামটি মুছে ফেলতে চান?", 'danger', true)) {
-                footerInfo.columns.splice(colIdx, 1);
-                await saveLayoutConfig();
-            }
-        }
-
+        /* --- Footer ARROWS Logic --- */
         function moveColumnPosition(colIdx, direction) {
             const cols = footerInfo.columns;
             if (direction === 'up' && colIdx > 0) {
                 const item = cols.splice(colIdx, 1)[0];
                 cols.splice(colIdx - 1, 0, item);
-                isColumnReordered = true;
                 renderFooterSectionCards();
+                triggerGlobalSaveBar();
             } else if (direction === 'down' && colIdx < cols.length - 1) {
                 const item = cols.splice(colIdx, 1)[0];
                 cols.splice(colIdx + 1, 0, item);
-                isColumnReordered = true;
                 renderFooterSectionCards();
+                triggerGlobalSaveBar();
             }
         }
 
+        function moveFooterLinkPosition(colIdx, lkIdx, direction) {
+            const list = footerInfo.columns[colIdx].links;
+            if (direction === 'up' && lkIdx > 0) {
+                const item = list.splice(lkIdx, 1)[0];
+                list.splice(lkIdx - 1, 0, item);
+                renderFooterSectionCards();
+                triggerGlobalSaveBar();
+            } else if (direction === 'down' && lkIdx < list.length - 1) {
+                const item = list.splice(lkIdx, 1)[0];
+                list.splice(lkIdx + 1, 0, item);
+                renderFooterSectionCards();
+                triggerGlobalSaveBar();
+            }
+        }
+
+        function moveCopyLinkPosition(lkIdx, direction) {
+            const list = copyrightInfo.links;
+            if (direction === 'up' && lkIdx > 0) {
+                const item = list.splice(lkIdx, 1)[0];
+                list.splice(lkIdx - 1, 0, item);
+                renderCopyrightSection();
+                triggerGlobalSaveBar();
+            } else if (direction === 'down' && lkIdx < list.length - 1) {
+                const item = list.splice(lkIdx, 1)[0];
+                list.splice(lkIdx + 1, 0, item);
+                renderCopyrightSection();
+                triggerGlobalSaveBar();
+            }
+        }
+
+        /* --- YOUR ORIGINAL COLUMN DRAG AND DROP (Updated with 2px line) --- */
         function initColumnDragAndDrop() {
             const colItems = document.querySelectorAll('.col-drag-item');
             let draggedColIdx = null;
 
             colItems.forEach(item => {
                 item.addEventListener('dragstart', (e) => {
-                    if (e.target.classList.contains('footer-drag-item')) return; 
+                    if (e.target.classList.contains('footer-drag-item') || e.target.classList.contains('copy-drag-item')) return; 
                     draggedColIdx = parseInt(item.dataset.colIdx);
                     item.classList.add('dragging-col');
                     e.dataTransfer.effectAllowed = 'move';
@@ -392,31 +428,14 @@
                         const movedCol = footerInfo.columns.splice(draggedColIdx, 1)[0];
                         footerInfo.columns.splice(targetColIdx, 0, movedCol);
                         
-                        isColumnReordered = true; 
                         renderFooterSectionCards();
+                        triggerGlobalSaveBar();
                     }
                 });
             });
         }
 
-        async function saveReorderedColumns() { await saveLayoutConfig(); isColumnReordered = false; renderFooterSectionCards(); }
-        function cancelColumnReorder() { isColumnReordered = false; fetchLayoutConfig(); }
-
-        function moveFooterLinkPosition(colIdx, lkIdx, direction) {
-            const list = footerInfo.columns[colIdx].links;
-            if (direction === 'up' && lkIdx > 0) {
-                const item = list.splice(lkIdx, 1)[0];
-                list.splice(lkIdx - 1, 0, item);
-                isFooterReordered[colIdx] = true;
-                renderFooterSectionCards();
-            } else if (direction === 'down' && lkIdx < list.length - 1) {
-                const item = list.splice(lkIdx, 1)[0];
-                list.splice(lkIdx + 1, 0, item);
-                isFooterReordered[colIdx] = true;
-                renderFooterSectionCards();
-            }
-        }
-
+        /* --- YOUR ORIGINAL FOOTER LINKS DRAG AND DROP (Updated with 2px line) --- */
         function initFooterDragAndDrop() {
             const container = document.getElementById('footer-container');
             const dragContainers = container.querySelectorAll('.footer-drag-container');
@@ -448,16 +467,32 @@
                             const list = footerInfo.columns[colIdx].links;
                             const movedItem = list.splice(draggedIdx, 1)[0];
                             list.splice(targetIdx, 0, movedItem);
-                            isFooterReordered[colIdx] = true;
+                            
                             renderFooterSectionCards();
+                            triggerGlobalSaveBar();
                         }
                     });
                 });
             });
         }
 
-        async function saveReorderedFooterLinks(colIdx) { await saveLayoutConfig(); isFooterReordered[colIdx] = false; renderFooterSectionCards(); }
-        function cancelFooterReorder() { fetchLayoutConfig(); }
+
+        /* --- Footer Column Functions --- */
+        function addNewColumn(type) {
+            if(type === 'info') {
+                footerInfo.columns.push({ type: 'info', title: 'নতুন তথ্য কলাম', text: 'সাইট সম্পর্কিত তথ্য...', fb: '', yt: '', wa: '', tw: '', tg: '', ln: '' });
+            } else {
+                footerInfo.columns.push({ type: 'links', title: 'নতুন লিংক কলাম', links: [] });
+            }
+            saveLayoutConfig(); 
+        }
+
+        async function deleteFooterColumn(colIdx) {
+            if (await showTopAlert("পুরো কলামটি মুছে ফেলতে চান?", 'danger', true)) {
+                footerInfo.columns.splice(colIdx, 1);
+                await saveLayoutConfig();
+            }
+        }
 
         function editFooterInfoInline(colIdx) {
             const col = footerInfo.columns[colIdx];
@@ -497,7 +532,7 @@
         function editFooterTitleInline(colIdx) {
             const col = footerInfo.columns[colIdx];
             const card = document.querySelectorAll('.col-drag-item')[colIdx];
-            card.style.background = "#ffffff";
+            card.style.background = "#ffffff"; card.draggable = false;
             card.innerHTML = `
                 <div style="font-weight: bold; margin-bottom: 10px; color: #17a2b8;">কলাম টাইটেল এডিট করুন</div>
                 <div class="form-group"><label>কলাম টাইটেল:</label><input type="text" id="edit-col-title-${colIdx}" value="${(col.title || '').replace(/"/g, '&quot;')}"></div>
@@ -569,6 +604,7 @@
             `;
             rowsContainer.appendChild(rowDiv);
         }
+
         function removeNewFooterLinkRow(btn, colIdx) {
             const row = btn.closest('.new-footer-link-row');
             if (row) {
@@ -576,6 +612,7 @@
                 if (rowsContainer && rowsContainer.children.length === 0) renderFooterSectionCards();
             }
         }
+        
         async function saveAllNewFooterLinks(colIdx) {
             const container = document.getElementById(`add-footer-link-box-${colIdx}`);
             if (!container) return;
@@ -590,6 +627,7 @@
             if (addedCount === 0) return showTopAlert("লিংক টাইটেল প্রদান করুন!", "warning");
             await saveLayoutConfig(); renderFooterSectionCards();
         }
+
         async function deleteFooterLink(colIdx, lkIdx) {
             if (await showTopAlert("আপনি কি নিশ্চিত যে এই লিংকটি মুছে ফেলতে চান?", 'danger', true)) {
                 footerInfo.columns[colIdx].links.splice(lkIdx, 1);
@@ -598,7 +636,7 @@
         }
 
 
-        /* ================= 4. COPYRIGHT SECTION (WITH LINKS & TEXT TOGGLE) ================= */
+        /* ================= 4. COPYRIGHT SECTION (WITH LINKS) ================= */
         function renderCopyrightSection() {
             const container = document.getElementById('copyright-container');
             container.innerHTML = '';
@@ -606,16 +644,14 @@
             const copyText = copyrightInfo.text || '';
             const linksList = copyrightInfo.links || [];
 
-            // --- 1. Text Area Generation ---
+            // Text Area
             let textHtml = '';
             if (copyText) {
                 textHtml = `
                     <div id="copyright-text-wrapper">
                         <div class="read-box" style="border-left: 5px solid var(--purple-btn); margin-bottom: 15px; padding: 12px 18px;">
                             <div class="card-header-flex" style="margin-bottom: 0; align-items: center;">
-                                <div>
-                                    <div class="read-title" style="margin-bottom: 0;"><i class="fa-solid fa-copyright"></i> ${copyText}</div>
-                                </div>
+                                <div><div class="read-title" style="margin-bottom: 0;"><i class="fa-solid fa-copyright"></i> ${copyText}</div></div>
                                 <div class="card-actions">
                                     <button class="btn btn-warning btn-sm" onclick="editCopyrightTextInline()"><i class="fa-solid fa-pen-to-square"></i> Edit Text</button>
                                     <button class="btn btn-danger btn-sm" onclick="deleteCopyrightText()"><i class="fa-solid fa-trash"></i> Delete</button>
@@ -627,21 +663,19 @@
             } else {
                 textHtml = `
                     <div id="copyright-text-wrapper" style="margin-bottom: 15px;">
-                        <button class="btn btn-add btn-sm" onclick="editCopyrightTextInline(true)">
-                            <i class="fa-solid fa-plus"></i> কপিরাইট টেক্সট যোগ করুন
-                        </button>
+                        <button class="btn btn-add btn-sm" onclick="editCopyrightTextInline(true)"><i class="fa-solid fa-plus"></i> কপিরাইট টেক্সট যোগ করুন</button>
                     </div>
                 `;
             }
 
-            // --- 2. Links Area Generation ---
+            // Links Area
             let linksHtml = '';
             if (linksList.length > 0) {
                 linksHtml = `
                     <div class="sub-menu-list copy-drag-container" style="border-left-color: var(--purple-btn);">
                         <div style="font-size:12px; font-weight:bold; color:#555; margin-bottom:5px;">কপিরাইট লিংক সমূহ (FAQ, Terms, Privacy):</div>
                         ${linksList.map((lk, lkIdx) => `
-                            <div class="sub-menu-item draggable-box copy-drag-item" draggable="true" data-index="${lkIdx}">
+                            <div class="sub-menu-item copy-drag-item" draggable="true" data-index="${lkIdx}">
                                 <span style="font-size:13px; color:#333; display:flex; align-items:center;">
                                     <i class="fa-solid fa-grip-vertical drag-handle" title="মাউস চেপে পজিশন পরিবর্তন করুন"></i>
                                     <div class="arrow-btn-group">
@@ -660,77 +694,18 @@
                 `;
             }
 
-            let saveCancelCopyBtns = '';
-            if (isCopyrightLinkReordered) {
-                saveCancelCopyBtns = `
-                    <button class="btn btn-submit" onclick="saveReorderedCopyLinks()"><i class="fa-solid fa-floppy-disk"></i> নতুন পজিশন সেভ করুন</button>
-                    <button class="btn btn-secondary" onclick="cancelCopyReorder()"><i class="fa-solid fa-xmark"></i> বাতিল করুন</button>
-                `;
-            }
-
             container.innerHTML = `
                 ${textHtml}
                 ${linksHtml}
                 <div id="add-copy-link-box"></div>
                 <div class="card-actions" style="margin-top: 10px;" id="copy-link-action-bar">
                     <button class="btn btn-info" onclick="showAddCopyLinkForm()"><i class="fa-solid fa-plus"></i> কপিরাইট লিংক যোগ করুন</button>
-                    ${saveCancelCopyBtns}
                 </div>
             `;
             initCopyDragAndDrop();
         }
 
-        /* --- Copyright Text Controls --- */
-        function editCopyrightTextInline(isNew = false) {
-            renderCopyrightSection(); // ensure clean state
-            const textWrapper = document.getElementById('copyright-text-wrapper');
-            const currentValue = copyrightInfo.text || '';
-            
-            textWrapper.innerHTML = `
-                <div class="read-box" style="border-left: 5px solid #007bff; background: #ffffff; padding: 15px 18px; margin-bottom: 15px;">
-                    <div style="font-weight: bold; margin-bottom: 10px; color: #007bff;">
-                        ${isNew ? 'নতুন কপিরাইট যোগ করুন' : 'কপিরাইট টেক্সট এডিট করুন'}
-                    </div>
-                    <div class="row" style="margin-bottom: 0;">
-                        <input type="text" id="copyright-text-input" value="${currentValue.replace(/"/g, '&quot;')}" style="flex:1;" placeholder="যেমন: © 2026 TopMCQ. All rights reserved.">
-                        <button class="btn btn-submit btn-sm" onclick="saveCopyrightTextInline()"><i class="fa-solid fa-floppy-disk"></i> Save</button>
-                        <button class="btn btn-secondary btn-sm" onclick="renderCopyrightSection()"><i class="fa-solid fa-xmark"></i> Cancel</button>
-                    </div>
-                </div>
-            `;
-        }
-
-        async function saveCopyrightTextInline() {
-            copyrightInfo.text = document.getElementById('copyright-text-input').value.trim();
-            await saveLayoutConfig();
-            renderCopyrightSection();
-        }
-
-        async function deleteCopyrightText() {
-            if (await showTopAlert("আপনি কি নিশ্চিত যে কপিরাইট টেক্সট মুছে ফেলতে চান?", 'danger', true)) {
-                copyrightInfo.text = '';
-                await saveLayoutConfig();
-                renderCopyrightSection();
-            }
-        }
-
-        /* --- Copyright Links Arrow Controls --- */
-        function moveCopyLinkPosition(lkIdx, direction) {
-            const list = copyrightInfo.links;
-            if (direction === 'up' && lkIdx > 0) {
-                const item = list.splice(lkIdx, 1)[0];
-                list.splice(lkIdx - 1, 0, item);
-                isCopyrightLinkReordered = true;
-                renderCopyrightSection();
-            } else if (direction === 'down' && lkIdx < list.length - 1) {
-                const item = list.splice(lkIdx, 1)[0];
-                list.splice(lkIdx + 1, 0, item);
-                isCopyrightLinkReordered = true;
-                renderCopyrightSection();
-            }
-        }
-
-        /* --- Copyright Links Drag & Drop --- */
+        /* --- YOUR ORIGINAL COPYRIGHT DRAG AND DROP (Updated with 2px line) --- */
         function initCopyDragAndDrop() {
             const container = document.getElementById('copyright-container');
             const dragContainer = container.querySelector('.copy-drag-container');
@@ -763,16 +738,44 @@
                     if (draggedIdx !== null && draggedIdx !== targetIdx) {
                         const list = copyrightInfo.links; const movedItem = list.splice(draggedIdx, 1)[0];
                         list.splice(targetIdx, 0, movedItem);
-                        isCopyrightLinkReordered = true; renderCopyrightSection();
+                        
+                        renderCopyrightSection();
+                        triggerGlobalSaveBar();
                     }
                 });
             });
         }
 
-        async function saveReorderedCopyLinks() { await saveLayoutConfig(); isCopyrightLinkReordered = false; renderCopyrightSection(); }
-        function cancelCopyReorder() { fetchLayoutConfig(); }
+        function editCopyrightTextInline(isNew = false) {
+            renderCopyrightSection(); // ensure clean state
+            const textWrapper = document.getElementById('copyright-text-wrapper');
+            const currentValue = copyrightInfo.text || '';
+            
+            textWrapper.innerHTML = `
+                <div class="read-box" style="border-left: 5px solid #007bff; background: #ffffff; padding: 15px 18px; margin-bottom: 15px;">
+                    <div style="font-weight: bold; margin-bottom: 10px; color: #007bff;">
+                        ${isNew ? 'নতুন কপিরাইট যোগ করুন' : 'কপিরাইট টেক্সট এডিট করুন'}
+                    </div>
+                    <div class="row" style="margin-bottom: 0;">
+                        <input type="text" id="copyright-text-input" value="${currentValue.replace(/"/g, '&quot;')}" style="flex:1;" placeholder="যেমন: © 2026 TopMCQ. All rights reserved.">
+                        <button class="btn btn-submit btn-sm" onclick="saveCopyrightTextInline()"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+                        <button class="btn btn-secondary btn-sm" onclick="renderCopyrightSection()"><i class="fa-solid fa-xmark"></i> Cancel</button>
+                    </div>
+                </div>
+            `;
+        }
 
-        /* --- Edit/Add Copyright Links --- */
+        async function saveCopyrightTextInline() {
+            copyrightInfo.text = document.getElementById('copyright-text-input').value.trim();
+            await saveLayoutConfig(); renderCopyrightSection();
+        }
+
+        async function deleteCopyrightText() {
+            if (await showTopAlert("আপনি কি নিশ্চিত যে কপিরাইট টেক্সট মুছে ফেলতে চান?", 'danger', true)) {
+                copyrightInfo.text = ''; await saveLayoutConfig(); renderCopyrightSection();
+            }
+        }
+
         function editCopyLinkInline(lkIdx) {
             renderCopyrightSection();
             const container = document.getElementById('copyright-container');

@@ -36,7 +36,7 @@
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--light); color: #333; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--light); color: #333; padding-bottom: 80px; }
 
         .alert-container-inner { max-width: 1300px !important; width: 100%; padding: 0 25px; display: flex; justify-content: space-between; align-items: center; }
         .container { max-width: 1300px; margin: 0 auto; padding: 0 25px 25px 25px; }
@@ -79,15 +79,64 @@
         .btn-info:hover { background-color: #138496; }
         .btn-add { background: var(--main-dash-btn); color: white; border: none; padding: 10px 18px; border-radius: 5px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; font-size: 14px; }
 
-        .btn-icon-danger { background-color: #dc3545; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-size: 13px; transition: background 0.2s ease; display: inline-flex; align-items: center; justify-content: center; height: 38px; }
-        .btn-icon-danger:hover { background-color: #c82333; }
-
         .sub-menu-list { margin-top: 10px; padding-left: 15px; border-left: 3px solid #17a2b8; margin-bottom: 12px; }
-        .sub-menu-item { background: #ffffff; padding: 8px 12px; border: 1px dashed #cbd5e1; border-radius: 5px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; transition: border-top 0.1s ease, border-bottom 0.1s ease; }
+        .sub-menu-item { background: #ffffff; padding: 8px 12px; border: 1px dashed #cbd5e1; border-radius: 5px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s ease; }
 
+        /* ====== ARROW & DRAG HANDLE ====== */
+        .drag-handle {
+            cursor: grab;
+            color: #475569;
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            padding: 4px 6px;
+            font-size: 13px;
+            margin-right: 6px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        .drag-handle:hover {
+            background: var(--primary);
+            color: #ffffff;
+            border-color: var(--primary);
+        }
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+        
         .arrow-btn-group { display: inline-flex; flex-direction: column; gap: 2px; margin-right: 10px; }
         .btn-arrow { background: #e2e8f0; border: none; color: #475569; padding: 2px 6px; border-radius: 3px; font-size: 10px; cursor: pointer; line-height: 1; transition: background 0.2s ease; }
-        .btn-arrow:hover { background: #007bff; color: #ffffff; }
+        .btn-arrow:hover { background: var(--primary); color: #ffffff; }
+        
+        .draggable-item { position: relative; transition: opacity 0.2s; }
+        .draggable-item.dragging { opacity: 0.35; }
+        
+        /* 2px Target Indicator Line */
+        .drop-above::before {
+            content: ''; position: absolute; top: -3px; left: 0; width: 100%; height: 3px;
+            background-color: var(--primary); z-index: 100; border-radius: 2px;
+        }
+        .drop-below::after {
+            content: ''; position: absolute; bottom: -3px; left: 0; width: 100%; height: 3px;
+            background-color: var(--primary); z-index: 100; border-radius: 2px;
+        }
+
+        /* Reorder Save Action Bar */
+        #reorder-action-bar {
+            display: none;
+            position: fixed;
+            bottom: 0; left: 0; width: 100%;
+            background: #2c3e50;
+            padding: 15px;
+            border-top: 4px solid #ffc107;
+            z-index: 9999;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.2);
+            justify-content: center; align-items: center; gap: 20px;
+            animation: slideUp 0.3s ease;
+        }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -141,6 +190,15 @@
 
     </div>
 
+    <!-- Drag & Drop Save Action Bar (CLEAN, NO ALERT ICON) -->
+    <div id="reorder-action-bar">
+        <span style="color: #ffffff; font-weight: bold; font-size: 15px;">
+            আপনি মেনু বা লিংকের ক্রম পরিবর্তন করেছেন। সেভ করতে বোতাম চাপুন।
+        </span>
+        <button class="btn btn-submit" style="padding: 10px 20px; font-size:14px;" onclick="saveReorder()"><i class="fa-solid fa-floppy-disk"></i> পরিবর্তন সেভ করুন</button>
+        <button class="btn btn-danger" style="padding: 10px 15px; font-size:14px;" onclick="cancelReorder()"><i class="fa-solid fa-xmark"></i> বাতিল করুন</button>
+    </div>
+
     <!-- GLOBAL JS LINKS -->
     <script src="../global/global.js"></script>
     <script src="../global/admin-global.js"></script>
@@ -154,6 +212,7 @@
         let copyrightInfo = null;
         
         let isMenuReordered = false;
+        let dragData = null; 
 
         async function logout() {
             const confirmLogout = await showTopAlert('আপনি কি নিশ্চিত যে লগআউট করতে চান?', 'warning', true);
@@ -180,6 +239,7 @@
                 if (!headerInfo.megaMenus) headerInfo.megaMenus = [];
 
                 isMenuReordered = false;
+                document.getElementById('reorder-action-bar').style.display = 'none';
 
                 renderAnnounceSection();
                 renderHeaderBrandSection();
@@ -191,6 +251,202 @@
                 console.error("Layout Config Fetch Error:", err); 
             }
         }
+
+        /* ================= DRAG AND DROP HANDLERS WITH NESTED BUBBLING PROTECTION ================= */
+        
+        function dragStart(e, type, mIdx, idx2, idx3) {
+            e.stopPropagation();
+            
+            dragData = { 
+                type: String(type), 
+                mIdx: Number(mIdx), 
+                idx2: idx2 !== undefined && idx2 !== null ? Number(idx2) : null, 
+                idx3: idx3 !== undefined && idx3 !== null ? Number(idx3) : null 
+            };
+            
+            e.dataTransfer.effectAllowed = "move";
+            e.dataTransfer.setData("text/plain", "");
+            
+            const item = e.currentTarget;
+            if (item) {
+                setTimeout(() => item.classList.add('dragging'), 0);
+            }
+        }
+
+        function dragEnd(e) {
+            e.stopPropagation();
+            document.querySelectorAll('.draggable-item').forEach(el => {
+                el.classList.remove('dragging', 'drop-above', 'drop-below');
+            });
+            dragData = null;
+        }
+
+        function dragOver(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.dataTransfer.dropEffect = "move";
+            
+            const item = e.currentTarget;
+            if (!item || !dragData) return;
+
+            if (item.dataset.type !== dragData.type) return;
+
+            if (dragData.type === 'sub' && Number(item.dataset.midx) !== dragData.mIdx) return;
+            if (dragData.type === 'megacol' && Number(item.dataset.midx) !== dragData.mIdx) return;
+            if (dragData.type === 'megalink' && (Number(item.dataset.midx) !== dragData.mIdx || Number(item.dataset.idx2) !== dragData.idx2)) return;
+
+            document.querySelectorAll('.drop-above, .drop-below').forEach(el => {
+                if (el !== item) el.classList.remove('drop-above', 'drop-below');
+            });
+
+            const rect = item.getBoundingClientRect();
+            const midY = rect.top + (rect.height / 2);
+            
+            item.classList.remove('drop-above', 'drop-below');
+            if (e.clientY < midY) {
+                item.classList.add('drop-above');
+            } else {
+                item.classList.add('drop-below');
+            }
+        }
+
+        function drop(e, targetType, targetMIdx, targetIdx2, targetIdx3) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const item = e.currentTarget;
+            let position = 'below';
+            
+            if (item && item.classList.contains('drop-above')) {
+                position = 'above';
+            }
+
+            document.querySelectorAll('.drop-above, .drop-below').forEach(el => el.classList.remove('drop-above', 'drop-below'));
+
+            if (!dragData || dragData.type !== String(targetType)) {
+                dragData = null;
+                return;
+            }
+
+            targetMIdx = Number(targetMIdx);
+            if (targetIdx2 !== undefined && targetIdx2 !== null) targetIdx2 = Number(targetIdx2);
+            if (targetIdx3 !== undefined && targetIdx3 !== null) targetIdx3 = Number(targetIdx3);
+
+            let list;
+            let fromIdx, toIdx;
+
+            if (targetType === 'main') {
+                list = headerInfo.menus;
+                fromIdx = dragData.mIdx;
+                toIdx = targetMIdx;
+            } else if (targetType === 'sub') {
+                if (dragData.mIdx !== targetMIdx) return;
+                list = headerInfo.menus[targetMIdx].subMenus;
+                fromIdx = dragData.idx2;
+                toIdx = targetIdx2;
+            } else if (targetType === 'megacol') {
+                if (dragData.mIdx !== targetMIdx) return;
+                list = headerInfo.megaMenus[targetMIdx].columns;
+                fromIdx = dragData.idx2;
+                toIdx = targetIdx2;
+            } else if (targetType === 'megalink') {
+                if (dragData.mIdx !== targetMIdx || dragData.idx2 !== targetIdx2) return;
+                list = headerInfo.megaMenus[targetMIdx].columns[targetIdx2].links;
+                fromIdx = dragData.idx3;
+                toIdx = targetIdx3;
+            }
+
+            if (fromIdx !== null && toIdx !== null && fromIdx !== undefined && toIdx !== undefined) {
+                let insertIdx = toIdx;
+                if (position === 'below') {
+                    insertIdx = toIdx + 1;
+                }
+                if (fromIdx < insertIdx) {
+                    insertIdx--;
+                }
+                if (fromIdx !== insertIdx) {
+                    const movedItem = list.splice(fromIdx, 1)[0];
+                    list.splice(insertIdx, 0, movedItem);
+                    markAsReordered();
+                }
+            }
+            dragData = null;
+        }
+
+        /* ================= CLICK ARROW HANDLERS ================= */
+        
+        function moveMainMenuPosition(mIdx, dir) {
+            const list = headerInfo.menus;
+            if (dir === 'up' && mIdx > 0) {
+                const itm = list.splice(mIdx, 1)[0];
+                list.splice(mIdx - 1, 0, itm);
+                markAsReordered();
+            } else if (dir === 'down' && mIdx < list.length - 1) {
+                const itm = list.splice(mIdx, 1)[0];
+                list.splice(mIdx + 1, 0, itm);
+                markAsReordered();
+            }
+        }
+
+        function moveSubMenuPosition(mIdx, smIdx, dir) {
+            const list = headerInfo.menus[mIdx].subMenus;
+            if (dir === 'up' && smIdx > 0) {
+                const itm = list.splice(smIdx, 1)[0];
+                list.splice(smIdx - 1, 0, itm);
+                markAsReordered();
+            } else if (dir === 'down' && smIdx < list.length - 1) {
+                const itm = list.splice(smIdx, 1)[0];
+                list.splice(smIdx + 1, 0, itm);
+                markAsReordered();
+            }
+        }
+
+        function moveMegaCol(mIdx, cIdx, dir) {
+            const list = headerInfo.megaMenus[mIdx].columns;
+            if (dir === 'up' && cIdx > 0) {
+                const itm = list.splice(cIdx, 1)[0];
+                list.splice(cIdx - 1, 0, itm);
+                markAsReordered();
+            } else if (dir === 'down' && cIdx < list.length - 1) {
+                const itm = list.splice(cIdx, 1)[0];
+                list.splice(cIdx + 1, 0, itm);
+                markAsReordered();
+            }
+        }
+
+        function moveMegaLink(mIdx, cIdx, lIdx, dir) {
+            const list = headerInfo.megaMenus[mIdx].columns[cIdx].links;
+            if (dir === 'up' && lIdx > 0) {
+                const itm = list.splice(lIdx, 1)[0];
+                list.splice(lIdx - 1, 0, itm);
+                markAsReordered();
+            } else if (dir === 'down' && lIdx < list.length - 1) {
+                const itm = list.splice(lIdx, 1)[0];
+                list.splice(lIdx + 1, 0, itm);
+                markAsReordered();
+            }
+        }
+
+        /* ================= SAVE TRIGGER ================= */
+        function markAsReordered() {
+            isMenuReordered = true;
+            document.getElementById('reorder-action-bar').style.display = 'flex';
+            renderHeaderMenuCards();
+            renderMegaMenuBuilder();
+        }
+
+        async function saveReorder() {
+            await saveLayoutConfig();
+            isMenuReordered = false;
+            document.getElementById('reorder-action-bar').style.display = 'none';
+        }
+
+        async function cancelReorder() {
+            isMenuReordered = false;
+            document.getElementById('reorder-action-bar').style.display = 'none';
+            await fetchLayoutConfig(); 
+        }
+
 
         /* ================= 1 & 2. BASIC HEADER FUNCTIONS ================= */
         function renderAnnounceSection() {
@@ -327,9 +583,14 @@
                 (mega.columns || []).forEach((col, cIdx) => {
                     if (col.type === 'info') {
                         colsHtml += `
-                            <div id="mega-col-${mIdx}-${cIdx}" class="read-box" style="border-left: 4px solid #17a2b8; padding: 15px; margin-bottom: 12px; background: #ffffff;">
+                            <div id="mega-col-${mIdx}-${cIdx}" class="read-box draggable-item" draggable="true" data-type="megacol" data-midx="${mIdx}" data-idx2="${cIdx}"
+                                 ondragstart="dragStart(event, 'megacol', ${mIdx}, ${cIdx})" 
+                                 ondragend="dragEnd(event)" ondragover="dragOver(event)" 
+                                 ondrop="drop(event, 'megacol', ${mIdx}, ${cIdx})"
+                                 style="border-left: 4px solid #17a2b8; padding: 15px; margin-bottom: 12px; background: #ffffff;">
                                 <div class="card-header-flex">
                                     <div class="read-title" style="display:flex; align-items:center;">
+                                        <i class="fa-solid fa-grip-vertical drag-handle" title="Drag to reorder"></i>
                                         <div class="arrow-btn-group">
                                             <button type="button" class="btn-arrow" onclick="moveMegaCol(${mIdx}, ${cIdx}, 'up')">▲</button>
                                             <button type="button" class="btn-arrow" onclick="moveMegaCol(${mIdx}, ${cIdx}, 'down')">▼</button>
@@ -347,9 +608,14 @@
                         `;
                     } else {
                         let linksListHtml = (col.links || []).map((lk, lIdx) => `
-                            <div class="sub-menu-item" style="padding: 6px 12px; border: 1px dashed #cbd5e1; background: #fdfdfd; flex-wrap: wrap;">
+                            <div class="sub-menu-item draggable-item" draggable="true" data-type="megalink" data-midx="${mIdx}" data-idx2="${cIdx}" data-idx3="${lIdx}"
+                                 ondragstart="dragStart(event, 'megalink', ${mIdx}, ${cIdx}, ${lIdx})" 
+                                 ondragend="dragEnd(event)" ondragover="dragOver(event)" 
+                                 ondrop="drop(event, 'megalink', ${mIdx}, ${cIdx}, ${lIdx})"
+                                 style="padding: 6px 12px; border: 1px dashed #cbd5e1; background: #fdfdfd; flex-wrap: wrap;">
                                 <span style="font-size:13px; display:flex; align-items:center;">
-                                    <div class="arrow-btn-group" style="margin-right:8px;">
+                                    <i class="fa-solid fa-grip-vertical drag-handle" title="Drag to reorder"></i>
+                                    <div class="arrow-btn-group">
                                         <button type="button" class="btn-arrow" onclick="moveMegaLink(${mIdx}, ${cIdx}, ${lIdx}, 'up')">▲</button>
                                         <button type="button" class="btn-arrow" onclick="moveMegaLink(${mIdx}, ${cIdx}, ${lIdx}, 'down')">▼</button>
                                     </div>
@@ -363,9 +629,14 @@
                         `).join('');
 
                         colsHtml += `
-                            <div id="mega-col-${mIdx}-${cIdx}" class="read-box" style="border-left: 4px solid #28a745; padding: 15px; margin-bottom: 12px; background: #ffffff;">
+                            <div id="mega-col-${mIdx}-${cIdx}" class="read-box draggable-item" draggable="true" data-type="megacol" data-midx="${mIdx}" data-idx2="${cIdx}"
+                                 ondragstart="dragStart(event, 'megacol', ${mIdx}, ${cIdx})" 
+                                 ondragend="dragEnd(event)" ondragover="dragOver(event)" 
+                                 ondrop="drop(event, 'megacol', ${mIdx}, ${cIdx})"
+                                 style="border-left: 4px solid #28a745; padding: 15px; margin-bottom: 12px; background: #ffffff;">
                                 <div class="card-header-flex">
                                     <div class="read-title" style="display:flex; align-items:center;">
+                                        <i class="fa-solid fa-grip-vertical drag-handle" title="Drag to reorder"></i>
                                         <div class="arrow-btn-group">
                                             <button type="button" class="btn-arrow" onclick="moveMegaCol(${mIdx}, ${cIdx}, 'up')">▲</button>
                                             <button type="button" class="btn-arrow" onclick="moveMegaCol(${mIdx}, ${cIdx}, 'down')">▼</button>
@@ -476,21 +747,6 @@
                 await saveLayoutConfig(); 
                 renderMegaMenuBuilder(); 
             } 
-        }
-
-        async function moveMegaCol(mIdx, cIdx, dir) {
-            const cols = headerInfo.megaMenus[mIdx].columns;
-            if (dir === 'up' && cIdx > 0) { 
-                const itm = cols.splice(cIdx, 1)[0]; 
-                cols.splice(cIdx - 1, 0, itm); 
-                await saveLayoutConfig(); 
-                renderMegaMenuBuilder(); 
-            } else if (dir === 'down' && cIdx < cols.length - 1) { 
-                const itm = cols.splice(cIdx, 1)[0]; 
-                cols.splice(cIdx + 1, 0, itm); 
-                await saveLayoutConfig(); 
-                renderMegaMenuBuilder(); 
-            }
         }
 
         function renameMegaColTitleInline(mIdx, cIdx) {
@@ -614,24 +870,8 @@
             await saveLayoutConfig(); 
             renderMegaMenuBuilder(); 
         }
-        
-        async function moveMegaLink(mIdx, cIdx, lIdx, dir) {
-            const list = headerInfo.megaMenus[mIdx].columns[cIdx].links;
-            if (dir === 'up' && lIdx > 0) { 
-                const itm = list.splice(lIdx, 1)[0]; 
-                list.splice(lIdx - 1, 0, itm); 
-                await saveLayoutConfig(); 
-                renderMegaMenuBuilder(); 
-            } else if (dir === 'down' && lIdx < list.length - 1) { 
-                const itm = list.splice(lIdx, 1)[0]; 
-                list.splice(lIdx + 1, 0, itm); 
-                await saveLayoutConfig(); 
-                renderMegaMenuBuilder(); 
-            }
-        }
 
-
-        /* ================= 2.3 MAIN NAV MENU (PERFECT MUTUAL EXCLUSIVITY) ================= */
+        /* ================= 2.3 MAIN NAV MENU ================= */
         function renderHeaderMenuCards() {
             const container = document.getElementById('header-menu-container'); 
             document.getElementById('new-menu-form-box').innerHTML = ''; 
@@ -653,7 +893,6 @@
                 let actionButtonsHtml = '';
 
                 if (hasMega) {
-                    // Scenario A: Mega Menu Connected
                     const linkedMega = (headerInfo.megaMenus || []).find(x => x.id === m.megaMenuId);
                     const megaName = linkedMega ? linkedMega.title : '<span style="color:red;">(মেগা মেনু পাওয়া যায়নি)</span>';
                     
@@ -665,16 +904,19 @@
                                 <button class="btn btn-danger btn-sm" onclick="removeMegaMenuConnection(${mIdx})"><i class="fa-solid fa-trash"></i> কানেকশন মুছুন</button>
                             </div>
                         </div>`;
-                    actionButtonsHtml = ''; // Hide both add buttons when connected
+                    actionButtonsHtml = ''; 
                 } else if (hasSub) {
-                    // Scenario B: Has Sub-Menus
                     contentHtml = `
                         <div class="sub-menu-list">
-                            <div style="font-size:12px; font-weight:bold; color:#555; margin-bottom:5px;">সাধারণ সাব-মেনু সমূহ:</div>
+                            <div style="font-size:12px; font-weight:bold; color:#555; margin-bottom:8px;">সাধারণ সাব-মেনু সমূহ:</div>
                             ${m.subMenus.map((sm, smIdx) => `
-                                <div class="sub-menu-item">
+                                <div class="sub-menu-item draggable-item" draggable="true" data-type="sub" data-midx="${mIdx}" data-idx2="${smIdx}"
+                                     ondragstart="dragStart(event, 'sub', ${mIdx}, ${smIdx})" 
+                                     ondragend="dragEnd(event)" ondragover="dragOver(event)" 
+                                     ondrop="drop(event, 'sub', ${mIdx}, ${smIdx})">
                                     <span style="font-size:13px; display:flex; align-items:center;">
-                                        <div class="arrow-btn-group" style="margin-right:8px;">
+                                        <i class="fa-solid fa-grip-vertical drag-handle" title="Drag to reorder"></i>
+                                        <div class="arrow-btn-group">
                                             <button type="button" class="btn-arrow" onclick="moveSubMenuPosition(${mIdx}, ${smIdx}, 'up')">▲</button>
                                             <button type="button" class="btn-arrow" onclick="moveSubMenuPosition(${mIdx}, ${smIdx}, 'down')">▼</button>
                                         </div>
@@ -687,10 +929,8 @@
                                 </div>
                             `).join('')}
                         </div>`;
-                    // Only sub-menu button is shown (Mega Menu button removed)
                     actionButtonsHtml = `<button class="btn btn-info btn-sm" onclick="showSubMenuAddForm(${mIdx})"><i class="fa-solid fa-plus"></i> সাব-মেনু যোগ করুন</button>`;
                 } else {
-                    // Scenario C: Empty (Neither Sub-Menu nor Mega Menu -> Show BOTH Buttons)
                     contentHtml = `<p style="color:#888; font-size:13px; font-style:italic; margin-bottom:10px;">কোনো সাব-মেনু বা মেগা মেনু যুক্ত নেই।</p>`;
                     actionButtonsHtml = `
                         <button class="btn btn-info btn-sm" onclick="showSubMenuAddForm(${mIdx})"><i class="fa-solid fa-plus"></i> সাব-মেনু যোগ করুন</button>
@@ -701,26 +941,31 @@
                 const megaBadge = hasMega ? `<span style="background:#6f42c1; color:white; padding:2px 8px; border-radius:4px; font-size:10px; margin-left:10px; display:inline-block;"><i class="fa-solid fa-layer-group"></i> Mega Menu Active</span>` : '';
                 
                 container.innerHTML += `
-                    <div class="read-box" style="border-left: 5px solid ${hasMega ? '#6f42c1' : '#20c997'}; margin-bottom: 15px;">
+                    <div class="read-box draggable-item" draggable="true" data-type="main" data-midx="${mIdx}"
+                         ondragstart="dragStart(event, 'main', ${mIdx})" 
+                         ondragend="dragEnd(event)" ondragover="dragOver(event)" 
+                         ondrop="drop(event, 'main', ${mIdx})"
+                         style="border-left: 5px solid ${hasMega ? '#6f42c1' : '#20c997'}; margin-bottom: 15px;">
                         <div class="card-header-flex">
                             <div>
                                 <div class="read-title" style="display:flex; align-items:center;">
+                                    <i class="fa-solid fa-grip-vertical drag-handle" title="Drag to reorder"></i>
                                     <div class="arrow-btn-group">
                                         <button type="button" class="btn-arrow" onclick="moveMainMenuPosition(${mIdx}, 'up')">▲</button>
                                         <button type="button" class="btn-arrow" onclick="moveMainMenuPosition(${mIdx}, 'down')">▼</button>
-                                    </div> 
+                                    </div>
                                     <i class="fa-solid fa-bars" style="color:${hasMega ? '#6f42c1' : '#20c997'}; margin-right:6px;"></i> 
                                     ${m.title || '(নাম নেই)'} 
                                     ${megaBadge}
                                 </div>
-                                <div class="read-subtitle" style="margin-left: 30px;"><b>URL:</b> ${m.url || '#'}</div>
+                                <div class="read-subtitle" style="margin-left: 55px;"><b>URL:</b> ${m.url || '#'}</div>
                             </div>
                             <div class="card-actions">
                                 <button class="btn btn-warning" onclick="editMainMenuInline(${mIdx})"><i class="fa-solid fa-pen-to-square"></i> Edit Menu</button>
                                 <button class="btn btn-danger" onclick="deleteMainMenu(${mIdx})"><i class="fa-solid fa-trash"></i> Delete</button>
                             </div>
                         </div>
-                        <div style="margin-left:30px;">
+                        <div style="margin-left:55px;">
                             ${contentHtml}
                             <div id="add-sub-${mIdx}"></div>
                             <div id="connect-mega-${mIdx}"></div>
@@ -738,9 +983,8 @@
             mainActionBar.innerHTML = `<button class="btn btn-add" id="add-menu-btn" onclick="showNewMenuForm()"><i class="fa-solid fa-plus"></i> মূল মেনু যোগ করুন</button>`;
         }
 
-        // Connect Mega Menu Selector UI
         function showConnectMegaMenuForm(mIdx) {
-            renderHeaderMenuCards(); // Reset UI state first
+            renderHeaderMenuCards(); 
             const megaBox = document.getElementById(`connect-mega-${mIdx}`);
             const actionBox = document.getElementById(`menu-action-bar-${mIdx}`);
             
@@ -781,7 +1025,7 @@
             if (selectedId) {
                 headerInfo.menus[mIdx].isMegaMenu = true;
                 headerInfo.menus[mIdx].megaMenuId = selectedId;
-                headerInfo.menus[mIdx].subMenus = []; // Clear sub-menus when mega-menu is selected
+                headerInfo.menus[mIdx].subMenus = []; 
                 await saveLayoutConfig();
                 renderHeaderMenuCards();
             }
@@ -792,25 +1036,7 @@
                 headerInfo.menus[mIdx].isMegaMenu = false;
                 headerInfo.menus[mIdx].megaMenuId = null;
                 await saveLayoutConfig();
-                renderHeaderMenuCards(); // Resets UI and shows BOTH buttons
-            }
-        }
-
-        function moveMainMenuPosition(mIdx, dir) {
-            const list = headerInfo.menus;
-            if (dir === 'up' && mIdx > 0) { 
-                const itm = list.splice(mIdx, 1)[0]; list.splice(mIdx - 1, 0, itm); saveLayoutConfig().then(renderHeaderMenuCards); 
-            } else if (dir === 'down' && mIdx < list.length - 1) { 
-                const itm = list.splice(mIdx, 1)[0]; list.splice(mIdx + 1, 0, itm); saveLayoutConfig().then(renderHeaderMenuCards); 
-            }
-        }
-        
-        function moveSubMenuPosition(mIdx, smIdx, dir) {
-            const list = headerInfo.menus[mIdx].subMenus;
-            if (dir === 'up' && smIdx > 0) { 
-                const itm = list.splice(smIdx, 1)[0]; list.splice(smIdx - 1, 0, itm); saveLayoutConfig().then(renderHeaderMenuCards); 
-            } else if (dir === 'down' && smIdx < list.length - 1) { 
-                const itm = list.splice(smIdx, 1)[0]; list.splice(smIdx + 1, 0, itm); saveLayoutConfig().then(renderHeaderMenuCards); 
+                renderHeaderMenuCards(); 
             }
         }
 
@@ -862,7 +1088,7 @@
         }
 
         function editMainMenuInline(mIdx) {
-            renderHeaderMenuCards(); // reset
+            renderHeaderMenuCards(); 
             const m = headerInfo.menus[mIdx];
             const container = document.getElementById('header-menu-container').children[mIdx];
             container.innerHTML = `
@@ -912,7 +1138,7 @@
         async function deleteSubMenu(mIdx, smIdx) { 
             headerInfo.menus[mIdx].subMenus.splice(smIdx, 1); 
             await saveLayoutConfig(); 
-            renderHeaderMenuCards(); // Automatically re-evaluates and shows BOTH buttons if last sub-menu is deleted!
+            renderHeaderMenuCards(); 
         }
 
         function editSubMenuInline(mIdx, smIdx) {
