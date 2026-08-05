@@ -1,13 +1,15 @@
+window.MENU_API_URL = window.MENU_API_URL || 'https://mosabber-quiz-app.onrender.com/api/sidebar-config';
+
 // Function to Render Global Admin LEFT SIDEBAR Navigation
-function renderAdminNavbar() {
+async function renderAdminNavbar() {
     const navbarWrapper = document.getElementById('admin-navbar-container');
     if (!navbarWrapper) return;
 
-    // লোকাল স্টোরেজ থেকে ইউজার নাম নেওয়া[cite: 18]
+    // লোকাল স্টোরেজ থেকে ইউজার নাম নেওয়া
     const user = JSON.parse(localStorage.getItem('user') || localStorage.getItem('quiz_user') || '{}');
     const userName = user.name || 'Profile';
 
-    // বর্তমান পেজের ফাইলনেম বের করা (active menu হাইলাইট করার জন্য)[cite: 18]
+    // বর্তমান পেজের ফাইলনেম বের করা (active menu হাইলাইট করার জন্য)
     const currentPage = window.location.pathname.split('/').pop() || 'dashboard.html';
 
     // সাইডবার আগে থেকেই কল্যাপসড ছিল কি না তা চেক করা
@@ -16,8 +18,8 @@ function renderAdminNavbar() {
         document.body.classList.add('sidebar-collapsed');
     }
 
-    // সাইডবার মেনু আইটেম লিস্ট (সহজে আপডেট করা যাবে)[cite: 18]
-    const menuItems = [
+    // ব্যাকআপ/ডিফল্ট সাইডবার মেনু আইটেম লিস্ট
+    const defaultMenuItems = [
         { href: 'dashboard.html', icon: 'fa-gauge-high', label: 'ড্যাশবোর্ড' },
         { href: 'header-dashboard.html', icon: 'fa-window-restore', label: 'হেডার কন্ট্রোল' },
         { href: 'footer-dashboard.html', icon: 'fa-table-columns', label: 'ফুটার কন্ট্রোল' },
@@ -26,26 +28,47 @@ function renderAdminNavbar() {
         { href: 'quiz-dashboard.html', icon: 'fa-file-circle-question', label: 'প্রশ্ন ব্যাংক ও কুইজ' },
         { href: 'packages-dashboard.html', icon: 'fa-box-open', label: 'প্যাকেজসমূহ পেজ' },
         { href: 'users.html', icon: 'fa-users-gear', label: 'ইউজার ও সাবস্ক্রিপশন' },
+        { href: 'admin-menu-dashboard.html', icon: 'fa-list-check', label: 'সাইডবার মেনু কন্ট্রোল' },
         { href: 'policy-dashboard.html', icon: 'fa-file-invoice-dollar', label: 'রিফান্ড ও পলিসি' },
     ];
 
+    let menuItems = defaultMenuItems;
+
+    // ব্যাকএন্ড API থেকে ডায়নামিক সাইডবার মেনু লোড করার চেষ্টা করা
+    try {
+        const res = await fetch(window.MENU_API_URL);
+        if (res.ok) {
+            const data = await res.json();
+            if (data.menus && data.menus.length > 0) {
+                menuItems = data.menus.map(item => ({
+                    href: item.url,
+                    icon: item.icon ? item.icon.replace('fa-solid ', '') : 'fa-circle',
+                    label: item.title
+                }));
+            }
+        }
+    } catch (err) {
+        console.warn("Sidebar Dynamic Menu Load Failed, using default list.", err);
+    }
+
     const menuHTML = menuItems.map(item => {
         const isActive = currentPage === item.href ? 'active' : '';
+        const iconClass = item.icon.includes('fa-') ? item.icon : `fa-solid ${item.icon}`;
         return `
             <a href="${item.href}" class="sidebar-link ${isActive}" title="${item.label}">
-                <i class="fa-solid ${item.icon}"></i>
+                <i class="${iconClass}"></i>
                 <span>${item.label}</span>
             </a>`;
     }).join('');
 
     navbarWrapper.className = 'sidebar-wrapper';
     navbarWrapper.innerHTML = `
-        <!-- মোবাইল টগল বাটন[cite: 18] -->
+        <!-- মোবাইল টগল বাটন -->
         <button class="mobile-sidebar-toggle" id="mobileSidebarToggle" onclick="toggleSidebar()">
             <i class="fa-solid fa-bars"></i>
         </button>
 
-        <!-- মোবাইলে সাইডবার খোলা থাকলে পিছনে অন্ধকার ওভারলে[cite: 18] -->
+        <!-- মোবাইলে সাইডবার খোলা থাকলে পিছনে অন্ধকার ওভারলে -->
         <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
         <aside class="sidebar" id="adminSidebar">
@@ -96,7 +119,7 @@ function toggleDesktopSidebar() {
     // আইকন পরিবর্তন করা
     const iconBtn = document.querySelector('.desktop-sidebar-collapse-btn i');
     if (iconBtn) {
-        iconBtn.className = isCollapsed ? 'fa-solid fa-outdent' : 'fa-indent';
+        iconBtn.className = isCollapsed ? 'fa-solid fa-outdent' : 'fa-solid fa-indent';
     }
 
     // ব্র্যান্ড টেক্সট হাইড বা শো করার জন্য
@@ -106,7 +129,7 @@ function toggleDesktopSidebar() {
     }
 }
 
-// মোবাইল/ট্যাবলেট এ সাইডবার খোলা-বন্ধ করার ফাংশন[cite: 18]
+// মোবাইল/ট্যাবলেট এ সাইডবার খোলা-বন্ধ করার ফাংশন
 function toggleSidebar() {
     const sidebar = document.getElementById('adminSidebar');
     const overlay = document.getElementById('sidebarOverlay');
@@ -114,7 +137,7 @@ function toggleSidebar() {
     if (overlay) overlay.classList.toggle('active');
 }
 
-// সেন্ট্রালাইজড লগআউট ফাংশন[cite: 18]
+// সেন্ট্রালাইজড লগআউট ফাংশন
 async function logout() {
     const confirmed = (typeof showTopAlert === 'function')
         ? await showTopAlert('আপনি কি নিশ্চিত যে লগআউট করতে চান?', 'warning', true)
@@ -129,5 +152,5 @@ async function logout() {
     }
 }
 
-// DOM লোড হওয়া মাত্রই সাইডবার বসিয়ে দিবে[cite: 18]
+// DOM লোড হওয়া মাত্রই সাইডবার বসিয়ে দিবে
 document.addEventListener('DOMContentLoaded', renderAdminNavbar);

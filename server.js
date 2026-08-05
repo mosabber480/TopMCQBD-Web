@@ -12,6 +12,7 @@ const HomeConfig = require('./models/HomeConfig');
 const authRoutes = require('./routes/auth');
 const homeConfigRoutes = require('./routes/homeConfigRoutes'); 
 const layoutRoutes = require('./routes/layoutRoutes');
+const adminSidebarRoutes = require('./routes/adminSidebarRoutes');
 const { verifyToken, authorizeRoles } = require('./middleware/authMiddleware');
 
 const app = express();
@@ -33,6 +34,7 @@ app.use('/global', express.static(path.join(__dirname, 'global')));
 app.use('/api/auth', authRoutes);
 app.use('/api/home-config', homeConfigRoutes);
 app.use('/api', layoutRoutes); 
+app.use('/api', adminSidebarRoutes);
 
 // Multer Setup for Memory Storage
 const upload = multer({ storage: multer.memoryStorage() });
