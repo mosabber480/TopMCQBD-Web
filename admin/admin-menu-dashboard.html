@@ -64,6 +64,7 @@
         .btn-danger { background-color: #dc3545; color: white; }
         .btn-submit { background-color: #28a745; color: white; }
         .btn-secondary { background-color: #6c757d; color: white; }
+        .btn-info { background-color: #17a2b8; color: white; }
         .btn-add { background: var(--main-dash-btn); color: white; border: none; padding: 10px 18px; border-radius: 5px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; font-size: 14px; }
 
         /* ARROWS & DRAG HANDLES */
@@ -79,6 +80,10 @@
         
         .drop-above::before { content: ''; position: absolute; top: -3px; left: 0; width: 100%; height: 3px; background-color: var(--primary); z-index: 100; border-radius: 2px; }
         .drop-below::after { content: ''; position: absolute; bottom: -3px; left: 0; width: 100%; height: 3px; background-color: var(--primary); z-index: 100; border-radius: 2px; }
+
+        /* SUBMENU STYLES IN ADMIN UI */
+        .submenu-container { margin-top: 15px; padding-left: 25px; border-left: 3px dashed var(--primary); }
+        .submenu-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px 15px; border-radius: 6px; margin-bottom: 8px; }
 
         /* Reorder Save Action Bar */
         #reorder-action-bar {
@@ -130,14 +135,14 @@
 
         // ডিফল্ট সাইডবার মেনু ব্যাকআপ (যদি ব্যাকএন্ডে এখনো ডাটা না থাকে)
         const defaultMenus = [
-            { title: "Dashboard Overview", url: "dashboard.html", icon: "fa-solid fa-gauge" },
-            { title: "Manage Quizzes", url: "quiz-dashboard.html", icon: "fa-solid fa-pen-to-square" },
-            { title: "Header Settings", url: "header-dashboard.html", icon: "fa-solid fa-heading" },
-            { title: "Home Settings", url: "home-dashboard.html", icon: "fa-solid fa-house" },
-            { title: "Footer Settings", url: "footer-dashboard.html", icon: "fa-solid fa-table-columns" },
-            { title: "User & Subscriptions", url: "users.html", icon: "fa-solid fa-users" },
-            { title: "Sidebar Menu Settings", url: "admin-menu-dashboard.html", icon: "fa-solid fa-list-check" },
-            { title: "My Profile", url: "admin-profile.html", icon: "fa-solid fa-user-gear" }
+            { title: "Dashboard Overview", url: "dashboard.html", icon: "fa-solid fa-gauge-high", subMenus: [] },
+            { title: "Manage Quizzes", url: "quiz-dashboard.html", icon: "fa-solid fa-file-circle-question", subMenus: [] },
+            { title: "Header Settings", url: "header-dashboard.html", icon: "fa-solid fa-window-restore", subMenus: [] },
+            { title: "Home Settings", url: "home-dashboard.html", icon: "fa-solid fa-sliders", subMenus: [] },
+            { title: "Footer Settings", url: "footer-dashboard.html", icon: "fa-solid fa-table-columns", subMenus: [] },
+            { title: "User & Subscriptions", url: "users.html", icon: "fa-solid fa-users-gear", subMenus: [] },
+            { title: "Sidebar Menu Settings", url: "admin-menu-dashboard.html", icon: "fa-solid fa-list-check", subMenus: [] },
+            { title: "My Profile", url: "admin-profile.html", icon: "fa-solid fa-user-shield", subMenus: [] }
         ];
 
         async function fetchSidebarConfig() {
@@ -172,6 +177,29 @@
                 card.draggable = true;
                 card.dataset.index = idx;
 
+                const hasSub = m.subMenus && m.subMenus.length > 0;
+                let subHTML = '';
+
+                if (hasSub) {
+                    subHTML = `
+                        <div class="submenu-container">
+                            <div style="font-size:12px; font-weight:bold; color:var(--primary); margin-bottom:6px;">সাব-মেনু তালিকা (${m.subMenus.length}টি):</div>
+                            ${m.subMenus.map((sub, sIdx) => `
+                                <div class="submenu-box card-header-flex">
+                                    <div>
+                                        <i class="${sub.icon || 'fa-solid fa-circle'}" style="color:var(--secondary); font-size: 13px;"></i>
+                                        <b style="font-size:13px; margin-left:5px;">${sub.title}</b>
+                                        <span style="font-size:12px; color:#666; margin-left:10px;">(URL: ${sub.url})</span>
+                                    </div>
+                                    <div>
+                                        <button class="btn btn-danger btn-sm" style="padding:2px 8px; font-size:10px;" onclick="deleteSubMenu(${idx}, ${sIdx})"><i class="fa-solid fa-trash"></i></button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                }
+
                 card.innerHTML = `
                     <div class="card-header-flex">
                         <div>
@@ -189,10 +217,13 @@
                             </div>
                         </div>
                         <div class="card-actions">
+                            <button class="btn btn-info btn-sm" onclick="showSubMenuForm(${idx})"><i class="fa-solid fa-plus"></i> সাব-মেনু</button>
                             <button class="btn btn-warning btn-sm" onclick="editMenuInline(${idx})"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
                             <button class="btn btn-danger btn-sm" onclick="deleteMenu(${idx})"><i class="fa-solid fa-trash"></i> Delete</button>
                         </div>
                     </div>
+                    ${subHTML}
+                    <div id="sub-form-box-${idx}"></div>
                 `;
 
                 // Drag Events
@@ -295,7 +326,7 @@
                         </div>
                         <div class="form-group" style="flex:1; min-width:200px;">
                             <label>URL (ফাইল পাথ):</label>
-                            <input type="text" id="new-m-url" placeholder="যেমন: settings.html">
+                            <input type="text" id="new-m-url" placeholder="যেমন: settings.html বা #">
                         </div>
                         <div class="form-group" style="flex:1; min-width:200px;">
                             <label>FontAwesome Icon Class:</label>
@@ -315,12 +346,74 @@
             const url = document.getElementById('new-m-url').value.trim();
             const icon = document.getElementById('new-m-icon').value.trim();
 
-            if (!title || !url) return showTopAlert('টাইটেল এবং URL প্রয়োজন!', 'warning');
+            if (!title) return showTopAlert('টাইটেল দেওয়া প্রয়োজন!', 'warning');
 
-            sidebarMenus.push({ title, url, icon: icon || 'fa-solid fa-circle' });
+            sidebarMenus.push({ 
+                title, 
+                url: url || '#', 
+                icon: icon || 'fa-solid fa-circle',
+                subMenus: []
+            });
             await saveConfig();
             document.getElementById('new-menu-form-box').innerHTML = '';
             renderMenuList();
+        }
+
+        /* --- SubMenu CRUD --- */
+        function showSubMenuForm(parentIdx) {
+            const formBox = document.getElementById(`sub-form-box-${parentIdx}`);
+            formBox.innerHTML = `
+                <div style="background: #f1f5f9; padding: 12px 15px; border-radius:6px; margin-top: 10px; border: 1px solid #cbd5e1;">
+                    <div style="font-weight: bold; font-size:13px; margin-bottom: 8px; color: var(--primary);">নতুন সাব-মেনু যোগ করুন</div>
+                    <div class="row">
+                        <div class="form-group" style="flex:1; min-width:150px;">
+                            <label>টাইটেল:</label>
+                            <input type="text" id="sub-title-${parentIdx}" placeholder="যেমন: General Settings">
+                        </div>
+                        <div class="form-group" style="flex:1; min-width:150px;">
+                            <label>URL (ফাইল পাথ):</label>
+                            <input type="text" id="sub-url-${parentIdx}" placeholder="যেমন: general-settings.html">
+                        </div>
+                        <div class="form-group" style="flex:1; min-width:150px;">
+                            <label>Icon Class:</label>
+                            <input type="text" id="sub-icon-${parentIdx}" placeholder="যেমন: fa-solid fa-sliders">
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <button class="btn btn-submit btn-sm" onclick="saveSubMenu(${parentIdx})"><i class="fa-solid fa-plus"></i> Add Submenu</button>
+                        <button class="btn btn-secondary btn-sm" onclick="document.getElementById('sub-form-box-${parentIdx}').innerHTML=''"><i class="fa-solid fa-xmark"></i> Cancel</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function saveSubMenu(parentIdx) {
+            const title = document.getElementById(`sub-title-${parentIdx}`).value.trim();
+            const url = document.getElementById(`sub-url-${parentIdx}`).value.trim();
+            const icon = document.getElementById(`sub-icon-${parentIdx}`).value.trim();
+
+            if (!title || !url) return showTopAlert('সাব-মেনুর টাইটেল এবং URL প্রয়োজন!', 'warning');
+
+            if (!sidebarMenus[parentIdx].subMenus) {
+                sidebarMenus[parentIdx].subMenus = [];
+            }
+
+            sidebarMenus[parentIdx].subMenus.push({
+                title,
+                url,
+                icon: icon || 'fa-solid fa-circle'
+            });
+
+            await saveConfig();
+            renderMenuList();
+        }
+
+        async function deleteSubMenu(parentIdx, subIdx) {
+            if (await showTopAlert("সাব-মেনুটি মুছে ফেলতে চান?", 'danger', true)) {
+                sidebarMenus[parentIdx].subMenus.splice(subIdx, 1);
+                await saveConfig();
+                renderMenuList();
+            }
         }
 
         function editMenuInline(idx) {

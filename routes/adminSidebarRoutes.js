@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const AdminSidebarConfig = require('../models/AdminSidebarConfig');
-const { verifyToken } = require('../middleware/authMiddleware'); // 👈 এখানে verifyToken ডি-স্ট্রাকচার করে নেওয়া হয়েছে
+const { verifyToken } = require('../middleware/authMiddleware');
 
 // GET: Fetch Sidebar Configuration
 router.get('/sidebar-config', async (req, res) => {
@@ -17,7 +17,7 @@ router.get('/sidebar-config', async (req, res) => {
 });
 
 // POST: Save/Update Sidebar Configuration (Protected Route)
-router.post('/sidebar-config', verifyToken, async (req, res) => { // 👈 authMiddleware এর জায়গায় verifyToken বসানো হয়েছে
+router.post('/sidebar-config', verifyToken, async (req, res) => {
     try {
         const { menus } = req.body;
         let config = await AdminSidebarConfig.findOne();

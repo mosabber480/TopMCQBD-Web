@@ -5,7 +5,7 @@ async function renderAdminNavbar() {
     const navbarWrapper = document.getElementById('admin-navbar-container');
     if (!navbarWrapper) return;
 
-    // লোকাল স্টোরেজ থেকে ইউজার নাম নেওয়া
+    // ১. লোকাল স্টোরেজ থেকে ইউজার নাম নেওয়া
     const user = JSON.parse(localStorage.getItem('user') || localStorage.getItem('quiz_user') || '{}');
     const userName = user.name || 'Profile';
 
@@ -20,44 +20,101 @@ async function renderAdminNavbar() {
 
     // ব্যাকআপ/ডিফল্ট সাইডবার মেনু আইটেম লিস্ট
     const defaultMenuItems = [
-        { href: 'dashboard.html', icon: 'fa-gauge-high', label: 'ড্যাশবোর্ড' },
-        { href: 'header-dashboard.html', icon: 'fa-window-restore', label: 'হেডার কন্ট্রোল' },
-        { href: 'footer-dashboard.html', icon: 'fa-table-columns', label: 'ফুটার কন্ট্রোল' },
-        { href: 'home-dashboard.html', icon: 'fa-sliders', label: 'হোম পেজ কন্ট্রোল' },
-        { href: 'about-dashboard.html', icon: 'fa-address-card', label: 'আমাদের সম্পর্কে' },
-        { href: 'quiz-dashboard.html', icon: 'fa-file-circle-question', label: 'প্রশ্ন ব্যাংক ও কুইজ' },
-        { href: 'packages-dashboard.html', icon: 'fa-box-open', label: 'প্যাকেজসমূহ পেজ' },
-        { href: 'users.html', icon: 'fa-users-gear', label: 'ইউজার ও সাবস্ক্রিপশন' },
-        { href: 'admin-menu-dashboard.html', icon: 'fa-list-check', label: 'সাইডবার মেনু কন্ট্রোল' },
-        { href: 'policy-dashboard.html', icon: 'fa-file-invoice-dollar', label: 'রিফান্ড ও পলিসি' },
+        { href: 'dashboard.html', icon: 'fa-solid fa-gauge-high', label: 'ড্যাশবোর্ড', subMenus: [] },
+        { href: 'header-dashboard.html', icon: 'fa-solid fa-window-restore', label: 'হেডার কন্ট্রোল', subMenus: [] },
+        { href: 'footer-dashboard.html', icon: 'fa-solid fa-table-columns', label: 'ফুটার কন্ট্রোল', subMenus: [] },
+        { href: 'home-dashboard.html', icon: 'fa-solid fa-sliders', label: 'হোম পেজ কন্ট্রোল', subMenus: [] },
+        { href: 'about-dashboard.html', icon: 'fa-solid fa-address-card', label: 'আমাদের সম্পর্কে', subMenus: [] },
+        { href: 'quiz-dashboard.html', icon: 'fa-solid fa-file-circle-question', label: 'প্রশ্ন ব্যাংক ও কুইজ', subMenus: [] },
+        { href: 'packages-dashboard.html', icon: 'fa-solid fa-box-open', label: 'প্যাকেজসমূহ পেজ', subMenus: [] },
+        { href: 'users.html', icon: 'fa-solid fa-users-gear', label: 'ইউজার ও সাবস্ক্রিপশন', subMenus: [] },
+        { href: 'admin-menu-dashboard.html', icon: 'fa-solid fa-list-check', label: 'সাইডবার মেনু কন্ট্রোল', subMenus: [] },
+        { href: 'policy-dashboard.html', icon: 'fa-solid fa-file-invoice-dollar', label: 'রিফান্ড ও পলিসি', subMenus: [] },
     ];
 
-    let menuItems = defaultMenuItems;
+    // ২. ব্রাউজারের LocalStorage থেকে জমানো/ক্যাশড মেনু ডাটা পড়া
+    const cachedMenus = localStorage.getItem('cached_sidebar_menus');
+    let menuItems = cachedMenus ? JSON.parse(cachedMenus) : defaultMenuItems;
 
-    // ব্যাকএন্ড API থেকে ডায়নামিক সাইডবার মেনু লোড করার চেষ্টা করা
+    // ৩. প্রথমবার ইনস্ট্যান্ট ক্যাশড ডাটা দিয়ে সাইডবার রেন্ডার করে দেওয়া (যাতে কোনো ডিলে না হয়)
+    buildAndInjectSidebarHTML(navbarWrapper, menuItems, currentPage, userName, isCollapsed);
+
+    // ৪. ব্যাকগ্রাউন্ডে API থেকে ফ্রেশ ডাটা আনা এবং কোনো পরিবর্তন থাকলে ক্যাশ ও UI আপডেট করা
     try {
         const res = await fetch(window.MENU_API_URL);
         if (res.ok) {
             const data = await res.json();
             if (data.menus && data.menus.length > 0) {
-                menuItems = data.menus.map(item => ({
+                const fetchedMenuItems = data.menus.map(item => ({
                     href: item.url,
-                    icon: item.icon ? item.icon.replace('fa-solid ', '') : 'fa-circle',
-                    label: item.title
+                    icon: item.icon || 'fa-solid fa-circle',
+                    label: item.title,
+                    subMenus: item.subMenus || []
                 }));
+
+                const fetchedStr = JSON.stringify(fetchedMenuItems);
+                
+                // ক্যাশের ডাটার সাথে সার্ভারের ডাটা মিলিয়ে দেখা
+                if (cachedMenus !== fetchedStr) {
+                    localStorage.setItem('cached_sidebar_menus', fetchedStr);
+                    buildAndInjectSidebarHTML(navbarWrapper, fetchedMenuItems, currentPage, userName, isCollapsed);
+                }
             }
         }
     } catch (err) {
-        console.warn("Sidebar Dynamic Menu Load Failed, using default list.", err);
+        console.warn("Sidebar Dynamic Menu Load Failed, using cached/default list.", err);
     }
+}
 
-    const menuHTML = menuItems.map(item => {
-        const isActive = currentPage === item.href ? 'active' : '';
-        const iconClass = item.icon.includes('fa-') ? item.icon : `fa-solid ${item.icon}`;
+// সাইডবার HTML জেনারেট ও ডোমে বসানোর কেন্দ্রীয় ফাংশন
+function buildAndInjectSidebarHTML(navbarWrapper, menuItems, currentPage, userName, isCollapsed) {
+    const menuHTML = menuItems.map((item, index) => {
+        const hasSubMenu = item.subMenus && item.subMenus.length > 0;
+        const isSubActive = hasSubMenu && item.subMenus.some(sub => sub.url === currentPage);
+        const isActive = currentPage === item.href || isSubActive ? 'active' : '';
+
+        // fa-solid / fa-brands / fa-regular আগে থেকে না থাকলে fa-solid অটো বসিয়ে দেওয়ার লজিক
+        let rawIcon = (item.icon || '').trim();
+        const hasPrefix = rawIcon.startsWith('fa-solid') || rawIcon.startsWith('fa-brands') || rawIcon.startsWith('fa-regular');
+        const iconClass = hasPrefix ? rawIcon : `fa-solid ${rawIcon}`;
+
+        if (hasSubMenu) {
+            const subItemsHTML = item.subMenus.map(sub => {
+                let subRawIcon = (sub.icon || 'fa-solid fa-circle').trim();
+                const subHasPrefix = subRawIcon.startsWith('fa-solid') || subRawIcon.startsWith('fa-brands') || subRawIcon.startsWith('fa-regular');
+                const subIconClass = subHasPrefix ? subRawIcon : `fa-solid ${subRawIcon}`;
+                const subActive = currentPage === sub.url ? 'active' : '';
+
+                return `
+                    <a href="${sub.url}" class="sidebar-sublink ${subActive}" title="${sub.title}">
+                        <i class="${subIconClass}"></i>
+                        <span>${sub.title}</span>
+                    </a>
+                `;
+            }).join('');
+
+            return `
+                <div class="sidebar-item-group ${isSubActive ? 'open' : ''}">
+                    <a href="#" class="sidebar-link ${isActive}" onclick="toggleSidebarSubMenu(event, 'submenu-${index}')" title="${item.label}">
+                        <div class="link-content">
+                            <i class="${iconClass}"></i>
+                            <span>${item.label}</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-down submenu-arrow"></i>
+                    </a>
+                    <div class="sidebar-submenu" id="submenu-${index}" style="display: ${isSubActive ? 'block' : 'none'};">
+                        ${subItemsHTML}
+                    </div>
+                </div>
+            `;
+        }
+
         return `
             <a href="${item.href}" class="sidebar-link ${isActive}" title="${item.label}">
-                <i class="${iconClass}"></i>
-                <span>${item.label}</span>
+                <div class="link-content">
+                    <i class="${iconClass}"></i>
+                    <span>${item.label}</span>
+                </div>
             </a>`;
     }).join('');
 
@@ -92,20 +149,44 @@ async function renderAdminNavbar() {
 
             <div class="sidebar-footer">
                 <a href="../index.html" class="sidebar-link" target="_blank" title="মূল ওয়েবসাইট">
-                    <i class="fa-solid fa-globe"></i>
-                    <span>মূল ওয়েবসাইট</span>
+                    <div class="link-content">
+                        <i class="fa-solid fa-globe"></i>
+                        <span>মূল ওয়েবসাইট</span>
+                    </div>
                 </a>
                 <a href="admin-profile.html" class="sidebar-link ${currentPage === 'admin-profile.html' ? 'active' : ''}" title="${userName}">
-                    <i class="fa-solid fa-user-shield"></i>
-                    <span>${userName}</span>
+                    <div class="link-content">
+                        <i class="fa-solid fa-user-shield"></i>
+                        <span>${userName}</span>
+                    </div>
                 </a>
                 <a href="#" class="sidebar-link logout-link" onclick="logout(); return false;" title="লগআউট">
-                    <i class="fa-solid fa-right-from-bracket"></i>
-                    <span>লগআউট</span>
+                    <div class="link-content">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>লগআউট</span>
+                    </div>
                 </a>
             </div>
         </aside>
     `;
+}
+
+// সাব-মেনু ড্রপডাউন টগল করার ফাংশন
+function toggleSidebarSubMenu(event, submenuId) {
+    event.preventDefault();
+    const submenu = document.getElementById(submenuId);
+    if (!submenu) return;
+
+    const parentGroup = submenu.closest('.sidebar-item-group');
+    const isVisible = submenu.style.display === 'block';
+
+    if (isVisible) {
+        submenu.style.display = 'none';
+        if (parentGroup) parentGroup.classList.remove('open');
+    } else {
+        submenu.style.display = 'block';
+        if (parentGroup) parentGroup.classList.add('open');
+    }
 }
 
 // ডেস্কটপে সাইডবার ছোট/বড় করার ফাংশন
@@ -148,6 +229,7 @@ async function logout() {
         localStorage.removeItem('user');
         localStorage.removeItem('quiz_token');
         localStorage.removeItem('quiz_user');
+        localStorage.removeItem('cached_sidebar_menus'); // ক্যাশ মেনু ডিলিট করা
         window.location.replace('../login.html');
     }
 }
