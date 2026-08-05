@@ -18,10 +18,10 @@
     <style>
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         
-        /* সাইডবার লেআউট যেন ঠিক থাকে তার জন্য container এর স্পেসিং যোগ করা হলো */
-        .container { margin-top: 30px; margin-bottom: 30px; padding: 0 25px 25px 25px; }
+        /* সাইডবার লেআউট এবং ফুল-উইথ সামঞ্জস্য রাখার জন্য container স্টাইল */
+        .container { margin-top: 30px; margin-bottom: 30px; padding: 0 25px; }
 
-        .box { background: white; padding: 25px 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .box { background: white; padding: 25px 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #e2e8f0; }
         .form-group { margin-bottom: 12px; position: relative; }
         label { display: block; font-weight: bold; margin-bottom: 4px; font-size: 13px; color: #555; }
         input { width: 100%; padding: 8px 35px 8px 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; box-sizing: border-box; }
@@ -72,7 +72,7 @@
                     </div>
                     <div class="info-row"><span style="font-weight:bold;">Email:</span> <span id="userEmail">Loading...</span></div>
                     <div class="info-row"><span style="font-weight:bold;">Joined:</span> <span id="userCreatedAt">N/A</span></div>
-                    <!-- ডুপ্লিকেট পপআপের বদলে সেন্ট্রাল logout() কল করা হলো -->
+                    <!-- সেন্ট্রাল logout() কল করা হলো -->
                     <button type="button" class="btn-submit" style="background:#dc3545; margin-top:20px;" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
                 </div>
 
@@ -164,7 +164,6 @@
         async function loadStatsAndUsers() {
             const tableBody = document.getElementById('pendingUserTableBody');
             try {
-                // 💡 Cache-buster '?t=' যোগ করা হয়েছে যাতে ব্রাউজার সবসময় নতুন ডাটা নেয়
                 const res = await fetch(`${API_BASE}/users?t=${new Date().getTime()}`, { 
                     headers: { 'Authorization': `Bearer ${token}` } 
                 });
@@ -189,7 +188,6 @@
 
                     if(u.lastLogin) {
                         const lastLoginDate = new Date(u.lastLogin);
-                        // চেক করা হচ্ছে আজকের তারিখের সাথে মেলে কিনা
                         if (lastLoginDate.toDateString() === now.toDateString()) {
                             todayLogins++;
                         }
@@ -201,7 +199,6 @@
                     }
                 });
                 
-                // ড্যাশবোর্ডে ডাটা আপডেট
                 document.getElementById('totalUsersCount').innerText = totalUsers;
                 document.getElementById('activeCount').innerText = active;
                 document.getElementById('pendingCount').innerText = pending;

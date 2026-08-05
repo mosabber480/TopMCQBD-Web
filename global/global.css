@@ -84,10 +84,11 @@ body {
 .btn-alert-cancel { background-color: #e2e8f0; color: #4a5568; }
 
 /* ==========================================================================
-   ADMIN DASHBOARD LEFT SIDEBAR NAVIGATION
+   ADMIN DASHBOARD LEFT SIDEBAR NAVIGATION & COLLAPSE STYLES
    ========================================================================== */
 :root {
     --sidebar-width: 260px;
+    --sidebar-collapsed-width: 70px;
 }
 
 .sidebar-wrapper {
@@ -107,6 +108,7 @@ body {
     z-index: 1100;
     box-shadow: 2px 0 10px rgba(0,0,0,0.1);
     overflow-y: auto;
+    transition: width 0.3s ease, left 0.3s ease;
 }
 
 .sidebar-header {
@@ -137,6 +139,21 @@ body {
     font-size: 20px;
     cursor: pointer;
     padding: 4px;
+}
+
+/* ডেস্কটপ সাইডবার টগল বাটন স্টাইল */
+.desktop-sidebar-collapse-btn {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 6px;
+    transition: background 0.2s;
+}
+.desktop-sidebar-collapse-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
 }
 
 .sidebar-menu {
@@ -193,6 +210,40 @@ body {
     color: var(--danger);
 }
 
+/* --- SIDEBAR COLLAPSED (MINIMIZED) STATE --- */
+body.sidebar-collapsed .sidebar {
+    width: var(--sidebar-collapsed-width) !important;
+}
+
+body.sidebar-collapsed .sidebar-brand span,
+body.sidebar-collapsed .sidebar-link span,
+body.sidebar-collapsed .sidebar-footer .sidebar-link span {
+    display: none !important;
+}
+
+body.sidebar-collapsed .sidebar-link {
+    justify-content: center;
+    padding: 12px 0;
+}
+
+body.sidebar-collapsed .sidebar-link i {
+    font-size: 18px;
+    margin: 0;
+}
+
+body.sidebar-collapsed .sidebar-header {
+    justify-content: center;
+    padding: 20px 10px;
+}
+
+/* কল্যাপসড অবস্থায় ডানপাশের ফাঁকা জায়গা রিমুভ ও ফুল উইথ করার জন্য মার্জিন ও ম্যাক্স-উইথ আপডেট */
+body.sidebar-collapsed .sidebar-wrapper ~ .container,
+body.sidebar-collapsed .sidebar-wrapper ~ .welcome-card {
+    margin-left: var(--sidebar-collapsed-width) !important;
+    margin-right: 30px !important;
+    max-width: none !important;
+}
+
 /* Mobile hamburger toggle + overlay (ডিফল্টভাবে ডেস্কটপে লুকানো) */
 .mobile-sidebar-toggle {
     display: none;
@@ -219,13 +270,16 @@ body {
     z-index: 1050;
 }
 
-/* সাইডবারের পাশে মূল কন্টেন্ট সরিয়ে দেওয়া (শুধু sidebar-wrapper থাকা পেজেই কাজ করবে) */
+/* সাইডবারের পাশে মূল কন্টেন্ট সরিয়ে দেওয়া এবং ফুল উইথ করা */
 .sidebar-wrapper ~ .container,
 .sidebar-wrapper ~ .welcome-card {
     margin-left: var(--sidebar-width);
+    margin-right: 30px;
+    max-width: none !important;
+    transition: margin-left 0.3s ease;
 }
 .sidebar-wrapper ~ .container {
-    max-width: calc(1300px + var(--sidebar-width));
+    width: auto;
 }
 
 /* ==========================================================================
