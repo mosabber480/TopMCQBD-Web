@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Policy Dashboard - TopMCQ</title>
     
-    <!-- Instant Auth Check (Updated path for Root login.html) -->
+    <!-- Instant Auth Check -->
     <script>
         (function checkAuth() {
             const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
@@ -17,145 +17,613 @@
 
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- বাংলা ফন্ট -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Quill.js CSS (Rich Text Editor) -->
+    <!-- Quill.js CSS -->
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
 
     <!-- GLOBAL CSS LINK -->
     <link rel="stylesheet" href="../global/global.css">
 
     <style>
-        /* global.css এর ফুল-উইথ ও মার্জিন লেআউট ঠিকঠাক রাখতে কন্টেইনার স্টাইল */
-        .container { margin-top: 30px; margin-bottom: 30px; padding: 0 25px; }
-        .box { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
-        
-        /* Custom Styles for Editor */
-        .page-title { font-size: 22px; color: var(--dark, #2d3748); margin-bottom: 20px; border-bottom: 2px solid #edf2f7; padding-bottom: 10px; }
-        .editor-wrapper { margin-top: 15px; }
-        #editor-container { height: 350px; background: white; font-family: inherit; font-size: 16px; }
-        
-        .save-btn { 
-            margin-top: 20px; 
-            background: var(--primary, #3182ce); 
-            color: white; 
-            padding: 10px 20px; 
-            border: none; 
-            border-radius: 6px; 
-            cursor: pointer; 
-            font-size: 15px; 
-            font-weight: 600;
-            transition: background 0.3s;
+        :root {
+            --primary: #007bff;
+            --primary-dark: #0056b3;
+            --secondary: #17a2b8;
+            --warning: #ff9f43;
+            --danger: #dc3545;
+            --dark: #2c3e50;
+            --light: #f4f7f6;
+            --main-dash-btn: #28a745;
+            --font-main: 'Noto Sans Bengali', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        .save-btn:hover { background: var(--primary-dark, #2b6cb0); }
-        #status-message { margin-left: 15px; font-weight: 600; font-size: 14px; }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: var(--font-main); background-color: var(--light); color: #333; padding-bottom: 80px; }
+
+        .container { margin-top: 30px; margin-bottom: 30px; padding: 0 25px 25px 25px; }
+        
+        .section-card { background: white; padding: 25px 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid #e2e8f0; border-left: 6px solid var(--primary); }
+        .section-title { font-size: 20px; color: var(--dark); margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; padding-bottom: 10px; border-bottom: 1px dashed #e2e8f0; }
+
+        .read-box { background: #fdfdfd; border: 1px solid #ddd; padding: 20px; border-radius: 8px; margin-bottom: 15px; transition: all 0.2s ease; }
+        
+        .card-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 15px; }
+        .btn { padding: 8px 16px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s; }
+        .btn-warning { background-color: #ffc107; color: #212529; }
+        .btn-danger { background-color: #dc3545; color: white; }
+        .btn-submit { background-color: #28a745; color: white; }
+        .btn-secondary { background-color: #6c757d; color: white; }
+        .btn-add { background: var(--main-dash-btn); color: white; padding: 10px 18px; font-size: 14px; }
+        
+        /* =====================================================
+           VIEW MODE 
+           ===================================================== */
+        .policy-preview-box { 
+            background: white; 
+            padding: 15px 0; 
+            border: none; 
+            height: auto; 
+            overflow: visible;
+            color: #4a5568; 
+            line-height: 1.75; 
+            font-family: var(--font-main);
+        }
+        .policy-preview-box h1,
+        .policy-preview-box h2,
+        .policy-preview-box h3 {
+            color: var(--dark);
+            font-weight: 700;
+            margin-top: 22px;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #edf2f7;
+        }
+        .policy-preview-box h1:first-child,
+        .policy-preview-box h2:first-child,
+        .policy-preview-box h3:first-child { margin-top: 0; }
+        .policy-preview-box p { margin-bottom: 12px; }
+        .policy-preview-box ul, .policy-preview-box ol { margin-left: 22px; margin-bottom: 12px; }
+        .policy-preview-box li { margin-bottom: 6px; }
+        .policy-preview-box a { color: var(--primary); text-decoration: underline; word-break: break-word; }
+
+        /* =====================================================
+           EDIT MODE 
+           ===================================================== */
+        .editor-wrapper {
+            border: 1px solid #ccd6e0;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #ffffff;
+            margin-bottom: 15px;
+        }
+
+        .editor-wrapper .ql-toolbar.ql-snow {
+            box-sizing: border-box;
+            border: none !important;
+            border-bottom: 1px solid #ccd6e0 !important;
+            background: #f8fafc;
+            border-radius: 8px 8px 0 0;
+            padding: 10px 12px;
+            font-family: var(--font-main);
+        }
+        .editor-wrapper .ql-toolbar.ql-snow .ql-formats {
+            display: inline-flex !important;
+            align-items: center;
+            margin-right: 12px !important;
+            float: none !important;
+        }
+        .editor-wrapper .ql-toolbar.ql-snow button {
+            background: transparent !important;
+            border: none !important;
+            outline: none !important;
+            cursor: pointer;
+            width: 28px;
+            height: 24px;
+            padding: 3px 5px;
+            float: none !important;
+        }
+        .editor-wrapper .ql-toolbar.ql-snow button:hover,
+        .editor-wrapper .ql-toolbar.ql-snow button.ql-active {
+            color: var(--primary);
+        }
+        .editor-wrapper .ql-toolbar.ql-snow svg { display: inline-block !important; }
+        .editor-wrapper .ql-snow .ql-stroke { stroke: #444; }
+        .editor-wrapper .ql-snow .ql-fill { fill: #444; }
+        .editor-wrapper .ql-toolbar.ql-snow .ql-picker { font-size: 14px; float: none !important; }
+        .editor-wrapper .ql-toolbar.ql-snow .ql-picker-label {
+            display: flex !important;
+            align-items: center;
+            border: 1px solid transparent;
+        }
+        .editor-wrapper .ql-snow .ql-picker-options {
+            position: absolute;
+            z-index: 20;
+            background: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .editor-wrapper .ql-container.ql-snow {
+            border: none !important;
+            height: auto !important;
+            min-height: 350px;
+            font-family: var(--font-main) !important;
+            font-size: 15px;
+        }
+        .editor-wrapper .ql-editor {
+            min-height: 350px;
+            overflow-y: hidden;
+            padding: 18px 20px;
+            line-height: 1.75;
+            color: #333;
+            font-family: var(--font-main) !important;
+        }
+        .editor-wrapper .ql-editor * { font-family: inherit; }
+
+        .editor-wrapper .ql-editor h1,
+        .editor-wrapper .ql-editor h2,
+        .editor-wrapper .ql-editor h3 {
+            font-weight: 700;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            padding-bottom: 6px;
+            border-bottom: 2px solid #edf2f7;
+        }
+        .editor-wrapper .ql-editor h1:first-child,
+        .editor-wrapper .ql-editor h2:first-child,
+        .editor-wrapper .ql-editor h3:first-child { margin-top: 0; }
+        .editor-wrapper .ql-editor p { margin-bottom: 10px; }
+        .editor-wrapper .ql-editor a { color: var(--primary); text-decoration: underline; }
+
+        /* =====================================================
+           CUSTOM LINK MODAL
+           ===================================================== */
+        .link-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.55);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .link-modal-overlay.active { display: flex; }
+        .link-modal-box {
+            background: white;
+            width: 100%;
+            max-width: 420px;
+            border-radius: 10px;
+            padding: 22px 24px;
+            box-shadow: 0 10px 35px rgba(0,0,0,0.25);
+        }
+        .link-modal-title {
+            font-size: 17px;
+            font-weight: bold;
+            color: var(--dark);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .link-type-tabs { display: flex; gap: 8px; margin-bottom: 15px; }
+        .link-type-tab {
+            flex: 1;
+            text-align: center;
+            padding: 8px 6px;
+            border: 1px solid #dde3ea;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            color: #64748b;
+            background: #f8fafc;
+            transition: 0.2s;
+        }
+        .link-type-tab.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .link-modal-box input[type="text"],
+        .link-modal-box input[type="email"],
+        .link-modal-box input[type="tel"],
+        .link-modal-box input[type="url"] {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #dde3ea;
+            border-radius: 6px;
+            font-size: 14px;
+            margin-bottom: 8px;
+            font-family: inherit;
+        }
+        .link-modal-hint { font-size: 12px; color: #94a3b8; margin-bottom: 15px; }
+        .link-modal-actions { justify-content: flex-end; margin-top: 5px; }
+
+        .ql-container.ql-snow { height: auto !important; }
     </style>
 </head>
 <body>
 
-    <!-- Dynamic Admin Global Navigation Bar Container -->
     <div id="admin-navbar-container"></div>
 
     <div class="container">
-        <div class="box">
-            <h1 class="page-title"><i class="fa-solid fa-file-signature"></i> Edit Privacy & Refund Policy</h1>
+        <div class="section-card">
+            <div class="section-title">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <i class="fa-solid fa-file-signature" style="color: var(--primary);"></i> প্রাইভেসি ও রিফান্ড পলিসি
+                </div>
+            </div>
             
-            <div class="editor-wrapper">
-                <!-- Create the editor container -->
-                <div id="editor-container"></div>
-                
-                <button id="save-policy-btn" class="save-btn"><i class="fa-solid fa-save"></i> Save Policy</button>
-                <span id="status-message"></span>
+            <!-- Loading Box -->
+            <div id="loading-box" style="text-align: center; color: #718096; padding: 20px;">
+                <i class="fa-solid fa-spinner fa-spin"></i> ডেটা লোড হচ্ছে...
+            </div>
+
+            <!-- VIEW MODE -->
+            <div id="view-mode-box" style="display: none;">
+                <div class="read-box" style="border-left: 5px solid var(--primary);">
+                    <div id="preview-content" class="policy-preview-box ql-editor"></div>
+                    
+                    <div class="card-actions" id="action-buttons-exist" style="display: none;">
+                        <button class="btn btn-warning" onclick="toggleMode('edit')"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                        <button class="btn btn-danger" onclick="deletePolicy()"><i class="fa-solid fa-trash"></i> Delete</button>
+                    </div>
+                    
+                    <div class="card-actions" id="action-buttons-empty" style="display: none;">
+                        <button class="btn btn-add" onclick="toggleMode('edit')"><i class="fa-solid fa-plus"></i> নতুন পলিসি যোগ করুন</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EDIT MODE -->
+            <div id="edit-mode-box" style="display: none;">
+                <div class="read-box" style="border-left: 5px solid var(--primary); background: #ffffff;">
+                    <div style="font-weight: bold; margin-bottom: 12px; color: var(--primary);" id="edit-box-title">
+                        পলিসি এডিট করুন
+                    </div>
+                    <div class="editor-wrapper">
+                        <div id="editor-container"></div>
+                    </div>
+                    <div class="card-actions">
+                        <button class="btn btn-submit" id="save-policy-btn" onclick="savePolicy()"><i class="fa-solid fa-floppy-disk"></i> Save Policy</button>
+                        <button class="btn btn-secondary" onclick="toggleMode('view')"><i class="fa-solid fa-xmark"></i> Cancel</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- CUSTOM LINK MODAL -->
+    <div class="link-modal-overlay" id="link-modal-overlay">
+        <div class="link-modal-box">
+            <div class="link-modal-title"><i class="fa-solid fa-link"></i> লিংক যুক্ত করুন</div>
+
+            <div class="link-type-tabs">
+                <div class="link-type-tab active" data-type="website" onclick="switchLinkType('website')">
+                    <i class="fa-solid fa-globe"></i> ওয়েবসাইট
+                </div>
+                <div class="link-type-tab" data-type="email" onclick="switchLinkType('email')">
+                    <i class="fa-solid fa-envelope"></i> ইমেইল
+                </div>
+                <div class="link-type-tab" data-type="phone" onclick="switchLinkType('phone')">
+                    <i class="fa-solid fa-phone"></i> ফোন
+                </div>
+            </div>
+
+            <input type="url" id="link-input-website" placeholder="https://example.com">
+            <input type="email" id="link-input-email" style="display:none;" placeholder="example@mail.com">
+            <input type="tel" id="link-input-phone" style="display:none;" placeholder="+8801XXXXXXXXX">
+
+            <div class="link-modal-hint" id="link-modal-hint">সম্পূর্ণ ওয়েব এড্রেস দিন (https:// সহ)</div>
+
+            <div class="card-actions link-modal-actions">
+                <button class="btn btn-danger" id="remove-link-btn" style="display:none;" onclick="removeCustomLink()">
+                    <i class="fa-solid fa-link-slash"></i> লিংক সরান
+                </button>
+                <button class="btn btn-secondary" onclick="closeLinkModal()">
+                    <i class="fa-solid fa-xmark"></i> বাতিল
+                </button>
+                <button class="btn btn-submit" onclick="insertCustomLink()">
+                    <i class="fa-solid fa-check"></i> যুক্ত করুন
+                </button>
             </div>
         </div>
     </div>
 
     <!-- Quill.js Library -->
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
-
-    <!-- GLOBAL JS LINKS -->
     <script src="../global/global.js"></script>
     <script src="../global/admin-global.js"></script>
 
     <script>
+        const API_BASE = 'https://mosabber-quiz-app.onrender.com';
+        const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
+        
+        let currentPolicyContent = '';
+        let quillEditor = null;
+
+        // Link modal state
+        let savedRange = null;
+        let activeLinkType = 'website';
+
         document.addEventListener('DOMContentLoaded', async () => {
-            // ১. Quill Editor ইনিশিয়ালাইজ করা
-            const quill = new Quill('#editor-container', {
-                theme: 'snow',
-                modules: {
-                    toolbar: [
-                        [{ 'header': [1, 2, 3, false] }],
-                        ['bold', 'italic', 'underline'],
-                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                        [{ 'color': [] }, { 'background': [] }],
-                        [{ 'align': [] }],
-                        ['clean'] // Formatting মুছে ফেলার বাটন
-                    ]
-                }
-            });
+            // Quill Editor তৈরি করার কোড এখান থেকে সরিয়ে toggleMode ফাংশনে নেওয়া হয়েছে
+            await fetchPolicy();
+        });
 
-            const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
-            const statusMessage = document.getElementById('status-message');
-
-            // ২. পেজ লোড হলে আগের পলিসি ডেটাবেস থেকে এনে এডিটরে দেখানো
+        async function fetchPolicy() {
             try {
-                statusMessage.innerText = 'Loading existing policy...';
-                statusMessage.style.color = '#3182ce'; // Blue
-
-                const response = await fetch('/api/policy/get', {
+                const response = await fetch(`${API_BASE}/api/policy/get`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 
                 if (response.ok) {
                     const data = await response.json();
-                    if (data && data.content) {
-                        // HTML কে Quill এর ফরমেটে কনভার্ট করে বসানো
-                        const delta = quill.clipboard.convert(data.content);
-                        quill.setContents(delta, 'silent');
-                    }
-                    statusMessage.innerText = '';
-                } else {
-                    statusMessage.innerText = 'Failed to load policy.';
-                    statusMessage.style.color = '#e53e3e'; // Red
+                    currentPolicyContent = (data && data.content) ? data.content : '';
+                    updateViewBox();
+                    document.getElementById('loading-box').style.display = 'none';
+                    toggleMode('view');
                 }
             } catch (error) {
-                console.error('Error fetching policy:', error);
-                statusMessage.innerText = 'Error connecting to server.';
-                statusMessage.style.color = '#e53e3e';
+                document.getElementById('loading-box').innerHTML = `<p style="color: red;">সার্ভার কানেকশন এরর!</p>`;
             }
+        }
 
-            // ৩. Save বাটনে ক্লিক করলে ডেটাবেসে সেভ করা
-            document.getElementById('save-policy-btn').addEventListener('click', async () => {
-                // এডিটর থেকে এক্স্যাক্ট HTML কন্টেন্ট বের করা
-                const htmlContent = document.querySelector('.ql-editor').innerHTML;
+        function updateViewBox() {
+            const previewBox = document.getElementById('preview-content');
+            const btnExist = document.getElementById('action-buttons-exist');
+            const btnEmpty = document.getElementById('action-buttons-empty');
 
-                statusMessage.innerText = 'Saving...';
-                statusMessage.style.color = '#3182ce';
+            if (currentPolicyContent.trim() !== '') {
+                previewBox.innerHTML = currentPolicyContent;
+                btnExist.style.display = 'flex';
+                btnEmpty.style.display = 'none';
+            } else {
+                previewBox.innerHTML = '<p style="color:#888;">কোনো পলিসি পাওয়া যায়নি।</p>';
+                btnExist.style.display = 'none';
+                btnEmpty.style.display = 'flex';
+            }
+        }
+
+        function toggleMode(mode) {
+            const viewBox = document.getElementById('view-mode-box');
+            const editBox = document.getElementById('edit-mode-box');
+
+            if (mode === 'edit') {
+                viewBox.style.display = 'none';
+                editBox.style.display = 'block'; // বক্সটি দৃশ্যমান করা হলো
+                
+                // বক্স দৃশ্যমান হওয়ার পর Quill Editor তৈরি করা হচ্ছে (যাতে এর হাইট/উইডথ ঠিক থাকে)
+                if (!quillEditor) {
+                    quillEditor = new Quill('#editor-container', {
+                        theme: 'snow',
+                        modules: {
+                            toolbar: {
+                                container: [
+                                    [{ 'header': [1, 2, 3, false] }],
+                                    ['bold', 'italic', 'underline'],
+                                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                                    [{ 'color': [] }, { 'background': [] }],
+                                    [{ 'align': [] }],
+                                    ['link'],
+                                    ['clean']
+                                ],
+                                handlers: {
+                                    link: function () {
+                                        openLinkModal();
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
 
                 try {
-                    const response = await fetch('/api/policy/save', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}` // অ্যাডমিন ভেরিফিকেশনের জন্য
-                        },
-                        body: JSON.stringify({ content: htmlContent })
-                    });
-
-                    if (response.ok) {
-                        statusMessage.innerText = 'Policy updated successfully!';
-                        statusMessage.style.color = '#38a169'; // Green
-                        setTimeout(() => statusMessage.innerText = '', 3000); // ৩ সেকেন্ড পর মেসেজ গায়েব
+                    if (currentPolicyContent) {
+                        quillEditor.clipboard.dangerouslyPasteHTML(currentPolicyContent);
                     } else {
-                        const errorData = await response.json();
-                        statusMessage.innerText = errorData.error || 'Failed to save policy.';
-                        statusMessage.style.color = '#e53e3e';
+                        quillEditor.setContents([]);
                     }
-                } catch (error) {
-                    console.error('Error saving policy:', error);
-                    statusMessage.innerText = 'Error connecting to server.';
-                    statusMessage.style.color = '#e53e3e';
+                } catch (err) {
+                    console.error('Editor content load error:', err);
                 }
+
+                document.getElementById('edit-box-title').innerText = currentPolicyContent ? 'পলিসি এডিট করুন' : 'নতুন পলিসি লিখুন';
+
+            } else {
+                viewBox.style.display = 'block';
+                editBox.style.display = 'none';
+            }
+        }
+
+        async function savePolicy() {
+            const saveBtn = document.getElementById('save-policy-btn');
+            const originalText = saveBtn.innerHTML;
+            saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+            saveBtn.disabled = true;
+
+            const htmlContent = quillEditor.root.innerHTML;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/policy/save`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ content: htmlContent })
+                });
+
+                if (response.ok) {
+                    currentPolicyContent = htmlContent;
+                    updateViewBox();
+                    if(typeof showTopAlert === 'function') showTopAlert('পলিসি সফলভাবে সেভ হয়েছে!', 'success');
+                    toggleMode('view');
+                } else {
+                    if(typeof showTopAlert === 'function') showTopAlert('সেভ করতে ব্যর্থ হয়েছে।', 'danger');
+                }
+            } catch (error) {
+                if(typeof showTopAlert === 'function') showTopAlert('সার্ভার কানেকশন এরর!', 'danger');
+            } finally {
+                saveBtn.innerHTML = originalText;
+                saveBtn.disabled = false;
+            }
+        }
+
+        async function deletePolicy() {
+            const isConfirmed = confirm("আপনি কি নিশ্চিত যে পলিসি মুছে ফেলতে চান?");
+            if (!isConfirmed) return;
+
+            const deleteBtn = document.querySelector('#action-buttons-exist .btn-danger');
+            const originalBtnHtml = deleteBtn ? deleteBtn.innerHTML : null;
+            if (deleteBtn) {
+                deleteBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Deleting...';
+                deleteBtn.disabled = true;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/api/policy/save`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ content: '' })
+                });
+
+                if (response.ok) {
+                    currentPolicyContent = '';
+                    updateViewBox();
+                    if (typeof showTopAlert === 'function') showTopAlert('পলিসি মুছে ফেলা হয়েছে!', 'success');
+                } else {
+                    if (typeof showTopAlert === 'function') {
+                        showTopAlert('পলিসি মুছতে ব্যর্থ হয়েছে (সার্ভার এরর)।', 'danger');
+                    } else {
+                        alert('পলিসি মুছতে ব্যর্থ হয়েছে (সার্ভার এরর)।');
+                    }
+                }
+            } catch (error) {
+                console.error('Error deleting policy:', error);
+                if (typeof showTopAlert === 'function') {
+                    showTopAlert('সার্ভার কানেকশন এরর!', 'danger');
+                } else {
+                    alert('সার্ভার কানেকশন এরর!');
+                }
+            } finally {
+                if (deleteBtn && originalBtnHtml) {
+                    deleteBtn.innerHTML = originalBtnHtml;
+                    deleteBtn.disabled = false;
+                }
+            }
+        }
+
+        // =====================================================
+        // CUSTOM LINK MODAL
+        // =====================================================
+        function switchLinkType(type) {
+            activeLinkType = type;
+            document.querySelectorAll('.link-type-tab').forEach(t => {
+                t.classList.toggle('active', t.dataset.type === type);
             });
+            document.getElementById('link-input-website').style.display = type === 'website' ? 'block' : 'none';
+            document.getElementById('link-input-email').style.display = type === 'email' ? 'block' : 'none';
+            document.getElementById('link-input-phone').style.display = type === 'phone' ? 'block' : 'none';
+
+            const hint = document.getElementById('link-modal-hint');
+            if (type === 'website') {
+                hint.innerText = 'সম্পূর্ণ ওয়েব এড্রেস দিন (https:// সহ)';
+            } else if (type === 'email') {
+                hint.innerText = 'শুধু ইমেইল এড্রেস দিন — ক্লিক করলে মেইল অ্যাপ খুলবে';
+            } else {
+                hint.innerText = 'কান্ট্রি কোডসহ ফোন নাম্বার দিন — ক্লিক করলে কল অ্যাপ খুলবে';
+            }
+        }
+
+        function openLinkModal() {
+            savedRange = quillEditor.getSelection(true);
+            if (!savedRange) {
+                if (typeof showTopAlert === 'function') showTopAlert('প্রথমে টেক্সট সিলেক্ট করুন অথবা কার্সার বসান!', 'warning');
+                return;
+            }
+
+            document.getElementById('link-input-website').value = '';
+            document.getElementById('link-input-email').value = '';
+            document.getElementById('link-input-phone').value = '';
+
+            const format = quillEditor.getFormat(savedRange);
+            document.getElementById('remove-link-btn').style.display = format.link ? 'inline-flex' : 'none';
+
+            if (format.link) {
+                const existing = format.link;
+                if (existing.startsWith('mailto:')) {
+                    switchLinkType('email');
+                    document.getElementById('link-input-email').value = existing.replace('mailto:', '');
+                } else if (existing.startsWith('tel:')) {
+                    switchLinkType('phone');
+                    document.getElementById('link-input-phone').value = existing.replace('tel:', '');
+                } else {
+                    switchLinkType('website');
+                    document.getElementById('link-input-website').value = existing;
+                }
+            } else {
+                switchLinkType('website');
+            }
+
+            document.getElementById('link-modal-overlay').classList.add('active');
+        }
+
+        function closeLinkModal() {
+            document.getElementById('link-modal-overlay').classList.remove('active');
+        }
+
+        function insertCustomLink() {
+            if (!savedRange) return;
+
+            let url = '';
+            let displayText = '';
+
+            if (activeLinkType === 'website') {
+                url = document.getElementById('link-input-website').value.trim();
+                if (url && !/^https?:\/\//i.test(url)) url = 'https://' + url;
+                displayText = url;
+            } else if (activeLinkType === 'email') {
+                const email = document.getElementById('link-input-email').value.trim();
+                if (email) url = 'mailto:' + email;
+                displayText = email;
+            } else if (activeLinkType === 'phone') {
+                const phone = document.getElementById('link-input-phone').value.trim();
+                if (phone) url = 'tel:' + phone;
+                displayText = phone;
+            }
+
+            if (!url) {
+                if (typeof showTopAlert === 'function') showTopAlert('সঠিক তথ্য দিন!', 'warning');
+                return;
+            }
+
+            quillEditor.setSelection(savedRange);
+
+            if (savedRange.length === 0) {
+                quillEditor.insertText(savedRange.index, displayText, { link: url }, 'user');
+                quillEditor.setSelection(savedRange.index + displayText.length, 0);
+            } else {
+                quillEditor.format('link', url);
+            }
+
+            closeLinkModal();
+        }
+
+        function removeCustomLink() {
+            if (!savedRange) return;
+            quillEditor.setSelection(savedRange);
+            quillEditor.format('link', false);
+            closeLinkModal();
+        }
+
+        document.getElementById('link-modal-overlay').addEventListener('click', function (e) {
+            if (e.target === this) closeLinkModal();
         });
     </script>
 </body>

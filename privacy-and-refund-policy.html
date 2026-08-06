@@ -7,6 +7,11 @@
     
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Quill.js CSS — পলিসি কনটেন্ট Quill এডিটর থেকে সেভ হয়, তাই bullet/numbered
+         লিস্ট ঠিকভাবে দেখাতে এই CSS প্রয়োজন (Quill CSS-counter দিয়ে বুলেট/নাম্বার আঁকে,
+         ব্রাউজারের ডিফল্ট list-style দিয়ে নয়) -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     
     <!-- GLOBAL CSS LINK (Root level path for /pages files) -->
     <link rel="stylesheet" href="global/global.css">
@@ -23,14 +28,24 @@
         
         .content-container { max-width: 900px; margin: 40px auto; padding: 0 20px; }
         .policy-card { background: white; border-radius: 12px; padding: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; margin-bottom: 25px; }
+
+        /* policy-card-এর নিজস্ব padding যেন Quill-এর ডিফল্ট .ql-editor
+           padding (12px 15px) দিয়ে ওভাররাইড না হয়ে যায় */
+        #policy-content.ql-editor {
+            padding: 0;
+            overflow: visible;
+            height: auto;
+            cursor: default;
+        }
         
         /* Styles for dynamic rich text content */
         #policy-content h1, #policy-content h2, #policy-content h3 { 
             color: var(--dark); 
-            margin-bottom: 15px; 
-            margin-top: 20px;
+            font-weight: 700;
+            margin-top: 25px; 
+            margin-bottom: 10px; 
             border-bottom: 2px solid #edf2f7; 
-            padding-bottom: 10px; 
+            padding-bottom: 8px; 
         }
         #policy-content h1:first-child, #policy-content h2:first-child, #policy-content h3:first-child {
             margin-top: 0;
@@ -39,17 +54,37 @@
             font-size: 15px; 
             color: #4a5568; 
             line-height: 1.8; 
-            margin-bottom: 15px; 
+            margin-top: 0; /* প্যারাগ্রাফের উপরের ডিফল্ট স্পেস জিরো করা হলো */
+            margin-bottom: 12px; 
         }
+        
+        /* Enter দিলে এখন স্পেস কাজ করবে, তবে স্পেসটি অতিরিক্ত বড় হবে না */
+        #policy-content p:has(br:only-child), #policy-content p:empty { 
+            display: block; 
+            min-height: 15px;
+            margin-bottom: 5px;
+        }
+        
         #policy-content ul, #policy-content ol { 
             padding-left: 20px; 
             color: #4a5568; 
             line-height: 1.8; 
+            margin-top: 0;
             margin-bottom: 15px;
         }
         #policy-content li { 
             margin-bottom: 8px; 
             font-size: 14px; 
+        }
+
+        /* লিংক (ওয়েবসাইট / ইমেইল / ফোন) স্টাইলিং */
+        #policy-content a {
+            color: var(--primary, #007bff);
+            text-decoration: underline;
+            word-break: break-word;
+        }
+        #policy-content a:hover {
+            color: var(--primary-dark, #0056b3);
         }
     </style>
 </head>
@@ -61,12 +96,14 @@
 
     <div class="page-banner">
         <h1>রিফান্ড ও পেমেন্ট পলিসি</h1>
-        <p>TopMCQ প্ল্যাটফর্ম ব্যবহারের পূর্বে আমাদের পেমেন্ট ও রিফান্ড সংক্রান্ত নিয়মাবলী জেনে নিন</p>
+        <p>TopMCQ প্ল্যাটফর্ম ব্যবহারের পূর্বে আমাদের পেমেন্ট ও রিফান্ড সংক্রান্ত নিয়মাবলী জেনে নিন</p>
     </div>
 
     <div class="content-container">
         <!-- Dynamic Content from Backend will be injected here -->
-        <div id="policy-content" class="policy-card">
+        <!-- class="ql-editor" যোগ করা হয়েছে যাতে Quill থেকে সেভ হওয়া
+             bullet/numbered লিস্ট এখানে ঠিকভাবে রেন্ডার হয় -->
+        <div id="policy-content" class="policy-card ql-editor">
             <p style="text-align: center; color: #718096;"><i class="fa-solid fa-spinner fa-spin"></i> পলিসি লোড হচ্ছে...</p>
         </div>
     </div>
@@ -82,24 +119,24 @@
         document.addEventListener('DOMContentLoaded', async () => {
             try {
                 // Fetching the policy from the backend API
-                const response = await fetch('/api/policy/get');
+                const API_BASE = 'https://mosabber-quiz-app.onrender.com';
+                const response = await fetch(`${API_BASE}/api/policy/get`);
                 
                 if (response.ok) {
                     const data = await response.json();
                     const policyContainer = document.getElementById('policy-content');
                     
-                    // Inject the HTML if content exists, otherwise show a default message
                     if(data && data.content) {
                         policyContainer.innerHTML = data.content;
                     } else {
-                        policyContainer.innerHTML = '<p style="text-align: center;">এখনও কোনো পলিসি যুক্ত করা হয়নি।</p>';
+                        policyContainer.innerHTML = '<p style="text-align: center;">এখনও কোনো পলিসি যুক্ত করা হয়নি।</p>';
                     }
                 } else {
                     throw new Error('Failed to fetch data from the server.');
                 }
             } catch (error) {
                 console.error('Error fetching policy:', error);
-                document.getElementById('policy-content').innerHTML = '<p style="text-align: center; color: var(--danger);">পলিসি লোড করতে সমস্যা হয়েছে। দয়া করে কিছুক্ষণ পর আবার চেষ্টা করুন।</p>';
+                document.getElementById('policy-content').innerHTML = '<p style="text-align: center; color: var(--danger);">পলিসি লোড করতে সমস্যা হয়েছে। দয়া করে কিছুক্ষণ পর আবার চেষ্টা করুন।</p>';
             }
         });
     </script>
