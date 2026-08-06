@@ -1,20 +1,20 @@
 const express = require('express');
 const router = express.Router();
 const PolicyConfig = require('../models/PolicyConfig');
-// const authMiddleware = require('../middleware/authMiddleware'); // যদি অ্যাডমিন ভেরিফিকেশন লাগে
+const { verifyToken, authorizeRoles } = require('../middleware/authMiddleware');
 
 // Public route to fetch the policy
 router.get('/get', async (req, res) => {
     try {
         const policy = await PolicyConfig.findOne();
-        res.json(policy || { content: '<p>No policy found.</p>' });
+        res.json(policy || { content: '' });
     } catch (error) {
         res.status(500).json({ error: 'Server error' });
     }
 });
 
-// Admin route to save/update the policy
-router.post('/save', async (req, res) => { // You can add authMiddleware here
+// Admin route to save/update the policy (Protected)
+router.post('/save', verifyToken, authorizeRoles('owner', 'admin'), async (req, res) => {
     try {
         let policy = await PolicyConfig.findOne();
         if (policy) {
