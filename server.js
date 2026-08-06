@@ -13,6 +13,7 @@ const authRoutes = require('./routes/auth');
 const homeConfigRoutes = require('./routes/homeConfigRoutes'); 
 const layoutRoutes = require('./routes/layoutRoutes');
 const adminSidebarRoutes = require('./routes/adminSidebarRoutes');
+const policyRoutes = require('./routes/policyRoutes'); // নতুন পলিসি রাউট যুক্ত করা হলো
 const { verifyToken, authorizeRoles } = require('./middleware/authMiddleware');
 
 const app = express();
@@ -35,6 +36,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/home-config', homeConfigRoutes);
 app.use('/api', layoutRoutes); 
 app.use('/api', adminSidebarRoutes);
+app.use('/api/policy', policyRoutes); // পলিসি API রাউট কানেক্ট করা হলো
 
 // Multer Setup for Memory Storage
 const upload = multer({ storage: multer.memoryStorage() });

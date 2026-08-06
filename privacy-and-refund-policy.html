@@ -23,10 +23,34 @@
         
         .content-container { max-width: 900px; margin: 40px auto; padding: 0 20px; }
         .policy-card { background: white; border-radius: 12px; padding: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; margin-bottom: 25px; }
-        .policy-card h2 { font-size: 20px; color: var(--dark); margin-bottom: 15px; display: flex; align-items: center; gap: 10px; border-bottom: 2px solid #edf2f7; padding-bottom: 10px; }
-        .policy-card p { font-size: 15px; color: #4a5568; line-height: 1.8; margin-bottom: 10px; }
-        .policy-card ul { padding-left: 20px; color: #4a5568; line-height: 1.8; }
-        .policy-card li { margin-bottom: 8px; font-size: 14px; }
+        
+        /* Styles for dynamic rich text content */
+        #policy-content h1, #policy-content h2, #policy-content h3 { 
+            color: var(--dark); 
+            margin-bottom: 15px; 
+            margin-top: 20px;
+            border-bottom: 2px solid #edf2f7; 
+            padding-bottom: 10px; 
+        }
+        #policy-content h1:first-child, #policy-content h2:first-child, #policy-content h3:first-child {
+            margin-top: 0;
+        }
+        #policy-content p { 
+            font-size: 15px; 
+            color: #4a5568; 
+            line-height: 1.8; 
+            margin-bottom: 15px; 
+        }
+        #policy-content ul, #policy-content ol { 
+            padding-left: 20px; 
+            color: #4a5568; 
+            line-height: 1.8; 
+            margin-bottom: 15px;
+        }
+        #policy-content li { 
+            margin-bottom: 8px; 
+            font-size: 14px; 
+        }
     </style>
 </head>
 <body>
@@ -41,25 +65,9 @@
     </div>
 
     <div class="content-container">
-        <div class="policy-card">
-            <h2><i class="fa-solid fa-credit-card" style="color: var(--primary);"></i> ১. পেমেন্ট পদ্ধতি (Payment Methods)</h2>
-            <p>আমাদের ওয়েবসাইট বা অ্যাপের মাধ্যমে আপনার পছন্দের প্যাকেজ কেনার সময় বিকাশ (bKash), নগদ (Nagad), রকেট (Rocket) অথবা অন্যান্য অনলাইন গেটওয়ের মাধ্যমে নিরাপদে পেমেন্ট করতে পারবেন।</p>
-        </div>
-
-        <div class="policy-card">
-            <h2><i class="fa-solid fa-rotate-left" style="color: var(--danger);"></i> ২. রিফান্ড পলিসি (Refund Policy)</h2>
-            <p>TopMCQ থেকে যেকোনো প্যাকেজ বা সার্ভিস সাবস্ক্রাইব করার ক্ষেত্রে নিম্নলিখিত নিয়ম প্রযোজ্য হবে:</p>
-            <ul>
-                <li>যেহেতু এটি একটি ডিজিটাল কনটেন্ট ভিত্তিক সেবা, তাই সাবস্ক্রিপশন চালু হওয়ার পর সাধারণভাবে পেমেন্ট রিফান্ডযোগ্য নয়।</li>
-                <li>কারিগরি কোনো ত্রুটিজনিত কারণে যদি টাকা কেটে নেওয়ার পরও অ্যাকাউন্ট অ্যাক্টিভ না হয়, তবে ২৪ ঘণ্টার মধ্যে সাপোর্ট টিমের সাথে যোগাযোগ করতে হবে।</li>
-                <li>ভুলবশত একই পেমেন্ট দু'বার করা হলে যাচাইসাপেক্ষে অতিরিক্ত টাকা ৩-৫ কার্যদিবসের মধ্যে যে মাধ্যমে পেমেন্ট এসেছে সেখানে ফেরত দেওয়া হবে।</li>
-            </ul>
-        </div>
-
-        <div class="policy-card">
-            <h2><i class="fa-solid fa-headset" style="color: var(--secondary);"></i> ৩. হেল্পলাইন ও সহায়তা</h2>
-            <p>পেমেন্ট সংক্রান্ত যেকোনো সমস্যা বা তথ্যের জন্য আমাদের সাপোর্ট টিমের সাথে যোগাযোগ করুন:</p>
-            <p><b>ইমেইল:</b> support@topmcq.com</p>
+        <!-- Dynamic Content from Backend will be injected here -->
+        <div id="policy-content" class="policy-card">
+            <p style="text-align: center; color: #718096;"><i class="fa-solid fa-spinner fa-spin"></i> পলিসি লোড হচ্ছে...</p>
         </div>
     </div>
 
@@ -68,5 +76,32 @@
 
     <!-- GLOBAL JS LINK (Root level path for /pages files) -->
     <script src="global/global.js"></script>
+
+    <!-- Fetch Policy Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Fetching the policy from the backend API
+                const response = await fetch('/api/policy/get');
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const policyContainer = document.getElementById('policy-content');
+                    
+                    // Inject the HTML if content exists, otherwise show a default message
+                    if(data && data.content) {
+                        policyContainer.innerHTML = data.content;
+                    } else {
+                        policyContainer.innerHTML = '<p style="text-align: center;">এখনও কোনো পলিসি যুক্ত করা হয়নি।</p>';
+                    }
+                } else {
+                    throw new Error('Failed to fetch data from the server.');
+                }
+            } catch (error) {
+                console.error('Error fetching policy:', error);
+                document.getElementById('policy-content').innerHTML = '<p style="text-align: center; color: var(--danger);">পলিসি লোড করতে সমস্যা হয়েছে। দয়া করে কিছুক্ষণ পর আবার চেষ্টা করুন।</p>';
+            }
+        });
+    </script>
 </body>
 </html>

@@ -18,6 +18,9 @@
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- Quill.js CSS (Rich Text Editor) -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+
     <!-- GLOBAL CSS LINK -->
     <link rel="stylesheet" href="../global/global.css">
 
@@ -25,6 +28,26 @@
         /* global.css এর ফুল-উইথ ও মার্জিন লেআউট ঠিকঠাক রাখতে কন্টেইনার স্টাইল */
         .container { margin-top: 30px; margin-bottom: 30px; padding: 0 25px; }
         .box { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
+        
+        /* Custom Styles for Editor */
+        .page-title { font-size: 22px; color: var(--dark, #2d3748); margin-bottom: 20px; border-bottom: 2px solid #edf2f7; padding-bottom: 10px; }
+        .editor-wrapper { margin-top: 15px; }
+        #editor-container { height: 350px; background: white; font-family: inherit; font-size: 16px; }
+        
+        .save-btn { 
+            margin-top: 20px; 
+            background: var(--primary, #3182ce); 
+            color: white; 
+            padding: 10px 20px; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-size: 15px; 
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+        .save-btn:hover { background: var(--primary-dark, #2b6cb0); }
+        #status-message { margin-left: 15px; font-weight: 600; font-size: 14px; }
     </style>
 </head>
 <body>
@@ -34,16 +57,106 @@
 
     <div class="container">
         <div class="box">
-            <h1>Start Soon</h1>
+            <h1 class="page-title"><i class="fa-solid fa-file-signature"></i> Edit Privacy & Refund Policy</h1>
+            
+            <div class="editor-wrapper">
+                <!-- Create the editor container -->
+                <div id="editor-container"></div>
+                
+                <button id="save-policy-btn" class="save-btn"><i class="fa-solid fa-save"></i> Save Policy</button>
+                <span id="status-message"></span>
+            </div>
         </div>
     </div>
+
+    <!-- Quill.js Library -->
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
 
     <!-- GLOBAL JS LINKS -->
     <script src="../global/global.js"></script>
     <script src="../global/admin-global.js"></script>
 
     <script>
-        // আপনার পেজের অন্যান্য কাস্টম JS কোড এখানে থাকবে
+        document.addEventListener('DOMContentLoaded', async () => {
+            // ১. Quill Editor ইনিশিয়ালাইজ করা
+            const quill = new Quill('#editor-container', {
+                theme: 'snow',
+                modules: {
+                    toolbar: [
+                        [{ 'header': [1, 2, 3, false] }],
+                        ['bold', 'italic', 'underline'],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        [{ 'color': [] }, { 'background': [] }],
+                        [{ 'align': [] }],
+                        ['clean'] // Formatting মুছে ফেলার বাটন
+                    ]
+                }
+            });
+
+            const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
+            const statusMessage = document.getElementById('status-message');
+
+            // ২. পেজ লোড হলে আগের পলিসি ডেটাবেস থেকে এনে এডিটরে দেখানো
+            try {
+                statusMessage.innerText = 'Loading existing policy...';
+                statusMessage.style.color = '#3182ce'; // Blue
+
+                const response = await fetch('/api/policy/get', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data && data.content) {
+                        // HTML কে Quill এর ফরমেটে কনভার্ট করে বসানো
+                        const delta = quill.clipboard.convert(data.content);
+                        quill.setContents(delta, 'silent');
+                    }
+                    statusMessage.innerText = '';
+                } else {
+                    statusMessage.innerText = 'Failed to load policy.';
+                    statusMessage.style.color = '#e53e3e'; // Red
+                }
+            } catch (error) {
+                console.error('Error fetching policy:', error);
+                statusMessage.innerText = 'Error connecting to server.';
+                statusMessage.style.color = '#e53e3e';
+            }
+
+            // ৩. Save বাটনে ক্লিক করলে ডেটাবেসে সেভ করা
+            document.getElementById('save-policy-btn').addEventListener('click', async () => {
+                // এডিটর থেকে এক্স্যাক্ট HTML কন্টেন্ট বের করা
+                const htmlContent = document.querySelector('.ql-editor').innerHTML;
+
+                statusMessage.innerText = 'Saving...';
+                statusMessage.style.color = '#3182ce';
+
+                try {
+                    const response = await fetch('/api/policy/save', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}` // অ্যাডমিন ভেরিফিকেশনের জন্য
+                        },
+                        body: JSON.stringify({ content: htmlContent })
+                    });
+
+                    if (response.ok) {
+                        statusMessage.innerText = 'Policy updated successfully!';
+                        statusMessage.style.color = '#38a169'; // Green
+                        setTimeout(() => statusMessage.innerText = '', 3000); // ৩ সেকেন্ড পর মেসেজ গায়েব
+                    } else {
+                        const errorData = await response.json();
+                        statusMessage.innerText = errorData.error || 'Failed to save policy.';
+                        statusMessage.style.color = '#e53e3e';
+                    }
+                } catch (error) {
+                    console.error('Error saving policy:', error);
+                    statusMessage.innerText = 'Error connecting to server.';
+                    statusMessage.style.color = '#e53e3e';
+                }
+            });
+        });
     </script>
 </body>
 </html>
