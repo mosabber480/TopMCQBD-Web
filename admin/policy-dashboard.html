@@ -55,14 +55,11 @@
         .card-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 15px; }
         .btn { padding: 8px 16px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s; }
         .btn-warning { background-color: #ffc107; color: #212529; }
-        .btn-danger { background-color: #dc3545; color: white; }
         .btn-submit { background-color: #28a745; color: white; }
         .btn-secondary { background-color: #6c757d; color: white; }
         .btn-add { background: var(--main-dash-btn); color: white; padding: 10px 18px; font-size: 14px; }
         
-        /* =====================================================
-           VIEW MODE 
-           ===================================================== */
+        /* VIEW MODE */
         .policy-preview-box { 
             background: white; 
             padding: 15px 0; 
@@ -91,9 +88,7 @@
         .policy-preview-box li { margin-bottom: 6px; }
         .policy-preview-box a { color: var(--primary); text-decoration: underline; word-break: break-word; }
 
-        /* =====================================================
-           EDIT MODE 
-           ===================================================== */
+        /* EDIT MODE */
         .editor-wrapper {
             border: 1px solid #ccd6e0;
             border-radius: 8px;
@@ -179,9 +174,7 @@
         .editor-wrapper .ql-editor p { margin-bottom: 10px; }
         .editor-wrapper .ql-editor a { color: var(--primary); text-decoration: underline; }
 
-        /* =====================================================
-           CUSTOM LINK MODAL
-           ===================================================== */
+        /* CUSTOM LINK MODAL */
         .link-modal-overlay {
             display: none;
             position: fixed;
@@ -267,7 +260,7 @@
                     
                     <div class="card-actions" id="action-buttons-exist" style="display: none;">
                         <button class="btn btn-warning" onclick="toggleMode('edit')"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-                        <button class="btn btn-danger" onclick="deletePolicy()"><i class="fa-solid fa-trash"></i> Delete</button>
+                        <!-- Delete button has been removed -->
                     </div>
                     
                     <div class="card-actions" id="action-buttons-empty" style="display: none;">
@@ -344,12 +337,10 @@
         let currentPolicyContent = '';
         let quillEditor = null;
 
-        // Link modal state
         let savedRange = null;
         let activeLinkType = 'website';
 
         document.addEventListener('DOMContentLoaded', async () => {
-            // Quill Editor তৈরি করার কোড এখান থেকে সরিয়ে toggleMode ফাংশনে নেওয়া হয়েছে
             await fetchPolicy();
         });
 
@@ -393,9 +384,8 @@
 
             if (mode === 'edit') {
                 viewBox.style.display = 'none';
-                editBox.style.display = 'block'; // বক্সটি দৃশ্যমান করা হলো
+                editBox.style.display = 'block'; 
                 
-                // বক্স দৃশ্যমান হওয়ার পর Quill Editor তৈরি করা হচ্ছে (যাতে এর হাইট/উইডথ ঠিক থাকে)
                 if (!quillEditor) {
                     quillEditor = new Quill('#editor-container', {
                         theme: 'snow',
@@ -459,63 +449,23 @@
                 if (response.ok) {
                     currentPolicyContent = htmlContent;
                     updateViewBox();
-                    if(typeof showTopAlert === 'function') showTopAlert('পলিসি সফলভাবে সেভ হয়েছে!', 'success');
+                    
+                    // কাস্টম পপআপ যুক্ত করা হলো 
+                    if(typeof showTopAlert === 'function') {
+                        showTopAlert('পলিসি সফলভাবে সেভ হয়েছে!', 'success');
+                    } else {
+                        alert('পলিসি সফলভাবে সেভ হয়েছে!');
+                    }
+                    
                     toggleMode('view');
                 } else {
-                    if(typeof showTopAlert === 'function') showTopAlert('সেভ করতে ব্যর্থ হয়েছে।', 'danger');
+                    if(typeof showTopAlert === 'function') showTopAlert('সেভ করতে ব্যর্থ হয়েছে।', 'danger'); else alert('সেভ করতে ব্যর্থ হয়েছে।');
                 }
             } catch (error) {
-                if(typeof showTopAlert === 'function') showTopAlert('সার্ভার কানেকশন এরর!', 'danger');
+                if(typeof showTopAlert === 'function') showTopAlert('সার্ভার কানেকশন এরর!', 'danger'); else alert('সার্ভার কানেকশন এরর!');
             } finally {
                 saveBtn.innerHTML = originalText;
                 saveBtn.disabled = false;
-            }
-        }
-
-        async function deletePolicy() {
-            const isConfirmed = confirm("আপনি কি নিশ্চিত যে পলিসি মুছে ফেলতে চান?");
-            if (!isConfirmed) return;
-
-            const deleteBtn = document.querySelector('#action-buttons-exist .btn-danger');
-            const originalBtnHtml = deleteBtn ? deleteBtn.innerHTML : null;
-            if (deleteBtn) {
-                deleteBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Deleting...';
-                deleteBtn.disabled = true;
-            }
-
-            try {
-                const response = await fetch(`${API_BASE}/api/policy/save`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ content: '' })
-                });
-
-                if (response.ok) {
-                    currentPolicyContent = '';
-                    updateViewBox();
-                    if (typeof showTopAlert === 'function') showTopAlert('পলিসি মুছে ফেলা হয়েছে!', 'success');
-                } else {
-                    if (typeof showTopAlert === 'function') {
-                        showTopAlert('পলিসি মুছতে ব্যর্থ হয়েছে (সার্ভার এরর)।', 'danger');
-                    } else {
-                        alert('পলিসি মুছতে ব্যর্থ হয়েছে (সার্ভার এরর)।');
-                    }
-                }
-            } catch (error) {
-                console.error('Error deleting policy:', error);
-                if (typeof showTopAlert === 'function') {
-                    showTopAlert('সার্ভার কানেকশন এরর!', 'danger');
-                } else {
-                    alert('সার্ভার কানেকশন এরর!');
-                }
-            } finally {
-                if (deleteBtn && originalBtnHtml) {
-                    deleteBtn.innerHTML = originalBtnHtml;
-                    deleteBtn.disabled = false;
-                }
             }
         }
 
@@ -544,7 +494,8 @@
         function openLinkModal() {
             savedRange = quillEditor.getSelection(true);
             if (!savedRange) {
-                if (typeof showTopAlert === 'function') showTopAlert('প্রথমে টেক্সট সিলেক্ট করুন অথবা কার্সার বসান!', 'warning');
+                // কাস্টম পপআপ যুক্ত করা হলো 
+                if(typeof showTopAlert === 'function') showTopAlert('প্রথমে টেক্সট সিলেক্ট করুন অথবা কার্সার বসান!', 'warning'); else alert('প্রথমে টেক্সট সিলেক্ট করুন অথবা কার্সার বসান!');
                 return;
             }
 
@@ -599,7 +550,8 @@
             }
 
             if (!url) {
-                if (typeof showTopAlert === 'function') showTopAlert('সঠিক তথ্য দিন!', 'warning');
+                // কাস্টম পপআপ যুক্ত করা হলো 
+                if(typeof showTopAlert === 'function') showTopAlert('সঠিক তথ্য দিন!', 'warning'); else alert('সঠিক তথ্য দিন!');
                 return;
             }
 

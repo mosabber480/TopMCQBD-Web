@@ -92,7 +92,19 @@ const UserSchema = new mongoose.Schema({
     lastLogin: {
         type: Date,
         default: null
+    },
+    // 💡 পাসওয়ার্ড রিসেটের জন্য নতুন দুটি ফিল্ড যোগ করা হলো
+    resetPasswordToken: {
+        type: String
+    },
+    resetPasswordExpires: {
+        type: Date
     }
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', UserSchema);
+```[cite: 4]
+
+এটি সেভ করার পর আমাদের ব্যাকএন্ড এবং ডেটাবেস স্কিমার কাজ পুরোপুরি শেষ! এখন আমাদের ফ্রন্টএন্টে **`forgot-password.html`** এবং **`reset-password.html`** পেজ দুটি তৈরি করতে হবে। 
+
+এটি করার জন্য প্রস্তুত থাকলে আমাকে জানান, আমি পেজ দুটির কোড দিয়ে দিচ্ছি।

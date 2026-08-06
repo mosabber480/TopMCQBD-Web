@@ -218,21 +218,89 @@ function toggleSidebar() {
     if (overlay) overlay.classList.toggle('active');
 }
 
-// সেন্ট্রালাইজড লগআউট ফাংশন
-async function logout() {
-    const confirmed = (typeof showTopAlert === 'function')
-        ? await showTopAlert('আপনি কি নিশ্চিত যে লগআউট করতে চান?', 'warning', true)
-        : confirm('আপনি কি নিশ্চিত যে লগআউট করতে চান?');
+// ==========================================================
+// নতুন কাস্টম লগআউট পপআপ (মডেল) ইনজেকশন 
+// ==========================================================
+(function injectAdminLogoutModal() {
+    document.addEventListener('DOMContentLoaded', () => {
+        if (!document.getElementById('adminLogoutModal')) {
+            // ১. পপআপের CSS স্টাইল যোগ করা
+            const style = document.createElement('style');
+            style.innerHTML = `
+                .logout-modal-overlay {
+                    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                    background: rgba(0, 0, 0, 0.55); display: flex; align-items: center; justify-content: center;
+                    z-index: 99999; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease;
+                    backdrop-filter: blur(4px); /* ব্যাকগ্রাউন্ড ব্লার ইফেক্ট */
+                }
+                .logout-modal-overlay.active { opacity: 1; visibility: visible; }
+                .logout-modal {
+                    background: white; padding: 35px 40px; border-radius: 12px; text-align: center;
+                    box-shadow: 0 10px 35px rgba(0,0,0,0.25); transform: translateY(-20px); transition: transform 0.3s ease;
+                    max-width: 420px; width: 90%; font-family: 'Noto Sans Bengali', sans-serif;
+                }
+                .logout-modal-overlay.active .logout-modal { transform: translateY(0); }
+                .logout-icon { font-size: 48px; color: #dc3545; margin-bottom: 15px; }
+                .logout-modal h3 { margin: 0 0 12px 0; color: #2c3e50; font-size: 22px; font-weight: 700; }
+                .logout-modal p { color: #64748b; margin-bottom: 25px; font-size: 15px; line-height: 1.6; }
+                .logout-actions { display: flex; gap: 15px; justify-content: center; }
+                .logout-btn-cancel, .logout-btn-confirm {
+                    padding: 10px 20px; border: none; border-radius: 6px; font-weight: 700; cursor: pointer;
+                    font-size: 14px; transition: 0.2s; flex: 1;
+                }
+                .logout-btn-cancel { background: #e2e8f0; color: #475569; }
+                .logout-btn-cancel:hover { background: #cbd5e1; color: #1e293b; }
+                .logout-btn-confirm { background: #dc3545; color: white; }
+                .logout-btn-confirm:hover { background: #c82333; }
+            `;
+            document.head.appendChild(style);
 
-    if (confirmed) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        localStorage.removeItem('quiz_token');
-        localStorage.removeItem('quiz_user');
-        localStorage.removeItem('cached_sidebar_menus'); // ক্যাশ মেনু ডিলিট করা
-        window.location.replace('../login.html');
+            // ২. পপআপের HTML স্ট্রাকচার যোগ করা
+            const modalDiv = document.createElement('div');
+            modalDiv.className = 'logout-modal-overlay';
+            modalDiv.id = 'adminLogoutModal';
+            modalDiv.innerHTML = `
+                <div class="logout-modal">
+                    <i class="fa-solid fa-right-from-bracket logout-icon"></i>
+                    <h3>লগআউট নিশ্চিত করুন</h3>
+                    <p>আপনি কি নিশ্চিত যে আপনি অ্যাডমিন প্যানেল থেকে লগআউট করতে চান?</p>
+                    <div class="logout-actions">
+                        <button class="logout-btn-cancel" onclick="closeAdminLogoutModal()">বাতিল করুন</button>
+                        <button class="logout-btn-confirm" onclick="confirmAdminLogout()">লগআউট</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modalDiv);
+        }
+    });
+})();
+
+// সেন্ট্রালাইজড লগআউট ফাংশন (যেটা সাইডবারের বাটনে ক্লিক করলে কল হয়)
+function logout() {
+    const modal = document.getElementById('adminLogoutModal');
+    if (modal) {
+        modal.classList.add('active'); // মডেল ওপেন করা
+    } else {
+        // ফলব্যাক অপশন
+        confirmAdminLogout(); 
     }
 }
+
+// মডেলটি বন্ধ করার ফাংশন
+window.closeAdminLogoutModal = function() {
+    const modal = document.getElementById('adminLogoutModal');
+    if (modal) modal.classList.remove('active');
+};
+
+// ডাটা ক্লিয়ার করে লগআউট সম্পন্ন করার ফাংশন
+window.confirmAdminLogout = function() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('quiz_token');
+    localStorage.removeItem('quiz_user');
+    localStorage.removeItem('cached_sidebar_menus'); // ক্যাশ মেনু ডিলিট করা
+    window.location.replace('../login.html');
+};
 
 // DOM লোড হওয়া মাত্রই সাইডবার বসিয়ে দিবে
 document.addEventListener('DOMContentLoaded', renderAdminNavbar);

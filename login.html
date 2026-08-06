@@ -146,6 +146,10 @@
                             <input type="password" id="loginPassword" placeholder="Enter password..." required>
                             <i class="fa-solid fa-eye toggle-password-icon" onclick="togglePasswordVisibility('loginPassword', this)"></i>
                         </div>
+                        <!-- FORGOT PASSWORD LINK -->
+                        <div style="text-align: right; margin-top: 8px;">
+                            <span onclick="toggleForm('forgot')" style="font-size: 13px; color: var(--primary, #007bff); font-weight: bold; cursor: pointer;">Forgot Password?</span>
+                        </div>
                     </div>
                     <button type="submit" class="btn" id="loginBtn">
                         <i class="fa-solid fa-right-to-bracket"></i> Login
@@ -181,6 +185,40 @@
                     </button>
                 </form>
 
+                <!-- FORGOT PASSWORD FORM -->
+                <form id="forgotForm" style="display: none;">
+                    <p style="text-align: center; font-size: 14px; color: #666; margin-bottom: 20px;">Enter your registered email address to receive a password reset link.</p>
+                    <div class="form-group">
+                        <label>Email Address:</label>
+                        <input type="email" id="forgotEmail" placeholder="Enter your email..." required>
+                    </div>
+                    <button type="submit" class="btn" id="forgotBtn">
+                        <i class="fa-solid fa-paper-plane"></i> Send Reset Link
+                    </button>
+                </form>
+
+                <!-- RESET PASSWORD FORM -->
+                <form id="resetForm" style="display: none;">
+                    <p style="text-align: center; font-size: 14px; color: #666; margin-bottom: 20px;">Create a new strong password for your account.</p>
+                    <div class="form-group">
+                        <label>New Password:</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="resetNewPassword" placeholder="Enter new password..." required>
+                            <i class="fa-solid fa-eye toggle-password-icon" onclick="togglePasswordVisibility('resetNewPassword', this)"></i>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Confirm Password:</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="resetConfirmPassword" placeholder="Confirm new password..." required>
+                            <i class="fa-solid fa-eye toggle-password-icon" onclick="togglePasswordVisibility('resetConfirmPassword', this)"></i>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn" id="resetBtn">
+                        <i class="fa-solid fa-floppy-disk"></i> Save New Password
+                    </button>
+                </form>
+
                 <div class="toggle-text" id="toggleMessage">
                     Don't have an account? <span class="toggle-link" onclick="toggleForm('register')">Register Now</span>
                 </div>
@@ -196,6 +234,11 @@
     <script>
         const AUTH_API = 'https://mosabber-quiz-app.onrender.com/api/auth';
 
+        // URL থেকে Token এবং Email বের করা (রিসেট লিংকের জন্য)
+        const urlParams = new URLSearchParams(window.location.search);
+        const resetToken = urlParams.get('token');
+        const resetEmail = urlParams.get('email');
+
         function togglePasswordVisibility(inputId, icon) {
             const inputField = document.getElementById(inputId);
             if (inputField.type === "password") {
@@ -210,8 +253,9 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('action') === 'register' || urlParams.get('mode') === 'register') {
+            if (resetToken && resetEmail) {
+                toggleForm('reset'); // ইমেইলের লিংকে ক্লিক করলে সরাসরি রিসেট ফর্ম দেখাবে
+            } else if (urlParams.get('action') === 'register' || urlParams.get('mode') === 'register') {
                 toggleForm('register');
             }
         });
@@ -223,22 +267,35 @@
             alertBox.style.display = 'block';
         }
 
+        // ফর্ম পরিবর্তন করার লজিক (Login, Register, Forgot, Reset)
         function toggleForm(type) {
             document.getElementById('alertBox').style.display = 'none';
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'none';
+            document.getElementById('forgotForm').style.display = 'none';
+            document.getElementById('resetForm').style.display = 'none';
+            document.getElementById('toggleMessage').style.display = 'block';
+
             if (type === 'register') {
-                document.getElementById('loginForm').style.display = 'none';
                 document.getElementById('registerForm').style.display = 'block';
                 document.getElementById('formTitle').innerHTML = '<i class="fa-solid fa-user-pen"></i> Register Account';
                 document.getElementById('toggleMessage').innerHTML = `Already have an account? <span class="toggle-link" onclick="toggleForm('login')">Login Here</span>`;
+            } else if (type === 'forgot') {
+                document.getElementById('forgotForm').style.display = 'block';
+                document.getElementById('formTitle').innerHTML = '<i class="fa-solid fa-envelope-circle-check"></i> Reset Password';
+                document.getElementById('toggleMessage').innerHTML = `Remember your password? <span class="toggle-link" onclick="toggleForm('login')">Login Here</span>`;
+            } else if (type === 'reset') {
+                document.getElementById('resetForm').style.display = 'block';
+                document.getElementById('formTitle').innerHTML = '<i class="fa-solid fa-key"></i> Set New Password';
+                document.getElementById('toggleMessage').style.display = 'none'; // রিসেট পেজে নিচের মেসেজটি দরকার নেই
             } else {
-                document.getElementById('registerForm').style.display = 'none';
                 document.getElementById('loginForm').style.display = 'block';
                 document.getElementById('formTitle').innerHTML = '<i class="fa-solid fa-lock"></i> Login to Account';
                 document.getElementById('toggleMessage').innerHTML = `Don't have an account? <span class="toggle-link" onclick="toggleForm('register')">Register Now</span>`;
             }
         }
 
-        // LOGIN SUBMIT
+        // 1. LOGIN SUBMIT
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('loginBtn');
@@ -282,7 +339,7 @@
             }
         });
 
-        // REGISTER SUBMIT
+        // 2. REGISTER SUBMIT
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -319,6 +376,78 @@
                 showAlert("Server connection error!");
             } finally {
                 btn.innerHTML = `<i class="fa-solid fa-user-plus"></i> Register Account`;
+                btn.disabled = false;
+            }
+        });
+
+        // 3. FORGOT PASSWORD SUBMIT
+        document.getElementById('forgotForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('forgotBtn');
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Sending...`;
+            btn.disabled = true;
+
+            const email = document.getElementById('forgotEmail').value;
+
+            try {
+                const res = await fetch(`${AUTH_API}/forgot-password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                const data = await res.json();
+
+                if (res.ok && data.success) {
+                    showAlert(data.message || "Reset link sent to your email!", true);
+                    document.getElementById('forgotForm').reset();
+                } else {
+                    showAlert(data.message || "Something went wrong!");
+                }
+            } catch (err) {
+                showAlert("Server connection error!");
+            } finally {
+                btn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> Send Reset Link`;
+                btn.disabled = false;
+            }
+        });
+
+        // 4. RESET PASSWORD SUBMIT
+        document.getElementById('resetForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const newPassword = document.getElementById('resetNewPassword').value;
+            const confirmPassword = document.getElementById('resetConfirmPassword').value;
+
+            if (newPassword !== confirmPassword) {
+                showAlert("Passwords do not match!");
+                return;
+            }
+
+            const btn = document.getElementById('resetBtn');
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Saving...`;
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`${AUTH_API}/reset-password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: resetEmail, token: resetToken, newPassword })
+                });
+                const data = await res.json();
+
+                if (res.ok && data.success) {
+                    showAlert("Password reset successful! Redirecting to login...", true);
+                    document.getElementById('resetForm').reset();
+                    setTimeout(() => {
+                        // URL থেকে Token ক্লিন করে রিফ্রেশ করা হবে
+                        window.location.href = 'login.html';
+                    }, 2000);
+                } else {
+                    showAlert(data.message || "Invalid or expired token!");
+                }
+            } catch (err) {
+                showAlert("Server connection error!");
+            } finally {
+                btn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Save New Password`;
                 btn.disabled = false;
             }
         });
