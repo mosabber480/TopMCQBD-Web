@@ -27,6 +27,7 @@ const transporter = nodemailer.createTransport({
     tls: {
         rejectUnauthorized: false
     },
+    family: 4, // <-- এই লাইনটি যুক্ত করা হলো (Forces IPv4 to avoid ENETUNREACH)
     connectionTimeout: 20000,
     greetingTimeout: 20000,
     socketTimeout: 20000
