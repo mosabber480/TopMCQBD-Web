@@ -2,13 +2,19 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const crypto = require('crypto'); // টোকেন তৈরির জন্য ক্রিপ্টো মডিউল
-const nodemailer = require('nodemailer'); // ইমেইল পাঠানোর জন্য
+const crypto = require('crypto');
+const nodemailer = require('nodemailer');
 const User = require('../models/User');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey_quizapp';
 
-// Nodemailer Transporter সেটআপ
+// =======================
+// EMAIL CONFIG
+// =======================
+
+console.log("EMAIL_USER:", process.env.EMAIL_USER);
+console.log("EMAIL_PASS:", process.env.EMAIL_PASS ? "Loaded ✅" : "Missing ❌");
+
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -17,61 +23,113 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-// 1. REGISTER API
+// Verify Gmail Connection
+transporter.verify((error, success) => {
+    if (error) {
+        console.error("❌ EMAIL VERIFY ERROR");
+        console.error(error);
+    } else {
+        console.log("✅ Gmail Server Ready");
+    }
+});
+
+
+// =====================================================
+// REGISTER
+// =====================================================
+
 router.post('/register', async (req, res) => {
     try {
+
         const { name, email, password, role } = req.body;
+
         let user = await User.findOne({ email });
+
         if (user) {
-            return res.status(400).json({ success: false, message: 'User already exists with this email' });
+            return res.status(400).json({
+                success: false,
+                message: 'User already exists with this email'
+            });
         }
+
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
+
         user = new User({
             name,
             email,
             password: hashedPassword,
             role: role || 'customer'
         });
+
         await user.save();
-        res.status(201).json({ success: true, message: 'User registered successfully!' });
+
+        res.status(201).json({
+            success: true,
+            message: 'User registered successfully!'
+        });
+
     } catch (err) {
-        console.error('Register Error:', err); // 👈 Render Logs এ error দেখার জন্য যোগ করা হয়েছে
-        res.status(500).json({ success: false, error: err.message });
+
+        console.error("REGISTER ERROR");
+        console.error(err);
+
+        res.status(500).json({
+            success: false,
+            message: err.message
+        });
+
     }
 });
 
-// 2. LOGIN API
+
+// =====================================================
+// LOGIN
+// =====================================================
+
 router.post('/login', async (req, res) => {
+
     try {
+
         const { email, password } = req.body;
 
         const user = await User.findOne({ email });
+
         if (!user) {
-            return res.status(400).json({ success: false, message: 'Invalid Email or Password' });
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid Email or Password'
+            });
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
+
         if (!isMatch) {
-            return res.status(400).json({ success: false, message: 'Invalid Email or Password' });
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid Email or Password'
+            });
         }
 
-        if (user.subscription && user.subscription.active && user.subscription.endDate) {
-            if (new Date() > new Date(user.subscription.endDate)) {
-                user.subscription.active = false;
-            }
+        if (
+            user.subscription &&
+            user.subscription.active &&
+            user.subscription.endDate &&
+            new Date() > new Date(user.subscription.endDate)
+        ) {
+            user.subscription.active = false;
         }
 
         user.lastLogin = new Date();
         await user.save();
 
-        const payload = {
+        const token = jwt.sign({
             userId: user._id,
             role: user.role,
             subscription: user.subscription
-        };
-
-        const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' });
+        }, JWT_SECRET, {
+            expiresIn: '7d'
+        });
 
         res.json({
             success: true,
@@ -85,75 +143,176 @@ router.post('/login', async (req, res) => {
                 pendingRequests: user.pendingRequests
             }
         });
+
     } catch (err) {
-        console.error('Login Error:', err); // 👈 Render Logs এ error দেখার জন্য যোগ করা হয়েছে
-        res.status(500).json({ success: false, error: err.message });
+
+        console.error("LOGIN ERROR");
+        console.error(err);
+
+        res.status(500).json({
+            success: false,
+            message: err.message
+        });
+
     }
+
 });
 
-// 3. FORGOT PASSWORD API (ইমেইলে রিসেট লিংক পাঠানো)
+
+// =====================================================
+// FORGOT PASSWORD
+// =====================================================
+
 router.post('/forgot-password', async (req, res) => {
+
     try {
+
         const { email } = req.body;
+
         const user = await User.findOne({ email });
+
         if (!user) {
-            return res.status(404).json({ success: false, message: 'User with this email does not exist' });
+
+            return res.status(404).json({
+                success: false,
+                message: 'Email address not found.'
+            });
+
         }
 
-        // র‍্যান্ডম টোকেন তৈরি করা এবং মেয়াদ ১৫ মিনিট সেট করা
-        const resetToken = crypto.randomBytes(32).toString('hex');
-        user.resetPasswordToken = resetToken;
-        user.resetPasswordExpires = Date.now() + 15 * 60 * 1000; // ১৫ মিনিট
+        const token = crypto.randomBytes(32).toString('hex');
+
+        user.resetPasswordToken = token;
+        user.resetPasswordExpires = Date.now() + 15 * 60 * 1000;
+
         await user.save();
 
-        // 💡 এখানে লিংক আপডেট করা হয়েছে (reset-password.html এর বদলে login.html)
-        const resetUrl = `${req.protocol}://${req.get('host')}/login.html?token=${resetToken}&email=${user.email}`;
+        const resetLink =
+            `${req.protocol}://${req.get('host')}/login.html?token=${token}&email=${user.email}`;
 
-        const mailOptions = {
-            from: process.env.EMAIL_USER,
+        console.log("Reset Link:");
+        console.log(resetLink);
+
+        await transporter.sendMail({
+
+            from: `"TopMCQ" <${process.env.EMAIL_USER}>`,
             to: user.email,
-            subject: 'Password Reset Request - TopMCQ',
-            html: `<p>You requested a password reset.</p>
-                   <p>Click this <a href="${resetUrl}">link</a> to reset your password. This link is valid for 15 minutes.</p>`
-        };
+            subject: "Reset Your Password",
 
-        await transporter.sendMail(mailOptions);
-        res.status(200).json({ success: true, message: 'Password reset link sent to your email.' });
+            html: `
+                <h2>Password Reset</h2>
+
+                <p>Hello ${user.name},</p>
+
+                <p>Click below to reset your password.</p>
+
+                <a href="${resetLink}">
+                    Reset Password
+                </a>
+
+                <br><br>
+
+                <small>This link expires in 15 minutes.</small>
+            `
+
+        });
+
+        console.log("✅ Email Sent Successfully");
+
+        res.json({
+            success: true,
+            message: "Password reset link has been sent."
+        });
+
     } catch (err) {
-        console.error('Forgot Password Error:', err); // 👈 Render Logs এ error দেখার জন্য যোগ করা হয়েছে
-        res.status(500).json({ success: false, error: err.message });
+
+        console.error("==============================");
+        console.error("FORGOT PASSWORD ERROR");
+        console.error("==============================");
+        console.error(err);
+        console.error("==============================");
+
+        res.status(500).json({
+            success: false,
+            message: err.message,
+            stack: err.stack
+        });
+
     }
+
 });
 
-// 4. RESET PASSWORD API (নতুন পাসওয়ার্ড সেভ করা)
+
+// =====================================================
+// RESET PASSWORD
+// =====================================================
+
 router.post('/reset-password', async (req, res) => {
+
     try {
-        const { email, token, newPassword } = req.body;
+
+        const {
+            email,
+            token,
+            newPassword
+        } = req.body;
 
         const user = await User.findOne({
+
             email,
+
             resetPasswordToken: token,
-            resetPasswordExpires: { $gt: Date.now() } // টোকেনের মেয়াদ আছে কিনা চেক
+
+            resetPasswordExpires: {
+                $gt: Date.now()
+            }
+
         });
 
         if (!user) {
-            return res.status(400).json({ success: false, message: 'Invalid or expired password reset token' });
+
+            return res.status(400).json({
+
+                success: false,
+
+                message: "Invalid or expired reset token."
+
+            });
+
         }
 
-        // নতুন পাসওয়ার্ড হ্যাশ করে সেভ করা
         const salt = await bcrypt.genSalt(10);
+
         user.password = await bcrypt.hash(newPassword, salt);
 
-        // টোকেন ক্লিয়ার করে দেওয়া যাতে পুনরায় ব্যবহার করা না যায়
         user.resetPasswordToken = undefined;
         user.resetPasswordExpires = undefined;
+
         await user.save();
 
-        res.status(200).json({ success: true, message: 'Password has been reset successfully!' });
+        res.json({
+
+            success: true,
+
+            message: "Password reset successful."
+
+        });
+
     } catch (err) {
-        console.error('Reset Password Error:', err); // 👈 Render Logs এ error দেখার জন্য যোগ করা হয়েছে
-        res.status(500).json({ success: false, error: err.message });
+
+        console.error("RESET PASSWORD ERROR");
+        console.error(err);
+
+        res.status(500).json({
+
+            success: false,
+
+            message: err.message
+
+        });
+
     }
+
 });
 
 module.exports = router;
