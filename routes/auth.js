@@ -3,18 +3,48 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
-const { Resend } = require('resend'); // Render-এ SMTP পোর্ট (587/465) ব্লক থাকায় Nodemailer/Gmail এর বদলে Resend এর HTTP API ব্যবহার করা হচ্ছে
+const brevo = require('@getbrevo/brevo'); // Render-এ SMTP পোর্ট ব্লক থাকায় Nodemailer/Gmail এর বদলে Brevo এর HTTP API ব্যবহার করা হচ্ছে
 const User = require('../models/User');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey_quizapp';
 
 // =======================
-// EMAIL CONFIG (Resend)
+// EMAIL CONFIG (Brevo)
 // =======================
 
-console.log("RESEND_API_KEY:", process.env.RESEND_API_KEY ? "Loaded ✅" : "Missing ❌");
+console.log("BREVO_API_KEY:", process.env.BREVO_API_KEY ? "Loaded ✅" : "Missing ❌");
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const brevoClient = new brevo.TransactionalEmailsApi();
+brevoClient.setApiKey(brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY);
+
+async function sendResetEmail(user, resetLink) {
+    const emailPayload = new brevo.SendSmtpEmail();
+
+    emailPayload.sender = {
+        name: "TopMCQ",
+        // 💡 Brevo-তে যে ইমেইল দিয়ে অ্যাকাউন্ট খুলেছেন এবং verify করেছেন, সেটাই এখানে বসান
+        email: process.env.BREVO_SENDER_EMAIL
+    };
+    emailPayload.to = [{ email: user.email, name: user.name }];
+    emailPayload.subject = "Reset Your Password";
+    emailPayload.htmlContent = `
+        <h2>Password Reset</h2>
+
+        <p>Hello ${user.name},</p>
+
+        <p>Click below to reset your password.</p>
+
+        <a href="${resetLink}">
+            Reset Password
+        </a>
+
+        <br><br>
+
+        <small>This link expires in 15 minutes.</small>
+    `;
+
+    return brevoClient.sendTransacEmail(emailPayload);
+}
 
 
 // =====================================================
@@ -176,34 +206,14 @@ router.post('/forgot-password', async (req, res) => {
         console.log("Reset Link:");
         console.log(resetLink);
 
-        // 💡 প্রথমে টেস্টের জন্য Resend-এর ডিফল্ট 'onboarding@resend.dev' ব্যবহার করা হচ্ছে।
-        // নিজের ডোমেইন Resend-এ ভেরিফাই করা থাকলে সেটা দিয়ে বদলে নিন, যেমন: 'TopMCQ <noreply@yourdomain.com>'
-        const { data, error } = await resend.emails.send({
-            from: 'TopMCQ <onboarding@resend.dev>',
-            to: user.email,
-            subject: "Reset Your Password",
-            html: `
-                <h2>Password Reset</h2>
-
-                <p>Hello ${user.name},</p>
-
-                <p>Click below to reset your password.</p>
-
-                <a href="${resetLink}">
-                    Reset Password
-                </a>
-
-                <br><br>
-
-                <small>This link expires in 15 minutes.</small>
-            `
-        });
-
-        if (error) {
+        try {
+            await sendResetEmail(user, resetLink);
+            console.log("✅ Email Sent Successfully via Brevo");
+        } catch (emailErr) {
             console.error("==============================");
-            console.error("RESEND EMAIL ERROR");
+            console.error("BREVO EMAIL ERROR");
             console.error("==============================");
-            console.error(error);
+            console.error(emailErr);
             console.error("==============================");
 
             return res.status(500).json({
@@ -211,8 +221,6 @@ router.post('/forgot-password', async (req, res) => {
                 message: 'Failed to send reset email'
             });
         }
-
-        console.log("✅ Email Sent Successfully:", data);
 
         res.json({
             success: true,
