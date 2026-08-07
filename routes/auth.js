@@ -3,47 +3,46 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
-const brevo = require('@getbrevo/brevo'); // Render-এ SMTP পোর্ট ব্লক থাকায় Nodemailer/Gmail এর বদলে Brevo এর HTTP API ব্যবহার করা হচ্ছে
+const { BrevoClient } = require('@getbrevo/brevo'); // Render-এ SMTP পোর্ট ব্লক থাকায় Nodemailer/Gmail এর বদলে Brevo এর HTTP API ব্যবহার করা হচ্ছে
 const User = require('../models/User');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey_quizapp';
 
 // =======================
-// EMAIL CONFIG (Brevo)
+// EMAIL CONFIG (Brevo v6.x SDK)
 // =======================
 
 console.log("BREVO_API_KEY:", process.env.BREVO_API_KEY ? "Loaded ✅" : "Missing ❌");
 
-const brevoClient = new brevo.TransactionalEmailsApi();
-brevoClient.setApiKey(brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY);
+const brevoClient = new BrevoClient({
+    apiKey: process.env.BREVO_API_KEY
+});
 
 async function sendResetEmail(user, resetLink) {
-    const emailPayload = new brevo.SendSmtpEmail();
+    return brevoClient.transactionalEmails.sendTransacEmail({
+        sender: {
+            name: "TopMCQ",
+            // 💡 Brevo-তে যে ইমেইল দিয়ে অ্যাকাউন্ট খুলেছেন এবং verify করেছেন, সেটাই এখানে বসান
+            email: process.env.BREVO_SENDER_EMAIL
+        },
+        to: [{ email: user.email, name: user.name }],
+        subject: "Reset Your Password",
+        htmlContent: `
+            <h2>Password Reset</h2>
 
-    emailPayload.sender = {
-        name: "TopMCQ",
-        // 💡 Brevo-তে যে ইমেইল দিয়ে অ্যাকাউন্ট খুলেছেন এবং verify করেছেন, সেটাই এখানে বসান
-        email: process.env.BREVO_SENDER_EMAIL
-    };
-    emailPayload.to = [{ email: user.email, name: user.name }];
-    emailPayload.subject = "Reset Your Password";
-    emailPayload.htmlContent = `
-        <h2>Password Reset</h2>
+            <p>Hello ${user.name},</p>
 
-        <p>Hello ${user.name},</p>
+            <p>Click below to reset your password.</p>
 
-        <p>Click below to reset your password.</p>
+            <a href="${resetLink}">
+                Reset Password
+            </a>
 
-        <a href="${resetLink}">
-            Reset Password
-        </a>
+            <br><br>
 
-        <br><br>
-
-        <small>This link expires in 15 minutes.</small>
-    `;
-
-    return brevoClient.sendTransacEmail(emailPayload);
+            <small>This link expires in 15 minutes.</small>
+        `
+    });
 }
 
 
