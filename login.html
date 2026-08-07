@@ -311,7 +311,12 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, password })
                 });
+                
+                // Logging raw response for debugging
+                console.log("Login API Response Status:", res.status);
+                
                 const data = await res.json();
+                console.log("Login API Response Data:", data);
 
                 if (res.ok && (data.success || data.token)) {
                     localStorage.setItem('token', data.token);
@@ -332,7 +337,8 @@
                     showAlert(data.message || "Invalid login credentials!");
                 }
             } catch (err) {
-                showAlert("Server connection error!");
+                console.error("Login Fetch Error:", err);
+                showAlert("Server connection error! Check console for details.");
             } finally {
                 btn.innerHTML = `<i class="fa-solid fa-right-to-bracket"></i> Login`;
                 btn.disabled = false;
@@ -363,7 +369,10 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name, email, password })
                 });
+                
+                console.log("Register API Response Status:", res.status);
                 const data = await res.json();
+                console.log("Register API Response Data:", data);
 
                 if (res.ok && (data.success || data.token)) {
                     showAlert("Registration successful! Please login below.", true);
@@ -373,7 +382,8 @@
                     showAlert(data.message || "Registration failed!");
                 }
             } catch (err) {
-                showAlert("Server connection error!");
+                console.error("Register Fetch Error:", err);
+                showAlert("Server connection error! Check console for details.");
             } finally {
                 btn.innerHTML = `<i class="fa-solid fa-user-plus"></i> Register Account`;
                 btn.disabled = false;
@@ -390,12 +400,17 @@
             const email = document.getElementById('forgotEmail').value;
 
             try {
+                console.log("Sending Forgot Password request for:", email);
+                
                 const res = await fetch(`${AUTH_API}/forgot-password`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email })
                 });
+                
+                console.log("Forgot Password API Response Status:", res.status);
                 const data = await res.json();
+                console.log("Forgot Password API Response Data:", data);
 
                 if (res.ok && data.success) {
                     showAlert(data.message || "Reset link sent to your email!", true);
@@ -404,7 +419,8 @@
                     showAlert(data.message || "Something went wrong!");
                 }
             } catch (err) {
-                showAlert("Server connection error!");
+                console.error("Forgot Password Fetch Error:", err);
+                showAlert("Server connection error! Check console for details.");
             } finally {
                 btn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> Send Reset Link`;
                 btn.disabled = false;
@@ -432,7 +448,10 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email: resetEmail, token: resetToken, newPassword })
                 });
+                
+                console.log("Reset Password API Response Status:", res.status);
                 const data = await res.json();
+                console.log("Reset Password API Response Data:", data);
 
                 if (res.ok && data.success) {
                     showAlert("Password reset successful! Redirecting to login...", true);
@@ -445,7 +464,8 @@
                     showAlert(data.message || "Invalid or expired token!");
                 }
             } catch (err) {
-                showAlert("Server connection error!");
+                console.error("Reset Password Fetch Error:", err);
+                showAlert("Server connection error! Check console for details.");
             } finally {
                 btn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Save New Password`;
                 btn.disabled = false;
