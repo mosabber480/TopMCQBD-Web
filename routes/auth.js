@@ -3,45 +3,18 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend'); // Render-এ SMTP পোর্ট (587/465) ব্লক থাকায় Nodemailer/Gmail এর বদলে Resend এর HTTP API ব্যবহার করা হচ্ছে
 const User = require('../models/User');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey_quizapp';
 
 // =======================
-// EMAIL CONFIG
+// EMAIL CONFIG (Resend)
 // =======================
 
-console.log("EMAIL_USER:", process.env.EMAIL_USER);
-console.log("EMAIL_PASS:", process.env.EMAIL_PASS ? "Loaded ✅" : "Missing ❌");
+console.log("RESEND_API_KEY:", process.env.RESEND_API_KEY ? "Loaded ✅" : "Missing ❌");
 
-// Updated Transporter config for Render ENETUNREACH issue
-const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 587,
-    secure: false, // true for 465, false for other ports
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-    },
-    tls: {
-        rejectUnauthorized: false
-    },
-    family: 4, // <-- এই লাইনটি যুক্ত করা হলো (Forces IPv4 to avoid ENETUNREACH)
-    connectionTimeout: 20000,
-    greetingTimeout: 20000,
-    socketTimeout: 20000
-});
-
-// Verify Gmail Connection
-transporter.verify((error, success) => {
-    if (error) {
-        console.error("❌ EMAIL VERIFY ERROR");
-        console.error(error);
-    } else {
-        console.log("✅ Gmail Server Ready");
-    }
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 
 // =====================================================
@@ -198,17 +171,17 @@ router.post('/forgot-password', async (req, res) => {
         await user.save();
 
         const resetLink =
-            `${req.protocol}://${req.get('host')}/login.html?token=${token}&email=${user.email}`;
+            `${req.protocol}://${req.get('host')}/login.html?token=${token}&email=${encodeURIComponent(user.email)}`;
 
         console.log("Reset Link:");
         console.log(resetLink);
 
-        await transporter.sendMail({
-
-            from: `"TopMCQ" <${process.env.EMAIL_USER}>`,
+        // 💡 প্রথমে টেস্টের জন্য Resend-এর ডিফল্ট 'onboarding@resend.dev' ব্যবহার করা হচ্ছে।
+        // নিজের ডোমেইন Resend-এ ভেরিফাই করা থাকলে সেটা দিয়ে বদলে নিন, যেমন: 'TopMCQ <noreply@yourdomain.com>'
+        const { data, error } = await resend.emails.send({
+            from: 'TopMCQ <onboarding@resend.dev>',
             to: user.email,
             subject: "Reset Your Password",
-
             html: `
                 <h2>Password Reset</h2>
 
@@ -224,10 +197,22 @@ router.post('/forgot-password', async (req, res) => {
 
                 <small>This link expires in 15 minutes.</small>
             `
-
         });
 
-        console.log("✅ Email Sent Successfully");
+        if (error) {
+            console.error("==============================");
+            console.error("RESEND EMAIL ERROR");
+            console.error("==============================");
+            console.error(error);
+            console.error("==============================");
+
+            return res.status(500).json({
+                success: false,
+                message: 'Failed to send reset email'
+            });
+        }
+
+        console.log("✅ Email Sent Successfully:", data);
 
         res.json({
             success: true,
