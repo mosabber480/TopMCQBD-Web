@@ -1,4 +1,4 @@
-window.MENU_API_URL = window.MENU_API_URL || 'https://mosabber-quiz-app.onrender.com/api/sidebar-config';
+window.MENU_API_URL = window.MENU_API_URL || 'https://topmcqbd.onrender.com/api/sidebar-config';
 
 // Function to Render Global Admin LEFT SIDEBAR Navigation
 async function renderAdminNavbar() {

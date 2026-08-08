@@ -1,5 +1,5 @@
 // Global API Endpoint for Layout Configuration
-const LAYOUT_API_URL = 'https://mosabber-quiz-app.onrender.com/api/layout-config';
+const LAYOUT_API_URL = 'https://topmcqbd.onrender.com/api/layout-config';
 
 // Smart URL Helper Function (Fixes internal vs external links issue)
 function formatURL(url) {

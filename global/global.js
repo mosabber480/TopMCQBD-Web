@@ -1,5 +1,5 @@
 // High-Performance Cached Global Layout Renderer
-const LAYOUT_API_URL = 'https://mosabber-quiz-app.onrender.com/api/layout-config';
+const LAYOUT_API_URL = 'https://topmcqbd.onrender.com/api/layout-config';
 
 // 1. DEFAULT ANNOUNCEMENT CONFIGURATION
 const DEFAULT_ANNOUNCEMENT = {

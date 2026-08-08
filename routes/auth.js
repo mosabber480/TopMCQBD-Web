@@ -21,7 +21,8 @@ const brevoClient = new BrevoClient({
 async function sendResetEmail(user, resetLink) {
     return brevoClient.transactionalEmails.sendTransacEmail({
         sender: {
-            name: "TopMCQ",
+            // 💡 নাম পরিবর্তন করে TopMCQBD করা হলো
+            name: "TopMCQBD",
             // 💡 Brevo-তে যে ইমেইল দিয়ে অ্যাকাউন্ট খুলেছেন এবং verify করেছেন, সেটাই এখানে বসান
             email: process.env.BREVO_SENDER_EMAIL
         },
@@ -199,8 +200,9 @@ router.post('/forgot-password', async (req, res) => {
 
         await user.save();
 
-        const resetLink =
-            `${req.protocol}://${req.get('host')}/login.html?token=${token}&email=${encodeURIComponent(user.email)}`;
+        // 💡 ইউজার ফ্রন্টএন্ড ডোমেইন হার্ডকোড করে দেওয়া হলো
+        const FRONTEND_URL = 'https://topmcqbd.pages.dev';
+        const resetLink = `${FRONTEND_URL}/login.html?token=${token}&email=${encodeURIComponent(user.email)}`;
 
         console.log("Reset Link:");
         console.log(resetLink);
