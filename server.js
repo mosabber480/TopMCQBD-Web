@@ -13,7 +13,7 @@ const authRoutes = require('./routes/auth');
 const homeConfigRoutes = require('./routes/homeConfigRoutes'); 
 const layoutRoutes = require('./routes/layoutRoutes');
 const adminSidebarRoutes = require('./routes/adminSidebarRoutes');
-const policyRoutes = require('./routes/policyRoutes'); // নতুন পলিসি রাউট যুক্ত করা হলো
+const policyRoutes = require('./routes/policyRoutes');
 const { verifyToken, authorizeRoles } = require('./middleware/authMiddleware');
 
 const app = express();
@@ -21,7 +21,30 @@ const app = express();
 // Middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors());
+
+// Dynamic CORS Setup for Cloudflare Pages & Custom Domains
+const allowedOrigins = [
+  'https://topmcqbd.pages.dev',
+  'https://topmcqbd.com',
+  'http://localhost:3000',
+  'http://localhost:5000'
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1 || origin.endsWith('.pages.dev')) {
+      return callback(null, true);
+    } else {
+      return callback(null, true); // Fallback allow for dynamic origins if needed
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-access-token']
+}));
 
 // ------------------- STATIC FILES & ROUTING SETUP -------------------
 // 1. Project Root Directory (Serves HTML, CSS, JS directly from main folder)
@@ -36,12 +59,12 @@ app.use('/api/auth', authRoutes);
 app.use('/api/home-config', homeConfigRoutes);
 app.use('/api', layoutRoutes); 
 app.use('/api', adminSidebarRoutes);
-app.use('/api/policy', policyRoutes); // পলিসি API রাউট কানেক্ট করা হলো
+app.use('/api/policy', policyRoutes);
 
 // Multer Setup for Memory Storage
 const upload = multer({ storage: multer.memoryStorage() });
 
-// MongoDB Connection Setup (Updated with new credentials and database name)
+// MongoDB Connection Setup
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://mosabber480_db_user:EScirLEzwgQVVNaB@ac-472re4l-shard-00-00.3ajdj0u.mongodb.net:27017,ac-472re4l-shard-00-01.3ajdj0u.mongodb.net:27017,ac-472re4l-shard-00-02.3ajdj0u.mongodb.net:27017/TopMCQBD_DB?ssl=true&replicaSet=atlas-wzdf1e-shard-0&authSource=admin&appName=Mosabber';
 const PORT = process.env.PORT || 5000;
 
@@ -161,7 +184,7 @@ app.post('/api/users/request-plan', verifyToken, async (req, res) => {
         const pendingCount = user.pendingRequests.filter(r => r.status === 'pending').length;
 
         if (action === 'renew' && !isSubActive) {
-            return res.status(400).json({ success: false, message: 'আপনার কোনো Active subscription নেই, তাই Renew request পাঠানো যাবে ঘন।' });
+            return res.status(400).json({ success: false, message: 'আপনার কোনো Active subscription নেই, তাই Renew request পাঠানো যাবে না।' });
         }
         if (action !== 'renew' && isSubActive) {
             return res.status(400).json({ success: false, message: 'আপনার Active subscription আছে। শুধু মেয়াদ বাড়ানোর (renew) রিকোয়েস্ট পাঠানো যাবে।' });
@@ -253,7 +276,7 @@ app.delete('/api/users/:userId/pending-requests/:requestId', verifyToken, author
     }
 });
 
-// 💡 Approve a specific Pending Request (Owner and Admin only)
+// Approve a specific Pending Request (Owner and Admin only)
 app.put('/api/users/:userId/pending-requests/:requestId/approve', verifyToken, authorizeRoles('owner', 'admin'), async (req, res) => {
     try {
         const user = await User.findById(req.params.userId);
@@ -273,14 +296,13 @@ app.put('/api/users/:userId/pending-requests/:requestId/approve', verifyToken, a
         const baseDate = hasFutureEndDate ? new Date(user.subscription.endDate) : now;
         const newEndDate = addPlanDuration(baseDate, request.plan);
 
-        // 💡 NEW LOGIC: Stacking plan name ONLY if currently active & not expired
         let newPlanName = request.plan;
         if (hasFutureEndDate && user.subscription.plan && user.subscription.plan !== 'none') {
             newPlanName = user.subscription.plan + ' + ' + request.plan;
         }
 
         user.subscription = {
-            plan: newPlanName, // 💡 Updated string
+            plan: newPlanName,
             startDate: (user.subscription && user.subscription.startDate && hasFutureEndDate) ? user.subscription.startDate : now,
             endDate: newEndDate,
             active: true

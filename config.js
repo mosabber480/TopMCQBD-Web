@@ -1,5 +1,17 @@
-// Global API Endpoint for Layout Configuration
-const LAYOUT_API_URL = 'https://topmcqbd.onrender.com/api/layout-config';
+// Centralized API Configuration
+const CONFIG = {
+  // MongoDB Database 1 (TopMCQBD_DB - Paid) Services
+  ADMIN_API: "https://mosabber-quiz-app.onrender.com/api",
+  MAIN_PAID_API: "https://topmcqbd.onrender.com/api",
+  PAGES_API: "https://topmcqbdpages.onrender.com/api",
+  WRITTEN_API: "https://topmcqbd-model-written.onrender.com/api",
+
+  // MongoDB Database 2 (Free Database) Service
+  FREE_MCQS_API: "https://topmcqbd-free-mcqs.onrender.com/api"
+};
+
+// Global API Endpoint for Layout Configuration (Using CONFIG Object)
+const LAYOUT_API_URL = `${CONFIG.MAIN_PAID_API}/layout-config`;
 
 // Smart URL Helper Function (Fixes internal vs external links issue)
 function formatURL(url) {

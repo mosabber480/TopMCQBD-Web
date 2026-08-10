@@ -8,26 +8,26 @@ const MONGO_URI = process.env.MONGO_URI;
 
 const initialUsers = [
     {
-        name: 'Main Owner',
-        email: 'owner@example.com',
+        name: 'Mosabber Owner',
+        email: 'mosabber.tech@gmail.com',
         password: 'ownerpassword123',
         role: 'owner'
     },
     {
-        name: 'Admin One',
-        email: 'admin1@example.com',
-        password: 'adminpassword1',
+        name: 'Mosabber Admin',
+        email: 'mosabber480@gmail.com',
+        password: 'adminpassword123',
         role: 'admin'
     },
     {
-        name: 'Admin Two',
-        email: 'admin2@example.com',
-        password: 'adminpassword2',
+        name: 'Mosabber Admin',
+        email: 'mosabber16376@gmail.com',
+        password: 'adminpassword123',
         role: 'admin'
     },
     {
         name: 'General User',
-        email: 'user@example.com',
+        email: 'user@gmail.com',
         password: 'userpassword123',
         role: 'customer'
     }
