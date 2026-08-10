@@ -10,8 +10,8 @@ const CONFIG = {
   FREE_MCQS_API: "https://topmcqbd-free-mcqs.onrender.com/api"
 };
 
-// Global API Endpoint for Layout Configuration (Using CONFIG Object)
-const LAYOUT_API_URL = `${CONFIG.MAIN_PAID_API}/layout-config`;
+// Global API Endpoint for Layout Configuration (Attached safely to window object)
+window.LAYOUT_API_URL = window.LAYOUT_API_URL || `${CONFIG.MAIN_PAID_API}/layout-config`;
 
 // Smart URL Helper Function (Fixes internal vs external links issue)
 function formatURL(url) {
@@ -38,7 +38,7 @@ async function loadLayoutConfig() {
     let config = cachedData ? JSON.parse(cachedData) : null;
 
     try {
-        const res = await fetch(LAYOUT_API_URL);
+        const res = await fetch(window.LAYOUT_API_URL);
         if (res.ok) {
             const freshData = await res.json();
             if (!config || JSON.stringify(config) !== JSON.stringify(freshData)) {

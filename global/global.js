@@ -1,5 +1,5 @@
-// Dynamic Multi-Server Layout API URL Fallback Logic
-const LAYOUT_API_URL = window.LAYOUT_API_URL || (typeof CONFIG !== 'undefined' ? `${CONFIG.MAIN_PAID_API}/layout-config` : 'https://topmcqbd.onrender.com/api/layout-config');
+// Dynamic Multi-Server Layout API URL Fallback Logic (Attached safely to window)
+window.LAYOUT_API_URL = window.LAYOUT_API_URL || (typeof CONFIG !== 'undefined' ? `${CONFIG.MAIN_PAID_API}/layout-config` : 'https://topmcqbd.onrender.com/api/layout-config');
 
 // 1. DEFAULT ANNOUNCEMENT CONFIGURATION
 const DEFAULT_ANNOUNCEMENT = {
@@ -87,8 +87,7 @@ function getAuthRedirectLink() {
 }
 
 async function renderGlobalLayout() {
-    // Dynamic cache key based on the active API URL
-    const cacheKey = 'layout_config_data_' + btoa(LAYOUT_API_URL).slice(0, 10);
+    const cacheKey = 'layout_config_data_' + btoa(window.LAYOUT_API_URL).slice(0, 10);
     let cachedData = localStorage.getItem(cacheKey) || localStorage.getItem('layout_config_data');
     let config = cachedData ? JSON.parse(cachedData) : null;
 
@@ -98,7 +97,7 @@ async function renderGlobalLayout() {
     applyLayoutToDOM(config);
 
     try {
-        const response = await fetch(LAYOUT_API_URL);
+        const response = await fetch(window.LAYOUT_API_URL);
         if (response.ok) {
             const freshData = await response.json();
             if (!freshData.announcement || !freshData.announcement.text) freshData.announcement = DEFAULT_ANNOUNCEMENT;
@@ -154,7 +153,6 @@ function applyLayoutToDOM(data) {
             logoUrlFormatted = '../' + logoUrlFormatted;
         }
 
-        // 💡 ডায়নামিক লজিক: সেভ করা নাম থাকলে সেটাই দেখাবে, না থাকলে ডিফল্ট 'TopMCQBD' দেখাবে
         let siteTitleText = (h.siteTitle && h.siteTitle.trim()) ? h.siteTitle.trim() : 'TopMCQBD';
 
         let logoHTML = logoUrlFormatted 
