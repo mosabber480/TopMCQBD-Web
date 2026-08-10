@@ -1,5 +1,5 @@
-// High-Performance Cached Global Layout Renderer
-const LAYOUT_API_URL = `${CONFIG.MAIN_PAID_API}/layout-config`;
+// Dynamic Multi-Server Layout API URL Fallback Logic
+const LAYOUT_API_URL = window.LAYOUT_API_URL || (typeof CONFIG !== 'undefined' ? `${CONFIG.MAIN_PAID_API}/layout-config` : 'https://topmcqbd.onrender.com/api/layout-config');
 
 // 1. DEFAULT ANNOUNCEMENT CONFIGURATION
 const DEFAULT_ANNOUNCEMENT = {
@@ -78,13 +78,18 @@ function getAuthRedirectLink() {
     if (!token) return 'login.html'; 
     try {
         const user = JSON.parse(userStr || '{}');
-        if (user && (user.role === 'owner' || user.role === 'admin')) return `${CONFIG.ADMIN_API.replace('/api', '')}/admin/dashboard.html`;
+        if (user && (user.role === 'owner' || user.role === 'admin')) {
+            const adminBase = typeof CONFIG !== 'undefined' ? CONFIG.ADMIN_API.replace('/api', '') : '';
+            return `${adminBase}/admin/dashboard.html`;
+        }
     } catch(e){}
     return 'profile.html';
 }
 
 async function renderGlobalLayout() {
-    let cachedData = localStorage.getItem('layout_config_data');
+    // Dynamic cache key based on the active API URL
+    const cacheKey = 'layout_config_data_' + btoa(LAYOUT_API_URL).slice(0, 10);
+    let cachedData = localStorage.getItem(cacheKey) || localStorage.getItem('layout_config_data');
     let config = cachedData ? JSON.parse(cachedData) : null;
 
     if (!config) config = { announcement: DEFAULT_ANNOUNCEMENT };
@@ -98,6 +103,7 @@ async function renderGlobalLayout() {
             const freshData = await response.json();
             if (!freshData.announcement || !freshData.announcement.text) freshData.announcement = DEFAULT_ANNOUNCEMENT;
             if (JSON.stringify(config) !== JSON.stringify(freshData)) {
+                localStorage.setItem(cacheKey, JSON.stringify(freshData));
                 localStorage.setItem('layout_config_data', JSON.stringify(freshData));
                 applyLayoutToDOM(freshData);
             }
