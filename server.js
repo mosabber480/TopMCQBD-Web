@@ -41,8 +41,8 @@ app.use('/api/policy', policyRoutes); // পলিসি API রাউট কা
 // Multer Setup for Memory Storage
 const upload = multer({ storage: multer.memoryStorage() });
 
-// MongoDB Connection Setup
-const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://admin:password@cluster0.mongodb.net/quizDB';
+// MongoDB Connection Setup (Updated with new credentials and database name)
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://mosabber480_db_user:EScirLEzwgQVVNaB@ac-472re4l-shard-00-00.3ajdj0u.mongodb.net:27017,ac-472re4l-shard-00-01.3ajdj0u.mongodb.net:27017,ac-472re4l-shard-00-02.3ajdj0u.mongodb.net:27017/TopMCQBD_DB?ssl=true&replicaSet=atlas-wzdf1e-shard-0&authSource=admin&appName=Mosabber';
 const PORT = process.env.PORT || 5000;
 
 mongoose.connect(MONGO_URI)
