@@ -154,9 +154,12 @@ function applyLayoutToDOM(data) {
             logoUrlFormatted = '../' + logoUrlFormatted;
         }
 
+        // 💡 সাইট টাইটেল না থাকলে উভয় ক্ষেত্রে ডিফল্ট 'TopMCQBD' ব্যবহার করা হবে
+        let siteTitleText = h.siteTitle ? h.siteTitle.trim() : 'TopMCQBD';
+
         let logoHTML = logoUrlFormatted 
-            ? `<img src="${logoUrlFormatted}" alt="${h.siteTitle || 'TopMCQ'}">` 
-            : `<i class="fa-solid fa-book-open" style="color:var(--primary);"></i> ${h.siteTitle || 'TopMCQ'}`;
+            ? `<img src="${logoUrlFormatted}" alt="${siteTitleText}">` 
+            : `<i class="fa-solid fa-book-open" style="color:var(--primary);"></i> ${siteTitleText}`;
 
         let navItemsHTML = '';
         if (h.menus && h.menus.length > 0) {
@@ -316,7 +319,7 @@ function applyLayoutToDOM(data) {
         }).join('');
 
         let hasLinks = c.links && c.links.length > 0;
-        let copyTextValue = c.text !== undefined ? c.text : '© ' + new Date().getFullYear() + ' TopMCQ. All rights reserved.';
+        let copyTextValue = c.text !== undefined ? c.text : '© ' + new Date().getFullYear() + ' TopMCQBD. All rights reserved.';
         let textAlignmentClass = hasLinks ? 'text-left' : 'text-center';
         let copyTextHtml = copyTextValue ? `<div class="footer-copy-text ${textAlignmentClass}">${copyTextValue}</div>` : '';
 
