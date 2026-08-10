@@ -328,7 +328,8 @@
                     
                     setTimeout(() => {
                         if (data.user && (data.user.role === 'owner' || data.user.role === 'admin')) {
-                            window.location.href = `${CONFIG.ADMIN_API.replace('/api', '')}/admin/dashboard.html`;
+                            // 💡 একই ডোমেইনের অ্যাডমিন ড্যাশবোর্ডে রিডিরেক্ট করা হলো
+                            window.location.href = 'admin/dashboard.html';
                         } else {
                             window.location.href = 'profile.html';
                         }
