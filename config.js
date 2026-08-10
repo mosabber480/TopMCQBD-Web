@@ -118,11 +118,14 @@ function renderLayout(data) {
                 }).join('');
             }
 
+            // 💡 টাইটেল ফাঁকা থাকলে বাধ্যতামূলক 'TopMCQBD' ব্যবহার করা হবে
+            let siteTitleText = (h.siteTitle && h.siteTitle.trim()) ? h.siteTitle.trim() : 'TopMCQBD';
+
             headerContainer.innerHTML = `
                 <div class="header-wrapper">
                     <div class="site-logo">
                         <a href="${homePath}">
-                            ${h.logoUrl ? `<img src="${h.logoUrl}" alt="${h.siteTitle || 'Logo'}">` : `<h2>${h.siteTitle || 'TopMCQ'}</h2>`}
+                            ${h.logoUrl ? `<img src="${h.logoUrl}" alt="${siteTitleText}">` : `<h2>${siteTitleText}</h2>`}
                         </a>
                     </div>
 
@@ -184,7 +187,7 @@ function renderLayout(data) {
                         </div>
                     </div>
                     <div class="footer-bottom">
-                        <p>${c.text || '© 2026 TopMCQ. All rights reserved.'}</p>
+                        <p>${c.text || '© 2026 TopMCQBD. All rights reserved.'}</p>
                     </div>
                 </div>
             `;

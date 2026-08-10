@@ -154,8 +154,8 @@ function applyLayoutToDOM(data) {
             logoUrlFormatted = '../' + logoUrlFormatted;
         }
 
-        // 💡 সাইট টাইটেল না থাকলে উভয় ক্ষেত্রে ডিফল্ট 'TopMCQBD' ব্যবহার করা হবে
-        let siteTitleText = h.siteTitle ? h.siteTitle.trim() : 'TopMCQBD';
+        // 💡 ডায়নামিক লজিক: সেভ করা নাম থাকলে সেটাই দেখাবে, না থাকলে ডিফল্ট 'TopMCQBD' দেখাবে
+        let siteTitleText = (h.siteTitle && h.siteTitle.trim()) ? h.siteTitle.trim() : 'TopMCQBD';
 
         let logoHTML = logoUrlFormatted 
             ? `<img src="${logoUrlFormatted}" alt="${siteTitleText}">` 
