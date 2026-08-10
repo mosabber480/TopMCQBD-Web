@@ -40,7 +40,6 @@
 
         .alert-container-inner { max-width: 1300px !important; width: 100%; padding: 0 25px; display: flex; justify-content: space-between; align-items: center; }
         
-        /* max-width & margin: auto সরানো হয়েছে যাতে global.css এর sidebar layout ঠিকমতো কাজ করে */
         .container { margin-top: 30px; margin-bottom: 30px; padding: 0 25px 25px 25px; }
         
         .section-card { background: white; padding: 25px 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid #e2e8f0; }
@@ -84,7 +83,6 @@
         .sub-menu-list { margin-top: 10px; padding-left: 15px; border-left: 3px solid #17a2b8; margin-bottom: 12px; }
         .sub-menu-item { background: #ffffff; padding: 8px 12px; border: 1px dashed #cbd5e1; border-radius: 5px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
 
-        /* ====== ARROWS & DRAG HANDLES ====== */
         .drag-handle, .col-drag-handle {
             cursor: grab; color: #475569; background: #f1f5f9; border: 1px solid #cbd5e1;
             border-radius: 4px; padding: 4px 6px; font-size: 13px; margin-right: 6px;
@@ -98,7 +96,6 @@
         .btn-arrow { background: #e2e8f0; border: none; color: #475569; padding: 2px 6px; border-radius: 3px; font-size: 10px; cursor: pointer; line-height: 1; transition: background 0.2s ease; }
         .btn-arrow:hover { background: #007bff; color: #ffffff; }
 
-        /* ====== DRAG & DROP WITH 2PX INDICATORS ====== */
         .col-drag-item, .footer-drag-item, .copy-drag-item { position: relative; transition: opacity 0.15s ease; }
         .dragging-col, .dragging { opacity: 0.4; background: #eef6ff !important; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         
@@ -111,7 +108,6 @@
             background-color: var(--primary); z-index: 100; border-radius: 2px;
         }
 
-        /* ====== REORDER ACTION BAR ====== */
         #reorder-action-bar {
             display: none; position: fixed; bottom: 0; left: 0; width: 100%; background: #2c3e50;
             padding: 15px; border-top: 4px solid #ffc107; z-index: 9999; box-shadow: 0 -5px 15px rgba(0,0,0,0.2);
@@ -122,7 +118,6 @@
 </head>
 <body>
 
-    <!-- Dynamic Admin Global Navigation Bar Container -->
     <div id="admin-navbar-container"></div>
 
     <div class="container">
@@ -162,11 +157,12 @@
     </div>
 
     <!-- GLOBAL JS LINKS -->
+    <script src="../config.js"></script>
     <script src="../global/global.js"></script>
     <script src="../global/admin-global.js"></script>
 
     <script>
-        window.LAYOUT_API_URL = window.LAYOUT_API_URL || 'https://topmcqbd.onrender.com/api/layout-config';
+        window.LAYOUT_API_URL = `${CONFIG.ADMIN_API}/layout-config`;
 
         let announceInfo = null;
         let headerInfo = null;
@@ -207,7 +203,6 @@
             }
         }
 
-        /* ================= TRIGGER GLOBAL SAVE BAR ================= */
         function triggerGlobalSaveBar() {
             hasPendingReorder = true;
             document.getElementById('reorder-action-bar').style.display = 'flex';
@@ -225,10 +220,9 @@
 
         function cancelReorder() {
             hideGlobalSaveBar();
-            fetchLayoutConfig(); // Refetch to discard changes
+            fetchLayoutConfig();
         }
 
-        /* ================= 3. FOOTER SECTION RENDER ================= */
         function renderFooterSectionCards() {
             const container = document.getElementById('footer-container');
             container.innerHTML = '';
@@ -328,7 +322,6 @@
             initFooterDragAndDrop();
         }
 
-        /* --- Footer ARROWS Logic --- */
         function moveColumnPosition(colIdx, direction) {
             const cols = footerInfo.columns;
             if (direction === 'up' && colIdx > 0) {
@@ -374,7 +367,6 @@
             }
         }
 
-        /* --- YOUR ORIGINAL COLUMN DRAG AND DROP (Updated with 2px line) --- */
         function initColumnDragAndDrop() {
             const colItems = document.querySelectorAll('.col-drag-item');
             let draggedColIdx = null;
@@ -426,7 +418,6 @@
             });
         }
 
-        /* --- YOUR ORIGINAL FOOTER LINKS DRAG AND DROP (Updated with 2px line) --- */
         function initFooterDragAndDrop() {
             const container = document.getElementById('footer-container');
             const dragContainers = container.querySelectorAll('.footer-drag-container');
@@ -467,8 +458,6 @@
             });
         }
 
-
-        /* --- Footer Column Functions --- */
         function addNewColumn(type) {
             if(type === 'info') {
                 footerInfo.columns.push({ type: 'info', title: 'নতুন তথ্য কলাম', text: 'সাইট সম্পর্কিত তথ্য...', fb: '', yt: '', wa: '', tw: '', tg: '', ln: '' });
@@ -626,8 +615,6 @@
             }
         }
 
-
-        /* ================= 4. COPYRIGHT SECTION (WITH LINKS) ================= */
         function renderCopyrightSection() {
             const container = document.getElementById('copyright-container');
             container.innerHTML = '';
@@ -635,7 +622,6 @@
             const copyText = copyrightInfo.text || '';
             const linksList = copyrightInfo.links || [];
 
-            // Text Area
             let textHtml = '';
             if (copyText) {
                 textHtml = `
@@ -659,7 +645,6 @@
                 `;
             }
 
-            // Links Area
             let linksHtml = '';
             if (linksList.length > 0) {
                 linksHtml = `
@@ -696,7 +681,6 @@
             initCopyDragAndDrop();
         }
 
-        /* --- YOUR ORIGINAL COPYRIGHT DRAG AND DROP (Updated with 2px line) --- */
         function initCopyDragAndDrop() {
             const container = document.getElementById('copyright-container');
             const dragContainer = container.querySelector('.copy-drag-container');
@@ -738,7 +722,7 @@
         }
 
         function editCopyrightTextInline(isNew = false) {
-            renderCopyrightSection(); // ensure clean state
+            renderCopyrightSection();
             const textWrapper = document.getElementById('copyright-text-wrapper');
             const currentValue = copyrightInfo.text || '';
             
@@ -860,7 +844,6 @@
             }
         }
 
-        /* ================= SAVE ALL LAYOUT CONFIG TO BACKEND ================= */
         async function saveLayoutConfig() {
             const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
             if (!token) return showTopAlert('অনুগ্রহ করে লগইন করুন!', 'warning'); 
@@ -880,7 +863,6 @@
             }
         }
 
-        // DOMContentLoaded Event Listener
         document.addEventListener('DOMContentLoaded', () => { fetchLayoutConfig(); });
     </script>
 </body>

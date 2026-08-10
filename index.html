@@ -14,7 +14,7 @@
     <style>
         /* ভেরিয়েবল ডিফাইন করা হলো যাতে এরর না আসে */
         :root {
-            --secondary-dark: #27ae60; /* এখানে আপনার পছন্দমতো ডার্ক কালার কোডটি দিতে পারেন */
+            --secondary-dark: #27ae60;
         }
 
         /* এখানে শুধু index.html পেজের নিজস্ব স্লাইডার বা কন্টেন্টের CSS থাকবে */
@@ -110,10 +110,11 @@
 
     <footer id="global-footer"></footer>
 
+    <script src="config.js"></script>
     <script src="global/global.js"></script>
 
     <script>
-        const API_URL = 'https://topmcqbd.onrender.com/api/home-config';
+        const API_URL = `${CONFIG.MAIN_PAID_API}/home-config`;
         let slideIndex = 0;
         let slideInterval;
 
@@ -136,7 +137,6 @@
                     }
                     metaDesc.content = data.seoDescription;
                 }
-                // --------------------------------------
 
                 const sliderWrapper = document.getElementById('slider-wrapper');
                 const sliderDots = document.getElementById('slider-dots');

@@ -137,15 +137,17 @@
     <!-- DYNAMIC FOOTER CONTAINER -->
     <footer id="global-footer"></footer>
 
-    <!-- GLOBAL JS LINK -->
+    <!-- GLOBAL JS LINKS -->
+    <script src="config.js"></script>
     <script src="global/global.js"></script>
 
     <!-- Fetch Policy Script -->
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             try {
-                const API_BASE = 'https://topmcqbd.onrender.com';
-                const response = await fetch(`${API_BASE}/api/policy/get`);
+                // Pages Server (topmcqbdpages.onrender.com) API Link
+                const API_BASE = CONFIG.PAGES_API;
+                const response = await fetch(`${API_BASE}/policy/get`);
                 
                 if (response.ok) {
                     const data = await response.json();

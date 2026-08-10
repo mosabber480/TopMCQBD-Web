@@ -46,7 +46,6 @@
             max-width: 1300px !important;
         }
 
-        /* max-width & margin: auto সরানো হয়েছে যাতে global.css এর sidebar layout ঠিকমতো কাজ করে */
         .container { margin-top: 30px; margin-bottom: 30px; padding: 0 25px 25px 25px; }
 
         .box { background: white; padding: 25px 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 25px; }
@@ -107,7 +106,6 @@
             cursor: grabbing;
         }
         
-        /* 2PX DROP INDICATOR LINE STYLES */
         .drag-over-top {
             border-top: 2px solid #007bff !important;
         }
@@ -174,7 +172,6 @@
                 <li>Loading Categories...</li>
             </ul>
 
-            <!-- SAVE & CANCEL BUTTONS AT THE BOTTOM OF CATEGORY TREE LIST -->
             <div id="categorySaveActionBar" class="bottom-action-bar" style="display:none;">
                 <button class="btn btn-submit" style="width:auto;" onclick="saveCategoryReorder()"><i class="fa-solid fa-floppy-disk"></i> Save Order</button>
                 <button class="btn btn-secondary" style="width:auto;" onclick="cancelCategoryReorder()"><i class="fa-solid fa-xmark"></i> Cancel</button>
@@ -216,7 +213,6 @@
                 <p style="color:#888;">Select a category above to view and edit questions.</p>
             </div>
 
-            <!-- SAVE & CANCEL BUTTONS AT THE BOTTOM OF EXISTING QUESTIONS CONTAINER -->
             <div id="questionsSaveActionBar" class="bottom-action-bar" style="display:none;">
                 <button class="btn btn-submit" style="width:auto;" onclick="saveQuestionsReorder()"><i class="fa-solid fa-floppy-disk"></i> Save Questions Order</button>
                 <button class="btn btn-secondary" style="width:auto;" onclick="cancelQuestionsReorder()"><i class="fa-solid fa-xmark"></i> Cancel</button>
@@ -246,13 +242,14 @@
     </div>
 
     <!-- GLOBAL JS LINKS -->
+    <script src="../config.js"></script>
     <script src="../global/global.js"></script>
     <script src="../global/admin-global.js"></script>
 
     <script>
         let mcqCount = 0;
-        const API_URL = 'https://mosabber-quiz-app.onrender.com/api/questions';
-        const CAT_API_URL = 'https://mosabber-quiz-app.onrender.com/api/categories';
+        const API_URL = `${CONFIG.ADMIN_API}/questions`;
+        const CAT_API_URL = `${CONFIG.ADMIN_API}/categories`;
 
         let categoryData = {};
         let loadedQuestions = [];
@@ -421,7 +418,6 @@
             onMainCategoryChange();
         }
 
-        /* --- CATEGORY ARROW & DRAG CONTROLS --- */
         function moveMainCatPosition(mIdx, direction) {
             const keys = Object.keys(categoryData);
             if ((direction === 'up' && mIdx > 0) || (direction === 'down' && mIdx < keys.length - 1)) {
@@ -485,7 +481,6 @@
                 el.classList.remove('drag-over-top', 'drag-over-bottom');
             };
 
-            // MAIN CATEGORY DRAG
             let draggedMainIdx = null;
             treeContainer.querySelectorAll('.main-cat-drag-item').forEach(item => {
                 item.addEventListener('dragstart', (e) => {
@@ -541,7 +536,6 @@
                 });
             });
 
-            // SUB CATEGORY DRAG
             treeContainer.querySelectorAll('.sub-cat-drag-item').forEach(item => {
                 let draggedSubIdx = null;
                 item.addEventListener('dragstart', (e) => {
@@ -597,7 +591,6 @@
                 });
             });
 
-            // TOPIC DRAG
             treeContainer.querySelectorAll('.topic-drag-item').forEach(item => {
                 let draggedTopicIdx = null;
                 item.addEventListener('dragstart', (e) => {
@@ -1005,7 +998,6 @@
             initQuestionsDragAndDrop();
         }
 
-        /* --- QUESTIONS ARROW & DRAG CONTROLS --- */
         function moveQuestionPosition(qIdx, direction) {
             if ((direction === 'up' && qIdx > 0) || (direction === 'down' && qIdx < loadedQuestions.length - 1)) {
                 const targetIdx = direction === 'up' ? qIdx - 1 : qIdx + 1;
@@ -1241,7 +1233,7 @@
             uploadBtn.disabled = true;
 
             try {
-                const res = await fetch('https://mosabber-quiz-app.onrender.com/api/questions/upload-csv', {
+                const res = await fetch(`${CONFIG.ADMIN_API}/questions/upload-csv`, {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${token}` },
                     body: formData

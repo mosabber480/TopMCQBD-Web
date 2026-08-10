@@ -40,7 +40,6 @@
             margin: 0 auto;
         }
 
-        /* Container exactly matching header/footer 1300px */
         .contact-container {
             max-width: 1300px;
             margin: 0 auto 60px auto;
@@ -50,7 +49,6 @@
             gap: 30px;
         }
 
-        /* Contact Info Cards */
         .contact-info-wrapper {
             display: flex;
             flex-direction: column;
@@ -87,7 +85,6 @@
             flex-shrink: 0;
         }
 
-        /* Icon Colors */
         .info-card.wa .info-icon { background: #dcfce7; color: #25d366; }
         .info-card.tg .info-icon { background: #e0f2fe; color: #0088cc; }
 
@@ -109,7 +106,6 @@
             color: var(--primary, #007bff);
         }
 
-        /* Contact Form Card */
         .contact-form-card {
             background: white;
             padding: 30px 28px;
@@ -329,11 +325,15 @@
     <!-- DYNAMIC FOOTER CONTAINER -->
     <footer id="global-footer"></footer>
 
-    <!-- GLOBAL JS LINK (Root level path for /pages files) -->
+    <!-- GLOBAL JS LINKS -->
+    <script src="config.js"></script>
     <script src="global/global.js"></script>
 
     <!-- CONTACT FORM HANDLER -->
     <script>
+        // Pages Server (topmcqbdpages.onrender.com) API Link
+        const API_BASE = CONFIG.PAGES_API;
+
         document.getElementById('contactForm').addEventListener('submit', function(e) {
             e.preventDefault();
             

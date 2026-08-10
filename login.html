@@ -228,12 +228,13 @@
         <footer id="global-footer"></footer>
     </div>
 
-    <!-- GLOBAL JS LINK (Root level path for /pages files) -->
+    <!-- GLOBAL JS LINKS -->
+    <script src="config.js"></script>
     <script src="global/global.js"></script>
 
     <script>
-        // 💡 API বেস আপডেট করা হলো
-        const AUTH_API = 'https://topmcqbd.onrender.com/api/auth';
+        // API Base for Main Paid Server Auth
+        const AUTH_API = `${CONFIG.MAIN_PAID_API}/auth`;
 
         // URL থেকে Token এবং Email বের করা (রিসেট লিংকের জন্য)
         const urlParams = new URLSearchParams(window.location.search);
@@ -288,7 +289,7 @@
             } else if (type === 'reset') {
                 document.getElementById('resetForm').style.display = 'block';
                 document.getElementById('formTitle').innerHTML = '<i class="fa-solid fa-key"></i> Set New Password';
-                document.getElementById('toggleMessage').style.display = 'none'; // রিসেট পেজে নিচের মেসেজটি দরকার নেই
+                document.getElementById('toggleMessage').style.display = 'none';
             } else {
                 document.getElementById('loginForm').style.display = 'block';
                 document.getElementById('formTitle').innerHTML = '<i class="fa-solid fa-lock"></i> Login to Account';
@@ -313,9 +314,7 @@
                     body: JSON.stringify({ email, password })
                 });
                 
-                // Logging raw response for debugging
                 console.log("Login API Response Status:", res.status);
-                
                 const data = await res.json();
                 console.log("Login API Response Data:", data);
 
@@ -329,8 +328,7 @@
                     
                     setTimeout(() => {
                         if (data.user && (data.user.role === 'owner' || data.user.role === 'admin')) {
-                            // 💡 অ্যাডমিন লগইন করলে অ্যাডমিন ডোমেইনে রিডিরেক্ট হবে
-                            window.location.href = 'https://mosabber-quiz-app.onrender.com/admin/dashboard.html';
+                            window.location.href = `${CONFIG.ADMIN_API.replace('/api', '')}/admin/dashboard.html`;
                         } else {
                             window.location.href = 'profile.html';
                         }
@@ -459,7 +457,6 @@
                     showAlert("Password reset successful! Redirecting to login...", true);
                     document.getElementById('resetForm').reset();
                     setTimeout(() => {
-                        // URL থেকে Token ক্লিন করে রিফ্রেশ করা হবে
                         window.location.href = 'login.html';
                     }, 2000);
                 } else {

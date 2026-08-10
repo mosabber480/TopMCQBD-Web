@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coming Soon - TopMCQ</title>
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- GLOBAL CSS LINK -->
+    <link rel="stylesheet" href="global/global.css">
+
+    <style>
+        .coming-soon-container { 
+            max-width: 1300px;
+            margin: 60px auto; 
+            padding: 0 20px; 
+            text-align: center;
+        }
+        .coming-soon-box { 
+            background: white; 
+            padding: 60px 30px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
+            border: 1px solid #e2e8f0; 
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .coming-soon-box h1 {
+            color: var(--primary, #007bff);
+            font-size: 32px;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        .coming-soon-box p {
+            color: #64748b;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- DYNAMIC GLOBAL LAYOUT CONTAINERS -->
+    <div id="global-announce-bar" style="display:none;"></div>
+    <header id="global-header"></header>
+
+    <main class="coming-soon-container">
+        <div class="coming-soon-box">
+            <i class="fa-solid fa-clock-rotate-left" style="font-size: 50px; color: var(--primary, #007bff); margin-bottom: 20px;"></i>
+            <h1>Coming Soon</h1>
+            <p>এই ফিচার বা পেজটির কাজ বর্তমানে চলমান রয়েছে। খুব শীঘ্রই এটি লাইভ চালু করা হবে।</p>
+        </div>
+    </main>
+
+    <!-- DYNAMIC FOOTER CONTAINER -->
+    <footer id="global-footer"></footer>
+
+    <!-- GLOBAL JS LINKS -->
+    <script src="config.js"></script>
+    <script src="global/global.js"></script>
+
+    <script>
+        // Dynamic API Base URL for Pages Server
+        const API_BASE = CONFIG.PAGES_API;
+    </script>
+</body>
+</html>

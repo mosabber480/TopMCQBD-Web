@@ -40,7 +40,6 @@
 
         .alert-container-inner { max-width: 1300px !important; width: 100%; padding: 0 25px; display: flex; justify-content: space-between; align-items: center; }
         
-        /* max-width & margin: auto সরানো হয়েছে যাতে global.css এর sidebar layout ঠিকমতো কাজ করে */
         .container { margin-top: 30px; margin-bottom: 30px; padding: 0 25px 25px 25px; }
         
         .section-card { background: white; padding: 25px 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid #e2e8f0; }
@@ -84,7 +83,6 @@
         .sub-menu-list { margin-top: 10px; padding-left: 15px; border-left: 3px solid #17a2b8; margin-bottom: 12px; }
         .sub-menu-item { background: #ffffff; padding: 8px 12px; border: 1px dashed #cbd5e1; border-radius: 5px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s ease; }
 
-        /* ====== ARROW & DRAG HANDLE ====== */
         .drag-handle {
             cursor: grab;
             color: #475569;
@@ -115,7 +113,6 @@
         .draggable-item { position: relative; transition: opacity 0.2s; }
         .draggable-item.dragging { opacity: 0.35; }
         
-        /* 2px Target Indicator Line */
         .drop-above::before {
             content: ''; position: absolute; top: -3px; left: 0; width: 100%; height: 3px;
             background-color: var(--primary); z-index: 100; border-radius: 2px;
@@ -125,7 +122,6 @@
             background-color: var(--primary); z-index: 100; border-radius: 2px;
         }
 
-        /* Reorder Save Action Bar */
         #reorder-action-bar {
             display: none;
             position: fixed;
@@ -192,7 +188,7 @@
 
     </div>
 
-    <!-- Drag & Drop Save Action Bar (CLEAN, NO ALERT ICON) -->
+    <!-- Drag & Drop Save Action Bar -->
     <div id="reorder-action-bar">
         <span style="color: #ffffff; font-weight: bold; font-size: 15px;">
             আপনি মেনু বা লিংকের ক্রম পরিবর্তন করেছেন। সেভ করতে বোতাম চাপুন।
@@ -202,11 +198,12 @@
     </div>
 
     <!-- GLOBAL JS LINKS -->
+    <script src="../config.js"></script>
     <script src="../global/global.js"></script>
     <script src="../global/admin-global.js"></script>
 
     <script>
-        window.LAYOUT_API_URL = window.LAYOUT_API_URL || 'https://topmcqbd.onrender.com/api/layout-config';
+        window.LAYOUT_API_URL = `${CONFIG.ADMIN_API}/layout-config`;
 
         let announceInfo = null;
         let headerInfo = null;
@@ -243,8 +240,6 @@
             }
         }
 
-        /* ================= DRAG AND DROP HANDLERS WITH NESTED BUBBLING PROTECTION ================= */
-        
         function dragStart(e, type, mIdx, idx2, idx3) {
             e.stopPropagation();
             
@@ -364,8 +359,6 @@
             dragData = null;
         }
 
-        /* ================= CLICK ARROW HANDLERS ================= */
-        
         function moveMainMenuPosition(mIdx, dir) {
             const list = headerInfo.menus;
             if (dir === 'up' && mIdx > 0) {
@@ -418,7 +411,6 @@
             }
         }
 
-        /* ================= SAVE TRIGGER ================= */
         function markAsReordered() {
             isMenuReordered = true;
             document.getElementById('reorder-action-bar').style.display = 'flex';
@@ -438,8 +430,6 @@
             await fetchLayoutConfig(); 
         }
 
-
-        /* ================= 1 & 2. BASIC HEADER FUNCTIONS ================= */
         function renderAnnounceSection() {
             const container = document.getElementById('announce-container');
             container.innerHTML = '';
@@ -556,8 +546,6 @@
             }
         }
 
-
-        /* ================= 2.4 MEGA MENU BUILDER ================= */
         function renderMegaMenuBuilder() {
             const container = document.getElementById('mega-menu-builder-container');
             container.innerHTML = '';
@@ -862,7 +850,6 @@
             renderMegaMenuBuilder(); 
         }
 
-        /* ================= 2.3 MAIN NAV MENU ================= */
         function renderHeaderMenuCards() {
             const container = document.getElementById('header-menu-container'); 
             document.getElementById('new-menu-form-box').innerHTML = ''; 
@@ -1160,8 +1147,6 @@
             renderHeaderMenuCards(); 
         }
 
-
-        /* ================= SAVE ALL ================= */
         async function saveLayoutConfig() {
             const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
             try {

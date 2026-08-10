@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const AdminSidebarConfig = require('../models/AdminSidebarConfig');
-const { verifyToken } = require('../middleware/authMiddleware');
+const { verifyToken, authorizeRoles } = require('../middleware/authMiddleware');
 
 // GET: Fetch Sidebar Configuration
 router.get('/sidebar-config', async (req, res) => {
@@ -16,8 +16,8 @@ router.get('/sidebar-config', async (req, res) => {
     }
 });
 
-// POST: Save/Update Sidebar Configuration (Protected Route)
-router.post('/sidebar-config', verifyToken, async (req, res) => {
+// POST: Save/Update Sidebar Configuration (Protected Route - Owner & Admin only)
+router.post('/sidebar-config', verifyToken, authorizeRoles('owner', 'admin'), async (req, res) => {
     try {
         const { menus } = req.body;
         let config = await AdminSidebarConfig.findOne();

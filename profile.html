@@ -238,7 +238,7 @@
                 </div>
                 <a href="index.html" class="btn-quiz"><i class="fa-solid fa-play"></i> Start Practice</a>
 
-                <!-- 💡 Payment History বক্স -->
+                <!-- Payment History বক্স -->
                 <div class="sub-box" id="paymentHistoryWrapper" style="display: none; margin-top: 15px;">
                     <h4 style="margin:0 0 10px 0; color:#007bff;"><i class="fa-solid fa-clock-rotate-left"></i> Payment History</h4>
                     <div id="pendingRequestsList"></div>
@@ -261,10 +261,12 @@
 
     <footer id="global-footer"></footer>
 
+    <!-- GLOBAL JS LINKS -->
+    <script src="config.js"></script>
     <script src="global/global.js"></script>
     <script>
-        // 💡 API বেস আপডেট করা হলো
-        const API_BASE = 'https://topmcqbd.onrender.com/api';
+        // API Base for Main Paid Server
+        const API_BASE = CONFIG.MAIN_PAID_API;
 
         let user = JSON.parse(localStorage.getItem('quiz_user') || localStorage.getItem('user'));
         const token = localStorage.getItem('quiz_token') || localStorage.getItem('token');
@@ -317,15 +319,13 @@
         }
 
         function methodLabel(method) {
-            return method === 'bkash' ? 'বিকাশ' : method === 'nagad' ? 'ন নগদ' : method;
+            return method === 'bkash' ? 'বিকাশ' : method === 'nagad' ? 'নগদ' : method;
         }
 
-        // 💡 UPDATED: Current Plan Logic - Read directly from Database
         function getDisplayPlan(userObj) {
             const sub = userObj.subscription || {};
             
             if (sub.active && sub.endDate && new Date(sub.endDate) > new Date()) {
-                // Return exactly what the database has saved
                 return planLabel(sub.plan);
             }
             return 'None';

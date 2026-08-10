@@ -38,7 +38,6 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--light); color: #333; }
 
-        /* max-width & margin: auto সরানো হয়েছে যাতে global.css এর sidebar layout ঠিকমতো কাজ করে */
         .container { margin-top: 30px; margin-bottom: 30px; padding: 0 25px 25px 25px; }
         
         .section-card { background: white; padding: 25px 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid #e2e8f0; }
@@ -51,7 +50,6 @@
         .section-title { font-size: 20px; color: var(--dark); margin-bottom: 15px; display: flex; align-items: center; gap: 10px; padding-bottom: 10px; border-bottom: 1px dashed #e2e8f0; }
         .sub-header-title { font-size: 16px; font-weight: bold; color: var(--dark); margin: 15px 0 10px 0; display: flex; align-items: center; gap: 8px; }
 
-        /* READ-ONLY CARD STYLE */
         .read-box { 
             background: #fdfdfd; 
             border: 1px solid #ddd; 
@@ -74,7 +72,6 @@
         .read-meta { font-size: 13px; color: #555; margin-bottom: 4px; }
         .read-preview-text { font-size: 13px; color: #777; margin-bottom: 10px; }
 
-        /* ITEM BOX STYLE */
         .item-box { background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #cbd5e1; }
         
         .form-group { margin-bottom: 12px; }
@@ -87,7 +84,6 @@
 
         .card-actions { display: flex; gap: 10px; margin-top: 15px; }
 
-        /* BUTTON STYLES */
         .btn { padding: 8px 16px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
         .btn-warning { background-color: #ffc107; color: #212529; }
         .btn-warning:hover { background-color: #e0a800; }
@@ -105,7 +101,6 @@
         .btn-remove { background: #dc3545; color: white; border: none; padding: 10px 16px; border-radius: 5px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; }
         .btn-remove:hover { background: #c82333; }
 
-        /* DRAG AND DROP & ARROW CONTROLS STYLES */
         .draggable-box {
             cursor: move;
             transition: transform 0.15s ease, opacity 0.15s ease, border-top 0.1s ease, border-bottom 0.1s ease;
@@ -124,7 +119,6 @@
             cursor: grabbing;
         }
 
-        /* 2PX DROP INDICATOR LINE STYLES */
         .drag-over-top {
             border-top: 2px solid #007bff !important;
         }
@@ -187,7 +181,6 @@
         <div class="section-card demo-card" id="card-demo">
             <div class="section-title"><i class="fa-solid fa-pen-to-square" style="color: var(--secondary);"></i> ২. ফ্রি ডেমো কুইজ (Demo Quizzes)</div>
             
-            <!-- DEMO HEADER TITLE/SUBTITLE SECTION -->
             <div id="demo-header-container"></div>
 
             <div class="sub-header-title"><i class="fa-solid fa-list"></i> ডেমো কুইজের তালিকা:</div>
@@ -207,7 +200,6 @@
         <div class="section-card package-card" id="card-package">
             <div class="section-title"><i class="fa-solid fa-box-open" style="color: var(--warning);"></i> ৩. প্রিপারেশন প্যাকেজ (Packages)</div>
             
-            <!-- PACKAGE HEADER TITLE/SUBTITLE SECTION -->
             <div id="package-header-container"></div>
 
             <div class="sub-header-title"><i class="fa-solid fa-list"></i> প্যাকেজের তালিকা:</div>
@@ -231,13 +223,14 @@
     </div>
 
     <!-- GLOBAL JS LINKS -->
+    <script src="../config.js"></script>
     <script src="../global/global.js"></script>
     <script src="../global/admin-global.js"></script>
 
     <script>
-        const CONFIG_API_URL = 'https://topmcqbd.onrender.com/api/home-config';
+        const CONFIG_API_URL = `${CONFIG.ADMIN_API}/home-config`;
         
-        let seoInfo = { title: '', description: '' }; // SEO Object
+        let seoInfo = { title: '', description: '' };
         let sliderDataList = [];
         let demoDataList = [];
         let packageDataList = [];
@@ -282,7 +275,6 @@
                 const res = await fetch(CONFIG_API_URL);
                 const data = await res.json();
 
-                // Load SEO Info
                 seoInfo.title = data.seoTitle || '';
                 seoInfo.description = data.seoDescription || '';
 
@@ -315,7 +307,6 @@
             } catch (err) { console.error("Config fetch failed:", err); }
         }
 
-        /* ================= 0. SEO SECTION HANDLER ================= */
         function renderSeoSection() {
             const container = document.getElementById(`seo-read-container`);
             container.innerHTML = '';
@@ -385,7 +376,6 @@
             }
         }
 
-        /* ================= SECTION HEADER (TITLE & SUBTITLE) HANDLER ================= */
         function renderHeaderSection(type) {
             const container = document.getElementById(`${type}-header-container`);
             const info = type === 'demo' ? demoHeaderInfo : packageHeaderInfo;
@@ -468,7 +458,6 @@
             }
         }
 
-        /* ================= 1. SLIDERS SECTION ================= */
         function renderSliderReadCards() {
             const container = document.getElementById('slider-read-container');
             container.innerHTML = '';
@@ -612,7 +601,6 @@
             if (autoShowSave) showSaveBtn('slider');
         }
 
-        /* ================= 2. DEMO QUIZZES SECTION ================= */
         function renderDemoReadCards() {
             const container = document.getElementById('demo-read-container');
             container.innerHTML = '';
@@ -731,7 +719,6 @@
             if (autoShowSave) showSaveBtn('demo');
         }
 
-        /* ================= 3. PACKAGES SECTION ================= */
         function renderPackageReadCards() {
             const container = document.getElementById('package-read-container');
             container.innerHTML = '';
@@ -867,7 +854,6 @@
             }
         }
 
-        /* ================= 4. MISSION & GOALS SECTION HANDLER ================= */
         function renderMissionSection() {
             const container = document.getElementById('mission-container');
             container.innerHTML = '';
@@ -983,7 +969,6 @@
             }
         }
 
-        /* ================= DRAG AND DROP & ACTION BAR HELPERS ================= */
         function updateSectionActionBar(type) {
             const actionBar = document.getElementById(`${type}-action-bar`);
             let isReordered = false;
@@ -1083,7 +1068,6 @@
             });
         }
 
-        /* ================= SAVE ALL CONFIG TO BACKEND ================= */
         async function saveHomeConfig() {
             const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
             if (!token) { 

@@ -172,7 +172,7 @@
         
         #final-score { font-size: 26px; color: #2c3e50; font-weight: bold; display: inline-block; margin-top: 5px; }
 
-        /* 💡 PROGRESS BAR STYLES */
+        /* PROGRESS BAR STYLES */
         .quiz-progress-bar-container {
             width: 100%;
             max-width: 600px;
@@ -386,7 +386,8 @@
     <!-- DYNAMIC FOOTER CONTAINER -->
     <footer id="global-footer"></footer>
 
-    <!-- GLOBAL JS LINK (Root level path for /pages files) -->
+    <!-- GLOBAL JS LINKS -->
+    <script src="config.js"></script>
     <script src="global/global.js"></script>
 
     <!-- QUIZ ENGINE SCRIPT -->
@@ -394,7 +395,7 @@
         const urlParams = new URLSearchParams(window.location.search);
         const currentCategory = urlParams.get('category');
 
-        const API_BASE = 'https://topmcqbd.onrender.com/api';
+        const API_BASE = CONFIG.MAIN_PAID_API;
         const API_URL = currentCategory 
             ? `${API_BASE}/questions?category=${encodeURIComponent(currentCategory)}`
             : null;
@@ -449,7 +450,6 @@
             return letters[index] || index;
         }
 
-        // Toggle Event Listeners
         toggleAnswer.addEventListener('change', updateVisibility);
         toggleExplanation.addEventListener('change', updateVisibility);
         toggleColor.addEventListener('change', updateOptionColors);
@@ -464,12 +464,10 @@
             }
         });
 
-        // READ MODE EVENT LISTENER
         toggleRead.addEventListener('change', () => {
             isReadMode = toggleRead.checked;
             
             if (isReadMode) {
-                // Disable Time and Score switches visually and functionally
                 toggleTime.disabled = true;
                 toggleScore.disabled = true;
                 toggleTime.checked = false;
@@ -477,32 +475,26 @@
                 document.getElementById('time-switch-container').style.opacity = '0.5';
                 document.getElementById('score-switch-container').style.opacity = '0.5';
                 
-                // Hide floating boards
                 timerBoardBox.style.display = "none";
                 scoreBoardBox.style.display = "none";
                 if (timerInterval) clearInterval(timerInterval);
                 
-                // Enable Color and Explanation, Disable Correct Answer text
                 toggleColor.checked = true;
                 toggleExplanation.checked = true;
                 toggleAnswer.checked = false;
                 
-                // Re-render UI to display as reading material
                 renderQuizUI();
             } else {
-                // Enable Time and Score switches
                 toggleTime.disabled = false;
                 toggleScore.disabled = false;
-                toggleScore.checked = true; // Default back to showing score
+                toggleScore.checked = true;
                 document.getElementById('time-switch-container').style.opacity = '1';
                 document.getElementById('score-switch-container').style.opacity = '1';
                 
-                // Reset quiz to normal practice mode
                 resetQuiz();
             }
         });
 
-        // 💡 Tooltip Logic setup (Removed onclick popup logic)
         function setupProgressTooltip(elem, text) {
             elem.onmouseenter = (e) => {
                 progressTooltip.style.display = 'block';
@@ -519,7 +511,6 @@
             };
         }
 
-        // 💡 UPDATE PROGRESS BAR FUNCTION
         function updateProgressBar() {
             const total = displayQuestions.length;
             if (total === 0 || isReadMode) {
@@ -551,7 +542,6 @@
             setupProgressTooltip(progressUnanswered, `উত্তর দেওয়া হয়নি: ${Math.round(unansweredPct)}%`);
         }
 
-        // Authentication and Subscription Access Guard
         async function initQuizAccess() {
             const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
 
@@ -614,7 +604,6 @@
                 const correctAnsIdx = typeof currentQuestion.ans !== 'undefined' ? currentQuestion.ans : currentQuestion.correctAnswer;
                 const allButtons = qBlock.querySelectorAll('.quiz-option-btn');
 
-                // Clear previous colors
                 allButtons.forEach(btn => {
                     btn.classList.remove('correct', 'incorrect', 'neutral-selected');
                 });
@@ -761,7 +750,6 @@
                 startIndexOffset = start;
             }
 
-            // Handle Score & Time Visibility
             scoreBoardBox.style.display = (toggleScore.checked && !isReadMode) ? "block" : "none";
 
             if (toggleTime.checked && !isReadMode) {
@@ -824,7 +812,6 @@
                 quizWrapper.appendChild(qBlock);
             });
 
-            // Reset scores internally when range is changed
             score = 0;
             correctCount = 0;
             incorrectCount = 0;

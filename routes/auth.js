@@ -3,7 +3,7 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
-const { BrevoClient } = require('@getbrevo/brevo'); // Render-এ SMTP পোর্ট ব্লক থাকায় Nodemailer/Gmail এর বদলে Brevo এর HTTP API ব্যবহার করা হচ্ছে
+const { BrevoClient } = require('@getbrevo/brevo');
 const User = require('../models/User');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey_quizapp';
@@ -21,9 +21,7 @@ const brevoClient = new BrevoClient({
 async function sendResetEmail(user, resetLink) {
     return brevoClient.transactionalEmails.sendTransacEmail({
         sender: {
-            // 💡 নাম পরিবর্তন করে TopMCQBD করা হলো
             name: "TopMCQBD",
-            // 💡 Brevo-তে যে ইমেইল দিয়ে অ্যাকাউন্ট খুলেছেন এবং verify করেছেন, সেটাই এখানে বসান
             email: process.env.BREVO_SENDER_EMAIL
         },
         to: [{ email: user.email, name: user.name }],
@@ -53,7 +51,6 @@ async function sendResetEmail(user, resetLink) {
 
 router.post('/register', async (req, res) => {
     try {
-
         const { name, email, password, role } = req.body;
 
         let user = await User.findOne({ email });
@@ -83,7 +80,6 @@ router.post('/register', async (req, res) => {
         });
 
     } catch (err) {
-
         console.error("REGISTER ERROR");
         console.error(err);
 
@@ -91,7 +87,6 @@ router.post('/register', async (req, res) => {
             success: false,
             message: err.message
         });
-
     }
 });
 
@@ -101,9 +96,7 @@ router.post('/register', async (req, res) => {
 // =====================================================
 
 router.post('/login', async (req, res) => {
-
     try {
-
         const { email, password } = req.body;
 
         const user = await User.findOne({ email });
@@ -158,7 +151,6 @@ router.post('/login', async (req, res) => {
         });
 
     } catch (err) {
-
         console.error("LOGIN ERROR");
         console.error(err);
 
@@ -166,9 +158,7 @@ router.post('/login', async (req, res) => {
             success: false,
             message: err.message
         });
-
     }
-
 });
 
 
@@ -177,20 +167,16 @@ router.post('/login', async (req, res) => {
 // =====================================================
 
 router.post('/forgot-password', async (req, res) => {
-
     try {
-
         const { email } = req.body;
 
         const user = await User.findOne({ email });
 
         if (!user) {
-
             return res.status(404).json({
                 success: false,
                 message: 'Email address not found.'
             });
-
         }
 
         const token = crypto.randomBytes(32).toString('hex');
@@ -200,8 +186,8 @@ router.post('/forgot-password', async (req, res) => {
 
         await user.save();
 
-        // 💡 ইউজার ফ্রন্টএন্ড ডোমেইন হার্ডকোড করে দেওয়া হলো
-        const FRONTEND_URL = 'https://topmcqbd.pages.dev';
+        // 💡 FRONTEND_URL এনভায়রনমেন্ট ভেরিয়েবল থেকে ডায়নামিক করা হলো
+        const FRONTEND_URL = process.env.FRONTEND_URL || 'https://topmcqbd.pages.dev';
         const resetLink = `${FRONTEND_URL}/login.html?token=${token}&email=${encodeURIComponent(user.email)}`;
 
         console.log("Reset Link:");
@@ -229,7 +215,6 @@ router.post('/forgot-password', async (req, res) => {
         });
 
     } catch (err) {
-
         console.error("==============================");
         console.error("FORGOT PASSWORD ERROR");
         console.error("==============================");
@@ -241,9 +226,7 @@ router.post('/forgot-password', async (req, res) => {
             message: err.message,
             stack: err.stack
         });
-
     }
-
 });
 
 
@@ -252,9 +235,7 @@ router.post('/forgot-password', async (req, res) => {
 // =====================================================
 
 router.post('/reset-password', async (req, res) => {
-
     try {
-
         const {
             email,
             token,
@@ -262,27 +243,18 @@ router.post('/reset-password', async (req, res) => {
         } = req.body;
 
         const user = await User.findOne({
-
             email,
-
             resetPasswordToken: token,
-
             resetPasswordExpires: {
                 $gt: Date.now()
             }
-
         });
 
         if (!user) {
-
             return res.status(400).json({
-
                 success: false,
-
                 message: "Invalid or expired reset token."
-
             });
-
         }
 
         const salt = await bcrypt.genSalt(10);
@@ -295,28 +267,19 @@ router.post('/reset-password', async (req, res) => {
         await user.save();
 
         res.json({
-
             success: true,
-
             message: "Password reset successful."
-
         });
 
     } catch (err) {
-
         console.error("RESET PASSWORD ERROR");
         console.error(err);
 
         res.status(500).json({
-
             success: false,
-
             message: err.message
-
         });
-
     }
-
 });
 
 module.exports = router;

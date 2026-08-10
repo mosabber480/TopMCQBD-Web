@@ -1,4 +1,4 @@
-window.MENU_API_URL = window.MENU_API_URL || 'https://topmcqbd.onrender.com/api/sidebar-config';
+window.MENU_API_URL = window.MENU_API_URL || `${CONFIG.ADMIN_API}/sidebar-config`;
 
 // Function to Render Global Admin LEFT SIDEBAR Navigation
 async function renderAdminNavbar() {
@@ -231,7 +231,7 @@ function toggleSidebar() {
                     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
                     background: rgba(0, 0, 0, 0.55); display: flex; align-items: center; justify-content: center;
                     z-index: 99999; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease;
-                    backdrop-filter: blur(4px); /* ব্যাকগ্রাউন্ড ব্লার ইফেক্ট */
+                    backdrop-filter: blur(4px);
                 }
                 .logout-modal-overlay.active { opacity: 1; visibility: visible; }
                 .logout-modal {
@@ -275,13 +275,12 @@ function toggleSidebar() {
     });
 })();
 
-// সেন্ট্রালাইজড লগআউট ফাংশন (যেটা সাইডবারের বাটনে ক্লিক করলে কল হয়)
+// সেন্ট্রালাইজড লগআউট ফাংশন
 function logout() {
     const modal = document.getElementById('adminLogoutModal');
     if (modal) {
-        modal.classList.add('active'); // মডেল ওপেন করা
+        modal.classList.add('active');
     } else {
-        // ফলব্যাক অপশন
         confirmAdminLogout(); 
     }
 }
@@ -298,7 +297,7 @@ window.confirmAdminLogout = function() {
     localStorage.removeItem('user');
     localStorage.removeItem('quiz_token');
     localStorage.removeItem('quiz_user');
-    localStorage.removeItem('cached_sidebar_menus'); // ক্যাশ মেনু ডিলিট করা
+    localStorage.removeItem('cached_sidebar_menus');
     window.location.replace('../login.html');
 };
 

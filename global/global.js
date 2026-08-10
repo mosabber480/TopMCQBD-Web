@@ -1,5 +1,5 @@
 // High-Performance Cached Global Layout Renderer
-const LAYOUT_API_URL = 'https://topmcqbd.onrender.com/api/layout-config';
+const LAYOUT_API_URL = `${CONFIG.MAIN_PAID_API}/layout-config`;
 
 // 1. DEFAULT ANNOUNCEMENT CONFIGURATION
 const DEFAULT_ANNOUNCEMENT = {
@@ -78,7 +78,7 @@ function getAuthRedirectLink() {
     if (!token) return 'login.html'; 
     try {
         const user = JSON.parse(userStr || '{}');
-        if (user && (user.role === 'owner' || user.role === 'admin')) return 'admin/dashboard.html';
+        if (user && (user.role === 'owner' || user.role === 'admin')) return `${CONFIG.ADMIN_API.replace('/api', '')}/admin/dashboard.html`;
     } catch(e){}
     return 'profile.html';
 }
@@ -334,25 +334,20 @@ function applyLayoutToDOM(data) {
     }
 }
 
-// Function: Mobile Navigation Toggles (💡 JS DYNAMIC PADDING CALCULATION)
 function initMobileNav() {
     const toggleBtn = document.getElementById('mobile-toggle-btn');
     const siteNav = document.getElementById('site-nav');
     const header = document.getElementById('global-header');
 
-    // 💡 ফাংশন: স্ক্রল হলে ডায়নামিক প্যাডিং অ্যাড করা
     function updateNavState() {
         if (siteNav && siteNav.classList.contains('active')) {
             const headerHeight = header ? header.offsetHeight : 65;
             const availableHeight = window.innerHeight - headerHeight;
             siteNav.style.maxHeight = availableHeight + 'px';
-            
-            // 💡 কন্টেন্ট কতটুকু জায়গা নিচ্ছে তা চেক করার জন্য আগে প্যাডিং রিসেট করা হচ্ছে
             siteNav.style.paddingBottom = '20px';
             
-            // যদি কন্টেন্টের হাইট এভেইলেবল হাইটের চেয়ে বেশি হয়, তার মানে স্ক্রল হচ্ছে
             if (siteNav.scrollHeight > availableHeight) {
-                siteNav.style.paddingBottom = '120px'; // স্ক্রল হলে নিচের বারের জন্য এক্সট্রা প্যাডিং
+                siteNav.style.paddingBottom = '120px';
             }
         }
     }
@@ -365,13 +360,13 @@ function initMobileNav() {
             
             if (siteNav.classList.contains('active')) {
                 if(icon) icon.className = 'fa-solid fa-xmark';
-                document.body.style.overflow = 'hidden'; // Lock Body Scroll
-                updateNavState(); // 💡 ডায়নামিক হাইট ও প্যাডিং আপডেট
+                document.body.style.overflow = 'hidden';
+                updateNavState();
             } else {
                 if(icon) icon.className = 'fa-solid fa-bars';
                 document.body.style.overflow = '';
-                siteNav.style.maxHeight = ''; // Reset
-                siteNav.style.paddingBottom = ''; // Reset
+                siteNav.style.maxHeight = '';
+                siteNav.style.paddingBottom = '';
             }
         };
 
@@ -383,8 +378,8 @@ function initMobileNav() {
                 const icon = toggleBtn.querySelector('i');
                 if (icon) icon.className = 'fa-solid fa-bars';
                 document.body.style.overflow = '';
-                siteNav.style.maxHeight = ''; // Reset
-                siteNav.style.paddingBottom = ''; // Reset
+                siteNav.style.maxHeight = '';
+                siteNav.style.paddingBottom = '';
             }
         };
 
@@ -396,8 +391,6 @@ function initMobileNav() {
                     if (navItem && navItem.classList.contains('has-dropdown')) {
                         e.preventDefault();
                         navItem.classList.toggle('show-mobile-dropdown');
-                        
-                        // 💡 সাব-মেনু ওপেন/ক্লোজ হলে হাইট পরিবর্তন হয়, তাই একটু ডিলিট করে পুনরায় আপডেট কল করা হলো
                         setTimeout(updateNavState, 50); 
                     }
                 }
@@ -406,5 +399,4 @@ function initMobileNav() {
     }
 }
 
-// Execute on DOM Ready
 document.addEventListener('DOMContentLoaded', renderGlobalLayout);

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free MCQs Dashboard - TopMCQ</title>
+    
+    <!-- Instant Auth Check -->
+    <script>
+        (function checkAuth() {
+            const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
+            if (!token) {
+                window.location.replace('../login.html');
+            }
+        })();
+    </script>
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- GLOBAL CSS LINK -->
+    <link rel="stylesheet" href="../global/global.css">
+
+    <style>
+        .container { 
+            margin-top: 50px; 
+            margin-bottom: 50px; 
+            padding: 0 25px; 
+            text-align: center;
+        }
+        .box { 
+            background: white; 
+            padding: 50px 30px; 
+            border-radius: 10px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
+            border: 1px solid #e2e8f0; 
+            border-left: 6px solid #28a745;
+            max-width: 650px;
+            margin: 0 auto;
+        }
+        .box h1 {
+            color: #28a745;
+            font-size: 28px;
+            margin-bottom: 15px;
+        }
+        .box p {
+            color: #666;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Dynamic Admin Global Navigation Bar Container -->
+    <div id="admin-navbar-container"></div>
+
+    <div class="container">
+        <div class="box">
+            <i class="fa-solid fa-clock-rotate-left" style="font-size: 50px; color: #28a745; margin-bottom: 20px;"></i>
+            <h1>Free MCQs Dashboard</h1>
+            <p>এই ড্যাশবোর্ডটি <b>mosabber-quiz-app</b> থেকে পরিচালিত হবে এবং ফ্রি ডাটাবেজের (<b>TopMCQBD Free MCQs</b>) ডাটা নিয়ন্ত্রণ করবে। ফিচারগুলো শীঘ্রই যুক্ত করা হবে।</p>
+        </div>
+    </div>
+
+    <!-- GLOBAL JS LINKS -->
+    <script src="../config.js"></script>
+    <script src="../global/global.js"></script>
+    <script src="../global/admin-global.js"></script>
+
+    <script>
+        // Admin Server (mosabber-quiz-app) API Link
+        const API_BASE = CONFIG.ADMIN_API;
+    </script>
+</body>
+</html>

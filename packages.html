@@ -429,20 +429,18 @@
 
     <footer id="global-footer"></footer>
 
+    <!-- GLOBAL JS LINKS -->
+    <script src="config.js"></script>
     <script src="global/global.js"></script>
 
     <script>
-        const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-            ? 'http://localhost:5000/api' 
-            : 'https://topmcqbd.onrender.com/api';
+        const API_BASE = CONFIG.MAIN_PAID_API;
 
-        // এই তিনটা modal-এর overlay/open/close নিয়ন্ত্রণের জন্য ছোট হেল্পার
         function openModal(id) { document.getElementById(id).classList.add('active'); }
         function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
         function planLabelBn(plan) { return (plan || '').replace('_', ' ').toUpperCase(); }
 
-        // পুরো ফ্লো-জুড়ে যা যা মনে রাখতে হবে (কোন প্ল্যান ক্লিক হয়েছে, action কী হবে, change হলে কোন request id)
         let pendingFlow = {
             plan: null,
             action: null,   // 'new' | 'add' | 'change' | 'renew'
@@ -480,7 +478,6 @@
                 const pending = (user.pendingRequests || []).filter(r => r.status === 'pending');
 
                 if (isSubActive) {
-                    // ------- Active plan থাকলে সরাসরি প্যাকেজ পরিবর্তন করতে দেওয়া হবে না, শুধু Renew request -------
                     document.getElementById('activeConfirmDesc').innerText =
                         `আপনার বর্তমানে ${planLabelBn(sub.plan)} প্ল্যান একটিভ আছে, যার মেয়াদ শেষ হবে ${new Date(sub.endDate).toLocaleDateString()} তারিখে। ` +
                         `আপনি কি এই মেয়াদের উপর ${planLabelBn(planType)} প্ল্যান যোগ করার (মেয়াদ বাড়ানোর) রিকোয়েস্ট পাঠাতে চান?`;
@@ -495,7 +492,6 @@
                     document.getElementById('activeConfirmNoBtn').onclick = () => closeModal('activeConfirmOverlay');
 
                 } else if (pending.length > 0) {
-                    // ------- Active নেই, কিন্তু আগে থেকে Pending request আছে -------
                     const lastPending = pending[pending.length - 1];
                     document.getElementById('choiceModalDesc').innerHTML =
                         `আপনার সর্বশেষ Pending রিকোয়েস্ট: <b>${planLabelBn(lastPending.plan)}</b>। ` +
@@ -516,7 +512,6 @@
                     document.getElementById('choiceCancelBtn').onclick = () => closeModal('choiceModalOverlay');
 
                 } else {
-                    // ------- একদম নতুন রিকোয়েস্ট -------
                     pendingFlow = { plan: planType, action: 'new', requestId: null };
                     openPaymentModal();
                 }

@@ -177,11 +177,12 @@
     </div>
 
     <!-- GLOBAL JS LINKS -->
+    <script src="../config.js"></script>
     <script src="../global/global.js"></script>
     <script src="../global/admin-global.js"></script>
 
     <script>
-        const API_BASE = 'https://topmcqbd.onrender.com/api';
+        const API_BASE = CONFIG.ADMIN_API;
         const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
         const currentUser = JSON.parse(localStorage.getItem('user') || localStorage.getItem('quiz_user') || '{}');
 
@@ -221,11 +222,10 @@
         }
         function methodLabel(method) { return method === 'bkash' ? 'বিকাশ' : method === 'nagad' ? 'নগদ' : method; }
 
-        // 💡 UPDATED: Current Plan Logic - Read directly from Database
+        // Current Plan Logic - Read directly from Database
         function getDisplayPlan(userObj) {
             const sub = userObj.subscription || {};
             
-            // যদি সাবস্ক্রিপশন একটিভ থাকে এবং মেয়াদ শেষ না হয়ে থাকে, তবে ডাটাবেজে সেভ করা নামটাই দেখাবে
             if (sub.active && sub.endDate && new Date(sub.endDate) > new Date()) {
                 return planLabel(sub.plan);
             }
@@ -318,7 +318,6 @@
                     }
                 }
 
-                // 💡 Custom Date Manual Override Form HTML
                 const currentCustomName = defaultSelect !== 'none' && !['1_month','3_months','6_months','1_year','2_years','3_years'].includes(defaultSelect) ? defaultSelect : '';
                 const isCustomActive = currentCustomName ? 'selected' : '';
 
@@ -433,7 +432,6 @@
             if (currentOpenUserId) { renderHistoryContent(currentOpenUserId); }
         }
 
-        // 💡 Function to Toggle Custom Input Fields
         window.toggleCustomFields = function(userId) {
             const val = document.getElementById(`plan-${userId}`).value;
             const fields = document.getElementById(`custom-fields-${userId}`);
@@ -478,7 +476,6 @@
                     <div class="form-row">
                         <div>
                             <label>প্যাকেজ নাম (যে কোনো কিছু)</label>
-                            <!-- 💡 Dropdown Removed. Added Text Input -->
                             <input type="text" id="addPlan-${userId}" placeholder="e.g. 3_months বা Custom">
                         </div>
                         <div>
@@ -498,7 +495,7 @@
                         <label>পেমেন্ট মাধ্যম</label>
                         <select id="addMethod-${userId}">
                             <option value="bkash">বিকাশ (Bkash)</option>
-                            <option value="nagad">ন নগদ (Nagad)</option>
+                            <option value="nagad">নগদ (Nagad)</option>
                         </select>
                     </div>
                     <div style="display: flex; gap: 10px;">
@@ -552,7 +549,6 @@
                             </div>
 
                             <div class="he-edit-form" id="he-edit-${r._id}" style="display:none;">
-                                <!-- 💡 Dropdown Removed. Added Text Input -->
                                 <input type="text" id="he-plan-${r._id}" value="${r.plan}" placeholder="Package Name (e.g. 1_month or Custom Name)">
                                 <select id="he-method-${r._id}">
                                     <option value="bkash" ${r.paymentMethod === 'bkash' ? 'selected' : ''}>বিকাশ</option>
@@ -611,7 +607,6 @@
             } catch (err) { showTopAlert(`❌ Error updating plan!`, 'danger'); }
         }
 
-        // 💡 Update Subscription Handling (Including Custom Logic)
         async function updateSubscription(userId) {
             const plan = document.getElementById(`plan-${userId}`).value;
             let payload = { plan };

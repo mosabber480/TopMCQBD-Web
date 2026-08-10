@@ -62,8 +62,6 @@
             transition: all 0.2s ease;
         }
 
-        /* Main Container - max-width & margin-left এখন global.css এর
-           .sidebar-wrapper ~ .container রুল থেকে আসছে, তাই এখানে override করা হলো না */
         .container {
             margin-top: 30px;
             margin-bottom: 30px;
@@ -166,7 +164,6 @@
                     আপনার কুইজ প্ল্যাটফর্ম এবং ওয়েবসাইট কন্টেন্ট এক জায়গা থেকেই পরিবর্তন ও নিয়ন্ত্রণ করুন।
                 </p>
             </div>
-            <!-- নতুন অ্যাডমিন প্রোফাইল বাটন -->
             <div>
                 <a href="admin-profile.html" class="btn" style="background-color: var(--dark); color: white;">
                     <i class="fa-solid fa-user-shield"></i> অ্যাডমিন প্রোফাইল
@@ -275,12 +272,13 @@
     </div>
 
     <!-- GLOBAL JS LINKS -->
+    <script src="../config.js"></script>
     <script src="../global/global.js"></script>
     <script src="../global/admin-global.js"></script>
 
-    <!-- User Profile Loader (Welcome Card নামের জন্য) -->
-    <!-- logout() ফাংশনটা এখন centralized ভাবে admin-global.js এ আছে, তাই এখানে আলাদা করে লেখা হয়নি -->
     <script>
+        const API_BASE = CONFIG.ADMIN_API;
+
         window.addEventListener('DOMContentLoaded', () => {
             const user = JSON.parse(localStorage.getItem('user') || localStorage.getItem('quiz_user') || '{}');
             if (user && user.name) {

@@ -67,7 +67,6 @@
         .btn-info { background-color: #17a2b8; color: white; }
         .btn-add { background: var(--main-dash-btn); color: white; border: none; padding: 10px 18px; border-radius: 5px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; font-size: 14px; }
 
-        /* ARROWS & DRAG HANDLES */
         .drag-handle { cursor: grab; color: #475569; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 4px; padding: 4px 6px; font-size: 13px; margin-right: 6px; display: inline-flex; align-items: center; justify-content: center; }
         .drag-handle:active { cursor: grabbing; }
 
@@ -81,11 +80,9 @@
         .drop-above::before { content: ''; position: absolute; top: -3px; left: 0; width: 100%; height: 3px; background-color: var(--primary); z-index: 100; border-radius: 2px; }
         .drop-below::after { content: ''; position: absolute; bottom: -3px; left: 0; width: 100%; height: 3px; background-color: var(--primary); z-index: 100; border-radius: 2px; }
 
-        /* SUBMENU STYLES IN ADMIN UI */
         .submenu-container { margin-top: 15px; padding-left: 25px; border-left: 3px dashed var(--primary); }
         .submenu-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px 15px; border-radius: 6px; margin-bottom: 8px; }
 
-        /* Reorder Save Action Bar */
         #reorder-action-bar {
             display: none; position: fixed; bottom: 0; left: 0; width: 100%; background: #2c3e50;
             padding: 15px; border-top: 4px solid #ffc107; z-index: 9999; box-shadow: 0 -5px 15px rgba(0,0,0,0.2);
@@ -123,17 +120,17 @@
     </div>
 
     <!-- GLOBAL JS LINKS -->
+    <script src="../config.js"></script>
     <script src="../global/global.js"></script>
     <script src="../global/admin-global.js"></script>
 
     <script>
-        window.MENU_API_URL = window.MENU_API_URL || 'https://topmcqbd.onrender.com/api/sidebar-config';
+        window.MENU_API_URL = `${CONFIG.ADMIN_API}/sidebar-config`;
 
         let sidebarMenus = [];
         let isReordered = false;
         let dragData = null;
 
-        // ডিফল্ট সাইডবার মেনু ব্যাকআপ (যদি ব্যাকএন্ডে এখনো ডাটা না থাকে)
         const defaultMenus = [
             { title: "Dashboard Overview", url: "dashboard.html", icon: "fa-solid fa-gauge-high", subMenus: [] },
             { title: "Manage Quizzes", url: "quiz-dashboard.html", icon: "fa-solid fa-file-circle-question", subMenus: [] },
@@ -226,7 +223,6 @@
                     <div id="sub-form-box-${idx}"></div>
                 `;
 
-                // Drag Events
                 card.addEventListener('dragstart', (e) => dragStart(e, idx));
                 card.addEventListener('dragend', dragEnd);
                 card.addEventListener('dragover', dragOver);
@@ -236,7 +232,6 @@
             });
         }
 
-        /* --- Drag and Drop Handlers --- */
         function dragStart(e, idx) {
             dragData = idx;
             e.dataTransfer.effectAllowed = "move";
@@ -282,7 +277,6 @@
             markAsReordered();
         }
 
-        /* --- Arrow Handlers --- */
         function moveMenu(idx, dir) {
             if (dir === 'up' && idx > 0) {
                 const item = sidebarMenus.splice(idx, 1)[0];
@@ -313,7 +307,6 @@
             fetchSidebarConfig();
         }
 
-        /* --- CRUD Functions --- */
         function showNewMenuForm() {
             const formBox = document.getElementById('new-menu-form-box');
             formBox.innerHTML = `
@@ -359,7 +352,6 @@
             renderMenuList();
         }
 
-        /* --- SubMenu CRUD --- */
         function showSubMenuForm(parentIdx) {
             const formBox = document.getElementById(`sub-form-box-${parentIdx}`);
             formBox.innerHTML = `
