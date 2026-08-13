@@ -1,8 +1,14 @@
 # Dependencies
 node_modules/
 
+# Next.js build output
+.next/
+out/
+build/
+
 # Environment Variables
 .env
+.env*.local
 
 # Logs
 logs
@@ -15,5 +21,6 @@ yarn-test.log*
 .DS_Store
 Thumbs.db
 
-# IDE files (optional but recommended)
+# IDE files
 .vscode/
+.idea/
