@@ -6,6 +6,8 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import TopAlert from '@/components/layout/TopAlert';
 
+export const runtime = 'edge';
+
 export const dynamic = 'force-dynamic';
 
 export async function generateMetadata() {
