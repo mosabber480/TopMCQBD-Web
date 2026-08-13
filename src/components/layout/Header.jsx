@@ -73,25 +73,27 @@ export default function Header({ headerData }) {
 
   return (
     <header id="global-header">
-      <div className="header-container">
+      <div className="header-wrapper">
         {/* Brand Logo & Title */}
-        <Link href="/" className="header-brand">
-          <img src={logoUrl} alt={siteTitle} className="header-logo" />
-          <span className="header-site-title">{siteTitle}</span>
-        </Link>
+        <div className="site-logo">
+          <Link href="/">
+            <img src={logoUrl} alt={siteTitle} />
+            <span>{siteTitle}</span>
+          </Link>
+        </div>
 
-        {/* Mobile Hamburger Toggle */}
+        {/* Mobile Hamburger Toggle Button */}
         <button
-          className="mobile-nav-toggle"
+          className="mobile-toggle-btn"
           aria-label="Toggle navigation"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
         >
           <i className={`fa-solid ${mobileMenuOpen ? 'fa-xmark' : 'fa-bars'}`}></i>
         </button>
 
-        {/* Desktop & Mobile Navigation Links */}
-        <nav className={`header-nav ${mobileMenuOpen ? 'mobile-open' : ''}`}>
-          <ul className="nav-menu-list">
+        {/* Main Desktop & Mobile Navigation */}
+        <nav className={`site-nav ${mobileMenuOpen ? 'active' : ''}`}>
+          <ul>
             {(h.menus || []).map((menu, index) => {
               const connectedMega = megaMenus.find(
                 m => m.menuTitle && m.menuTitle.trim() === menu.title.trim()
@@ -103,69 +105,65 @@ export default function Header({ headerData }) {
                 return (
                   <li
                     key={index}
-                    className={`nav-item has-mega ${isDropdownOpen ? 'dropdown-open' : ''}`}
+                    className={`nav-item has-mega-menu ${isDropdownOpen ? 'show-mobile-dropdown' : ''}`}
                     onMouseEnter={() => setOpenDropdownIndex(index)}
                     onMouseLeave={() => setOpenDropdownIndex(null)}
                   >
-                    <div className="nav-link-dropdown-wrapper">
-                      <Link href={formatURL(menu.url || '#')} className="nav-link">
-                        {menu.title} <i className="fa-solid fa-chevron-down nav-arrow"></i>
-                      </Link>
-                      <button
-                        className="mobile-dropdown-toggle"
-                        onClick={(e) => {
+                    <Link
+                      href={formatURL(menu.url || '#')}
+                      onClick={(e) => {
+                        if (window.innerWidth <= 768) {
                           e.preventDefault();
                           setOpenDropdownIndex(isDropdownOpen ? null : index);
-                        }}
-                      >
-                        <i className={`fa-solid fa-angle-${isDropdownOpen ? 'up' : 'down'}`}></i>
-                      </button>
-                    </div>
+                        }
+                      }}
+                    >
+                      {menu.title} <i className="fa-solid fa-chevron-down" style={{ fontSize: '11px', marginLeft: '4px' }}></i>
+                    </Link>
 
                     {/* Mega Menu Dropdown */}
-                    <div className="mega-menu-panel">
-                      <div className="mega-menu-grid">
+                    <div className="mega-menu">
+                      <div className="mega-grid-container">
                         {connectedMega.columns.map((col, cIdx) => (
-                          <div key={cIdx} className="mega-col">
+                          <div key={cIdx} className={col.type === 'info' ? 'mega-col mega-info-col' : 'mega-col mega-links-col'}>
+                            <div className="mega-col-title">{col.title || (col.type === 'info' ? 'তথ্য' : 'লিংকসমূহ')}</div>
+                            
                             {col.type === 'info' ? (
-                              <div className="mega-info-box">
-                                <h4 className="mega-col-title">{col.title || 'তথ্য'}</h4>
-                                <p className="mega-info-text">{col.text || ''}</p>
-                                <div className="mega-social-links">
+                              <div>
+                                <p style={{ fontSize: '13.5px', color: '#475569', lineHeight: '1.6', margin: '0 0 12px 0' }}>
+                                  {col.text || ''}
+                                </p>
+                                <div className="mega-social">
                                   {col.fb && (
-                                    <a href={col.fb} target="_blank" rel="noreferrer" className="social-icon fb">
+                                    <a href={formatURL(col.fb)} target="_blank" rel="noreferrer" className="fb" title="Facebook">
                                       <i className="fa-brands fa-facebook-f"></i>
                                     </a>
                                   )}
                                   {col.yt && (
-                                    <a href={col.yt} target="_blank" rel="noreferrer" className="social-icon yt">
+                                    <a href={formatURL(col.yt)} target="_blank" rel="noreferrer" className="yt" title="YouTube">
                                       <i className="fa-brands fa-youtube"></i>
                                     </a>
                                   )}
                                   {col.wa && (
-                                    <a href={col.wa} target="_blank" rel="noreferrer" className="social-icon wa">
+                                    <a href={formatURL(col.wa)} target="_blank" rel="noreferrer" className="wa" title="WhatsApp">
                                       <i className="fa-brands fa-whatsapp"></i>
                                     </a>
                                   )}
                                   {col.tg && (
-                                    <a href={col.tg} target="_blank" rel="noreferrer" className="social-icon tg">
+                                    <a href={formatURL(col.tg)} target="_blank" rel="noreferrer" className="tg" title="Telegram">
                                       <i className="fa-brands fa-telegram"></i>
                                     </a>
                                   )}
                                 </div>
                               </div>
                             ) : (
-                              <div className="mega-links-box">
-                                <h4 className="mega-col-title">{col.title || 'লিংকসমূহ'}</h4>
-                                <ul className="mega-links-list">
-                                  {(col.links || []).map((link, lIdx) => (
-                                    <li key={lIdx}>
-                                      <Link href={formatURL(link.url || '#')} className="mega-link-item">
-                                        <i className="fa-solid fa-angle-right"></i> {link.text}
-                                      </Link>
-                                    </li>
-                                  ))}
-                                </ul>
+                              <div className="mega-col-links">
+                                {(col.links || []).map((link, lIdx) => (
+                                  <Link key={lIdx} href={formatURL(link.url || '#')}>
+                                    <i className="fa-solid fa-angle-right" style={{ marginRight: '6px', color: 'var(--primary)' }}></i>
+                                    {link.text}
+                                  </Link>
+                                ))}
                               </div>
                             )}
                           </div>
@@ -178,7 +176,7 @@ export default function Header({ headerData }) {
 
               return (
                 <li key={index} className="nav-item">
-                  <Link href={formatURL(menu.url || '#')} className="nav-link">
+                  <Link href={formatURL(menu.url || '#')}>
                     {menu.title}
                   </Link>
                 </li>
@@ -186,15 +184,15 @@ export default function Header({ headerData }) {
             })}
           </ul>
 
-          {/* Action Buttons */}
-          <div className="header-actions">
+          {/* Right Action Buttons */}
+          <div className="header-btn-group">
             {h.btnText && (
-              <Link href={formatURL(h.btnLink || '/contact')} className="btn-header-support">
+              <Link href={formatURL(h.btnLink || '/contact')} className="btn-primary-head">
                 <i className="fa-solid fa-headset"></i> {h.btnText}
               </Link>
             )}
 
-            <Link href={authLink} className="btn-header-auth">
+            <Link href={authLink} className="btn-auth-head">
               <i className={user ? 'fa-solid fa-user-check' : 'fa-solid fa-user-lock'}></i> {authText}
             </Link>
           </div>
