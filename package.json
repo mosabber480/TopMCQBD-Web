@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:pages": "next-on-pages",
     "start": "next start",
     "seed": "node seedUsers.js"
   },
@@ -16,5 +17,9 @@
     "next": "^14.2.5",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@cloudflare/next-on-pages": "^1.13.7",
+    "wrangler": "^3.107.0"
   }
 }
