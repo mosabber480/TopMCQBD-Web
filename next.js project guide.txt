@@ -1,0 +1,276 @@
+===============================================================================
+           TopMCQBD: Complete Migration & Next.js Project Guide
+           (From HTML + Node.js/Render to Next.js App Router)
+===============================================================================
+
+-------------------------------------------------------------------------------
+1. MIGRATION OVERVIEW (প্রজেক্ট মাইগ্রেশন ওভারভিউ)
+-------------------------------------------------------------------------------
+
+* পুরাতন স্ট্যাক (Old Architecture):
+  - Frontend: Plain HTML, CSS, Vanilla JavaScript
+  - Backend: Node.js (Express.js) deployed on Render (Multiple Render Services)
+  - Database: MongoDB Atlas (Mongoose ORM)
+  - Email Service: Brevo (Password Reset)
+
+* নতুন Next.js স্ট্যাক (New Architecture):
+  - Framework: Next.js (App Router Architecture)
+  - Language/Format: JSX / ES Modules (JavaScript)
+  - Styling: Tailwind CSS / Global CSS (`src/app/globals.css`)
+  - Backend API: Next.js API Route Handlers (`src/app/api/`)
+  - Database Models: Mongoose Models (`src/models/`)
+  - Utilities & Helpers: `src/lib/` (`db.js`, `auth.js`, `brevo.js`, `config.js`)
+  - Email Service: Brevo API Integration
+
+
+===============================================================================
+2. OLD PROJECT FILE STRUCTURE & ARCHITECTURE (পুরাতন HTML + Render প্রজেক্ট)
+===============================================================================
+
+📂 Old-Mosabber-Quiz-App/ (Render & Node.js Architecture)
+│
+├── 📄 index.html                      # হোম পেজ (topmcqbd.onrender.com)
+├── 📄 login.html                      # ইউজার/এডমিন লগইন পেজ (mosabber-quiz-app.onrender.com)
+├── 📄 profile.html                    # ইউজার প্রোফাইল পেজ (mosabber-quiz-app.onrender.com)
+├── 📄 quiz.html                       # পেইড কুইজ পেজ (topmcqbd.onrender.com)
+├── 📄 all-mcq.html                    # অল এমসিকিউ পেজ (topmcqbd.onrender.com)
+├── 📄 contact.html                    # যোগাযোগ পেজ (topmcqbd.onrender.com)
+├── 📄 about-us.html                   # আমাদের সম্পর্কে পেজ (topmcqbd.onrender.com)
+├── 📄 packages.html                   # প্যাকেজ লিস্ট পেজ (topmcqbd.onrender.com)
+├── 📄 privacy-and-refund-policy.html  # প্রাইভেসি পলিসি পেজ (topmcqbd.onrender.com)
+├── 📄 FAQ.html                        # সচরাচর জিজ্ঞাসিত প্রশ্নাবলী পেজ
+│
+├── 📁 admin/                          # Admin Dashboard HTML Files
+│   ├── 📄 dashboard.html              # প্রধান এডমিন ওভারভিউ ড্যাশবোর্ড
+│   ├── 📄 quiz-dashboard.html         # কুইজ ও প্রশ্ন ম্যানেজমেন্ট
+│   ├── 📄 users.html                  # ইউজার ইউজার রিকোয়েস্ট ও রোল ম্যানেজমেন্ট
+│   ├── 📄 admin-profile.html          # এডমিন নিজস্ব প্রোফাইল
+│   ├── 📄 home-dashboard.html         # হোম পেজ কন্টেন্ট এডিটর
+│   ├── 📄 header-dashboard.html       # হেডার নেভিগেশন ও ফুটার এডিটর
+│   ├── 📄 about-dashboard.html        # এবাউট পেজ কন্টেন্ট এডিটর
+│   ├── 📄 packages-dashboard.html     # প্রাইসিং প্যাকেজ এডিটর
+│   ├── 📄 policy-dashboard.html       # পলিসি কন্টেন্ট এডিটর
+│   ├── 📄 admin-menu-dashboard.html   # সাইডবার ও মেনু ম্যানেজমেন্ট
+│   └── 📄 free-mcqs-dashboard.html    # ফ্রি কুইজ কন্টেন্ট এডিটর
+│
+├── 📁 global/                         # Vanilla JS & Global CSS Resources
+│   ├── 📄 global.js                   # পাবলিক পেজের গ্লোবাল স্ক্রিপ্ট ও এপিআই কল
+│   ├── 📄 admin-global.js             # এডমিন পেজের কমন স্ক্রিপ্ট ও অথ চেকার
+│   └── 📄 global.css                  # প্রধান সিএসএস স্টাইল ফাইল
+│
+├── 📁 models/                         # Mongoose DB Schemas (Express Backend)
+│   ├── 📄 User.js                     # ইউজার স্কিমা
+│   ├── 📄 LayoutConfig.js             # লেআউট স্কিমা
+│   ├── 📄 HomeConfig.js               # হোম পেজ কনফিগ স্কিমা
+│   ├── 📄 AdminSidebarConfig.js       # এডমিন মেনু স্কিমা
+│   └── 📄 PolicyConfig.js             # পলিসি ডাটা স্কিমা
+│
+├── 📁 routes/                         # Express API Endpoint Routes
+│   ├── 📄 auth.js                     # /api/auth (Login, Register, Password Reset)
+│   ├── 📄 layoutRoutes.js             # /api/layout (Site Layout API)
+│   ├── 📄 homeConfigRoutes.js         # /api/home-config (Home Config API)
+│   ├── 📄 adminSidebarRoutes.js       # /api/admin-sidebar (Sidebar Config API)
+│   └── 📄 policyRoutes.js             # /api/policy (Privacy Policy API)
+│
+├── 📁 middleware/
+│   └── 📄 authMiddleware.js           # Express JWT Authentication Middleware
+│
+├── 📁 images/                         # প্রজেক্টের সকল ইমেজ ও ছবি
+├── 📄 server.js                       # Express App Entry File & Server Config
+├── 📄 config.js                       # 5 Render Services Multi-Domain API Config
+├── 📄 seed.js                         # ডাটাবেজ কুইজ সিড স্ক্রিপ্ট
+├── 📄 seedUsers.js                    # ডাটাবেজ ইউজার সিড স্ক্রিপ্ট
+├── 📄 .env                            # Express Environment Secrets
+├── 📄 package.json                    # Backend Node Dependencies
+└── 📄 package-lock.json
+
+--- 🔹 Old Render Services Setup ---
+1. Server 1 (mosabber-quiz-app.onrender.com): Auth & Admin Backend
+2. Server 2 (topmcqbd.onrender.com): Paid Quiz & Main Site Backend
+3. Server 3 (topmcqbdpages.onrender.com): Extra Page Services
+4. Server 4 (topmcqbd-model-written.onrender.com): Written Exam Backend
+5. Server 5 (topmcqbd-free-mcqs.onrender.com): Free MCQs Backend (MongoDB 2)
+
+
+===============================================================================
+3. NEW NEXT.JS PROJECT STRUCTURE & FILE GUIDE (নতুন Next.js App Router)
+===============================================================================
+
+📂 TopMCQBD-NextJS/
+│
+├── 📁 public/                         # Public Static Assets
+│   ├── 📄 favicon.ico
+│   └── 📁 images/                     # Project Images
+│       ├── 📄 TopMCQ.png
+│       ├── 📄 favicon.png
+│       ├── 📄 slider-01.jpg
+│       └── 📄 slider-02.jpg
+│
+├── 📁 src/
+│   ├── 📁 app/                        # Next.js App Router Architecture
+│   │   ├── 📄 layout.jsx              # Global Main Layout Component
+│   │   ├── 📄 globals.css             # Global CSS & Tailwind Directives
+│   │   ├── 📄 page.jsx                # Home Page (/)
+│   │   │
+│   │   ├── 📁 quiz/
+│   │   │   └── 📄 page.jsx            # Main Paid Quiz Page (/quiz)
+│   │   ├── 📁 all-mcq/
+│   │   │   └── 📄 page.jsx            # All MCQ Library Page (/all-mcq)
+│   │   ├── 📁 free-mcqs/
+│   │   │   └── 📄 page.jsx            # Free MCQs Page (/free-mcqs)
+│   │   ├── 📁 packages/
+│   │   │   └── 📄 page.jsx            # Pricing Packages Page (/packages)
+│   │   ├── 📁 profile/
+│   │   │   └── 📄 page.jsx            # User Profile & Dashboard (/profile)
+│   │   ├── 📁 login/
+│   │   │   └── 📄 page.jsx            # User & Admin Login Page (/login)
+│   │   ├── 📁 about-us/
+│   │   │   └── 📄 page.jsx            # About Us Page (/about-us)
+│   │   ├── 📁 contact/
+│   │   │   └── 📄 page.jsx            # Contact Us Page (/contact)
+│   │   ├── 📁 faq/
+│   │   │   └── 📄 page.jsx            # Frequently Asked Questions Page (/faq)
+│   │   ├── 📁 privacy-and-refund-policy/
+│   │   │   └── 📄 page.jsx            # Privacy & Refund Policy Page (/privacy-and-refund-policy)
+│   │   ├── 📁 status/
+│   │   │   └── 📄 page.jsx            # System / Exam Status Page (/status)
+│   │   │
+│   │   ├── 📁 admin/                  # Admin Dashboard Module
+│   │   │   ├── 📄 layout.jsx          # Admin Dashboard Wrapper Layout
+│   │   │   ├── 📄 page.jsx            # Admin Root / Dashboard Overview (/admin)
+│   │   │   ├── 📁 dashboard/
+│   │   │   │   └── 📄 page.jsx        # Admin Main Overview Page (/admin/dashboard)
+│   │   │   ├── 📁 quiz-dashboard/
+│   │   │   │   └── 📄 page.jsx        # Quiz & Question Management (/admin/quiz-dashboard)
+│   │   │   ├── 📁 users/
+│   │   │   │   └── 📄 page.jsx        # User & Admin Role Management (/admin/users)
+│   │   │   ├── 📁 home-dashboard/
+│   │   │   │   └── 📄 page.jsx        # Home Page Content Editor (/admin/home-dashboard)
+│   │   │   ├── 📁 header-dashboard/
+│   │   │   │   └── 📄 page.jsx        # Header Navigation Config (/admin/header-dashboard)
+│   │   │   ├── 📁 footer-dashboard/
+│   │   │   │   └── 📄 page.jsx        # Footer Config Editor (/admin/footer-dashboard)
+│   │   │   ├── 📁 policy-dashboard/
+│   │   │   │   └── 📄 page.jsx        # Privacy Policy Content Editor (/admin/policy-dashboard)
+│   │   │   ├── 📁 admin-menu-dashboard/
+│   │   │   │   └── 📄 page.jsx        # Sidebar Menu Management (/admin/admin-menu-dashboard)
+│   │   │   ├── 📁 admin-profile/
+│   │   │   │   └── 📄 page.jsx        # Admin Profile Settings (/admin/admin-profile)
+│   │   │   ├── 📁 about-dashboard/
+│   │   │   │   └── 📄 page.jsx        # About Page Editor (/admin/about-dashboard)
+│   │   │   ├── 📁 packages-dashboard/
+│   │   │   │   └── 📄 page.jsx        # Packages Config Editor (/admin/packages-dashboard)
+│   │   │   └── 📁 free-mcqs-dashboard/
+│   │   │       └── 📄 page.jsx        # Free MCQs Config Editor (/admin/free-mcqs-dashboard)
+│   │   │
+│   │   └── 📁 api/                    # Next.js Route Handlers (20 API Endpoints)
+│   │       ├── 📁 auth/               # Auth APIs (Login, Reset Password)
+│   │       ├── 📁 users/              # User Management APIs
+│   │       ├── 📁 questions/          # Paid & Free Quiz Question APIs
+│   │       └── 📁 admin/              # Admin Panel Control APIs
+│   │
+│   ├── 📁 components/                 # Reusable React UI Components
+│   │   ├── 📁 layout/                 # Site Header, Footer & Banners
+│   │   │   ├── 📄 Header.jsx
+│   │   │   ├── 📄 Footer.jsx
+│   │   │   ├── 📄 AnnouncementBar.jsx
+│   │   │   └── 📄 TopAlert.jsx
+│   │   └── 📁 admin/                  # Admin Components
+│   │       ├── 📄 AdminSidebar.jsx
+│   │       └── 📄 AdminHeader.jsx
+│   │
+│   ├── 📁 lib/                        # Backend Utility Libraries & Configs
+│   │   ├── 📄 db.js                   # MongoDB Connection Handler
+│   │   ├── 📄 auth.js                 # JWT Authentication & Authorization Helper
+│   │   ├── 📄 brevo.js                # Brevo Email Sending Handler
+│   │   └── 📄 config.js               # Application Global Config
+│   │
+│   └── 📁 models/                     # Mongoose Schemas & Database Models
+│       ├── 📄 User.js                 # User Schema
+│       ├── 📄 Question.js             # Question / Quiz Schema
+│       ├── 📄 HomeConfig.js           # Home Page Config Schema
+│       ├── 📄 LayoutConfig.js         # Header & Layout Config Schema
+│       ├── 📄 AdminSidebarConfig.js   # Admin Sidebar Schema
+│       └── 📄 PolicyConfig.js         # Privacy Policy Schema
+│
+├── 📄 seedUsers.js                    # Database User Seeding Script
+├── 📄 .env                            # Next.js Environment Variables
+├── 📄 next.config.mjs                 # Next.js Configuration
+├── 📄 jsconfig.json                   # JS Path Aliases (e.g. `@/*`)
+├── 📄 package.json                    # Project Dependencies
+└── 📄 package-lock.json
+
+
+===============================================================================
+4. COMPLETE FILE MAPPING GUIDE (Old HTML -> Next.js App Router)
+===============================================================================
+
+-------------------------------------------------------------------------------
+🔹 PUBLIC FRONTEND PAGES MAPPING
+-------------------------------------------------------------------------------
+Old HTML File                        New Next.js App Route Path
+------------------                   ---------------------------
+index.html                        -> src/app/page.jsx
+login.html                        -> src/app/login/page.jsx
+profile.html                      -> src/app/profile/page.jsx
+quiz.html                         -> src/app/quiz/page.jsx
+all-mcq.html                      -> src/app/all-mcq/page.jsx
+contact.html                      -> src/app/contact/page.jsx
+about-us.html                     -> src/app/about-us/page.jsx
+packages.html                     -> src/app/packages/page.jsx
+privacy-and-refund-policy.html    -> src/app/privacy-and-refund-policy/page.jsx
+FAQ.html                          -> src/app/faq/page.jsx
+(New Extra Status Page)           -> src/app/status/page.jsx
+(New Free MCQ Dedicated Page)     -> src/app/free-mcqs/page.jsx
+
+-------------------------------------------------------------------------------
+🔹 ADMIN DASHBOARD PAGES MAPPING
+-------------------------------------------------------------------------------
+Old Admin HTML File                  New Next.js App Route Path
+-------------------                  ---------------------------
+admin/dashboard.html              -> src/app/admin/dashboard/page.jsx
+admin/quiz-dashboard.html         -> src/app/admin/quiz-dashboard/page.jsx
+admin/users.html                  -> src/app/admin/users/page.jsx
+admin/admin-profile.html          -> src/app/admin/admin-profile/page.jsx
+admin/home-dashboard.html         -> src/app/admin/home-dashboard/page.jsx
+admin/header-dashboard.html       -> src/app/admin/header-dashboard/page.jsx
+admin/about-dashboard.html        -> src/app/admin/about-dashboard/page.jsx
+admin/packages-dashboard.html     -> src/app/admin/packages-dashboard/page.jsx
+admin/policy-dashboard.html       -> src/app/admin/policy-dashboard/page.jsx
+admin/free-mcqs-dashboard.html    -> src/app/admin/free-mcqs-dashboard/page.jsx
+admin/admin-menu-dashboard.html   -> src/app/admin/admin-menu-dashboard/page.jsx
+(New Footer Config Page)          -> src/app/admin/footer-dashboard/page.jsx
+
+-------------------------------------------------------------------------------
+🔹 BACKEND & API ROUTE HANDLERS MAPPING
+-------------------------------------------------------------------------------
+Old Express / Render File            New Next.js Route Handler Path
+-------------------------            ------------------------------
+server.js / Express App           -> src/app/api/... (20 Route Handlers)
+routes/auth.js                    -> src/app/api/auth/route.js (or login/route.js)
+middleware/authMiddleware.js      -> src/lib/auth.js & Next.js Middleware (`middleware.js`)
+global/global.js & config.js      -> src/lib/config.js & Next.js Client Utilities
+models/* (Mongoose Schemas)       -> src/models/*
+
+
+===============================================================================
+5. NEXT.JS ENVIRONMENT VARIABLES & CONFIGURATION GUIDE
+===============================================================================
+
+📋 Next.js .env Secret Configurations:
+
+MONGODB_URI_PAID="mongodb+srv://mosabber480_db_user:EScirLEzwgQVVNaB@mosabber.3ajdj0u.mongodb.net/TopMCQBD_DB?retryWrites=true&w=majority"
+MONGODB_URI_FREE="mongodb+srv://mosabber480_db_user:VVcrE9PeIIyVlcKU@topmcqbd.pixb7fx.mongodb.net/TopMCQBD_DB_Free?retryWrites=true&w=majority"
+MONGODB_DB_NAME_PAID="TopMCQBD_DB"
+MONGODB_DB_NAME_FREE="TopMCQBD_DB_Free"
+JWT_SECRET="topmcqbd_super_secret_jwt_key_2026"
+BREVO_API_KEY="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"
+BREVO_SENDER_EMAIL="mosabber480@gmail.com"
+
+-------------------------------------------------------------------------------
+📌 Key Advantages of this Next.js Setup over Old Express/Render Setup:
+1. Unified Codebase: Frontend & Backend API Route Handlers in one project (`src/app/api/`).
+2. Server-Side Rendering (SSR) & Static Site Generation (SSG) for fast MCQ page loads.
+3. Centralized UI Components in `src/components/layout` and `src/components/admin`.
+4. Clear Model Layer with Mongoose in `src/models/` and DB connections in `src/lib/db.js`.
+===============================================================================
