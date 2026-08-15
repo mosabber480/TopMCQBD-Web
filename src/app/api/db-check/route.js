@@ -40,8 +40,8 @@ export async function GET() {
   try {
     const startPaid = Date.now();
     clientPaid = new MongoClient(MONGODB_URI_PAID, {
-      connectTimeoutMS: 15000,
-      serverSelectionTimeoutMS: 15000,
+      connectTimeoutMS: 4000,
+      serverSelectionTimeoutMS: 4000,
     });
     await clientPaid.connect();
     const dbPaid = clientPaid.db(MONGODB_DB_NAME_PAID);
@@ -70,8 +70,8 @@ export async function GET() {
   try {
     const startFree = Date.now();
     clientFree = new MongoClient(MONGODB_URI_FREE, {
-      connectTimeoutMS: 15000,
-      serverSelectionTimeoutMS: 15000,
+      connectTimeoutMS: 4000,
+      serverSelectionTimeoutMS: 4000,
     });
     await clientFree.connect();
     const dbFree = clientFree.db(MONGODB_DB_NAME_FREE);
@@ -83,10 +83,14 @@ export async function GET() {
     results.freeDb.latencyMs = Date.now() - startFree;
     results.freeDb.collections = collectionsFree.map(c => c.name);
   } catch (err) {
+    let msg = err.message || String(err);
+    if (msg.includes('SSL alert number 80') || msg.includes('tlsv1 alert') || msg.includes('querySrv')) {
+      msg = `${msg} (টিপস: MongoDB Atlas ড্যাশবোর্ডে Network Access > IP Access List এ 0.0.0.0/0 'Allow Access from Anywhere' এনাবল করা আছে কিনা চেক করুন)`;
+    }
     results.freeDb.connected = false;
     results.freeDb.status = 'Error';
     results.freeDb.error = {
-      message: err.message || String(err),
+      message: msg,
       name: err.name
     };
   } finally {
@@ -97,6 +101,7 @@ export async function GET() {
 
   return NextResponse.json(results, {
     headers: {
+      'Content-Type': 'application/json; charset=utf-8',
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
