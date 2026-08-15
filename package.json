@@ -8,15 +8,9 @@
     "build:cloudflare": "opennextjs-cloudflare build --dangerouslyUseUnsupportedNextVersion",
     "preview": "opennextjs-cloudflare preview",
     "deploy": "opennextjs-cloudflare deploy",
-    "start": "next start",
-    "seed": "node seedUsers.js"
+    "start": "next start"
   },
   "dependencies": {
-    "@getbrevo/brevo": "^6.0.2",
-    "bcryptjs": "^3.0.3",
-    "jsonwebtoken": "^9.0.3",
-    "mongodb": "^7.5.0",
-    "mongoose": "^8.5.2",
     "next": "^14.2.5",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
