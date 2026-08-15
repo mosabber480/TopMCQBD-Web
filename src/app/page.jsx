@@ -32,10 +32,14 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="footer-note">
-          © {new Date().getFullYear()} TopMCQBD. All Rights Reserved.
+        <div className="footer-note" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+          <span>© {new Date().getFullYear()} TopMCQBD. All Rights Reserved.</span>
+          <a href="/db-connection-check" style={{ color: '#60a5fa', textDecoration: 'none', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+            <span>🔌</span> DB Connection Check
+          </a>
         </div>
       </div>
     </main>
   );
 }
+

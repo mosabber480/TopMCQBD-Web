@@ -362,4 +362,6 @@ MONGODB_URI_FREE="mongodb+srv://mosabber480_db_user:VVcrE9PeIIyVlcKU@topmcqbd.pi
 MONGODB_DB_NAME_PAID="TopMCQBD_DB"
 MONGODB_DB_NAME_FREE="TopMCQBD_DB_Free"
 JWT_SECRET="topmcqbd_super_secret_jwt_key_2026"
+BREVO_API_KEY        = "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"
+BREVO_SENDER_EMAIL   = "mosabber480@gmail.com"
 ===============================================================================
