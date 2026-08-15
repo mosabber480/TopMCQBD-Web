@@ -273,6 +273,7 @@ body.sidebar-collapsed .sidebar {
     width: var(--sidebar-collapsed-width) !important;
 }
 
+body.sidebar-collapsed .admin-panel-brand,
 body.sidebar-collapsed .sidebar-brand span,
 body.sidebar-collapsed .sidebar-link span,
 body.sidebar-collapsed .sidebar-sublink span,

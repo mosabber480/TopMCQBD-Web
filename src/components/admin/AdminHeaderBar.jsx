@@ -297,7 +297,7 @@ export default function AdminHeaderBar() {
         }
       `}</style>
 
-      {/* 1. TOP LEFT: [ Collapse Toggle on LEFT ] + [ Brand: Unlock Icon + অ্য়াডমিন প্যানেল in White ] */}
+      {/* 1. TOP LEFT: [ Collapse Toggle on LEFT ] + [ Brand: Unlock Icon + অ্য়াডমিন প্যানেল (Shows when NOT collapsed) ] */}
       <div className="admin-header-left">
         <button
           type="button"
@@ -322,15 +322,17 @@ export default function AdminHeaderBar() {
           <i className={`fa-solid ${isCollapsed ? 'fa-bars-staggered' : 'fa-bars'}`}></i>
         </button>
 
-        <Link
-          href="/admin/dashboard"
-          className="admin-panel-brand"
-          title="অ্যাডমিন ড্যাশবোর্ড"
-          style={{ color: '#ffffff', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px' }}
-        >
-          <i className="fa-solid fa-unlock-keyhole" style={{ color: '#ffffff', fontSize: '18px' }}></i>
-          <span className="brand-text" style={{ color: '#ffffff', fontWeight: '700', fontSize: '16px' }}>অ্যাডমিন প্যানেল</span>
-        </Link>
+        {!isCollapsed && (
+          <Link
+            href="/admin/dashboard"
+            className="admin-panel-brand"
+            title="অ্যাডমিন ড্যাশবোর্ড"
+            style={{ color: '#ffffff', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px' }}
+          >
+            <i className="fa-solid fa-unlock-keyhole" style={{ color: '#ffffff', fontSize: '18px' }}></i>
+            <span className="brand-text" style={{ color: '#ffffff', fontWeight: '700', fontSize: '16px' }}>অ্যাডমিন প্যানেল</span>
+          </Link>
+        )}
       </div>
 
       {/* 2. TOP RIGHT: Dynamic Action Buttons + User Profile + Logout */}
