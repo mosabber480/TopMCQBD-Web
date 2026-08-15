@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { formatURL } from '@/lib/config';
+import { formatURL, mapLegacyUrl } from '@/lib/config';
 
 const DEFAULT_HEADER = {
   siteTitle: 'TopMCQBD',
@@ -12,7 +12,7 @@ const DEFAULT_HEADER = {
   btnLink: '/contact',
   menus: [
     { title: 'হোম', url: '/' },
-    { title: 'প্রশ্ন অনুশীলন', url: '/questions' },
+    { title: 'কুইজ অনুশীলন', url: '/quiz' },
     { title: 'সকল MCQ', url: '/all-mcq' },
     { title: 'প্যাকেজসমূহ', url: '/packages' },
     { title: 'আমাদের সম্পর্কে', url: '/about-us' },
@@ -159,7 +159,7 @@ export default function Header({ headerData: initialHeader }) {
                     onMouseLeave={() => setOpenDropdownIndex(null)}
                   >
                     <Link
-                      href={formatURL(menu.url || '#')}
+                      href={mapLegacyUrl(menu.url || '#')}
                       onClick={(e) => {
                         if (typeof window !== 'undefined' && window.innerWidth <= 768) {
                           e.preventDefault();
@@ -194,7 +194,7 @@ export default function Header({ headerData: initialHeader }) {
                               ) : (
                                 <div className="mega-col-links">
                                   {(col.links || []).map((lk, lIdx) => (
-                                    <Link key={lIdx} href={formatURL(lk.url || '#')}>
+                                    <Link key={lIdx} href={mapLegacyUrl(lk.url || '#')}>
                                       <i className="fa-solid fa-angle-right" style={{ fontSize: '10px', marginRight: '5px', color: 'var(--primary)' }}></i>
                                       {lk.title || lk.text}
                                     </Link>
@@ -220,7 +220,7 @@ export default function Header({ headerData: initialHeader }) {
                     onMouseLeave={() => setOpenDropdownIndex(null)}
                   >
                     <Link
-                      href={formatURL(menu.url || '#')}
+                      href={mapLegacyUrl(menu.url || '#')}
                       onClick={(e) => {
                         if (typeof window !== 'undefined' && window.innerWidth <= 768) {
                           e.preventDefault();
@@ -234,7 +234,7 @@ export default function Header({ headerData: initialHeader }) {
                     <ul className="dropdown-menu">
                       {menu.subMenus.map((sub, sIdx) => (
                         <li key={sIdx}>
-                          <Link href={formatURL(sub.url || '#')}>
+                          <Link href={mapLegacyUrl(sub.url || '#')}>
                             {sub.title}
                           </Link>
                         </li>
@@ -247,7 +247,7 @@ export default function Header({ headerData: initialHeader }) {
               // 3. REGULAR MENU LINK
               return (
                 <li key={index} className="nav-item">
-                  <Link href={formatURL(menu.url || '#')}>
+                  <Link href={mapLegacyUrl(menu.url || '#')}>
                     {menu.title}
                   </Link>
                 </li>
@@ -258,7 +258,7 @@ export default function Header({ headerData: initialHeader }) {
           {/* Right Action Buttons */}
           <div className="header-btn-group">
             {h.btnText && h.btnText.trim() && (
-              <Link href={formatURL(h.btnLink || '/contact')} className="btn-primary-head">
+              <Link href={mapLegacyUrl(h.btnLink || '/contact')} className="btn-primary-head">
                 <i className="fa-solid fa-headset"></i> {h.btnText.trim()}
               </Link>
             )}

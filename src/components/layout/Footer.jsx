@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { formatURL } from '@/lib/config';
+import { formatURL, mapLegacyUrl } from '@/lib/config';
 
 const DEFAULT_FOOTER = {
   columns: [
@@ -23,7 +23,7 @@ const DEFAULT_FOOTER = {
       title: "প্রয়োজনীয় লিংক",
       links: [
         { title: "হোম পেজ", url: "/" },
-        { title: "প্রশ্ন অনুশীলন", url: "/questions" },
+        { title: "কুইজ অনুশীলন", url: "/quiz" },
         { title: "সকল প্রশ্ন ক্যাটাগরি", url: "/all-mcq" },
         { title: "প্যাকেজ ও মূল্য তালিকা", url: "/packages" }
       ]
@@ -32,9 +32,9 @@ const DEFAULT_FOOTER = {
       type: "links",
       title: "ক্যাটাগরি",
       links: [
-        { title: "বিসিএস প্রস্তুতি", url: "/questions?category=bcs" },
-        { title: "ব্যাংক জব", url: "/questions?category=bank" },
-        { title: "প্রাথমিক শিক্ষক", url: "/questions?category=primary" }
+        { title: "বিসিএস প্রস্তুতি", url: "/quiz?category=bcs" },
+        { title: "ব্যাংক জব", url: "/quiz?category=bank" },
+        { title: "প্রাথমিক শিক্ষক", url: "/quiz?category=primary" }
       ]
     },
     {
@@ -105,7 +105,7 @@ export default function Footer({ footerData: initialFooter, copyrightData: initi
   const c = copyrightData || DEFAULT_COPYRIGHT;
   const columns = f.columns || DEFAULT_FOOTER.columns;
   const hasLinks = c.links && c.links.length > 0;
-  const copyTextValue = c.text !== undefined ? c.text : '© ' + new Date().getFullYear() + ' TopMCQBD. All rights reserved.';
+  const copyTextValue = c.text !== undefined ? c.text : '© " + new Date().getFullYear() + " TopMCQBD. All rights reserved.';
 
   return (
     <footer id="global-footer">
@@ -135,7 +135,7 @@ export default function Footer({ footerData: initialFooter, copyrightData: initi
                 <ul>
                   {(col.links || []).map((l, lIdx) => (
                     <li key={lIdx}>
-                      <Link href={formatURL(l.url || '#')}>
+                      <Link href={mapLegacyUrl(l.url || '#')}>
                         <i className="fa-solid fa-angle-right"></i> {l.title || l.text}
                       </Link>
                     </li>
@@ -158,7 +158,7 @@ export default function Footer({ footerData: initialFooter, copyrightData: initi
               {c.links.map((l, lIdx) => (
                 <React.Fragment key={lIdx}>
                   {lIdx > 0 && <span className="sep"> | </span>}
-                  <Link href={formatURL(l.url || '#')}>
+                  <Link href={mapLegacyUrl(l.url || '#')}>
                     {l.title}
                   </Link>
                 </React.Fragment>
