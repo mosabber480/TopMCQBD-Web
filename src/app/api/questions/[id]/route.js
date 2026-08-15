@@ -3,6 +3,9 @@ import { authorize } from '@/lib/auth';
 import { connectDB } from '@/lib/db';
 import Question from '@/models/Question';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function PUT(request, { params }) {
   try {
     const { user: currentAdmin, errorResponse } = await authorize(request, ['owner', 'admin']);

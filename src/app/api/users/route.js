@@ -3,6 +3,9 @@ import { authorize } from '@/lib/auth';
 import User from '@/models/User';
 import { connectDB } from '@/lib/db';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET(request) {
   try {
     const { user, errorResponse } = await authorize(request, ['owner', 'admin']);
