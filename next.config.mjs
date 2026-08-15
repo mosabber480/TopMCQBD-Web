@@ -2,7 +2,7 @@
 const nextConfig = {
   reactStrictMode: false,
   experimental: {
-    serverComponentsExternalPackages: ['mongoose', 'bcryptjs', 'jsonwebtoken']
+    serverComponentsExternalPackages: ['mongoose', 'mongodb', 'bcryptjs', 'jsonwebtoken']
   }
 };
 

@@ -15,7 +15,7 @@
 
 * নতুন স্ট্যাক (New Architecture):
   - Frontend Framework: React.js (Vite) / Next.js (App Router Architecture)
-  - Backend Engine: Cloudflare Pages Serverless Functions & Next.js Route Handlers
+  - Backend Engine: Cloudflare Pages Serverless Functions & Next.js Route Handlers (OpenNext Cloudflare)
   - Hosting & Scaling: Cloudflare Pages (Dual Account Setup for 2,00,000 Free Daily Requests)
   - Database Driver: Native MongoDB Node.js Driver (MongoClient) using `nodejs_compat`
   - Email Gateway: Brevo (Sendinblue) Transactional Email API
@@ -302,7 +302,43 @@ models/* (Mongoose Schemas)       -> Direct Collections via functions/utils/db.j
 
 
 ===============================================================================
-7. IMPORTANT: MONGODB DATABASE CONNECTION & VARIABLES GUIDE
+7. CLOUDFLARE PAGES BUILD CONFIGURATION (বিল্ড সেটিংস কনফিগারেশন)
+===============================================================================
+
+Cloudflare Pages ড্যাশবোর্ডে (Settings > Builds & deployments > Build configuration) নিচের সেটিংস নিশ্চিত করুন:
+
+┌─────────────────────┬────────────────────────────────────────────────────────┐
+│ Setting Field       │ Value / Configuration                                  │
+├─────────────────────┼────────────────────────────────────────────────────────┤
+│ Build command       │ npm run build:cloudflare                               │
+│ Build output        │ .open-next/assets                                      │
+│ Root directory      │ (খালি থাকবে / Repository Root)                         │
+│ Build comments      │ Enabled                                                │
+└─────────────────────┴────────────────────────────────────────────────────────┘
+
+💡 নোট: OpenNext আর্কিটেকচার ব্যবহার করে Next.js অ্যাপ ক্লাউডফ্লেয়ার পেজে বিল্ড করার জন্য বিল্ড আউটপুট ডিরেক্টরি `.open-next/assets` এবং বিল্ড কমান্ড `npm run build:cloudflare` কনফিগার করা হয়েছে।
+
+
+===============================================================================
+8. CLOUDFLARE PAGES FUNCTIONS RUNTIME CONFIGURATION (রানটাইম কনফিগারেশন)
+===============================================================================
+
+Cloudflare Pages ড্যাশবোর্ডে (Settings > Functions > Runtime) নিচের সেটিংস নিশ্চিত করুন:
+
+┌─────────────────────┬────────────────────────────────────────────────────────┐
+│ Setting Field       │ Value / Configuration                                  │
+├─────────────────────┼────────────────────────────────────────────────────────┤
+│ Placement           │ Default                                                │
+│ Compatibility date  │ 2026-08-14 (Latest Working Compatible Date)             │
+│ Compatibility flags │ nodejs_compat                                          │
+│ Fail open/closed    │ Fail open                                              │
+└─────────────────────┴────────────────────────────────────────────────────────┘
+
+💡 নোট: `nodejs_compat` ফ্ল্যাগটি এনাবল থাকলে Native MongoDB Driver ও Node.js ক্রিপ্টো/মডিউলগুলো ক্লাউডফ্লেয়ার সার্ভারলেস ফাংশনে নির্বিঘ্নে কাজ করবে।
+
+
+===============================================================================
+9. IMPORTANT: MONGODB DATABASE CONNECTION & VARIABLES GUIDE
 ===============================================================================
 
 ⚠️ MONGODB APP ID & KEY সংক্রান্ত তথ্য (কেন ব্যবহার করা হয়নি):
@@ -312,11 +348,11 @@ models/* (Mongoose Schemas)       -> Direct Collections via functions/utils/db.j
 
 ✅ প্রজেক্টে বর্তমানে যা ব্যবহৃত হচ্ছে (Native MongoDB Driver System):
    - প্রজেক্টের `package.json` থেকে অফিশিয়াল `mongodb` NPM ড্রাইভারে থাকা `MongoClient` ব্যবহার করে সরাসরি ডাটাবেসে কানেক্ট করা হয় (`npm install mongodb`)।
-   - Cloudflare Pages Functions-এ Native Driver চালানোর জন্য `wrangler.toml` ফাইলে `compatibility_flags = ["nodejs_compat"]` এনাবল রাখা হয়েছে।
+   - Cloudflare Pages Functions-এ Native Driver চালানোর জন্য `wrangler.toml` ফাইল ও ড্যাশবোর্ডে `compatibility_flags = ["nodejs_compat"]` এনাবল রাখা হয়েছে।
 
 
 ===============================================================================
-8. ENVIRONMENT VARIABLES & SECRETS CONFIGURATION
+10. ENVIRONMENT VARIABLES & SECRETS CONFIGURATION
 ===============================================================================
 
 📋 বর্তমান ফাইনাল সিক্রেট ভ্যারিয়েবলসমূহ (.dev.vars, .env এবং Cloudflare Dashboard):

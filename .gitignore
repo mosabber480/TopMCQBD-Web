@@ -5,10 +5,13 @@ node_modules/
 .next/
 out/
 build/
+.open-next/
 
 # Environment Variables
 .env
 .env*.local
+.dev.vars
+
 
 # Logs
 logs

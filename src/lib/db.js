@@ -1,15 +1,21 @@
 import mongoose from 'mongoose';
-import dns from 'dns';
+import { MongoClient } from 'mongodb';
 
-// Fix for Windows / ISP DNS querySrv ECONNREFUSED on MongoDB Atlas
+// Fix for local DNS issues without breaking Cloudflare runtime
 try {
-  dns.setServers(['8.8.8.8', '1.1.1.1', '8.8.4.4']);
+  if (typeof process !== 'undefined' && process.versions?.node) {
+    const dns = await import('dns').catch(() => null);
+    if (dns && typeof dns.setServers === 'function') {
+      dns.setServers(['8.8.8.8', '1.1.1.1', '8.8.4.4']);
+    }
+  }
 } catch (e) {
-  console.warn('DNS server setting warning:', e);
+  // Ignore DNS override errors on Edge / Cloudflare Workers
 }
 
 const MONGODB_URI_PAID = process.env.MONGODB_URI_PAID || process.env.MONGO_URI || 'mongodb+srv://mosabber480_db_user:EScirLEzwgQVVNaB@mosabber.3ajdj0u.mongodb.net/TopMCQBD_DB?retryWrites=true&w=majority';
 const MONGODB_URI_FREE = process.env.MONGODB_URI_FREE || 'mongodb+srv://mosabber480_db_user:VVcrE9PeIIyVlcKU@topmcqbd.pixb7fx.mongodb.net/TopMCQBD_DB_Free?retryWrites=true&w=majority';
+
 
 if (!global.mongooseCache) {
   global.mongooseCache = {
@@ -84,6 +90,22 @@ export async function connectFreeDB() {
   }
 
   return cached.freeConn;
+}
+
+export async function getPaidMongoClient() {
+  if (!global.mongoClientPaid) {
+    global.mongoClientPaid = new MongoClient(MONGODB_URI_PAID);
+    await global.mongoClientPaid.connect();
+  }
+  return global.mongoClientPaid.db(process.env.MONGODB_DB_NAME_PAID || 'TopMCQBD_DB');
+}
+
+export async function getFreeMongoClient() {
+  if (!global.mongoClientFree) {
+    global.mongoClientFree = new MongoClient(MONGODB_URI_FREE);
+    await global.mongoClientFree.connect();
+  }
+  return global.mongoClientFree.db(process.env.MONGODB_DB_NAME_FREE || 'TopMCQBD_DB_Free');
 }
 
 export default connectDB;
