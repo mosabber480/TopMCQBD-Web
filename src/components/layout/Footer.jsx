@@ -64,16 +64,9 @@ export default function Footer({ footerData: initialFooter, copyrightData: initi
   const [footerData, setFooterData] = useState(initialFooter || DEFAULT_FOOTER);
   const [copyrightData, setCopyrightData] = useState(initialCopyright || DEFAULT_COPYRIGHT);
 
-  // Load layout data from localStorage immediately & fetch fresh from API
   useEffect(() => {
-    try {
-      const cached = localStorage.getItem('layout_config_data');
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (parsed.footer) setFooterData(parsed.footer);
-        if (parsed.copyright) setCopyrightData(parsed.copyright);
-      }
-    } catch (e) {}
+    if (initialFooter) setFooterData(initialFooter);
+    if (initialCopyright) setCopyrightData(initialCopyright);
 
     const fetchConfig = () => {
       fetch('/api/layout-config')
@@ -94,7 +87,7 @@ export default function Footer({ footerData: initialFooter, copyrightData: initi
     fetchConfig();
     window.addEventListener('layout-updated', fetchConfig);
     return () => window.removeEventListener('layout-updated', fetchConfig);
-  }, []);
+  }, [initialFooter, initialCopyright]);
 
   // Hide Main Website Footer on all Admin and Diagnostic routes
   if (pathname && (pathname.startsWith('/admin') || pathname.startsWith('/db-connection-check'))) {

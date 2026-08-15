@@ -99,9 +99,9 @@ export async function POST(request) {
       await config.save();
     }
 
-    return NextResponse.json({ message: 'Layout configuration saved successfully!', config });
+    return NextResponse.json({ success: true, message: 'Layout configuration saved successfully!', config });
   } catch (err) {
     console.error('SAVE LAYOUT CONFIG ERROR:', err);
-    return NextResponse.json({ message: 'Save failed', error: err.message }, { status: 500 });
+    return NextResponse.json({ success: false, message: 'Save failed', error: err.message }, { status: 500 });
   }
 }

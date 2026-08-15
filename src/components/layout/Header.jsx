@@ -28,15 +28,10 @@ export default function Header({ headerData: initialHeader }) {
   const [headerData, setHeaderData] = useState(initialHeader || DEFAULT_HEADER);
   const pathname = usePathname();
 
-  // Load layout data from localStorage immediately & fetch fresh from API
   useEffect(() => {
-    try {
-      const cached = localStorage.getItem('layout_config_data');
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (parsed.header) setHeaderData(parsed.header);
-      }
-    } catch (e) {}
+    if (initialHeader) {
+      setHeaderData(initialHeader);
+    }
 
     const fetchConfig = () => {
       fetch('/api/layout-config')
@@ -64,7 +59,7 @@ export default function Header({ headerData: initialHeader }) {
     fetchConfig();
     window.addEventListener('layout-updated', fetchConfig);
     return () => window.removeEventListener('layout-updated', fetchConfig);
-  }, []);
+  }, [initialHeader]);
 
   // Check login state
   useEffect(() => {

@@ -89,9 +89,9 @@ export async function POST(request) {
       await config.save();
     }
 
-    return NextResponse.json({ message: 'সাইডবার ও হেডার কনফিগারেশন সফলভাবে সংরক্ষিত হয়েছে!', config });
+    return NextResponse.json({ success: true, message: 'সাইডবার ও হেডার কনফিগারেশন সফলভাবে সংরক্ষিত হয়েছে!', config });
   } catch (err) {
     console.error('SAVE SIDEBAR CONFIG ERROR:', err);
-    return NextResponse.json({ message: 'Server Error', error: err.message }, { status: 500 });
+    return NextResponse.json({ success: false, message: 'Server Error', error: err.message }, { status: 500 });
   }
 }

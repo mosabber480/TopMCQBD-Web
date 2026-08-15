@@ -15,13 +15,7 @@ export default function AnnouncementBar({ announcement: initialAnnouncement }) {
   const [announcement, setAnnouncement] = useState(initialAnnouncement || DEFAULT_ANNOUNCEMENT);
 
   useEffect(() => {
-    try {
-      const cached = localStorage.getItem('layout_config_data');
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (parsed.announcement) setAnnouncement(parsed.announcement);
-      }
-    } catch (e) {}
+    if (initialAnnouncement) setAnnouncement(initialAnnouncement);
 
     const fetchConfig = () => {
       fetch('/api/layout-config')
@@ -41,7 +35,7 @@ export default function AnnouncementBar({ announcement: initialAnnouncement }) {
     fetchConfig();
     window.addEventListener('layout-updated', fetchConfig);
     return () => window.removeEventListener('layout-updated', fetchConfig);
-  }, []);
+  }, [initialAnnouncement]);
 
   // Hide Announcement Bar on all Admin and Diagnostic routes
   if (pathname && (pathname.startsWith('/admin') || pathname.startsWith('/db-connection-check'))) {

@@ -1,8 +1,10 @@
 import './globals.css';
-import AnnouncementBar from '@/components/layout/AnnouncementBar';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
-import TopAlert from '@/components/layout/TopAlert';
+import AppLayoutWrapper from '@/components/layout/AppLayoutWrapper';
+import { connectDB } from '@/lib/db';
+import LayoutConfig from '@/models/LayoutConfig';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export const metadata = {
   title: 'TopMCQBD - সেরা অনলাইন কুইজ ও প্রস্তুতি প্ল্যাটফর্ম',
@@ -14,80 +16,27 @@ export const metadata = {
   }
 };
 
-const defaultLayoutData = {
-  announcement: {
-    text: "বিশেষ বিজ্ঞপ্তি: সার্ভার থেকে প্রথমবার কুইজের তথ্য লোড হতে ৩০ সেকেন্ড পর্যন্ত সময় লাগতে পারে। অনুগ্রহ করে ধৈর্য ধরুন!",
-    link: ""
-  },
-  header: {
-    siteTitle: "TopMCQBD",
-    logoUrl: "/images/TopMCQ.png",
-    seoTitle: "TopMCQBD - সেরা অনলাইন কুইজ ও প্রস্তুতি প্ল্যাটফর্ম",
-    faviconUrl: "/images/favicon.ico",
-    btnText: "সহায়তা",
-    btnLink: "/contact",
-    menus: [
-      { title: "হোম", url: "/" },
-      { title: "প্রশ্ন অনুশীলন", url: "/questions" },
-      { title: "সকল MCQ", url: "/all-mcq" },
-      { title: "প্যাকেজসমূহ", url: "/packages" },
-      { title: "আমাদের সম্পর্কে", url: "/about-us" },
-      { title: "যোগাযোগ", url: "/contact" }
-    ],
-    megaMenus: []
-  },
-  footer: {
-    columns: [
-      {
-        type: "info",
-        title: "সাইট তথ্য ও সোশাল লিংক",
-        text: "বিসিএস, ব্যাংক, প্রাথমিক শিক্ষক নিয়োগ এবং বিশ্ববিদ্যালয়ের ভর্তি পরীক্ষার জন্য একটি আধুনিক ও স্বয়ংসম্পূর্ণ অনলাইন প্রস্তুতি প্ল্যাটফর্ম।",
-        fb: "",
-        yt: "",
-        wa: ""
-      },
-      {
-        type: "links",
-        title: "প্রয়োজনীয় লিংক",
-        links: [
-          { text: "হোম পেজ", url: "/" },
-          { text: "প্রশ্ন অনুশীলন", url: "/questions" },
-          { text: "সকল প্রশ্ন ক্যাটাগরি", url: "/all-mcq" },
-          { text: "প্যাকেজ ও মূল্য তালিকা", url: "/packages" }
-        ]
-      },
-      {
-        type: "links",
-        title: "ক্যাটাগরি",
-        links: [
-          { text: "বিসিএস প্রস্তুতি", url: "/questions?category=bcs" },
-          { text: "ব্যাংক জব", url: "/questions?category=bank" },
-          { text: "প্রাথমিক শিক্ষক", url: "/questions?category=primary" }
-        ]
-      },
-      {
-        type: "links",
-        title: "যোগাযোগ",
-        links: [
-          { text: "আমাদের সম্পর্কে", url: "/about-us" },
-          { text: "যোগাযোগ করুন", url: "/contact" },
-          { text: "সচরাচর জিজ্ঞাসা (FAQ)", url: "/faq" },
-          { text: "রিফান্ড ও পেমেন্ট পলিসি", url: "/privacy-and-refund-policy" }
-        ]
-      }
-    ]
-  },
-  copyright: {
-    text: "© 2026 TopMCQ. All rights reserved.",
-    links: [
-      { title: "FAQ", url: "/faq" },
-      { title: "Privacy & Refund Policy", url: "/privacy-and-refund-policy" },
-      { title: "System Status", url: "/status" }
-    ]
+async function getLayoutConfig() {
+  try {
+    await connectDB();
+    const config = await LayoutConfig.findOne().lean();
+    if (config) {
+      return {
+        announcement: config.announcement || null,
+        header: config.header || null,
+        footer: config.footer || null,
+        copyright: config.copyright || null
+      };
+    }
+  } catch (err) {
+    console.error('Error fetching LayoutConfig in RootLayout:', err);
   }
-};
+  return null;
+}
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  const layoutData = await getLayoutConfig();
+
   return (
     <html lang="bn">
       <head>
@@ -99,13 +48,9 @@ export default function RootLayout({ children }) {
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Bengali:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
       </head>
       <body>
-        <TopAlert />
-        <AnnouncementBar announcement={defaultLayoutData.announcement} />
-        <Header headerData={defaultLayoutData.header} />
-
-        <main>{children}</main>
-
-        <Footer footerData={defaultLayoutData.footer} copyrightData={defaultLayoutData.copyright} />
+        <AppLayoutWrapper initialLayoutData={layoutData}>
+          {children}
+        </AppLayoutWrapper>
       </body>
     </html>
   );
