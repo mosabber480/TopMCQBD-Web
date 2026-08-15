@@ -39,7 +39,7 @@ export async function onRequest(context) {
       connected: !!MONGODB_URI_FREE,
       latencyMs: Math.floor(Math.random() * 8) + 15,
       host: parseClusterHost(MONGODB_URI_FREE),
-      collections: ['questions'],
+      collections: ['examssolvedtest', 'questions'],
       error: null
     }
   };
