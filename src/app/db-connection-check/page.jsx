@@ -21,17 +21,10 @@ export default function DBConnectionCheck() {
     setFetchError(null);
     try {
       const selected = serverOptions.find(s => s.id === serverType) || serverOptions[0];
-      let res = await fetch(selected.url, { cache: 'no-store' }).catch(() => null);
-      
-      // If local /api/db-check returns 404, fallback to live Cloudflare endpoint
-      if (!res || !res.ok) {
-        if (selected.id === 'current' && typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-          res = await fetch('https://topmcqbd.pages.dev/api/db-check', { cache: 'no-store' }).catch(() => null);
-        }
-      }
+      const res = await fetch(selected.url, { cache: 'no-store' });
 
-      if (!res || !res.ok) {
-        throw new Error(res ? `HTTP ${res.status}: ${res.statusText}` : 'Network error or endpoint not reachable');
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
       }
       const json = await res.json();
       setData(json);
@@ -42,7 +35,6 @@ export default function DBConnectionCheck() {
       setLoading(false);
     }
   };
-
 
   useEffect(() => {
     checkConnection('current');
@@ -66,7 +58,7 @@ export default function DBConnectionCheck() {
           <div className="db-badge">Diagnostic Tool</div>
           <h1 className="db-title">DB Connection Check</h1>
           <p className="db-subtitle">
-            Cloudflare Pages সার্ভারলেস ও MongoDB ক্লাস্টারের মধ্যকার রিয়েল-টাইম কানেকশন স্ট্যাটাস
+            Cloudflare Pages ও MongoDB ক্লাস্টারের মধ্যকার রিয়েল-টাইম কানেকশন স্ট্যাটাস
           </p>
         </div>
 
@@ -228,48 +220,6 @@ export default function DBConnectionCheck() {
                 <pre className="error-code">{data.freeDb.error.message || JSON.stringify(data.freeDb.error)}</pre>
               </div>
             )}
-          </div>
-        </div>
-
-        {/* Diagnostic Explanation & Troubleshooting Guide */}
-        <div className="guide-card">
-          <h2 className="guide-title">📖 ডাটাবেজ কানেকশন গাইড ও সমাধান (Troubleshooting)</h2>
-          
-          <div className="guide-grid">
-            <div className="guide-item">
-              <div className="guide-icon">🟢</div>
-              <div>
-                <strong>কানেকশন সফল (Connected):</strong>
-                <p>Cloudflare Pages Functions সরাসরি Native MongoDB Driver দিয়ে ক্লাস্টারের সাথে যুক্ত হয়েছে এবং পিং কমান্ড সফল হয়েছে।</p>
-              </div>
-            </div>
-
-            <div className="guide-item">
-              <div className="guide-icon">🔒</div>
-              <div>
-                <strong>আইপি অ্যাক্সেস সমস্যা (Timeout / ECONNREFUSED):</strong>
-                <p>MongoDB Atlas ড্যাশবোর্ডে <strong>Network Access ➔ Add IP Address</strong> এ গিয়ে <code>0.0.0.0/0</code> (Allow Access from Anywhere) এনাবল থাকতে হবে, কারণ Cloudflare Pages ডাইনামিক ক্লাউড আইপি ব্যবহার করে।</p>
-              </div>
-            </div>
-
-            <div className="guide-item">
-              <div className="guide-icon">🔑</div>
-              <div>
-                <strong>অথেনটিকেশন এরর (AuthenticationFailed):</strong>
-                <p>MongoDB Atlas-এর Database Access ইউজার পাসওয়ার্ড ও URI সঠিক আছে কিনা যাচাই করুন।</p>
-              </div>
-            </div>
-
-            <div className="guide-item">
-              <div className="guide-icon">🌐</div>
-              <div>
-                <strong>সার্ভার রাউটিং আর্কিটেকচার:</strong>
-                <p>
-                  • <code>https://topmcqbd.pages.dev</code> ➔ পেইড সিস্টেম ও মূল ক্লাস্টার (TopMCQBD_DB)<br />
-                  • <code>https://topmcqbd-web-free.pages.dev</code> ➔ ফ্রি এমসিকিউ ক্লাস্টার (TopMCQBD_DB_Free)
-                </p>
-              </div>
-            </div>
           </div>
         </div>
 
