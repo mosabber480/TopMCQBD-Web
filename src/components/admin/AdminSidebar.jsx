@@ -48,6 +48,15 @@ export default function AdminSidebar() {
       }
     } catch (e) {}
 
+    const handleSync = () => {
+      try {
+        const state = localStorage.getItem('sidebar_collapsed') === 'true';
+        setIsCollapsed(state);
+      } catch (e) {}
+    };
+
+    window.addEventListener('sidebar-toggle', handleSync);
+
     // Fetch dynamic sidebar config
     fetch('/api/sidebar-config')
       .then(res => res.json())
@@ -63,28 +72,25 @@ export default function AdminSidebar() {
         }
       })
       .catch(() => {});
+
+    return () => window.removeEventListener('sidebar-toggle', handleSync);
   }, []);
 
   // Close mobile sidebar on navigation
   useEffect(() => {
     setMobileOpen(false);
+    const sidebar = document.getElementById('adminSidebar');
+    const overlay = document.querySelector('.sidebar-overlay');
+    if (sidebar) sidebar.classList.remove('active');
+    if (overlay) overlay.classList.remove('active');
   }, [pathname]);
-
-  const toggleDesktopSidebar = () => {
-    const nextState = !isCollapsed;
-    setIsCollapsed(nextState);
-    if (nextState) {
-      document.body.classList.add('sidebar-collapsed');
-    } else {
-      document.body.classList.remove('sidebar-collapsed');
-    }
-    try {
-      localStorage.setItem('sidebar_collapsed', nextState.toString());
-    } catch (e) {}
-  };
 
   const toggleMobileSidebar = () => {
     setMobileOpen(!mobileOpen);
+    const sidebar = document.getElementById('adminSidebar');
+    const overlay = document.querySelector('.sidebar-overlay');
+    if (sidebar) sidebar.classList.toggle('active');
+    if (overlay) overlay.classList.toggle('active');
   };
 
   const toggleSubmenu = (index, e) => {
@@ -95,15 +101,6 @@ export default function AdminSidebar() {
   return (
     <>
       <div className="sidebar-wrapper">
-        {/* Mobile Toggle Button */}
-        <button
-          className="mobile-sidebar-toggle"
-          onClick={toggleMobileSidebar}
-          aria-label="Toggle Sidebar"
-        >
-          <i className="fa-solid fa-bars"></i>
-        </button>
-
         {/* Mobile Overlay */}
         <div
           className={`sidebar-overlay ${mobileOpen ? 'active' : ''}`}
@@ -111,20 +108,12 @@ export default function AdminSidebar() {
         ></div>
 
         <aside className={`sidebar ${mobileOpen ? 'active' : ''}`} id="adminSidebar">
-          <div className="sidebar-header">
-            <Link href="/admin/dashboard" className="sidebar-brand" style={{ display: isCollapsed ? 'none' : 'flex' }}>
-              <i className="fa-solid fa-unlock-keyhole" style={{ color: '#38bdf8' }}></i>
-              <span>অ্যাডমিন প্যানেল</span>
-            </Link>
-
-            <button
-              className="desktop-sidebar-collapse-btn"
-              onClick={toggleDesktopSidebar}
-              title="Toggle Sidebar"
-            >
-              <i className={`fa-solid ${isCollapsed ? 'fa-outdent' : 'fa-indent'}`}></i>
-            </button>
-
+          {/* Mobile Only Header Row with Close button */}
+          <div className="sidebar-mobile-header">
+            <span className="mobile-brand-title">
+              <i className="fa-solid fa-unlock-keyhole" style={{ color: '#38bdf8', marginRight: '8px' }}></i>
+              মেনু অপশন
+            </span>
             <button
               className="sidebar-close-btn"
               onClick={toggleMobileSidebar}
@@ -134,6 +123,7 @@ export default function AdminSidebar() {
             </button>
           </div>
 
+          {/* Main Sidebar Navigation Menu */}
           <nav className="sidebar-menu">
             {menuItems.map((item, index) => {
               const hasSub = item.subMenus && item.subMenus.length > 0;
@@ -170,7 +160,7 @@ export default function AdminSidebar() {
                         return (
                           <Link
                             key={sIdx}
-                            href={formatURL(sub.url)}
+                            href={formatURL(sub.url || '#')}
                             className={`sidebar-sublink ${subActive ? 'active' : ''}`}
                             title={sub.title}
                           >
@@ -187,7 +177,7 @@ export default function AdminSidebar() {
               return (
                 <Link
                   key={index}
-                  href={formatURL(item.href)}
+                  href={formatURL(item.href || '#')}
                   className={`sidebar-link ${isActive ? 'active' : ''}`}
                   title={item.label}
                 >
@@ -200,21 +190,18 @@ export default function AdminSidebar() {
             })}
           </nav>
 
+          {/* Bottom Sidebar Footer */}
           <div className="sidebar-footer">
-            <Link href="/" className="sidebar-link" target="_blank" title="মূল ওয়েবসাইট">
+            <Link href="/" className="sidebar-link" title="মূল ওয়েবসাইট">
               <div className="link-content">
-                <i className="fa-solid fa-globe"></i>
-                <span>মূল ওয়েবসাইট</span>
+                <i className="fa-solid fa-globe" style={{ color: '#38bdf8' }}></i>
+                <span>মূল ওয়েবসাইট</span>
               </div>
             </Link>
 
-            <Link
-              href="/admin/admin-profile"
-              className={`sidebar-link ${pathname === '/admin/admin-profile' ? 'active' : ''}`}
-              title={userName}
-            >
+            <Link href="/admin/admin-profile" className="sidebar-link" title="প্রোফাইল সেটিংস">
               <div className="link-content">
-                <i className="fa-solid fa-user-shield"></i>
+                <i className="fa-solid fa-user-gear" style={{ color: '#4ade80' }}></i>
                 <span>{userName}</span>
               </div>
             </Link>
@@ -237,9 +224,17 @@ export default function AdminSidebar() {
         </aside>
       </div>
 
+      {/* Admin Logout Confirmation Modal */}
       <AdminLogoutModal
         isOpen={logoutModalOpen}
         onClose={() => setLogoutModalOpen(false)}
+        onConfirm={() => {
+          localStorage.removeItem('token');
+          localStorage.removeItem('quiz_token');
+          localStorage.removeItem('user');
+          localStorage.removeItem('quiz_user');
+          router.push('/login');
+        }}
       />
     </>
   );
