@@ -2,43 +2,56 @@ import { parseClusterHost, getDbConfig } from '../utils/db.js';
 import { generateToken, verifyTokenFromRequest } from '../utils/auth.js';
 import { sendResetEmail } from '../utils/brevo.js';
 
-// Default Fallbacks for Cloudflare Edge Functions
+// Default Configs matching MongoDB Atlas Collections
 const DEFAULT_HOME_CONFIG = {
-  seoTitle: '',
-  seoDescription: '',
+  seoTitle: "",
+  seoDescription: "",
   sliders: [
     {
-      title: 'TopMCQBD এ আপনাকে স্বাগতম!',
-      subtitle: 'সেরা অনলাইন কুইজ ও প্রস্তুতি প্ল্যাটফর্মে নিজেকে প্রস্তুত করুন।',
-      bgImage: 'images/slider-01.jpg',
+      title: "বিসিএস ও ব্যাংক জব প্রস্তুতির সেরা মাধ্যম",
+      subtitle: "হাজারো সঠিক প্রশ্নের ব্যাখ্যাসহ নিজেকে যাচাই করুন এবং দ্রুততম সময়ে আপনার চাকরির প্রস্তুতি সম্পন্ন করু",
+      bgImage: "images/slider-01.jpg",
       bgOpacity: 0.5,
-      btn1Text: 'কুইজ শুরু করুন',
-      btn1Link: '/quiz',
-      btn2Text: 'সকল প্যাকেজ',
-      btn2Link: '/packages'
+      btn1Text: "🚀 কুইজ শুরু করুন",
+      btn1Link: "/all-mcq",
+      btn2Text: "ফ্রি ডেমো দেখুন",
+      btn2Link: "#demo"
     },
     {
-      title: 'সহজ ও নির্ভুল প্রস্তুতি',
-      subtitle: 'টপিকভিত্তিক প্রশ্নব্যাংক ও রিয়েল-টাইম টাইমার টেস্ট।',
-      bgImage: 'images/slider-02.jpg',
+      title: "বিসিএস ও ব্যাংক জব প্রস্তুতির সেরা মাধ্যম",
+      subtitle: "হাজারো সঠিক প্রশ্নের ব্যাখ্যাসহ নিজেকে যাচাই করুন এবং দ্রুততম সময়ে আপনার চাকরির প্রস্তুতি সম্পন্ন করু",
+      bgImage: "images/slider-02.jpg",
       bgOpacity: 0.5,
-      btn1Text: 'সকল ক্যাটাগরি',
-      btn1Link: '/all-mcq',
-      btn2Text: 'যোগাযোগ করুন',
-      btn2Link: '/contact'
+      btn1Text: "🚀 কুইজ শুরু করুন",
+      btn1Link: "/all-mcq",
+      btn2Text: "ফ্রি ডেমো দেখুন",
+      btn2Link: "#demo"
     }
   ],
-  demoQuizzes: [],
+  demoQuizzes: [
+    {
+      title: "বাংলা ভাষা ও সাহিত্য",
+      badgeText: "ফ্রি টেস্ট",
+      desc: "সন্ধি, সমাস ও গুরুত্বপূর্ণ সাহিত্যিকদের প্রশ্নাবলি।",
+      link: ""
+    }
+  ],
   packages: [],
-  demoSectionInfo: { title: 'ফ্রি ডেমো কুইজ (Free Demo Quiz)', subtitle: 'কোনো রেজিস্ট্রেশন ছাড়াই এখনই নিচের কুইজগুলো প্র্যাকটিস করে দেখুন' },
-  packageSectionInfo: { title: 'আমাদের প্রিপারেশন প্যাকেজসমূহ', subtitle: 'আপনার প্রয়োজন অনুযায়ী সেরা প্যাকেজটি বেছে নিন' },
+  demoSectionInfo: {
+    title: "ফ্রি কুইজ",
+    subtitle: "কোনো রেজিস্ট্রেশন ছাড়াই এখনই নিচের কুইজগুলো প্র্যাকটিস করে দেখুন"
+  },
+  packageSectionInfo: {
+    title: "ফ্রি কুইজ",
+    subtitle: "কোনো রেজিস্ট্রেশন ছাড়াই এখনই নিচের কুইজগুলো প্র্যাকটিস করে দেখুন"
+  },
   missionSectionInfo: {
-    sectionTitle: 'আমাদের লক্ষ্য ও উদ্দেশ্য',
-    sectionSubtitle: 'শিক্ষার্থীদের প্রস্তুতিকে নির্ভুল ও প্রযুক্তিবান্ধব করা',
-    missionTitle: 'আমাদের মিশন',
-    missionDesc: 'একটি মানসম্মত ও বিষয়ভিত্তিক প্ল্যাটফর্ম তৈরি করা যাতে যে কেউ যেকোনো স্থান থেকে আত্মবিশ্বাসের সাথে প্রতিযোগিতামূলক পরীক্ষার প্রস্তুতি নিতে পারে।',
-    goalTitle: 'আমাদের ভিশন',
-    goalDesc: 'বাংলাদেশের অন্যতম বিশ্বস্ত এবং সমৃদ্ধ ই-লার্নিং ও অনলাইন কুইজ প্ল্যাটফর্ম হিসেবে গড়ে তোলা।'
+    sectionTitle: "আমাদের মিশন ও লক্ষ্য",
+    sectionSubtitle: "শিক্ষার্থীদের সফলতা ও সঠিক প্রস্তুতির পথ সুগম করাই আমাদের উদ্দেশ্য",
+    missionTitle: "আমাদের মিশন",
+    missionDesc: "বাংলাদেশের যেকোনো প্রান্তের শিক্ষার্থীদের কাছে মানসম্মত ও তথ্যসমৃদ্ধ প্রস্তুতিমূলক কুইজ পৌঁছে দেওয়া, যাতে তারা ঘরে বসেই রিয়েল-টাইম মূল্যায়নের মাধ্যমে নিজের আত্মবিশ্বাস বৃদ্ধি করতে পারে।",
+    goalTitle: "আমাদের লক্ষ্য",
+    goalDesc: "একটি আধুনিক, সহজ ও কার্যকর লার্নিং প্ল্যাটফর্ম হিসেবে প্রতিটি প্রতিযোগিতামূলক পরীক্ষার পরীক্ষার্থীর প্রথম পছন্দ হয়ে ওঠা এবং ব্যাখ্যামূলক অনুশীলনের মাধ্যমে তাদের শতভাগ সাফল্য নিশ্চিত করা।"
   }
 };
 
@@ -67,13 +80,19 @@ const DEFAULT_LAYOUT_CONFIG = {
   footer: {
     columns: [
       {
-        type: "text",
-        title: "TopMCQBD",
-        content: "বিসিএস, ব্যাংক, প্রাথমিক শিক্ষক নিয়োগ এবং বিশ্ববিদ্যালয়ের ভর্তি পরীক্ষার জন্য একটি আধুনিক ও স্বয়ংসম্পূর্ণ অনলাইন প্রস্তুতি প্ল্যাটফর্ম।"
+        type: "info",
+        title: "সাইট তথ্য ও সোশাল লিংক",
+        text: "বিসিএস, ব্যাংক, প্রাথমিক শিক্ষক নিয়োগ এবং বিশ্ববিদ্যালয়ের ভর্তি পরীক্ষার জন্য একটি আধুনিক ও স্বয়ংসম্পূর্ণ অনলাইন প্রস্তুতি প্ল্যাটফর্ম।",
+        fb: "",
+        yt: "",
+        wa: "",
+        tw: "",
+        tg: "",
+        ln: ""
       },
       {
         type: "links",
-        title: "গুরুত্বপূর্ণ লিংক",
+        title: "প্রয়োজনীয় লিংক",
         links: [
           { title: "হোম পেজ", url: "/" },
           { title: "কুইজ অনুশীলন", url: "/quiz" },
@@ -83,7 +102,16 @@ const DEFAULT_LAYOUT_CONFIG = {
       },
       {
         type: "links",
-        title: "সহায়তা ও তথ্য",
+        title: "ক্যাটাগরি",
+        links: [
+          { title: "বিসিএস প্রস্তুতি", url: "/quiz?category=bcs" },
+          { title: "ব্যাংক জব", url: "/quiz?category=bank" },
+          { title: "প্রাথমিক শিক্ষক", url: "/quiz?category=primary" }
+        ]
+      },
+      {
+        type: "links",
+        title: "যোগাযোগ",
         links: [
           { title: "আমাদের সম্পর্কে", url: "/about-us" },
           { title: "যোগাযোগ করুন", url: "/contact" },

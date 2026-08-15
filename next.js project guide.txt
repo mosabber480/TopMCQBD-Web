@@ -6,7 +6,8 @@
 ===============================================================================
 next.js project guide.txt = holo amar project yer full guide.
 
-Old-Mosabber-Quiz-App (ager Full-Stack Node.js App with Vanilla JavaScript files)  o Old-project (akta yei related next.js old project)
+Old-Mosabber-Quiz-App (ager Full-Stack Node.js App with Vanilla JavaScript files) jar style o logic next.js a convert hobe.
+
 ===============================================================================
 
 
