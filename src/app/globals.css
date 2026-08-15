@@ -1046,3 +1046,16 @@ body.sidebar-collapsed .admin-main-content {
   bottom: 10%;
   right: 15%;
 }
+
+/* Ensure Admin Panel Brand is always crisp white across all browser states */
+.admin-panel-brand,
+.admin-panel-brand:link,
+.admin-panel-brand:visited,
+.admin-panel-brand:hover,
+.admin-panel-brand:active,
+.admin-panel-brand i,
+.admin-panel-brand span,
+.admin-panel-brand .brand-text {
+  color: #ffffff !important;
+  text-decoration: none !important;
+}

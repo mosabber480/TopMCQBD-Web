@@ -21,11 +21,12 @@ async function getLayoutConfig() {
     await connectDB();
     const config = await LayoutConfig.findOne().lean();
     if (config) {
+      const cleanConfig = JSON.parse(JSON.stringify(config));
       return {
-        announcement: config.announcement || null,
-        header: config.header || null,
-        footer: config.footer || null,
-        copyright: config.copyright || null
+        announcement: cleanConfig.announcement || null,
+        header: cleanConfig.header || null,
+        footer: cleanConfig.footer || null,
+        copyright: cleanConfig.copyright || null
       };
     }
   } catch (err) {

@@ -140,12 +140,16 @@ export default function AdminHeaderBar() {
           border-radius: 6px;
         }
 
-        .admin-panel-brand {
+        .admin-panel-brand,
+        .admin-panel-brand:link,
+        .admin-panel-brand:visited,
+        .admin-panel-brand:hover,
+        .admin-panel-brand:active {
           display: flex;
           align-items: center;
           gap: 10px;
           color: #ffffff !important;
-          text-decoration: none;
+          text-decoration: none !important;
           font-size: 16px;
           font-weight: 700;
           white-space: nowrap;
@@ -160,6 +164,8 @@ export default function AdminHeaderBar() {
         }
         .admin-panel-brand .brand-text {
           color: #ffffff !important;
+          font-size: 16px;
+          font-weight: 700;
         }
 
         .desktop-collapse-btn {
@@ -316,9 +322,14 @@ export default function AdminHeaderBar() {
           <i className={`fa-solid ${isCollapsed ? 'fa-bars-staggered' : 'fa-bars'}`}></i>
         </button>
 
-        <Link href="/admin/dashboard" className="admin-panel-brand" title="অ্যাডমিন ড্যাশবোর্ড">
-          <i className="fa-solid fa-unlock-keyhole"></i>
-          <span className="brand-text">অ্যাডমিন প্যানেল</span>
+        <Link
+          href="/admin/dashboard"
+          className="admin-panel-brand"
+          title="অ্যাডমিন ড্যাশবোর্ড"
+          style={{ color: '#ffffff', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px' }}
+        >
+          <i className="fa-solid fa-unlock-keyhole" style={{ color: '#ffffff', fontSize: '18px' }}></i>
+          <span className="brand-text" style={{ color: '#ffffff', fontWeight: '700', fontSize: '16px' }}>অ্যাডমিন প্যানেল</span>
         </Link>
       </div>
 

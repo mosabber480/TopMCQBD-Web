@@ -89,7 +89,8 @@ export default function Header({ headerData: initialHeader }) {
 
   const h = headerData || DEFAULT_HEADER;
   const siteTitle = (h.siteTitle && h.siteTitle.trim()) ? h.siteTitle.trim() : 'TopMCQBD';
-  const logoUrl = h.logoUrl ? formatURL(h.logoUrl) : '/images/TopMCQ.png';
+  const hasLogo = Boolean(h.logoUrl && h.logoUrl.trim());
+  const logoUrl = hasLogo ? formatURL(h.logoUrl.trim()) : '';
 
   // Auth Button Link & Text
   let authLink = '/login';
@@ -110,15 +111,14 @@ export default function Header({ headerData: initialHeader }) {
   return (
     <header id="global-header">
       <div className="header-wrapper">
-        {/* Brand Logo & Title */}
+        {/* Brand Logo or Title: Show logo ONLY if present; otherwise show text title */}
         <div className="site-logo">
-          <Link href="/">
-            {logoUrl ? (
+          <Link href="/" title={siteTitle}>
+            {hasLogo ? (
               <img src={logoUrl} alt={siteTitle} />
             ) : (
-              <i className="fa-solid fa-book-open" style={{ color: 'var(--primary)', marginRight: '6px' }}></i>
+              <span>{siteTitle}</span>
             )}
-            <span>{siteTitle}</span>
           </Link>
         </div>
 
