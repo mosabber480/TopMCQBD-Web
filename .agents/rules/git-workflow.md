@@ -1,13 +1,12 @@
-# Git Workflow Rule
+# Terminal & Git Rules
 
-1. **Automatic Add & Commit**:
-   - Always automatically run `git add .` and create descriptive commits `git commit -m "..."` upon completing coding tasks.
-   - Do NOT ask or prompt the user to run `git add` or `git commit`.
-
-2. **Manual Push by User**:
-   - NEVER execute `git push` commands directly.
-   - ALWAYS show only the final `git push` commands:
-     ```bash
-     git push mcq main
-     git push free-mcq main
-     ```
+- **Allowed Git & Dev Commands**:
+  - `git status` (Read-only status check)
+  - `git remote -v` (Read-only remote list)
+  - `npm run dev` (Start / manage development server)
+  - Build/test validation commands when needed.
+- **Strictly Prohibited Git Commands**:
+  - Do NOT run `git add`
+  - Do NOT run `git commit`
+  - Do NOT run `git push`
+  - The USER will handle all git staging, commits, and pushes manually.

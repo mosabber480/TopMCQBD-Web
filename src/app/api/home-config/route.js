@@ -14,40 +14,12 @@ export async function GET() {
       config = {
         seoTitle: '',
         seoDescription: '',
-        sliders: [
-          {
-            title: 'TopMCQBD এ আপনাকে স্বাগতম!',
-            subtitle: 'সেরা অনলাইন কুইজ ও প্রস্তুতি প্ল্যাটফর্মে নিজেকে প্রস্তুত করুন।',
-            bgImage: 'images/slider-01.jpg',
-            bgOpacity: 0.5,
-            btn1Text: 'কুইজ শুরু করুন',
-            btn1Link: '/quiz',
-            btn2Text: 'সকল প্যাকেজ',
-            btn2Link: '/packages'
-          },
-          {
-            title: 'সহজ ও নির্ভুল প্রস্তুতি',
-            subtitle: 'টপিকভিত্তিক প্রশ্নব্যাংক ও রিয়েল-টাইম টাইমার টেস্ট।',
-            bgImage: 'images/slider-02.jpg',
-            bgOpacity: 0.5,
-            btn1Text: 'সকল ক্যাটাগরি',
-            btn1Link: '/all-mcq',
-            btn2Text: 'যোগাযোগ করুন',
-            btn2Link: '/contact'
-          }
-        ],
+        sliders: [],
         demoQuizzes: [],
         packages: [],
-        demoSectionInfo: { title: 'ফ্রি ডেমো কুইজ (Free Demo Quiz)', subtitle: 'কোনো রেজিস্ট্রেশন ছাড়াই এখনই নিচের কুইজগুলো প্র্যাকটিস করে দেখুন' },
-        packageSectionInfo: { title: 'আমাদের প্রিপারেশন প্যাকেজসমূহ', subtitle: 'আপনার প্রয়োজন অনুযায়ী সেরা প্যাকেজটি বেছে নিন' },
-        missionSectionInfo: {
-          sectionTitle: 'আমাদের লক্ষ্য ও উদ্দেশ্য',
-          sectionSubtitle: 'শিক্ষার্থীদের প্রস্তুতিকে নির্ভুল ও প্রযুক্তিবান্ধব করা',
-          missionTitle: 'আমাদের মিশন',
-          missionDesc: 'একটি মানসম্মত ও বিষয়ভিত্তিক প্ল্যাটফর্ম তৈরি করা যাতে যে কেউ যেকোনো স্থান থেকে আত্মবিশ্বাসের সাথে প্রতিযোগিতামূলক পরীক্ষার প্রস্তুতি নিতে পারে।',
-          goalTitle: 'আমাদের ভিশন',
-          goalDesc: 'বাংলাদেশের অন্যতম বিশ্বস্ত এবং সমৃদ্ধ ই-লার্নিং ও অনলাইন কুইজ প্ল্যাটফর্ম হিসেবে গড়ে তোলা।'
-        }
+        demoSectionInfo: { title: '', subtitle: '' },
+        packageSectionInfo: { title: '', subtitle: '' },
+        missionSectionInfo: null
       };
     }
     return NextResponse.json(config);

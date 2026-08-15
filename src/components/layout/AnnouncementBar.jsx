@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import { formatURL } from '@/lib/config';
 
 const DEFAULT_ANNOUNCEMENT = {
-  text: "বিশেষ বিজ্ঞপ্তি: সার্ভার থেকে প্রথমবার কুইজের তথ্য লোড হতে ৩০ সেকেন্ড পর্যন্ত সময় লাগতে পারে। অনুগ্রহ করে ধৈর্য ধরুন!",
+  text: "",
   link: ""
 };
 

@@ -6,57 +6,12 @@ import { usePathname } from 'next/navigation';
 import { formatURL, mapLegacyUrl } from '@/lib/config';
 
 const DEFAULT_FOOTER = {
-  columns: [
-    {
-      type: "info",
-      title: "সাইট তথ্য ও সোশাল লিংক",
-      text: "বিসিএস, ব্যাংক, প্রাথমিক শিক্ষক নিয়োগ এবং বিশ্ববিদ্যালয়ের ভর্তি পরীক্ষার জন্য একটি আধুনিক ও স্বয়ংসম্পূর্ণ অনলাইন প্রস্তুতি প্ল্যাটফর্ম।",
-      fb: "",
-      yt: "",
-      wa: "",
-      tw: "",
-      tg: "",
-      ln: ""
-    },
-    {
-      type: "links",
-      title: "প্রয়োজনীয় লিংক",
-      links: [
-        { title: "হোম পেজ", url: "/" },
-        { title: "কুইজ অনুশীলন", url: "/quiz" },
-        { title: "সকল প্রশ্ন ক্যাটাগরি", url: "/all-mcq" },
-        { title: "প্যাকেজ ও মূল্য তালিকা", url: "/packages" }
-      ]
-    },
-    {
-      type: "links",
-      title: "ক্যাটাগরি",
-      links: [
-        { title: "বিসিএস প্রস্তুতি", url: "/quiz?category=bcs" },
-        { title: "ব্যাংক জব", url: "/quiz?category=bank" },
-        { title: "প্রাথমিক শিক্ষক", url: "/quiz?category=primary" }
-      ]
-    },
-    {
-      type: "links",
-      title: "যোগাযোগ",
-      links: [
-        { title: "আমাদের সম্পর্কে", url: "/about-us" },
-        { title: "যোগাযোগ করুন", url: "/contact" },
-        { title: "সচরাচর জিজ্ঞাসা (FAQ)", url: "/faq" },
-        { title: "রিফান্ড ও পেমেন্ট পলিসি", url: "/privacy-and-refund-policy" }
-      ]
-    }
-  ]
+  columns: []
 };
 
 const DEFAULT_COPYRIGHT = {
-  text: "© " + new Date().getFullYear() + " TopMCQBD. All rights reserved.",
-  links: [
-    { title: "FAQ", url: "/faq" },
-    { title: "Privacy & Refund Policy", url: "/privacy-and-refund-policy" },
-    { title: "System Status", url: "/status" }
-  ]
+  text: "",
+  links: []
 };
 
 export default function Footer({ footerData: initialFooter, copyrightData: initialCopyright }) {

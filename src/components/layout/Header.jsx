@@ -6,18 +6,11 @@ import { usePathname } from 'next/navigation';
 import { formatURL, mapLegacyUrl } from '@/lib/config';
 
 const DEFAULT_HEADER = {
-  siteTitle: 'TopMCQBD',
-  logoUrl: '/images/TopMCQ.png',
-  btnText: 'সহায়তা',
-  btnLink: '/contact',
-  menus: [
-    { title: 'হোম', url: '/' },
-    { title: 'কুইজ অনুশীলন', url: '/quiz' },
-    { title: 'সকল MCQ', url: '/all-mcq' },
-    { title: 'প্যাকেজসমূহ', url: '/packages' },
-    { title: 'আমাদের সম্পর্কে', url: '/about-us' },
-    { title: 'যোগাযোগ', url: '/contact' }
-  ],
+  siteTitle: '',
+  logoUrl: '',
+  btnText: '',
+  btnLink: '',
+  menus: [],
   megaMenus: []
 };
 
