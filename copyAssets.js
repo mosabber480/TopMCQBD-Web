@@ -18,6 +18,37 @@ function copyDir(src, dest) {
   }
 }
 
+function copyHtmlFilesRecursively(srcDir, targetDir, currentSubdir = '') {
+  if (!fs.existsSync(srcDir)) return;
+  const entries = fs.readdirSync(srcDir, { withFileTypes: true });
+
+  for (const entry of entries) {
+    const fullSrc = path.join(srcDir, entry.name);
+
+    if (entry.isDirectory()) {
+      // Ignore internal next directories
+      if (!entry.name.startsWith('_') && entry.name !== 'api') {
+        copyHtmlFilesRecursively(fullSrc, targetDir, path.join(currentSubdir, entry.name));
+      }
+    } else if (entry.isFile() && entry.name.endsWith('.html')) {
+      const baseName = entry.name.replace(/\.html$/, '');
+
+      if (baseName === 'index' && !currentSubdir) {
+        // Root index.html
+        fs.copyFileSync(fullSrc, path.join(targetDir, 'index.html'));
+      } else if (baseName === '_not-found') {
+        fs.copyFileSync(fullSrc, path.join(targetDir, '404.html'));
+      } else {
+        const routeName = currentSubdir ? path.join(currentSubdir, baseName) : baseName;
+        const pageFolder = path.join(targetDir, routeName);
+        fs.mkdirSync(pageFolder, { recursive: true });
+        fs.copyFileSync(fullSrc, path.join(pageFolder, 'index.html'));
+        fs.copyFileSync(fullSrc, path.join(targetDir, `${routeName}.html`));
+      }
+    }
+  }
+}
+
 const outDirs = [
   path.resolve('out'),
   path.resolve('.open-next', 'assets')
@@ -41,26 +72,7 @@ for (const targetDir of outDirs) {
   // 3. Copy Prerendered HTML pages
   const nextAppServerDir = path.resolve('.next', 'server', 'app');
   if (fs.existsSync(nextAppServerDir)) {
-    // Home page index.html
-    const homeHtml = path.join(nextAppServerDir, 'index.html');
-    if (fs.existsSync(homeHtml)) {
-      fs.copyFileSync(homeHtml, path.join(targetDir, 'index.html'));
-    }
-
-    // 404 page
-    const notFoundHtml = path.join(nextAppServerDir, '_not-found.html');
-    if (fs.existsSync(notFoundHtml)) {
-      fs.copyFileSync(notFoundHtml, path.join(targetDir, '404.html'));
-    }
-
-    // DB Connection check page
-    const dbCheckHtml = path.join(nextAppServerDir, 'db-connection-check.html');
-    if (fs.existsSync(dbCheckHtml)) {
-      const dbCheckDir = path.join(targetDir, 'db-connection-check');
-      fs.mkdirSync(dbCheckDir, { recursive: true });
-      fs.copyFileSync(dbCheckHtml, path.join(dbCheckDir, 'index.html'));
-      fs.copyFileSync(dbCheckHtml, path.join(targetDir, 'db-connection-check.html'));
-    }
+    copyHtmlFilesRecursively(nextAppServerDir, targetDir);
   }
 }
 

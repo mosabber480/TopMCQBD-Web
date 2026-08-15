@@ -8,10 +8,15 @@
     "build": "next build && node copyAssets.js",
     "build:cloudflare": "next build && node copyAssets.js",
     "preview": "next start",
-    "start": "next start"
+    "start": "next start",
+    "seed": "node seedUsers.js"
   },
   "dependencies": {
+    "@getbrevo/brevo": "^6.0.2",
+    "bcryptjs": "^3.0.3",
+    "jsonwebtoken": "^9.0.3",
     "mongodb": "^7.5.0",
+    "mongoose": "^8.5.2",
     "next": "^14.2.5",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"

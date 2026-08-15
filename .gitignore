@@ -23,10 +23,13 @@ yarn-test.log*
 # OS files
 .DS_Store
 Thumbs.db
+_worker.bundle
 
 # IDE files
 .vscode/
 .idea/
 
-# Custom Local Guides
+# Custom Local Guides & Reference Folders
 next.js project guide.txt
+Old-Project/
+Old-Mosabber-Quiz-App/
