@@ -1,0 +1,27 @@
+import fs from 'fs';
+import path from 'path';
+
+function copyDir(src, dest) {
+  if (!fs.existsSync(src)) return;
+  fs.mkdirSync(dest, { recursive: true });
+  const entries = fs.readdirSync(src, { withFileTypes: true });
+
+  for (const entry of entries) {
+    const srcPath = path.join(src, entry.name);
+    const destPath = path.join(dest, entry.name);
+
+    if (entry.isDirectory()) {
+      copyDir(srcPath, destPath);
+    } else {
+      fs.copyFileSync(srcPath, destPath);
+    }
+  }
+}
+
+const outDir = path.resolve('out');
+const openNextAssetsDir = path.resolve('.open-next', 'assets');
+
+if (fs.existsSync(outDir)) {
+  copyDir(outDir, openNextAssetsDir);
+  console.log('✅ Synchronized static build output to .open-next/assets and out/');
+}

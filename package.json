@@ -2,12 +2,12 @@
   "name": "topmcqbd-nextjs",
   "version": "2.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
-    "build:cloudflare": "opennextjs-cloudflare build --dangerouslyUseUnsupportedNextVersion",
-    "preview": "opennextjs-cloudflare preview",
-    "deploy": "opennextjs-cloudflare deploy",
+    "build": "next build && node copyAssets.js",
+    "build:cloudflare": "next build && node copyAssets.js",
+    "preview": "next start",
     "start": "next start"
   },
   "dependencies": {
@@ -16,8 +16,6 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "@opennextjs/cloudflare": "^1.20.2",
-    "esbuild": "^0.28.2",
     "wrangler": "^4.123.0"
   }
 }

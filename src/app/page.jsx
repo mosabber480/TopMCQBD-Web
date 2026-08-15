@@ -1,7 +1,41 @@
 export default function Home() {
   return (
-    <main style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'sans-serif' }}>
-      <h2>TopMCQBD</h2>
+    <main className="hero-container">
+      {/* Background ambient glowing orbs */}
+      <div className="glow-orb orb-1" />
+      <div className="glow-orb orb-2" />
+
+      <div className="card">
+        <div className="badge">
+          <span className="badge-dot" />
+          Coming Soon
+        </div>
+
+        <h1 className="title">TopMCQBD</h1>
+
+        <p className="description">
+          TopMCQ হলো একটি বিশ্বস্ত অনলাইন কুইজ প্ল্যাটফর্ম, যেখানে বিসিএস, ব্যাংক, প্রাইমারি সহ সকল চাকরির প্রস্তুতি সহজ ও ব্যাখ্যামূলকভাবে নিশ্চিত করা হয়।
+        </p>
+
+        <div className="features-grid">
+          <div className="feature-item">
+            <span className="feature-icon">📚</span>
+            <span>বিসিএস ও ব্যাংক প্রস্তুতি</span>
+          </div>
+          <div className="feature-item">
+            <span className="feature-icon">⏱️</span>
+            <span>লাইভ মডেল টেস্ট</span>
+          </div>
+          <div className="feature-item">
+            <span className="feature-icon">🎯</span>
+            <span>ব্যাখ্যামূলক সমাধান</span>
+          </div>
+        </div>
+
+        <div className="footer-note">
+          © {new Date().getFullYear()} TopMCQBD. All Rights Reserved.
+        </div>
+      </div>
     </main>
   );
 }
