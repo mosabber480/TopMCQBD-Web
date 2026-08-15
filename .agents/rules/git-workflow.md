@@ -1,6 +1,13 @@
-# Git Push Workflow Rule
+# Git Workflow Rule
 
-- **Strict Constraint**: Do NOT execute `git push` commands directly.
-- **Workflow**:
-  - Always prepare code changes and stage/commit if requested.
-  - Provide the exact `git push` commands in the response for the USER to execute manually.
+1. **Automatic Add & Commit**:
+   - Always automatically run `git add .` and create descriptive commits `git commit -m "..."` upon completing coding tasks.
+   - Do NOT ask or prompt the user to run `git add` or `git commit`.
+
+2. **Manual Push by User**:
+   - NEVER execute `git push` commands directly.
+   - ALWAYS show only the final `git push` commands:
+     ```bash
+     git push mcq main
+     git push free-mcq main
+     ```
