@@ -144,7 +144,7 @@ export default function AdminHeaderBar() {
           display: flex;
           align-items: center;
           gap: 10px;
-          color: #ffffff;
+          color: #ffffff !important;
           text-decoration: none;
           font-size: 16px;
           font-weight: 700;
@@ -156,7 +156,10 @@ export default function AdminHeaderBar() {
         }
         .admin-panel-brand i {
           font-size: 18px;
-          color: #38bdf8;
+          color: #ffffff !important;
+        }
+        .admin-panel-brand .brand-text {
+          color: #ffffff !important;
         }
 
         .desktop-collapse-btn {
@@ -288,7 +291,7 @@ export default function AdminHeaderBar() {
         }
       `}</style>
 
-      {/* 1. TOP LEFT: [ অ্য়াডমিন প্যানেল ] Text, Icon, Dashboard Link & Collapse Toggle */}
+      {/* 1. TOP LEFT: [ Collapse Toggle on LEFT ] + [ Brand: Unlock Icon + অ্য়াডমিন প্যানেল in White ] */}
       <div className="admin-header-left">
         <button
           type="button"
@@ -304,11 +307,6 @@ export default function AdminHeaderBar() {
           <i className="fa-solid fa-bars"></i>
         </button>
 
-        <Link href="/admin/dashboard" className="admin-panel-brand" title="অ্যাডমিন ড্যাশবোর্ড">
-          <i className="fa-solid fa-unlock-keyhole"></i>
-          <span className="brand-text">অ্যাডমিন প্যানেল</span>
-        </Link>
-
         <button
           type="button"
           className="desktop-collapse-btn"
@@ -317,6 +315,11 @@ export default function AdminHeaderBar() {
         >
           <i className={`fa-solid ${isCollapsed ? 'fa-bars-staggered' : 'fa-bars'}`}></i>
         </button>
+
+        <Link href="/admin/dashboard" className="admin-panel-brand" title="অ্যাডমিন ড্যাশবোর্ড">
+          <i className="fa-solid fa-unlock-keyhole"></i>
+          <span className="brand-text">অ্যাডমিন প্যানেল</span>
+        </Link>
       </div>
 
       {/* 2. TOP RIGHT: Dynamic Action Buttons + User Profile + Logout */}
