@@ -27,3 +27,6 @@ Thumbs.db
 # IDE files
 .vscode/
 .idea/
+
+# Custom Local Guides
+next.js project guide.txt
