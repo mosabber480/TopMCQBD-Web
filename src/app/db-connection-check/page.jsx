@@ -21,9 +21,17 @@ export default function DBConnectionCheck() {
     setFetchError(null);
     try {
       const selected = serverOptions.find(s => s.id === serverType) || serverOptions[0];
-      const res = await fetch(selected.url, { cache: 'no-store' });
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      let res = await fetch(selected.url, { cache: 'no-store' }).catch(() => null);
+      
+      // If local /api/db-check returns 404, fallback to live Cloudflare endpoint
+      if (!res || !res.ok) {
+        if (selected.id === 'current' && typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+          res = await fetch('https://topmcqbd.pages.dev/api/db-check', { cache: 'no-store' }).catch(() => null);
+        }
+      }
+
+      if (!res || !res.ok) {
+        throw new Error(res ? `HTTP ${res.status}: ${res.statusText}` : 'Network error or endpoint not reachable');
       }
       const json = await res.json();
       setData(json);
@@ -34,6 +42,7 @@ export default function DBConnectionCheck() {
       setLoading(false);
     }
   };
+
 
   useEffect(() => {
     checkConnection('current');

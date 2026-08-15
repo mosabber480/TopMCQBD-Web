@@ -1,16 +1,17 @@
+import { NextResponse } from 'next/server';
 import { MongoClient } from 'mongodb';
 
-export async function onRequest(context) {
-  const env = context.env || {};
+export const dynamic = 'force-dynamic';
 
-  const MONGODB_URI_PAID = env.MONGODB_URI_PAID || process.env.MONGODB_URI_PAID || 'mongodb+srv://mosabber480_db_user:EScirLEzwgQVVNaB@mosabber.3ajdj0u.mongodb.net/TopMCQBD_DB?retryWrites=true&w=majority';
-  const MONGODB_URI_FREE = env.MONGODB_URI_FREE || process.env.MONGODB_URI_FREE || 'mongodb+srv://mosabber480_db_user:VVcrE9PeIIyVlcKU@topmcqbd.pixb7fx.mongodb.net/TopMCQBD_DB_Free?retryWrites=true&w=majority';
-  const MONGODB_DB_NAME_PAID = env.MONGODB_DB_NAME_PAID || process.env.MONGODB_DB_NAME_PAID || 'TopMCQBD_DB';
-  const MONGODB_DB_NAME_FREE = env.MONGODB_DB_NAME_FREE || process.env.MONGODB_DB_NAME_FREE || 'TopMCQBD_DB_Free';
+export async function GET() {
+  const MONGODB_URI_PAID = process.env.MONGODB_URI_PAID || 'mongodb+srv://mosabber480_db_user:EScirLEzwgQVVNaB@mosabber.3ajdj0u.mongodb.net/TopMCQBD_DB?retryWrites=true&w=majority';
+  const MONGODB_URI_FREE = process.env.MONGODB_URI_FREE || 'mongodb+srv://mosabber480_db_user:VVcrE9PeIIyVlcKU@topmcqbd.pixb7fx.mongodb.net/TopMCQBD_DB_Free?retryWrites=true&w=majority';
+  const MONGODB_DB_NAME_PAID = process.env.MONGODB_DB_NAME_PAID || 'TopMCQBD_DB';
+  const MONGODB_DB_NAME_FREE = process.env.MONGODB_DB_NAME_FREE || 'TopMCQBD_DB_Free';
 
   const results = {
     timestamp: new Date().toISOString(),
-    server: context.request.url,
+    server: 'Localhost / Next.js Development Server',
     paidDb: {
       name: MONGODB_DB_NAME_PAID,
       status: 'pending',
@@ -41,7 +42,7 @@ export async function onRequest(context) {
     const dbPaid = clientPaid.db(MONGODB_DB_NAME_PAID);
     await dbPaid.command({ ping: 1 });
     const collectionsPaid = await dbPaid.listCollections().toArray();
-    
+
     results.paidDb.connected = true;
     results.paidDb.status = 'Connected';
     results.paidDb.latencyMs = Date.now() - startPaid;
@@ -51,8 +52,7 @@ export async function onRequest(context) {
     results.paidDb.status = 'Error';
     results.paidDb.error = {
       message: err.message || String(err),
-      name: err.name,
-      code: err.code
+      name: err.name
     };
   } finally {
     if (clientPaid) {
@@ -82,8 +82,7 @@ export async function onRequest(context) {
     results.freeDb.status = 'Error';
     results.freeDb.error = {
       message: err.message || String(err),
-      name: err.name,
-      code: err.code
+      name: err.name
     };
   } finally {
     if (clientFree) {
@@ -91,9 +90,8 @@ export async function onRequest(context) {
     }
   }
 
-  return new Response(JSON.stringify(results, null, 2), {
+  return NextResponse.json(results, {
     headers: {
-      'Content-Type': 'application/json',
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
