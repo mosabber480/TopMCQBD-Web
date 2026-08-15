@@ -99,6 +99,12 @@ export default function AdminFooterDashboardPage() {
       const result = await res.json();
       if (res.ok && result.success) {
         showTopAlert('✅ সফলভাবে সেভ হয়েছে!', 'success');
+        try {
+          localStorage.setItem('layout_config_data', JSON.stringify(payload));
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new Event('layout-updated'));
+          }
+        } catch (e) {}
         fetchLayoutConfig();
       } else {
         showTopAlert('❌ ' + (result.message || 'সেভ করতে ব্যর্থ হয়েছে!'), 'danger');

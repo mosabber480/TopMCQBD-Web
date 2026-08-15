@@ -1,5 +1,10 @@
 import { NextResponse } from 'next/server';
 import { MongoClient } from 'mongodb';
+import dns from 'dns';
+
+try {
+  dns.setServers(['8.8.8.8', '1.1.1.1', '8.8.4.4']);
+} catch (e) {}
 
 export const dynamic = 'force-dynamic';
 

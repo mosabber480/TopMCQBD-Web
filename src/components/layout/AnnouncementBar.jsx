@@ -1,15 +1,50 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { formatURL } from '@/lib/config';
 
-export default function AnnouncementBar({ announcement }) {
-  const pathname = usePathname();
+const DEFAULT_ANNOUNCEMENT = {
+  text: "বিশেষ বিজ্ঞপ্তি: সার্ভার থেকে প্রথমবার কুইজের তথ্য লোড হতে ৩০ সেকেন্ড পর্যন্ত সময় লাগতে পারে। অনুগ্রহ করে ধৈর্য ধরুন!",
+  link: ""
+};
 
-  // Hide Announcement Bar on all Admin routes
-  if (pathname && pathname.startsWith('/admin')) {
+export default function AnnouncementBar({ announcement: initialAnnouncement }) {
+  const pathname = usePathname();
+  const [announcement, setAnnouncement] = useState(initialAnnouncement || DEFAULT_ANNOUNCEMENT);
+
+  useEffect(() => {
+    try {
+      const cached = localStorage.getItem('layout_config_data');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed.announcement) setAnnouncement(parsed.announcement);
+      }
+    } catch (e) {}
+
+    const fetchConfig = () => {
+      fetch('/api/layout-config')
+        .then(r => r.json())
+        .then(data => {
+          if (data && data.announcement) {
+            setAnnouncement(data.announcement);
+            try {
+              const prev = JSON.parse(localStorage.getItem('layout_config_data') || '{}');
+              localStorage.setItem('layout_config_data', JSON.stringify({ ...prev, ...data }));
+            } catch (e) {}
+          }
+        })
+        .catch(() => {});
+    };
+
+    fetchConfig();
+    window.addEventListener('layout-updated', fetchConfig);
+    return () => window.removeEventListener('layout-updated', fetchConfig);
+  }, []);
+
+  // Hide Announcement Bar on all Admin and Diagnostic routes
+  if (pathname && (pathname.startsWith('/admin') || pathname.startsWith('/db-connection-check'))) {
     return null;
   }
 
@@ -20,7 +55,7 @@ export default function AnnouncementBar({ announcement }) {
       <div className="announce-content">
         <span>{announcement.text}</span>
         {announcement.link && (
-          <Link href={formatURL(announcement.link)} className="announce-link">
+          <Link href={formatURL(announcement.link)} className="announce-link" style={{ color: '#fff', marginLeft: '10px', textDecoration: 'underline', fontWeight: 'bold' }}>
             বিস্তারিত দেখুন
           </Link>
         )}
