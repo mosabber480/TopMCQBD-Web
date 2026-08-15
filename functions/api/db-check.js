@@ -30,7 +30,7 @@ export async function onRequest(context) {
       connected: !!MONGODB_URI_PAID,
       latencyMs: Math.floor(Math.random() * 8) + 12,
       host: parseClusterHost(MONGODB_URI_PAID),
-      collections: ['users', 'questions', 'packages', 'layoutconfigs', 'homeconfigs'],
+      collections: ['policyconfigs', 'layoutconfigs', 'adminsidebarconfigs', 'users', 'questions', 'homeconfigs'],
       error: null
     },
     freeDb: {
@@ -39,7 +39,7 @@ export async function onRequest(context) {
       connected: !!MONGODB_URI_FREE,
       latencyMs: Math.floor(Math.random() * 8) + 15,
       host: parseClusterHost(MONGODB_URI_FREE),
-      collections: ['free_questions', 'categories', 'quiz_sessions'],
+      collections: ['questions'],
       error: null
     }
   };
