@@ -3,32 +3,48 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
+const CACHE_KEY = 'topmcqbd_db_check_cache';
+
 export default function DBConnectionCheck() {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState(null);
-  const [selectedServer, setSelectedServer] = useState('current');
   const [fetchError, setFetchError] = useState(null);
   const [lastChecked, setLastChecked] = useState(null);
+  const [isFromCache, setIsFromCache] = useState(false);
 
-  const serverOptions = [
-    { id: 'current', name: 'Current Origin (Default)', url: '/api/db-check' },
-    { id: 'paid', name: 'Paid Server (topmcqbd.pages.dev)', url: 'https://topmcqbd.pages.dev/api/db-check' },
-    { id: 'free', name: 'Free Server (topmcqbd-web-free.pages.dev)', url: 'https://topmcqbd-web-free.pages.dev/api/db-check' }
-  ];
+  // Function to save result to cache (localStorage & Cookie)
+  const saveToCache = (payload, timestamp) => {
+    try {
+      const cacheObj = {
+        data: payload,
+        lastChecked: timestamp,
+        savedAt: Date.now()
+      };
+      localStorage.setItem(CACHE_KEY, JSON.stringify(cacheObj));
+      // Also save in cookie (expires in 7 days)
+      document.cookie = `${CACHE_KEY}=true; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`;
+    } catch (e) {
+      console.warn('Unable to write to localStorage:', e);
+    }
+  };
 
-  const checkConnection = async (serverType = selectedServer) => {
+  // Perform a live connection check
+  const checkConnection = async () => {
     setLoading(true);
     setFetchError(null);
     try {
-      const selected = serverOptions.find(s => s.id === serverType) || serverOptions[0];
-      const res = await fetch(selected.url, { cache: 'no-store' });
+      const res = await fetch('/api/db-check', { cache: 'no-store' });
 
       if (!res.ok) {
         throw new Error(`HTTP ${res.status}: ${res.statusText}`);
       }
       const json = await res.json();
+      const currentTime = new Date().toLocaleTimeString();
+      
       setData(json);
-      setLastChecked(new Date().toLocaleTimeString());
+      setLastChecked(currentTime);
+      setIsFromCache(false);
+      saveToCache(json, currentTime);
     } catch (err) {
       setFetchError(err.message || 'Failed to fetch database diagnostic endpoint');
     } finally {
@@ -36,15 +52,26 @@ export default function DBConnectionCheck() {
     }
   };
 
+  // On page load/reload, check cache first
   useEffect(() => {
-    checkConnection('current');
-  }, []);
+    try {
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed && parsed.data) {
+          setData(parsed.data);
+          setLastChecked(parsed.lastChecked || new Date(parsed.savedAt).toLocaleTimeString());
+          setIsFromCache(true);
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn('Unable to read from localStorage:', e);
+    }
 
-  const handleServerChange = (e) => {
-    const newServer = e.target.value;
-    setSelectedServer(newServer);
-    checkConnection(newServer);
-  };
+    // If no cache found, run initial check
+    checkConnection();
+  }, []);
 
   return (
     <main className="db-page-container">
@@ -62,27 +89,25 @@ export default function DBConnectionCheck() {
           </p>
         </div>
 
-        {/* Server Selector & Refresh Action */}
+        {/* Action Bar */}
         <div className="db-control-bar">
-          <div className="select-wrapper">
-            <label htmlFor="server-select" className="control-label">টার্গেট ক্লাউডফ্লেয়ার সার্ভার:</label>
-            <select
-              id="server-select"
-              value={selectedServer}
-              onChange={handleServerChange}
-              className="server-dropdown"
-              disabled={loading}
-            >
-              {serverOptions.map((opt) => (
-                <option key={opt.id} value={opt.id}>
-                  {opt.name}
-                </option>
-              ))}
-            </select>
+          <div className="status-info-text">
+            {lastChecked ? (
+              <div className="status-badge-row">
+                <span>সর্বশেষ টেস্ট: <strong>{lastChecked}</strong></span>
+                {isFromCache ? (
+                  <span className="cache-indicator-badge">📦 আগের যাচাইকৃত ফলাফল</span>
+                ) : (
+                  <span className="live-indicator-badge">⚡ সদ্য যাচাইকৃত ফলাফল</span>
+                )}
+              </div>
+            ) : (
+              <span>ডাটাবেস কানেকশন স্ট্যাটাস চেক করা হচ্ছে...</span>
+            )}
           </div>
 
           <button
-            onClick={() => checkConnection(selectedServer)}
+            onClick={checkConnection}
             disabled={loading}
             className="recheck-btn"
           >
@@ -99,12 +124,6 @@ export default function DBConnectionCheck() {
             )}
           </button>
         </div>
-
-        {lastChecked && (
-          <div className="last-checked-bar">
-            সর্বশেষ টেস্ট করা হয়েছে: <strong>{lastChecked}</strong>
-          </div>
-        )}
 
         {/* API Fetch Error */}
         {fetchError && (
