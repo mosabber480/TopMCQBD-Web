@@ -1,10 +1,5 @@
 import './globals.css';
 import AppLayoutWrapper from '@/components/layout/AppLayoutWrapper';
-import { connectDB } from '@/lib/db';
-import LayoutConfig from '@/models/LayoutConfig';
-
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
 
 export const metadata = {
   title: 'TopMCQBD - সেরা অনলাইন কুইজ ও প্রস্তুতি প্ল্যাটফর্ম',
@@ -16,28 +11,7 @@ export const metadata = {
   }
 };
 
-async function getLayoutConfig() {
-  try {
-    await connectDB();
-    const config = await LayoutConfig.findOne().lean();
-    if (config) {
-      const cleanConfig = JSON.parse(JSON.stringify(config));
-      return {
-        announcement: cleanConfig.announcement || null,
-        header: cleanConfig.header || null,
-        footer: cleanConfig.footer || null,
-        copyright: cleanConfig.copyright || null
-      };
-    }
-  } catch (err) {
-    console.error('Error fetching LayoutConfig in RootLayout:', err);
-  }
-  return null;
-}
-
-export default async function RootLayout({ children }) {
-  const layoutData = await getLayoutConfig();
-
+export default function RootLayout({ children }) {
   return (
     <html lang="bn">
       <head>
@@ -49,7 +23,7 @@ export default async function RootLayout({ children }) {
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Bengali:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
       </head>
       <body>
-        <AppLayoutWrapper initialLayoutData={layoutData}>
+        <AppLayoutWrapper>
           {children}
         </AppLayoutWrapper>
       </body>
