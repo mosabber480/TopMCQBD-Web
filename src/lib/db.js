@@ -5,10 +5,12 @@ import dns from 'dns';
 try {
   dns.setServers(['8.8.8.8', '1.1.1.1', '8.8.4.4']);
 } catch (e) {
-  console.warn('DNS server setting warning:', e);
+  // Ignore in environments where setServers is restricted
 }
 
-const MONGODB_URI_PAID = process.env.MONGODB_URI_PAID || process.env.MONGO_URI || 'mongodb+srv://mosabber480_db_user:EScirLEzwgQVVNaB@mosabber.3ajdj0u.mongodb.net/TopMCQBD_DB?retryWrites=true&w=majority';
+const DIRECT_PAID_URI = 'mongodb://mosabber480_db_user:EScirLEzwgQVVNaB@ac-472re4l-shard-00-00.3ajdj0u.mongodb.net:27017,ac-472re4l-shard-00-01.3ajdj0u.mongodb.net:27017,ac-472re4l-shard-00-02.3ajdj0u.mongodb.net:27017/TopMCQBD_DB?ssl=true&replicaSet=atlas-wzdf1e-shard-0&authSource=admin&appName=Mosabber';
+
+const MONGODB_URI_PAID = process.env.MONGODB_URI_PAID || process.env.MONGO_URI || DIRECT_PAID_URI;
 const MONGODB_URI_FREE = process.env.MONGODB_URI_FREE || 'mongodb+srv://mosabber480_db_user:VVcrE9PeIIyVlcKU@topmcqbd.pixb7fx.mongodb.net/TopMCQBD_DB_Free?retryWrites=true&w=majority';
 
 if (!global.mongooseCache) {
@@ -26,23 +28,34 @@ const cached = global.mongooseCache;
  * Connect to Primary (Paid) Database
  */
 export async function connectDB() {
-  if (cached.paidConn && cached.paidConn.connection?.readyState === 1) {
+  if (cached.paidConn && (cached.paidConn.connection?.readyState === 1 || cached.paidConn.readyState === 1)) {
     return cached.paidConn;
   }
 
   if (!cached.paidPromise) {
     const opts = {
       bufferCommands: false,
+      serverSelectionTimeoutMS: 5000,
+      connectTimeoutMS: 10000,
     };
 
-    cached.paidPromise = mongoose.connect(MONGODB_URI_PAID, opts).then((mongooseInstance) => {
-      console.log('✅ Connected to MongoDB (Paid/Primary DB)');
-      return mongooseInstance;
-    }).catch(err => {
-      cached.paidPromise = null;
-      console.error('❌ MongoDB Connection Error (Paid):', err);
-      throw err;
-    });
+    cached.paidPromise = mongoose.connect(MONGODB_URI_PAID, opts)
+      .then((mongooseInstance) => {
+        console.log('✅ Connected to MongoDB (Paid/Primary DB)');
+        return mongooseInstance;
+      })
+      .catch(async (err) => {
+        console.warn('⚠️ Initial MongoDB connect failed, retrying with direct replica set URI...', err.message);
+        try {
+          const directConn = await mongoose.connect(DIRECT_PAID_URI, opts);
+          console.log('✅ Connected to MongoDB via Direct ReplicaSet URI');
+          return directConn;
+        } catch (directErr) {
+          cached.paidPromise = null;
+          console.error('❌ MongoDB Connection Error (Paid):', directErr);
+          throw directErr;
+        }
+      });
   }
 
   try {
@@ -66,6 +79,8 @@ export async function connectFreeDB() {
   if (!cached.freePromise) {
     cached.freePromise = mongoose.createConnection(MONGODB_URI_FREE, {
       bufferCommands: false,
+      serverSelectionTimeoutMS: 5000,
+      connectTimeoutMS: 10000,
     }).asPromise().then((conn) => {
       console.log('✅ Connected to MongoDB (Free DB)');
       return conn;

@@ -204,7 +204,7 @@ export default function AdminOverviewDashboard() {
             <h3>প্রশ্ন ব্যাংক ও কুইজ</h3>
             <p>নতুন কুইজের প্রশ্ন যোগ করুন, সংশোধন করুন বা CSV ফাইল আপলোড করে এক ক্লিকে ডাটাবেজে সেভ করুন।</p>
           </div>
-          <Link href="/admin/quiz-dashboard" className="btn" style={{ backgroundColor: 'var(--primary, #007bff)', color: 'white' }}>
+          <Link href="/admin/questions-dashboard" className="btn" style={{ backgroundColor: 'var(--primary, #007bff)', color: 'white' }}>
             <i className="fa-solid fa-gear"></i> প্রশ্ন ম্যানেজ করুন
           </Link>
         </div>

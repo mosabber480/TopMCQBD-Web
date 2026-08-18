@@ -242,8 +242,8 @@ export default function ProfilePage() {
                   <strong>মেয়াদ শেষ হবে:</strong> <span style={{ color: '#e74c3c', fontWeight: 'bold' }}>{new Date(user.subscription.endDate).toLocaleDateString('bn-BD')}</span>
                 </p>
                 <div style={{ marginTop: '18px', display: 'flex', gap: '10px' }}>
-                  <Link href="/quiz" className="btn btn-success">
-                    <i className="fa-solid fa-play"></i> কুইজ শুরু করুন
+                  <Link href="/questions" className="btn btn-success">
+                    <i className="fa-solid fa-play"></i> প্রশ্নব্যাংক শুরু করুন
                   </Link>
                   <Link href="/packages" className="btn btn-primary">
                     <i className="fa-solid fa-rotate"></i> মেয়াদ বাড়ান (Renew)

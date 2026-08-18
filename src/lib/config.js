@@ -55,7 +55,7 @@ export function mapLegacyUrl(url) {
   if (url === 'index.html' || url === '/' || url === 'Home-hobe.html') return '/';
   if (url === 'login.html') return '/login';
   if (url === 'profile.html') return '/profile';
-  if (url === 'quiz.html') return '/quiz';
+  if (url === 'quiz.html' || url === 'questions.html') return '/questions';
   if (url === 'all-mcq.html') return '/all-mcq';
   if (url === 'packages.html') return '/packages';
   if (url === 'about-us.html') return '/about-us';
@@ -65,7 +65,7 @@ export function mapLegacyUrl(url) {
   if (url === 'free-mcqs.html') return '/free-mcqs';
   if (url === 'status.html') return '/status';
   if (url.includes('admin/dashboard.html')) return '/admin/dashboard';
-  if (url.includes('admin/quiz-dashboard.html')) return '/admin/quiz-dashboard';
+  if (url.includes('admin/quiz-dashboard.html') || url.includes('admin/questions-dashboard.html')) return '/admin/questions-dashboard';
   if (url.includes('admin/users.html')) return '/admin/users';
   if (url.includes('admin/home-dashboard.html')) return '/admin/home-dashboard';
   if (url.includes('admin/header-dashboard.html')) return '/admin/header-dashboard';

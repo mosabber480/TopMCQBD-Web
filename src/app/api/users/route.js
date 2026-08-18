@@ -16,12 +16,12 @@ export async function GET(request) {
 
     return NextResponse.json({
       success: true,
-      users
+      users: users || []
     });
   } catch (err) {
     console.error('GET USERS ERROR:', err);
     return NextResponse.json(
-      { success: false, error: err.message },
+      { success: false, message: err.message || 'ইউজার ডাটাবেজ থেকে লোড করতে ব্যর্থ হয়েছে', error: err.message },
       { status: 500 }
     );
   }

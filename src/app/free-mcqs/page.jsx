@@ -28,8 +28,8 @@ export default function FreeMcqsPage() {
         <p style={{ color: '#64748b', fontSize: '16px', lineHeight: '1.7', marginBottom: '25px' }}>
           ফ্রি কুইজ ও প্রশ্ন ব্যাংকের কাজ চলমান রয়েছে। খুব শীঘ্রই ফ্রিতে অনুশীলন করার সকল প্রশ্ন এখানে যুক্ত করা হবে।
         </p>
-        <Link href="/quiz" className="btn btn-success" style={{ padding: '12px 24px', fontSize: '15px' }}>
-          <i className="fa-solid fa-play"></i> মূল কুইজ অনুশীলন করুন
+        <Link href="/questions" className="btn btn-success" style={{ padding: '12px 24px', fontSize: '15px' }}>
+          <i className="fa-solid fa-play"></i> মূল প্রশ্নব্যাংক অনুশীলন করুন
         </Link>
       </div>
     </div>

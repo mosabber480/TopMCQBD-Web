@@ -25,7 +25,16 @@ export async function GET() {
     return NextResponse.json(config);
   } catch (err) {
     console.error('GET HOME CONFIG ERROR:', err);
-    return NextResponse.json({ success: false, message: 'Server error occurred' }, { status: 500 });
+    return NextResponse.json({
+      seoTitle: '',
+      seoDescription: '',
+      sliders: [],
+      demoQuizzes: [],
+      packages: [],
+      demoSectionInfo: { title: '', subtitle: '' },
+      packageSectionInfo: { title: '', subtitle: '' },
+      missionSectionInfo: null
+    });
   }
 }
 

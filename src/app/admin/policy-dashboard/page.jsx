@@ -4,41 +4,40 @@ import React, { useState, useEffect, useRef } from 'react';
 import { showTopAlert } from '@/components/layout/TopAlert';
 
 export default function AdminPolicyDashboardPage() {
-  const [content, setContent] = useState('');
+  const [currentPolicyContent, setCurrentPolicyContent] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [mode, setMode] = useState('view'); // 'view' | 'edit'
-  const [rawHtmlMode, setRawHtmlMode] = useState(false);
 
-  // Link Modal State
+  // Custom Link Modal State
   const [showLinkModal, setShowLinkModal] = useState(false);
-  const [linkType, setLinkType] = useState('website'); // 'website' | 'email' | 'phone'
-  const [linkWebsite, setLinkWebsite] = useState('');
-  const [linkEmail, setLinkEmail] = useState('');
-  const [linkPhone, setLinkPhone] = useState('');
-  const [linkText, setLinkText] = useState('');
+  const [activeLinkType, setActiveLinkType] = useState('website'); // 'website' | 'email' | 'phone'
+  const [linkInputWebsite, setLinkInputWebsite] = useState('');
+  const [linkInputEmail, setLinkInputEmail] = useState('');
+  const [linkInputPhone, setLinkInputPhone] = useState('');
+  const [linkDisplayText, setLinkDisplayText] = useState('');
 
   const editorRef = useRef(null);
 
   const fetchPolicy = async () => {
     setLoading(true);
+    const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
+
     try {
-      const res = await fetch('/api/policy/get');
-      const data = await res.json();
-      if (data && data.content) {
-        setContent(data.content);
+      const response = await fetch('/api/policy/get', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const content = data && data.content ? data.content : '';
+        setCurrentPolicyContent(content);
       } else {
-        setContent(`<h1>প্রাইভেসি ও রিফান্ড পলিসি</h1>
-<p>TopMCQBD-তে আপনাকে স্বাগতম। আমাদের প্ল্যাটফর্ম ব্যবহার করার পূর্বে অনুগ্রহ করে নিচের শর্তাবলি এবং রিফান্ড পলিসি সতর্কতার সাথে পড়ুন।</p>
-<h2>১. সাবস্ক্রিপশন ও পেমেন্ট</h2>
-<p>আমাদের সকল পেইড প্যাকেজ ডিজিটাল সেবা হিসেবে প্রদান করা হয়। বিকাশ অথবা নগদের মাধ্যমে পেমেন্ট সম্পন্ন করার পর ট্রানজেকশন আইডি প্রদান করে সাবস্ক্রিপশন চালু করতে হবে।</p>
-<h2>২. রিফান্ড পলিসি</h2>
-<p>ডিজিটাল সার্ভিসে কোনো কারিগরি ত্রুটি থাকলে এবং তা ২৪ ঘণ্টার মধ্যে সমাধান করতে ব্যর্থ হলে সম্পূর্ণ রিফান্ড প্রদান করা হবে। রিফান্ডের জন্য আমাদের সাপোর্ট ইমেইলে যোগাযোগ করুন।</p>
-<h2>৩. যোগাযোগ</h2>
-<p>যেকোনো প্রশ্ন বা সহায়তার জন্য ইমেইল করুন: <a href="mailto:support@topmcqbd.com">support@topmcqbd.com</a> অথবা কল করুন: <a href="tel:+8801700000000">+880 1700-000000</a></p>`);
+        showTopAlert('পলিসি লোড করতে সমস্যা হয়েছে!', 'danger');
       }
-    } catch (err) {
-      console.error('Fetch policy error:', err);
+    } catch (error) {
+      console.error('Fetch policy error:', error);
+      showTopAlert('সার্ভার কানেকশন এরর!', 'danger');
     } finally {
       setLoading(false);
     }
@@ -49,85 +48,99 @@ export default function AdminPolicyDashboardPage() {
   }, []);
 
   useEffect(() => {
-    if (mode === 'edit' && editorRef.current && !rawHtmlMode) {
-      editorRef.current.innerHTML = content;
+    if (mode === 'edit' && editorRef.current) {
+      editorRef.current.innerHTML = currentPolicyContent;
     }
-  }, [mode, rawHtmlMode]);
+  }, [mode]);
 
-  const handleSave = async () => {
-    setSaving(true);
-    const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
-
-    let finalContent = content;
-    if (mode === 'edit' && editorRef.current && !rawHtmlMode) {
-      finalContent = editorRef.current.innerHTML;
-      setContent(finalContent);
-    }
-
-    try {
-      const res = await fetch('/api/policy/save', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({ content: finalContent })
-      });
-
-      const data = await res.json();
-      if (res.ok) {
-        showTopAlert('✅ পলিসি সফলভাবে সেভ হয়েছে!', 'success');
-        setMode('view');
-      } else {
-        showTopAlert('❌ ' + (data.message || 'সেভ করতে ব্যর্থ হয়েছে।'), 'danger');
-      }
-    } catch (err) {
-      showTopAlert('সার্ভার কানেকশন এরর!', 'danger');
-    } finally {
-      setSaving(false);
+  const toggleMode = (newMode) => {
+    if (newMode === 'edit') {
+      setMode('edit');
+    } else {
+      setMode('view');
     }
   };
 
-  const execCmd = (command, value = null) => {
+  const handleExec = (command, value = null) => {
     if (editorRef.current) {
       editorRef.current.focus();
       document.execCommand(command, false, value);
     }
   };
 
-  const handleInsertHeading = (tag) => {
+  const handleHeading = (tag) => {
     if (editorRef.current) {
       editorRef.current.focus();
       document.execCommand('formatBlock', false, tag);
     }
   };
 
+  const handleSavePolicy = async () => {
+    setSaving(true);
+    const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
+
+    let htmlContent = currentPolicyContent;
+    if (editorRef.current) {
+      htmlContent = editorRef.current.innerHTML;
+      setCurrentPolicyContent(htmlContent);
+    }
+
+    try {
+      const response = await fetch('/api/policy/save', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ content: htmlContent })
+      });
+
+      if (response.ok) {
+        showTopAlert('পলিসি সফলভাবে সেভ হয়েছে!', 'success');
+        setMode('view');
+      } else {
+        const errData = await response.json().catch(() => ({}));
+        showTopAlert(errData.message || 'সেভ করতে ব্যর্থ হয়েছে।', 'danger');
+      }
+    } catch (error) {
+      showTopAlert('সার্ভার কানেকশন এরর!', 'danger');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Custom Link Handlers
   const openLinkModal = () => {
     const selected = window.getSelection()?.toString() || '';
-    setLinkText(selected);
-    setLinkWebsite('');
-    setLinkEmail('');
-    setLinkPhone('');
+    setLinkDisplayText(selected);
+    setLinkInputWebsite('');
+    setLinkInputEmail('');
+    setLinkInputPhone('');
+    setActiveLinkType('website');
     setShowLinkModal(true);
+  };
+
+  const closeLinkModal = () => {
+    setShowLinkModal(false);
   };
 
   const insertCustomLink = () => {
     let url = '';
-    let text = linkText.trim();
+    let text = linkDisplayText.trim();
 
-    if (linkType === 'website') {
-      url = linkWebsite.trim();
+    if (activeLinkType === 'website') {
+      url = linkInputWebsite.trim();
       if (url && !/^https?:\/\//i.test(url)) url = 'https://' + url;
-    } else if (linkType === 'email') {
-      const email = linkEmail.trim();
+    } else if (activeLinkType === 'email') {
+      const email = linkInputEmail.trim();
       if (email) url = 'mailto:' + email;
-    } else if (linkType === 'phone') {
-      const phone = linkPhone.trim();
+    } else if (activeLinkType === 'phone') {
+      const phone = linkInputPhone.trim();
       if (phone) url = 'tel:' + phone;
     }
 
     if (!url) {
-      showTopAlert('সঠিক লিংক বা তথ্য প্রদান করুন!', 'warning');
+      showTopAlert('সঠিক তথ্য দিন!', 'warning');
       return;
     }
 
@@ -139,20 +152,11 @@ export default function AdminPolicyDashboardPage() {
       document.execCommand('insertHTML', false, linkHtml);
     }
 
-    setShowLinkModal(false);
+    closeLinkModal();
   };
 
-  if (loading) {
-    return (
-      <div style={{ textAlign: 'center', padding: '60px' }}>
-        <i className="fa-solid fa-spinner fa-spin" style={{ fontSize: '32px', color: 'var(--primary)' }}></i>
-        <p style={{ marginTop: '12px', color: '#64748b' }}>পলিসি কনটেন্ট লোড হচ্ছে...</p>
-      </div>
-    );
-  }
-
   return (
-    <div className="container" style={{ maxWidth: '1300px', margin: '0 auto', padding: '0 25px 30px 25px' }}>
+    <div className="container" style={{ margin: '30px auto', padding: '0 25px 25px 25px', maxWidth: '1300px' }}>
       <style jsx>{`
         :root {
           --primary: #007bff;
@@ -172,7 +176,7 @@ export default function AdminPolicyDashboardPage() {
           box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
           margin-bottom: 25px;
           border: 1px solid #e2e8f0;
-          border-left: 6px solid #e83e8c;
+          border-left: 6px solid var(--primary);
         }
 
         .section-title {
@@ -182,30 +186,90 @@ export default function AdminPolicyDashboardPage() {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          padding-bottom: 12px;
+          padding-bottom: 10px;
           border-bottom: 1px dashed #e2e8f0;
-          flex-wrap: wrap;
-          gap: 10px;
         }
 
         .read-box {
           background: #fdfdfd;
           border: 1px solid #ddd;
-          padding: 25px;
+          padding: 20px;
           border-radius: 8px;
           margin-bottom: 15px;
+          transition: all 0.2s ease;
         }
 
-        /* VIEW MODE STYLES */
-        .policy-preview-box {
-          color: #334155;
-          line-height: 1.8;
-          font-size: 15px;
+        .card-actions {
+          display: flex;
+          gap: 8px;
+          flex-wrap: wrap;
+          align-items: center;
+          margin-top: 15px;
         }
+
+        .btn {
+          padding: 8px 16px;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+          font-weight: bold;
+          font-size: 13px;
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          transition: 0.2s;
+          text-decoration: none;
+        }
+
+        .btn-warning {
+          background-color: #ffc107;
+          color: #212529;
+        }
+        .btn-warning:hover {
+          background-color: #e0a800;
+        }
+
+        .btn-submit {
+          background-color: #28a745;
+          color: white;
+        }
+        .btn-submit:hover {
+          background-color: #218838;
+        }
+
+        .btn-secondary {
+          background-color: #6c757d;
+          color: white;
+        }
+        .btn-secondary:hover {
+          background-color: #5a6268;
+        }
+
+        .btn-add {
+          background: var(--main-dash-btn);
+          color: white;
+          padding: 10px 18px;
+          font-size: 14px;
+        }
+        .btn-add:hover {
+          background: #218838;
+        }
+
+        /* VIEW MODE */
+        .policy-preview-box {
+          background: white;
+          padding: 15px 0;
+          border: none;
+          height: auto;
+          overflow: visible;
+          color: #4a5568;
+          line-height: 1.75;
+        }
+
         .policy-preview-box :global(h1),
         .policy-preview-box :global(h2),
         .policy-preview-box :global(h3) {
-          color: #1e293b;
+          color: var(--dark);
           font-weight: 700;
           margin-top: 22px;
           margin-bottom: 12px;
@@ -222,8 +286,8 @@ export default function AdminPolicyDashboardPage() {
         }
         .policy-preview-box :global(ul),
         .policy-preview-box :global(ol) {
-          margin-left: 24px;
-          margin-bottom: 14px;
+          margin-left: 22px;
+          margin-bottom: 12px;
         }
         .policy-preview-box :global(li) {
           margin-bottom: 6px;
@@ -234,39 +298,25 @@ export default function AdminPolicyDashboardPage() {
           word-break: break-word;
         }
 
-        /* TOOLBAR */
+        /* EDIT MODE TOOLBAR & WRAPPER */
+        .editor-wrapper {
+          border: 1px solid #ccd6e0;
+          border-radius: 8px;
+          overflow: hidden;
+          background: #ffffff;
+          margin-bottom: 15px;
+        }
+
         .editor-toolbar {
           display: flex;
           flex-wrap: wrap;
           gap: 6px;
           background: #f8fafc;
           padding: 10px 12px;
-          border: 1px solid #cbd5e1;
-          border-bottom: none;
-          border-radius: 8px 8px 0 0;
+          border-bottom: 1px solid #ccd6e0;
           align-items: center;
         }
-        .toolbar-btn {
-          background: white;
-          border: 1px solid #cbd5e1;
-          padding: 6px 10px;
-          border-radius: 4px;
-          cursor: pointer;
-          font-size: 13px;
-          font-weight: 600;
-          color: #475569;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          gap: 4px;
-          min-width: 32px;
-          height: 32px;
-          transition: all 0.2s ease;
-        }
-        .toolbar-btn:hover {
-          background: #e2e8f0;
-          color: var(--primary);
-        }
+
         .toolbar-select {
           padding: 5px 8px;
           border: 1px solid #cbd5e1;
@@ -278,80 +328,69 @@ export default function AdminPolicyDashboardPage() {
           outline: none;
         }
 
-        .editor-content {
-          border: 1px solid #cbd5e1;
-          border-radius: 0 0 8px 8px;
-          padding: 20px;
-          min-height: 350px;
-          background: white;
+        .toolbar-btn {
+          background: transparent;
+          border: 1px solid transparent;
+          border-radius: 4px;
           outline: none;
-          font-size: 15px;
-          line-height: 1.8;
-          color: #334155;
+          cursor: pointer;
+          min-width: 28px;
+          height: 28px;
+          padding: 3px 6px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          color: #444;
+          font-size: 13px;
+          transition: 0.2s;
         }
+        .toolbar-btn:hover {
+          background: #e2e8f0;
+          color: var(--primary);
+          border-color: #cbd5e1;
+        }
+
+        .toolbar-separator {
+          border-right: 1px solid #cbd5e1;
+          height: 20px;
+          margin: 0 4px;
+        }
+
+        .editor-content {
+          border: none;
+          min-height: 350px;
+          padding: 18px 20px;
+          line-height: 1.75;
+          color: #333;
+          outline: none;
+          background: white;
+          font-size: 15px;
+        }
+
         .editor-content :global(h1),
         .editor-content :global(h2),
         .editor-content :global(h3) {
-          color: #1e293b;
           font-weight: 700;
-          margin-top: 18px;
+          margin-top: 20px;
           margin-bottom: 10px;
           padding-bottom: 6px;
           border-bottom: 2px solid #edf2f7;
+        }
+        .editor-content :global(h1:first-child),
+        .editor-content :global(h2:first-child),
+        .editor-content :global(h3:first-child) {
+          margin-top: 0;
+        }
+        .editor-content :global(p) {
+          margin-bottom: 10px;
         }
         .editor-content :global(a) {
           color: var(--primary);
           text-decoration: underline;
         }
 
-        .raw-textarea {
-          width: 100%;
-          min-height: 350px;
-          padding: 15px;
-          border: 1px solid #cbd5e1;
-          border-radius: 0 0 8px 8px;
-          font-family: monospace;
-          font-size: 14px;
-          line-height: 1.6;
-          outline: none;
-          box-sizing: border-box;
-        }
-
-        .btn {
-          padding: 8px 16px;
-          border: none;
-          border-radius: 5px;
-          cursor: pointer;
-          font-weight: bold;
-          font-size: 13px;
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          text-decoration: none;
-          transition: opacity 0.2s;
-        }
-        .btn:hover {
-          opacity: 0.9;
-        }
-        .btn-submit {
-          background-color: #28a745;
-          color: white;
-        }
-        .btn-warning {
-          background-color: #ffc107;
-          color: #212529;
-        }
-        .btn-secondary {
-          background-color: #6c757d;
-          color: white;
-        }
-        .btn-primary {
-          background-color: #007bff;
-          color: white;
-        }
-
-        /* MODAL */
-        .modal-overlay {
+        /* CUSTOM LINK MODAL */
+        .link-modal-overlay {
           position: fixed;
           inset: 0;
           background: rgba(15, 23, 42, 0.55);
@@ -360,299 +399,345 @@ export default function AdminPolicyDashboardPage() {
           align-items: center;
           justify-content: center;
           padding: 20px;
+          backdrop-filter: blur(2px);
         }
-        .modal-box {
+
+        .link-modal-box {
           background: white;
           width: 100%;
-          max-width: 440px;
+          max-width: 420px;
           border-radius: 10px;
-          padding: 24px;
+          padding: 22px 24px;
           box-shadow: 0 10px 35px rgba(0, 0, 0, 0.25);
         }
-        .modal-tabs {
+
+        .link-modal-title {
+          font-size: 17px;
+          font-weight: bold;
+          color: var(--dark);
+          margin-bottom: 16px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .link-type-tabs {
           display: flex;
           gap: 8px;
-          margin-bottom: 16px;
+          margin-bottom: 15px;
         }
-        .modal-tab {
+
+        .link-type-tab {
           flex: 1;
-          padding: 8px;
           text-align: center;
-          border: 1px solid #cbd5e1;
+          padding: 8px 6px;
+          border: 1px solid #dde3ea;
           border-radius: 6px;
           cursor: pointer;
           font-size: 13px;
           font-weight: 600;
+          color: #64748b;
           background: #f8fafc;
+          transition: 0.2s;
         }
-        .modal-tab.active {
+        .link-type-tab.active {
           background: var(--primary);
           color: white;
           border-color: var(--primary);
+        }
+
+        .link-modal-box input {
+          width: 100%;
+          padding: 10px 12px;
+          border: 1px solid #dde3ea;
+          border-radius: 6px;
+          font-size: 14px;
+          margin-bottom: 8px;
+          box-sizing: border-box;
+          font-family: inherit;
+        }
+
+        .link-modal-hint {
+          font-size: 12px;
+          color: #94a3b8;
+          margin-bottom: 15px;
         }
       `}</style>
 
       <div className="section-card">
         <div className="section-title">
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <i className="fa-solid fa-file-invoice-dollar" style={{ color: '#e83e8c', fontSize: '22px' }}></i>
-            <span>রিফান্ড ও প্রাইভেসি পলিসি কন্ট্রোল (Policy Dashboard)</span>
-          </div>
-
-          <div style={{ display: 'flex', gap: '10px' }}>
-            {mode === 'view' ? (
-              <button
-                type="button"
-                className="btn btn-warning"
-                onClick={() => setMode('edit')}
-              >
-                <i className="fa-solid fa-pen-to-square"></i> পলিসি এডিট করুন
-              </button>
-            ) : (
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={() => setMode('view')}
-              >
-                <i className="fa-solid fa-eye"></i> ভিউ মোড দেখুন
-              </button>
-            )}
-
-            <button
-              type="button"
-              className="btn btn-submit"
-              onClick={handleSave}
-              disabled={saving}
-            >
-              <i className="fa-solid fa-floppy-disk"></i> {saving ? 'সংরক্ষণ হচ্ছে...' : 'পলিসি সেভ করুন'}
-            </button>
+            <i className="fa-solid fa-file-signature" style={{ color: 'var(--primary)' }}></i>
+            <span>প্রাইভেসি ও রিফান্ড পলিসি</span>
           </div>
         </div>
 
-        {/* VIEW MODE */}
-        {mode === 'view' && (
-          <div className="read-box">
-            <div
-              className="policy-preview-box"
-              dangerouslySetInnerHTML={{ __html: content }}
-            ></div>
+        {/* Loading Box */}
+        {loading ? (
+          <div style={{ textAlign: 'center', color: '#718096', padding: '30px' }}>
+            <i className="fa-solid fa-spinner fa-spin" style={{ marginRight: '8px', fontSize: '20px' }}></i>
+            ডেটা লোড হচ্ছে...
           </div>
-        )}
-
-        {/* EDIT MODE */}
-        {mode === 'edit' && (
-          <div style={{ marginTop: '15px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-              <span style={{ fontSize: '14px', fontWeight: 'bold', color: '#475569' }}>
-                WYSIWYG রিচ টেক্সট এডিটর:
-              </span>
-              <button
-                type="button"
-                className="btn btn-secondary btn-sm"
-                style={{ padding: '4px 10px', fontSize: '12px' }}
-                onClick={() => {
-                  if (!rawHtmlMode && editorRef.current) {
-                    setContent(editorRef.current.innerHTML);
-                  }
-                  setRawHtmlMode(!rawHtmlMode);
-                }}
-              >
-                <i className="fa-solid fa-code"></i> {rawHtmlMode ? 'WYSIWYG মোডে ফিরুন' : 'Raw HTML মোড'}
-              </button>
-            </div>
-
-            {!rawHtmlMode ? (
-              <div>
-                {/* TOOLBAR */}
-                <div className="editor-toolbar">
-                  <select
-                    className="toolbar-select"
-                    onChange={(e) => handleInsertHeading(e.target.value)}
-                    defaultValue="p"
-                  >
-                    <option value="p">Paragraph</option>
-                    <option value="h1">Heading 1</option>
-                    <option value="h2">Heading 2</option>
-                    <option value="h3">Heading 3</option>
-                  </select>
-
-                  <button type="button" className="toolbar-btn" onClick={() => execCmd('bold')} title="Bold">
-                    <i className="fa-solid fa-bold"></i>
-                  </button>
-                  <button type="button" className="toolbar-btn" onClick={() => execCmd('italic')} title="Italic">
-                    <i className="fa-solid fa-italic"></i>
-                  </button>
-                  <button type="button" className="toolbar-btn" onClick={() => execCmd('underline')} title="Underline">
-                    <i className="fa-solid fa-underline"></i>
-                  </button>
-                  <button type="button" className="toolbar-btn" onClick={() => execCmd('strikeThrough')} title="Strikethrough">
-                    <i className="fa-solid fa-strikethrough"></i>
-                  </button>
-
-                  <span style={{ borderRight: '1px solid #cbd5e1', height: '20px', margin: '0 4px' }}></span>
-
-                  <button type="button" className="toolbar-btn" onClick={() => execCmd('insertUnorderedList')} title="Bullet List">
-                    <i className="fa-solid fa-list-ul"></i>
-                  </button>
-                  <button type="button" className="toolbar-btn" onClick={() => execCmd('insertOrderedList')} title="Numbered List">
-                    <i className="fa-solid fa-list-ol"></i>
-                  </button>
-
-                  <span style={{ borderRight: '1px solid #cbd5e1', height: '20px', margin: '0 4px' }}></span>
-
-                  <button type="button" className="toolbar-btn" onClick={openLinkModal} title="Insert Link">
-                    <i className="fa-solid fa-link"></i> Link
-                  </button>
-
-                  <button type="button" className="toolbar-btn" onClick={() => execCmd('removeFormat')} title="Clear Formatting">
-                    <i className="fa-solid fa-eraser"></i> Clean
-                  </button>
-                </div>
-
-                {/* CONTENT AREA */}
-                <div
-                  ref={editorRef}
-                  className="editor-content"
-                  contentEditable
-                  suppressContentEditableWarning
-                  onBlur={() => {
-                    if (editorRef.current) setContent(editorRef.current.innerHTML);
-                  }}
-                ></div>
+        ) : (
+          <>
+            {/* VIEW MODE */}
+            {mode === 'view' && (
+              <div className="read-box" style={{ borderLeft: '5px solid var(--primary)' }}>
+                {currentPolicyContent.trim() !== '' ? (
+                  <>
+                    <div
+                      className="policy-preview-box"
+                      dangerouslySetInnerHTML={{ __html: currentPolicyContent }}
+                    ></div>
+                    <div className="card-actions">
+                      <button className="btn btn-warning" onClick={() => toggleMode('edit')}>
+                        <i className="fa-solid fa-pen-to-square"></i> Edit
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="policy-preview-box">
+                      <p style={{ color: '#888' }}>কোনো পলিসি পাওয়া যায়নি।</p>
+                    </div>
+                    <div className="card-actions">
+                      <button className="btn btn-add" onClick={() => toggleMode('edit')}>
+                        <i className="fa-solid fa-plus"></i> নতুন পলিসি যোগ করুন
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
-            ) : (
-              <textarea
-                className="raw-textarea"
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder="Write or paste raw HTML code here..."
-              ></textarea>
             )}
 
-            <div style={{ marginTop: '15px', display: 'flex', gap: '10px' }}>
-              <button
-                type="button"
-                className="btn btn-submit"
-                style={{ padding: '10px 22px' }}
-                onClick={handleSave}
-                disabled={saving}
-              >
-                <i className="fa-solid fa-floppy-disk"></i> {saving ? 'সংরক্ষণ হচ্ছে...' : 'পলিসি পরিবর্তন সংরক্ষণ করুন'}
-              </button>
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={() => setMode('view')}
-              >
-                <i className="fa-solid fa-xmark"></i> বাতিল করুন
-              </button>
-            </div>
-          </div>
+            {/* EDIT MODE */}
+            {mode === 'edit' && (
+              <div className="read-box" style={{ borderLeft: '5px solid var(--primary)', background: '#ffffff' }}>
+                <div style={{ fontWeight: 'bold', marginBottom: '12px', color: 'var(--primary)' }}>
+                  {currentPolicyContent ? 'পলিসি এডিট করুন' : 'নতুন পলিসি লিখুন'}
+                </div>
+
+                <div className="editor-wrapper">
+                  {/* Toolbar */}
+                  <div className="editor-toolbar">
+                    <select
+                      className="toolbar-select"
+                      onChange={(e) => handleHeading(e.target.value)}
+                      defaultValue="p"
+                    >
+                      <option value="p">Paragraph</option>
+                      <option value="h1">Heading 1</option>
+                      <option value="h2">Heading 2</option>
+                      <option value="h3">Heading 3</option>
+                    </select>
+
+                    <button
+                      type="button"
+                      className="toolbar-btn"
+                      onClick={() => handleExec('bold')}
+                      title="Bold"
+                    >
+                      <i className="fa-solid fa-bold"></i>
+                    </button>
+                    <button
+                      type="button"
+                      className="toolbar-btn"
+                      onClick={() => handleExec('italic')}
+                      title="Italic"
+                    >
+                      <i className="fa-solid fa-italic"></i>
+                    </button>
+                    <button
+                      type="button"
+                      className="toolbar-btn"
+                      onClick={() => handleExec('underline')}
+                      title="Underline"
+                    >
+                      <i className="fa-solid fa-underline"></i>
+                    </button>
+                    <button
+                      type="button"
+                      className="toolbar-btn"
+                      onClick={() => handleExec('strikeThrough')}
+                      title="Strikethrough"
+                    >
+                      <i className="fa-solid fa-strikethrough"></i>
+                    </button>
+
+                    <span className="toolbar-separator"></span>
+
+                    <button
+                      type="button"
+                      className="toolbar-btn"
+                      onClick={() => handleExec('insertUnorderedList')}
+                      title="Bullet List"
+                    >
+                      <i className="fa-solid fa-list-ul"></i>
+                    </button>
+                    <button
+                      type="button"
+                      className="toolbar-btn"
+                      onClick={() => handleExec('insertOrderedList')}
+                      title="Numbered List"
+                    >
+                      <i className="fa-solid fa-list-ol"></i>
+                    </button>
+
+                    <span className="toolbar-separator"></span>
+
+                    <button
+                      type="button"
+                      className="toolbar-btn"
+                      onClick={() => handleExec('justifyLeft')}
+                      title="Align Left"
+                    >
+                      <i className="fa-solid fa-align-left"></i>
+                    </button>
+                    <button
+                      type="button"
+                      className="toolbar-btn"
+                      onClick={() => handleExec('justifyCenter')}
+                      title="Align Center"
+                    >
+                      <i className="fa-solid fa-align-center"></i>
+                    </button>
+                    <button
+                      type="button"
+                      className="toolbar-btn"
+                      onClick={() => handleExec('justifyRight')}
+                      title="Align Right"
+                    >
+                      <i className="fa-solid fa-align-right"></i>
+                    </button>
+
+                    <span className="toolbar-separator"></span>
+
+                    <button
+                      type="button"
+                      className="toolbar-btn"
+                      onClick={openLinkModal}
+                      title="Insert Link"
+                    >
+                      <i className="fa-solid fa-link"></i> Link
+                    </button>
+                    <button
+                      type="button"
+                      className="toolbar-btn"
+                      onClick={() => handleExec('removeFormat')}
+                      title="Clear Formatting"
+                    >
+                      <i className="fa-solid fa-eraser"></i> Clean
+                    </button>
+                  </div>
+
+                  {/* Content Editable Area */}
+                  <div
+                    ref={editorRef}
+                    className="editor-content"
+                    contentEditable
+                    suppressContentEditableWarning
+                    onBlur={() => {
+                      if (editorRef.current) setCurrentPolicyContent(editorRef.current.innerHTML);
+                    }}
+                  ></div>
+                </div>
+
+                <div className="card-actions">
+                  <button
+                    className="btn btn-submit"
+                    onClick={handleSavePolicy}
+                    disabled={saving}
+                  >
+                    <i className="fa-solid fa-floppy-disk"></i> {saving ? 'Saving...' : 'Save Policy'}
+                  </button>
+                  <button className="btn btn-secondary" onClick={() => toggleMode('view')}>
+                    <i className="fa-solid fa-xmark"></i> Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
 
       {/* CUSTOM LINK MODAL */}
       {showLinkModal && (
-        <div className="modal-overlay" onClick={() => setShowLinkModal(false)}>
-          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
-            <h3 style={{ margin: '0 0 15px 0', fontSize: '18px', color: '#1e293b' }}>
-              <i className="fa-solid fa-link" style={{ color: 'var(--primary)', marginRight: '8px' }}></i>
-              কাস্টম লিংক যুক্ত করুন
-            </h3>
+        <div className="link-modal-overlay" onClick={closeLinkModal}>
+          <div className="link-modal-box" onClick={(e) => e.stopPropagation()}>
+            <div className="link-modal-title">
+              <i className="fa-solid fa-link"></i> লিংক যুক্ত করুন
+            </div>
 
-            <div className="modal-tabs">
+            <div className="link-type-tabs">
               <div
-                className={`modal-tab ${linkType === 'website' ? 'active' : ''}`}
-                onClick={() => setLinkType('website')}
+                className={`link-type-tab ${activeLinkType === 'website' ? 'active' : ''}`}
+                onClick={() => setActiveLinkType('website')}
               >
-                <i className="fa-solid fa-globe"></i> Website
+                <i className="fa-solid fa-globe"></i> ওয়েবসাইট
               </div>
               <div
-                className={`modal-tab ${linkType === 'email' ? 'active' : ''}`}
-                onClick={() => setLinkType('email')}
+                className={`link-type-tab ${activeLinkType === 'email' ? 'active' : ''}`}
+                onClick={() => setActiveLinkType('email')}
               >
-                <i className="fa-solid fa-envelope"></i> Email
+                <i className="fa-solid fa-envelope"></i> ইমেইল
               </div>
               <div
-                className={`modal-tab ${linkType === 'phone' ? 'active' : ''}`}
-                onClick={() => setLinkType('phone')}
+                className={`link-type-tab ${activeLinkType === 'phone' ? 'active' : ''}`}
+                onClick={() => setActiveLinkType('phone')}
               >
-                <i className="fa-solid fa-phone"></i> Phone
+                <i className="fa-solid fa-phone"></i> ফোন
               </div>
             </div>
 
-            <div style={{ marginBottom: '12px' }}>
-              <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '4px', color: '#475569' }}>
-                Display Text (টেক্সট):
-              </label>
-              <input
-                type="text"
-                value={linkText}
-                onChange={(e) => setLinkText(e.target.value)}
-                placeholder="যেমন: আমাদের পলিসি দেখুন"
-                style={{ width: '100%', padding: '9px 12px', border: '1px solid #cbd5e1', borderRadius: '5px', fontSize: '14px', boxSizing: 'border-box' }}
-              />
-            </div>
+            <input
+              type="text"
+              placeholder="টেক্সট (Display Text)"
+              value={linkDisplayText}
+              onChange={(e) => setLinkDisplayText(e.target.value)}
+            />
 
-            {linkType === 'website' && (
-              <div style={{ marginBottom: '15px' }}>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '4px', color: '#475569' }}>
-                  Web URL (ওয়েব ঠিকানা):
-                </label>
+            {activeLinkType === 'website' && (
+              <>
                 <input
-                  type="text"
-                  value={linkWebsite}
-                  onChange={(e) => setLinkWebsite(e.target.value)}
+                  type="url"
                   placeholder="https://example.com"
-                  style={{ width: '100%', padding: '9px 12px', border: '1px solid #cbd5e1', borderRadius: '5px', fontSize: '14px', boxSizing: 'border-box' }}
+                  value={linkInputWebsite}
+                  onChange={(e) => setLinkInputWebsite(e.target.value)}
                 />
-              </div>
+                <div className="link-modal-hint">সম্পূর্ণ ওয়েব এড্রেস দিন (https:// সহ)</div>
+              </>
             )}
 
-            {linkType === 'email' && (
-              <div style={{ marginBottom: '15px' }}>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '4px', color: '#475569' }}>
-                  Email Address (ইমেইল):
-                </label>
+            {activeLinkType === 'email' && (
+              <>
                 <input
                   type="email"
-                  value={linkEmail}
-                  onChange={(e) => setLinkEmail(e.target.value)}
-                  placeholder="support@topmcqbd.com"
-                  style={{ width: '100%', padding: '9px 12px', border: '1px solid #cbd5e1', borderRadius: '5px', fontSize: '14px', boxSizing: 'border-box' }}
+                  placeholder="example@mail.com"
+                  value={linkInputEmail}
+                  onChange={(e) => setLinkInputEmail(e.target.value)}
                 />
-              </div>
+                <div className="link-modal-hint">শুধু ইমেইল এড্রেস দিন — ক্লিক করলে মেইল অ্যাপ খুলবে</div>
+              </>
             )}
 
-            {linkType === 'phone' && (
-              <div style={{ marginBottom: '15px' }}>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '4px', color: '#475569' }}>
-                  Phone Number (ফোন নাম্বার):
-                </label>
+            {activeLinkType === 'phone' && (
+              <>
                 <input
-                  type="text"
-                  value={linkPhone}
-                  onChange={(e) => setLinkPhone(e.target.value)}
-                  placeholder="+880 1700-000000"
-                  style={{ width: '100%', padding: '9px 12px', border: '1px solid #cbd5e1', borderRadius: '5px', fontSize: '14px', boxSizing: 'border-box' }}
+                  type="tel"
+                  placeholder="+8801XXXXXXXXX"
+                  value={linkInputPhone}
+                  onChange={(e) => setLinkInputPhone(e.target.value)}
                 />
-              </div>
+                <div className="link-modal-hint">কান্ট্রি কোডসহ ফোন নাম্বার দিন — ক্লিক করলে কল অ্যাপ খুলবে</div>
+              </>
             )}
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={() => setShowLinkModal(false)}
-              >
-                বাতিল
+            <div className="card-actions" style={{ justifyContent: 'flex-end', marginTop: '10px' }}>
+              <button className="btn btn-secondary" onClick={closeLinkModal}>
+                <i className="fa-solid fa-xmark"></i> বাতিল
               </button>
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={insertCustomLink}
-              >
-                <i className="fa-solid fa-plus"></i> লিংক যোগ করুন
+              <button className="btn btn-submit" onClick={insertCustomLink}>
+                <i className="fa-solid fa-check"></i> যুক্ত করুন
               </button>
             </div>
           </div>

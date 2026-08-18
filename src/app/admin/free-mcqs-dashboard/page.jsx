@@ -81,7 +81,7 @@ export default function AdminFreeMcqsDashboardPage() {
             <Link href="/free-mcqs" target="_blank" className="btn btn-success">
               <i className="fa-solid fa-arrow-up-right-from-square"></i> ফ্রি এমসিকিউ পেজ দেখুন
             </Link>
-            <Link href="/admin/quiz-dashboard" className="btn btn-primary">
+            <Link href="/admin/questions-dashboard" className="btn btn-primary">
               <i className="fa-solid fa-file-circle-question"></i> প্রশ্ন ব্যাংক পরিচালনা
             </Link>
           </div>

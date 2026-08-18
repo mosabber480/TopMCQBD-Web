@@ -149,12 +149,21 @@ export default function Header({ headerData: initialHeader }) {
                 return (
                   <li
                     key={index}
-                    className={`nav-item has-mega-menu ${isDropdownOpen ? 'show-mobile-dropdown' : ''}`}
-                    onMouseEnter={() => setOpenDropdownIndex(index)}
-                    onMouseLeave={() => setOpenDropdownIndex(null)}
+                    className={`nav-item has-dropdown has-mega-menu ${isDropdownOpen ? 'show-mobile-dropdown' : ''}`}
+                    onMouseEnter={() => {
+                      if (typeof window !== 'undefined' && window.innerWidth > 768) {
+                        setOpenDropdownIndex(index);
+                      }
+                    }}
+                    onMouseLeave={() => {
+                      if (typeof window !== 'undefined' && window.innerWidth > 768) {
+                        setOpenDropdownIndex(null);
+                      }
+                    }}
                   >
                     <Link
                       href={mapLegacyUrl(menu.url || '#')}
+                      className="dropdown-toggle-link"
                       onClick={(e) => {
                         if (typeof window !== 'undefined' && window.innerWidth <= 768) {
                           e.preventDefault();
@@ -189,7 +198,14 @@ export default function Header({ headerData: initialHeader }) {
                               ) : (
                                 <div className="mega-col-links">
                                   {(col.links || []).map((lk, lIdx) => (
-                                    <Link key={lIdx} href={mapLegacyUrl(lk.url || '#')}>
+                                    <Link
+                                      key={lIdx}
+                                      href={mapLegacyUrl(lk.url || '#')}
+                                      onClick={() => {
+                                        setMobileMenuOpen(false);
+                                        setOpenDropdownIndex(null);
+                                      }}
+                                    >
                                       <i className="fa-solid fa-angle-right" style={{ fontSize: '10px', marginRight: '5px', color: 'var(--primary)' }}></i>
                                       {lk.title || lk.text}
                                     </Link>
@@ -211,11 +227,20 @@ export default function Header({ headerData: initialHeader }) {
                   <li
                     key={index}
                     className={`nav-item has-dropdown ${isDropdownOpen ? 'show-mobile-dropdown' : ''}`}
-                    onMouseEnter={() => setOpenDropdownIndex(index)}
-                    onMouseLeave={() => setOpenDropdownIndex(null)}
+                    onMouseEnter={() => {
+                      if (typeof window !== 'undefined' && window.innerWidth > 768) {
+                        setOpenDropdownIndex(index);
+                      }
+                    }}
+                    onMouseLeave={() => {
+                      if (typeof window !== 'undefined' && window.innerWidth > 768) {
+                        setOpenDropdownIndex(null);
+                      }
+                    }}
                   >
                     <Link
                       href={mapLegacyUrl(menu.url || '#')}
+                      className="dropdown-toggle-link"
                       onClick={(e) => {
                         if (typeof window !== 'undefined' && window.innerWidth <= 768) {
                           e.preventDefault();
@@ -229,7 +254,13 @@ export default function Header({ headerData: initialHeader }) {
                     <ul className="dropdown-menu">
                       {menu.subMenus.map((sub, sIdx) => (
                         <li key={sIdx}>
-                          <Link href={mapLegacyUrl(sub.url || '#')}>
+                          <Link
+                            href={mapLegacyUrl(sub.url || '#')}
+                            onClick={() => {
+                              setMobileMenuOpen(false);
+                              setOpenDropdownIndex(null);
+                            }}
+                          >
                             {sub.title}
                           </Link>
                         </li>
@@ -242,7 +273,13 @@ export default function Header({ headerData: initialHeader }) {
               // 3. REGULAR MENU LINK
               return (
                 <li key={index} className="nav-item">
-                  <Link href={mapLegacyUrl(menu.url || '#')}>
+                  <Link
+                    href={mapLegacyUrl(menu.url || '#')}
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      setOpenDropdownIndex(null);
+                    }}
+                  >
                     {menu.title}
                   </Link>
                 </li>

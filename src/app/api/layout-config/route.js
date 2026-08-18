@@ -38,7 +38,21 @@ export async function GET() {
     return NextResponse.json(config);
   } catch (err) {
     console.error('GET LAYOUT CONFIG ERROR:', err);
-    return NextResponse.json({ message: 'Server error', error: err.message }, { status: 500 });
+    return NextResponse.json({
+      announcement: { text: '', link: '' },
+      header: {
+        siteTitle: 'TopMCQ',
+        logoUrl: '',
+        seoTitle: '',
+        faviconUrl: '',
+        btnText: 'যোগাযোগ',
+        btnLink: '/contact',
+        menus: [],
+        megaMenus: []
+      },
+      footer: { columns: [] },
+      copyright: { text: '© 2026 TopMCQBD. All rights reserved.', links: [] }
+    });
   }
 }
 
