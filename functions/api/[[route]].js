@@ -1,84 +1,30 @@
 import { parseClusterHost, getDbConfig } from '../utils/db.js';
 import { generateToken, verifyTokenFromRequest, addPlanDuration } from '../utils/auth.js';
+import {
+  initialLayoutConfig,
+  initialHomeConfig,
+  initialSidebarConfig,
+  initialPolicy,
+  initialQuestions,
+  initialUsers
+} from '../data/liveConfigs.js';
 
-// Live In-Memory State for Edge Runtime
-let liveHomeConfig = {
+// Live State for Edge Runtime (Synchronized directly with MongoDB Atlas data)
+let liveHomeConfig = (initialHomeConfig && Object.keys(initialHomeConfig).length > 0) ? initialHomeConfig : {
   seoTitle: "TopMCQBD - সেরা অনলাইন কুইজ ও প্রস্তুতি প্ল্যাটফর্ম",
-  seoDescription: "বিসিএস, ব্যাংক, প্রাথমিক শিক্ষক নিয়োগ এবং বিশ্ববিদ্যালয়ের ভর্তি পরীক্ষার জন্য সেরা অনলাইন প্রস্তুতি প্ল্যাটফর্ম।",
-  sliders: [
-    {
-      title: "বিসিএস ও ব্যাংক জব প্রস্তুতির সেরা মাধ্যম",
-      subtitle: "হাজারো সঠিক প্রশ্নের ব্যাখ্যাসহ নিজেকে যাচাই করুন এবং দ্রুততম সময়ে আপনার চাকরির প্রস্তুতি সম্পন্ন করুন।",
-      bgImage: "images/slider-01.jpg",
-      bgOpacity: 0.5,
-      btn1Text: "🚀 কুইজ শুরু করুন",
-      btn1Link: "/all-mcq",
-      btn2Text: "ফ্রি ডেমো দেখুন",
-      btn2Link: "#demo"
-    },
-    {
-      title: "বিসিএস ও ব্যাংক জব প্রস্তুতির সেরা মাধ্যম",
-      subtitle: "হাজারো সঠিক প্রশ্নের ব্যাখ্যাসহ নিজেকে যাচাই করুন এবং দ্রুততম সময়ে আপনার চাকরির প্রস্তুতি সম্পন্ন করুন।",
-      bgImage: "images/slider-02.jpg",
-      bgOpacity: 0.5,
-      btn1Text: "🚀 কুইজ শুরু করুন",
-      btn1Link: "/all-mcq",
-      btn2Text: "ফ্রি ডেমো দেখুন",
-      btn2Link: "#demo"
-    }
-  ],
-  demoQuizzes: [
-    {
-      title: "বাংলা ভাষা ও সাহিত্য",
-      badgeText: "ফ্রি টেস্ট",
-      desc: "সন্ধি, সমাস ও গুরুত্বপূর্ণ সাহিত্যিকদের বিগত বছরের প্রশ্নাবলি।",
-      link: "/free-mcqs"
-    }
-  ],
-  packages: [],
-  demoSectionInfo: {
-    title: "ফ্রি ডেমো কুইজ",
-    subtitle: "কোনো রেজিস্ট্রেশন ছাড়াই এখনই নিচের কুইজগুলো প্র্যাকটিস করে দেখুন"
-  },
-  packageSectionInfo: {
-    title: "প্যাকেজসমূহ",
-    subtitle: "আপনার সুবিধাজনক প্রস্তুতি প্ল্যান বেছে নিন"
-  },
-  missionSectionInfo: {
-    sectionTitle: "আমাদের মিশন ও লক্ষ্য",
-    sectionSubtitle: "শিক্ষার্থীদের সফলতা ও সঠিক প্রস্ততির পথ সুগম করাই আমাদের উদ্দেশ্য",
-    missionTitle: "আমাদের মিশন",
-    missionDesc: "বাংলাদেশের যেকোনো প্রান্তের শিক্ষার্থীদের কাছে মানসম্মত ও তথ্যসমৃদ্ধ প্রস্তুতিমূলক কুইজ পৌঁছে দেওয়া, যাতে তারা ঘরে বসেই রিয়েল-টাইম মূল্যায়নের মাধ্যমে নিজের আত্মবিশ্বাস বৃদ্ধি করতে পারে।",
-    goalTitle: "আমাদের লক্ষ্য",
-    goalDesc: "একটি আধুনিক, সহজ ও কার্যকর লার্নিং প্ল্যাটফর্ম হিসেবে প্রতিটি প্রতিযোগিতামূলক পরীক্ষার পরীক্ষার্থীর প্রথম পছন্দ হয়ে ওঠা এবং ব্যাখ্যামূলক অনুশীলনের মাধ্যমে তাদের শতভাগ সাফল্য নিশ্চিত করা।"
-  }
+  sliders: [],
+  demoQuizzes: [],
+  packages: []
 };
 
-let liveLayoutConfig = {
-  announcement: {
-    text: "বিশেষ বিজ্ঞপ্তি: সার্ভার থেকে প্রথমবার কুইজের তথ্য লোড হতে ৩০ সেকেন্ড পর্যন্ত সময় লাগতে পারে। অনুগ্রহ করে ধৈর্য ধরুন!",
-    link: ""
-  },
+let liveLayoutConfig = (initialLayoutConfig && Object.keys(initialLayoutConfig).length > 0) ? initialLayoutConfig : {
+  announcement: { text: "", link: "" },
   header: {
     siteTitle: "TopMCQBD",
     logoUrl: "/images/TopMCQ.png",
-    seoTitle: "TopMCQBD - সেরা অনলাইন কুইজ ও প্রস্তুতি প্ল্যাটফর্ম",
-    faviconUrl: "/images/favicon.ico",
-    btnText: "সহায়তা",
-    btnLink: "/contact",
     menus: [
       { title: "হোম", url: "/" },
-      {
-        title: "কুইজ অনুশীলন",
-        url: "/quiz",
-        isMegaMenu: false,
-        subMenus: [
-          { title: "বিসিএস প্রস্তুতি", url: "/quiz?category=bcs" },
-          { title: "ব্যাংক জব প্রস্তুতি", url: "/quiz?category=bank" },
-          { title: "প্রাথমিক শিক্ষক নিয়োগ", url: "/quiz?category=primary" },
-          { title: "সকল MCQ", url: "/all-mcq" }
-        ]
-      },
+      { title: "কুইজ অনুশীলন", url: "/quiz" },
       { title: "সকল MCQ", url: "/all-mcq" },
       { title: "প্যাকেজসমূহ", url: "/packages" },
       { title: "আমাদের সম্পর্কে", url: "/about-us" },
@@ -86,122 +32,18 @@ let liveLayoutConfig = {
     ],
     megaMenus: []
   },
-  footer: {
-    columns: [
-      {
-        type: "info",
-        title: "সাইট তথ্য ও সোশাল লিংক",
-        text: "বিসিএস, ব্যাংক, প্রাথমিক শিক্ষক নিয়োগ এবং বিশ্ববিদ্যালয়ের ভর্তি পরীক্ষার জন্য একটি আধুনিক ও স্বয়ংসম্পূর্ণ অনলাইন প্রস্তুতি প্ল্যাটফর্ম।",
-        fb: "",
-        yt: "",
-        wa: "",
-        tw: "",
-        tg: "",
-        ln: ""
-      },
-      {
-        type: "links",
-        title: "প্রয়োজনীয় লিংক",
-        links: [
-          { title: "হোম পেজ", url: "/" },
-          { title: "কুইজ অনুশীলন", url: "/quiz" },
-          { title: "সকল প্রশ্ন ক্যাটাগরি", url: "/all-mcq" },
-          { title: "প্যাকেজ ও মূল্য তালিকা", url: "/packages" }
-        ]
-      },
-      {
-        type: "links",
-        title: "ক্যাটাগরি",
-        links: [
-          { title: "বিসিএস প্রস্তুতি", url: "/quiz?category=bcs" },
-          { title: "ব্যাংক জব", url: "/quiz?category=bank" },
-          { title: "প্রাথমিক শিক্ষক", url: "/quiz?category=primary" }
-        ]
-      },
-      {
-        type: "links",
-        title: "যোগাযোগ",
-        links: [
-          { title: "আমাদের সম্পর্কে", url: "/about-us" },
-          { title: "যোগাযোগ করুন", url: "/contact" },
-          { title: "সচরাচর জিজ্ঞাসা (FAQ)", url: "/faq" },
-          { title: "রিফান্ড ও পেমেন্ট পলিসি", url: "/privacy-and-refund-policy" }
-        ]
-      }
-    ]
-  },
-  copyright: {
-    text: "© 2026 TopMCQBD. সর্বস্বত্ব সংরক্ষিত।",
-    links: [
-      { title: "FAQ", url: "/faq" },
-      { title: "Privacy & Refund Policy", url: "/privacy-and-refund-policy" },
-      { title: "System Status", url: "/status" }
-    ]
-  }
+  footer: { columns: [] },
+  copyright: { text: "© 2026 TopMCQBD. সর্বস্বত্ব সংরক্ষিত。", links: [] }
 };
 
-let liveSidebarConfig = {
-  menus: [
-    { title: 'ড্যাশবোর্ড', url: '/admin/dashboard', icon: 'fa-solid fa-gauge-high', subMenus: [] },
-    { title: 'হেডার কন্ট্রোল', url: '/admin/header-dashboard', icon: 'fa-solid fa-window-restore', subMenus: [] },
-    { title: 'ফুটার কন্ট্রোল', url: '/admin/footer-dashboard', icon: 'fa-solid fa-table-columns', subMenus: [] },
-    { title: 'হোম পেজ কন্ট্রোল', url: '/admin/home-dashboard', icon: 'fa-solid fa-sliders', subMenus: [] },
-    { title: 'আমাদের সম্পর্কে', url: '/admin/about-dashboard', icon: 'fa-solid fa-address-card', subMenus: [] },
-    { title: 'প্রশ্ন ব্যাংক ও কুইজ', url: '/admin/quiz-dashboard', icon: 'fa-solid fa-file-circle-question', subMenus: [] },
-    { title: 'প্যাকেজসমূহ পেজ', url: '/admin/packages-dashboard', icon: 'fa-solid fa-box-open', subMenus: [] },
-    { title: 'ইউজার ও সাবস্ক্রিপশন', url: '/admin/users', icon: 'fa-solid fa-users-gear', subMenus: [] },
-    { title: 'সাইডবার মেনু কন্ট্রোল', url: '/admin/admin-menu-dashboard', icon: 'fa-solid fa-list-check', subMenus: [] },
-    { title: 'রিফান্ড ও পলিসি', url: '/admin/policy-dashboard', icon: 'fa-solid fa-file-invoice-dollar', subMenus: [] },
-    { title: 'ফ্রি এমসিকিউ কন্ট্রোল', url: '/admin/free-mcqs-dashboard', icon: 'fa-solid fa-gift', subMenus: [] }
-  ],
-  headerButtons: [
-    { text: 'ওয়েবসাইট ভিজিট', url: '/', icon: 'fa-solid fa-globe', color: 'success', targetBlank: true, action: 'link' },
-    { text: 'হোম পেজ এডিটর', url: '/admin/home-dashboard', icon: 'fa-solid fa-sliders', color: 'primary', targetBlank: false, action: 'link' },
-    { text: 'কুইজ ম্যানেজমেন্ট', url: '/admin/quiz-dashboard', icon: 'fa-solid fa-file-circle-question', color: 'info', targetBlank: false, action: 'link' },
-    { text: 'ইউজার লিস্ট', url: '/admin/users', icon: 'fa-solid fa-users', color: 'warning', targetBlank: false, action: 'link' },
-    { text: 'Database Connection', url: '/db-connection-check', icon: 'fa-solid fa-arrow-up-right-from-square', color: 'primary', targetBlank: true, action: 'link' }
-  ]
+let liveSidebarConfig = (initialSidebarConfig && Object.keys(initialSidebarConfig).length > 0) ? initialSidebarConfig : {
+  menus: [],
+  headerButtons: []
 };
 
-let livePolicy = "<h2>TopMCQBD রিফান্ড ও গোপনীয়তা নীতিমালা</h2><p>TopMCQBD তে আপনাকে স্বাগতম। আমাদের প্ল্যাটফর্ম ব্যবহার করার মাধ্যমে আপনি নিম্নলিখিত শর্তাবলি মেনে নিচ্ছেন।</p>";
-
-let liveQuestions = [
-  {
-    _id: 'q_1',
-    q: '‘বিদ্যা + আলয়’ = কোনটি?',
-    options: ['বিদ্যালয়', 'বিদালয়', 'বিদ্যালয়ী', 'বিদালয়া'],
-    ans: 0,
-    explanation: 'বিদ্যা ও আলয় মিলে সন্ধিযুক্ত হয়ে বিদ্যালয় গঠিত হয়।',
-    category: 'Bangla > grammer > sondhi'
-  },
-  {
-    _id: 'q_2',
-    q: '‘অ + অ’ মিলে কী হয়?',
-    options: ['আ', 'ই', 'উ', 'এ'],
-    ans: 0,
-    explanation: 'স্বরসন্ধির নিয়ম অনুযায়ী অ-কার কিংবা আ-কারের পর অ-কার বা আ-কার থাকলে উভয় মিলে আ-কার হয়।',
-    category: 'Bangla > grammer > sondhi'
-  }
-];
-
-let liveUsers = [
-  {
-    _id: 'u_1',
-    name: 'Mosabber (Owner)',
-    email: 'mosabber480@gmail.com',
-    role: 'owner',
-    subscription: { plan: 'lifetime', active: true, startDate: new Date().toISOString(), endDate: '2099-12-31' },
-    pendingRequests: []
-  },
-  {
-    _id: 'u_2',
-    name: 'Rahim User',
-    email: 'rahim@gmail.com',
-    role: 'customer',
-    subscription: { plan: '1_month', active: true, startDate: new Date().toISOString(), endDate: new Date(Date.now() + 30*24*60*60*1000).toISOString() },
-    pendingRequests: []
-  }
-];
+let livePolicy = initialPolicy || "<h2>TopMCQBD রিফান্ড ও গোপনীয়তা নীতিমালা</h2>";
+let liveQuestions = Array.isArray(initialQuestions) && initialQuestions.length > 0 ? initialQuestions : [];
+let liveUsers = Array.isArray(initialUsers) && initialUsers.length > 0 ? initialUsers : [];
 
 function jsonResponse(data, status = 200) {
   return new Response(JSON.stringify(data), {

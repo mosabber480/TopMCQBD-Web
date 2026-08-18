@@ -69,7 +69,7 @@ export default function Footer({ footerData: initialFooter, copyrightData: initi
     if (initialCopyright) setCopyrightData(initialCopyright);
 
     const fetchConfig = () => {
-      fetch('/api/layout-config')
+      fetch('/api/layout-config?t=' + Date.now(), { cache: 'no-store' })
         .then(r => r.json())
         .then(data => {
           if (data) {

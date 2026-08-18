@@ -18,7 +18,7 @@ export default function AnnouncementBar({ announcement: initialAnnouncement }) {
     if (initialAnnouncement) setAnnouncement(initialAnnouncement);
 
     const fetchConfig = () => {
-      fetch('/api/layout-config')
+      fetch('/api/layout-config?t=' + Date.now(), { cache: 'no-store' })
         .then(r => r.json())
         .then(data => {
           if (data && data.announcement) {

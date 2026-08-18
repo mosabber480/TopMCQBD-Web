@@ -195,6 +195,13 @@ export default function AdminFooterDashboardPage() {
         showTopAlert('✅ সফলভাবে সেভ হয়েছে!', 'success');
         setConfig(payload);
         setHasPendingReorder(false);
+        try {
+          const prev = JSON.parse(localStorage.getItem('layout_config_data') || '{}');
+          localStorage.setItem('layout_config_data', JSON.stringify({ ...prev, ...payload }));
+        } catch (e) {}
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new Event('layout-updated'));
+        }
         return true;
       } else {
         showTopAlert('❌ ' + (result.message || 'সেভ করতে ব্যর্থ হয়েছে!'), 'danger');

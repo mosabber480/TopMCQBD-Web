@@ -170,6 +170,13 @@ export default function AdminHeaderDashboardPage() {
         showTopAlert('✅ সফলভাবে সেভ হয়েছে!', 'success');
         setConfig(payload);
         setIsMenuReordered(false);
+        try {
+          const prev = JSON.parse(localStorage.getItem('layout_config_data') || '{}');
+          localStorage.setItem('layout_config_data', JSON.stringify({ ...prev, ...payload }));
+        } catch (e) {}
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new Event('layout-updated'));
+        }
         return true;
       } else {
         showTopAlert('❌ সেভ করতে ব্যর্থ হয়েছে!', 'danger');

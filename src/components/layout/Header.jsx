@@ -12,17 +12,7 @@ const DEFAULT_HEADER = {
   btnLink: '/contact',
   menus: [
     { title: 'হোম', url: '/' },
-    {
-      title: 'কুইজ অনুশীলন',
-      url: '/quiz',
-      isMegaMenu: false,
-      subMenus: [
-        { title: 'বিসিএস প্রস্তুতি', url: '/quiz?category=bcs' },
-        { title: 'ব্যাংক জব প্রস্তুতি', url: '/quiz?category=bank' },
-        { title: 'প্রাথমিক শিক্ষক নিয়োগ', url: '/quiz?category=primary' },
-        { title: 'সকল MCQ', url: '/all-mcq' }
-      ]
-    },
+    { title: 'কুইজ অনুশীলন', url: '/quiz' },
     { title: 'সকল MCQ', url: '/all-mcq' },
     { title: 'প্যাকেজসমূহ', url: '/packages' },
     { title: 'আমাদের সম্পর্কে', url: '/about-us' },
@@ -41,10 +31,20 @@ export default function Header({ headerData: initialHeader }) {
   useEffect(() => {
     if (initialHeader) {
       setHeaderData(initialHeader);
+    } else {
+      try {
+        const cached = localStorage.getItem('layout_config_data');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed && parsed.header) {
+            setHeaderData(parsed.header);
+          }
+        }
+      } catch (e) {}
     }
 
     const fetchConfig = () => {
-      fetch('/api/layout-config')
+      fetch('/api/layout-config?t=' + Date.now(), { cache: 'no-store' })
         .then(r => r.json())
         .then(data => {
           if (data && data.header) {
