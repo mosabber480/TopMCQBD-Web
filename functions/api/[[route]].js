@@ -68,7 +68,17 @@ let liveLayoutConfig = {
     btnLink: "/contact",
     menus: [
       { title: "হোম", url: "/" },
-      { title: "কুইজ অনুশীলন", url: "/quiz" },
+      {
+        title: "কুইজ অনুশীলন",
+        url: "/quiz",
+        isMegaMenu: false,
+        subMenus: [
+          { title: "বিসিএস প্রস্তুতি", url: "/quiz?category=bcs" },
+          { title: "ব্যাংক জব প্রস্তুতি", url: "/quiz?category=bank" },
+          { title: "প্রাথমিক শিক্ষক নিয়োগ", url: "/quiz?category=primary" },
+          { title: "সকল MCQ", url: "/all-mcq" }
+        ]
+      },
       { title: "সকল MCQ", url: "/all-mcq" },
       { title: "প্যাকেজসমূহ", url: "/packages" },
       { title: "আমাদের সম্পর্কে", url: "/about-us" },
