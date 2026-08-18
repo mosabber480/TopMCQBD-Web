@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build && node copyAssets.js",
-    "build:cloudflare": "next build && node copyAssets.js",
+    "build:cloudflare": "node fixBson.js && next build && node copyAssets.js",
+    "postinstall": "node fixBson.js",
     "preview": "next start",
     "start": "next start",
     "seed": "node seedUsers.js"
