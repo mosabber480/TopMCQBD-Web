@@ -3,37 +3,115 @@
 import React, { useState, useEffect } from 'react';
 import { showTopAlert } from '@/components/layout/TopAlert';
 
-export default function AdminHomeDashboardPage() {
-  const [loading, setLoading] = useState(true);
+const defaultHomeConfig = {
+  seoTitle: 'TopMCQBD - বাংলাদেশের সেরা অনলাইন MCQ ও কুইজ প্র্যাকটিস প্ল্যাটফর্ম',
+  seoDescription: 'বিসিএস, ব্যাংক, প্রাথমিক সহকারী শিক্ষক নিয়োগ ও সরকারি চাকরির চূড়ান্ত প্রস্তুতির জন্য অনলাইন মডেল টেস্ট ও ব্যাখ্যাসহ MCQ প্র্যাকটিস।',
+  sliders: [
+    {
+      title: 'বিসিএস ও সরকারি চাকরির সেরা প্রস্তুতি',
+      subtitle: 'হাজারো মডেল টেস্ট ও বিষয়ভিত্তিক MCQ প্র্যাকটিসের মাধ্যমে নিজের প্রস্তুতি যাচাই করুন।',
+      bgImage: '/images/hero-banner.jpg',
+      opacity: '0.85',
+      btn1Text: 'প্র্যাকটিস শুরু করুন',
+      btn1Link: '/packages',
+      btn2Text: 'ফ্রি কুইজ দিন',
+      btn2Link: '/free-mcqs'
+    }
+  ],
+  demoSectionInfo: {
+    title: 'ফ্রি ডেমো কুইজ',
+    subtitle: 'নিবন্ধন ছাড়াই এখনই বিষয়ভিত্তিক ফ্রি কুইজে অংশ নিন'
+  },
+  demoQuizzes: [
+    {
+      title: 'বাংলা ভাষা ও সাহিত্য',
+      badge: '১০ মিনিট • ২০ প্রশ্ন',
+      desc: 'প্রাচীন, মধ্য ও আধুনিক যুগের গুরুত্বপূর্ণ বিগত বছরের প্রশ্নাবলি।',
+      link: '/free-mcqs'
+    },
+    {
+      title: 'বাংলাদেশ বিষয়াবলী',
+      badge: '১০ মিনিট • ২০ প্রশ্ন',
+      desc: 'বাংলাদেশের ইতিহাস, মুক্তিযুদ্ধ, সংবিধান ও অর্থনৈতিক সমীক্ষা।',
+      link: '/free-mcqs'
+    }
+  ],
+  packageSectionInfo: {
+    title: 'আমাদের প্রিপারেশন প্যাকেজসমূহ',
+    subtitle: 'সাশ্রয়ী মূল্যে সেরা চাকরির প্রস্তুতি ও আনলিমিটেড মডেল টেস্ট'
+  },
+  packages: [
+    {
+      title: '১ মাসের স্ট্যান্ডার্ড প্যাক',
+      price: '৯৯ টাকা',
+      duration: '১ মাস',
+      desc: 'সকল বিষয়ের অধ্যায়ভিত্তিক আনলিমিটেড মডেল টেস্ট ও সম্পূর্ণ ব্যাখ্যা।',
+      img: '',
+      link: '/packages'
+    },
+    {
+      title: '৬ মাসের প্রিমিয়াম প্যাক',
+      price: '৩৯৯ টাকা',
+      duration: '৬ মাস',
+      desc: 'বিসিএস ও সকল পরীক্ষার স্পেশাল মডেল টেস্ট এবং লাইভ এক্সাম।',
+      img: '',
+      link: '/packages'
+    },
+    {
+      title: '১ বছরের মেগা প্যাক',
+      price: '৫৯৯ টাকা',
+      duration: '১ বছর',
+      desc: 'এক বছরের জন্য সমস্ত পেইড ফিচার, প্রশ্ন ব্যাংক ও সার্বক্ষণিক আপডেট।',
+      img: '',
+      link: '/packages'
+    }
+  ],
+  missionSectionInfo: {
+    sectionTitle: 'আমাদের লক্ষ্য ও উদ্দেশ্য',
+    sectionSubtitle: 'ডিজিটাল প্রযুক্তির মাধ্যমে চাকরি প্রার্থীদের প্রস্তুতিকে সহজ ও নিখুঁত করা',
+    missionTitle: 'আমাদের মিশন',
+    missionDesc: 'বাংলাদেশের প্রতিটি প্রান্তের শিক্ষার্থীদের জন্য মানসম্মত প্রশ্ন ব্যাংক ও সহজলভ্য মডেল টেস্ট পৌঁছে দেওয়া।',
+    goalTitle: 'আমাদের ভিশন',
+    goalDesc: 'স্মার্ট ও নির্ভুল অ্যানালিটিক্স দিয়ে চাকরি প্রার্থীদের সাফল্যের শীর্ষে পৌঁছে দেওয়া।'
+  }
+};
 
-  // SEO
+export default function AdminHomeDashboardPage() {
+  const [config, setConfig] = useState(defaultHomeConfig);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [isReordered, setIsReordered] = useState(false);
+
+  // SEO State
   const [seoTitle, setSeoTitle] = useState('');
   const [seoDescription, setSeoDescription] = useState('');
-  const [isEditingSeo, setIsEditingSeo] = useState(false);
 
-  // Sliders
+  // Sliders State
   const [sliders, setSliders] = useState([]);
-  const [editingSliderIndex, setEditingSliderIndex] = useState(null);
-  const [draggedSliderIdx, setDraggedSliderIdx] = useState(null);
-  const [sliderDropPos, setSliderDropPos] = useState({}); // { [idx]: 'top' | 'bottom' }
+  const [newSlider, setNewSlider] = useState({
+    title: '',
+    subtitle: '',
+    bgImage: '',
+    opacity: '0.85',
+    btn1Text: 'শুরু করুন',
+    btn1Link: '/packages',
+    btn2Text: '',
+    btn2Link: ''
+  });
 
-  // Demo Quizzes
-  const [demoHeader, setDemoHeader] = useState({ title: '', subtitle: '' });
-  const [isEditingDemoHeader, setIsEditingDemoHeader] = useState(false);
+  // Demo Quizzes State
+  const [demoSectionTitle, setDemoSectionTitle] = useState('');
+  const [demoSectionSubtitle, setDemoSectionSubtitle] = useState('');
   const [demoQuizzes, setDemoQuizzes] = useState([]);
-  const [editingDemoIndex, setEditingDemoIndex] = useState(null);
-  const [draggedDemoIdx, setDraggedDemoIdx] = useState(null);
-  const [demoDropPos, setDemoDropPos] = useState({});
+  const [newDemoQuiz, setNewDemoQuiz] = useState({ title: '', badge: '', desc: '', link: '/free-mcqs' });
 
-  // Packages
-  const [packageHeader, setPackageHeader] = useState({ title: '', subtitle: '' });
-  const [isEditingPackageHeader, setIsEditingPackageHeader] = useState(false);
+  // Packages State
+  const [pkgSectionTitle, setPkgSectionTitle] = useState('');
+  const [pkgSectionSubtitle, setPkgSectionSubtitle] = useState('');
   const [packages, setPackages] = useState([]);
-  const [editingPackageIndex, setEditingPackageIndex] = useState(null);
-  const [draggedPkgIdx, setDraggedPkgIdx] = useState(null);
-  const [pkgDropPos, setPkgDropPos] = useState({});
+  const [newPackage, setNewPackage] = useState({ title: '', price: '', duration: '', desc: '', img: '', link: '/packages' });
 
-  // Mission
+  // Mission State
   const [missionInfo, setMissionInfo] = useState({
     sectionTitle: '',
     sectionSubtitle: '',
@@ -42,62 +120,61 @@ export default function AdminHomeDashboardPage() {
     goalTitle: '',
     goalDesc: ''
   });
-  const [isEditingMission, setIsEditingMission] = useState(false);
 
-  // Reorder save tracking
-  const [hasSliderChanges, setHasSliderChanges] = useState(false);
-  const [hasDemoChanges, setHasDemoChanges] = useState(false);
-  const [hasPackageChanges, setHasPackageChanges] = useState(false);
-
-  const fetchHomeConfig = async () => {
+  const fetchConfig = async () => {
     setLoading(true);
     try {
       const res = await fetch('/api/home-config');
       const data = await res.json();
-      if (data) {
-        setSeoTitle(data.seoTitle || '');
-        setSeoDescription(data.seoDescription || '');
-        setSliders(data.sliders || []);
-        setDemoQuizzes(data.demoQuizzes || []);
-        setPackages(data.packages || []);
-        setDemoHeader(data.demoSectionInfo || { title: '', subtitle: '' });
-        setPackageHeader(data.packageSectionInfo || { title: '', subtitle: '' });
-        setMissionInfo(data.missionSectionInfo || {
-          sectionTitle: '',
-          sectionSubtitle: '',
-          missionTitle: '',
-          missionDesc: '',
-          goalTitle: '',
-          goalDesc: ''
-        });
+      if (data && (data.sliders || data.seoTitle)) {
+        setConfig(data);
+        setSeoTitle(data.seoTitle || defaultHomeConfig.seoTitle);
+        setSeoDescription(data.seoDescription || defaultHomeConfig.seoDescription);
+        setSliders(data.sliders || defaultHomeConfig.sliders);
+        setDemoSectionTitle(data.demoSectionInfo?.title || defaultHomeConfig.demoSectionInfo.title);
+        setDemoSectionSubtitle(data.demoSectionInfo?.subtitle || defaultHomeConfig.demoSectionInfo.subtitle);
+        setDemoQuizzes(data.demoQuizzes || defaultHomeConfig.demoQuizzes);
+        setPkgSectionTitle(data.packageSectionInfo?.title || defaultHomeConfig.packageSectionInfo.title);
+        setPkgSectionSubtitle(data.packageSectionInfo?.subtitle || defaultHomeConfig.packageSectionInfo.subtitle);
+        setPackages(data.packages || defaultHomeConfig.packages);
+        setMissionInfo(data.missionSectionInfo || defaultHomeConfig.missionSectionInfo);
+      } else {
+        setConfig(defaultHomeConfig);
+        setSeoTitle(defaultHomeConfig.seoTitle);
+        setSeoDescription(defaultHomeConfig.seoDescription);
+        setSliders(defaultHomeConfig.sliders);
+        setDemoSectionTitle(defaultHomeConfig.demoSectionInfo.title);
+        setDemoSectionSubtitle(defaultHomeConfig.demoSectionInfo.subtitle);
+        setDemoQuizzes(defaultHomeConfig.demoQuizzes);
+        setPkgSectionTitle(defaultHomeConfig.packageSectionInfo.title);
+        setPkgSectionSubtitle(defaultHomeConfig.packageSectionInfo.subtitle);
+        setPackages(defaultHomeConfig.packages);
+        setMissionInfo(defaultHomeConfig.missionSectionInfo);
       }
     } catch (err) {
-      console.error('Error loading home config:', err);
+      console.error('Failed to load home config:', err);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchHomeConfig();
+    fetchConfig();
   }, []);
 
-  const saveHomeConfig = async (overrideData = {}) => {
+  const handleSaveToDB = async (customPayload = null) => {
+    setSaving(true);
     const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
-    if (!token) {
-      showTopAlert('অনুগ্রহ করে লগইন করুন!', 'warning');
-      return;
-    }
 
-    const payload = {
-      seoTitle: overrideData.seoTitle !== undefined ? overrideData.seoTitle : seoTitle,
-      seoDescription: overrideData.seoDescription !== undefined ? overrideData.seoDescription : seoDescription,
-      sliders: overrideData.sliders !== undefined ? overrideData.sliders : sliders,
-      demoQuizzes: overrideData.demoQuizzes !== undefined ? overrideData.demoQuizzes : demoQuizzes,
-      packages: overrideData.packages !== undefined ? overrideData.packages : packages,
-      demoSectionInfo: overrideData.demoSectionInfo !== undefined ? overrideData.demoSectionInfo : demoHeader,
-      packageSectionInfo: overrideData.packageSectionInfo !== undefined ? overrideData.packageSectionInfo : packageHeader,
-      missionSectionInfo: overrideData.missionSectionInfo !== undefined ? overrideData.missionSectionInfo : missionInfo
+    const payload = customPayload || {
+      seoTitle,
+      seoDescription,
+      sliders,
+      demoSectionInfo: { title: demoSectionTitle, subtitle: demoSectionSubtitle },
+      demoQuizzes,
+      packageSectionInfo: { title: pkgSectionTitle, subtitle: pkgSectionSubtitle },
+      packages,
+      missionSectionInfo: missionInfo
     };
 
     try {
@@ -109,1188 +186,608 @@ export default function AdminHomeDashboardPage() {
         },
         body: JSON.stringify(payload)
       });
-
-      const result = await res.json();
-      if (res.ok && result.success) {
-        showTopAlert('✅ সফলভাবে সেভ হয়েছে!', 'success');
-        setHasSliderChanges(false);
-        setHasDemoChanges(false);
-        setHasPackageChanges(false);
-        fetchHomeConfig();
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showTopAlert('✅ হোম পেজের সমস্ত পরিবর্তন সফলভাবে সংরক্ষিত হয়েছে!', 'success');
+        setConfig(payload);
+        setIsReordered(false);
       } else {
-        showTopAlert('❌ ' + (result.message || 'সেভ করতে ব্যর্থ হয়েছে!'), 'danger');
+        showTopAlert('❌ ' + (data.message || 'সংরক্ষণ ব্যর্থ হয়েছে'), 'danger');
       }
     } catch (err) {
-      console.error('Save error:', err);
-      showTopAlert('সার্ভারে যোগাযোগ করতে সমস্যা হয়েছে!', 'danger');
+      showTopAlert('সার্ভার কানেকশন এরর!', 'danger');
+    } finally {
+      setSaving(false);
     }
   };
 
-  // Drag and Drop helpers for Sliders
-  const handleSliderDragStart = (e, idx) => {
-    setDraggedSliderIdx(idx);
-    e.dataTransfer.effectAllowed = 'move';
-  };
-
-  const handleSliderDragOver = (e, idx) => {
+  // Slider actions
+  const handleAddSlider = (e) => {
     e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    const rect = e.currentTarget.getBoundingClientRect();
-    const offset = e.clientY - rect.top;
-    const pos = offset < rect.height / 2 ? 'top' : 'bottom';
-    setSliderDropPos({ [idx]: pos });
+    if (!newSlider.title.trim()) return;
+    const updated = [...sliders, newSlider];
+    setSliders(updated);
+    setNewSlider({
+      title: '',
+      subtitle: '',
+      bgImage: '',
+      opacity: '0.85',
+      btn1Text: 'শুরু করুন',
+      btn1Link: '/packages',
+      btn2Text: '',
+      btn2Link: ''
+    });
+    handleSaveToDB({ ...config, sliders: updated });
   };
 
-  const handleSliderDragLeave = () => {
-    setSliderDropPos({});
+  const handleDeleteSlider = (index) => {
+    if (!window.confirm('আপনি কি এই স্লাইডারটি মুছে ফেলতে চান?')) return;
+    const updated = sliders.filter((_, idx) => idx !== index);
+    setSliders(updated);
+    handleSaveToDB({ ...config, sliders: updated });
   };
 
-  const handleSliderDrop = (e, targetIdx) => {
-    e.preventDefault();
-    setSliderDropPos({});
-    if (draggedSliderIdx === null || draggedSliderIdx === targetIdx) return;
-
-    const list = [...sliders];
-    const item = list.splice(draggedSliderIdx, 1)[0];
-    list.splice(targetIdx, 0, item);
-    setSliders(list);
-    setHasSliderChanges(true);
-    setDraggedSliderIdx(null);
-  };
-
-  const moveSlider = (fromIdx, toIdx) => {
-    if (toIdx < 0 || toIdx >= sliders.length) return;
+  const moveSlider = (index, dir) => {
+    if ((dir === 'up' && index === 0) || (dir === 'down' && index === sliders.length - 1)) return;
+    const targetIdx = dir === 'up' ? index - 1 : index + 1;
     const updated = [...sliders];
-    const item = updated.splice(fromIdx, 1)[0];
-    updated.splice(toIdx, 0, item);
+    const temp = updated[index];
+    updated[index] = updated[targetIdx];
+    updated[targetIdx] = temp;
     setSliders(updated);
-    setHasSliderChanges(true);
+    setIsReordered(true);
   };
 
-  const addSlider = () => {
-    const newSlide = {
-      title: 'বিসিএস ও ব্যাংক জব প্রস্তুতির সেরা মাধ্যম',
-      subtitle: 'হাজারো সঠিক প্রশ্নের ব্যাখ্যাসহ নিজেকে যাচাই করুন এবং দ্রুততম সময়ে আপনার চাকরির প্রস্তুতি সম্পন্ন করুন',
-      bgImage: 'images/slider-01.jpg',
-      bgOpacity: 0.5,
-      btn1Text: '🚀 কুইজ শুরু করুন',
-      btn1Link: 'all-mcq.html',
-      btn2Text: 'ফ্রি ডেমো দেখুন',
-      btn2Link: '#demo'
-    };
-    const updated = [...sliders, newSlide];
-    setSliders(updated);
-    setEditingSliderIndex(updated.length - 1);
-    setHasSliderChanges(true);
-  };
-
-  const deleteSlider = async (idx) => {
-    const confirm = await showTopAlert('আপনি কি এই স্লাইডারটি মুছে ফেলতে চান?', 'danger', true);
-    if (!confirm) return;
-    const updated = sliders.filter((_, i) => i !== idx);
-    setSliders(updated);
-    await saveHomeConfig({ sliders: updated });
-  };
-
-  // Demo Drag and Drop
-  const handleDemoDragStart = (e, idx) => {
-    setDraggedDemoIdx(idx);
-    e.dataTransfer.effectAllowed = 'move';
-  };
-
-  const handleDemoDragOver = (e, idx) => {
+  // Demo Quiz actions
+  const handleAddDemoQuiz = (e) => {
     e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    const rect = e.currentTarget.getBoundingClientRect();
-    const offset = e.clientY - rect.top;
-    const pos = offset < rect.height / 2 ? 'top' : 'bottom';
-    setDemoDropPos({ [idx]: pos });
-  };
-
-  const handleDemoDragLeave = () => {
-    setDemoDropPos({});
-  };
-
-  const handleDemoDrop = (e, targetIdx) => {
-    e.preventDefault();
-    setDemoDropPos({});
-    if (draggedDemoIdx === null || draggedDemoIdx === targetIdx) return;
-
-    const list = [...demoQuizzes];
-    const item = list.splice(draggedDemoIdx, 1)[0];
-    list.splice(targetIdx, 0, item);
-    setDemoQuizzes(list);
-    setHasDemoChanges(true);
-    setDraggedDemoIdx(null);
-  };
-
-  const moveDemo = (fromIdx, toIdx) => {
-    if (toIdx < 0 || toIdx >= demoQuizzes.length) return;
-    const updated = [...demoQuizzes];
-    const item = updated.splice(fromIdx, 1)[0];
-    updated.splice(toIdx, 0, item);
+    if (!newDemoQuiz.title.trim()) return;
+    const updated = [...demoQuizzes, newDemoQuiz];
     setDemoQuizzes(updated);
-    setHasDemoChanges(true);
+    setNewDemoQuiz({ title: '', badge: '', desc: '', link: '/free-mcqs' });
+    handleSaveToDB({ ...config, demoQuizzes: updated });
   };
 
-  const addDemo = () => {
-    const newDemo = {
-      title: 'বাংলা ভাষা ও সাহিত্য',
-      badgeText: 'ফ্রি টেস্ট',
-      desc: 'সন্ধি, সমাস ও গুরুত্বপূর্ণ সাহিত্যিকদের প্রশ্নাবলি।',
-      link: '/quiz'
-    };
-    const updated = [...demoQuizzes, newDemo];
+  const handleDeleteDemoQuiz = (index) => {
+    if (!window.confirm('আপনি কি এই ডেমো কুইজটি মুছে ফেলতে চান?')) return;
+    const updated = demoQuizzes.filter((_, idx) => idx !== index);
     setDemoQuizzes(updated);
-    setEditingDemoIndex(updated.length - 1);
-    setHasDemoChanges(true);
+    handleSaveToDB({ ...config, demoQuizzes: updated });
   };
 
-  const deleteDemo = async (idx) => {
-    const confirm = await showTopAlert('আপনি কি এই ডেমো কুইজটি মুছে ফেলতে চান?', 'danger', true);
-    if (!confirm) return;
-    const updated = demoQuizzes.filter((_, i) => i !== idx);
-    setDemoQuizzes(updated);
-    await saveHomeConfig({ demoQuizzes: updated });
-  };
-
-  // Package Drag and Drop
-  const handlePkgDragStart = (e, idx) => {
-    setDraggedPkgIdx(idx);
-    e.dataTransfer.effectAllowed = 'move';
-  };
-
-  const handlePkgDragOver = (e, idx) => {
+  // Package actions
+  const handleAddPackage = (e) => {
     e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    const rect = e.currentTarget.getBoundingClientRect();
-    const offset = e.clientY - rect.top;
-    const pos = offset < rect.height / 2 ? 'top' : 'bottom';
-    setPkgDropPos({ [idx]: pos });
-  };
-
-  const handlePkgDragLeave = () => {
-    setPkgDropPos({});
-  };
-
-  const handlePkgDrop = (e, targetIdx) => {
-    e.preventDefault();
-    setPkgDropPos({});
-    if (draggedPkgIdx === null || draggedPkgIdx === targetIdx) return;
-
-    const list = [...packages];
-    const item = list.splice(draggedPkgIdx, 1)[0];
-    list.splice(targetIdx, 0, item);
-    setPackages(list);
-    setHasPackageChanges(true);
-    setDraggedPkgIdx(null);
-  };
-
-  const movePackage = (fromIdx, toIdx) => {
-    if (toIdx < 0 || toIdx >= packages.length) return;
-    const updated = [...packages];
-    const item = updated.splice(fromIdx, 1)[0];
-    updated.splice(toIdx, 0, item);
+    if (!newPackage.title.trim() || !newPackage.price.trim()) return;
+    const updated = [...packages, newPackage];
     setPackages(updated);
-    setHasPackageChanges(true);
+    setNewPackage({ title: '', price: '', duration: '', desc: '', img: '', link: '/packages' });
+    handleSaveToDB({ ...config, packages: updated });
   };
 
-  const addPackage = () => {
-    const newPkg = {
-      title: '১ মাসের প্যাকেজ',
-      price: '৳ ৩০০',
-      duration: '১ মাস',
-      desc: 'সকল বিষয়ের প্রিমিয়াম প্রশ্ন ও আনলিমিটেড টেস্ট।',
-      imageUrl: 'images/slider-01.jpg',
-      buyLink: '/packages'
-    };
-    const updated = [...packages, newPkg];
+  const handleDeletePackage = (index) => {
+    if (!window.confirm('আপনি কি এই প্যাকেজটি মুছে ফেলতে চান?')) return;
+    const updated = packages.filter((_, idx) => idx !== index);
     setPackages(updated);
-    setEditingPackageIndex(updated.length - 1);
-    setHasPackageChanges(true);
-  };
-
-  const deletePackage = async (idx) => {
-    const confirm = await showTopAlert('আপনি কি এই প্যাকেজটি মুছে ফেলতে চান?', 'danger', true);
-    if (!confirm) return;
-    const updated = packages.filter((_, i) => i !== idx);
-    setPackages(updated);
-    await saveHomeConfig({ packages: updated });
+    handleSaveToDB({ ...config, packages: updated });
   };
 
   if (loading) {
     return (
-      <div style={{ textAlign: 'center', padding: '50px' }}>
-        <i className="fa-solid fa-spinner fa-spin" style={{ fontSize: '30px', color: 'var(--primary)' }}></i>
-        <p style={{ marginTop: '10px', color: '#666' }}>হোম পেজ ডাটা লোড হচ্ছে...</p>
+      <div style={{ textAlign: 'center', padding: '60px' }}>
+        <i className="fa-solid fa-spinner fa-spin" style={{ fontSize: '32px', color: 'var(--primary)' }}></i>
+        <p style={{ marginTop: '12px', color: '#64748b' }}>হোম পেজ কনফিগারেশন লোড হচ্ছে...</p>
       </div>
     );
   }
 
   return (
-    <div className="container" style={{ maxWidth: '1300px', margin: '0 auto', padding: '0 25px 25px 25px' }}>
+    <div className="container" style={{ maxWidth: '1300px', margin: '0 auto', padding: '0 25px 30px 25px' }}>
       <style jsx>{`
-        .section-card {
+        :root {
+          --primary: #007bff;
+          --secondary: #17a2b8;
+          --warning: #ff9f43;
+          --danger: #dc3545;
+          --dark: #2c3e50;
+          --light: #f4f7f6;
+        }
+
+        .box {
           background: white;
           padding: 25px 30px;
           border-radius: 8px;
-          box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
           margin-bottom: 25px;
           border: 1px solid #e2e8f0;
         }
-        .section-title {
-          font-size: 18px;
-          font-weight: bold;
-          color: var(--dark, #2c3e50);
-          border-bottom: 2px solid #e2e8f0;
-          padding-bottom: 10px;
-          margin-bottom: 20px;
-          display: flex;
-          align-items: center;
-          gap: 10px;
-        }
-        .sub-header-title {
-          font-size: 15px;
-          font-weight: bold;
-          color: #475569;
-          margin: 20px 0 10px 0;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-        .read-box {
-          background: #f8fafc;
-          border: 1px solid #cbd5e1;
-          border-radius: 6px;
-          padding: 15px 20px;
+
+        .form-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 15px;
           margin-bottom: 15px;
-          position: relative;
-          transition: transform 0.15s ease, opacity 0.15s ease;
         }
-        .draggable-box {
-          cursor: move;
+        .form-group {
+          margin-bottom: 12px;
         }
-        .drag-handle {
-          cursor: grab;
-          color: #888;
-          margin-right: 8px;
-          font-size: 16px;
+        label {
+          display: block;
+          font-weight: bold;
+          margin-bottom: 6px;
+          font-size: 13.5px;
+          color: #475569;
         }
-        .drag-handle:active {
-          cursor: grabbing;
-        }
-        .dragging {
-          opacity: 0.4;
-          background: #eef6ff !important;
-        }
-        .drag-over-top {
-          border-top: 3px solid #007bff !important;
-        }
-        .drag-over-bottom {
-          border-bottom: 3px solid #007bff !important;
-        }
-
-        .seo-card { border-left: 6px solid #e83e8c; }
-        .slider-card { border-left: 6px solid var(--primary, #007bff); }
-        .demo-card { border-left: 6px solid var(--secondary, #17a2b8); }
-        .package-card { border-left: 6px solid var(--warning, #ff9f43); }
-        .mission-card { border-left: 6px solid var(--purple-btn, #6f42c1); }
-
-        .form-group { margin-bottom: 12px; }
-        label { display: block; font-weight: 600; margin-bottom: 5px; color: #475569; font-size: 13.5px; }
-        input, select, textarea {
+        input,
+        textarea {
           width: 100%;
           padding: 9px 12px;
           border: 1px solid #cbd5e1;
           border-radius: 5px;
-          font-size: 13.5px;
-          outline: none;
+          font-size: 14px;
           box-sizing: border-box;
+          outline: none;
         }
-        input:focus, textarea:focus { border-color: var(--primary, #007bff); }
-        .row { display: flex; gap: 15px; margin-bottom: 10px; flex-wrap: wrap; align-items: flex-start; }
-        .row .form-group { flex: 1; min-width: 240px; }
-        .card-actions { display: flex; gap: 10px; margin-top: 15px; }
+        input:focus,
+        textarea:focus {
+          border-color: #007bff;
+        }
 
         .btn {
-          padding: 8px 16px;
-          border: none;
+          padding: 9px 16px;
           border-radius: 5px;
+          border: none;
           cursor: pointer;
           font-weight: bold;
-          font-size: 13px;
+          font-size: 13.5px;
           display: inline-flex;
           align-items: center;
           gap: 6px;
+          transition: opacity 0.2s;
         }
-        .btn-warning { background-color: #ffc107; color: #212529; }
-        .btn-warning:hover { background-color: #e0a800; }
-        .btn-danger { background-color: #dc3545; color: white; }
-        .btn-danger:hover { background-color: #c82333; }
-        .btn-submit { background-color: #28a745; color: white; }
-        .btn-submit:hover { background-color: #218838; }
-        .btn-secondary { background-color: #6c757d; color: white; }
-        .btn-secondary:hover { background-color: #5a6268; }
-
-        .section-action-bar {
-          display: flex;
-          gap: 10px;
-          align-items: center;
-          margin-top: 15px;
-          flex-wrap: wrap;
+        .btn:hover {
+          opacity: 0.9;
         }
-        .btn-add {
-          background: var(--main-dash-btn, #28a745);
+        .btn-primary {
+          background: #007bff;
           color: white;
-          border: none;
-          padding: 10px 18px;
-          border-radius: 5px;
-          cursor: pointer;
-          font-weight: 600;
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          font-size: 14px;
         }
-        .btn-save-section {
-          background: var(--primary, #007bff);
+        .btn-success {
+          background: #28a745;
           color: white;
-          border: none;
-          padding: 10px 22px;
-          border-radius: 5px;
-          cursor: pointer;
-          font-weight: bold;
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          font-size: 14px;
         }
-        .btn-save-section:hover { background-color: var(--primary-dark, #0056b3); }
+        .btn-warning {
+          background: #ffc107;
+          color: #212529;
+        }
+        .btn-danger {
+          background: #dc3545;
+          color: white;
+        }
+        .btn-secondary {
+          background: #64748b;
+          color: white;
+        }
 
+        .item-card {
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
+          border-radius: 8px;
+          padding: 14px 18px;
+          margin-bottom: 12px;
+        }
         .arrow-btn-group {
           display: inline-flex;
           flex-direction: column;
           gap: 2px;
-          margin-right: 10px;
+          margin-right: 8px;
         }
         .btn-arrow {
           background: #e2e8f0;
           border: none;
           color: #475569;
-          padding: 2px 6px;
+          padding: 2px 5px;
           border-radius: 3px;
-          font-size: 10px;
+          font-size: 9px;
           cursor: pointer;
-          line-height: 1;
         }
-        .btn-arrow:hover {
-          background: #007bff;
-          color: #ffffff;
+
+        .bottom-action-bar {
+          position: sticky;
+          bottom: 20px;
+          background: #1e293b;
+          padding: 12px 24px;
+          border-radius: 8px;
+          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          color: white;
+          z-index: 100;
+          margin-top: 20px;
+        }
+
+        @media (max-width: 800px) {
+          .form-grid {
+            grid-template-columns: 1fr;
+          }
         }
       `}</style>
 
-      {/* ০. SEO SETTINGS CARD */}
-      <div className="section-card seo-card" id="card-seo">
-        <div className="section-title">
-          <i className="fa-solid fa-magnifying-glass" style={{ color: '#e83e8c' }}></i> হোম পেজ SEO সেটিংস
+      {/* 1. SEO META SETTINGS */}
+      <div className="box" style={{ borderLeft: '6px solid #007bff' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+          <div>
+            <h2 style={{ margin: 0, fontSize: '20px' }}>
+              <i className="fa-solid fa-globe" style={{ color: '#007bff', marginRight: '8px' }}></i>
+              হোম পেজ SEO মেটা তথ্য (SEO Settings)
+            </h2>
+            <p style={{ color: '#64748b', fontSize: '13.5px', margin: '4px 0 0 0' }}>
+              গুগল ও সার্চ ইঞ্জিনে হোম পেজের টাইটেল ও মেটা ডেসক্রিপশন সেট করুন।
+            </p>
+          </div>
+          <button className="btn btn-success" onClick={() => handleSaveToDB()} disabled={saving}>
+            <i className="fa-solid fa-floppy-disk"></i> {saving ? 'সংরক্ষণ হচ্ছে...' : 'সংরক্ষণ করুন'}
+          </button>
         </div>
 
-        {!isEditingSeo ? (
-          <div className="read-box" style={{ borderLeft: '5px solid #e83e8c' }}>
-            <div style={{ position: 'absolute', top: '15px', right: '15px', display: 'flex', gap: '8px' }}>
-              <button className="btn btn-warning" onClick={() => setIsEditingSeo(true)}>
-                <i className="fa-solid fa-pen-to-square"></i> Edit
-              </button>
-              {(seoTitle || seoDescription) && (
-                <button
-                  className="btn btn-danger"
-                  onClick={async () => {
-                    if (await showTopAlert('আপনি কি নিশ্চিত যে SEO সেটিংস মুছে ফেলতে চান?', 'danger', true)) {
-                      setSeoTitle('');
-                      setSeoDescription('');
-                      await saveHomeConfig({ seoTitle: '', seoDescription: '' });
-                    }
-                  }}
-                >
-                  <i className="fa-solid fa-trash"></i> Delete
-                </button>
-              )}
-            </div>
-            <div style={{ fontWeight: 'bold', fontSize: '15px', color: 'var(--dark)' }}>
-              {seoTitle || '(টাইটেল নেই)'}
-            </div>
-            <div style={{ marginTop: '5px', color: '#666', fontSize: '13.5px' }}>
-              <b>Meta Description:</b> {seoDescription || '(ডেসক্রিপশন নেই)'}
-            </div>
-          </div>
-        ) : (
-          <div className="read-box" style={{ borderLeft: '5px solid #007bff', background: '#ffffff' }}>
-            <div style={{ fontWeight: 'bold', marginBottom: '12px', color: '#007bff' }}>
-              SEO টাইটেল ও ডেসক্রিপশন এডিট করুন
-            </div>
-            <div className="row">
-              <div className="form-group">
-                <label>Home Meta Title (SEO):</label>
-                <input
-                  type="text"
-                  value={seoTitle}
-                  onChange={(e) => setSeoTitle(e.target.value)}
-                  placeholder="যেমন: TopMCQ - সেরা অনলাইন কুইজ প্ল্যাটফর্ম"
-                />
-              </div>
-            </div>
-            <div className="row">
-              <div className="form-group">
-                <label>Home Meta Description (SEO):</label>
-                <textarea
-                  rows={2}
-                  value={seoDescription}
-                  onChange={(e) => setSeoDescription(e.target.value)}
-                  placeholder="যেমন: TopMCQ-তে সেরা সব কুইজ দিয়ে আপনার প্রস্তুতি যাচাই করুন..."
-                ></textarea>
-              </div>
-            </div>
-            <div className="card-actions">
-              <button
-                className="btn btn-submit"
-                onClick={async () => {
-                  await saveHomeConfig({ seoTitle, seoDescription });
-                  setIsEditingSeo(false);
-                }}
-              >
-                <i className="fa-solid fa-floppy-disk"></i> পরিবর্তন সংরক্ষণ করুন
-              </button>
-              <button className="btn btn-secondary" onClick={() => setIsEditingSeo(false)}>
-                <i className="fa-solid fa-xmark"></i> বাতিল করুন
-              </button>
-            </div>
-          </div>
-        )}
+        <div className="form-group">
+          <label>SEO Meta Title:</label>
+          <input
+            type="text"
+            value={seoTitle}
+            onChange={(e) => setSeoTitle(e.target.value)}
+            placeholder="SEO Meta Title..."
+          />
+        </div>
+        <div className="form-group">
+          <label>SEO Meta Description:</label>
+          <textarea
+            rows={3}
+            value={seoDescription}
+            onChange={(e) => setSeoDescription(e.target.value)}
+            placeholder="SEO Meta Description..."
+          ></textarea>
+        </div>
       </div>
 
-      {/* ১. SLIDERS MANAGER CARD */}
-      <div className="section-card slider-card" id="card-slider">
-        <div className="section-title">
-          <i className="fa-solid fa-images" style={{ color: 'var(--primary, #007bff)' }}></i> ১. স্লাইডার সেকশন (Sliders)
-        </div>
+      {/* 2. HERO SLIDERS */}
+      <div className="box" style={{ borderLeft: '6px solid #ff9f43' }}>
+        <h2>
+          <i className="fa-solid fa-images" style={{ color: '#ff9f43', marginRight: '8px' }}></i>
+          হিরো ব্যানার ও স্লাইডার্স (Hero Sliders)
+        </h2>
 
-        <div>
-          {sliders.map((s, idx) => {
-            const isEditing = editingSliderIndex === idx;
-            const dropClass = sliderDropPos[idx] === 'top' ? 'drag-over-top' : sliderDropPos[idx] === 'bottom' ? 'drag-over-bottom' : '';
-            const isDragging = draggedSliderIdx === idx;
-
-            if (isEditing) {
-              return (
-                <div key={idx} className="read-box" style={{ background: '#ffffff', borderLeft: '4px solid var(--primary)' }}>
-                  <div style={{ fontWeight: 'bold', marginBottom: '12px', color: 'var(--primary)' }}>
-                    স্লাইডার #{idx + 1} এডিট করুন
-                  </div>
-                  <div className="row">
-                    <div className="form-group">
-                      <label>Title:</label>
-                      <input
-                        type="text"
-                        value={s.title}
-                        onChange={(e) => {
-                          const updated = [...sliders];
-                          updated[idx].title = e.target.value;
-                          setSliders(updated);
-                        }}
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label>Background Image Path:</label>
-                      <input
-                        type="text"
-                        value={s.bgImage}
-                        onChange={(e) => {
-                          const updated = [...sliders];
-                          updated[idx].bgImage = e.target.value;
-                          setSliders(updated);
-                        }}
-                      />
-                    </div>
-                  </div>
-                  <div className="row">
-                    <div className="form-group">
-                      <label>Subtitle:</label>
-                      <input
-                        type="text"
-                        value={s.subtitle}
-                        onChange={(e) => {
-                          const updated = [...sliders];
-                          updated[idx].subtitle = e.target.value;
-                          setSliders(updated);
-                        }}
-                      />
-                    </div>
-                    <div className="form-group" style={{ maxWidth: '140px' }}>
-                      <label>Opacity (0.1 - 1.0):</label>
-                      <input
-                        type="number"
-                        step="0.1"
-                        min="0"
-                        max="1"
-                        value={s.bgOpacity}
-                        onChange={(e) => {
-                          const updated = [...sliders];
-                          updated[idx].bgOpacity = parseFloat(e.target.value);
-                          setSliders(updated);
-                        }}
-                      />
-                    </div>
-                  </div>
-                  <div className="row">
-                    <div className="form-group">
-                      <label>Button 1 Text:</label>
-                      <input
-                        type="text"
-                        value={s.btn1Text}
-                        onChange={(e) => {
-                          const updated = [...sliders];
-                          updated[idx].btn1Text = e.target.value;
-                          setSliders(updated);
-                        }}
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label>Button 1 Link:</label>
-                      <input
-                        type="text"
-                        value={s.btn1Link}
-                        onChange={(e) => {
-                          const updated = [...sliders];
-                          updated[idx].btn1Link = e.target.value;
-                          setSliders(updated);
-                        }}
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label>Button 2 Text:</label>
-                      <input
-                        type="text"
-                        value={s.btn2Text}
-                        onChange={(e) => {
-                          const updated = [...sliders];
-                          updated[idx].btn2Text = e.target.value;
-                          setSliders(updated);
-                        }}
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label>Button 2 Link:</label>
-                      <input
-                        type="text"
-                        value={s.btn2Link}
-                        onChange={(e) => {
-                          const updated = [...sliders];
-                          updated[idx].btn2Link = e.target.value;
-                          setSliders(updated);
-                        }}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="card-actions">
-                    <button
-                      className="btn btn-submit"
-                      onClick={async () => {
-                        await saveHomeConfig();
-                        setEditingSliderIndex(null);
-                      }}
-                    >
-                      <i className="fa-solid fa-floppy-disk"></i> Save Slider
-                    </button>
-                    <button className="btn btn-secondary" onClick={() => setEditingSliderIndex(null)}>
-                      <i className="fa-solid fa-xmark"></i> Cancel
-                    </button>
-                  </div>
-                </div>
-              );
-            }
-
-            return (
-              <div
-                key={idx}
-                className={`read-box draggable-box ${isDragging ? 'dragging' : ''} ${dropClass}`}
-                draggable
-                onDragStart={(e) => handleSliderDragStart(e, idx)}
-                onDragOver={(e) => handleSliderDragOver(e, idx)}
-                onDragLeave={handleSliderDragLeave}
-                onDrop={(e) => handleSliderDrop(e, idx)}
-              >
-                <div style={{ position: 'absolute', top: '15px', right: '15px', display: 'flex', gap: '8px' }}>
-                  <button className="btn btn-warning" onClick={() => setEditingSliderIndex(idx)}>
-                    <i className="fa-solid fa-pen-to-square"></i> Edit
-                  </button>
-                  <button className="btn btn-danger" onClick={() => deleteSlider(idx)}>
-                    <i className="fa-solid fa-trash"></i> Delete
-                  </button>
-                </div>
-
+        {/* Sliders List */}
+        <div style={{ marginBottom: '20px' }}>
+          {sliders.map((slider, index) => (
+            <div key={index} className="item-card">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <i className="fa-solid fa-grip-vertical drag-handle" title="টেনে ধরে স্থান পরিবর্তন করুন"></i>
                   <div className="arrow-btn-group">
-                    <button className="btn-arrow" onClick={() => moveSlider(idx, idx - 1)} disabled={idx === 0}>
+                    <button type="button" className="btn-arrow" onClick={() => moveSlider(index, 'up')}>
                       ▲
                     </button>
-                    <button className="btn-arrow" onClick={() => moveSlider(idx, idx + 1)} disabled={idx === sliders.length - 1}>
+                    <button type="button" className="btn-arrow" onClick={() => moveSlider(index, 'down')}>
                       ▼
                     </button>
                   </div>
                   <div>
-                    <h4 style={{ margin: '0 0 5px 0', color: 'var(--dark)' }}>
-                      #{idx + 1}. {s.title}
-                    </h4>
-                    <p style={{ fontSize: '13.5px', color: '#666', margin: '0 0 8px 0' }}>{s.subtitle}</p>
-                    <div style={{ fontSize: '12.5px', color: '#888' }}>
-                      Image: <code>{s.bgImage}</code> | Opacity: <code>{s.bgOpacity}</code> | Button 1: <code>{s.btn1Text || 'None'}</code> | Button 2: <code>{s.btn2Text || 'None'}</code>
-                    </div>
+                    <strong style={{ fontSize: '15px', color: '#1e293b' }}>
+                      স্লাইডার {index + 1}: {slider.title}
+                    </strong>
+                    <div style={{ fontSize: '12.5px', color: '#64748b' }}>{slider.subtitle}</div>
                   </div>
                 </div>
+                <button className="btn btn-danger btn-sm" onClick={() => handleDeleteSlider(index)}>
+                  <i className="fa-solid fa-trash"></i>
+                </button>
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
 
-        <div className="section-action-bar">
-          <button type="button" className="btn-add" onClick={addSlider}>
+        {/* Add Slider Form */}
+        <form onSubmit={handleAddSlider} style={{ background: '#fdfdfd', border: '1px dashed #cbd5e1', padding: '15px', borderRadius: '8px' }}>
+          <h4 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#007bff' }}>+ নতুন স্লাইডার যোগ করুন</h4>
+          <div className="form-grid">
+            <div className="form-group">
+              <label>স্লাইডার শিরোনাম (Title):</label>
+              <input
+                type="text"
+                placeholder="যেমন: বিসিএস ও সরকারি চাকরির প্রস্তুতি"
+                value={newSlider.title}
+                onChange={(e) => setNewSlider({ ...newSlider, title: e.target.value })}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label>সাব-টাইটেল (Subtitle):</label>
+              <input
+                type="text"
+                placeholder="সংক্ষিপ্ত বর্ণনা..."
+                value={newSlider.subtitle}
+                onChange={(e) => setNewSlider({ ...newSlider, subtitle: e.target.value })}
+              />
+            </div>
+            <div className="form-group">
+              <label>বাটন ১ টেক্সট ও লিংক:</label>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <input
+                  type="text"
+                  placeholder="বাটন টেক্সট"
+                  value={newSlider.btn1Text}
+                  onChange={(e) => setNewSlider({ ...newSlider, btn1Text: e.target.value })}
+                />
+                <input
+                  type="text"
+                  placeholder="URL (/packages)"
+                  value={newSlider.btn1Link}
+                  onChange={(e) => setNewSlider({ ...newSlider, btn1Link: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="form-group">
+              <label>বাটন ২ টেক্সট ও লিংক (ঐচ্ছিক):</label>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <input
+                  type="text"
+                  placeholder="বাটন ২ টেক্সট"
+                  value={newSlider.btn2Text}
+                  onChange={(e) => setNewSlider({ ...newSlider, btn2Text: e.target.value })}
+                />
+                <input
+                  type="text"
+                  placeholder="URL (/free-mcqs)"
+                  value={newSlider.btn2Link}
+                  onChange={(e) => setNewSlider({ ...newSlider, btn2Link: e.target.value })}
+                />
+              </div>
+            </div>
+          </div>
+          <button type="submit" className="btn btn-primary">
             <i className="fa-solid fa-plus"></i> স্লাইডার যোগ করুন
           </button>
-          {hasSliderChanges && (
-            <button type="button" className="btn-save-section" onClick={() => saveHomeConfig()}>
-              <i className="fa-solid fa-floppy-disk"></i> সেভ করুন
-            </button>
-          )}
-        </div>
+        </form>
       </div>
 
-      {/* ২. DEMO QUIZZES CARD */}
-      <div className="section-card demo-card" id="card-demo">
-        <div className="section-title">
-          <i className="fa-solid fa-pen-to-square" style={{ color: 'var(--secondary, #17a2b8)' }}></i> ২. ফ্রি ডেমো কুইজ (Demo Quizzes)
+      {/* 3. FREE DEMO QUIZZES */}
+      <div className="box" style={{ borderLeft: '6px solid #17a2b8' }}>
+        <h2>
+          <i className="fa-solid fa-gift" style={{ color: '#17a2b8', marginRight: '8px' }}></i>
+          ফ্রি ডেমো কুইজ সেকশন (Free Demo Quizzes)
+        </h2>
+
+        <div className="form-grid">
+          <div className="form-group">
+            <label>সেকশন টাইটেল:</label>
+            <input
+              type="text"
+              value={demoSectionTitle}
+              onChange={(e) => setDemoSectionTitle(e.target.value)}
+            />
+          </div>
+          <div className="form-group">
+            <label>সেকশন সাব-টাইটেল:</label>
+            <input
+              type="text"
+              value={demoSectionSubtitle}
+              onChange={(e) => setDemoSectionSubtitle(e.target.value)}
+            />
+          </div>
         </div>
 
-        {/* Demo Header Info */}
-        {!isEditingDemoHeader ? (
-          <div className="read-box" style={{ borderLeft: '5px solid #17a2b8' }}>
-            <div style={{ position: 'absolute', top: '15px', right: '15px' }}>
-              <button className="btn btn-warning" onClick={() => setIsEditingDemoHeader(true)}>
-                <i className="fa-solid fa-pen-to-square"></i> Edit
-              </button>
-            </div>
-            <div style={{ fontWeight: 'bold', fontSize: '15px', color: 'var(--dark)' }}>
-              <i className="fa-solid fa-heading" style={{ color: 'var(--secondary)', marginRight: '6px' }}></i>
-              {demoHeader.title || 'ফ্রি কুইজ'}
-            </div>
-            <div style={{ marginTop: '5px', color: '#666', fontSize: '13.5px' }}>
-              <b>সাব-টাইটেল:</b> {demoHeader.subtitle || 'বিবরণ দেওয়া হয়নি'}
-            </div>
-          </div>
-        ) : (
-          <div className="read-box" style={{ borderLeft: '5px solid #007bff', background: '#ffffff' }}>
-            <div className="form-group">
-              <label>Section Title:</label>
-              <input
-                type="text"
-                value={demoHeader.title}
-                onChange={(e) => setDemoHeader({ ...demoHeader, title: e.target.value })}
-              />
-            </div>
-            <div className="form-group">
-              <label>Section Subtitle:</label>
-              <input
-                type="text"
-                value={demoHeader.subtitle}
-                onChange={(e) => setDemoHeader({ ...demoHeader, subtitle: e.target.value })}
-              />
-            </div>
-            <div className="card-actions">
-              <button
-                className="btn btn-submit"
-                onClick={async () => {
-                  await saveHomeConfig({ demoSectionInfo: demoHeader });
-                  setIsEditingDemoHeader(false);
-                }}
-              >
-                <i className="fa-solid fa-floppy-disk"></i> পরিবর্তন সংরক্ষণ করুন
-              </button>
-              <button className="btn btn-secondary" onClick={() => setIsEditingDemoHeader(false)}>
-                <i className="fa-solid fa-xmark"></i> বাতিল করুন
-              </button>
-            </div>
-          </div>
-        )}
-
-        <div className="sub-header-title">
-          <i className="fa-solid fa-list"></i> ডেমো কুইজের তালিকা:
-        </div>
-
-        <div>
-          {demoQuizzes.map((d, idx) => {
-            const isEditing = editingDemoIndex === idx;
-            const dropClass = demoDropPos[idx] === 'top' ? 'drag-over-top' : demoDropPos[idx] === 'bottom' ? 'drag-over-bottom' : '';
-            const isDragging = draggedDemoIdx === idx;
-
-            if (isEditing) {
-              return (
-                <div key={idx} className="read-box" style={{ background: '#ffffff', borderLeft: '4px solid var(--secondary)' }}>
-                  <div style={{ fontWeight: 'bold', marginBottom: '12px', color: 'var(--secondary)' }}>
-                    ডেমো কুইজ #{idx + 1} এডিট করুন
-                  </div>
-                  <div className="row">
-                    <div className="form-group">
-                      <label>Title:</label>
-                      <input
-                        type="text"
-                        value={d.title}
-                        onChange={(e) => {
-                          const updated = [...demoQuizzes];
-                          updated[idx].title = e.target.value;
-                          setDemoQuizzes(updated);
-                        }}
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label>Badge Text:</label>
-                      <input
-                        type="text"
-                        value={d.badgeText}
-                        onChange={(e) => {
-                          const updated = [...demoQuizzes];
-                          updated[idx].badgeText = e.target.value;
-                          setDemoQuizzes(updated);
-                        }}
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label>Quiz Link (URL):</label>
-                      <input
-                        type="text"
-                        value={d.link}
-                        onChange={(e) => {
-                          const updated = [...demoQuizzes];
-                          updated[idx].link = e.target.value;
-                          setDemoQuizzes(updated);
-                        }}
-                      />
-                    </div>
-                  </div>
-                  <div className="form-group">
-                    <label>Description:</label>
-                    <textarea
-                      rows={2}
-                      value={d.desc}
-                      onChange={(e) => {
-                        const updated = [...demoQuizzes];
-                        updated[idx].desc = e.target.value;
-                        setDemoQuizzes(updated);
-                      }}
-                    ></textarea>
-                  </div>
-
-                  <div className="card-actions">
-                    <button
-                      className="btn btn-submit"
-                      onClick={async () => {
-                        await saveHomeConfig();
-                        setEditingDemoIndex(null);
-                      }}
-                    >
-                      <i className="fa-solid fa-floppy-disk"></i> Save Demo
-                    </button>
-                    <button className="btn btn-secondary" onClick={() => setEditingDemoIndex(null)}>
-                      <i className="fa-solid fa-xmark"></i> Cancel
-                    </button>
-                  </div>
+        {/* Demo Quizzes List */}
+        <div style={{ marginBottom: '20px' }}>
+          {demoQuizzes.map((quiz, index) => (
+            <div key={index} className="item-card">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <strong style={{ fontSize: '15px', color: '#1e293b' }}>{quiz.title}</strong>{' '}
+                  <span style={{ fontSize: '12px', background: '#e0f2fe', color: '#0369a1', padding: '2px 8px', borderRadius: '10px', marginLeft: '6px' }}>
+                    {quiz.badge}
+                  </span>
+                  <div style={{ fontSize: '12.5px', color: '#64748b', marginTop: '2px' }}>{quiz.desc}</div>
                 </div>
-              );
-            }
-
-            return (
-              <div
-                key={idx}
-                className={`read-box draggable-box ${isDragging ? 'dragging' : ''} ${dropClass}`}
-                draggable
-                onDragStart={(e) => handleDemoDragStart(e, idx)}
-                onDragOver={(e) => handleDemoDragOver(e, idx)}
-                onDragLeave={handleDemoDragLeave}
-                onDrop={(e) => handleDemoDrop(e, idx)}
-              >
-                <div style={{ position: 'absolute', top: '15px', right: '15px', display: 'flex', gap: '8px' }}>
-                  <button className="btn btn-warning" onClick={() => setEditingDemoIndex(idx)}>
-                    <i className="fa-solid fa-pen-to-square"></i> Edit
-                  </button>
-                  <button className="btn btn-danger" onClick={() => deleteDemo(idx)}>
-                    <i className="fa-solid fa-trash"></i> Delete
-                  </button>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <i className="fa-solid fa-grip-vertical drag-handle" title="টেনে ধরে স্থান পরিবর্তন করুন"></i>
-                  <div className="arrow-btn-group">
-                    <button className="btn-arrow" onClick={() => moveDemo(idx, idx - 1)} disabled={idx === 0}>
-                      ▲
-                    </button>
-                    <button className="btn-arrow" onClick={() => moveDemo(idx, idx + 1)} disabled={idx === demoQuizzes.length - 1}>
-                      ▼
-                    </button>
-                  </div>
-                  <div>
-                    <h4 style={{ margin: '0 0 5px 0', color: 'var(--dark)' }}>
-                      #{idx + 1}. {d.title} <span style={{ fontSize: '12px', background: '#e3f2fd', color: '#007bff', padding: '2px 6px', borderRadius: '4px' }}>{d.badgeText}</span>
-                    </h4>
-                    <p style={{ fontSize: '13.5px', color: '#666', margin: '0 0 6px 0' }}>{d.desc}</p>
-                    <div style={{ fontSize: '12.5px', color: '#888' }}>
-                      Link: <code>{d.link || 'None'}</code>
-                    </div>
-                  </div>
-                </div>
+                <button className="btn btn-danger btn-sm" onClick={() => handleDeleteDemoQuiz(index)}>
+                  <i className="fa-solid fa-trash"></i>
+                </button>
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
 
-        <div className="section-action-bar">
-          <button type="button" className="btn-add" onClick={addDemo}>
-            <i className="fa-solid fa-plus"></i> ডেমো কুইজ যোগ করুন
+        {/* Add Demo Quiz Form */}
+        <form onSubmit={handleAddDemoQuiz} style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 2fr 1fr auto', gap: '8px', alignItems: 'flex-end' }}>
+          <input
+            type="text"
+            placeholder="কুইজের নাম"
+            value={newDemoQuiz.title}
+            onChange={(e) => setNewDemoQuiz({ ...newDemoQuiz, title: e.target.value })}
+            required
+          />
+          <input
+            type="text"
+            placeholder="ব্যাজ (১০ মিনিট • ২০ প্রশ্ন)"
+            value={newDemoQuiz.badge}
+            onChange={(e) => setNewDemoQuiz({ ...newDemoQuiz, badge: e.target.value })}
+          />
+          <input
+            type="text"
+            placeholder="সংক্ষিপ্ত বিবরণ"
+            value={newDemoQuiz.desc}
+            onChange={(e) => setNewDemoQuiz({ ...newDemoQuiz, desc: e.target.value })}
+          />
+          <input
+            type="text"
+            placeholder="লিংক (/free-mcqs)"
+            value={newDemoQuiz.link}
+            onChange={(e) => setNewDemoQuiz({ ...newDemoQuiz, link: e.target.value })}
+          />
+          <button type="submit" className="btn btn-primary">
+            + যোগ করুন
           </button>
-          {hasDemoChanges && (
-            <button type="button" className="btn-save-section" onClick={() => saveHomeConfig()}>
-              <i className="fa-solid fa-floppy-disk"></i> সেভ করুন
-            </button>
-          )}
-        </div>
+        </form>
       </div>
 
-      {/* ৩. PACKAGES CARD */}
-      <div className="section-card package-card" id="card-package">
-        <div className="section-title">
-          <i className="fa-solid fa-box-open" style={{ color: 'var(--warning, #ff9f43)' }}></i> ৩. প্রিপারেশন প্যাকেজ (Packages)
+      {/* 4. PREPARATION PACKAGES */}
+      <div className="box" style={{ borderLeft: '6px solid #6366f1' }}>
+        <h2>
+          <i className="fa-solid fa-box-open" style={{ color: '#6366f1', marginRight: '8px' }}></i>
+          প্রিপারেশন প্যাকেজসমূহ (Preparation Packages)
+        </h2>
+
+        <div className="form-grid">
+          <div className="form-group">
+            <label>সেকশন টাইটেল:</label>
+            <input
+              type="text"
+              value={pkgSectionTitle}
+              onChange={(e) => setPkgSectionTitle(e.target.value)}
+            />
+          </div>
+          <div className="form-group">
+            <label>সেকশন সাব-টাইটেল:</label>
+            <input
+              type="text"
+              value={pkgSectionSubtitle}
+              onChange={(e) => setPkgSectionSubtitle(e.target.value)}
+            />
+          </div>
         </div>
 
-        {/* Package Header Info */}
-        {!isEditingPackageHeader ? (
-          <div className="read-box" style={{ borderLeft: '5px solid #ff9f43' }}>
-            <div style={{ position: 'absolute', top: '15px', right: '15px' }}>
-              <button className="btn btn-warning" onClick={() => setIsEditingPackageHeader(true)}>
-                <i className="fa-solid fa-pen-to-square"></i> Edit
-              </button>
-            </div>
-            <div style={{ fontWeight: 'bold', fontSize: '15px', color: 'var(--dark)' }}>
-              <i className="fa-solid fa-heading" style={{ color: 'var(--warning)', marginRight: '6px' }}></i>
-              {packageHeader.title || 'আমাদের প্যাকেজসমূহ'}
-            </div>
-            <div style={{ marginTop: '5px', color: '#666', fontSize: '13.5px' }}>
-              <b>সাব-টাইটেল:</b> {packageHeader.subtitle || 'বিবরণ দেওয়া হয়নি'}
-            </div>
-          </div>
-        ) : (
-          <div className="read-box" style={{ borderLeft: '5px solid #007bff', background: '#ffffff' }}>
-            <div className="form-group">
-              <label>Section Title:</label>
-              <input
-                type="text"
-                value={packageHeader.title}
-                onChange={(e) => setPackageHeader({ ...packageHeader, title: e.target.value })}
-              />
-            </div>
-            <div className="form-group">
-              <label>Section Subtitle:</label>
-              <input
-                type="text"
-                value={packageHeader.subtitle}
-                onChange={(e) => setPackageHeader({ ...packageHeader, subtitle: e.target.value })}
-              />
-            </div>
-            <div className="card-actions">
-              <button
-                className="btn btn-submit"
-                onClick={async () => {
-                  await saveHomeConfig({ packageSectionInfo: packageHeader });
-                  setIsEditingPackageHeader(false);
-                }}
-              >
-                <i className="fa-solid fa-floppy-disk"></i> পরিবর্তন সংরক্ষণ করুন
-              </button>
-              <button className="btn btn-secondary" onClick={() => setIsEditingPackageHeader(false)}>
-                <i className="fa-solid fa-xmark"></i> বাতিল করুন
-              </button>
-            </div>
-          </div>
-        )}
-
-        <div className="sub-header-title">
-          <i className="fa-solid fa-list"></i> প্যাকেজের তালিকা:
-        </div>
-
-        <div>
-          {packages.map((pkg, idx) => {
-            const isEditing = editingPackageIndex === idx;
-            const dropClass = pkgDropPos[idx] === 'top' ? 'drag-over-top' : pkgDropPos[idx] === 'bottom' ? 'drag-over-bottom' : '';
-            const isDragging = draggedPkgIdx === idx;
-
-            if (isEditing) {
-              return (
-                <div key={idx} className="read-box" style={{ background: '#ffffff', borderLeft: '4px solid var(--warning)' }}>
-                  <div style={{ fontWeight: 'bold', marginBottom: '12px', color: 'var(--warning)' }}>
-                    প্যাকেজ #{idx + 1} এডিট করুন
-                  </div>
-                  <div className="row">
-                    <div className="form-group">
-                      <label>Title:</label>
-                      <input
-                        type="text"
-                        value={pkg.title}
-                        onChange={(e) => {
-                          const updated = [...packages];
-                          updated[idx].title = e.target.value;
-                          setPackages(updated);
-                        }}
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label>Price (e.g. ৳ ৩০০):</label>
-                      <input
-                        type="text"
-                        value={pkg.price}
-                        onChange={(e) => {
-                          const updated = [...packages];
-                          updated[idx].price = e.target.value;
-                          setPackages(updated);
-                        }}
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label>Duration (e.g. ১ মাস):</label>
-                      <input
-                        type="text"
-                        value={pkg.duration}
-                        onChange={(e) => {
-                          const updated = [...packages];
-                          updated[idx].duration = e.target.value;
-                          setPackages(updated);
-                        }}
-                      />
-                    </div>
-                  </div>
-                  <div className="row">
-                    <div className="form-group">
-                      <label>Image URL / Path:</label>
-                      <input
-                        type="text"
-                        value={pkg.imageUrl}
-                        onChange={(e) => {
-                          const updated = [...packages];
-                          updated[idx].imageUrl = e.target.value;
-                          setPackages(updated);
-                        }}
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label>Buy Link:</label>
-                      <input
-                        type="text"
-                        value={pkg.buyLink}
-                        onChange={(e) => {
-                          const updated = [...packages];
-                          updated[idx].buyLink = e.target.value;
-                          setPackages(updated);
-                        }}
-                      />
-                    </div>
-                  </div>
-                  <div className="form-group">
-                    <label>Description:</label>
-                    <textarea
-                      rows={2}
-                      value={pkg.desc}
-                      onChange={(e) => {
-                        const updated = [...packages];
-                        updated[idx].desc = e.target.value;
-                        setPackages(updated);
-                      }}
-                    ></textarea>
-                  </div>
-
-                  <div className="card-actions">
-                    <button
-                      className="btn btn-submit"
-                      onClick={async () => {
-                        await saveHomeConfig();
-                        setEditingPackageIndex(null);
-                      }}
-                    >
-                      <i className="fa-solid fa-floppy-disk"></i> Save Package
-                    </button>
-                    <button className="btn btn-secondary" onClick={() => setEditingPackageIndex(null)}>
-                      <i className="fa-solid fa-xmark"></i> Cancel
-                    </button>
-                  </div>
+        {/* Packages List */}
+        <div style={{ marginBottom: '20px' }}>
+          {packages.map((pkg, index) => (
+            <div key={index} className="item-card">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <strong style={{ fontSize: '15px', color: '#1e293b' }}>{pkg.title}</strong>{' '}
+                  <span style={{ fontSize: '13px', fontWeight: 'bold', color: '#16a34a', marginLeft: '6px' }}>
+                    {pkg.price}
+                  </span>{' '}
+                  <span style={{ fontSize: '12px', color: '#64748b' }}>({pkg.duration})</span>
+                  <div style={{ fontSize: '12.5px', color: '#64748b', marginTop: '2px' }}>{pkg.desc}</div>
                 </div>
-              );
-            }
-
-            return (
-              <div
-                key={idx}
-                className={`read-box draggable-box ${isDragging ? 'dragging' : ''} ${dropClass}`}
-                draggable
-                onDragStart={(e) => handlePkgDragStart(e, idx)}
-                onDragOver={(e) => handlePkgDragOver(e, idx)}
-                onDragLeave={handlePkgDragLeave}
-                onDrop={(e) => handlePkgDrop(e, idx)}
-              >
-                <div style={{ position: 'absolute', top: '15px', right: '15px', display: 'flex', gap: '8px' }}>
-                  <button className="btn btn-warning" onClick={() => setEditingPackageIndex(idx)}>
-                    <i className="fa-solid fa-pen-to-square"></i> Edit
-                  </button>
-                  <button className="btn btn-danger" onClick={() => deletePackage(idx)}>
-                    <i className="fa-solid fa-trash"></i> Delete
-                  </button>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <i className="fa-solid fa-grip-vertical drag-handle" title="টেনে ধরে স্থান পরিবর্তন করুন"></i>
-                  <div className="arrow-btn-group">
-                    <button className="btn-arrow" onClick={() => movePackage(idx, idx - 1)} disabled={idx === 0}>
-                      ▲
-                    </button>
-                    <button className="btn-arrow" onClick={() => movePackage(idx, idx + 1)} disabled={idx === packages.length - 1}>
-                      ▼
-                    </button>
-                  </div>
-                  <div>
-                    <h4 style={{ margin: '0 0 5px 0', color: 'var(--dark)' }}>
-                      #{idx + 1}. {pkg.title} <span style={{ color: '#27ae60', fontWeight: 'bold' }}>({pkg.price} / {pkg.duration})</span>
-                    </h4>
-                    <p style={{ fontSize: '13.5px', color: '#666', margin: '0 0 6px 0' }}>{pkg.desc}</p>
-                    <div style={{ fontSize: '12.5px', color: '#888' }}>
-                      Image: <code>{pkg.imageUrl}</code> | Link: <code>{pkg.buyLink}</code>
-                    </div>
-                  </div>
-                </div>
+                <button className="btn btn-danger btn-sm" onClick={() => handleDeletePackage(index)}>
+                  <i className="fa-solid fa-trash"></i>
+                </button>
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
 
-        <div className="section-action-bar">
-          <button type="button" className="btn-add" onClick={addPackage}>
-            <i className="fa-solid fa-plus"></i> প্যাকেজ যোগ করুন
+        {/* Add Package Form */}
+        <form onSubmit={handleAddPackage} style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 2fr auto', gap: '8px', alignItems: 'flex-end' }}>
+          <input
+            type="text"
+            placeholder="প্যাকেজের নাম"
+            value={newPackage.title}
+            onChange={(e) => setNewPackage({ ...newPackage, title: e.target.value })}
+            required
+          />
+          <input
+            type="text"
+            placeholder="মূল্য (যেমন: ৯৯ টাকা)"
+            value={newPackage.price}
+            onChange={(e) => setNewPackage({ ...newPackage, price: e.target.value })}
+            required
+          />
+          <input
+            type="text"
+            placeholder="মেয়াদ (যেমন: ১ মাস)"
+            value={newPackage.duration}
+            onChange={(e) => setNewPackage({ ...newPackage, duration: e.target.value })}
+          />
+          <input
+            type="text"
+            placeholder="বিবরণ"
+            value={newPackage.desc}
+            onChange={(e) => setNewPackage({ ...newPackage, desc: e.target.value })}
+          />
+          <button type="submit" className="btn btn-primary">
+            + যোগ করুন
           </button>
-          {hasPackageChanges && (
-            <button type="button" className="btn-save-section" onClick={() => saveHomeConfig()}>
-              <i className="fa-solid fa-floppy-disk"></i> সেভ করুন
+        </form>
+      </div>
+
+      {/* 5. MISSION & VISION */}
+      <div className="box" style={{ borderLeft: '6px solid #20c997' }}>
+        <h2>
+          <i className="fa-solid fa-bullseye" style={{ color: '#20c997', marginRight: '8px' }}></i>
+          আমাদের লক্ষ্য ও উদ্দেশ্য (Mission & Vision)
+        </h2>
+
+        <div className="form-grid">
+          <div className="form-group">
+            <label>সেকশন টাইটেল:</label>
+            <input
+              type="text"
+              value={missionInfo.sectionTitle || ''}
+              onChange={(e) => setMissionInfo({ ...missionInfo, sectionTitle: e.target.value })}
+            />
+          </div>
+          <div className="form-group">
+            <label>সেকশন সাব-টাইটেল:</label>
+            <input
+              type="text"
+              value={missionInfo.sectionSubtitle || ''}
+              onChange={(e) => setMissionInfo({ ...missionInfo, sectionSubtitle: e.target.value })}
+            />
+          </div>
+          <div className="form-group">
+            <label>মিশন টাইটেল:</label>
+            <input
+              type="text"
+              value={missionInfo.missionTitle || ''}
+              onChange={(e) => setMissionInfo({ ...missionInfo, missionTitle: e.target.value })}
+            />
+          </div>
+          <div className="form-group">
+            <label>মিশন বিবরণ:</label>
+            <textarea
+              rows={2}
+              value={missionInfo.missionDesc || ''}
+              onChange={(e) => setMissionInfo({ ...missionInfo, missionDesc: e.target.value })}
+            ></textarea>
+          </div>
+          <div className="form-group">
+            <label>ভিশন/লক্ষ্য টাইটেল:</label>
+            <input
+              type="text"
+              value={missionInfo.goalTitle || ''}
+              onChange={(e) => setMissionInfo({ ...missionInfo, goalTitle: e.target.value })}
+            />
+          </div>
+          <div className="form-group">
+            <label>ভিশন/লক্ষ্য বিবরণ:</label>
+            <textarea
+              rows={2}
+              value={missionInfo.goalDesc || ''}
+              onChange={(e) => setMissionInfo({ ...missionInfo, goalDesc: e.target.value })}
+            ></textarea>
+          </div>
+        </div>
+
+        <button type="button" className="btn btn-success" onClick={() => handleSaveToDB()} disabled={saving}>
+          <i className="fa-solid fa-floppy-disk"></i> মিশন ও ভিশন সেভ করুন
+        </button>
+      </div>
+
+      {/* Floating Reorder Save Bar */}
+      {isReordered && (
+        <div className="bottom-action-bar">
+          <span>⚠️ আইটেমের পজিশন পরিবর্তন করা হয়েছে!</span>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button className="btn btn-success" onClick={() => handleSaveToDB()}>
+              <i className="fa-solid fa-floppy-disk"></i> পরিবর্তন সংরক্ষণ করুন
             </button>
-          )}
-        </div>
-      </div>
-
-      {/* ৪. MISSION & GOALS CARD */}
-      <div className="section-card mission-card" id="card-mission">
-        <div className="section-title">
-          <i className="fa-solid fa-bullseye" style={{ color: 'var(--purple-btn, #6f42c1)' }}></i> ৪. আমাদের মিশন ও লক্ষ্য (Mission & Goals)
-        </div>
-
-        {!isEditingMission ? (
-          <div className="read-box" style={{ borderLeft: '5px solid var(--purple-btn, #6f42c1)' }}>
-            <div style={{ position: 'absolute', top: '15px', right: '15px' }}>
-              <button className="btn btn-warning" onClick={() => setIsEditingMission(true)}>
-                <i className="fa-solid fa-pen-to-square"></i> Edit
-              </button>
-            </div>
-            <div style={{ fontWeight: 'bold', fontSize: '15px', color: 'var(--dark)' }}>
-              <i className="fa-solid fa-bullseye" style={{ color: 'var(--purple-btn)', marginRight: '6px' }}></i>
-              {missionInfo.sectionTitle || 'আমাদের মিশন ও লক্ষ্য'}
-            </div>
-            <div style={{ marginTop: '5px', color: '#666', fontSize: '13.5px' }}>
-              <b>সাব-টাইটেল:</b> {missionInfo.sectionSubtitle || 'বিবরণ দেওয়া হয়নি'}
-            </div>
-            <hr style={{ margin: '12px 0', border: 'none', borderTop: '1px solid #e2e8f0' }} />
-            <div><strong>আমাদের মিশন:</strong> {missionInfo.missionTitle}</div>
-            <p style={{ fontSize: '13.5px', color: '#555', marginTop: '4px' }}>{missionInfo.missionDesc}</p>
-            <hr style={{ margin: '12px 0', border: 'none', borderTop: '1px solid #e2e8f0' }} />
-            <div><strong>আমাদের লক্ষ্য:</strong> {missionInfo.goalTitle}</div>
-            <p style={{ fontSize: '13.5px', color: '#555', marginTop: '4px' }}>{missionInfo.goalDesc}</p>
+            <button className="btn btn-secondary" onClick={() => fetchConfig()}>
+              <i className="fa-solid fa-xmark"></i> বাতিল
+            </button>
           </div>
-        ) : (
-          <div className="read-box" style={{ borderLeft: '5px solid #007bff', background: '#ffffff' }}>
-            <div className="row">
-              <div className="form-group">
-                <label>Section Title:</label>
-                <input
-                  type="text"
-                  value={missionInfo.sectionTitle}
-                  onChange={(e) => setMissionInfo({ ...missionInfo, sectionTitle: e.target.value })}
-                />
-              </div>
-              <div className="form-group">
-                <label>Section Subtitle:</label>
-                <input
-                  type="text"
-                  value={missionInfo.sectionSubtitle}
-                  onChange={(e) => setMissionInfo({ ...missionInfo, sectionSubtitle: e.target.value })}
-                />
-              </div>
-            </div>
-
-            <div className="row">
-              <div className="form-group">
-                <label>Mission Title:</label>
-                <input
-                  type="text"
-                  value={missionInfo.missionTitle}
-                  onChange={(e) => setMissionInfo({ ...missionInfo, missionTitle: e.target.value })}
-                />
-              </div>
-              <div className="form-group">
-                <label>Goal / Vision Title:</label>
-                <input
-                  type="text"
-                  value={missionInfo.goalTitle}
-                  onChange={(e) => setMissionInfo({ ...missionInfo, goalTitle: e.target.value })}
-                />
-              </div>
-            </div>
-
-            <div className="row">
-              <div className="form-group">
-                <label>Mission Description:</label>
-                <textarea
-                  rows={3}
-                  value={missionInfo.missionDesc}
-                  onChange={(e) => setMissionInfo({ ...missionInfo, missionDesc: e.target.value })}
-                ></textarea>
-              </div>
-              <div className="form-group">
-                <label>Goal / Vision Description:</label>
-                <textarea
-                  rows={3}
-                  value={missionInfo.goalDesc}
-                  onChange={(e) => setMissionInfo({ ...missionInfo, goalDesc: e.target.value })}
-                ></textarea>
-              </div>
-            </div>
-
-            <div className="card-actions">
-              <button
-                className="btn btn-submit"
-                onClick={async () => {
-                  await saveHomeConfig({ missionSectionInfo: missionInfo });
-                  setIsEditingMission(false);
-                }}
-              >
-                <i className="fa-solid fa-floppy-disk"></i> পরিবর্তন সংরক্ষণ করুন
-              </button>
-              <button className="btn btn-secondary" onClick={() => setIsEditingMission(false)}>
-                <i className="fa-solid fa-xmark"></i> বাতিল করুন
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

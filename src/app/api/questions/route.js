@@ -46,7 +46,49 @@ export async function POST(request) {
     if (errorResponse) return errorResponse;
 
     await connectDB();
-    const { q, options, ans, explanation, category } = await request.json();
+    const body = await request.json();
+
+    // Check if bulk array is provided
+    if (Array.isArray(body)) {
+      const validQuestions = body
+        .filter(item => item && item.q && Array.isArray(item.options) && item.category)
+        .map(item => ({
+          q: item.q.trim(),
+          options: item.options.map(o => (o !== undefined ? String(o).trim() : '')),
+          ans: parseInt(item.ans || 0, 10),
+          explanation: item.explanation || '',
+          category: item.category.trim()
+        }));
+
+      if (validQuestions.length === 0) {
+        return NextResponse.json({ success: false, message: 'No valid questions found in array' }, { status: 400 });
+      }
+
+      const inserted = await Question.insertMany(validQuestions);
+      return NextResponse.json({ success: true, count: inserted.length, data: inserted }, { status: 201 });
+    }
+
+    if (body.questions && Array.isArray(body.questions)) {
+      const validQuestions = body.questions
+        .filter(item => item && item.q && Array.isArray(item.options) && item.category)
+        .map(item => ({
+          q: item.q.trim(),
+          options: item.options.map(o => (o !== undefined ? String(o).trim() : '')),
+          ans: parseInt(item.ans || 0, 10),
+          explanation: item.explanation || '',
+          category: item.category.trim()
+        }));
+
+      if (validQuestions.length === 0) {
+        return NextResponse.json({ success: false, message: 'No valid questions found' }, { status: 400 });
+      }
+
+      const inserted = await Question.insertMany(validQuestions);
+      return NextResponse.json({ success: true, count: inserted.length, data: inserted }, { status: 201 });
+    }
+
+    // Single Question insert
+    const { q, options, ans, explanation, category } = body;
 
     if (!q || !options || options.length < 2 || ans === undefined || !category) {
       return NextResponse.json(

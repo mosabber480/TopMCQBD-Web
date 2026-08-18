@@ -3,87 +3,141 @@
 import React, { useState, useEffect } from 'react';
 import { showTopAlert } from '@/components/layout/TopAlert';
 
+const defaultFooterConfig = {
+  announcement: { text: '', link: '' },
+  header: {
+    siteTitle: '',
+    logoUrl: '',
+    seoTitle: '',
+    faviconUrl: '',
+    btnText: '',
+    btnLink: '',
+    menus: [],
+    megaMenus: []
+  },
+  footer: {
+    columns: [
+      {
+        id: 'col_1',
+        type: 'info',
+        title: 'TopMCQBD',
+        description: 'বাংলাদেশের অন্যতম সেরা অনলাইন কুইজ ও MCQ প্র্যাকটিস প্ল্যাটফর্ম। বিসিএস, ব্যাংক, প্রাইমারি শিক্ষক নিয়োগ ও সরকারি চাকরির চূড়ান্ত প্রস্তুতির বিশ্বস্ত সঙ্গী।',
+        socialLinks: {
+          facebook: 'https://facebook.com',
+          youtube: 'https://youtube.com',
+          whatsapp: 'https://wa.me/8801700000000',
+          twitter: '',
+          telegram: '',
+          linkedin: ''
+        },
+        links: []
+      },
+      {
+        id: 'col_2',
+        type: 'links',
+        title: 'প্রয়োজনীয় লিংক',
+        description: '',
+        socialLinks: {},
+        links: [
+          { title: 'হোম পেজ', url: '/' },
+          { title: 'আমাদের সম্পর্কে', url: '/about-us' },
+          { title: 'প্যাকেজসমূহ', url: '/packages' },
+          { title: 'ফ্রি এমসিকিউ', url: '/free-mcqs' }
+        ]
+      },
+      {
+        id: 'col_3',
+        type: 'links',
+        title: 'জনপ্রিয় পরীক্ষা',
+        description: '',
+        socialLinks: {},
+        links: [
+          { title: 'বিসিএস প্রিলিমিনারি', url: '/packages' },
+          { title: 'প্রাইমারি সহকারী শিক্ষক', url: '/packages' },
+          { title: 'ব্যাংক জব প্রস্তুতি', url: '/packages' },
+          { title: 'এনটিআরসিএ (NTRCA)', url: '/packages' }
+        ]
+      },
+      {
+        id: 'col_4',
+        type: 'links',
+        title: 'সহায়তা ও নীতি',
+        description: '',
+        socialLinks: {},
+        links: [
+          { title: 'রিফান্ড পলিসি', url: '/policy' },
+          { title: 'প্রাইভেসি পলিসি', url: '/policy' },
+          { title: 'ব্যবহারের শর্তাবলী', url: '/policy' },
+          { title: 'যোগাযোগ করুন', url: '/about-us' }
+        ]
+      }
+    ]
+  },
+  copyright: {
+    text: '© 2026 TopMCQBD. সর্বস্বত্ব সংরক্ষিত।',
+    links: [
+      { title: 'Privacy Policy', url: '/policy' },
+      { title: 'Refund Policy', url: '/policy' }
+    ]
+  }
+};
+
 export default function AdminFooterDashboardPage() {
-  const [loading, setLoading] = useState(true);
-
-  // Layout pieces
-  const [announceInfo, setAnnounceInfo] = useState(null);
-  const [headerInfo, setHeaderInfo] = useState(null);
-
-  // Footer columns
+  const [config, setConfig] = useState(defaultFooterConfig);
   const [columns, setColumns] = useState([]);
-  const [editingColIdx, setEditingColIdx] = useState(null);
-  const [draggedColIdx, setDraggedColIdx] = useState(null);
-  const [colDropPos, setColDropPos] = useState({});
-
-  // Copyright
-  const [copyrightText, setCopyrightText] = useState('© 2026 TopMCQ. All rights reserved.');
+  const [copyrightText, setCopyrightText] = useState('');
   const [copyrightLinks, setCopyrightLinks] = useState([]);
-  const [isEditingCopyright, setIsEditingCopyright] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [isReordered, setIsReordered] = useState(false);
 
-  // New link form state per column
-  const [addingLinkColIdx, setAddingLinkColIdx] = useState(null);
-  const [newLinkText, setNewLinkText] = useState('');
-  const [newLinkUrl, setNewLinkUrl] = useState('');
+  // New Link inside Column Form State
+  const [newLinkInputs, setNewLinkInputs] = useState({}); // { [colId]: { title: '', url: '' } }
 
-  const fetchLayoutConfig = async () => {
+  // New Copyright Link Form State
+  const [newCopLinkTitle, setNewCopLinkTitle] = useState('');
+  const [newCopLinkUrl, setNewCopLinkUrl] = useState('');
+
+  const fetchConfig = async () => {
     setLoading(true);
     try {
       const res = await fetch('/api/layout-config');
       const data = await res.json();
-      if (data) {
-        setAnnounceInfo(data.announcement || null);
-        setHeaderInfo(data.header || null);
-
-        const foot = data.footer || {};
-        if (foot.columns && foot.columns.length > 0) {
-          setColumns(foot.columns);
-        } else {
-          setColumns([
-            {
-              type: 'info',
-              title: 'সাইট তথ্য ও সোশাল লিংক',
-              text: foot.col1Text || 'TopMCQ অনলাইন কুইজ প্ল্যাটফর্ম।',
-              fb: foot.col1Fb || '',
-              yt: foot.col1Yt || '',
-              wa: foot.col1Wa || '',
-              tw: foot.col1Tw || '',
-              tg: foot.col1Tg || '',
-              ln: foot.col1Ln || ''
-            },
-            { type: 'links', title: foot.col2Title || 'প্রয়োজনীয় লিংক', links: foot.col2Links || [] },
-            { type: 'links', title: foot.col3Title || 'ক্যাটাগরি', links: foot.col3Links || [] },
-            { type: 'links', title: foot.col4Title || 'যোগাযোগ', links: foot.col4Links || [] }
-          ]);
-        }
-
-        const copy = data.copyright || {};
-        setCopyrightText(copy.text || '© 2026 TopMCQ. All rights reserved.');
-        setCopyrightLinks(copy.links || []);
+      if (data && data.footer) {
+        setConfig(data);
+        setColumns(data.footer.columns && data.footer.columns.length > 0 ? data.footer.columns : defaultFooterConfig.footer.columns);
+        setCopyrightText(data.copyright?.text || defaultFooterConfig.copyright.text);
+        setCopyrightLinks(data.copyright?.links || defaultFooterConfig.copyright.links);
+      } else {
+        setConfig(defaultFooterConfig);
+        setColumns(defaultFooterConfig.footer.columns);
+        setCopyrightText(defaultFooterConfig.copyright.text);
+        setCopyrightLinks(defaultFooterConfig.copyright.links);
       }
     } catch (err) {
-      console.error('Error fetching layout config:', err);
+      console.error('Failed to load footer config:', err);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchLayoutConfig();
+    fetchConfig();
   }, []);
 
-  const saveLayoutConfig = async (overrideCols = null, overrideCopy = null) => {
+  const handleSaveToDB = async (customCols = columns, customText = copyrightText, customLinks = copyrightLinks) => {
+    setSaving(true);
     const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
-    if (!token) {
-      showTopAlert('অনুগ্রহ করে লগইন করুন!', 'warning');
-      return;
-    }
 
     const payload = {
-      announcement: announceInfo,
-      header: headerInfo,
-      footer: { columns: overrideCols || columns },
-      copyright: overrideCopy || { text: copyrightText, links: copyrightLinks }
+      ...config,
+      footer: {
+        columns: customCols
+      },
+      copyright: {
+        text: customText,
+        links: customLinks
+      }
     };
 
     try {
@@ -95,518 +149,531 @@ export default function AdminFooterDashboardPage() {
         },
         body: JSON.stringify(payload)
       });
-
-      const result = await res.json();
-      if (res.ok && result.success) {
-        showTopAlert('✅ সফলভাবে সেভ হয়েছে!', 'success');
-        try {
-          localStorage.setItem('layout_config_data', JSON.stringify(payload));
-          if (typeof window !== 'undefined') {
-            window.dispatchEvent(new Event('layout-updated'));
-          }
-        } catch (e) {}
-        fetchLayoutConfig();
+      const data = await res.json();
+      if (res.ok) {
+        showTopAlert('✅ ফুটার কনফিগারেশন সফলভাবে সংরক্ষিত হয়েছে!', 'success');
+        setConfig(payload);
+        setIsReordered(false);
       } else {
-        showTopAlert('❌ ' + (result.message || 'সেভ করতে ব্যর্থ হয়েছে!'), 'danger');
+        showTopAlert('❌ ' + (data.message || 'সংরক্ষণ ব্যর্থ হয়েছে'), 'danger');
       }
     } catch (err) {
-      console.error('Save error:', err);
-      showTopAlert('সার্ভারে যোগাযোগ করতে সমস্যা হয়েছে!', 'danger');
+      showTopAlert('সার্ভার কানেকশন এরর!', 'danger');
+    } finally {
+      setSaving(false);
     }
   };
 
-  // Drag and drop for columns
-  const handleColDragStart = (e, idx) => {
-    setDraggedColIdx(idx);
-    e.dataTransfer.effectAllowed = 'move';
-  };
-
-  const handleColDragOver = (e, idx) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    const rect = e.currentTarget.getBoundingClientRect();
-    const offset = e.clientY - rect.top;
-    const pos = offset < rect.height / 2 ? 'top' : 'bottom';
-    setColDropPos({ [idx]: pos });
-  };
-
-  const handleColDragLeave = () => {
-    setColDropPos({});
-  };
-
-  const handleColDrop = (e, targetIdx) => {
-    e.preventDefault();
-    setColDropPos({});
-    if (draggedColIdx === null || draggedColIdx === targetIdx) return;
-
-    const list = [...columns];
-    const item = list.splice(draggedColIdx, 1)[0];
-    list.splice(targetIdx, 0, item);
-    setColumns(list);
-    saveLayoutConfig(list);
-    setDraggedColIdx(null);
-  };
-
-  const moveColumn = (fromIdx, toIdx) => {
-    if (toIdx < 0 || toIdx >= columns.length) return;
+  // Move Column position (Up/Down)
+  const moveColumn = (index, dir) => {
+    if ((dir === 'up' && index === 0) || (dir === 'down' && index === columns.length - 1)) return;
+    const targetIdx = dir === 'up' ? index - 1 : index + 1;
     const updated = [...columns];
-    const item = updated.splice(fromIdx, 1)[0];
-    updated.splice(toIdx, 0, item);
+    const temp = updated[index];
+    updated[index] = updated[targetIdx];
+    updated[targetIdx] = temp;
     setColumns(updated);
-    saveLayoutConfig(updated);
+    setIsReordered(true);
   };
 
-  const addColumn = (type) => {
-    const newCol =
-      type === 'info'
-        ? {
-            type: 'info',
-            title: 'সাইট তথ্য',
-            text: 'ওয়েবসাইট পরিচিতি...',
-            fb: '',
-            yt: '',
-            wa: '',
-            tw: '',
-            tg: '',
-            ln: ''
-          }
-        : {
-            type: 'links',
-            title: 'নতুন লিংক কলাম',
-            links: []
-          };
-    const updated = [...columns, newCol];
+  // Update Column field
+  const handleColumnChange = (index, field, value) => {
+    const updated = [...columns];
+    updated[index][field] = value;
     setColumns(updated);
-    setEditingColIdx(updated.length - 1);
   };
 
-  const deleteColumn = async (idx) => {
-    const confirm = await showTopAlert('আপনি কি এই ফুটার কলামটি মুছে ফেলতে চান?', 'danger', true);
-    if (!confirm) return;
-    const updated = columns.filter((_, i) => i !== idx);
+  // Update Social Links inside Info column
+  const handleSocialLinkChange = (index, platform, value) => {
+    const updated = [...columns];
+    updated[index].socialLinks = {
+      ...(updated[index].socialLinks || {}),
+      [platform]: value
+    };
     setColumns(updated);
-    await saveLayoutConfig(updated);
   };
 
-  // Add link to a link-column
-  const handleAddLink = async (colIdx) => {
-    if (!newLinkText.trim()) {
-      showTopAlert('লিংকের নাম লিখুন!', 'warning');
+  // Add Link into Column
+  const handleAddLinkToColumn = (index, colId) => {
+    const input = newLinkInputs[colId] || {};
+    if (!input.title?.trim() || !input.url?.trim()) return;
+
+    const updated = [...columns];
+    const currentLinks = updated[index].links || [];
+    updated[index].links = [...currentLinks, { title: input.title.trim(), url: input.url.trim() }];
+    setColumns(updated);
+    setNewLinkInputs({ ...newLinkInputs, [colId]: { title: '', url: '' } });
+    handleSaveToDB(updated);
+  };
+
+  // Delete Link from Column
+  const handleDeleteLinkFromColumn = (colIdx, linkIdx) => {
+    const updated = [...columns];
+    updated[colIdx].links = updated[colIdx].links.filter((_, idx) => idx !== linkIdx);
+    setColumns(updated);
+    handleSaveToDB(updated);
+  };
+
+  // Add Column
+  const handleAddColumn = () => {
+    if (columns.length >= 4) {
+      showTopAlert('সর্বোচ্চ ৪টি কলাম সাপোর্ট করে!', 'warning');
       return;
     }
-
-    const updated = [...columns];
-    if (!updated[colIdx].links) updated[colIdx].links = [];
-    updated[colIdx].links.push({
-      text: newLinkText.trim(),
-      url: newLinkUrl.trim() || '#'
-    });
-
+    const newCol = {
+      id: 'col_' + Date.now(),
+      type: 'links',
+      title: `কলাম ${columns.length + 1}`,
+      description: '',
+      socialLinks: {},
+      links: []
+    };
+    const updated = [...columns, newCol];
     setColumns(updated);
-    await saveLayoutConfig(updated);
-    setNewLinkText('');
-    setNewLinkUrl('');
-    setAddingLinkColIdx(null);
+    handleSaveToDB(updated);
   };
 
-  const deleteLink = async (colIdx, linkIdx) => {
-    const updated = [...columns];
-    updated[colIdx].links.splice(linkIdx, 1);
+  // Delete Column
+  const handleDeleteColumn = (index) => {
+    if (!window.confirm('আপনি কি এই কলামটি মুছে ফেলতে চান?')) return;
+    const updated = columns.filter((_, idx) => idx !== index);
     setColumns(updated);
-    await saveLayoutConfig(updated);
+    handleSaveToDB(updated);
+  };
+
+  // Copyright Links
+  const handleAddCopyrightLink = (e) => {
+    e.preventDefault();
+    if (!newCopLinkTitle.trim() || !newCopLinkUrl.trim()) return;
+
+    const updated = [...copyrightLinks, { title: newCopLinkTitle.trim(), url: newCopLinkUrl.trim() }];
+    setCopyrightLinks(updated);
+    setNewCopLinkTitle('');
+    setNewCopLinkUrl('');
+    handleSaveToDB(columns, copyrightText, updated);
+  };
+
+  const handleDeleteCopyrightLink = (index) => {
+    const updated = copyrightLinks.filter((_, idx) => idx !== index);
+    setCopyrightLinks(updated);
+    handleSaveToDB(columns, copyrightText, updated);
   };
 
   if (loading) {
     return (
-      <div style={{ textAlign: 'center', padding: '50px' }}>
-        <i className="fa-solid fa-spinner fa-spin" style={{ fontSize: '30px', color: 'var(--primary)' }}></i>
-        <p style={{ marginTop: '10px', color: '#666' }}>ফুটার ডাটা লোড হচ্ছে...</p>
+      <div style={{ textAlign: 'center', padding: '60px' }}>
+        <i className="fa-solid fa-spinner fa-spin" style={{ fontSize: '32px', color: 'var(--primary)' }}></i>
+        <p style={{ marginTop: '12px', color: '#64748b' }}>ফুটার কনফিগারেশন লোড হচ্ছে...</p>
       </div>
     );
   }
 
   return (
-    <div className="container" style={{ maxWidth: '1300px', margin: '0 auto', padding: '0 25px 25px 25px' }}>
+    <div className="container" style={{ maxWidth: '1300px', margin: '0 auto', padding: '0 25px 30px 25px' }}>
       <style jsx>{`
-        .section-card {
+        :root {
+          --primary: #007bff;
+          --secondary: #17a2b8;
+          --warning: #ff9f43;
+          --danger: #dc3545;
+          --dark: #2c3e50;
+          --light: #f4f7f6;
+        }
+
+        .box {
           background: white;
           padding: 25px 30px;
           border-radius: 8px;
-          box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
           margin-bottom: 25px;
           border: 1px solid #e2e8f0;
         }
-        .section-title {
-          font-size: 18px;
-          font-weight: bold;
-          color: var(--dark, #2c3e50);
-          border-bottom: 2px solid #e2e8f0;
-          padding-bottom: 10px;
-          margin-bottom: 20px;
+
+        .columns-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 20px;
+        }
+        .col-card {
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
+          border-radius: 8px;
+          padding: 18px 20px;
+        }
+        .col-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          flex-wrap: wrap;
-          gap: 10px;
+          margin-bottom: 12px;
+          border-bottom: 1px solid #cbd5e1;
+          padding-bottom: 8px;
         }
-        .footer-card { border-left: 6px solid var(--secondary, #17a2b8); }
-        .copy-card { border-left: 6px solid var(--purple-btn, #6f42c1); }
 
-        .read-box {
-          background: #f8fafc;
-          border: 1px solid #cbd5e1;
-          border-radius: 6px;
-          padding: 15px 20px;
-          margin-bottom: 15px;
-          position: relative;
-          transition: transform 0.15s ease, opacity 0.15s ease;
+        .form-group {
+          margin-bottom: 12px;
         }
-        .draggable-box { cursor: move; }
-        .drag-handle {
-          cursor: grab;
-          color: #888;
-          margin-right: 8px;
-          font-size: 16px;
+        label {
+          display: block;
+          font-weight: bold;
+          margin-bottom: 5px;
+          font-size: 13px;
+          color: #475569;
         }
-        .drag-handle:active { cursor: grabbing; }
-        .dragging { opacity: 0.4; background: #eef6ff !important; }
-        .drag-over-top { border-top: 3px solid #007bff !important; }
-        .drag-over-bottom { border-bottom: 3px solid #007bff !important; }
-
-        .form-group { margin-bottom: 12px; }
-        label { display: block; font-weight: 600; margin-bottom: 5px; color: #475569; font-size: 13.5px; }
-        input, textarea {
+        input,
+        select,
+        textarea {
           width: 100%;
-          padding: 9px 12px;
+          padding: 8px 12px;
           border: 1px solid #cbd5e1;
           border-radius: 5px;
           font-size: 13.5px;
-          outline: none;
           box-sizing: border-box;
+          outline: none;
         }
-        input:focus, textarea:focus { border-color: var(--primary, #007bff); }
-        .row { display: flex; gap: 15px; margin-bottom: 10px; flex-wrap: wrap; align-items: flex-start; }
-        .row .form-group { flex: 1; min-width: 240px; }
-        .card-actions { display: flex; gap: 10px; margin-top: 15px; }
+        input:focus,
+        select:focus,
+        textarea:focus {
+          border-color: #007bff;
+        }
 
         .btn {
-          padding: 8px 16px;
-          border: none;
+          padding: 8px 14px;
           border-radius: 5px;
+          border: none;
           cursor: pointer;
           font-weight: bold;
           font-size: 13px;
           display: inline-flex;
           align-items: center;
           gap: 6px;
+          transition: opacity 0.2s;
         }
-        .btn-warning { background-color: #ffc107; color: #212529; }
-        .btn-danger { background-color: #dc3545; color: white; }
-        .btn-submit { background-color: #28a745; color: white; }
-        .btn-secondary { background-color: #6c757d; color: white; }
-        .btn-info { background-color: #17a2b8; color: white; }
+        .btn:hover {
+          opacity: 0.9;
+        }
+        .btn-primary {
+          background: #007bff;
+          color: white;
+        }
+        .btn-success {
+          background: #28a745;
+          color: white;
+        }
+        .btn-warning {
+          background: #ffc107;
+          color: #212529;
+        }
+        .btn-danger {
+          background: #dc3545;
+          color: white;
+        }
+        .btn-secondary {
+          background: #64748b;
+          color: white;
+        }
 
         .arrow-btn-group {
           display: inline-flex;
           flex-direction: column;
           gap: 2px;
-          margin-right: 10px;
+          margin-right: 8px;
         }
         .btn-arrow {
           background: #e2e8f0;
           border: none;
           color: #475569;
-          padding: 2px 6px;
+          padding: 2px 5px;
           border-radius: 3px;
-          font-size: 10px;
+          font-size: 9px;
           cursor: pointer;
-          line-height: 1;
         }
-        .btn-arrow:hover { background: #007bff; color: #ffffff; }
 
-        .link-list-box {
-          background: white;
-          border: 1px solid #e2e8f0;
-          border-radius: 5px;
-          padding: 10px 15px;
-          margin-top: 8px;
-        }
-        .link-item-row {
+        .bottom-action-bar {
+          position: sticky;
+          bottom: 20px;
+          background: #1e293b;
+          padding: 12px 24px;
+          border-radius: 8px;
+          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 6px 0;
-          border-bottom: 1px dashed #e2e8f0;
-          font-size: 13.5px;
+          color: white;
+          z-index: 100;
+          margin-top: 20px;
         }
-        .link-item-row:last-child { border-bottom: none; }
+
+        @media (max-width: 900px) {
+          .columns-grid {
+            grid-template-columns: 1fr;
+          }
+        }
       `}</style>
 
-      {/* 1. FOOTER COLUMNS CARD */}
-      <div className="section-card footer-card">
-        <div className="section-title">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <i className="fa-solid fa-table-columns" style={{ color: 'var(--secondary)' }}></i> ৩. ফুটার সেটিং (Footer Columns)
+      {/* 1. FOOTER COLUMNS MANAGER */}
+      <div className="box" style={{ borderLeft: '6px solid var(--secondary, #17a2b8)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+          <div>
+            <h2 style={{ margin: 0, fontSize: '20px' }}>
+              <i className="fa-solid fa-table-columns" style={{ color: 'var(--secondary)', marginRight: '8px' }}></i>
+              ফুটার কলাম ম্যানেজমেন্ট (Footer 4 Columns)
+            </h2>
+            <p style={{ color: '#64748b', fontSize: '13.5px', margin: '4px 0 0 0' }}>
+              ওয়েবসাইটের ফুটারের ৪টি কলাম সাজান, সোশ্যাল লিংক ও নেভিগেশন লিংক পরিচালনা করুন।
+            </p>
           </div>
-          <div style={{ display: 'flex', gap: '10px' }}>
-            <button className="btn btn-info" onClick={() => addColumn('info')}>
-              <i className="fa-solid fa-plus"></i> Info Column যোগ
-            </button>
-            <button className="btn btn-submit" onClick={() => addColumn('links')}>
-              <i className="fa-solid fa-plus"></i> Links Column যোগ
+          <div style={{ display: 'flex', gap: '8px' }}>
+            {columns.length < 4 && (
+              <button className="btn btn-primary" onClick={handleAddColumn}>
+                <i className="fa-solid fa-plus"></i> কলাম যোগ করুন
+              </button>
+            )}
+            <button className="btn btn-success" onClick={() => handleSaveToDB()} disabled={saving}>
+              <i className="fa-solid fa-floppy-disk"></i> {saving ? 'সংরক্ষণ হচ্ছে...' : 'সংরক্ষণ করুন'}
             </button>
           </div>
         </div>
 
-        <div>
-          {columns.map((col, cIdx) => {
-            const isEditing = editingColIdx === cIdx;
-            const dropClass = colDropPos[cIdx] === 'top' ? 'drag-over-top' : colDropPos[cIdx] === 'bottom' ? 'drag-over-bottom' : '';
-            const isDragging = draggedColIdx === cIdx;
-
-            if (isEditing) {
-              return (
-                <div key={cIdx} className="read-box" style={{ background: '#ffffff', borderLeft: '4px solid var(--secondary)' }}>
-                  <div style={{ fontWeight: 'bold', marginBottom: '10px', color: 'var(--secondary)' }}>
-                    কলাম #{cIdx + 1} ({col.type === 'info' ? 'Info / Social' : 'Links'}) এডিট করুন
-                  </div>
-
-                  <div className="form-group">
-                    <label>Column Title:</label>
-                    <input
-                      type="text"
-                      value={col.title}
-                      onChange={(e) => {
-                        const updated = [...columns];
-                        updated[cIdx].title = e.target.value;
-                        setColumns(updated);
-                      }}
-                    />
-                  </div>
-
-                  {col.type === 'info' ? (
-                    <>
-                      <div className="form-group">
-                        <label>Description / Text:</label>
-                        <textarea
-                          rows={2}
-                          value={col.text || ''}
-                          onChange={(e) => {
-                            const updated = [...columns];
-                            updated[cIdx].text = e.target.value;
-                            setColumns(updated);
-                          }}
-                        ></textarea>
-                      </div>
-                      <div className="row">
-                        <div className="form-group">
-                          <label>Facebook Link:</label>
-                          <input
-                            type="text"
-                            value={col.fb || ''}
-                            onChange={(e) => {
-                              const updated = [...columns];
-                              updated[cIdx].fb = e.target.value;
-                              setColumns(updated);
-                            }}
-                          />
-                        </div>
-                        <div className="form-group">
-                          <label>YouTube Link:</label>
-                          <input
-                            type="text"
-                            value={col.yt || ''}
-                            onChange={(e) => {
-                              const updated = [...columns];
-                              updated[cIdx].yt = e.target.value;
-                              setColumns(updated);
-                            }}
-                          />
-                        </div>
-                        <div className="form-group">
-                          <label>WhatsApp Link:</label>
-                          <input
-                            type="text"
-                            value={col.wa || ''}
-                            onChange={(e) => {
-                              const updated = [...columns];
-                              updated[cIdx].wa = e.target.value;
-                              setColumns(updated);
-                            }}
-                          />
-                        </div>
-                      </div>
-                    </>
-                  ) : null}
-
-                  <div className="card-actions">
-                    <button
-                      className="btn btn-submit"
-                      onClick={async () => {
-                        await saveLayoutConfig();
-                        setEditingColIdx(null);
-                      }}
-                    >
-                      <i className="fa-solid fa-floppy-disk"></i> Save Column
-                    </button>
-                    <button className="btn btn-secondary" onClick={() => setEditingColIdx(null)}>
-                      <i className="fa-solid fa-xmark"></i> Cancel
-                    </button>
-                  </div>
-                </div>
-              );
-            }
-
-            return (
-              <div
-                key={cIdx}
-                className={`read-box draggable-box ${isDragging ? 'dragging' : ''} ${dropClass}`}
-                draggable
-                onDragStart={(e) => handleColDragStart(e, cIdx)}
-                onDragOver={(e) => handleColDragOver(e, cIdx)}
-                onDragLeave={handleColDragLeave}
-                onDrop={(e) => handleColDrop(e, cIdx)}
-              >
-                <div style={{ position: 'absolute', top: '15px', right: '15px', display: 'flex', gap: '8px' }}>
-                  <button className="btn btn-warning" onClick={() => setEditingColIdx(cIdx)}>
-                    <i className="fa-solid fa-pen-to-square"></i> Edit
-                  </button>
-                  <button className="btn btn-danger" onClick={() => deleteColumn(cIdx)}>
-                    <i className="fa-solid fa-trash"></i> Delete
-                  </button>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'flex-start' }}>
-                  <i className="fa-solid fa-grip-vertical drag-handle" title="টেনে ধরে স্থান পরিবর্তন করুন" style={{ marginTop: '6px' }}></i>
-                  <div className="arrow-btn-group" style={{ marginTop: '4px' }}>
-                    <button className="btn-arrow" onClick={() => moveColumn(cIdx, cIdx - 1)} disabled={cIdx === 0}>
+        <div className="columns-grid">
+          {columns.map((col, index) => (
+            <div key={col.id || index} className="col-card">
+              <div className="col-header">
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <div className="arrow-btn-group">
+                    <button type="button" className="btn-arrow" onClick={() => moveColumn(index, 'up')}>
                       ▲
                     </button>
-                    <button className="btn-arrow" onClick={() => moveColumn(cIdx, cIdx + 1)} disabled={cIdx === columns.length - 1}>
+                    <button type="button" className="btn-arrow" onClick={() => moveColumn(index, 'down')}>
                       ▼
                     </button>
                   </div>
+                  <strong style={{ fontSize: '15px', color: '#1e293b' }}>
+                    কলাম {index + 1}: {col.title}
+                  </strong>
+                </div>
+                <button
+                  type="button"
+                  className="btn btn-danger btn-sm"
+                  style={{ padding: '2px 6px', fontSize: '11px' }}
+                  onClick={() => handleDeleteColumn(index)}
+                >
+                  <i className="fa-solid fa-trash"></i>
+                </button>
+              </div>
 
-                  <div style={{ flex: 1 }}>
-                    <h4 style={{ margin: '0 0 5px 0', color: 'var(--dark)' }}>
-                      #{cIdx + 1}. {col.title}{' '}
-                      <span style={{ fontSize: '12px', background: '#e3f2fd', color: '#007bff', padding: '2px 6px', borderRadius: '4px' }}>
-                        {col.type.toUpperCase()}
-                      </span>
-                    </h4>
+              <div className="form-group">
+                <label>কলাম টাইপ:</label>
+                <select
+                  value={col.type}
+                  onChange={(e) => handleColumnChange(index, 'type', e.target.value)}
+                >
+                  <option value="info">Info & Socials (বিবরণ ও সোশ্যাল মিডিয়া)</option>
+                  <option value="links">Navigation Links (প্রয়োজনীয় লিংকসমূহ)</option>
+                </select>
+              </div>
 
-                    {col.type === 'info' && (
-                      <p style={{ fontSize: '13.5px', color: '#666', margin: '4px 0 0 0' }}>{col.text}</p>
-                    )}
+              <div className="form-group">
+                <label>কলাম শিরোনাম (Title):</label>
+                <input
+                  type="text"
+                  value={col.title}
+                  onChange={(e) => handleColumnChange(index, 'title', e.target.value)}
+                />
+              </div>
 
-                    {col.type === 'links' && (
-                      <div className="link-list-box">
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                          <span style={{ fontWeight: 'bold', fontSize: '13px', color: '#475569' }}>
-                            <i className="fa-solid fa-link"></i> লিংক তালিকা ({(col.links || []).length})
-                          </span>
-                          <button
-                            className="btn btn-secondary"
-                            style={{ padding: '2px 8px', fontSize: '12px' }}
-                            onClick={() => setAddingLinkColIdx(cIdx)}
-                          >
-                            <i className="fa-solid fa-plus"></i> লিংক যোগ
-                          </button>
-                        </div>
+              {col.type === 'info' ? (
+                <div>
+                  <div className="form-group">
+                    <label>বিবরণ (Description):</label>
+                    <textarea
+                      rows={3}
+                      value={col.description}
+                      onChange={(e) => handleColumnChange(index, 'description', e.target.value)}
+                    ></textarea>
+                  </div>
 
-                        {addingLinkColIdx === cIdx && (
-                          <div className="row" style={{ background: '#f8fafc', padding: '10px', borderRadius: '5px', border: '1px solid #cbd5e1', marginBottom: '10px' }}>
-                            <input
-                              type="text"
-                              placeholder="লিংক টাইটেল (যেমন: আমাদের সম্পর্কে)"
-                              value={newLinkText}
-                              onChange={(e) => setNewLinkText(e.target.value)}
-                              style={{ flex: 1 }}
-                            />
-                            <input
-                              type="text"
-                              placeholder="URL (যেমন: /about-us)"
-                              value={newLinkUrl}
-                              onChange={(e) => setNewLinkUrl(e.target.value)}
-                              style={{ flex: 1 }}
-                            />
-                            <button className="btn btn-submit" style={{ padding: '6px 12px' }} onClick={() => handleAddLink(cIdx)}>
-                              <i className="fa-solid fa-floppy-disk"></i> Save
-                            </button>
-                            <button className="btn btn-secondary" style={{ padding: '6px 12px' }} onClick={() => setAddingLinkColIdx(null)}>
-                              <i className="fa-solid fa-xmark"></i> Cancel
-                            </button>
-                          </div>
-                        )}
-
-                        {(col.links || []).map((lnk, lIdx) => (
-                          <div key={lIdx} className="link-item-row">
-                            <span>
-                              <strong>{lnk.text}</strong> &rarr; <code>{lnk.url}</code>
-                            </span>
-                            <button
-                              className="btn btn-danger"
-                              style={{ padding: '2px 6px', fontSize: '11px' }}
-                              onClick={() => deleteLink(cIdx, lIdx)}
-                            >
-                              <i className="fa-solid fa-trash"></i>
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                  <div style={{ background: '#eef6ff', padding: '10px 12px', borderRadius: '6px', marginTop: '10px' }}>
+                    <label style={{ color: '#007bff', fontWeight: 'bold' }}>সোশ্যাল মিডিয়া লিংকসমূহ:</label>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginTop: '6px' }}>
+                      <input
+                        type="text"
+                        placeholder="Facebook URL"
+                        value={col.socialLinks?.facebook || ''}
+                        onChange={(e) => handleSocialLinkChange(index, 'facebook', e.target.value)}
+                      />
+                      <input
+                        type="text"
+                        placeholder="YouTube URL"
+                        value={col.socialLinks?.youtube || ''}
+                        onChange={(e) => handleSocialLinkChange(index, 'youtube', e.target.value)}
+                      />
+                      <input
+                        type="text"
+                        placeholder="WhatsApp Link"
+                        value={col.socialLinks?.whatsapp || ''}
+                        onChange={(e) => handleSocialLinkChange(index, 'whatsapp', e.target.value)}
+                      />
+                      <input
+                        type="text"
+                        placeholder="Telegram URL"
+                        value={col.socialLinks?.telegram || ''}
+                        onChange={(e) => handleSocialLinkChange(index, 'telegram', e.target.value)}
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              ) : (
+                <div>
+                  <label>লিংকসমূহ ({col.links?.length || 0}):</label>
+                  <div style={{ marginBottom: '10px' }}>
+                    {(col.links || []).map((lnk, lIdx) => (
+                      <div
+                        key={lIdx}
+                        style={{
+                          background: 'white',
+                          border: '1px solid #cbd5e1',
+                          padding: '6px 10px',
+                          borderRadius: '4px',
+                          marginBottom: '4px',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center'
+                        }}
+                      >
+                        <span style={{ fontSize: '13px' }}>
+                          <b>{lnk.title}</b> <code style={{ fontSize: '11px', color: '#64748b' }}>({lnk.url})</code>
+                        </span>
+                        <button
+                          type="button"
+                          className="btn btn-danger btn-sm"
+                          style={{ padding: '1px 5px', fontSize: '9px' }}
+                          onClick={() => handleDeleteLinkFromColumn(index, lIdx)}
+                        >
+                          <i className="fa-solid fa-xmark"></i>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Add Link Form */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1.5fr auto', gap: '6px' }}>
+                    <input
+                      type="text"
+                      placeholder="Title"
+                      value={newLinkInputs[col.id]?.title || ''}
+                      onChange={(e) =>
+                        setNewLinkInputs({
+                          ...newLinkInputs,
+                          [col.id]: { ...(newLinkInputs[col.id] || {}), title: e.target.value }
+                        })
+                      }
+                    />
+                    <input
+                      type="text"
+                      placeholder="URL"
+                      value={newLinkInputs[col.id]?.url || ''}
+                      onChange={(e) =>
+                        setNewLinkInputs({
+                          ...newLinkInputs,
+                          [col.id]: { ...(newLinkInputs[col.id] || {}), url: e.target.value }
+                        })
+                      }
+                    />
+                    <button
+                      type="button"
+                      className="btn btn-primary btn-sm"
+                      onClick={() => handleAddLinkToColumn(index, col.id)}
+                    >
+                      + Add
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* 2. COPYRIGHT SETTINGS CARD */}
-      <div className="section-card copy-card">
-        <div className="section-title">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <i className="fa-solid fa-copyright" style={{ color: 'var(--purple-btn)' }}></i> ৪. কপিরাইট ও ফুটনোট টেক্সট
-          </div>
+      {/* 2. COPYRIGHT & BOTTOM LINKS */}
+      <div className="box" style={{ borderLeft: '6px solid #ff9f43' }}>
+        <h2>
+          <i className="fa-solid fa-copyright" style={{ color: '#ff9f43', marginRight: '8px' }}></i>
+          কপিরাইট ও বটম লিংক (Copyright & Bottom Links)
+        </h2>
+
+        <div className="form-group">
+          <label>কপিরাইট টেক্সট:</label>
+          <input
+            type="text"
+            value={copyrightText}
+            onChange={(e) => setCopyrightText(e.target.value)}
+            placeholder="© 2026 TopMCQBD. All rights reserved."
+          />
         </div>
 
-        {!isEditingCopyright ? (
-          <div className="read-box" style={{ borderLeft: '5px solid var(--purple-btn)' }}>
-            <div style={{ position: 'absolute', top: '15px', right: '15px' }}>
-              <button className="btn btn-warning" onClick={() => setIsEditingCopyright(true)}>
-                <i className="fa-solid fa-pen-to-square"></i> Edit
-              </button>
-            </div>
-            <p><strong>Copyright Text:</strong> {copyrightText}</p>
-          </div>
-        ) : (
-          <div className="read-box" style={{ background: '#ffffff', borderLeft: '5px solid #007bff' }}>
-            <div className="form-group">
-              <label>Copyright Text:</label>
-              <input
-                type="text"
-                value={copyrightText}
-                onChange={(e) => setCopyrightText(e.target.value)}
-              />
-            </div>
-            <div className="card-actions">
+        <form onSubmit={handleAddCopyrightLink} style={{ display: 'grid', gridTemplateColumns: '2fr 2fr auto', gap: '10px', marginTop: '15px' }}>
+          <input
+            type="text"
+            placeholder="বটম লিংক নাম (যেমন: Terms & Conditions)"
+            value={newCopLinkTitle}
+            onChange={(e) => setNewCopLinkTitle(e.target.value)}
+            required
+          />
+          <input
+            type="text"
+            placeholder="লিংক URL (যেমন: /policy)"
+            value={newCopLinkUrl}
+            onChange={(e) => setNewCopLinkUrl(e.target.value)}
+            required
+          />
+          <button type="submit" className="btn btn-primary">
+            <i className="fa-solid fa-plus"></i> লিংক যোগ করুন
+          </button>
+        </form>
+
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '12px' }}>
+          {copyrightLinks.map((lnk, cIdx) => (
+            <div
+              key={cIdx}
+              style={{
+                background: '#f8fafc',
+                border: '1px solid #cbd5e1',
+                padding: '6px 12px',
+                borderRadius: '5px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}
+            >
+              <span style={{ fontSize: '13px', fontWeight: 'bold' }}>{lnk.title}</span>
+              <code style={{ fontSize: '11px', color: '#64748b' }}>({lnk.url})</code>
               <button
-                className="btn btn-submit"
-                onClick={async () => {
-                  await saveLayoutConfig(null, { text: copyrightText, links: copyrightLinks });
-                  setIsEditingCopyright(false);
-                }}
+                type="button"
+                className="btn btn-danger btn-sm"
+                style={{ padding: '1px 5px', fontSize: '9px' }}
+                onClick={() => handleDeleteCopyrightLink(cIdx)}
               >
-                <i className="fa-solid fa-floppy-disk"></i> পরিবর্তন সংরক্ষণ করুন
-              </button>
-              <button className="btn btn-secondary" onClick={() => setIsEditingCopyright(false)}>
-                <i className="fa-solid fa-xmark"></i> বাতিল করুন
+                <i className="fa-solid fa-xmark"></i>
               </button>
             </div>
-          </div>
-        )}
+          ))}
+        </div>
       </div>
+
+      {/* Floating Reorder Save Bar */}
+      {isReordered && (
+        <div className="bottom-action-bar">
+          <span>⚠️ কলামের পজিশন পরিবর্তন করা হয়েছে!</span>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button className="btn btn-success" onClick={() => handleSaveToDB()}>
+              <i className="fa-solid fa-floppy-disk"></i> পরিবর্তন সংরক্ষণ করুন
+            </button>
+            <button className="btn btn-secondary" onClick={() => fetchConfig()}>
+              <i className="fa-solid fa-xmark"></i> বাতিল
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

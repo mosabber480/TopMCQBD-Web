@@ -3,73 +3,97 @@
 import React, { useState, useEffect } from 'react';
 import { showTopAlert } from '@/components/layout/TopAlert';
 
-export default function AdminSidebarMenuDashboardPage() {
+const defaultMenus = [
+  { href: '/admin/dashboard', icon: 'fa-solid fa-gauge-high', label: 'ড্যাশবোর্ড', subMenus: [] },
+  { href: '/admin/header-dashboard', icon: 'fa-solid fa-window-restore', label: 'হেডার কন্ট্রোল', subMenus: [] },
+  { href: '/admin/footer-dashboard', icon: 'fa-solid fa-table-columns', label: 'ফুটার কন্ট্রোল', subMenus: [] },
+  { href: '/admin/home-dashboard', icon: 'fa-solid fa-sliders', label: 'হোম পেজ কন্ট্রোল', subMenus: [] },
+  { href: '/admin/about-dashboard', icon: 'fa-solid fa-address-card', label: 'আমাদের সম্পর্কে', subMenus: [] },
+  { href: '/admin/quiz-dashboard', icon: 'fa-solid fa-file-circle-question', label: 'প্রশ্ন ব্যাংক ও কুইজ', subMenus: [] },
+  { href: '/admin/packages-dashboard', icon: 'fa-solid fa-box-open', label: 'প্যাকেজসমূহ পেজ', subMenus: [] },
+  { href: '/admin/users', icon: 'fa-solid fa-users-gear', label: 'ইউজার ও সাবস্ক্রিপশন', subMenus: [] },
+  { href: '/admin/admin-menu-dashboard', icon: 'fa-solid fa-list-check', label: 'সাইডবার মেনু কন্ট্রোল', subMenus: [] },
+  { href: '/admin/policy-dashboard', icon: 'fa-solid fa-file-invoice-dollar', label: 'রিফান্ড ও পলিসি', subMenus: [] },
+  { href: '/admin/free-mcqs-dashboard', icon: 'fa-solid fa-gift', label: 'ফ্রি এমসিকিউ কন্ট্রোল', subMenus: [] }
+];
+
+export default function AdminMenuDashboardPage() {
   const [menus, setMenus] = useState([]);
   const [headerButtons, setHeaderButtons] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [isReordered, setIsReordered] = useState(false);
 
-  // New sidebar menu form
-  const [showNewMenu, setShowNewMenu] = useState(false);
+  // New Menu Form State
   const [newTitle, setNewTitle] = useState('');
   const [newUrl, setNewUrl] = useState('');
-  const [newIcon, setNewIcon] = useState('fa-solid fa-circle');
+  const [newIcon, setNewIcon] = useState('fa-solid fa-link');
 
-  // Editing sidebar menu index
-  const [editingIdx, setEditingIdx] = useState(null);
+  // Inline Editing State
+  const [editingMenuIndex, setEditingMenuIndex] = useState(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [editUrl, setEditUrl] = useState('');
+  const [editIcon, setEditIcon] = useState('');
 
-  // Submenu state
-  const [addingSubMenuIdx, setAddingSubMenuIdx] = useState(null);
+  // Inline Submenu Form State
+  const [activeSubmenuMenuIndex, setActiveSubmenuMenuIndex] = useState(null);
   const [newSubTitle, setNewSubTitle] = useState('');
   const [newSubUrl, setNewSubUrl] = useState('');
-  const [newSubIcon, setNewSubIcon] = useState('fa-solid fa-circle');
+  const [newSubIcon, setNewSubIcon] = useState('fa-solid fa-circle-dot');
 
-  // Drag and drop state for sidebar menus
-  const [draggedMenuIdx, setDraggedMenuIdx] = useState(null);
-  const [menuDropPos, setMenuDropPos] = useState({});
+  // Header Button Form State
+  const [newBtnText, setNewBtnText] = useState('');
+  const [newBtnUrl, setNewBtnUrl] = useState('');
+  const [newBtnIcon, setNewBtnIcon] = useState('fa-solid fa-arrow-up-right-from-square');
+  const [newBtnColor, setNewBtnColor] = useState('primary');
 
-  // --- Header Buttons State ---
-  const [showNewHeaderBtn, setShowNewHeaderBtn] = useState(false);
-  const [btnText, setBtnText] = useState('');
-  const [btnUrl, setBtnUrl] = useState('');
-  const [btnIcon, setBtnIcon] = useState('fa-solid fa-arrow-up-right-from-square');
-  const [btnColor, setBtnColor] = useState('primary');
-  const [btnTargetBlank, setBtnTargetBlank] = useState(false);
-  const [btnAction, setBtnAction] = useState('link');
-  const [editingHeaderBtnIdx, setEditingHeaderBtnIdx] = useState(null);
-
-  // Drag and drop state for header buttons
-  const [draggedBtnIdx, setDraggedBtnIdx] = useState(null);
-  const [btnDropPos, setBtnDropPos] = useState({});
-
-  const fetchSidebarConfig = async () => {
+  const fetchConfig = async () => {
     setLoading(true);
     try {
       const res = await fetch('/api/sidebar-config');
       const data = await res.json();
-      if (data) {
-        if (data.menus) setMenus(data.menus);
-        if (data.headerButtons) setHeaderButtons(data.headerButtons);
+      if (data && data.menus && data.menus.length > 0) {
+        setMenus(
+          data.menus.map((m) => ({
+            label: m.title || m.label,
+            href: m.url || m.href,
+            icon: m.icon || 'fa-solid fa-link',
+            subMenus: m.subMenus || []
+          }))
+        );
+      } else {
+        setMenus(defaultMenus);
+      }
+
+      if (data && data.headerButtons) {
+        setHeaderButtons(data.headerButtons);
       }
     } catch (err) {
-      console.error('Error fetching sidebar config:', err);
+      console.error('Failed to load sidebar config:', err);
+      setMenus(defaultMenus);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchSidebarConfig();
+    fetchConfig();
   }, []);
 
-  const saveSidebarConfig = async (overrideMenus = null, overrideButtons = null) => {
+  const handleSaveToDB = async (menusToSave = menus, btnsToSave = headerButtons) => {
+    setSaving(true);
     const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
-    if (!token) {
-      showTopAlert('অনুগ্রহ করে লগইন করুন!', 'warning');
-      return;
-    }
 
-    const payloadMenus = overrideMenus !== null ? overrideMenus : menus;
-    const payloadButtons = overrideButtons !== null ? overrideButtons : headerButtons;
+    const formattedMenus = menusToSave.map((m) => ({
+      title: m.label,
+      url: m.href,
+      icon: m.icon,
+      subMenus: (m.subMenus || []).map((s) => ({
+        title: s.title || s.label,
+        url: s.url || s.href,
+        icon: s.icon || 'fa-solid fa-circle-dot'
+      }))
+    }));
 
     try {
       const res = await fetch('/api/sidebar-config', {
@@ -79,843 +103,641 @@ export default function AdminSidebarMenuDashboardPage() {
           Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({
-          menus: payloadMenus,
-          headerButtons: payloadButtons
+          menus: formattedMenus,
+          headerButtons: btnsToSave
         })
       });
-
       const data = await res.json();
-      if (res.ok) {
-        showTopAlert('✅ কনফিগারেশন সফলভাবে সেভ হয়েছে!', 'success');
-        fetchSidebarConfig();
+      if (res.ok && data.success) {
+        showTopAlert('✅ সাইডবার ও হেডার কনফিগারেশন সফলভাবে সংরক্ষিত হয়েছে!', 'success');
+        setIsReordered(false);
       } else {
-        showTopAlert('❌ ' + (data.message || 'সেভ করতে ব্যর্থ হয়েছে!'), 'danger');
+        showTopAlert('❌ ' + (data.message || 'সংরক্ষণ ব্যর্থ হয়েছে'), 'danger');
       }
     } catch (err) {
-      showTopAlert('সার্ভারে যোগাযোগ করতে সমস্যা হয়েছে!', 'danger');
+      showTopAlert('সার্ভার কানেকশন এরর!', 'danger');
+    } finally {
+      setSaving(false);
     }
   };
 
-  // --- Sidebar Menus DND & Sort ---
-  const handleDragStart = (e, idx) => {
-    setDraggedMenuIdx(idx);
-    e.dataTransfer.effectAllowed = 'move';
-  };
-
-  const handleDragOver = (e, idx) => {
+  // Add New Menu
+  const handleAddMenu = (e) => {
     e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    const rect = e.currentTarget.getBoundingClientRect();
-    const offset = e.clientY - rect.top;
-    const pos = offset < rect.height / 2 ? 'top' : 'bottom';
-    setMenuDropPos({ [idx]: pos });
-  };
+    if (!newTitle.trim() || !newUrl.trim()) return;
 
-  const handleDragLeave = () => {
-    setMenuDropPos({});
-  };
+    const newMenu = {
+      label: newTitle.trim(),
+      href: newUrl.trim(),
+      icon: newIcon.trim() || 'fa-solid fa-link',
+      subMenus: []
+    };
 
-  const handleDrop = (e, targetIdx) => {
-    e.preventDefault();
-    setMenuDropPos({});
-    if (draggedMenuIdx === null || draggedMenuIdx === targetIdx) return;
-
-    const list = [...menus];
-    const item = list.splice(draggedMenuIdx, 1)[0];
-    list.splice(targetIdx, 0, item);
-    setMenus(list);
-    saveSidebarConfig(list, null);
-    setDraggedMenuIdx(null);
-  };
-
-  const moveMenu = (fromIdx, toIdx) => {
-    if (toIdx < 0 || toIdx >= menus.length) return;
-    const updated = [...menus];
-    const item = updated.splice(fromIdx, 1)[0];
-    updated.splice(toIdx, 0, item);
+    const updated = [...menus, newMenu];
     setMenus(updated);
-    saveSidebarConfig(updated, null);
+    setNewTitle('');
+    setNewUrl('');
+    setNewIcon('fa-solid fa-link');
+    handleSaveToDB(updated);
   };
 
-  const handleAddMenu = async () => {
-    if (!newTitle.trim()) {
-      showTopAlert('মেনু টাইটেল লিখুন!', 'warning');
-      return;
-    }
+  // Delete Menu
+  const handleDeleteMenu = (index) => {
+    if (!window.confirm('আপনি কি এই মেনুটি মুছে ফেলতে চান?')) return;
+    const updated = menus.filter((_, i) => i !== index);
+    setMenus(updated);
+    handleSaveToDB(updated);
+  };
 
-    const updated = [
-      ...menus,
+  // Move Menu Position
+  const moveMenu = (index, dir) => {
+    if ((dir === 'up' && index === 0) || (dir === 'down' && index === menus.length - 1)) return;
+    const targetIdx = dir === 'up' ? index - 1 : index + 1;
+    const updated = [...menus];
+    const temp = updated[index];
+    updated[index] = updated[targetIdx];
+    updated[targetIdx] = temp;
+    setMenus(updated);
+    setIsReordered(true);
+  };
+
+  // Inline Edit
+  const handleStartEdit = (index) => {
+    setEditingMenuIndex(index);
+    setEditTitle(menus[index].label);
+    setEditUrl(menus[index].href);
+    setEditIcon(menus[index].icon);
+  };
+
+  const handleSaveEdit = (index) => {
+    const updated = [...menus];
+    updated[index] = {
+      ...updated[index],
+      label: editTitle.trim(),
+      href: editUrl.trim(),
+      icon: editIcon.trim() || 'fa-solid fa-link'
+    };
+    setMenus(updated);
+    setEditingMenuIndex(null);
+    handleSaveToDB(updated);
+  };
+
+  // Add Submenu
+  const handleAddSubmenu = (menuIndex) => {
+    if (!newSubTitle.trim() || !newSubUrl.trim()) return;
+    const updated = [...menus];
+    const subList = updated[menuIndex].subMenus || [];
+    updated[menuIndex].subMenus = [
+      ...subList,
       {
-        title: newTitle.trim(),
-        url: newUrl.trim() || '#',
-        icon: newIcon.trim() || 'fa-solid fa-circle',
-        subMenus: []
+        title: newSubTitle.trim(),
+        url: newSubUrl.trim(),
+        icon: newSubIcon.trim() || 'fa-solid fa-circle-dot'
       }
     ];
     setMenus(updated);
-    await saveSidebarConfig(updated, null);
-    setNewTitle('');
-    setNewUrl('');
-    setNewIcon('fa-solid fa-circle');
-    setShowNewMenu(false);
-  };
-
-  const handleDeleteMenu = async (idx) => {
-    const confirm = await showTopAlert('আপনি কি এই মেনুটি মুছে ফেলতে চান?', 'danger', true);
-    if (!confirm) return;
-    const updated = menus.filter((_, i) => i !== idx);
-    setMenus(updated);
-    await saveSidebarConfig(updated, null);
-  };
-
-  const handleAddSubMenu = async (mIdx) => {
-    if (!newSubTitle.trim()) {
-      showTopAlert('সাব-মেনু টাইটেল লিখুন!', 'warning');
-      return;
-    }
-
-    const updated = [...menus];
-    if (!updated[mIdx].subMenus) updated[mIdx].subMenus = [];
-
-    updated[mIdx].subMenus.push({
-      title: newSubTitle.trim(),
-      url: newSubUrl.trim() || '#',
-      icon: newSubIcon.trim() || 'fa-solid fa-circle'
-    });
-
-    setMenus(updated);
-    await saveSidebarConfig(updated, null);
     setNewSubTitle('');
     setNewSubUrl('');
-    setNewSubIcon('fa-solid fa-circle');
-    setAddingSubMenuIdx(null);
+    setActiveSubmenuMenuIndex(null);
+    handleSaveToDB(updated);
   };
 
-  const handleDeleteSubMenu = async (mIdx, sIdx) => {
-    const confirm = await showTopAlert('আপনি কি এই সাব-মেনুটি মুছে ফেলতে চান?', 'danger', true);
-    if (!confirm) return;
+  // Delete Submenu
+  const handleDeleteSubmenu = (menuIndex, subIndex) => {
     const updated = [...menus];
-    updated[mIdx].subMenus = updated[mIdx].subMenus.filter((_, i) => i !== sIdx);
+    updated[menuIndex].subMenus = (updated[menuIndex].subMenus || []).filter((_, idx) => idx !== subIndex);
     setMenus(updated);
-    await saveSidebarConfig(updated, null);
+    handleSaveToDB(updated);
   };
 
-  // --- Header Buttons Actions & DND ---
-  const handleBtnDragStart = (e, idx) => {
-    setDraggedBtnIdx(idx);
-    e.dataTransfer.effectAllowed = 'move';
-  };
-
-  const handleBtnDragOver = (e, idx) => {
+  // Header Button Actions
+  const handleAddHeaderBtn = (e) => {
     e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    const rect = e.currentTarget.getBoundingClientRect();
-    const offset = e.clientY - rect.top;
-    const pos = offset < rect.height / 2 ? 'top' : 'bottom';
-    setBtnDropPos({ [idx]: pos });
-  };
+    if (!newBtnText.trim() || !newBtnUrl.trim()) return;
 
-  const handleBtnDragLeave = () => {
-    setBtnDropPos({});
-  };
-
-  const handleBtnDrop = (e, targetIdx) => {
-    e.preventDefault();
-    setBtnDropPos({});
-    if (draggedBtnIdx === null || draggedBtnIdx === targetIdx) return;
-
-    const list = [...headerButtons];
-    const item = list.splice(draggedBtnIdx, 1)[0];
-    list.splice(targetIdx, 0, item);
-    setHeaderButtons(list);
-    saveSidebarConfig(null, list);
-    setDraggedBtnIdx(null);
-  };
-
-  const moveHeaderBtn = (fromIdx, toIdx) => {
-    if (toIdx < 0 || toIdx >= headerButtons.length) return;
-    const updated = [...headerButtons];
-    const item = updated.splice(fromIdx, 1)[0];
-    updated.splice(toIdx, 0, item);
-    setHeaderButtons(updated);
-    saveSidebarConfig(null, updated);
-  };
-
-  const handleSaveHeaderBtn = async () => {
-    if (!btnText.trim()) {
-      showTopAlert('বোতামের নাম (Label) লিখুন!', 'warning');
-      return;
-    }
-
-    const updated = [...headerButtons];
-    const btnData = {
-      text: btnText.trim(),
-      url: btnUrl.trim() || '#',
-      icon: btnIcon.trim() || 'fa-solid fa-arrow-up-right-from-square',
-      color: btnColor || 'primary',
-      targetBlank: btnTargetBlank,
-      action: btnAction || 'link'
+    const newBtn = {
+      text: newBtnText.trim(),
+      url: newBtnUrl.trim(),
+      icon: newBtnIcon.trim() || 'fa-solid fa-link',
+      color: newBtnColor,
+      targetBlank: true,
+      action: 'link'
     };
 
-    if (editingHeaderBtnIdx !== null) {
-      updated[editingHeaderBtnIdx] = btnData;
-    } else {
-      updated.push(btnData);
-    }
-
+    const updated = [...headerButtons, newBtn];
     setHeaderButtons(updated);
-    await saveSidebarConfig(null, updated);
-
-    // Reset Form
-    setBtnText('');
-    setBtnUrl('');
-    setBtnIcon('fa-solid fa-arrow-up-right-from-square');
-    setBtnColor('primary');
-    setBtnTargetBlank(false);
-    setBtnAction('link');
-    setEditingHeaderBtnIdx(null);
-    setShowNewHeaderBtn(false);
+    setNewBtnText('');
+    setNewBtnUrl('');
+    handleSaveToDB(menus, updated);
   };
 
-  const handleEditHeaderBtn = (idx) => {
-    const btn = headerButtons[idx];
-    setBtnText(btn.text);
-    setBtnUrl(btn.url);
-    setBtnIcon(btn.icon || 'fa-solid fa-arrow-up-right-from-square');
-    setBtnColor(btn.color || 'primary');
-    setBtnTargetBlank(!!btn.targetBlank);
-    setBtnAction(btn.action || 'link');
-    setEditingHeaderBtnIdx(idx);
-    setShowNewHeaderBtn(true);
-  };
-
-  const handleDeleteHeaderBtn = async (idx) => {
-    const confirm = await showTopAlert('আপনি কি এই হেডার বোতামটি মুছে ফেলতে চান?', 'danger', true);
-    if (!confirm) return;
-    const updated = headerButtons.filter((_, i) => i !== idx);
+  const handleDeleteHeaderBtn = (index) => {
+    const updated = headerButtons.filter((_, idx) => idx !== index);
     setHeaderButtons(updated);
-    await saveSidebarConfig(null, updated);
+    handleSaveToDB(menus, updated);
   };
 
-  const getButtonBg = (color) => {
-    switch (color) {
-      case 'primary': return '#0284c7';
-      case 'success': return '#16a34a';
-      case 'danger': return '#dc2626';
-      case 'warning': return '#d97706';
-      case 'info': return '#0891b2';
-      case 'dark': return '#334155';
-      default: return '#0284c7';
-    }
-  };
+  if (loading) {
+    return (
+      <div style={{ textAlign: 'center', padding: '60px' }}>
+        <i className="fa-solid fa-spinner fa-spin" style={{ fontSize: '32px', color: 'var(--primary)' }}></i>
+        <p style={{ marginTop: '12px', color: '#64748b' }}>মেনু কনফিগারেশন লোড হচ্ছে...</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="container" style={{ maxWidth: '1200px', margin: '20px auto', padding: '0 15px' }}>
+    <div className="container" style={{ maxWidth: '1300px', margin: '0 auto', padding: '0 25px 30px 25px' }}>
       <style jsx>{`
-        .admin-card {
-          background: #fff;
+        :root {
+          --primary: #007bff;
+          --primary-dark: #0056b3;
+          --secondary: #17a2b8;
+          --warning: #ff9f43;
+          --danger: #dc3545;
+          --dark: #2c3e50;
+          --light: #f4f7f6;
+          --main-dash-btn: #28a745;
+        }
+
+        .box {
+          background: white;
+          padding: 25px 30px;
           border-radius: 8px;
-          padding: 25px;
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
           margin-bottom: 25px;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.05);
           border: 1px solid #e2e8f0;
         }
-        .admin-card h2 {
-          font-size: 19px;
-          color: #1e293b;
-          margin-bottom: 15px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          border-bottom: 2px solid #f1f5f9;
-          padding-bottom: 10px;
+
+        .form-grid {
+          display: grid;
+          grid-template-columns: 2fr 2fr 1.5fr auto;
+          gap: 12px;
+          align-items: flex-end;
+          margin-bottom: 20px;
         }
-        .menu-list-item {
-          background: #f8fafc;
+        .form-group {
+          margin-bottom: 0;
+        }
+        label {
+          display: block;
+          font-weight: bold;
+          margin-bottom: 5px;
+          font-size: 13px;
+          color: #475569;
+        }
+        input,
+        select {
+          width: 100%;
+          padding: 9px 12px;
           border: 1px solid #cbd5e1;
-          border-radius: 6px;
+          border-radius: 5px;
+          font-size: 14px;
+          box-sizing: border-box;
+          outline: none;
+        }
+        input:focus,
+        select:focus {
+          border-color: #007bff;
+        }
+
+        .menu-item-card {
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
+          border-radius: 8px;
           padding: 14px 18px;
           margin-bottom: 12px;
           transition: all 0.2s ease;
-          position: relative;
         }
-        .menu-list-item.drag-over-top {
-          border-top: 3px solid #007bff;
+        .menu-item-card:hover {
+          background: #f1f5f9;
         }
-        .menu-list-item.drag-over-bottom {
-          border-bottom: 3px solid #007bff;
-        }
-        .drag-handle {
-          cursor: grab;
-          color: #94a3b8;
-          margin-right: 12px;
-          font-size: 16px;
-        }
-        .drag-handle:active {
-          cursor: grabbing;
-        }
-        .btn-order {
-          background: #e2e8f0;
-          border: none;
-          color: #475569;
-          width: 28px;
-          height: 28px;
-          border-radius: 4px;
-          cursor: pointer;
-          font-size: 12px;
-          display: inline-flex;
+        .menu-item-header {
+          display: flex;
+          justify-content: space-between;
           align-items: center;
-          justify-content: center;
-          transition: all 0.2s;
+          flex-wrap: wrap;
+          gap: 10px;
         }
-        .btn-order:hover:not(:disabled) {
-          background: #007bff;
-          color: white;
-        }
-        .btn-order:disabled {
-          opacity: 0.3;
-          cursor: not-allowed;
-        }
-        .btn-primary {
-          background-color: #007bff;
-          color: white;
-          border: none;
-          padding: 8px 16px;
+
+        .btn {
+          padding: 8px 14px;
           border-radius: 5px;
+          border: none;
           cursor: pointer;
-          font-weight: 600;
-          font-size: 13.5px;
+          font-weight: bold;
+          font-size: 13px;
           display: inline-flex;
           align-items: center;
           gap: 6px;
+          transition: opacity 0.2s;
         }
-        .btn-primary:hover { background-color: #0056b3; }
-        .btn-secondary {
-          background-color: #64748b;
+        .btn:hover {
+          opacity: 0.9;
+        }
+        .btn-primary {
+          background: #007bff;
           color: white;
-          border: none;
-          padding: 8px 16px;
-          border-radius: 5px;
-          cursor: pointer;
-          font-weight: 600;
-          font-size: 13.5px;
+        }
+        .btn-success {
+          background: #28a745;
+          color: white;
+        }
+        .btn-warning {
+          background: #ffc107;
+          color: #212529;
         }
         .btn-danger {
-          background-color: #ef4444;
+          background: #dc3545;
           color: white;
-          border: none;
-          padding: 6px 12px;
-          border-radius: 4px;
-          cursor: pointer;
-          font-size: 12.5px;
         }
-        .btn-danger:hover { background-color: #dc2626; }
-        .btn-edit {
-          background-color: #f59e0b;
+        .btn-secondary {
+          background: #64748b;
           color: white;
-          border: none;
-          padding: 6px 12px;
-          border-radius: 4px;
-          cursor: pointer;
-          font-size: 12.5px;
         }
-        .btn-edit:hover { background-color: #d97706; }
-        .btn-sub {
-          background-color: #10b981;
+
+        .arrow-btn-group {
+          display: inline-flex;
+          flex-direction: column;
+          gap: 2px;
+          margin-right: 8px;
+        }
+        .btn-arrow {
+          background: #e2e8f0;
+          border: none;
+          color: #475569;
+          padding: 2px 5px;
+          border-radius: 3px;
+          font-size: 9px;
+          cursor: pointer;
+        }
+        .btn-arrow:hover {
+          background: #007bff;
           color: white;
-          border: none;
-          padding: 6px 12px;
-          border-radius: 4px;
-          cursor: pointer;
-          font-size: 12.5px;
         }
-        .btn-sub:hover { background-color: #059669; }
-        .form-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-          gap: 15px;
-          margin-bottom: 15px;
+
+        .submenu-container {
+          margin-top: 12px;
+          padding-left: 20px;
+          border-left: 3px solid #cbd5e1;
         }
-        .form-group label {
-          display: block;
-          font-size: 13px;
-          font-weight: 600;
-          color: #334155;
-          margin-bottom: 5px;
-        }
-        .form-control {
-          width: 100%;
-          padding: 8px 12px;
-          border: 1px solid #cbd5e1;
-          border-radius: 5px;
-          font-size: 13.5px;
-          outline: none;
-        }
-        .form-control:focus { border-color: #007bff; }
         .submenu-item {
-          background: #ffffff;
+          background: white;
           border: 1px dashed #cbd5e1;
-          border-radius: 4px;
-          padding: 8px 14px;
-          margin-top: 8px;
+          border-radius: 5px;
+          padding: 8px 12px;
+          margin-bottom: 6px;
           display: flex;
-          align-items: center;
           justify-content: space-between;
-        }
-        .header-btn-preview-bar {
-          background: #0f172a;
-          padding: 12px 20px;
-          border-radius: 6px;
-          display: flex;
           align-items: center;
-          gap: 10px;
-          flex-wrap: wrap;
-          margin-bottom: 20px;
-          border: 1px solid #1e293b;
+        }
+
+        .bottom-action-bar {
+          position: sticky;
+          bottom: 20px;
+          background: #1e293b;
+          padding: 12px 24px;
+          border-radius: 8px;
+          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          color: white;
+          z-index: 100;
+          margin-top: 20px;
+        }
+
+        @media (max-width: 900px) {
+          .form-grid {
+            grid-template-columns: 1fr;
+          }
         }
       `}</style>
 
-      {/* Page Header Title */}
-      <div style={{ marginBottom: '20px' }}>
-        <h1 style={{ fontSize: '24px', color: '#1e293b', fontWeight: 'bold' }}>
-          <i className="fa-solid fa-list-check" style={{ color: '#007bff', marginRight: '10px' }}></i>
-          অ্যাডমিন সাইডবার ও হেডার কন্ট্রোল ড্যাশবোর্ড
-        </h1>
-        <p style={{ color: '#64748b', fontSize: '14px', marginTop: '4px' }}>
-          বাম পাশের সাইডবার মেনু এবং উপরের কালো হেডার বারের বোতামগুলো সাজান ও নিয়ন্ত্রণ করুন।
-        </p>
-      </div>
-
-      {/* ========================================================================= */}
-      {/* SECTION 1: ADMIN SIDEBAR MENU LIST (Existing functionality fully preserved) */}
-      {/* ========================================================================= */}
-      <div className="admin-card">
-        <h2>
-          <span>
-            <i className="fa-solid fa-bars" style={{ color: '#007bff', marginRight: '8px' }}></i>
-            অ্যাডমিন সাইডবার মেনু তালিকা (Sidebar Menus)
-          </span>
-          <button className="btn-primary" onClick={() => setShowNewMenu(!showNewMenu)}>
-            <i className={`fa-solid ${showNewMenu ? 'fa-xmark' : 'fa-plus'}`}></i>
-            {showNewMenu ? 'বাতিল করুন' : 'নতুন মেনু যোগ করুন'}
-          </button>
-        </h2>
-
-        {/* Add/Edit Sidebar Menu Form */}
-        {showNewMenu && (
-          <div style={{ background: '#f1f5f9', padding: '20px', borderRadius: '6px', marginBottom: '20px', border: '1px solid #cbd5e1' }}>
-            <h4 style={{ margin: '0 0 15px 0', fontSize: '15px', color: '#1e293b' }}>
-              <i className="fa-solid fa-circle-plus" style={{ color: '#007bff', marginRight: '6px' }}></i>
-              নতুন সাইডবার মেনু তথ্য
-            </h4>
-            <div className="form-grid">
-              <div className="form-group">
-                <label>মেনু টাইটেল *</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="যেমন: ড্যাশবোর্ড"
-                  value={newTitle}
-                  onChange={(e) => setNewTitle(e.target.value)}
-                />
-              </div>
-              <div className="form-group">
-                <label>লিংক URL *</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="যেমন: /admin/dashboard"
-                  value={newUrl}
-                  onChange={(e) => setNewUrl(e.target.value)}
-                />
-              </div>
-              <div className="form-group">
-                <label>আইকন ক্লাস (FontAwesome)</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="যেমন: fa-solid fa-gauge-high"
-                  value={newIcon}
-                  onChange={(e) => setNewIcon(e.target.value)}
-                />
-              </div>
-            </div>
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <button className="btn-primary" onClick={handleAddMenu}>
-                <i className="fa-solid fa-check"></i> মেনু সংরক্ষণ করুন
-              </button>
-              <button className="btn-secondary" onClick={() => setShowNewMenu(false)}>
-                বাতিল
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Sidebar Menu List */}
-        {loading ? (
-          <p style={{ textAlign: 'center', padding: '30px', color: '#888' }}>
-            <i className="fa-solid fa-spinner fa-spin"></i> মেনু লোড হচ্ছে...
-          </p>
-        ) : menus.length === 0 ? (
-          <p style={{ textAlign: 'center', padding: '20px', color: '#888' }}>
-            কোনো সাইডবার মেনু পাওয়া যায়নি।
-          </p>
-        ) : (
+      {/* 1. SIDEBAR MENUS BUILDER */}
+      <div className="box" style={{ borderLeft: '6px solid #475569' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
           <div>
-            {menus.map((m, idx) => (
-              <div
-                key={idx}
-                className={`menu-list-item ${menuDropPos[idx] === 'top' ? 'drag-over-top' : ''} ${menuDropPos[idx] === 'bottom' ? 'drag-over-bottom' : ''}`}
-                draggable
-                onDragStart={(e) => handleDragStart(e, idx)}
-                onDragOver={(e) => handleDragOver(e, idx)}
-                onDragLeave={handleDragLeave}
-                onDrop={(e) => handleDrop(e, idx)}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span className="drag-handle" title="মাউস দিয়ে টেনে স্থান পরিবর্তন করুন">
-                      <i className="fa-solid fa-grip-vertical"></i>
-                    </span>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                      <button
-                        className="btn-order"
-                        disabled={idx === 0}
-                        onClick={() => moveMenu(idx, idx - 1)}
-                        title="উপরে নিন"
-                      >
-                        ▲
-                      </button>
-                      <button
-                        className="btn-order"
-                        disabled={idx === menus.length - 1}
-                        onClick={() => moveMenu(idx, idx + 1)}
-                        title="নিচে নিন"
-                      >
-                        ▼
-                      </button>
-                    </div>
+            <h2 style={{ margin: 0, fontSize: '20px' }}>
+              <i className="fa-solid fa-list-check" style={{ color: '#475569', marginRight: '8px' }}></i>
+              সাইডবার মেনু কন্ট্রোল (Sidebar Navigation Builder)
+            </h2>
+            <p style={{ color: '#64748b', fontSize: '13.5px', margin: '4px 0 0 0' }}>
+              অ্যাডমিন প্যানেলের সাইডবারে কোন কোন মেনু ও সাবমেনু দৃশ্যমান হবে তা এখান থেকে সাজান।
+            </p>
+          </div>
+          <button className="btn btn-success" onClick={() => handleSaveToDB()} disabled={saving}>
+            <i className="fa-solid fa-floppy-disk"></i> {saving ? 'সংরক্ষণ হচ্ছে...' : 'সংরক্ষণ করুন'}
+          </button>
+        </div>
 
-                    <div style={{ marginLeft: '6px' }}>
-                      <div style={{ fontWeight: '700', fontSize: '15px', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        {m.icon && <i className={m.icon} style={{ color: '#007bff' }}></i>}
-                        <span>{m.title}</span>
-                      </div>
-                      <div style={{ fontSize: '12.5px', color: '#64748b', marginTop: '2px' }}>
-                        URL: <code>{m.url || '#'}</code>
-                      </div>
-                    </div>
-                  </div>
+        {/* Add New Menu Form */}
+        <form onSubmit={handleAddMenu} className="form-grid">
+          <div className="form-group">
+            <label>মেনুর শিরোনাম (Title):</label>
+            <input
+              type="text"
+              placeholder="যেমন: নোটিশ বোর্ড"
+              value={newTitle}
+              onChange={(e) => setNewTitle(e.target.value)}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label>লিংক / URL:</label>
+            <input
+              type="text"
+              placeholder="যেমন: /admin/notices"
+              value={newUrl}
+              onChange={(e) => setNewUrl(e.target.value)}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label>FontAwesome Icon ক্লাস:</label>
+            <input
+              type="text"
+              placeholder="যেমন: fa-solid fa-bullhorn"
+              value={newIcon}
+              onChange={(e) => setNewIcon(e.target.value)}
+            />
+          </div>
+          <button type="submit" className="btn btn-primary" style={{ height: '40px' }}>
+            <i className="fa-solid fa-plus"></i> মেনু যোগ করুন
+          </button>
+        </form>
 
-                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                    <button className="btn-sub" onClick={() => setAddingSubMenuIdx(addingSubMenuIdx === idx ? null : idx)}>
-                      <i className="fa-solid fa-plus"></i> সাব-মেনু
-                    </button>
-                    <button className="btn-danger" onClick={() => handleDeleteMenu(idx)}>
-                      <i className="fa-solid fa-trash"></i> মুছুন
-                    </button>
-                  </div>
-                </div>
+        {/* Menus List */}
+        <div>
+          {menus.map((menu, index) => {
+            const isEditing = editingMenuIndex === index;
+            const subMenus = menu.subMenus || [];
+            const isAddingSub = activeSubmenuMenuIndex === index;
 
-                {/* Submenu Add Form */}
-                {addingSubMenuIdx === idx && (
-                  <div style={{ marginTop: '12px', padding: '12px', background: '#fff', borderRadius: '5px', border: '1px solid #cbd5e1' }}>
-                    <h5 style={{ margin: '0 0 10px 0', fontSize: '13.5px', color: '#1e293b' }}>
-                      {m.title}-এ নতুন সাব-মেনু যোগ করুন
-                    </h5>
-                    <div className="form-grid">
+            return (
+              <div key={index} className="menu-item-card">
+                {isEditing ? (
+                  /* INLINE EDIT */
+                  <div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '2fr 2fr 1.5fr auto', gap: '10px' }}>
                       <input
                         type="text"
-                        className="form-control"
-                        placeholder="সাব-মেনু টাইটেল *"
-                        value={newSubTitle}
-                        onChange={(e) => setNewSubTitle(e.target.value)}
+                        value={editTitle}
+                        onChange={(e) => setEditTitle(e.target.value)}
+                        placeholder="Title"
                       />
                       <input
                         type="text"
-                        className="form-control"
-                        placeholder="সাব-মেনু URL *"
-                        value={newSubUrl}
-                        onChange={(e) => setNewSubUrl(e.target.value)}
+                        value={editUrl}
+                        onChange={(e) => setEditUrl(e.target.value)}
+                        placeholder="URL"
                       />
                       <input
                         type="text"
-                        className="form-control"
-                        placeholder="আইকন ক্লাস (ঐচ্ছিক)"
-                        value={newSubIcon}
-                        onChange={(e) => setNewSubIcon(e.target.value)}
+                        value={editIcon}
+                        onChange={(e) => setEditIcon(e.target.value)}
+                        placeholder="Icon"
                       />
-                    </div>
-                    <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
-                      <button className="btn-primary" onClick={() => handleAddSubMenu(idx)}>
-                        যোগ করুন
-                      </button>
-                      <button className="btn-secondary" onClick={() => setAddingSubMenuIdx(null)}>
-                        বাতিল
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Submenu List */}
-                {m.subMenus && m.subMenus.length > 0 && (
-                  <div style={{ marginTop: '10px', paddingLeft: '25px', borderLeft: '2px solid #cbd5e1' }}>
-                    {m.subMenus.map((sub, sIdx) => (
-                      <div key={sIdx} className="submenu-item">
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          {sub.icon && <i className={sub.icon} style={{ color: '#10b981', fontSize: '12px' }}></i>}
-                          <span style={{ fontWeight: '600', fontSize: '13px' }}>{sub.title}</span>
-                          <span style={{ color: '#64748b', fontSize: '12px' }}>({sub.url})</span>
-                        </div>
-                        <button className="btn-danger" style={{ padding: '3px 8px', fontSize: '11px' }} onClick={() => handleDeleteSubMenu(idx, sIdx)}>
-                          <i className="fa-solid fa-xmark"></i>
+                      <div style={{ display: 'flex', gap: '6px' }}>
+                        <button
+                          type="button"
+                          className="btn btn-success"
+                          onClick={() => handleSaveEdit(index)}
+                        >
+                          💾 Save
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn-secondary"
+                          onClick={() => setEditingMenuIndex(null)}
+                        >
+                          ❌
                         </button>
                       </div>
-                    ))}
+                    </div>
+                  </div>
+                ) : (
+                  /* READ VIEW */
+                  <div>
+                    <div className="menu-item-header">
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <div className="arrow-btn-group">
+                          <button
+                            type="button"
+                            className="btn-arrow"
+                            onClick={() => moveMenu(index, 'up')}
+                          >
+                            ▲
+                          </button>
+                          <button
+                            type="button"
+                            className="btn-arrow"
+                            onClick={() => moveMenu(index, 'down')}
+                          >
+                            ▼
+                          </button>
+                        </div>
+                        <i
+                          className={menu.icon || 'fa-solid fa-link'}
+                          style={{ fontSize: '16px', color: '#007bff', marginRight: '10px' }}
+                        ></i>
+                        <div>
+                          <strong style={{ fontSize: '15px', color: '#1e293b' }}>{menu.label}</strong>
+                          <div style={{ fontSize: '12px', color: '#64748b' }}>
+                            <code>{menu.href}</code> {subMenus.length > 0 && `• (${subMenus.length} সাবমেনু)`}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '6px' }}>
+                        <button
+                          type="button"
+                          className="btn btn-secondary btn-sm"
+                          onClick={() =>
+                            setActiveSubmenuMenuIndex(isAddingSub ? null : index)
+                          }
+                        >
+                          <i className="fa-solid fa-plus"></i> Submenu
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn-warning btn-sm"
+                          onClick={() => handleStartEdit(index)}
+                        >
+                          <i className="fa-solid fa-pen-to-square"></i> Edit
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn-danger btn-sm"
+                          onClick={() => handleDeleteMenu(index)}
+                        >
+                          <i className="fa-solid fa-trash"></i> Delete
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Inline Add Submenu Form */}
+                    {isAddingSub && (
+                      <div style={{ marginTop: '10px', padding: '10px', background: '#eef6ff', borderRadius: '6px', display: 'grid', gridTemplateColumns: '2fr 2fr 1fr auto', gap: '8px' }}>
+                        <input
+                          type="text"
+                          placeholder="Submenu Title"
+                          value={newSubTitle}
+                          onChange={(e) => setNewSubTitle(e.target.value)}
+                        />
+                        <input
+                          type="text"
+                          placeholder="Submenu URL"
+                          value={newSubUrl}
+                          onChange={(e) => setNewSubUrl(e.target.value)}
+                        />
+                        <input
+                          type="text"
+                          placeholder="Submenu Icon"
+                          value={newSubIcon}
+                          onChange={(e) => setNewSubIcon(e.target.value)}
+                        />
+                        <div style={{ display: 'flex', gap: '4px' }}>
+                          <button
+                            type="button"
+                            className="btn btn-success btn-sm"
+                            onClick={() => handleAddSubmenu(index)}
+                          >
+                            + Add
+                          </button>
+                          <button
+                            type="button"
+                            className="btn btn-secondary btn-sm"
+                            onClick={() => setActiveSubmenuMenuIndex(null)}
+                          >
+                            ❌
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Submenus List */}
+                    {subMenus.length > 0 && (
+                      <div className="submenu-container">
+                        {subMenus.map((sub, sIdx) => (
+                          <div key={sIdx} className="submenu-item">
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <i className={sub.icon || 'fa-solid fa-circle-dot'} style={{ fontSize: '11px', color: '#17a2b8' }}></i>
+                              <span style={{ fontSize: '13.5px', fontWeight: 'bold', color: '#334155' }}>
+                                {sub.title || sub.label}
+                              </span>
+                              <code style={{ fontSize: '11px', color: '#64748b' }}>{sub.url || sub.href}</code>
+                            </div>
+                            <button
+                              type="button"
+                              className="btn btn-danger btn-sm"
+                              style={{ padding: '2px 6px', fontSize: '10px' }}
+                              onClick={() => handleDeleteSubmenu(index, sIdx)}
+                            >
+                              <i className="fa-solid fa-trash"></i>
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
-            ))}
-          </div>
-        )}
+            );
+          })}
+        </div>
       </div>
 
-      {/* ========================================================================= */}
-      {/* SECTION 2: ADMIN TOP BLACK HEADER BUTTONS CONTROL (Requested New Section) */}
-      {/* ========================================================================= */}
-      <div className="admin-card">
+      {/* 2. HEADER ACTION BUTTONS */}
+      <div className="box" style={{ borderLeft: '6px solid var(--secondary, #17a2b8)' }}>
         <h2>
-          <span>
-            <i className="fa-solid fa-window-maximize" style={{ color: '#0f172a', marginRight: '8px' }}></i>
-            অ্যাডমিন হেডার বোতাম কন্ট্রোল (Admin Top Header Buttons)
-          </span>
-          <button
-            className="btn-primary"
-            style={{ backgroundColor: '#0f172a' }}
-            onClick={() => {
-              setShowNewHeaderBtn(!showNewHeaderBtn);
-              setEditingHeaderBtnIdx(null);
-              setBtnText('');
-              setBtnUrl('');
-              setBtnIcon('fa-solid fa-arrow-up-right-from-square');
-              setBtnColor('primary');
-              setBtnTargetBlank(false);
-              setBtnAction('link');
-            }}
-          >
-            <i className={`fa-solid ${showNewHeaderBtn ? 'fa-xmark' : 'fa-plus'}`}></i>
-            {showNewHeaderBtn ? 'বাতিল করুন' : 'নতুন হেডার বোতাম যোগ করুন'}
-          </button>
+          <i className="fa-solid fa-window-maximize" style={{ color: 'var(--secondary)', marginRight: '8px' }}></i>
+          অ্যাডমিন টপ হেডার বাটনসমূহ (Header Quick Actions)
         </h2>
-
-        <p style={{ color: '#64748b', fontSize: '13.5px', marginBottom: '15px' }}>
-          এখানে কনফিগার করা বোতামগুলো অ্যাডমিন প্যানেলের উপরের কালো ব্যাকগ্রাউন্ড হেডারে সরাসরি দৃশ্যমান হবে।
+        <p style={{ color: '#64748b', fontSize: '13.5px', marginTop: '4px' }}>
+          হেডারের ডানপাশে দৃশ্যমান কুইক অ্যাকশন বাটনগুলো পরিচালনা করুন।
         </p>
 
-        {/* Live Preview Bar */}
-        <div style={{ marginBottom: '10px', fontSize: '12.5px', fontWeight: 'bold', color: '#475569' }}>
-          <i className="fa-solid fa-eye" style={{ marginRight: '6px' }}></i> লাইভ প্রিভিউ (Live Header Preview):
-        </div>
-        <div className="header-btn-preview-bar" style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '8px' }}>
-          {headerButtons.map((btn, idx) => (
-            <button
-              key={idx}
-              type="button"
+        <form onSubmit={handleAddHeaderBtn} className="form-grid">
+          <div className="form-group">
+            <label>বাটন টেক্সট:</label>
+            <input
+              type="text"
+              placeholder="যেমন: ওয়েবসাইট ভিজিট"
+              value={newBtnText}
+              onChange={(e) => setNewBtnText(e.target.value)}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label>লিংক / URL:</label>
+            <input
+              type="text"
+              placeholder="যেমন: /"
+              value={newBtnUrl}
+              onChange={(e) => setNewBtnUrl(e.target.value)}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label>রঙ ও স্টাইল:</label>
+            <select value={newBtnColor} onChange={(e) => setNewBtnColor(e.target.value)}>
+              <option value="primary">Primary (Blue)</option>
+              <option value="success">Success (Green)</option>
+              <option value="warning">Warning (Orange)</option>
+              <option value="info">Info (Cyan)</option>
+              <option value="danger">Danger (Red)</option>
+            </select>
+          </div>
+          <button type="submit" className="btn btn-primary" style={{ height: '40px' }}>
+            <i className="fa-solid fa-plus"></i> বাটন যোগ করুন
+          </button>
+        </form>
+
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '15px' }}>
+          {headerButtons.map((btn, index) => (
+            <div
+              key={index}
               style={{
-                backgroundColor: getButtonBg(btn.color),
-                color: '#fff',
-                border: 'none',
-                padding: '6px 14px',
-                borderRadius: '5px',
-                fontSize: '12px',
-                fontWeight: 'bold',
-                display: 'inline-flex',
+                background: '#f8fafc',
+                border: '1px solid #cbd5e1',
+                padding: '8px 14px',
+                borderRadius: '6px',
+                display: 'flex',
                 alignItems: 'center',
-                gap: '6px',
-                cursor: 'pointer'
+                gap: '8px'
               }}
             >
-              {btn.icon && <i className={btn.icon}></i>}
-              {btn.text}
-            </button>
+              <i className={btn.icon || 'fa-solid fa-link'}></i>
+              <span style={{ fontWeight: 'bold', fontSize: '13.5px' }}>{btn.text}</span>
+              <code style={{ fontSize: '11px', color: '#64748b' }}>({btn.url})</code>
+              <button
+                type="button"
+                className="btn btn-danger btn-sm"
+                style={{ padding: '2px 6px', fontSize: '10px', marginLeft: '6px' }}
+                onClick={() => handleDeleteHeaderBtn(index)}
+              >
+                <i className="fa-solid fa-xmark"></i>
+              </button>
+            </div>
           ))}
         </div>
-
-        {/* Add/Edit Header Button Form */}
-        {showNewHeaderBtn && (
-          <div style={{ background: '#f8fafc', padding: '20px', borderRadius: '6px', marginBottom: '20px', border: '1px solid #cbd5e1' }}>
-            <h4 style={{ margin: '0 0 15px 0', fontSize: '15px', color: '#1e293b' }}>
-              <i className="fa-solid fa-pen-to-square" style={{ color: '#0f172a', marginRight: '6px' }}></i>
-              {editingHeaderBtnIdx !== null ? 'হেডার বোতাম এডিট করুন' : 'নতুন হেডার বোতাম তথ্য'}
-            </h4>
-
-            <div className="form-grid">
-              <div className="form-group">
-                <label>বোতামের নাম (Label) *</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="যেমন: ওয়েবসাইট ভিজিট"
-                  value={btnText}
-                  onChange={(e) => setBtnText(e.target.value)}
-                />
-              </div>
-
-              <div className="form-group">
-                <label>বোতাম লিংক (URL) *</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="যেমন: /admin/quiz-dashboard বা /"
-                  value={btnUrl}
-                  onChange={(e) => setBtnUrl(e.target.value)}
-                />
-              </div>
-
-              <div className="form-group">
-                <label>আইকন ক্লাস (FontAwesome)</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="যেমন: fa-solid fa-globe"
-                  value={btnIcon}
-                  onChange={(e) => setBtnIcon(e.target.value)}
-                />
-              </div>
-
-              <div className="form-group">
-                <label>কালার থিম (Theme)</label>
-                <select
-                  className="form-control"
-                  value={btnColor}
-                  onChange={(e) => setBtnColor(e.target.value)}
-                >
-                  <option value="primary">Primary (Blue)</option>
-                  <option value="success">Success (Green)</option>
-                  <option value="danger">Danger (Red)</option>
-                  <option value="warning">Warning (Amber)</option>
-                  <option value="info">Info (Cyan)</option>
-                  <option value="dark">Dark (Slate)</option>
-                </select>
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', gap: '20px', marginBottom: '15px', flexWrap: 'wrap' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', cursor: 'pointer' }}>
-                <input
-                  type="checkbox"
-                  checked={btnTargetBlank}
-                  onChange={(e) => setBtnTargetBlank(e.target.checked)}
-                />
-                নতুন ট্যাবে ওপেন হবে (Open in New Tab)
-              </label>
-
-              <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', cursor: 'pointer' }}>
-                <input
-                  type="checkbox"
-                  checked={btnAction === 'logout'}
-                  onChange={(e) => setBtnAction(e.target.checked ? 'logout' : 'link')}
-                />
-                এটি লগআউট বোতাম (Logout Action)
-              </label>
-            </div>
-
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <button className="btn-primary" style={{ backgroundColor: '#0f172a' }} onClick={handleSaveHeaderBtn}>
-                <i className="fa-solid fa-check"></i> {editingHeaderBtnIdx !== null ? 'আপডেট করুন' : 'বোতাম যোগ করুন'}
-              </button>
-              <button className="btn-secondary" onClick={() => setShowNewHeaderBtn(false)}>
-                বাতিল
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Header Buttons Sortable List */}
-        {headerButtons.length === 0 ? (
-          <p style={{ textAlign: 'center', padding: '20px', color: '#888' }}>
-            কোনো হেডার বোতাম পাওয়া যায়নি। নতুন বোতাম যোগ করুন।
-          </p>
-        ) : (
-          <div>
-            {headerButtons.map((btn, idx) => (
-              <div
-                key={idx}
-                className={`menu-list-item ${btnDropPos[idx] === 'top' ? 'drag-over-top' : ''} ${btnDropPos[idx] === 'bottom' ? 'drag-over-bottom' : ''}`}
-                draggable
-                onDragStart={(e) => handleBtnDragStart(e, idx)}
-                onDragOver={(e) => handleBtnDragOver(e, idx)}
-                onDragLeave={handleBtnDragLeave}
-                onDrop={(e) => handleBtnDrop(e, idx)}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span className="drag-handle" title="মাউস দিয়ে টেনে স্থান পরিবর্তন করুন">
-                      <i className="fa-solid fa-grip-vertical"></i>
-                    </span>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                      <button
-                        className="btn-order"
-                        disabled={idx === 0}
-                        onClick={() => moveHeaderBtn(idx, idx - 1)}
-                        title="উপরে নিন"
-                      >
-                        ▲
-                      </button>
-                      <button
-                        className="btn-order"
-                        disabled={idx === headerButtons.length - 1}
-                        onClick={() => moveHeaderBtn(idx, idx + 1)}
-                        title="নিচে নিন"
-                      >
-                        ▼
-                      </button>
-                    </div>
-
-                    <div style={{ marginLeft: '6px' }}>
-                      <div style={{ fontWeight: '700', fontSize: '15px', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span
-                          style={{
-                            display: 'inline-block',
-                            width: '12px',
-                            height: '12px',
-                            borderRadius: '50%',
-                            backgroundColor: getButtonBg(btn.color)
-                          }}
-                        ></span>
-                        {btn.icon && <i className={btn.icon}></i>}
-                        <span>{btn.text}</span>
-                        {btn.targetBlank && (
-                          <span style={{ fontSize: '11px', background: '#e0f2fe', color: '#0284c7', padding: '2px 6px', borderRadius: '4px' }}>
-                            New Tab
-                          </span>
-                        )}
-                        {btn.action === 'logout' && (
-                          <span style={{ fontSize: '11px', background: '#fee2e2', color: '#dc2626', padding: '2px 6px', borderRadius: '4px' }}>
-                            Logout
-                          </span>
-                        )}
-                      </div>
-                      <div style={{ fontSize: '12.5px', color: '#64748b', marginTop: '2px' }}>
-                        URL: <code>{btn.url || '#'}</code> | কালার: <strong>{btn.color}</strong>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <button className="btn-edit" onClick={() => handleEditHeaderBtn(idx)}>
-                      <i className="fa-solid fa-pen"></i> এডিট
-                    </button>
-                    <button className="btn-danger" onClick={() => handleDeleteHeaderBtn(idx)}>
-                      <i className="fa-solid fa-trash"></i> মুছুন
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
+
+      {/* Floating Reorder Save Bar */}
+      {isReordered && (
+        <div className="bottom-action-bar">
+          <span>⚠️ মেনুর পজিশন পরিবর্তন করা হয়েছে!</span>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button className="btn btn-success" onClick={() => handleSaveToDB()}>
+              <i className="fa-solid fa-floppy-disk"></i> পরিবর্তন সংরক্ষণ করুন
+            </button>
+            <button className="btn btn-secondary" onClick={() => fetchConfig()}>
+              <i className="fa-solid fa-xmark"></i> বাতিল
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

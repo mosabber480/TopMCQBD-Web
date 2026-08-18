@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 
 export default function AdminOverviewDashboard() {
-  const [userName, setUserName] = useState('Admin');
+  const [userName, setUserName] = useState('অ্যাডমিন');
 
   useEffect(() => {
     try {
@@ -16,14 +16,27 @@ export default function AdminOverviewDashboard() {
   }, []);
 
   return (
-    <div className="container" style={{ maxWidth: '1300px', margin: '0 auto', padding: '0 25px 25px 25px' }}>
+    <div className="container" style={{ maxWidth: '1300px', margin: '0 auto', padding: '0 25px 30px 25px' }}>
       <style jsx>{`
-        .welcome-box {
+        :root {
+          --primary: #007bff;
+          --primary-dark: #0056b3;
+          --secondary: #17a2b8;
+          --warning: #ff9f43;
+          --danger: #dc3545;
+          --dark: #2c3e50;
+          --light: #f4f7f6;
+          --gray-btn: #6c757d;
+          --main-dash-btn: #28a745;
+          --purple-btn: #6f42c1;
+        }
+
+        .welcome-card {
           background: white;
           padding: 25px 30px;
-          border-radius: 8px;
-          box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-          margin-bottom: 30px;
+          border-radius: 10px;
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+          margin-bottom: 25px;
           display: flex;
           justify-content: space-between;
           align-items: center;
@@ -34,7 +47,8 @@ export default function AdminOverviewDashboard() {
         .welcome-text h2 {
           margin: 0 0 5px 0;
           color: var(--dark, #2c3e50);
-          font-size: 24px;
+          font-size: 22px;
+          font-weight: 700;
         }
         .welcome-text p {
           margin: 0;
@@ -43,26 +57,28 @@ export default function AdminOverviewDashboard() {
         }
         .grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+          grid-template-columns: repeat(3, 1fr);
           gap: 20px;
         }
         .card {
-          border-radius: 8px;
+          background: white;
+          border-radius: 10px;
           padding: 25px;
           display: flex;
           flex-direction: column;
           justify-content: space-between;
-          box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+          border: 1px solid #e2e8f0;
           transition: transform 0.2s ease, box-shadow 0.2s ease;
           min-height: 220px;
         }
         .card:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+          transform: translateY(-5px);
+          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
         }
         .card-icon {
-          font-size: 32px;
-          margin-bottom: 15px;
+          font-size: 34px;
+          margin-bottom: 14px;
         }
         .card h3 {
           margin: 0 0 8px 0;
@@ -73,13 +89,13 @@ export default function AdminOverviewDashboard() {
         .card p {
           color: #64748b;
           font-size: 13.5px;
-          line-height: 1.5;
+          line-height: 1.55;
           margin-bottom: 20px;
         }
         .btn {
           padding: 10px 15px;
-          border-radius: 5px;
-          font-weight: bold;
+          border-radius: 6px;
+          font-weight: 600;
           font-size: 13.5px;
           text-decoration: none;
           display: flex;
@@ -88,17 +104,31 @@ export default function AdminOverviewDashboard() {
           gap: 8px;
           text-align: center;
           transition: opacity 0.2s ease;
+          border: none;
         }
         .btn:hover {
           opacity: 0.9;
         }
+
+        @media (max-width: 992px) {
+          .grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
+        @media (max-width: 768px) {
+          .grid {
+            grid-template-columns: 1fr;
+          }
+        }
       `}</style>
 
       {/* Welcome Banner */}
-      <div className="welcome-box">
+      <div className="welcome-card">
         <div className="welcome-text">
-          <h2>স্বাগতম, <span>{userName}</span>! 👋</h2>
-          <p>TopMCQBD-এর সেন্ট্রাল অ্যাডমিন কন্ট্রোল প্যানেলে আপনাকে স্বাগতম।</p>
+          <h2>
+            স্বাগতম, <span style={{ color: 'var(--primary, #007bff)' }}>{userName}</span>! 👋
+          </h2>
+          <p>TopMCQBD-এর সেন্ট্রাল অ্যাডমিন কন্ট্রোল প্যানেলে আপনাকে স্বাগতম। কন্টেন্ট ও ডেটা এক জায়গা থেকেই নিয়ন্ত্রণ করুন।</p>
         </div>
         <div>
           <Link href="/admin/admin-profile" className="btn" style={{ background: 'var(--dark, #2c3e50)', color: 'white' }}>
@@ -107,9 +137,9 @@ export default function AdminOverviewDashboard() {
         </div>
       </div>
 
-      {/* Feature Grid */}
+      {/* Feature Grid - STRICTLY 3 CARDS PER ROW ON DESKTOP */}
       <div className="grid">
-        {/* 1. হেডার কন্ট্রোল */}
+        {/* ১. হেডার কন্ট্রোল */}
         <div className="card" style={{ border: '2px solid var(--purple-btn, #6f42c1)', background: '#fcfaff' }}>
           <div>
             <div className="card-icon" style={{ color: 'var(--purple-btn, #6f42c1)' }}>
@@ -123,7 +153,7 @@ export default function AdminOverviewDashboard() {
           </Link>
         </div>
 
-        {/* 2. ফুটার কন্ট্রোল */}
+        {/* ২. ফুটার কন্ট্রোল */}
         <div className="card" style={{ border: '2px solid var(--secondary, #17a2b8)', background: '#f2fafb' }}>
           <div>
             <div className="card-icon" style={{ color: 'var(--secondary, #17a2b8)' }}>
@@ -137,7 +167,7 @@ export default function AdminOverviewDashboard() {
           </Link>
         </div>
 
-        {/* 3. হোম পেজ কন্ট্রোল */}
+        {/* ৩. হোম পেজ কন্ট্রোল */}
         <div className="card" style={{ border: '2px solid var(--warning, #ff9f43)', background: '#fffdfa' }}>
           <div>
             <div className="card-icon" style={{ color: 'var(--warning, #ff9f43)' }}>
@@ -151,7 +181,7 @@ export default function AdminOverviewDashboard() {
           </Link>
         </div>
 
-        {/* 4. আমাদের সম্পর্কে */}
+        {/* ৪. আমাদের সম্পর্কে */}
         <div className="card" style={{ border: '2px solid #20c997', background: '#f4fbf8' }}>
           <div>
             <div className="card-icon" style={{ color: '#20c997' }}>
@@ -165,7 +195,7 @@ export default function AdminOverviewDashboard() {
           </Link>
         </div>
 
-        {/* 5. প্রশ্ন ব্যাংক ও কুইজ */}
+        {/* ৫. প্রশ্ন ব্যাংক ও কুইজ */}
         <div className="card" style={{ border: '2px solid var(--primary, #007bff)', background: '#f4f8ff' }}>
           <div>
             <div className="card-icon" style={{ color: 'var(--primary, #007bff)' }}>
@@ -179,7 +209,7 @@ export default function AdminOverviewDashboard() {
           </Link>
         </div>
 
-        {/* 6. প্যাকেজসমূহ পেজ */}
+        {/* ৬. প্যাকেজসমূহ পেজ */}
         <div className="card" style={{ border: '2px solid #6366f1', background: '#f5f5fe' }}>
           <div>
             <div className="card-icon" style={{ color: '#6366f1' }}>
@@ -193,7 +223,7 @@ export default function AdminOverviewDashboard() {
           </Link>
         </div>
 
-        {/* 7. ইউজার ও সাবস্ক্রিপশন */}
+        {/* ৭. ইউজার ও সাবস্ক্রিপশন */}
         <div className="card" style={{ border: '2px solid var(--secondary, #17a2b8)', background: '#f2fafb' }}>
           <div>
             <div className="card-icon" style={{ color: 'var(--secondary, #17a2b8)' }}>
@@ -207,7 +237,7 @@ export default function AdminOverviewDashboard() {
           </Link>
         </div>
 
-        {/* 8. রিফান্ড ও পেমেন্ট পলিসি */}
+        {/* ৮. রিফান্ড ও পেমেন্ট পলিসি */}
         <div className="card" style={{ border: '2px solid #e83e8c', background: '#fff9fc' }}>
           <div>
             <div className="card-icon" style={{ color: '#e83e8c' }}>
@@ -218,6 +248,34 @@ export default function AdminOverviewDashboard() {
           </div>
           <Link href="/admin/policy-dashboard" className="btn" style={{ backgroundColor: '#e83e8c', color: 'white' }}>
             <i className="fa-solid fa-pen-to-square"></i> পেজটি এডিট করুন
+          </Link>
+        </div>
+
+        {/* ৯. সাইডবার মেনু কন্ট্রোল */}
+        <div className="card" style={{ border: '2px solid #475569', background: '#f8fafc' }}>
+          <div>
+            <div className="card-icon" style={{ color: '#475569' }}>
+              <i className="fa-solid fa-list-check"></i>
+            </div>
+            <h3>সাইডবার মেনু কন্ট্রোল</h3>
+            <p>অ্যাডমিন প্যানেলের বামপাশের সাইডবার মেনু ও লিংকগুলো সাজান ও কাস্টমাইজ করুন।</p>
+          </div>
+          <Link href="/admin/admin-menu-dashboard" className="btn" style={{ backgroundColor: '#475569', color: 'white' }}>
+            <i className="fa-solid fa-sliders"></i> মেনু এডিট করুন
+          </Link>
+        </div>
+
+        {/* ১০. ফ্রি এমসিকিউ কন্ট্রোল */}
+        <div className="card" style={{ border: '2px solid #28a745', background: '#f4fbf8' }}>
+          <div>
+            <div className="card-icon" style={{ color: '#28a745' }}>
+              <i className="fa-solid fa-gift"></i>
+            </div>
+            <h3>ফ্রি এমসিকিউ কন্ট্রোল</h3>
+            <p>ফ্রি ডেমো কুইজ ও ফ্রি এমসিকিউ ডেটাবেজ কনফিগারেশন ম্যানেজ করুন।</p>
+          </div>
+          <Link href="/admin/free-mcqs-dashboard" className="btn" style={{ backgroundColor: '#28a745', color: 'white' }}>
+            <i className="fa-solid fa-gear"></i> ফ্রি কুইজ ম্যানেজ
           </Link>
         </div>
       </div>
