@@ -4,10 +4,17 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 
+const DEFAULT_ADMIN_HEADER_BUTTONS = [
+  { text: 'ওয়েবসাইট ভিজিট', url: '/', icon: 'fa-solid fa-globe', color: 'success', targetBlank: true },
+  { text: 'হোম পেজ এডিটর', url: '/admin/home-dashboard', icon: 'fa-solid fa-sliders', color: 'primary' },
+  { text: 'কুইজ ম্যানেজমেন্ট', url: '/admin/quiz-dashboard', icon: 'fa-solid fa-file-circle-question', color: 'info' },
+  { text: 'ইউজার লিস্ট', url: '/admin/users', icon: 'fa-solid fa-users', color: 'warning' }
+];
+
 export default function AdminHeaderBar() {
   const pathname = usePathname();
   const router = useRouter();
-  const [headerButtons, setHeaderButtons] = useState([]);
+  const [headerButtons, setHeaderButtons] = useState(DEFAULT_ADMIN_HEADER_BUTTONS);
   const [user, setUser] = useState(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
 
