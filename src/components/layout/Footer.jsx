@@ -98,7 +98,7 @@ export default function Footer({ footerData: initialFooter, copyrightData: initi
   const c = copyrightData || DEFAULT_COPYRIGHT;
   const columns = f.columns || DEFAULT_FOOTER.columns;
   const hasLinks = c.links && c.links.length > 0;
-  const copyTextValue = c.text !== undefined ? c.text : '© " + new Date().getFullYear() + " TopMCQBD. All rights reserved.';
+  const copyTextValue = c.text !== undefined ? c.text : `© ${new Date().getFullYear()} TopMCQBD. All rights reserved.`;
 
   return (
     <footer id="global-footer">
