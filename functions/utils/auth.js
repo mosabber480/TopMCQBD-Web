@@ -1,7 +1,13 @@
-// Edge-Safe Auth & JWT Helper for Cloudflare Pages Functions
-// Pure Web Standards (No Node.js CJS dependencies)
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
+import { getPaidCollections } from './db.js';
+import { ObjectId } from 'mongodb';
 
 export const VALID_PLANS = ['1_month', '3_months', '6_months', '1_year', '2_years', '3_years'];
+
+export function getJwtSecret(env) {
+  return env?.JWT_SECRET || (typeof process !== 'undefined' && process.env?.JWT_SECRET) || 'topmcqbd_super_secret_jwt_key_2026';
+}
 
 export function addPlanDuration(baseDate, plan) {
   const d = new Date(baseDate);
@@ -14,19 +20,23 @@ export function addPlanDuration(baseDate, plan) {
   return d;
 }
 
+/**
+ * Generate a cryptographically signed JWT token
+ */
 export function generateToken(user, env) {
+  const secret = getJwtSecret(env);
   const payload = {
-    userId: user._id || user.id || 'usr_' + Date.now(),
+    userId: String(user._id || user.id || ''),
     role: user.role || 'customer',
-    subscription: user.subscription,
-    exp: Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60)
+    subscription: user.subscription || { plan: 'none', active: false }
   };
-  const header = { alg: 'HS256', typ: 'JWT' };
-  const encodedHeader = btoa(JSON.stringify(header)).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
-  const encodedPayload = btoa(JSON.stringify(payload)).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
-  return `${encodedHeader}.${encodedPayload}.edge_token_sig`;
+
+  return jwt.sign(payload, secret, { expiresIn: '7d' });
 }
 
+/**
+ * Cryptographically verify JWT token from Authorization or x-access-token header
+ */
 export function verifyTokenFromRequest(request, env) {
   try {
     const authHeader = request.headers.get('authorization') || request.headers.get('x-access-token');
@@ -35,15 +45,72 @@ export function verifyTokenFromRequest(request, env) {
     const token = authHeader.startsWith('Bearer ') ? authHeader.substring(7) : authHeader;
     if (!token) return null;
 
-    const parts = token.split('.');
-    if (parts.length < 2) return null;
-
-    const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
-    if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) {
-      return null;
-    }
-    return payload;
+    const secret = getJwtSecret(env);
+    const decoded = jwt.verify(token, secret);
+    return decoded;
   } catch (err) {
     return null;
   }
 }
+
+/**
+ * Authenticate request and fetch user from live MongoDB
+ */
+export async function authenticate(request, context) {
+  const payload = verifyTokenFromRequest(request, context?.env);
+  if (!payload || !payload.userId) {
+    return {
+      user: null,
+      errorResponse: { success: false, message: 'Access Denied: No valid token provided', status: 401 }
+    };
+  }
+
+  const { users } = await getPaidCollections(context);
+  if (!users) {
+    return {
+      user: { _id: payload.userId, role: payload.role || 'customer' },
+      errorResponse: null
+    };
+  }
+
+  let user = null;
+  try {
+    if (ObjectId.isValid(payload.userId)) {
+      user = await users.findOne({ _id: new ObjectId(payload.userId) });
+    }
+  } catch (e) {
+    // fallback string match
+  }
+
+  if (!user) {
+    user = await users.findOne({ _id: payload.userId });
+  }
+
+  if (!user) {
+    return {
+      user: null,
+      errorResponse: { success: false, message: 'User not found or account deleted', status: 404 }
+    };
+  }
+
+  return { user, errorResponse: null };
+}
+
+/**
+ * Authorize role requirements
+ */
+export async function authorize(request, context, allowedRoles = ['owner', 'admin']) {
+  const { user, errorResponse } = await authenticate(request, context);
+  if (errorResponse) return { user: null, errorResponse };
+
+  if (!allowedRoles.includes(user.role)) {
+    return {
+      user: null,
+      errorResponse: { success: false, message: 'Access Forbidden: Insufficient Permissions', status: 403 }
+    };
+  }
+
+  return { user, errorResponse: null };
+}
+
+export { bcrypt };

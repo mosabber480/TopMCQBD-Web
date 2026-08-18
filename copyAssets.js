@@ -50,8 +50,10 @@ function copyHtmlFilesRecursively(srcDir, targetDir, currentSubdir = '') {
 }
 
 async function syncMongoDbToCloudflare() {
+  let mongooseModule = null;
   try {
     const { connectDB } = await import('./src/lib/db.js');
+    mongooseModule = (await import('mongoose')).default;
     await connectDB();
 
     const LayoutConfig = (await import('./src/models/LayoutConfig.js')).default;
@@ -84,6 +86,14 @@ export const initialUsers = ${JSON.stringify(users || [], null, 2)};
     console.log('✅ Synchronized live MongoDB configurations to functions/data/liveConfigs.js');
   } catch (err) {
     console.warn('⚠️ Warning: Could not sync MongoDB to Cloudflare functions during build:', err.message);
+  } finally {
+    if (mongooseModule) {
+      try {
+        await mongooseModule.disconnect();
+      } catch (e) {
+        // ignore
+      }
+    }
   }
 }
 
@@ -115,5 +125,6 @@ for (const targetDir of outDirs) {
   }
 }
 
-console.log('✅ Synchronized Next.js production build assets to out/ and .open-next/assets/');
+console.log('✅ Synchronized Next.js production build assets to out/');
+process.exit(0);
 

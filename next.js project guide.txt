@@ -133,7 +133,14 @@
 │       ├── 📄 AdminSidebarConfig.js   # Admin Menu & Sidebar Schema
 │       └── 📄 PolicyConfig.js         # Privacy Policy & Terms Schema
 │
+├── 📁 functions/                      # Cloudflare Pages Serverless Edge Functions
+│   ├── 📁 api/                        # Edge Route Handlers ([[route]].js, db-check.js, etc.)
+│   ├── 📁 utils/                      # Edge Utilities (db.js with MongoClient, auth.js, brevo.js)
+│   └── 📁 data/                       # Fallback Snapshot Data (liveConfigs.js)
+│
+├── 📄 copyAssets.js                   # Build Asset & Snapshot Synchronizer Script
 ├── 📄 seedUsers.js                    # Database Initial Users Seeding Script
+├── 📄 wrangler.toml                   # Cloudflare Pages & nodejs_compat Config
 ├── 📄 .env / .dev.vars                # Environment Secret Variables
 ├── 📄 next.config.mjs                 # Next.js Framework Configuration
 ├── 📄 jsconfig.json                   # Path Aliases Config (@/*)
