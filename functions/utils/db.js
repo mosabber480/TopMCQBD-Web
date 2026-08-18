@@ -1,10 +1,8 @@
-import { MongoClient } from 'mongodb';
+// Edge-Safe Database & Config Utility for Cloudflare Pages Functions
+// Pure Web Standards (No Node.js CJS/BSON dependencies)
 
 const DEFAULT_PAID_URI = 'mongodb+srv://mosabber480_db_user:EScirLEzwgQVVNaB@mosabber.3ajdj0u.mongodb.net/TopMCQBD_DB?retryWrites=true&w=majority';
 const DEFAULT_FREE_URI = 'mongodb+srv://mosabber480_db_user:VVcrE9PeIIyVlcKU@topmcqbd.pixb7fx.mongodb.net/TopMCQBD_DB_Free?retryWrites=true&w=majority';
-
-let cachedPaidClient = null;
-let cachedFreeClient = null;
 
 export function parseClusterHost(uri) {
   try {
@@ -28,38 +26,4 @@ export function getDbConfig(context) {
     paidDbName: env.MONGODB_DB_NAME_PAID || 'TopMCQBD_DB',
     freeDbName: env.MONGODB_DB_NAME_FREE || 'TopMCQBD_DB_Free',
   };
-}
-
-export async function getMongoDb(context, type = 'paid') {
-  const config = getDbConfig(context);
-  const isPaid = type === 'paid';
-  const uri = isPaid ? config.paidUri : config.freeUri;
-  const dbName = isPaid ? config.paidDbName : config.freeDbName;
-
-  try {
-    if (isPaid && cachedPaidClient) {
-      return cachedPaidClient.db(dbName);
-    }
-    if (!isPaid && cachedFreeClient) {
-      return cachedFreeClient.db(dbName);
-    }
-
-    const client = new MongoClient(uri, {
-      maxPoolSize: 10,
-      serverSelectionTimeoutMS: 5000,
-    });
-
-    await client.connect();
-
-    if (isPaid) {
-      cachedPaidClient = client;
-      return cachedPaidClient.db(dbName);
-    } else {
-      cachedFreeClient = client;
-      return cachedFreeClient.db(dbName);
-    }
-  } catch (err) {
-    console.error(`MongoDB Edge Connection Error (${type}):`, err);
-    throw err;
-  }
 }
