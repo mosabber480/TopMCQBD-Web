@@ -1,12 +1,21 @@
-import jwt from 'jsonwebtoken';
+// Edge-Safe Cryptographic Auth & JWT Helper for Cloudflare Pages Functions
+// 100% Pure Web Standards (Zero Node.js CJS/BSON dependencies)
 import bcrypt from 'bcryptjs';
-import { getPaidCollections } from './db.js';
-import { ObjectId } from 'mongodb';
 
 export const VALID_PLANS = ['1_month', '3_months', '6_months', '1_year', '2_years', '3_years'];
 
 export function getJwtSecret(env) {
   return env?.JWT_SECRET || (typeof process !== 'undefined' && process.env?.JWT_SECRET) || 'topmcqbd_super_secret_jwt_key_2026';
+}
+
+function base64UrlEncode(str) {
+  return btoa(str).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+}
+
+function base64UrlDecode(str) {
+  let base64 = str.replace(/-/g, '+').replace(/_/g, '/');
+  while (base64.length % 4) base64 += '=';
+  return atob(base64);
 }
 
 export function addPlanDuration(baseDate, plan) {
@@ -21,23 +30,47 @@ export function addPlanDuration(baseDate, plan) {
 }
 
 /**
- * Generate a cryptographically signed JWT token
+ * Cryptographically sign JWT using Web Crypto API (HMAC SHA-256)
  */
-export function generateToken(user, env) {
+export async function generateToken(user, env) {
   const secret = getJwtSecret(env);
+  const header = { alg: 'HS256', typ: 'JWT' };
   const payload = {
-    userId: String(user._id || user.id || ''),
+    userId: String(user._id || user.id || 'usr_' + Date.now()),
     role: user.role || 'customer',
-    subscription: user.subscription || { plan: 'none', active: false }
+    subscription: user.subscription || { plan: 'none', active: false },
+    exp: Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60)
   };
 
-  return jwt.sign(payload, secret, { expiresIn: '7d' });
+  const encodedHeader = base64UrlEncode(JSON.stringify(header));
+  const encodedPayload = base64UrlEncode(JSON.stringify(payload));
+  const dataToSign = `${encodedHeader}.${encodedPayload}`;
+
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    'raw',
+    enc.encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+
+  const signatureBuffer = await crypto.subtle.sign(
+    'HMAC',
+    key,
+    enc.encode(dataToSign)
+  );
+
+  const signatureArray = Array.from(new Uint8Array(signatureBuffer));
+  const signatureBase64 = base64UrlEncode(String.fromCharCode.apply(null, signatureArray));
+
+  return `${dataToSign}.${signatureBase64}`;
 }
 
 /**
- * Cryptographically verify JWT token from Authorization or x-access-token header
+ * Cryptographically verify JWT using Web Crypto API (HMAC SHA-256)
  */
-export function verifyTokenFromRequest(request, env) {
+export async function verifyTokenFromRequest(request, env) {
   try {
     const authHeader = request.headers.get('authorization') || request.headers.get('x-access-token');
     if (!authHeader) return null;
@@ -45,72 +78,45 @@ export function verifyTokenFromRequest(request, env) {
     const token = authHeader.startsWith('Bearer ') ? authHeader.substring(7) : authHeader;
     if (!token) return null;
 
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+
+    const [headerB64, payloadB64, sigB64] = parts;
+    const dataToSign = `${headerB64}.${payloadB64}`;
+
     const secret = getJwtSecret(env);
-    const decoded = jwt.verify(token, secret);
-    return decoded;
+    const enc = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      'raw',
+      enc.encode(secret),
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['verify']
+    );
+
+    const binarySig = base64UrlDecode(sigB64);
+    const sigBytes = new Uint8Array(binarySig.length);
+    for (let i = 0; i < binarySig.length; i++) {
+      sigBytes[i] = binarySig.charCodeAt(i);
+    }
+
+    const isValid = await crypto.subtle.verify(
+      'HMAC',
+      key,
+      sigBytes,
+      enc.encode(dataToSign)
+    );
+
+    if (!isValid) return null;
+
+    const payload = JSON.parse(base64UrlDecode(payloadB64));
+    if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) {
+      return null;
+    }
+    return payload;
   } catch (err) {
     return null;
   }
-}
-
-/**
- * Authenticate request and fetch user from live MongoDB
- */
-export async function authenticate(request, context) {
-  const payload = verifyTokenFromRequest(request, context?.env);
-  if (!payload || !payload.userId) {
-    return {
-      user: null,
-      errorResponse: { success: false, message: 'Access Denied: No valid token provided', status: 401 }
-    };
-  }
-
-  const { users } = await getPaidCollections(context);
-  if (!users) {
-    return {
-      user: { _id: payload.userId, role: payload.role || 'customer' },
-      errorResponse: null
-    };
-  }
-
-  let user = null;
-  try {
-    if (ObjectId.isValid(payload.userId)) {
-      user = await users.findOne({ _id: new ObjectId(payload.userId) });
-    }
-  } catch (e) {
-    // fallback string match
-  }
-
-  if (!user) {
-    user = await users.findOne({ _id: payload.userId });
-  }
-
-  if (!user) {
-    return {
-      user: null,
-      errorResponse: { success: false, message: 'User not found or account deleted', status: 404 }
-    };
-  }
-
-  return { user, errorResponse: null };
-}
-
-/**
- * Authorize role requirements
- */
-export async function authorize(request, context, allowedRoles = ['owner', 'admin']) {
-  const { user, errorResponse } = await authenticate(request, context);
-  if (errorResponse) return { user: null, errorResponse };
-
-  if (!allowedRoles.includes(user.role)) {
-    return {
-      user: null,
-      errorResponse: { success: false, message: 'Access Forbidden: Insufficient Permissions', status: 403 }
-    };
-  }
-
-  return { user, errorResponse: null };
 }
 
 export { bcrypt };
