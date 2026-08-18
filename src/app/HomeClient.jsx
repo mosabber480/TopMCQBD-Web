@@ -4,8 +4,44 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { formatURL } from '@/lib/config';
 
+const DEFAULT_HOME_CONFIG = {
+  sliders: [
+    {
+      title: "বিসিএস ও ব্যাংক জব প্রস্তুতির সেরা মাধ্যম",
+      subtitle: "হাজারো সঠিক প্রশ্নের ব্যাখ্যাসহ নিজেকে যাচাই করুন এবং দ্রুততম সময়ে আপনার চাকরির প্রস্তুতি সম্পন্ন করুন।",
+      bgImage: "images/slider-01.jpg",
+      bgOpacity: 0.5,
+      btn1Text: "🚀 কুইজ শুরু করুন",
+      btn1Link: "/all-mcq",
+      btn2Text: "ফ্রি ডেমো দেখুন",
+      btn2Link: "#demo"
+    }
+  ],
+  demoSectionInfo: {
+    title: "ফ্রি ডেমো কুইজ",
+    subtitle: "কোনো রেজিস্ট্রেশন ছাড়াই এখনই নিচের কুইজগুলো প্র্যাকটিস করে দেখুন"
+  },
+  demoQuizzes: [
+    {
+      title: "বাংলা ভাষা ও সাহিত্য",
+      badgeText: "ফ্রি টেস্ট",
+      desc: "সন্ধি, সমাস ও গুরুত্বপূর্ণ সাহিত্যিকদের বিগত বছরের প্রশ্নাবলি।",
+      link: "/free-mcqs"
+    }
+  ],
+  packages: [],
+  missionSectionInfo: {
+    sectionTitle: "আমাদের মিশন ও লক্ষ্য",
+    sectionSubtitle: "শিক্ষার্থীদের সফলতা ও সঠিক প্রস্তুতির পথ সুগম করাই আমাদের উদ্দেশ্য",
+    missionTitle: "আমাদের মিশন",
+    missionDesc: "বাংলাদেশের যেকোনো প্রান্তের শিক্ষার্থীদের কাছে মানসম্মত ও তথ্যসমৃদ্ধ প্রস্তুতিমূলক কুইজ পৌঁছে দেওয়া।",
+    goalTitle: "আমাদের লক্ষ্য",
+    goalDesc: "একটি আধুনিক, সহজ ও কার্যকর লার্নিং প্ল্যাটফর্ম হিসেবে প্রতিটি পরীক্ষার্থীর প্রথম পছন্দ হয়ে ওঠা।"
+  }
+};
+
 export default function HomeClient({ initialHomeData }) {
-  const [homeData, setHomeData] = useState(initialHomeData || null);
+  const [homeData, setHomeData] = useState(initialHomeData || DEFAULT_HOME_CONFIG);
   const [slideIndex, setSlideIndex] = useState(0);
 
   useEffect(() => {
@@ -16,7 +52,7 @@ export default function HomeClient({ initialHomeData }) {
       fetch('/api/home-config')
         .then(res => res.json())
         .then(data => {
-          if (data && !data.message) {
+          if (data && (data.sliders?.length > 0 || data.seoTitle)) {
             setHomeData(data);
           }
         })
