@@ -4,7 +4,9 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { formatURL } from '@/lib/config';
 
-const DEFAULT_HOME_CONFIG = {
+import homeConfigData from '@/data/home-config.json';
+
+const DEFAULT_HOME_CONFIG = homeConfigData || {
   sliders: [
     {
       title: "বিসিএস ও ব্যাংক জব প্রস্তুতির সেরা মাধ্যম",
@@ -48,19 +50,13 @@ export default function HomeClient({ initialHomeData }) {
     if (initialHomeData) {
       setHomeData(initialHomeData);
     }
-    const fetchConfig = () => {
-      fetch('/api/home-config')
-        .then(res => res.json())
-        .then(data => {
-          if (data && (data.sliders?.length > 0 || data.seoTitle)) {
-            setHomeData(data);
-          }
-        })
-        .catch(() => {});
+    const handleUpdate = (e) => {
+      if (e && e.detail) {
+        setHomeData(e.detail);
+      }
     };
-    fetchConfig();
-    window.addEventListener('home-config-updated', fetchConfig);
-    return () => window.removeEventListener('home-config-updated', fetchConfig);
+    window.addEventListener('home-config-updated', handleUpdate);
+    return () => window.removeEventListener('home-config-updated', handleUpdate);
   }, [initialHomeData]);
 
   const sliders = homeData?.sliders || [];
@@ -80,7 +76,7 @@ export default function HomeClient({ initialHomeData }) {
 
   return (
     <>
-      <style jsx>{`
+      <style jsx global>{`
         .slider-section {
           position: relative;
           max-width: 1300px;
@@ -144,35 +140,39 @@ export default function HomeClient({ initialHomeData }) {
           color: white;
           text-decoration: none;
           padding: 12px 24px;
-          border-radius: 5px;
+          border-radius: 6px;
           font-weight: bold;
           font-size: 15px;
           display: inline-flex;
           align-items: center;
           gap: 8px;
-          transition: background-color 0.2s ease;
+          transition: all 0.2s ease;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.15);
         }
         .btn-main:hover {
           background-color: #219653;
+          transform: translateY(-1px);
         }
         .btn-secondary {
-          background-color: rgba(255, 255, 255, 0.2);
-          color: white;
+          background-color: #212e3c;
+          color: #ffffff;
           text-decoration: none;
           padding: 12px 24px;
-          border-radius: 5px;
+          border-radius: 6px;
           font-weight: bold;
           font-size: 15px;
-          border: 1px solid white;
+          border: 2px solid #ffffff;
           display: inline-flex;
           align-items: center;
           gap: 8px;
-          backdrop-filter: blur(4px);
           transition: all 0.2s ease;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
         .btn-secondary:hover {
-          background-color: white;
-          color: var(--dark, #2c3e50);
+          background-color: #ffffff;
+          color: #212e3c;
+          border-color: #ffffff;
+          transform: translateY(-1px);
         }
         .slider-dots {
           position: absolute;

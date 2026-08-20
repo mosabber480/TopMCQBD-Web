@@ -1,23 +1,17 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import policyConfigData from '@/data/policy-config.json';
 
 export default function PrivacyPolicyPage() {
-  const [content, setContent] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [content, setContent] = useState(policyConfigData?.content || '');
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetch('/api/policy/get')
-      .then(res => res.json())
-      .then(data => {
-        setContent(data.content || '<p style="text-align: center;">এখনও কোনো পলিসি যুক্ত করা হয়নি।</p>');
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('Error fetching policy:', err);
-        setContent('<p style="text-align: center; color: var(--danger);">পলিসি লোড করতে সমস্যা হয়েছে।</p>');
-        setLoading(false);
-      });
+    if (policyConfigData?.content) {
+      setContent(policyConfigData.content);
+      setLoading(false);
+    }
   }, []);
 
   return (

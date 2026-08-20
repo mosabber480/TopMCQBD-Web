@@ -1,59 +1,39 @@
 import { NextResponse } from 'next/server';
 import { authorize } from '@/lib/auth';
-import { connectDB } from '@/lib/db';
-import LayoutConfig from '@/models/LayoutConfig';
+import fs from 'fs';
+import path from 'path';
+import layoutConfigData from '@/data/layout-config.json';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-export async function GET() {
+const getJsonPath = () => path.resolve(process.cwd(), 'src', 'data', 'layout-config.json');
+
+function getLayoutConfig() {
   try {
-    await connectDB();
-    let config = await LayoutConfig.findOne();
-    if (!config) {
-      config = {
-        announcement: {
-          text: "",
-          link: ""
-        },
-        header: {
-          siteTitle: "",
-          logoUrl: "",
-          seoTitle: "",
-          faviconUrl: "",
-          btnText: "",
-          btnLink: "",
-          menus: [],
-          megaMenus: []
-        },
-        footer: {
-          columns: []
-        },
-        copyright: {
-          text: "",
-          links: []
-        }
-      };
+    const filePath = getJsonPath();
+    if (fs.existsSync(filePath)) {
+      const content = fs.readFileSync(filePath, 'utf8');
+      return JSON.parse(content);
     }
-    return NextResponse.json(config);
   } catch (err) {
-    console.error('GET LAYOUT CONFIG ERROR:', err);
-    return NextResponse.json({
-      announcement: { text: '', link: '' },
-      header: {
-        siteTitle: 'TopMCQ',
-        logoUrl: '',
-        seoTitle: '',
-        faviconUrl: '',
-        btnText: 'যোগাযোগ',
-        btnLink: '/contact',
-        menus: [],
-        megaMenus: []
-      },
-      footer: { columns: [] },
-      copyright: { text: '© 2026 TopMCQBD. All rights reserved.', links: [] }
-    });
+    console.error('Error reading layout-config.json:', err);
   }
+  return layoutConfigData;
+}
+
+function saveLayoutConfig(data) {
+  try {
+    const filePath = getJsonPath();
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8');
+  } catch (err) {
+    console.error('Error writing layout-config.json:', err);
+  }
+}
+
+export async function GET() {
+  const config = getLayoutConfig();
+  return NextResponse.json(config);
 }
 
 export async function POST(request) {
@@ -61,22 +41,38 @@ export async function POST(request) {
     const { user: currentAdmin, errorResponse } = await authorize(request, ['owner', 'admin']);
     if (errorResponse) return errorResponse;
 
-    await connectDB();
     const { announcement, header, footer, copyright } = await request.json();
+    const currentConfig = getLayoutConfig();
 
-    let config = await LayoutConfig.findOne();
-    if (config) {
-      config.announcement = announcement;
-      config.header = header;
-      config.footer = footer;
-      config.copyright = copyright;
-      await config.save();
-    } else {
-      config = new LayoutConfig({ announcement, header, footer, copyright });
-      await config.save();
+    const newConfig = {
+      ...currentConfig,
+      announcement: announcement !== undefined ? announcement : currentConfig.announcement,
+      header: header !== undefined ? header : currentConfig.header,
+      footer: footer !== undefined ? footer : currentConfig.footer,
+      copyright: copyright !== undefined ? copyright : currentConfig.copyright
+    };
+
+    saveLayoutConfig(newConfig);
+
+    try {
+      const { connectDB } = await import('@/lib/db');
+      const LayoutConfig = (await import('@/models/LayoutConfig')).default;
+      await connectDB();
+      let dbConfig = await LayoutConfig.findOne();
+      if (dbConfig) {
+        dbConfig.announcement = newConfig.announcement;
+        dbConfig.header = newConfig.header;
+        dbConfig.footer = newConfig.footer;
+        dbConfig.copyright = newConfig.copyright;
+        await dbConfig.save();
+      } else {
+        await LayoutConfig.create(newConfig);
+      }
+    } catch (dbErr) {
+      // Ignore DB sync error
     }
 
-    return NextResponse.json({ success: true, message: 'Layout configuration saved successfully!', config });
+    return NextResponse.json({ success: true, message: 'Layout configuration saved successfully!', config: newConfig });
   } catch (err) {
     console.error('SAVE LAYOUT CONFIG ERROR:', err);
     return NextResponse.json({ success: false, message: 'Save failed', error: err.message }, { status: 500 });

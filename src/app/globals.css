@@ -1211,3 +1211,46 @@ body.sidebar-collapsed .admin-main-content {
   color: #ffffff !important;
   text-decoration: none !important;
 }
+
+/* Home Slider Buttons */
+.slider-section .btn-main {
+  background-color: #22c55e !important;
+  color: #ffffff !important;
+  text-decoration: none !important;
+  padding: 12px 24px !important;
+  border-radius: 6px !important;
+  font-weight: 700 !important;
+  font-size: 15px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  border: none !important;
+  transition: all 0.2s ease !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
+}
+.slider-section .btn-main:hover {
+  background-color: #16a34a !important;
+  transform: translateY(-1px) !important;
+}
+
+.slider-section .btn-secondary {
+  background-color: #212e3c !important;
+  color: #ffffff !important;
+  text-decoration: none !important;
+  padding: 12px 24px !important;
+  border-radius: 6px !important;
+  font-weight: 700 !important;
+  font-size: 15px !important;
+  border: 2px solid #ffffff !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  transition: all 0.2s ease !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
+}
+.slider-section .btn-secondary:hover {
+  background-color: #ffffff !important;
+  color: #212e3c !important;
+  border-color: #ffffff !important;
+  transform: translateY(-1px) !important;
+}

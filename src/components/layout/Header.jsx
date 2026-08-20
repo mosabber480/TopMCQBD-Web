@@ -5,7 +5,9 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { formatURL, mapLegacyUrl } from '@/lib/config';
 
-const DEFAULT_HEADER = {
+import layoutConfigData from '@/data/layout-config.json';
+
+const DEFAULT_HEADER = layoutConfigData?.header || {
   siteTitle: 'TopMCQBD',
   logoUrl: '/images/TopMCQ.png',
   btnText: 'সহায়তা',
@@ -31,44 +33,14 @@ export default function Header({ headerData: initialHeader }) {
   useEffect(() => {
     if (initialHeader) {
       setHeaderData(initialHeader);
-    } else {
-      try {
-        const cached = localStorage.getItem('layout_config_data');
-        if (cached) {
-          const parsed = JSON.parse(cached);
-          if (parsed && parsed.header) {
-            setHeaderData(parsed.header);
-          }
-        }
-      } catch (e) {}
     }
-
-    const fetchConfig = () => {
-      fetch('/api/layout-config?t=' + Date.now(), { cache: 'no-store' })
-        .then(r => r.json())
-        .then(data => {
-          if (data && data.header) {
-            setHeaderData(data.header);
-            try {
-              const prev = JSON.parse(localStorage.getItem('layout_config_data') || '{}');
-              localStorage.setItem('layout_config_data', JSON.stringify({ ...prev, ...data }));
-            } catch (e) {}
-
-            // Dynamic Favicon Update
-            if (data.header.faviconUrl) {
-              let favicon = document.querySelector("link[rel*='icon']");
-              if (favicon) {
-                favicon.href = formatURL(data.header.faviconUrl);
-              }
-            }
-          }
-        })
-        .catch(() => {});
+    const handleUpdate = (e) => {
+      if (e && e.detail && e.detail.header) {
+        setHeaderData(e.detail.header);
+      }
     };
-
-    fetchConfig();
-    window.addEventListener('layout-updated', fetchConfig);
-    return () => window.removeEventListener('layout-updated', fetchConfig);
+    window.addEventListener('layout-updated', handleUpdate);
+    return () => window.removeEventListener('layout-updated', handleUpdate);
   }, [initialHeader]);
 
   // Check login state

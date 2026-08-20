@@ -1,41 +1,39 @@
 import { NextResponse } from 'next/server';
 import { authorize } from '@/lib/auth';
-import { connectDB } from '@/lib/db';
-import HomeConfig from '@/models/HomeConfig';
+import fs from 'fs';
+import path from 'path';
+import homeConfigData from '@/data/home-config.json';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-export async function GET() {
+const getJsonPath = () => path.resolve(process.cwd(), 'src', 'data', 'home-config.json');
+
+function getHomeConfig() {
   try {
-    await connectDB();
-    let config = await HomeConfig.findOne();
-    if (!config) {
-      config = {
-        seoTitle: '',
-        seoDescription: '',
-        sliders: [],
-        demoQuizzes: [],
-        packages: [],
-        demoSectionInfo: { title: '', subtitle: '' },
-        packageSectionInfo: { title: '', subtitle: '' },
-        missionSectionInfo: null
-      };
+    const filePath = getJsonPath();
+    if (fs.existsSync(filePath)) {
+      const content = fs.readFileSync(filePath, 'utf8');
+      return JSON.parse(content);
     }
-    return NextResponse.json(config);
   } catch (err) {
-    console.error('GET HOME CONFIG ERROR:', err);
-    return NextResponse.json({
-      seoTitle: '',
-      seoDescription: '',
-      sliders: [],
-      demoQuizzes: [],
-      packages: [],
-      demoSectionInfo: { title: '', subtitle: '' },
-      packageSectionInfo: { title: '', subtitle: '' },
-      missionSectionInfo: null
-    });
+    console.error('Error reading home-config.json:', err);
   }
+  return homeConfigData;
+}
+
+function saveHomeConfig(data) {
+  try {
+    const filePath = getJsonPath();
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8');
+  } catch (err) {
+    console.error('Error writing home-config.json:', err);
+  }
+}
+
+export async function GET() {
+  const config = getHomeConfig();
+  return NextResponse.json(config);
 }
 
 export async function POST(request) {
@@ -43,51 +41,42 @@ export async function POST(request) {
     const { user: currentAdmin, errorResponse } = await authorize(request, ['owner', 'admin']);
     if (errorResponse) return errorResponse;
 
-    await connectDB();
     const body = await request.json();
+    const currentConfig = getHomeConfig();
 
-    let config = await HomeConfig.findOne();
-    if (config) {
-      config.seoTitle = body.seoTitle || '';
-      config.seoDescription = body.seoDescription || '';
-      config.sliders = body.sliders || [];
-      config.demoQuizzes = body.demoQuizzes || [];
-      config.packages = body.packages || [];
-      config.demoSectionInfo = body.demoSectionInfo || { title: '', subtitle: '' };
-      config.packageSectionInfo = body.packageSectionInfo || { title: '', subtitle: '' };
-      config.missionSectionInfo = body.missionSectionInfo || {
-        sectionTitle: '',
-        sectionSubtitle: '',
-        missionTitle: '',
-        missionDesc: '',
-        goalTitle: '',
-        goalDesc: ''
-      };
-      await config.save();
-    } else {
-      config = await HomeConfig.create({
-        seoTitle: body.seoTitle || '',
-        seoDescription: body.seoDescription || '',
-        sliders: body.sliders || [],
-        demoQuizzes: body.demoQuizzes || [],
-        packages: body.packages || [],
-        demoSectionInfo: body.demoSectionInfo || { title: '', subtitle: '' },
-        packageSectionInfo: body.packageSectionInfo || { title: '', subtitle: '' },
-        missionSectionInfo: body.missionSectionInfo || {
-          sectionTitle: '',
-          sectionSubtitle: '',
-          missionTitle: '',
-          missionDesc: '',
-          goalTitle: '',
-          goalDesc: ''
-        }
-      });
+    const newConfig = {
+      ...currentConfig,
+      ...body
+    };
+
+    saveHomeConfig(newConfig);
+
+    try {
+      const { connectDB } = await import('@/lib/db');
+      const HomeConfig = (await import('@/models/HomeConfig')).default;
+      await connectDB();
+      let dbConfig = await HomeConfig.findOne();
+      if (dbConfig) {
+        dbConfig.seoTitle = newConfig.seoTitle || '';
+        dbConfig.seoDescription = newConfig.seoDescription || '';
+        dbConfig.sliders = newConfig.sliders || [];
+        dbConfig.demoQuizzes = newConfig.demoQuizzes || [];
+        dbConfig.packages = newConfig.packages || [];
+        dbConfig.demoSectionInfo = newConfig.demoSectionInfo || { title: '', subtitle: '' };
+        dbConfig.packageSectionInfo = newConfig.packageSectionInfo || { title: '', subtitle: '' };
+        dbConfig.missionSectionInfo = newConfig.missionSectionInfo || null;
+        await dbConfig.save();
+      } else {
+        await HomeConfig.create(newConfig);
+      }
+    } catch (dbErr) {
+      // Ignore DB sync error
     }
 
     return NextResponse.json({
       success: true,
       message: 'Home config saved successfully!',
-      config
+      config: newConfig
     });
   } catch (err) {
     console.error('SAVE HOME CONFIG ERROR:', err);

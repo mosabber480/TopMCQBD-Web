@@ -1,8 +1,23 @@
 'use client';
 
 import React from 'react';
+import aboutData from '@/data/about-data.json';
 
 export default function AboutUsPage() {
+  const data = aboutData || {
+    title: "আমাদের সম্পর্কে (About Us)",
+    subtitle: "TopMCQBD - আপনার অনলাইন প্রস্তুতিকে সহজ ও নিখুঁত করতে আমরা সবসময় পাশে আছি",
+    whatIsTitle: "TopMCQBD কী?",
+    whatIsDesc: "TopMCQBD একটি আধুনিক, সহজ এবং বিষয়ভিত্তিক অনলাইন কুইজ ও প্রস্তুতিমূলক প্ল্যাটফর্ম। বিসিএস, ব্যাংক, প্রাথমিক শিক্ষক নিয়োগ, বিশ্ববিদ্যালয় ভর্তি পরীক্ষাসহ যেকোনো প্রতিযোগিতামূলক পরীক্ষার জন্য নিজেকে সঠিকভাবে প্রস্তুত করতে TopMCQBD সাহায্য করে।",
+    whyBestTitle: "কেন TopMCQBD সেরা?",
+    features: [
+      "টপিকভিত্তিক মডেল টেস্ট এবং লাইভ টাইমার রিয়েল এক্সাম এক্সপেরিয়েন্স দেয়।",
+      "প্রতিটি প্রশ্নের সাথে রয়েছে নির্ভুল ও বিস্তৃত ব্যাখ্যামূলক সমাধান।",
+      "তাত্ক্ষণিক রেজাল্ট এবং নিজের অবস্থান যাচাই করার সুবিধা।",
+      "নতুন নতুন কুইজ ও প্রশ্ন নিয়মিত আপডেট করা হয়।"
+    ]
+  };
+
   return (
     <>
       <style jsx>{`
@@ -25,28 +40,26 @@ export default function AboutUsPage() {
       `}</style>
 
       <div className="page-banner">
-        <h1>আমাদের সম্পর্কে (About Us)</h1>
-        <p>TopMCQBD - আপনার অনলাইন প্রস্তুতিকে সহজ ও নিখুঁত করতে আমরা সবসময় পাশে আছি</p>
+        <h1>{data.title}</h1>
+        <p>{data.subtitle}</p>
       </div>
 
       <div className="content-container">
         <div className="card-box">
-          <h2><i className="fa-solid fa-graduation-cap" style={{ color: 'var(--primary)' }}></i> TopMCQBD কী?</h2>
-          <p>
-            TopMCQBD একটি আধুনিক, সহজ এবং বিষয়ভিত্তিক অনলাইন কুইজ ও প্রস্তুতিমূলক প্ল্যাটফর্ম। বিসিএস, ব্যাংক, প্রাথমিক শিক্ষক নিয়োগ, বিশ্ববিদ্যালয় ভর্তি পরীক্ষাসহ যেকোনো প্রতিযোগিতামূলক পরীক্ষার জন্য নিজেকে সঠিকভাবে প্রস্তুত করতে TopMCQBD সাহায্য করে।
-          </p>
+          <h2><i className="fa-solid fa-graduation-cap" style={{ color: 'var(--primary)' }}></i> {data.whatIsTitle}</h2>
+          <p>{data.whatIsDesc}</p>
         </div>
 
         <div className="card-box">
-          <h2><i className="fa-solid fa-star" style={{ color: 'var(--warning)' }}></i> কেন TopMCQBD সেরা?</h2>
+          <h2><i className="fa-solid fa-star" style={{ color: 'var(--warning)' }}></i> {data.whyBestTitle}</h2>
           <ul className="feature-list">
-            <li><i className="fa-solid fa-circle-check"></i> টপিকভিত্তিক মডেল টেস্ট এবং লাইভ টাইমার রিয়েল এক্সাম এক্সপেরিয়েন্স দেয়।</li>
-            <li><i className="fa-solid fa-circle-check"></i> প্রতিটি প্রশ্নের সাথে রয়েছে নির্ভুল ও বিস্তৃত ব্যাখ্যামূলক সমাধান।</li>
-            <li><i className="fa-solid fa-circle-check"></i> তাত্ক্ষণিক রেজাল্ট এবং নিজের অবস্থান যাচাই করার সুবিধা।</li>
-            <li><i className="fa-solid fa-circle-check"></i> নতুন নতুন কুইজ ও প্রশ্ন নিয়মিত আপডেট করা হয়।</li>
+            {(data.features || []).map((feat, idx) => (
+              <li key={idx}><i className="fa-solid fa-circle-check"></i> {feat}</li>
+            ))}
           </ul>
         </div>
       </div>
     </>
   );
 }
+

@@ -5,7 +5,9 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { formatURL } from '@/lib/config';
 
-const DEFAULT_ANNOUNCEMENT = {
+import layoutConfigData from '@/data/layout-config.json';
+
+const DEFAULT_ANNOUNCEMENT = layoutConfigData?.announcement || {
   text: "বিশেষ বিজ্ঞপ্তি: সার্ভার থেকে প্রথমবার কুইজের তথ্য লোড হতে ৩০ সেকেন্ড পর্যন্ত সময় লাগতে পারে। অনুগ্রহ করে ধৈর্য ধরুন!",
   link: ""
 };
@@ -17,24 +19,14 @@ export default function AnnouncementBar({ announcement: initialAnnouncement }) {
   useEffect(() => {
     if (initialAnnouncement) setAnnouncement(initialAnnouncement);
 
-    const fetchConfig = () => {
-      fetch('/api/layout-config?t=' + Date.now(), { cache: 'no-store' })
-        .then(r => r.json())
-        .then(data => {
-          if (data && data.announcement) {
-            setAnnouncement(data.announcement);
-            try {
-              const prev = JSON.parse(localStorage.getItem('layout_config_data') || '{}');
-              localStorage.setItem('layout_config_data', JSON.stringify({ ...prev, ...data }));
-            } catch (e) {}
-          }
-        })
-        .catch(() => {});
+    const handleUpdate = (e) => {
+      if (e && e.detail && e.detail.announcement) {
+        setAnnouncement(e.detail.announcement);
+      }
     };
 
-    fetchConfig();
-    window.addEventListener('layout-updated', fetchConfig);
-    return () => window.removeEventListener('layout-updated', fetchConfig);
+    window.addEventListener('layout-updated', handleUpdate);
+    return () => window.removeEventListener('layout-updated', handleUpdate);
   }, [initialAnnouncement]);
 
   // Hide Announcement Bar on all Admin and Diagnostic routes

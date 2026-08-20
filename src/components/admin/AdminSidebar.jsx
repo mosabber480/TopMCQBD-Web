@@ -6,19 +6,28 @@ import { usePathname, useRouter } from 'next/navigation';
 import AdminLogoutModal from './AdminLogoutModal';
 import { formatURL } from '@/lib/config';
 
-const defaultMenuItems = [
-  { href: '/admin/dashboard', icon: 'fa-solid fa-gauge-high', label: 'ড্যাশবোর্ড', subMenus: [] },
-  { href: '/admin/header-dashboard', icon: 'fa-solid fa-window-restore', label: 'হেডার কন্ট্রোল', subMenus: [] },
-  { href: '/admin/footer-dashboard', icon: 'fa-solid fa-table-columns', label: 'ফুটার কন্ট্রোল', subMenus: [] },
-  { href: '/admin/home-dashboard', icon: 'fa-solid fa-sliders', label: 'হোম পেজ কন্ট্রোল', subMenus: [] },
-  { href: '/admin/about-dashboard', icon: 'fa-solid fa-address-card', label: 'আমাদের সম্পর্কে', subMenus: [] },
-  { href: '/admin/questions-dashboard', icon: 'fa-solid fa-file-circle-question', label: 'প্রশ্ন ব্যাংক ও কুইজ', subMenus: [] },
-  { href: '/admin/packages-dashboard', icon: 'fa-solid fa-box-open', label: 'প্যাকেজসমূহ পেজ', subMenus: [] },
-  { href: '/admin/users', icon: 'fa-solid fa-users-gear', label: 'ইউজার ও সাবস্ক্রিপশন', subMenus: [] },
-  { href: '/admin/admin-menu-dashboard', icon: 'fa-solid fa-list-check', label: 'সাইডবার মেনু কন্ট্রোল', subMenus: [] },
-  { href: '/admin/policy-dashboard', icon: 'fa-solid fa-file-invoice-dollar', label: 'রিফান্ড ও পলিসি', subMenus: [] },
-  { href: '/admin/free-mcqs-dashboard', icon: 'fa-solid fa-gift', label: 'ফ্রি এমসিকিউ কন্ট্রোল', subMenus: [] }
-];
+import sidebarConfigData from '@/data/sidebar-config.json';
+
+const defaultMenuItems = (sidebarConfigData?.menus && sidebarConfigData.menus.length > 0)
+  ? sidebarConfigData.menus.map(item => ({
+      href: item.url,
+      icon: item.icon || 'fa-solid fa-circle',
+      label: item.title,
+      subMenus: item.subMenus || []
+    }))
+  : [
+      { href: '/admin/dashboard', icon: 'fa-solid fa-gauge-high', label: 'ড্যাশবোর্ড', subMenus: [] },
+      { href: '/admin/header-dashboard', icon: 'fa-solid fa-window-restore', label: 'হেডার কন্ট্রোল', subMenus: [] },
+      { href: '/admin/footer-dashboard', icon: 'fa-solid fa-table-columns', label: 'ফুটার কন্ট্রোল', subMenus: [] },
+      { href: '/admin/home-dashboard', icon: 'fa-solid fa-sliders', label: 'হোম পেজ কন্ট্রোল', subMenus: [] },
+      { href: '/admin/about-dashboard', icon: 'fa-solid fa-address-card', label: 'আমাদের সম্পর্কে', subMenus: [] },
+      { href: '/admin/questions-dashboard', icon: 'fa-solid fa-file-circle-question', label: 'প্রশ্ন ব্যাংক ও কুইজ', subMenus: [] },
+      { href: '/admin/packages-dashboard', icon: 'fa-solid fa-box-open', label: 'প্যাকেজসমূহ পেজ', subMenus: [] },
+      { href: '/admin/users', icon: 'fa-solid fa-users-gear', label: 'ইউজার ও সাবস্ক্রিপশন', subMenus: [] },
+      { href: '/admin/admin-menu-dashboard', icon: 'fa-solid fa-list-check', label: 'সাইডবার মেনু কন্ট্রোল', subMenus: [] },
+      { href: '/admin/policy-dashboard', icon: 'fa-solid fa-file-invoice-dollar', label: 'রিফান্ড ও পলিসি', subMenus: [] },
+      { href: '/admin/free-mcqs-dashboard', icon: 'fa-solid fa-gift', label: 'ফ্রি এমসিকিউ কন্ট্রোল', subMenus: [] }
+    ];
 
 export default function AdminSidebar() {
   const pathname = usePathname();
@@ -56,22 +65,6 @@ export default function AdminSidebar() {
     };
 
     window.addEventListener('sidebar-toggle', handleSync);
-
-    // Fetch dynamic sidebar config
-    fetch('/api/sidebar-config')
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.menus && data.menus.length > 0) {
-          const items = data.menus.map(item => ({
-            href: item.url,
-            icon: item.icon || 'fa-solid fa-circle',
-            label: item.title,
-            subMenus: item.subMenus || []
-          }));
-          setMenuItems(items);
-        }
-      })
-      .catch(() => {});
 
     return () => window.removeEventListener('sidebar-toggle', handleSync);
   }, []);
