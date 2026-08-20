@@ -2,13 +2,16 @@ import { NextResponse } from 'next/server';
 import { MongoClient } from 'mongodb';
 import dns from 'dns';
 
-try {
-  dns.setServers(['8.8.8.8', '1.1.1.1', '8.8.4.4']);
-} catch (e) {}
+const DIRECT_PAID_URI = 'mongodb://mosabber480_db_user:EScirLEzwgQVVNaB@ac-472re4l-shard-00-00.3ajdj0u.mongodb.net:27017,ac-472re4l-shard-00-01.3ajdj0u.mongodb.net:27017,ac-472re4l-shard-00-02.3ajdj0u.mongodb.net:27017/TopMCQBD_DB?ssl=true&replicaSet=atlas-wzdf1e-shard-0&authSource=admin';
+const DIRECT_FREE_URI = 'mongodb://mosabber480_db_user:VVcrE9PeIIyVlcKU@ac-rw27hdk-shard-00-00.pixb7fx.mongodb.net:27017,ac-rw27hdk-shard-00-01.pixb7fx.mongodb.net:27017,ac-rw27hdk-shard-00-02.pixb7fx.mongodb.net:27017/TopMCQBD_DB_Free?ssl=true&replicaSet=atlas-13msb7-shard-0&authSource=admin';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
+  try {
+    dns.setServers(['8.8.8.8', '1.1.1.1', '8.8.4.4']);
+  } catch (e) {}
+
   const MONGODB_URI_PAID = process.env.MONGODB_URI_PAID || 'mongodb+srv://mosabber480_db_user:EScirLEzwgQVVNaB@mosabber.3ajdj0u.mongodb.net/TopMCQBD_DB?retryWrites=true&w=majority';
   const MONGODB_URI_FREE = process.env.MONGODB_URI_FREE || 'mongodb+srv://mosabber480_db_user:VVcrE9PeIIyVlcKU@topmcqbd.pixb7fx.mongodb.net/TopMCQBD_DB_Free?retryWrites=true&w=majority';
   const MONGODB_DB_NAME_PAID = process.env.MONGODB_DB_NAME_PAID || 'TopMCQBD_DB';
@@ -35,23 +38,60 @@ export async function GET() {
     }
   };
 
+  // Helper to attempt connection
+  const tryConnect = async (uri, fallbackUri, dbName) => {
+    let client;
+    const start = Date.now();
+    try {
+      client = new MongoClient(uri, {
+        connectTimeoutMS: 5000,
+        serverSelectionTimeoutMS: 5000,
+      });
+      await client.connect();
+      const db = client.db(dbName);
+      await db.command({ ping: 1 });
+      const collections = await db.listCollections().toArray();
+      return {
+        connected: true,
+        latencyMs: Date.now() - start,
+        collections: collections.map(c => c.name),
+        client
+      };
+    } catch (err) {
+      if (client) { try { await client.close(); } catch(e){} }
+      if (fallbackUri) {
+        try {
+          const fallbackClient = new MongoClient(fallbackUri, {
+            connectTimeoutMS: 5000,
+            serverSelectionTimeoutMS: 5000,
+          });
+          await fallbackClient.connect();
+          const db = fallbackClient.db(dbName);
+          await db.command({ ping: 1 });
+          const collections = await db.listCollections().toArray();
+          return {
+            connected: true,
+            latencyMs: Date.now() - start,
+            collections: collections.map(c => c.name),
+            client: fallbackClient
+          };
+        } catch (fallbackErr) {
+          throw fallbackErr;
+        }
+      }
+      throw err;
+    }
+  };
+
   // 1. Test Paid Database
   let clientPaid;
   try {
-    const startPaid = Date.now();
-    clientPaid = new MongoClient(MONGODB_URI_PAID, {
-      connectTimeoutMS: 4000,
-      serverSelectionTimeoutMS: 4000,
-    });
-    await clientPaid.connect();
-    const dbPaid = clientPaid.db(MONGODB_DB_NAME_PAID);
-    await dbPaid.command({ ping: 1 });
-    const collectionsPaid = await dbPaid.listCollections().toArray();
-
+    const resPaid = await tryConnect(MONGODB_URI_PAID, DIRECT_PAID_URI, MONGODB_DB_NAME_PAID);
+    clientPaid = resPaid.client;
     results.paidDb.connected = true;
     results.paidDb.status = 'Connected';
-    results.paidDb.latencyMs = Date.now() - startPaid;
-    results.paidDb.collections = collectionsPaid.map(c => c.name);
+    results.paidDb.latencyMs = resPaid.latencyMs;
+    results.paidDb.collections = resPaid.collections;
   } catch (err) {
     results.paidDb.connected = false;
     results.paidDb.status = 'Error';
@@ -68,20 +108,12 @@ export async function GET() {
   // 2. Test Free Database
   let clientFree;
   try {
-    const startFree = Date.now();
-    clientFree = new MongoClient(MONGODB_URI_FREE, {
-      connectTimeoutMS: 4000,
-      serverSelectionTimeoutMS: 4000,
-    });
-    await clientFree.connect();
-    const dbFree = clientFree.db(MONGODB_DB_NAME_FREE);
-    await dbFree.command({ ping: 1 });
-    const collectionsFree = await dbFree.listCollections().toArray();
-
+    const resFree = await tryConnect(MONGODB_URI_FREE, DIRECT_FREE_URI, MONGODB_DB_NAME_FREE);
+    clientFree = resFree.client;
     results.freeDb.connected = true;
     results.freeDb.status = 'Connected';
-    results.freeDb.latencyMs = Date.now() - startFree;
-    results.freeDb.collections = collectionsFree.map(c => c.name);
+    results.freeDb.latencyMs = resFree.latencyMs;
+    results.freeDb.collections = resFree.collections;
   } catch (err) {
     let msg = err.message || String(err);
     if (msg.includes('SSL alert number 80') || msg.includes('tlsv1 alert') || msg.includes('querySrv')) {

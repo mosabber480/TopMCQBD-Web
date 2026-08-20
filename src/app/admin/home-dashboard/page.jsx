@@ -84,9 +84,12 @@ export default function AdminHomeDashboardPage() {
     goalDesc: 'একটি আধুনিক, সহজ ও কার্যকর লার্নিং প্ল্যাটফর্ম হিসেবে প্রতিটি প্রতিযোগিতামূলক পরীক্ষার পরীক্ষার্থীর প্রথম পছন্দ হয়ে ওঠা...'
   });
 
-  // Drag and Drop Engine
-  const [dragItem, setDragItem] = useState(null); // { type: 'slider'|'demo'|'package', index }
-  const [dropIndicator, setDropIndicator] = useState(null); // { id, position: 'above'|'below' }
+  // Drag and Drop Indicator Engine
+  const [dragItem, setDragItem] = useState(null); // { type, index }
+  const [dropIndicator, setDropIndicator] = useState(null); // { id, position: 'above' | 'below' }
+
+  // Delete Confirmation Floating Bar State
+  const [pendingDelete, setPendingDelete] = useState(null); // { message, action }
 
   // -------------------------------------------------------------
   // Fetch Home Config
@@ -204,32 +207,21 @@ export default function AdminHomeDashboardPage() {
     await saveHomeConfig({ seo: updated });
   };
 
-  const deleteSeoSection = async () => {
-    if (await showTopAlert('আপনি কি নিশ্চিত যে SEO টাইটেল ও ডেসক্রিপশন মুছে ফেলতে চান?', 'danger', true)) {
-      const updated = { title: '', description: '' };
-      setSeoInfo(updated);
-      await saveHomeConfig({ seo: updated });
-    }
+  const deleteSeoSection = () => {
+    setPendingDelete({
+      message: 'আপনি কি নিশ্চিত যে SEO টাইটেল ও ডেসক্রিপশন মুছে ফেলতে চান?',
+      action: async () => {
+        const updated = { title: '', description: '' };
+        setSeoInfo(updated);
+        await saveHomeConfig({ seo: updated });
+        setPendingDelete(null);
+      }
+    });
   };
 
   // -------------------------------------------------------------
   // 1. Slider Section Handlers
   // -------------------------------------------------------------
-  const moveSliderPosition = (index, direction) => {
-    const list = [...sliderDataList];
-    if (direction === 'up' && index > 0) {
-      const item = list.splice(index, 1)[0];
-      list.splice(index - 1, 0, item);
-      setSliderDataList(list);
-      setIsSliderReordered(true);
-    } else if (direction === 'down' && index < list.length - 1) {
-      const item = list.splice(index, 1)[0];
-      list.splice(index + 1, 0, item);
-      setSliderDataList(list);
-      setIsSliderReordered(true);
-    }
-  };
-
   const startEditSlider = (index) => {
     const s = sliderDataList[index];
     setEditingSliderIdx(index);
@@ -262,12 +254,16 @@ export default function AdminHomeDashboardPage() {
     await saveHomeConfig({ sliders: list });
   };
 
-  const deleteSingleSlider = async (index) => {
-    if (await showTopAlert('আপনি কি নিশ্চিত যে এই স্লাইডারটি মুছে ফেলতে চান?', 'danger', true)) {
-      const list = sliderDataList.filter((_, idx) => idx !== index);
-      setSliderDataList(list);
-      await saveHomeConfig({ sliders: list });
-    }
+  const deleteSingleSlider = (index) => {
+    setPendingDelete({
+      message: 'আপনি কি নিশ্চিত যে এই স্লাইডারটি মুছে ফেলতে চান?',
+      action: async () => {
+        const list = sliderDataList.filter((_, idx) => idx !== index);
+        setSliderDataList(list);
+        await saveHomeConfig({ sliders: list });
+        setPendingDelete(null);
+      }
+    });
   };
 
   const addSliderRow = () => {
@@ -317,26 +313,15 @@ export default function AdminHomeDashboardPage() {
     await saveHomeConfig({ demoHeader: updated });
   };
 
-  const deleteDemoHeaderSection = async () => {
-    if (await showTopAlert('আপনি কি নিশ্চিত যে সেকশনের টাইটেল ও সাবটাইটেল মুছে ফেলতে চান?', 'danger', true)) {
-      setDemoHeaderInfo(null);
-      await saveHomeConfig({ demoHeader: null });
-    }
-  };
-
-  const moveDemoPosition = (index, direction) => {
-    const list = [...demoDataList];
-    if (direction === 'up' && index > 0) {
-      const item = list.splice(index, 1)[0];
-      list.splice(index - 1, 0, item);
-      setDemoDataList(list);
-      setIsDemoReordered(true);
-    } else if (direction === 'down' && index < list.length - 1) {
-      const item = list.splice(index, 1)[0];
-      list.splice(index + 1, 0, item);
-      setDemoDataList(list);
-      setIsDemoReordered(true);
-    }
+  const deleteDemoHeaderSection = () => {
+    setPendingDelete({
+      message: 'আপনি কি নিশ্চিত যে সেকশনের টাইটেল ও সাবটাইটেল মুছে ফেলতে চান?',
+      action: async () => {
+        setDemoHeaderInfo(null);
+        await saveHomeConfig({ demoHeader: null });
+        setPendingDelete(null);
+      }
+    });
   };
 
   const startEditDemo = (index) => {
@@ -363,12 +348,16 @@ export default function AdminHomeDashboardPage() {
     await saveHomeConfig({ demos: list });
   };
 
-  const deleteSingleDemo = async (index) => {
-    if (await showTopAlert('আপনি কি নিশ্চিত যে এই ডেমো কুইজটি মুছে ফেলতে চান?', 'danger', true)) {
-      const list = demoDataList.filter((_, idx) => idx !== index);
-      setDemoDataList(list);
-      await saveHomeConfig({ demos: list });
-    }
+  const deleteSingleDemo = (index) => {
+    setPendingDelete({
+      message: 'আপনি কি নিশ্চিত যে এই ডেমো কুইজটি মুছে ফেলতে চান?',
+      action: async () => {
+        const list = demoDataList.filter((_, idx) => idx !== index);
+        setDemoDataList(list);
+        await saveHomeConfig({ demos: list });
+        setPendingDelete(null);
+      }
+    });
   };
 
   const addDemoRow = () => {
@@ -414,26 +403,15 @@ export default function AdminHomeDashboardPage() {
     await saveHomeConfig({ packageHeader: updated });
   };
 
-  const deletePackageHeaderSection = async () => {
-    if (await showTopAlert('আপনি কি নিশ্চিত যে সেকশনের টাইটেল ও সাবটাইটেল মুছে ফেলতে চান?', 'danger', true)) {
-      setPackageHeaderInfo(null);
-      await saveHomeConfig({ packageHeader: null });
-    }
-  };
-
-  const movePackagePosition = (index, direction) => {
-    const list = [...packageDataList];
-    if (direction === 'up' && index > 0) {
-      const item = list.splice(index, 1)[0];
-      list.splice(index - 1, 0, item);
-      setPackageDataList(list);
-      setIsPackageReordered(true);
-    } else if (direction === 'down' && index < list.length - 1) {
-      const item = list.splice(index, 1)[0];
-      list.splice(index + 1, 0, item);
-      setPackageDataList(list);
-      setIsPackageReordered(true);
-    }
+  const deletePackageHeaderSection = () => {
+    setPendingDelete({
+      message: 'আপনি কি নিশ্চিত যে সেকশনের টাইটেল ও সাবটাইটেল মুছে ফেলতে চান?',
+      action: async () => {
+        setPackageHeaderInfo(null);
+        await saveHomeConfig({ packageHeader: null });
+        setPendingDelete(null);
+      }
+    });
   };
 
   const startEditPackage = (index) => {
@@ -464,12 +442,16 @@ export default function AdminHomeDashboardPage() {
     await saveHomeConfig({ packages: list });
   };
 
-  const deleteSinglePackage = async (index) => {
-    if (await showTopAlert('আপনি কি নিশ্চিত যে এই প্যাকেজটি মুছে ফেলতে চান?', 'danger', true)) {
-      const list = packageDataList.filter((_, idx) => idx !== index);
-      setPackageDataList(list);
-      await saveHomeConfig({ packages: list });
-    }
+  const deleteSinglePackage = (index) => {
+    setPendingDelete({
+      message: 'আপনি কি নিশ্চিত যে এই প্যাকেজটি মুছে ফেলতে চান?',
+      action: async () => {
+        const list = packageDataList.filter((_, idx) => idx !== index);
+        setPackageDataList(list);
+        await saveHomeConfig({ packages: list });
+        setPendingDelete(null);
+      }
+    });
   };
 
   const addPackageRow = () => {
@@ -525,11 +507,15 @@ export default function AdminHomeDashboardPage() {
     await saveHomeConfig({ mission: updated });
   };
 
-  const deleteMissionSection = async () => {
-    if (await showTopAlert('আপনি কি নিশ্চিত যে মিশন ও লক্ষ্য মুছে ফেলতে চান?', 'danger', true)) {
-      setMissionInfo(null);
-      await saveHomeConfig({ mission: null });
-    }
+  const deleteMissionSection = () => {
+    setPendingDelete({
+      message: 'আপনি কি নিশ্চিত যে মিশন ও লক্ষ্য মুছে ফেলতে চান?',
+      action: async () => {
+        setMissionInfo(null);
+        await saveHomeConfig({ mission: null });
+        setPendingDelete(null);
+      }
+    });
   };
 
   // -------------------------------------------------------------
@@ -723,6 +709,26 @@ export default function AdminHomeDashboardPage() {
 
         .row { display: flex; gap: 15px; margin-bottom: 10px; flex-wrap: wrap; align-items: flex-start; }
         .row .form-group { flex: 1; min-width: 250px; }
+        
+        .reorder-action-bar, #delete-confirm-bar {
+          display: flex;
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          width: 100%;
+          background: #2c3e50;
+          padding: 15px;
+          border-top: 4px solid #ffc107;
+          z-index: 9999;
+          box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.2);
+          justify-content: center;
+          align-items: center;
+          gap: 20px;
+          animation: slideUp 0.3s ease;
+        }
+        #delete-confirm-bar {
+          border-top: 4px solid #dc3545;
+        }
 
         .card-actions { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; align-items: center; }
 
@@ -1918,6 +1924,33 @@ export default function AdminHomeDashboardPage() {
           </button>
         )}
       </div>
+
+      {/* Floating Delete Confirmation Bar */}
+      {pendingDelete && (
+        <div id="delete-confirm-bar">
+          <span style={{ color: '#ffffff', fontWeight: 'bold', fontSize: '15px' }}>
+            {pendingDelete.message}
+          </span>
+          <button
+            className="btn btn-danger"
+            style={{ padding: '10px 20px', fontSize: '14px' }}
+            onClick={async () => {
+              const act = pendingDelete.action;
+              setPendingDelete(null);
+              if (act) await act();
+            }}
+          >
+            <i className="fa-solid fa-trash"></i> হ্যাঁ, মুছে ফেলুন
+          </button>
+          <button
+            className="btn btn-secondary"
+            style={{ padding: '10px 15px', fontSize: '14px' }}
+            onClick={() => setPendingDelete(null)}
+          >
+            <i className="fa-solid fa-xmark"></i> বাতিল করুন
+          </button>
+        </div>
+      )}
     </div>
   );
 }

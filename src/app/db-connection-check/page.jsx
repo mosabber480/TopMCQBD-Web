@@ -5,6 +5,35 @@ import Link from 'next/link';
 
 const CACHE_KEY = 'topmcqbd_db_check_cache';
 
+const formatDateTime = (dateVal) => {
+  if (!dateVal) return '';
+  const d = new Date(dateVal);
+  if (isNaN(d.getTime())) return String(dateVal);
+
+  const now = new Date();
+  const isToday =
+    d.getDate() === now.getDate() &&
+    d.getMonth() === now.getMonth() &&
+    d.getFullYear() === now.getFullYear();
+
+  const dateStr = isToday
+    ? 'Today'
+    : d.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      });
+
+  const timeStr = d.toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true
+  });
+
+  return `${dateStr}, ${timeStr}`;
+};
+
 export default function DBConnectionCheck() {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState(null);
@@ -39,7 +68,7 @@ export default function DBConnectionCheck() {
         throw new Error(`HTTP ${res.status}: ${res.statusText}`);
       }
       const json = await res.json();
-      const currentTime = new Date().toLocaleTimeString();
+      const currentTime = formatDateTime(new Date());
       
       setData(json);
       setLastChecked(currentTime);
@@ -60,7 +89,10 @@ export default function DBConnectionCheck() {
         const parsed = JSON.parse(cached);
         if (parsed && parsed.data) {
           setData(parsed.data);
-          setLastChecked(parsed.lastChecked || new Date(parsed.savedAt).toLocaleTimeString());
+          const timeString = parsed.savedAt
+            ? formatDateTime(parsed.savedAt)
+            : parsed.lastChecked;
+          setLastChecked(timeString || formatDateTime(new Date()));
           setIsFromCache(true);
           return;
         }

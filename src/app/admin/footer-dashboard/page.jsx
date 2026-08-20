@@ -120,6 +120,9 @@ export default function AdminFooterDashboardPage() {
   const [dragItem, setDragItem] = useState(null); // { type: 'col'|'footer-link'|'copy-link', colIdx, index }
   const [dropIndicator, setDropIndicator] = useState(null); // { id, position: 'above'|'below' }
 
+  // Delete Confirmation Floating Bar State
+  const [pendingDelete, setPendingDelete] = useState(null); // { message, action }
+
   // -------------------------------------------------------------
   // Fetch Layout Configuration
   // -------------------------------------------------------------
@@ -264,12 +267,15 @@ export default function AdminFooterDashboardPage() {
     await saveLayoutConfig(updated);
   };
 
-  const deleteFooterColumn = async (colIdx) => {
-    if (await showTopAlert('পুরো কলামটি মুছে ফেলতে চান?', 'danger', true)) {
-      const updated = footerColumns.filter((_, idx) => idx !== colIdx);
-      setFooterColumns(updated);
-      await saveLayoutConfig(updated);
-    }
+  const deleteFooterColumn = (colIdx) => {
+    setPendingDelete({
+      message: 'আপনি কি নিশ্চিত যে পুরো কলামটি মুছে ফেলতে চান?',
+      action: async () => {
+        const updated = footerColumns.filter((_, idx) => idx !== colIdx);
+        setFooterColumns(updated);
+        await saveLayoutConfig(updated);
+      }
+    });
   };
 
   const moveColumnPosition = (colIdx, direction) => {
@@ -377,13 +383,16 @@ export default function AdminFooterDashboardPage() {
     await saveLayoutConfig(updated);
   };
 
-  const deleteFooterLink = async (colIdx, lkIdx) => {
-    if (await showTopAlert('আপনি কি নিশ্চিত যে এই লিংকটি মুছে ফেলতে চান?', 'danger', true)) {
-      const updated = [...footerColumns];
-      updated[colIdx].links.splice(lkIdx, 1);
-      setFooterColumns(updated);
-      await saveLayoutConfig(updated);
-    }
+  const deleteFooterLink = (colIdx, lkIdx) => {
+    setPendingDelete({
+      message: 'আপনি কি নিশ্চিত যে এই লিংকটি মুছে ফেলতে চান?',
+      action: async () => {
+        const updated = [...footerColumns];
+        updated[colIdx].links.splice(lkIdx, 1);
+        setFooterColumns(updated);
+        await saveLayoutConfig(updated);
+      }
+    });
   };
 
   // Multi-row Add Links Form in Column
@@ -450,12 +459,15 @@ export default function AdminFooterDashboardPage() {
     await saveLayoutConfig(null, updatedCop);
   };
 
-  const deleteCopyrightText = async () => {
-    if (await showTopAlert('আপনি কি নিশ্চিত যে কপিরাইট টেক্সট মুছে ফেলতে চান?', 'danger', true)) {
-      const updatedCop = { ...copyrightInfo, text: '' };
-      setCopyrightInfo(updatedCop);
-      await saveLayoutConfig(null, updatedCop);
-    }
+  const deleteCopyrightText = () => {
+    setPendingDelete({
+      message: 'আপনি কি নিশ্চিত যে কপিরাইট টেক্সট মুছে ফেলতে চান?',
+      action: async () => {
+        const updatedCop = { ...copyrightInfo, text: '' };
+        setCopyrightInfo(updatedCop);
+        await saveLayoutConfig(null, updatedCop);
+      }
+    });
   };
 
   const moveCopyLinkPosition = (lkIdx, direction) => {
@@ -496,13 +508,16 @@ export default function AdminFooterDashboardPage() {
     await saveLayoutConfig(null, updatedCop);
   };
 
-  const deleteCopyLink = async (lkIdx) => {
-    if (await showTopAlert('আপনি কি নিশ্চিত যে এই লিংকটি মুছে ফেলতে চান?', 'danger', true)) {
-      const updatedCop = { ...copyrightInfo };
-      updatedCop.links.splice(lkIdx, 1);
-      setCopyrightInfo(updatedCop);
-      await saveLayoutConfig(null, updatedCop);
-    }
+  const deleteCopyLink = (lkIdx) => {
+    setPendingDelete({
+      message: 'আপনি কি নিশ্চিত যে এই লিংকটি মুছে ফেলতে চান?',
+      action: async () => {
+        const updatedCop = { ...copyrightInfo };
+        updatedCop.links.splice(lkIdx, 1);
+        setCopyrightInfo(updatedCop);
+        await saveLayoutConfig(null, updatedCop);
+      }
+    });
   };
 
   // Multi-row Add Copyright Links
@@ -880,7 +895,7 @@ export default function AdminFooterDashboardPage() {
           border-radius: 2px;
         }
 
-        #reorder-action-bar {
+        #reorder-action-bar, #delete-confirm-bar {
           display: flex;
           position: fixed;
           bottom: 0;
@@ -896,6 +911,9 @@ export default function AdminFooterDashboardPage() {
           gap: 20px;
           animation: slideUp 0.3s ease;
         }
+        #delete-confirm-bar {
+          border-top: 4px solid #dc3545;
+        }
         @keyframes slideUp {
           from { transform: translateY(100%); }
           to { transform: translateY(0); }
@@ -909,20 +927,12 @@ export default function AdminFooterDashboardPage() {
             <i className="fa-solid fa-table-columns" style={{ color: 'var(--secondary)' }}></i>
             ৩. ফুটার সেটিং (Drag & Drop Columns)
           </div>
-          <div style={{ display: 'flex', gap: '10px' }}>
-            <button className="btn btn-info btn-sm" onClick={() => addNewColumn('info')}>
-              <i className="fa-solid fa-plus"></i> Info Column যোগ
-            </button>
-            <button className="btn btn-add btn-sm" onClick={() => addNewColumn('links')}>
-              <i className="fa-solid fa-plus"></i> Links Column যোগ
-            </button>
-          </div>
         </div>
 
         {/* Footer Columns List */}
         <div>
           {footerColumns.length === 0 ? (
-            <p style={{ color: '#777', fontStyle: 'italic' }}>কোনো ফুটার কলাম নেই। উপরে বাটনে ক্লিক করে যোগ করুন।</p>
+            <p style={{ color: '#777', fontStyle: 'italic' }}>কোনো ফুটার কলাম নেই। নিচের বাটনে ক্লিক করে যোগ করুন।</p>
           ) : (
             footerColumns.map((col, colIdx) => {
               const isEditingInfoThis = editingInfoColIdx === colIdx;
@@ -1318,21 +1328,10 @@ export default function AdminFooterDashboardPage() {
                               fontWeight: 'bold',
                               fontSize: '13px',
                               color: '#17a2b8',
-                              marginBottom: '10px',
-                              display: 'flex',
-                              justifyContent: 'space-between',
-                              alignItems: 'center'
+                              marginBottom: '10px'
                             }}
                           >
                             <span>নতুন লিংক যোগ করুন:</span>
-                            <button
-                              type="button"
-                              className="btn btn-info btn-sm"
-                              onClick={addNewFooterLinkRow}
-                              title="আরও একটি লিংক রো যোগ করুন"
-                            >
-                              <i className="fa-solid fa-plus"></i> আরও যোগ করুন
-                            </button>
                           </div>
 
                           {newFooterLinkRows.map((row, rIdx) => (
@@ -1357,30 +1356,41 @@ export default function AdminFooterDashboardPage() {
                               />
                               <button
                                 type="button"
-                                className="btn-icon-danger"
+                                className="btn btn-danger"
                                 onClick={() => removeNewFooterLinkRow(rIdx)}
                                 title="মুছে ফেলুন"
+                                style={{ height: '38px', display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}
                               >
-                                <i className="fa-solid fa-trash"></i>
+                                <i className="fa-solid fa-trash"></i> Delete
                               </button>
                             </div>
                           ))}
 
-                          <div className="card-actions" style={{ marginTop: '10px' }}>
+                          <div className="card-actions" style={{ marginTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                              <button
+                                className="btn btn-submit"
+                                onClick={() => saveAllNewFooterLinks(colIdx)}
+                              >
+                                <i className="fa-solid fa-floppy-disk"></i> Save Links
+                              </button>
+                              <button
+                                className="btn btn-secondary"
+                                onClick={() => {
+                                  setAddingFooterLinksColIdx(null);
+                                  setNewFooterLinkRows([]);
+                                }}
+                              >
+                                <i className="fa-solid fa-xmark"></i> Cancel
+                              </button>
+                            </div>
                             <button
-                              className="btn btn-submit"
-                              onClick={() => saveAllNewFooterLinks(colIdx)}
+                              type="button"
+                              className="btn btn-info"
+                              onClick={addNewFooterLinkRow}
+                              title="আরও একটি লিংক রো যোগ করুন"
                             >
-                              <i className="fa-solid fa-floppy-disk"></i> Save Links
-                            </button>
-                            <button
-                              className="btn btn-secondary"
-                              onClick={() => {
-                                setAddingFooterLinksColIdx(null);
-                                setNewFooterLinkRows([]);
-                              }}
-                            >
-                              <i className="fa-solid fa-xmark"></i> Cancel
+                              <i className="fa-solid fa-plus"></i> আরও যোগ করুন
                             </button>
                           </div>
                         </div>
@@ -1402,6 +1412,16 @@ export default function AdminFooterDashboardPage() {
               );
             })
           )}
+        </div>
+
+        {/* Action Bar for Adding Columns */}
+        <div style={{ marginTop: '20px', display: 'flex', gap: '10px' }}>
+          <button className="btn btn-info" onClick={() => addNewColumn('info')}>
+            <i className="fa-solid fa-plus"></i> Info Column যোগ
+          </button>
+          <button className="btn btn-add" onClick={() => addNewColumn('links')}>
+            <i className="fa-solid fa-plus"></i> Links Column যোগ
+          </button>
         </div>
       </div>
 
@@ -1614,21 +1634,10 @@ export default function AdminFooterDashboardPage() {
                 fontWeight: 'bold',
                 fontSize: '13px',
                 color: 'var(--purple-btn)',
-                marginBottom: '10px',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center'
+                marginBottom: '10px'
               }}
             >
               <span>নতুন কপিরাইট লিংক যোগ করুন:</span>
-              <button
-                type="button"
-                className="btn btn-info btn-sm"
-                onClick={addNewCopyLinkRow}
-                title="আরও একটি লিংক রো যোগ করুন"
-              >
-                <i className="fa-solid fa-plus"></i> আরও যোগ করুন
-              </button>
             </div>
 
             {newCopyLinkRows.map((row, rIdx) => (
@@ -1653,27 +1662,38 @@ export default function AdminFooterDashboardPage() {
                 />
                 <button
                   type="button"
-                  className="btn-icon-danger"
+                  className="btn btn-danger"
                   onClick={() => removeNewCopyLinkRow(rIdx)}
                   title="মুছে ফেলুন"
+                  style={{ height: '38px', display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}
                 >
-                  <i className="fa-solid fa-trash"></i>
+                  <i className="fa-solid fa-trash"></i> Delete
                 </button>
               </div>
             ))}
 
-            <div className="card-actions" style={{ marginTop: '10px' }}>
-              <button className="btn btn-submit" onClick={saveAllNewCopyLinks}>
-                <i className="fa-solid fa-floppy-disk"></i> Save Links
-              </button>
+            <div className="card-actions" style={{ marginTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button className="btn btn-submit" onClick={saveAllNewCopyLinks}>
+                  <i className="fa-solid fa-floppy-disk"></i> Save Links
+                </button>
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => {
+                    setIsAddingCopyLinks(false);
+                    setNewCopyLinkRows([]);
+                  }}
+                >
+                  <i className="fa-solid fa-xmark"></i> Cancel
+                </button>
+              </div>
               <button
-                className="btn btn-secondary"
-                onClick={() => {
-                  setIsAddingCopyLinks(false);
-                  setNewCopyLinkRows([]);
-                }}
+                type="button"
+                className="btn btn-info"
+                onClick={addNewCopyLinkRow}
+                title="আরও একটি লিংক রো যোগ করুন"
               >
-                <i className="fa-solid fa-xmark"></i> Cancel
+                <i className="fa-solid fa-plus"></i> আরও যোগ করুন
               </button>
             </div>
           </div>
@@ -1686,8 +1706,35 @@ export default function AdminFooterDashboardPage() {
         )}
       </div>
 
+      {/* Floating Delete Confirmation Bar */}
+      {pendingDelete && (
+        <div id="delete-confirm-bar">
+          <span style={{ color: '#ffffff', fontWeight: 'bold', fontSize: '15px' }}>
+            {pendingDelete.message}
+          </span>
+          <button
+            className="btn btn-danger"
+            style={{ padding: '10px 20px', fontSize: '14px' }}
+            onClick={async () => {
+              const act = pendingDelete.action;
+              setPendingDelete(null);
+              if (act) await act();
+            }}
+          >
+            <i className="fa-solid fa-trash"></i> হ্যাঁ, মুছে ফেলুন
+          </button>
+          <button
+            className="btn btn-secondary"
+            style={{ padding: '10px 15px', fontSize: '14px' }}
+            onClick={() => setPendingDelete(null)}
+          >
+            <i className="fa-solid fa-xmark"></i> বাতিল করুন
+          </button>
+        </div>
+      )}
+
       {/* Floating Reorder Save Bar */}
-      {hasPendingReorder && (
+      {hasPendingReorder && !pendingDelete && (
         <div id="reorder-action-bar">
           <span style={{ color: '#ffffff', fontWeight: 'bold', fontSize: '15px' }}>
             আপনি ক্রম পরিবর্তন করেছেন। সেভ করতে বোতাম চাপুন।

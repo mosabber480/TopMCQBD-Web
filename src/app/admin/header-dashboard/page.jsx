@@ -53,7 +53,7 @@ export default function AdminHeaderDashboardPage() {
 
   // Main Menu Forms
   const [isAddingMainMenu, setIsAddingMainMenu] = useState(false);
-  const [newMainMenu, setNewMainMenu] = useState({ title: '', url: '' });
+  const [newMainMenuRows, setNewMainMenuRows] = useState([]);
   const [editingMainMenuIdx, setEditingMainMenuIdx] = useState(null);
   const [editMainMenuForm, setEditMainMenuForm] = useState({ title: '', url: '' });
 
@@ -76,17 +76,37 @@ export default function AdminHeaderDashboardPage() {
   const [editMegaColTitleForm, setEditMegaColTitleForm] = useState('');
 
   const [editingMegaInfo, setEditingMegaInfo] = useState(null); // { mIdx, cIdx }
-  const [editMegaInfoForm, setEditMegaInfoForm] = useState({ iconHtml: '', title: '', text: '' });
+  const [editMegaInfoForm, setEditMegaInfoForm] = useState({ iconHtml: '', title: '', text: '', url: '' });
 
   // Mega Menu Links Editor States
   const [activeMegaLinkAdd, setActiveMegaLinkAdd] = useState(null); // { mIdx, cIdx }
-  const [newMegaLinkForm, setNewMegaLinkForm] = useState({ title: '', url: '' });
+  const [newMegaLinkRows, setNewMegaLinkRows] = useState([]);
   const [editingMegaLink, setEditingMegaLink] = useState(null); // { mIdx, cIdx, lIdx }
   const [editMegaLinkForm, setEditMegaLinkForm] = useState({ title: '', url: '' });
+
+  // Mega Menu Image Column States
+  const [editingMegaImage, setEditingMegaImage] = useState(null); // { mIdx, cIdx }
+  const [editMegaImageForm, setEditMegaImageForm] = useState({ title: '', imageUrl: '', url: '', text: '' });
+
+  // Mega Menu Icon Column States
+  const [activeMegaIconAdd, setActiveMegaIconAdd] = useState(null); // { mIdx, cIdx }
+  const [newMegaIconRows, setNewMegaIconRows] = useState([]);
+  const [editingMegaIconItem, setEditingMegaIconItem] = useState(null); // { mIdx, cIdx, iIdx }
+  const [editMegaIconItemForm, setEditMegaIconItemForm] = useState({
+    iconType: 'fontawesome',
+    iconValue: '',
+    title: '',
+    desc: '',
+    url: ''
+  });
 
   // Drag & Drop State
   const [dragItem, setDragItem] = useState(null); // { type, mIdx, idx2, idx3 }
   const [dropIndicator, setDropIndicator] = useState(null); // { id, position: 'above' | 'below' }
+
+  // Delete Confirmation Floating Bar State
+  const [pendingDelete, setPendingDelete] = useState(null); // { message, action }
+  const [newSubMenuRows, setNewSubMenuRows] = useState([]);
 
   // -------------------------------------------------------------
   // Fetch Initial Data
@@ -421,12 +441,15 @@ export default function AdminHeaderDashboardPage() {
     await saveLayoutConfig({ announcement: newAnn });
   };
 
-  const deleteAnnounceSection = async () => {
-    if (await showTopAlert('আপনি কি নিশ্চিত যে অ্যানাউন্সমেন্ট মুছে ফেলতে চান?', 'danger', true)) {
-      const newAnn = { text: '', link: '' };
-      setAnnounceInfo(null);
-      await saveLayoutConfig({ announcement: newAnn });
-    }
+  const deleteAnnounceSection = () => {
+    setPendingDelete({
+      message: 'আপনি কি নিশ্চিত যে অ্যানাউন্সমেন্ট মুছে ফেলতে চান?',
+      action: async () => {
+        const newAnn = { text: '', link: '' };
+        setAnnounceInfo(null);
+        await saveLayoutConfig({ announcement: newAnn });
+      }
+    });
   };
 
   // -------------------------------------------------------------
@@ -452,12 +475,15 @@ export default function AdminHeaderDashboardPage() {
     await saveLayoutConfig({ brand: newBrand });
   };
 
-  const deleteHeaderBrandSection = async () => {
-    if (await showTopAlert('আপনি কি নিশ্চিত যে ব্রান্ড তথ্য মুছে ফেলতে চান?', 'danger', true)) {
-      const newBrand = { siteTitle: '', logoUrl: '', faviconUrl: '' };
-      setBrandInfo(newBrand);
-      await saveLayoutConfig({ brand: newBrand });
-    }
+  const deleteHeaderBrandSection = () => {
+    setPendingDelete({
+      message: 'আপনি কি নিশ্চিত যে ব্রান্ড তথ্য মুছে ফেলতে চান?',
+      action: async () => {
+        const newBrand = { siteTitle: '', logoUrl: '', faviconUrl: '' };
+        setBrandInfo(newBrand);
+        await saveLayoutConfig({ brand: newBrand });
+      }
+    });
   };
 
   // -------------------------------------------------------------
@@ -481,46 +507,78 @@ export default function AdminHeaderDashboardPage() {
     await saveLayoutConfig({ btn: newBtn });
   };
 
-  const deleteHeaderBtnSection = async () => {
-    if (await showTopAlert('আপনি কি নিশ্চিত যে হেডার বাটন তথ্য মুছে ফেলতে চান?', 'danger', true)) {
-      const newBtn = { btnText: '', btnLink: '' };
-      setBtnInfo(newBtn);
-      await saveLayoutConfig({ btn: newBtn });
-    }
+  const deleteHeaderBtnSection = () => {
+    setPendingDelete({
+      message: 'আপনি কি নিশ্চিত যে হেডার বাটন তথ্য মুছে ফেলতে চান?',
+      action: async () => {
+        const newBtn = { btnText: '', btnLink: '' };
+        setBtnInfo(newBtn);
+        await saveLayoutConfig({ btn: newBtn });
+      }
+    });
   };
 
   // -------------------------------------------------------------
   // 2.3 Navigation Menu & Sub-Menu Section Logic
   // -------------------------------------------------------------
-  const saveNewMainMenu = async () => {
-    const t = newMainMenu.title.trim();
-    const u = newMainMenu.url.trim();
-    if (!t) {
-      showTopAlert('মেনুর টাইটেল দিন!', 'warning');
-      return;
+  // Multi-row Main Menu Handlers
+  const openAddMainMenuForm = () => {
+    setIsAddingMainMenu(true);
+    setNewMainMenuRows([{ title: '', url: '' }]);
+  };
+
+  const addNewMainMenuRow = () => {
+    setNewMainMenuRows(prev => [...prev, { title: '', url: '' }]);
+  };
+
+  const updateNewMainMenuRow = (index, field, value) => {
+    const rows = [...newMainMenuRows];
+    rows[index][field] = value;
+    setNewMainMenuRows(rows);
+  };
+
+  const removeNewMainMenuRow = (index) => {
+    const rows = newMainMenuRows.filter((_, i) => i !== index);
+    if (rows.length === 0) {
+      setIsAddingMainMenu(false);
+      setNewMainMenuRows([]);
+    } else {
+      setNewMainMenuRows(rows);
     }
-    const updated = [
-      ...menus,
-      {
-        title: t,
-        url: u || '#',
+  };
+
+  const saveAllNewMainMenus = async () => {
+    const validRows = newMainMenuRows
+      .filter(r => r.title.trim())
+      .map(r => ({
+        title: r.title.trim(),
+        url: r.url.trim() || '#',
         subMenus: [],
         isMegaMenu: false,
         megaMenuId: null
-      }
-    ];
+      }));
+
+    if (validRows.length === 0) {
+      showTopAlert('কমপক্ষে একটি মূল মেনু টাইটেল দিন!', 'warning');
+      return;
+    }
+
+    const updated = [...menus, ...validRows];
     setMenus(updated);
-    setNewMainMenu({ title: '', url: '' });
     setIsAddingMainMenu(false);
+    setNewMainMenuRows([]);
     await saveLayoutConfig({ menus: updated });
   };
 
-  const deleteMainMenu = async (mIdx) => {
-    if (await showTopAlert('মেনুটি মুছতে চান?', 'warning', true)) {
-      const updated = menus.filter((_, idx) => idx !== mIdx);
-      setMenus(updated);
-      await saveLayoutConfig({ menus: updated });
-    }
+  const deleteMainMenu = (mIdx) => {
+    setPendingDelete({
+      message: 'আপনি কি নিশ্চিত যে এই মেনুটি মুছে ফেলতে চান?',
+      action: async () => {
+        const updated = menus.filter((_, idx) => idx !== mIdx);
+        setMenus(updated);
+        await saveLayoutConfig({ menus: updated });
+      }
+    });
   };
 
   const startEditMainMenu = (mIdx) => {
@@ -540,28 +598,61 @@ export default function AdminHeaderDashboardPage() {
     await saveLayoutConfig({ menus: updated });
   };
 
-  // Submenus
-  const saveNewSubMenu = async (mIdx) => {
-    const t = newSubMenuForm.title.trim();
-    const u = newSubMenuForm.url.trim();
-    if (!t) {
-      showTopAlert('সাব-মেনু টাইটেল দিন!', 'warning');
+  // Submenus Multi-row Handlers
+  const openAddSubMenuForm = (mIdx) => {
+    setActiveSubAddIdx(mIdx);
+    setNewSubMenuRows([{ title: '', url: '' }]);
+  };
+
+  const addNewSubMenuRow = () => {
+    setNewSubMenuRows(prev => [...prev, { title: '', url: '' }]);
+  };
+
+  const updateNewSubMenuRow = (index, field, value) => {
+    const rows = [...newSubMenuRows];
+    rows[index][field] = value;
+    setNewSubMenuRows(rows);
+  };
+
+  const removeNewSubMenuRow = (index) => {
+    const rows = newSubMenuRows.filter((_, i) => i !== index);
+    if (rows.length === 0) {
+      setActiveSubAddIdx(null);
+      setNewSubMenuRows([]);
+    } else {
+      setNewSubMenuRows(rows);
+    }
+  };
+
+  const saveAllNewSubMenus = async (mIdx) => {
+    const validRows = newSubMenuRows
+      .filter(r => r.title.trim())
+      .map(r => ({ title: r.title.trim(), url: r.url.trim() || '#' }));
+
+    if (validRows.length === 0) {
+      showTopAlert('কমপক্ষে একটি সাব-মেনু পূরণ করুন!', 'warning');
       return;
     }
+
     const updated = [...menus];
     if (!updated[mIdx].subMenus) updated[mIdx].subMenus = [];
-    updated[mIdx].subMenus.push({ title: t, url: u || '#' });
+    updated[mIdx].subMenus.push(...validRows);
     setMenus(updated);
-    setNewSubMenuForm({ title: '', url: '' });
     setActiveSubAddIdx(null);
+    setNewSubMenuRows([]);
     await saveLayoutConfig({ menus: updated });
   };
 
-  const deleteSubMenu = async (mIdx, smIdx) => {
-    const updated = [...menus];
-    updated[mIdx].subMenus.splice(smIdx, 1);
-    setMenus(updated);
-    await saveLayoutConfig({ menus: updated });
+  const deleteSubMenu = (mIdx, smIdx) => {
+    setPendingDelete({
+      message: 'আপনি কি নিশ্চিত যে এই সাব-মেনুটি মুছে ফেলতে চান?',
+      action: async () => {
+        const updated = [...menus];
+        updated[mIdx].subMenus.splice(smIdx, 1);
+        setMenus(updated);
+        await saveLayoutConfig({ menus: updated });
+      }
+    });
   };
 
   const startEditSubMenu = (mIdx, smIdx) => {
@@ -623,22 +714,25 @@ export default function AdminHeaderDashboardPage() {
     await saveLayoutConfig({ megaMenus: updated });
   };
 
-  const deleteMegaBlock = async (mIdx) => {
-    if (await showTopAlert('এই মেগা মেনুটি সম্পূর্ণ ডিলিট করতে চান? (লিঙ্ক করা থাকলে সেটি সাধারণ মেনু হয়ে যাবে)', 'danger', true)) {
-      const deletedId = megaMenus[mIdx].id;
-      const updatedMegas = megaMenus.filter((_, idx) => idx !== mIdx);
+  const deleteMegaBlock = (mIdx) => {
+    setPendingDelete({
+      message: 'আপনি কি নিশ্চিত যে এই মেগা মেনুটি সম্পূর্ণ ডিলিট করতে চান?',
+      action: async () => {
+        const deletedId = megaMenus[mIdx].id;
+        const updatedMegas = megaMenus.filter((_, idx) => idx !== mIdx);
 
-      const updatedMenus = menus.map(m => {
-        if (m.megaMenuId === deletedId) {
-          return { ...m, isMegaMenu: false, megaMenuId: null };
-        }
-        return m;
-      });
+        const updatedMenus = menus.map(m => {
+          if (m.megaMenuId === deletedId) {
+            return { ...m, isMegaMenu: false, megaMenuId: null };
+          }
+          return m;
+        });
 
-      setMegaMenus(updatedMegas);
-      setMenus(updatedMenus);
-      await saveLayoutConfig({ megaMenus: updatedMegas, menus: updatedMenus });
-    }
+        setMegaMenus(updatedMegas);
+        setMenus(updatedMenus);
+        await saveLayoutConfig({ megaMenus: updatedMegas, menus: updatedMenus });
+      }
+    });
   };
 
   const startRenameMegaBlock = (mIdx) => {
@@ -665,6 +759,28 @@ export default function AdminHeaderDashboardPage() {
         text: 'সাইট সম্পর্কে কিছু লিখুন...',
         iconHtml: '<i class="fa-solid fa-circle-info"></i>'
       });
+    } else if (type === 'image') {
+      updated[mIdx].columns.push({
+        type: 'image',
+        title: 'POSTS CAROUSEL',
+        imageUrl: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=600&q=80',
+        url: '',
+        text: ''
+      });
+    } else if (type === 'icon') {
+      updated[mIdx].columns.push({
+        type: 'icon',
+        title: 'নতুন আইকন কলাম',
+        items: [
+          {
+            iconType: 'fontawesome',
+            iconValue: 'fa-solid fa-building-columns',
+            title: 'Banking',
+            desc: 'Store, manage and move your funds safely.',
+            url: '#'
+          }
+        ]
+      });
     } else {
       updated[mIdx].columns.push({
         type: 'links',
@@ -676,37 +792,164 @@ export default function AdminHeaderDashboardPage() {
     await saveLayoutConfig({ megaMenus: updated });
   };
 
-  const deleteMegaCol = async (mIdx, cIdx) => {
-    if (await showTopAlert('কলামটি মুছতে চান?', 'warning', true)) {
-      const updated = [...megaMenus];
-      updated[mIdx].columns.splice(cIdx, 1);
-      setMegaMenus(updated);
-      await saveLayoutConfig({ megaMenus: updated });
-    }
+  const deleteMegaCol = (mIdx, cIdx) => {
+    setPendingDelete({
+      message: 'আপনি কি নিশ্চিত যে কলামটি মুছে ফেলতে চান?',
+      action: async () => {
+        const updated = [...megaMenus];
+        updated[mIdx].columns.splice(cIdx, 1);
+        setMegaMenus(updated);
+        await saveLayoutConfig({ megaMenus: updated });
+      }
+    });
   };
 
   // Info Column Edit
   const startEditMegaInfo = (mIdx, cIdx) => {
     const col = megaMenus[mIdx].columns[cIdx];
     setEditingMegaInfo({ mIdx, cIdx });
+    let rawIcon = col.iconHtml || '';
+    if (rawIcon.startsWith('<i class="') && rawIcon.endsWith('"></i>')) {
+      rawIcon = rawIcon.substring(10, rawIcon.length - 7);
+    } else if (rawIcon.startsWith("<i class='") && rawIcon.endsWith("'></i>")) {
+      rawIcon = rawIcon.substring(10, rawIcon.length - 7);
+    }
     setEditMegaInfoForm({
-      iconHtml: col.iconHtml || '',
+      iconHtml: rawIcon,
       title: col.title || '',
-      text: col.text || ''
+      text: col.text || '',
+      url: col.url || ''
     });
   };
 
   const saveMegaInfoInline = async (mIdx, cIdx) => {
     const updated = [...megaMenus];
     const col = updated[mIdx].columns[cIdx];
-    col.iconHtml = editMegaInfoForm.iconHtml.trim();
+    let iconVal = editMegaInfoForm.iconHtml.trim();
+    if (iconVal && !iconVal.startsWith('<')) {
+      iconVal = `<i class="${iconVal}"></i>`;
+    }
+    col.iconHtml = iconVal;
     col.title = editMegaInfoForm.title.trim();
     col.text = editMegaInfoForm.text.trim();
+    col.url = editMegaInfoForm.url ? editMegaInfoForm.url.trim() : '';
 
     delete col.fb; delete col.yt; delete col.wa; delete col.tw; delete col.tg; delete col.ln;
 
     setMegaMenus(updated);
     setEditingMegaInfo(null);
+    await saveLayoutConfig({ megaMenus: updated });
+  };
+
+  // Image Column Handlers
+  const startEditMegaImage = (mIdx, cIdx) => {
+    const col = megaMenus[mIdx].columns[cIdx];
+    setEditingMegaImage({ mIdx, cIdx });
+    setEditMegaImageForm({
+      title: col.title || '',
+      imageUrl: col.imageUrl || '',
+      url: col.url || '',
+      text: col.text || ''
+    });
+  };
+
+  const saveMegaImageInline = async (mIdx, cIdx) => {
+    const updated = [...megaMenus];
+    const col = updated[mIdx].columns[cIdx];
+    col.title = editMegaImageForm.title.trim();
+    col.imageUrl = editMegaImageForm.imageUrl.trim();
+    col.url = editMegaImageForm.url.trim();
+    col.text = editMegaImageForm.text.trim();
+    setMegaMenus(updated);
+    setEditingMegaImage(null);
+    await saveLayoutConfig({ megaMenus: updated });
+  };
+
+  // Icon Column Handlers
+  const openAddMegaIconForm = (mIdx, cIdx) => {
+    setActiveMegaIconAdd({ mIdx, cIdx });
+    setNewMegaIconRows([{ iconType: 'fontawesome', iconValue: 'fa-solid fa-star', title: '', desc: '', url: '' }]);
+  };
+
+  const addNewMegaIconRow = () => {
+    setNewMegaIconRows(prev => [...prev, { iconType: 'fontawesome', iconValue: 'fa-solid fa-star', title: '', desc: '', url: '' }]);
+  };
+
+  const updateNewMegaIconRow = (index, field, value) => {
+    const rows = [...newMegaIconRows];
+    rows[index][field] = value;
+    setNewMegaIconRows(rows);
+  };
+
+  const removeNewMegaIconRow = (index) => {
+    const rows = newMegaIconRows.filter((_, i) => i !== index);
+    if (rows.length === 0) {
+      setActiveMegaIconAdd(null);
+      setNewMegaIconRows([]);
+    } else {
+      setNewMegaIconRows(rows);
+    }
+  };
+
+  const saveAllNewMegaIcons = async (mIdx, cIdx) => {
+    const validRows = newMegaIconRows
+      .filter(r => r.title.trim() || r.iconValue.trim())
+      .map(r => ({
+        iconType: r.iconType || 'fontawesome',
+        iconValue: r.iconValue.trim(),
+        title: r.title.trim(),
+        desc: r.desc.trim(),
+        url: r.url.trim() || '#'
+      }));
+
+    if (validRows.length === 0) {
+      showTopAlert('কমপক্ষে একটি আইকন বা টাইটেল দিন!', 'warning');
+      return;
+    }
+
+    const updated = [...megaMenus];
+    if (!updated[mIdx].columns[cIdx].items) updated[mIdx].columns[cIdx].items = [];
+    updated[mIdx].columns[cIdx].items.push(...validRows);
+    setMegaMenus(updated);
+    setActiveMegaIconAdd(null);
+    setNewMegaIconRows([]);
+    await saveLayoutConfig({ megaMenus: updated });
+  };
+
+  const deleteMegaIconItem = (mIdx, cIdx, iIdx) => {
+    setPendingDelete({
+      message: 'আপনি কি নিশ্চিত যে এই আইকন আইটেমটি মুছে ফেলতে চান?',
+      action: async () => {
+        const updated = [...megaMenus];
+        updated[mIdx].columns[cIdx].items.splice(iIdx, 1);
+        setMegaMenus(updated);
+        await saveLayoutConfig({ megaMenus: updated });
+      }
+    });
+  };
+
+  const startEditMegaIconItem = (mIdx, cIdx, iIdx) => {
+    const item = megaMenus[mIdx].columns[cIdx].items[iIdx];
+    setEditingMegaIconItem({ mIdx, cIdx, iIdx });
+    setEditMegaIconItemForm({
+      iconType: item.iconType || 'fontawesome',
+      iconValue: item.iconValue || '',
+      title: item.title || '',
+      desc: item.desc || '',
+      url: item.url || ''
+    });
+  };
+
+  const saveMegaIconItemInline = async (mIdx, cIdx, iIdx) => {
+    const updated = [...megaMenus];
+    const item = updated[mIdx].columns[cIdx].items[iIdx];
+    item.iconType = editMegaIconItemForm.iconType;
+    item.iconValue = editMegaIconItemForm.iconValue.trim();
+    item.title = editMegaIconItemForm.title.trim();
+    item.desc = editMegaIconItemForm.desc.trim();
+    item.url = editMegaIconItemForm.url.trim() || '#';
+    setMegaMenus(updated);
+    setEditingMegaIconItem(null);
     await saveLayoutConfig({ megaMenus: updated });
   };
 
@@ -725,28 +968,61 @@ export default function AdminHeaderDashboardPage() {
     await saveLayoutConfig({ megaMenus: updated });
   };
 
-  // Links inside Column
-  const saveNewMegaLink = async (mIdx, cIdx) => {
-    const t = newMegaLinkForm.title.trim();
-    const u = newMegaLinkForm.url.trim();
-    if (!t) {
-      showTopAlert('লিংক টাইটেল প্রদান করুন!', 'warning');
+  // Multi-row Mega Link Handlers
+  const openAddMegaLinkForm = (mIdx, cIdx) => {
+    setActiveMegaLinkAdd({ mIdx, cIdx });
+    setNewMegaLinkRows([{ title: '', url: '' }]);
+  };
+
+  const addNewMegaLinkRow = () => {
+    setNewMegaLinkRows(prev => [...prev, { title: '', url: '' }]);
+  };
+
+  const updateNewMegaLinkRow = (index, field, value) => {
+    const rows = [...newMegaLinkRows];
+    rows[index][field] = value;
+    setNewMegaLinkRows(rows);
+  };
+
+  const removeNewMegaLinkRow = (index) => {
+    const rows = newMegaLinkRows.filter((_, i) => i !== index);
+    if (rows.length === 0) {
+      setActiveMegaLinkAdd(null);
+      setNewMegaLinkRows([]);
+    } else {
+      setNewMegaLinkRows(rows);
+    }
+  };
+
+  const saveAllNewMegaLinks = async (mIdx, cIdx) => {
+    const validRows = newMegaLinkRows
+      .filter(r => r.title.trim())
+      .map(r => ({ title: r.title.trim(), url: r.url.trim() || '#' }));
+
+    if (validRows.length === 0) {
+      showTopAlert('কমপক্ষে একটি লিংক টাইটেল দিন!', 'warning');
       return;
     }
+
     const updated = [...megaMenus];
     if (!updated[mIdx].columns[cIdx].links) updated[mIdx].columns[cIdx].links = [];
-    updated[mIdx].columns[cIdx].links.push({ title: t, url: u || '#' });
+    updated[mIdx].columns[cIdx].links.push(...validRows);
     setMegaMenus(updated);
-    setNewMegaLinkForm({ title: '', url: '' });
     setActiveMegaLinkAdd(null);
+    setNewMegaLinkRows([]);
     await saveLayoutConfig({ megaMenus: updated });
   };
 
-  const deleteMegaLink = async (mIdx, cIdx, lIdx) => {
-    const updated = [...megaMenus];
-    updated[mIdx].columns[cIdx].links.splice(lIdx, 1);
-    setMegaMenus(updated);
-    await saveLayoutConfig({ megaMenus: updated });
+  const deleteMegaLink = (mIdx, cIdx, lIdx) => {
+    setPendingDelete({
+      message: 'আপনি কি নিশ্চিত যে এই লিংকটি মুছে ফেলতে চান?',
+      action: async () => {
+        const updated = [...megaMenus];
+        updated[mIdx].columns[cIdx].links.splice(lIdx, 1);
+        setMegaMenus(updated);
+        await saveLayoutConfig({ megaMenus: updated });
+      }
+    });
   };
 
   const startEditMegaLink = (mIdx, cIdx, lIdx) => {
@@ -865,7 +1141,7 @@ export default function AdminHeaderDashboardPage() {
         input:focus, select:focus, textarea:focus { border-color: var(--primary); }
 
         .row { display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; align-items: center; }
-        .card-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+        .card-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; justify-content: flex-end; }
 
         .btn {
           padding: 8px 16px;
@@ -986,7 +1262,7 @@ export default function AdminHeaderDashboardPage() {
           border-radius: 2px;
         }
 
-        #reorder-action-bar {
+        #reorder-action-bar, #delete-confirm-bar {
           display: flex;
           position: fixed;
           bottom: 0;
@@ -1001,6 +1277,9 @@ export default function AdminHeaderDashboardPage() {
           align-items: center;
           gap: 20px;
           animation: slideUp 0.3s ease;
+        }
+        #delete-confirm-bar {
+          border-top: 4px solid #dc3545;
         }
         @keyframes slideUp {
           from { transform: translateY(100%); }
@@ -1053,19 +1332,23 @@ export default function AdminHeaderDashboardPage() {
           </div>
         ) : hasAnnounce ? (
           <div className="read-box" style={{ borderLeft: '5px solid #ff9f43' }}>
-            <div className="read-title">
-              <i className="fa-solid fa-bullhorn"></i> {announceInfo.text || '(কোনো নোটিশ নেই)'}
-            </div>
-            <div className="read-subtitle">
-              <b>লিংক (URL):</b> {announceInfo.link || 'নাই'}
-            </div>
-            <div className="card-actions">
-              <button className="btn btn-warning" onClick={editAnnounceSection}>
-                <i className="fa-solid fa-pen-to-square"></i> Edit
-              </button>
-              <button className="btn btn-danger" onClick={deleteAnnounceSection}>
-                <i className="fa-solid fa-trash"></i> Delete
-              </button>
+            <div className="card-header-flex" style={{ marginBottom: 0 }}>
+              <div>
+                <div className="read-title">
+                  <i className="fa-solid fa-bullhorn"></i> {announceInfo.text || '(কোনো নোটিশ নেই)'}
+                </div>
+                <div className="read-subtitle" style={{ marginTop: '4px' }}>
+                  <b>লিংক (URL):</b> {announceInfo.link || 'নাই'}
+                </div>
+              </div>
+              <div className="card-actions">
+                <button className="btn btn-warning" onClick={editAnnounceSection}>
+                  <i className="fa-solid fa-pen-to-square"></i> Edit
+                </button>
+                <button className="btn btn-danger" onClick={deleteAnnounceSection}>
+                  <i className="fa-solid fa-trash"></i> Delete
+                </button>
+              </div>
             </div>
           </div>
         ) : (
@@ -1132,20 +1415,24 @@ export default function AdminHeaderDashboardPage() {
           </div>
         ) : hasBrand ? (
           <div className="read-box" style={{ borderLeft: '5px solid #007bff' }}>
-            <div className="read-title">
-              <i className="fa-solid fa-pager" style={{ color: '#007bff' }}></i>
-              সাইট টাইটেল: {brandInfo.siteTitle || 'TopMCQ'}
-            </div>
-            <div className="read-meta" style={{ marginTop: '5px' }}>
-              <b>Logo URL:</b> {brandInfo.logoUrl || 'নাই'} | <b>Favicon URL:</b> {brandInfo.faviconUrl || 'নাই'}
-            </div>
-            <div className="card-actions" style={{ marginTop: '10px' }}>
-              <button className="btn btn-warning" onClick={editHeaderBrandSection}>
-                <i className="fa-solid fa-pen-to-square"></i> Edit
-              </button>
-              <button className="btn btn-danger" onClick={deleteHeaderBrandSection}>
-                <i className="fa-solid fa-trash"></i> Delete
-              </button>
+            <div className="card-header-flex" style={{ marginBottom: 0 }}>
+              <div>
+                <div className="read-title">
+                  <i className="fa-solid fa-pager" style={{ color: '#007bff' }}></i>
+                  সাইট টাইটেল: {brandInfo.siteTitle || 'TopMCQ'}
+                </div>
+                <div className="read-meta" style={{ marginTop: '4px' }}>
+                  <b>Logo URL:</b> {brandInfo.logoUrl || 'নাই'} | <b>Favicon URL:</b> {brandInfo.faviconUrl || 'নাই'}
+                </div>
+              </div>
+              <div className="card-actions">
+                <button className="btn btn-warning" onClick={editHeaderBrandSection}>
+                  <i className="fa-solid fa-pen-to-square"></i> Edit
+                </button>
+                <button className="btn btn-danger" onClick={deleteHeaderBrandSection}>
+                  <i className="fa-solid fa-trash"></i> Delete
+                </button>
+              </div>
             </div>
           </div>
         ) : (
@@ -1200,19 +1487,23 @@ export default function AdminHeaderDashboardPage() {
           </div>
         ) : hasBtn ? (
           <div className="read-box" style={{ borderLeft: '5px solid #e83e8c' }}>
-            <div className="read-title">
-              <i className="fa-solid fa-square-arrow-up-right" style={{ color: '#e83e8c' }}></i> হেডার বাটন
-            </div>
-            <div className="read-meta" style={{ marginTop: '5px' }}>
-              <b>বাটন টেক্সট:</b> {btnInfo.btnText || '(নাই)'} | <b>বাটন লিংক (URL):</b> {btnInfo.btnLink || '(নাই)'}
-            </div>
-            <div className="card-actions" style={{ marginTop: '10px' }}>
-              <button className="btn btn-warning" onClick={editHeaderBtnSection}>
-                <i className="fa-solid fa-pen-to-square"></i> Edit
-              </button>
-              <button className="btn btn-danger" onClick={deleteHeaderBtnSection}>
-                <i className="fa-solid fa-trash"></i> Delete
-              </button>
+            <div className="card-header-flex" style={{ marginBottom: 0 }}>
+              <div>
+                <div className="read-title">
+                  <i className="fa-solid fa-square-arrow-up-right" style={{ color: '#e83e8c' }}></i> হেডার বাটন
+                </div>
+                <div className="read-meta" style={{ marginTop: '4px' }}>
+                  <b>বাটন টেক্সট:</b> {btnInfo.btnText || '(নাই)'} | <b>বাটন লিংক (URL):</b> {btnInfo.btnLink || '(নাই)'}
+                </div>
+              </div>
+              <div className="card-actions">
+                <button className="btn btn-warning" onClick={editHeaderBtnSection}>
+                  <i className="fa-solid fa-pen-to-square"></i> Edit
+                </button>
+                <button className="btn btn-danger" onClick={deleteHeaderBtnSection}>
+                  <i className="fa-solid fa-trash"></i> Delete
+                </button>
+              </div>
             </div>
           </div>
         ) : (
@@ -1501,38 +1792,67 @@ export default function AdminHeaderDashboardPage() {
                           </p>
                         )}
 
-                        {/* Inline Add SubMenu Form */}
+                        {/* Multi-row Inline Add SubMenu Form */}
                         {isAddingSubThis && (
                           <div
-                            className="row"
                             style={{
                               background: '#f8fafc',
-                              padding: '10px',
-                              borderRadius: '5px',
+                              padding: '12px',
+                              borderRadius: '6px',
                               border: '1px solid #cbd5e1',
                               marginBottom: '10px'
                             }}
                           >
-                            <input
-                              type="text"
-                              placeholder="সাব-মেনু টাইটেল"
-                              value={newSubMenuForm.title}
-                              onChange={(e) => setNewSubMenuForm({ ...newSubMenuForm, title: e.target.value })}
-                              style={{ flex: 1, minWidth: '150px' }}
-                            />
-                            <input
-                              type="text"
-                              placeholder="URL"
-                              value={newSubMenuForm.url}
-                              onChange={(e) => setNewSubMenuForm({ ...newSubMenuForm, url: e.target.value })}
-                              style={{ flex: 1, minWidth: '150px' }}
-                            />
-                            <button className="btn btn-submit btn-sm" onClick={() => saveNewSubMenu(mIdx)}>
-                              <i className="fa-solid fa-floppy-disk"></i> Save
-                            </button>
-                            <button className="btn btn-secondary btn-sm" onClick={() => setActiveSubAddIdx(null)}>
-                              <i className="fa-solid fa-xmark"></i> Cancel
-                            </button>
+                            <div style={{ fontWeight: 'bold', fontSize: '13px', color: '#0284c7', marginBottom: '10px' }}>
+                              <span>নতুন সাব-মেনু যোগ করুন:</span>
+                            </div>
+
+                            {newSubMenuRows.map((row, rIdx) => (
+                              <div key={rIdx} className="row" style={{ marginBottom: '8px', display: 'flex', gap: '10px', alignItems: 'center' }}>
+                                <input
+                                  type="text"
+                                  placeholder="সাব-মেনু টাইটেল"
+                                  value={row.title}
+                                  onChange={(e) => updateNewSubMenuRow(rIdx, 'title', e.target.value)}
+                                  style={{ flex: 1, minWidth: '150px' }}
+                                />
+                                <input
+                                  type="text"
+                                  placeholder="URL"
+                                  value={row.url}
+                                  onChange={(e) => updateNewSubMenuRow(rIdx, 'url', e.target.value)}
+                                  style={{ flex: 1, minWidth: '150px' }}
+                                />
+                                <button
+                                  type="button"
+                                  className="btn btn-danger btn-sm"
+                                  onClick={() => removeNewSubMenuRow(rIdx)}
+                                  title="মুছে ফেলুন"
+                                  style={{ height: '38px', display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}
+                                >
+                                  <i className="fa-solid fa-trash"></i> Delete
+                                </button>
+                              </div>
+                            ))}
+
+                            <div style={{ marginTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <button
+                                type="button"
+                                className="btn btn-info btn-sm"
+                                onClick={addNewSubMenuRow}
+                                title="আরও একটি সাব-মেনু রো যোগ করুন"
+                              >
+                                <i className="fa-solid fa-plus"></i> আরও সাব-মেনু যোগ করুন
+                              </button>
+                              <div style={{ display: 'flex', gap: '8px' }}>
+                                <button className="btn btn-submit btn-sm" onClick={() => saveAllNewSubMenus(mIdx)}>
+                                  <i className="fa-solid fa-floppy-disk"></i> Save
+                                </button>
+                                <button className="btn btn-secondary btn-sm" onClick={() => { setActiveSubAddIdx(null); setNewSubMenuRows([]); }}>
+                                  <i className="fa-solid fa-xmark"></i> Cancel
+                                </button>
+                              </div>
+                            </div>
                           </div>
                         )}
 
@@ -1613,15 +1933,12 @@ export default function AdminHeaderDashboardPage() {
                           </div>
                         )}
 
-                        {/* Action buttons if not connecting mega */}
-                        {!isConnectingThisMega && !hasMega && (
-                          <div className="card-actions" style={{ marginTop: '10px' }}>
+                        {/* Action buttons if not connecting mega and not adding sub */}
+                        {!isConnectingThisMega && !hasMega && !isAddingSubThis && (
+                          <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'flex-start', gap: '8px' }}>
                             <button
                               className="btn btn-info btn-sm"
-                              onClick={() => {
-                                setActiveSubAddIdx(mIdx);
-                                setNewSubMenuForm({ title: '', url: '' });
-                              }}
+                              onClick={() => openAddSubMenuForm(mIdx)}
                             >
                               <i className="fa-solid fa-plus"></i> সাব-মেনু যোগ করুন
                             </button>
@@ -1651,49 +1968,77 @@ export default function AdminHeaderDashboardPage() {
             <div style={{ fontWeight: 'bold', marginBottom: '12px', color: '#28a745' }}>
               নতুন মূল মেনু যোগ করুন
             </div>
-            <div
-              className="row"
-              style={{
-                flexWrap: 'wrap',
-                background: '#f8fafc',
-                padding: '15px',
-                border: '1px solid #e2e8f0',
-                borderRadius: '6px'
-              }}
-            >
-              <input
-                type="text"
-                placeholder="মেনু টাইটেল (যেমন: সাধারণ জ্ঞান)"
-                value={newMainMenu.title}
-                onChange={(e) => setNewMainMenu({ ...newMainMenu, title: e.target.value })}
-                style={{ flex: 1, minWidth: '200px' }}
-              />
-              <input
-                type="text"
-                placeholder="URL (যেমন: /all-mcq)"
-                value={newMainMenu.url}
-                onChange={(e) => setNewMainMenu({ ...newMainMenu, url: e.target.value })}
-                style={{ flex: 1, minWidth: '200px' }}
-              />
-            </div>
-            <div className="card-actions" style={{ marginTop: '10px' }}>
-              <button className="btn btn-submit" onClick={saveNewMainMenu}>
-                <i className="fa-solid fa-floppy-disk"></i> Save Menu
-              </button>
-              <button
-                className="btn btn-secondary"
-                onClick={() => {
-                  setIsAddingMainMenu(false);
-                  setNewMainMenu({ title: '', url: '' });
+
+            {newMainMenuRows.map((row, rIdx) => (
+              <div
+                key={rIdx}
+                className="row"
+                style={{
+                  flexWrap: 'wrap',
+                  background: '#f8fafc',
+                  padding: '12px 15px',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '6px',
+                  marginBottom: '10px',
+                  display: 'flex',
+                  gap: '12px',
+                  alignItems: 'center'
                 }}
               >
-                <i className="fa-solid fa-xmark"></i> Cancel
+                <input
+                  type="text"
+                  placeholder="মেনু টাইটেল (যেমন: সাধারণ জ্ঞান)"
+                  value={row.title}
+                  onChange={(e) => updateNewMainMenuRow(rIdx, 'title', e.target.value)}
+                  style={{ flex: 1, minWidth: '200px' }}
+                />
+                <input
+                  type="text"
+                  placeholder="URL (যেমন: /all-mcq)"
+                  value={row.url}
+                  onChange={(e) => updateNewMainMenuRow(rIdx, 'url', e.target.value)}
+                  style={{ flex: 1, minWidth: '200px' }}
+                />
+                <button
+                  type="button"
+                  className="btn btn-danger btn-sm"
+                  onClick={() => removeNewMainMenuRow(rIdx)}
+                  title="মুছে ফেলুন"
+                  style={{ height: '38px', display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}
+                >
+                  <i className="fa-solid fa-trash"></i> Delete
+                </button>
+              </div>
+            ))}
+
+            <div className="card-actions" style={{ marginTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button className="btn btn-submit" onClick={saveAllNewMainMenus}>
+                  <i className="fa-solid fa-floppy-disk"></i> Save Menu
+                </button>
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => {
+                    setIsAddingMainMenu(false);
+                    setNewMainMenuRows([]);
+                  }}
+                >
+                  <i className="fa-solid fa-xmark"></i> Cancel
+                </button>
+              </div>
+              <button
+                type="button"
+                className="btn btn-info"
+                onClick={addNewMainMenuRow}
+                title="আরও একটি মূল মেনু যোগ করুন"
+              >
+                <i className="fa-solid fa-plus"></i> আরও মূল মেনু যোগ করুন
               </button>
             </div>
           </div>
         ) : (
-          <div className="card-actions" style={{ marginTop: '10px' }}>
-            <button className="btn btn-add" onClick={() => setIsAddingMainMenu(true)}>
+          <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'flex-start' }}>
+            <button className="btn btn-add" onClick={openAddMainMenuForm}>
               <i className="fa-solid fa-plus"></i> মূল মেনু যোগ করুন
             </button>
           </div>
@@ -1707,17 +2052,12 @@ export default function AdminHeaderDashboardPage() {
             <i className="fa-solid fa-layer-group" style={{ color: '#6f42c1' }}></i>
             ২.৪ মেগা মেনু বিল্ডার (Multiple Mega Menus)
           </div>
-          <div style={{ display: 'flex', gap: '10px' }}>
-            <button className="btn btn-add btn-sm" onClick={createNewMegaMenuBlock}>
-              <i className="fa-solid fa-plus"></i> নতুন মেগা মেনু তৈরি করুন
-            </button>
-          </div>
         </div>
 
         <div>
           {megaMenus.length === 0 ? (
             <p style={{ color: '#777', fontStyle: 'italic' }}>
-              কোনো মেগা মেনু তৈরি করা হয়নি। উপরে "নতুন মেগা মেনু তৈরি করুন" বাটনে ক্লিক করুন।
+              কোনো মেগা মেনু তৈরি করা হয়নি। নিচে "নতুন মেগা মেনু তৈরি করুন" বাটনে ক্লিক করুন।
             </p>
           ) : (
             megaMenus.map((mega, mIdx) => {
@@ -1800,27 +2140,8 @@ export default function AdminHeaderDashboardPage() {
                     )}
                   </div>
 
-                  {/* Add Column Buttons */}
-                  <div
-                    style={{
-                      marginBottom: '15px',
-                      display: 'flex',
-                      gap: '10px',
-                      flexWrap: 'wrap',
-                      paddingBottom: '10px',
-                      borderBottom: '1px dashed #cbd5e1'
-                    }}
-                  >
-                    <button className="btn btn-info btn-sm" onClick={() => addMegaCol(mIdx, 'info')}>
-                      <i className="fa-solid fa-plus"></i> Info Column যোগ
-                    </button>
-                    <button className="btn btn-add btn-sm" onClick={() => addMegaCol(mIdx, 'links')}>
-                      <i className="fa-solid fa-plus"></i> Links Column যোগ
-                    </button>
-                  </div>
-
                   {/* Columns List */}
-                  <div style={{ paddingTop: '10px' }}>
+                  <div>
                     {!mega.columns || mega.columns.length === 0 ? (
                       <p style={{ color: '#888', fontSize: '13px', fontStyle: 'italic' }}>
                         কোনো কলাম যোগ করা হয়নি।
@@ -1858,36 +2179,49 @@ export default function AdminHeaderDashboardPage() {
                                   <div style={{ fontWeight: 'bold', marginBottom: '10px', color: '#17a2b8' }}>
                                     সাইট তথ্য এডিট করুন (Info Column)
                                   </div>
-                                  <div className="form-group">
-                                    <label>আইকন/ইমেজ কোড (HTML):</label>
-                                    <input
-                                      type="text"
-                                      value={editMegaInfoForm.iconHtml}
-                                      onChange={(e) =>
-                                        setEditMegaInfoForm({ ...editMegaInfoForm, iconHtml: e.target.value })
-                                      }
-                                      placeholder='যেমন: <i class="fa-solid fa-star"></i> অথবা <img src="...">'
-                                    />
-                                  </div>
-                                  <div className="form-group">
-                                    <label>কলাম টাইটেল:</label>
-                                    <input
-                                      type="text"
-                                      value={editMegaInfoForm.title}
-                                      onChange={(e) =>
-                                        setEditMegaInfoForm({ ...editMegaInfoForm, title: e.target.value })
-                                      }
-                                    />
-                                  </div>
-                                  <div className="form-group">
-                                    <label>সাইট সম্পর্কে বিবরণ:</label>
-                                    <textarea
-                                      rows="3"
-                                      value={editMegaInfoForm.text}
-                                      onChange={(e) =>
-                                        setEditMegaInfoForm({ ...editMegaInfoForm, text: e.target.value })
-                                      }
-                                    />
+                                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                                    <div className="form-group">
+                                      <label>FontAwesome Icon Class:</label>
+                                      <input
+                                        type="text"
+                                        value={editMegaInfoForm.iconHtml}
+                                        onChange={(e) =>
+                                          setEditMegaInfoForm({ ...editMegaInfoForm, iconHtml: e.target.value })
+                                        }
+                                        placeholder="যেমন: fa-solid fa-circle-info"
+                                      />
+                                    </div>
+                                    <div className="form-group">
+                                      <label>কলাম টাইটেল:</label>
+                                      <input
+                                        type="text"
+                                        value={editMegaInfoForm.title}
+                                        onChange={(e) =>
+                                          setEditMegaInfoForm({ ...editMegaInfoForm, title: e.target.value })
+                                        }
+                                      />
+                                    </div>
+                                    <div className="form-group">
+                                      <label>সাইট সম্পর্কে বিবরণ:</label>
+                                      <textarea
+                                        rows="3"
+                                        value={editMegaInfoForm.text}
+                                        onChange={(e) =>
+                                          setEditMegaInfoForm({ ...editMegaInfoForm, text: e.target.value })
+                                        }
+                                      />
+                                    </div>
+                                    <div className="form-group">
+                                      <label>লিংক / Target URL (ঐচ্ছিক):</label>
+                                      <input
+                                        type="text"
+                                        value={editMegaInfoForm.url}
+                                        onChange={(e) =>
+                                          setEditMegaInfoForm({ ...editMegaInfoForm, url: e.target.value })
+                                        }
+                                        placeholder="যেমন: /about-us অথবা https://..."
+                                      />
+                                    </div>
                                   </div>
                                   <div className="card-actions" style={{ marginTop: '10px' }}>
                                     <button
@@ -1953,6 +2287,435 @@ export default function AdminHeaderDashboardPage() {
                                   </div>
                                   <div style={{ marginLeft: '30px', fontSize: '13px', color: '#555' }}>
                                     {col.text || 'কোনো বিবরণ নেই'}
+                                    {col.url && <div style={{ fontSize: '12px', color: '#007bff', marginTop: '4px' }}><b>URL:</b> {col.url}</div>}
+                                  </div>
+                                </>
+                              )}
+                            </div>
+                          );
+                        }
+
+                        // Image Column
+                        if (col.type === 'image') {
+                          const isEditingThisImage =
+                            editingMegaImage?.mIdx === mIdx && editingMegaImage?.cIdx === cIdx;
+
+                          return (
+                            <div
+                              key={cIdx}
+                              id={`mega-col-${mIdx}-${cIdx}`}
+                              className={`read-box draggable-item ${isDraggingCol ? 'dragging' : ''} ${dropPosCol === 'above' ? 'drop-above' : ''} ${dropPosCol === 'below' ? 'drop-below' : ''}`}
+                              draggable="true"
+                              onDragStart={(e) => handleDragStart(e, 'megacol', mIdx, cIdx)}
+                              onDragEnd={handleDragEnd}
+                              onDragOver={(e) => handleDragOver(e, `megacol-${mIdx}-${cIdx}`, 'megacol', mIdx, cIdx)}
+                              onDrop={(e) => handleDrop(e, 'megacol', mIdx, cIdx)}
+                              style={{
+                                borderLeft: '4px solid #e056fd',
+                                padding: '15px',
+                                marginBottom: '12px',
+                                background: '#ffffff'
+                              }}
+                            >
+                              {isEditingThisImage ? (
+                                <div>
+                                  <div style={{ fontWeight: 'bold', marginBottom: '10px', color: '#e056fd' }}>
+                                    ইমেজ কলাম এডিট করুন (Image Column)
+                                  </div>
+                                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                                    <div className="form-group">
+                                      <label>কলাম টাইটেল:</label>
+                                      <input
+                                        type="text"
+                                        value={editMegaImageForm.title}
+                                        onChange={(e) =>
+                                          setEditMegaImageForm({ ...editMegaImageForm, title: e.target.value })
+                                        }
+                                        placeholder="যেমন: POSTS CAROUSEL"
+                                      />
+                                    </div>
+                                    <div className="form-group">
+                                      <label>ইমেজ URL (Image Path):</label>
+                                      <input
+                                        type="text"
+                                        value={editMegaImageForm.imageUrl}
+                                        onChange={(e) =>
+                                          setEditMegaImageForm({ ...editMegaImageForm, imageUrl: e.target.value })
+                                        }
+                                        placeholder="যেমন: /images/banner.jpg অথবা https://..."
+                                      />
+                                    </div>
+                                    <div className="form-group">
+                                      <label>ইমেজ ক্লিক লিংক / Target URL (ঐচ্ছিক):</label>
+                                      <input
+                                        type="text"
+                                        value={editMegaImageForm.url}
+                                        onChange={(e) =>
+                                          setEditMegaImageForm({ ...editMegaImageForm, url: e.target.value })
+                                        }
+                                        placeholder="যেমন: /all-mcq"
+                                      />
+                                    </div>
+                                    <div className="form-group">
+                                      <label>বিবরণ / সাবটাইটেল (ঐচ্ছিক):</label>
+                                      <input
+                                        type="text"
+                                        value={editMegaImageForm.text}
+                                        onChange={(e) =>
+                                          setEditMegaImageForm({ ...editMegaImageForm, text: e.target.value })
+                                        }
+                                        placeholder="যেমন: বিস্তারিত দেখতে ক্লিক করুন"
+                                      />
+                                    </div>
+                                  </div>
+                                  <div className="card-actions" style={{ marginTop: '10px' }}>
+                                    <button
+                                      className="btn btn-submit"
+                                      onClick={() => saveMegaImageInline(mIdx, cIdx)}
+                                    >
+                                      <i className="fa-solid fa-floppy-disk"></i> Save Changes
+                                    </button>
+                                    <button
+                                      className="btn btn-secondary"
+                                      onClick={() => setEditingMegaImage(null)}
+                                    >
+                                      <i className="fa-solid fa-xmark"></i> Cancel
+                                    </button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <>
+                                  <div className="card-header-flex">
+                                    <div className="read-title" style={{ display: 'flex', alignItems: 'center' }}>
+                                      <i className="fa-solid fa-grip-vertical drag-handle" title="Drag to reorder"></i>
+                                      <div className="arrow-btn-group">
+                                        <button
+                                          type="button"
+                                          className="btn-arrow"
+                                          onClick={() => moveMegaCol(mIdx, cIdx, 'up')}
+                                        >
+                                          ▲
+                                        </button>
+                                        <button
+                                          type="button"
+                                          className="btn-arrow"
+                                          onClick={() => moveMegaCol(mIdx, cIdx, 'down')}
+                                        >
+                                          ▼
+                                        </button>
+                                      </div>
+                                      <i className="fa-solid fa-image" style={{ color: '#e056fd', marginRight: '8px', fontSize: '18px' }}></i>
+                                      {col.title}{' '}
+                                      <small style={{ color: '#777', fontWeight: 'normal', marginLeft: '8px' }}>
+                                        (Image Column)
+                                      </small>
+                                    </div>
+                                    <div className="card-actions">
+                                      <button
+                                        className="btn btn-warning btn-sm"
+                                        onClick={() => startEditMegaImage(mIdx, cIdx)}
+                                      >
+                                        <i className="fa-solid fa-pen-to-square"></i> Edit
+                                      </button>
+                                      <button
+                                        className="btn btn-danger btn-sm"
+                                        onClick={() => deleteMegaCol(mIdx, cIdx)}
+                                      >
+                                        <i className="fa-solid fa-trash"></i> Delete
+                                      </button>
+                                    </div>
+                                  </div>
+                                  <div style={{ marginLeft: '30px', marginTop: '6px' }}>
+                                    <img
+                                      src={col.imageUrl || '/images/banner.jpg'}
+                                      alt=""
+                                      style={{ maxWidth: '180px', maxHeight: '100px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #e2e8f0' }}
+                                    />
+                                    {col.text && <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>{col.text}</div>}
+                                  </div>
+                                </>
+                              )}
+                            </div>
+                          );
+                        }
+
+                        // Icon Column
+                        if (col.type === 'icon') {
+                          const isRenamingColTitle =
+                            editingMegaColTitle?.mIdx === mIdx && editingMegaColTitle?.cIdx === cIdx;
+                          const isAddingIconThis =
+                            activeMegaIconAdd?.mIdx === mIdx && activeMegaIconAdd?.cIdx === cIdx;
+
+                          return (
+                            <div
+                              key={cIdx}
+                              id={`mega-col-${mIdx}-${cIdx}`}
+                              className={`read-box draggable-item ${isDraggingCol ? 'dragging' : ''} ${dropPosCol === 'above' ? 'drop-above' : ''} ${dropPosCol === 'below' ? 'drop-below' : ''}`}
+                              draggable="true"
+                              onDragStart={(e) => handleDragStart(e, 'megacol', mIdx, cIdx)}
+                              onDragEnd={handleDragEnd}
+                              onDragOver={(e) => handleDragOver(e, `megacol-${mIdx}-${cIdx}`, 'megacol', mIdx, cIdx)}
+                              onDrop={(e) => handleDrop(e, 'megacol', mIdx, cIdx)}
+                              style={{
+                                borderLeft: '4px solid #0984e3',
+                                padding: '15px',
+                                marginBottom: '12px',
+                                background: '#ffffff'
+                              }}
+                            >
+                              {isRenamingColTitle ? (
+                                <div>
+                                  <div style={{ fontWeight: 'bold', marginBottom: '10px', color: '#0984e3' }}>
+                                    আইকন কলাম টাইটেল এডিট করুন
+                                  </div>
+                                  <div className="form-group">
+                                    <label>কলাম টাইটেল:</label>
+                                    <input
+                                      type="text"
+                                      value={editMegaColTitleForm}
+                                      onChange={(e) => setEditMegaColTitleForm(e.target.value)}
+                                    />
+                                  </div>
+                                  <div className="card-actions" style={{ marginTop: '10px' }}>
+                                    <button
+                                      className="btn btn-submit"
+                                      onClick={() => saveRenameMegaColTitle(mIdx, cIdx)}
+                                    >
+                                      <i className="fa-solid fa-floppy-disk"></i> Save Title
+                                    </button>
+                                    <button
+                                      className="btn btn-secondary"
+                                      onClick={() => setEditingMegaColTitle(null)}
+                                    >
+                                      <i className="fa-solid fa-xmark"></i> Cancel
+                                    </button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <>
+                                  <div className="card-header-flex">
+                                    <div className="read-title" style={{ display: 'flex', alignItems: 'center' }}>
+                                      <i className="fa-solid fa-grip-vertical drag-handle" title="Drag to reorder"></i>
+                                      <div className="arrow-btn-group">
+                                        <button
+                                          type="button"
+                                          className="btn-arrow"
+                                          onClick={() => moveMegaCol(mIdx, cIdx, 'up')}
+                                        >
+                                          ▲
+                                        </button>
+                                        <button
+                                          type="button"
+                                          className="btn-arrow"
+                                          onClick={() => moveMegaCol(mIdx, cIdx, 'down')}
+                                        >
+                                          ▼
+                                        </button>
+                                      </div>
+                                      <i className="fa-solid fa-icons" style={{ color: '#0984e3', marginRight: '8px', fontSize: '18px' }}></i>
+                                      {col.title}{' '}
+                                      <small style={{ color: '#777', fontWeight: 'normal', marginLeft: '8px' }}>
+                                        (Icon Column)
+                                      </small>
+                                    </div>
+                                    <div className="card-actions">
+                                      <button
+                                        className="btn btn-warning btn-sm"
+                                        onClick={() => startRenameMegaColTitle(mIdx, cIdx)}
+                                      >
+                                        <i className="fa-solid fa-pen-to-square"></i> Edit Title
+                                      </button>
+                                      <button
+                                        className="btn btn-danger btn-sm"
+                                        onClick={() => deleteMegaCol(mIdx, cIdx)}
+                                      >
+                                        <i className="fa-solid fa-trash"></i> Delete Column
+                                      </button>
+                                    </div>
+                                  </div>
+
+                                  {/* Icon Items List */}
+                                  <div style={{ marginLeft: '25px', marginTop: '10px' }}>
+                                    {!col.items || col.items.length === 0 ? (
+                                      <p style={{ color: '#888', fontSize: '13px', fontStyle: 'italic' }}>
+                                        কোনো আইকন আইটেম যোগ করা হয়নি।
+                                      </p>
+                                    ) : (
+                                      col.items.map((item, iIdx) => {
+                                        const isEditingThisIcon =
+                                          editingMegaIconItem?.mIdx === mIdx &&
+                                          editingMegaIconItem?.cIdx === cIdx &&
+                                          editingMegaIconItem?.iIdx === iIdx;
+
+                                        return (
+                                          <div
+                                            key={iIdx}
+                                            style={{
+                                              padding: '8px 12px',
+                                              border: '1px dashed #cbd5e1',
+                                              borderRadius: '6px',
+                                              marginBottom: '8px',
+                                              background: '#f8fafc',
+                                              display: 'flex',
+                                              alignItems: 'center',
+                                              justifyContent: 'space-between',
+                                              flexWrap: 'wrap'
+                                            }}
+                                          >
+                                            {isEditingThisIcon ? (
+                                              <div style={{ width: '100%' }}>
+                                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '8px' }}>
+                                                  <select
+                                                    value={editMegaIconItemForm.iconType}
+                                                    onChange={(e) => setEditMegaIconItemForm({ ...editMegaIconItemForm, iconType: e.target.value })}
+                                                    style={{ width: '100%' }}
+                                                  >
+                                                    <option value="fontawesome">FontAwesome Class</option>
+                                                    <option value="flaticon">Flaticon (URL)</option>
+                                                  </select>
+                                                  <input
+                                                    type="text"
+                                                    value={editMegaIconItemForm.iconValue}
+                                                    onChange={(e) => setEditMegaIconItemForm({ ...editMegaIconItemForm, iconValue: e.target.value })}
+                                                    placeholder={editMegaIconItemForm.iconType === 'flaticon' ? 'Flaticon URL' : 'Icon Class (যেমন: fa-solid fa-star)'}
+                                                    style={{ width: '100%' }}
+                                                  />
+                                                  <input
+                                                    type="text"
+                                                    value={editMegaIconItemForm.title}
+                                                    onChange={(e) => setEditMegaIconItemForm({ ...editMegaIconItemForm, title: e.target.value })}
+                                                    placeholder="টাইটেল (যেমন: Banking)"
+                                                    style={{ width: '100%' }}
+                                                  />
+                                                  <input
+                                                    type="text"
+                                                    value={editMegaIconItemForm.desc}
+                                                    onChange={(e) => setEditMegaIconItemForm({ ...editMegaIconItemForm, desc: e.target.value })}
+                                                    placeholder="বিবরণ / সাবটাইটেল"
+                                                    style={{ width: '100%' }}
+                                                  />
+                                                  <input
+                                                    type="text"
+                                                    value={editMegaIconItemForm.url}
+                                                    onChange={(e) => setEditMegaIconItemForm({ ...editMegaIconItemForm, url: e.target.value })}
+                                                    placeholder="URL (যেমন: /all-mcq)"
+                                                    style={{ width: '100%', gridColumn: '1 / -1' }}
+                                                  />
+                                                </div>
+                                                <div className="card-actions">
+                                                  <button className="btn btn-submit btn-sm" onClick={() => saveMegaIconItemInline(mIdx, cIdx, iIdx)}>
+                                                    <i className="fa-solid fa-floppy-disk"></i> Save
+                                                  </button>
+                                                  <button className="btn btn-secondary btn-sm" onClick={() => setEditingMegaIconItem(null)}>
+                                                    <i className="fa-solid fa-xmark"></i> Cancel
+                                                  </button>
+                                                </div>
+                                              </div>
+                                            ) : (
+                                              <>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                  {item.iconType === 'flaticon' || item.iconValue?.startsWith('http') || item.iconValue?.startsWith('/') ? (
+                                                    <img src={item.iconValue} alt="" style={{ width: '20px', height: '20px', objectFit: 'contain' }} />
+                                                  ) : (
+                                                    <i className={item.iconValue || 'fa-solid fa-building-columns'} style={{ fontSize: '16px', color: '#0984e3' }}></i>
+                                                  )}
+                                                  <div>
+                                                    <b style={{ fontSize: '13.5px', color: '#1e293b' }}>{item.title}</b>
+                                                    {item.desc && <small style={{ color: '#64748b', display: 'block', fontSize: '11.5px' }}>{item.desc}</small>}
+                                                  </div>
+                                                </div>
+                                                <div style={{ display: 'flex', gap: '6px' }}>
+                                                  <button className="btn btn-warning btn-sm" onClick={() => startEditMegaIconItem(mIdx, cIdx, iIdx)}>
+                                                    <i className="fa-solid fa-pen-to-square"></i> Edit
+                                                  </button>
+                                                  <button className="btn btn-danger btn-sm" onClick={() => deleteMegaIconItem(mIdx, cIdx, iIdx)}>
+                                                    <i className="fa-solid fa-trash"></i> Delete
+                                                  </button>
+                                                </div>
+                                              </>
+                                            )}
+                                          </div>
+                                        );
+                                      })
+                                    )}
+
+                                    {/* Multi-row Add Icon Items Form */}
+                                    {isAddingIconThis ? (
+                                      <div style={{ background: '#f8fafc', padding: '12px', border: '1px solid #cbd5e1', borderRadius: '6px', marginTop: '10px' }}>
+                                        <div style={{ fontWeight: 'bold', fontSize: '13px', color: '#0984e3', marginBottom: '10px' }}>
+                                          নতুন আইকন আইটেম যোগ করুন:
+                                        </div>
+                                        {newMegaIconRows.map((row, rIdx) => (
+                                          <div key={rIdx} style={{ marginBottom: '10px', padding: '10px', background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px' }}>
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '8px' }}>
+                                              <select
+                                                value={row.iconType}
+                                                onChange={(e) => updateNewMegaIconRow(rIdx, 'iconType', e.target.value)}
+                                                style={{ width: '100%' }}
+                                              >
+                                                <option value="fontawesome">FontAwesome Class</option>
+                                                <option value="flaticon">Flaticon (URL)</option>
+                                              </select>
+                                              <input
+                                                type="text"
+                                                placeholder={row.iconType === 'flaticon' ? 'Flaticon Image URL' : 'Icon Class (যেমন: fa-solid fa-star)'}
+                                                value={row.iconValue}
+                                                onChange={(e) => updateNewMegaIconRow(rIdx, 'iconValue', e.target.value)}
+                                                style={{ width: '100%' }}
+                                              />
+                                              <input
+                                                type="text"
+                                                placeholder="টাইটেল (যেমন: Banking)"
+                                                value={row.title}
+                                                onChange={(e) => updateNewMegaIconRow(rIdx, 'title', e.target.value)}
+                                                style={{ width: '100%' }}
+                                              />
+                                              <input
+                                                type="text"
+                                                placeholder="বিবরণ / সাবটাইটেল"
+                                                value={row.desc}
+                                                onChange={(e) => updateNewMegaIconRow(rIdx, 'desc', e.target.value)}
+                                                style={{ width: '100%' }}
+                                              />
+                                              <input
+                                                type="text"
+                                                placeholder="URL (যেমন: /all-mcq)"
+                                                value={row.url}
+                                                onChange={(e) => updateNewMegaIconRow(rIdx, 'url', e.target.value)}
+                                                style={{ width: '100%' }}
+                                              />
+                                              <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                <button
+                                                  type="button"
+                                                  className="btn btn-danger btn-sm"
+                                                  onClick={() => removeNewMegaIconRow(rIdx)}
+                                                  style={{ height: '38px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                                                >
+                                                  <i className="fa-solid fa-trash"></i> Delete Row
+                                                </button>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        ))}
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px' }}>
+                                          <button type="button" className="btn btn-secondary btn-sm" onClick={addNewMegaIconRow}>
+                                            <i className="fa-solid fa-plus"></i> + আরও যোগ করুন
+                                          </button>
+                                          <div style={{ display: 'flex', gap: '8px' }}>
+                                            <button type="button" className="btn btn-submit btn-sm" onClick={() => saveAllNewMegaIcons(mIdx, cIdx)}>
+                                              <i className="fa-solid fa-floppy-disk"></i> সব সেভ করুন
+                                            </button>
+                                            <button type="button" className="btn btn-secondary btn-sm" onClick={() => { setActiveMegaIconAdd(null); setNewMegaIconRows([]); }}>
+                                              <i className="fa-solid fa-xmark"></i> Cancel
+                                            </button>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    ) : (
+                                      <button className="btn btn-add btn-sm" style={{ marginTop: '6px' }} onClick={() => openAddMegaIconForm(mIdx, cIdx)}>
+                                        <i className="fa-solid fa-plus"></i> + আইকন যোগ করুন
+                                      </button>
+                                    )}
                                   </div>
                                 </>
                               )}
@@ -2070,7 +2833,7 @@ export default function AdminHeaderDashboardPage() {
                                       dragItem?.idx2 === cIdx &&
                                       dragItem?.idx3 === lIdx;
                                     const dropPosLink =
-                                      dropIndicator?.id === `megalink-${mIdx}-${cIdx}-${lIdx}`
+                                      dropIndicator?.id === `mega-link-${mIdx}-${cIdx}-${lIdx}`
                                         ? dropIndicator.position
                                         : null;
 
@@ -2083,7 +2846,7 @@ export default function AdminHeaderDashboardPage() {
                                         onDragStart={(e) => handleDragStart(e, 'megalink', mIdx, cIdx, lIdx)}
                                         onDragEnd={handleDragEnd}
                                         onDragOver={(e) =>
-                                          handleDragOver(e, `megalink-${mIdx}-${cIdx}-${lIdx}`, 'megalink', mIdx, cIdx, lIdx)
+                                          handleDragOver(e, `mega-link-${mIdx}-${cIdx}-${lIdx}`, 'megalink', mIdx, cIdx, lIdx)
                                         }
                                         onDrop={(e) => handleDrop(e, 'megalink', mIdx, cIdx, lIdx)}
                                         style={{
@@ -2095,14 +2858,14 @@ export default function AdminHeaderDashboardPage() {
                                       >
                                         {isEditingThisLink ? (
                                           <div style={{ width: '100%' }}>
-                                            <div className="row" style={{ marginBottom: '5px', width: '100%' }}>
+                                            <div className="row" style={{ marginBottom: '5px', width: '100%', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                                               <input
                                                 type="text"
                                                 value={editMegaLinkForm.title}
                                                 onChange={(e) =>
                                                   setEditMegaLinkForm({ ...editMegaLinkForm, title: e.target.value })
                                                 }
-                                                style={{ flex: 1 }}
+                                                style={{ flex: 1, minWidth: '130px' }}
                                                 placeholder="টাইটেল"
                                               />
                                               <input
@@ -2111,7 +2874,7 @@ export default function AdminHeaderDashboardPage() {
                                                 onChange={(e) =>
                                                   setEditMegaLinkForm({ ...editMegaLinkForm, url: e.target.value })
                                                 }
-                                                style={{ flex: 1 }}
+                                                style={{ flex: 1, minWidth: '130px' }}
                                                 placeholder="URL"
                                               />
                                             </div>
@@ -2150,8 +2913,10 @@ export default function AdminHeaderDashboardPage() {
                                                   ▼
                                                 </button>
                                               </div>
-                                              <b>{lk.title}</b>{' '}
-                                              <small style={{ color: '#777', marginLeft: '5px' }}>({lk.url})</small>
+                                              <div>
+                                                <b>{lk.title}</b>
+                                                <small style={{ color: '#777', marginLeft: '8px' }}>({lk.url})</small>
+                                              </div>
                                             </span>
                                             <div style={{ display: 'flex', gap: '6px' }}>
                                               <button
@@ -2166,6 +2931,7 @@ export default function AdminHeaderDashboardPage() {
                                               >
                                                 <i className="fa-solid fa-trash"></i> Delete
                                               </button>
+
                                             </div>
                                           </>
                                         )}
@@ -2174,60 +2940,74 @@ export default function AdminHeaderDashboardPage() {
                                   })}
                                 </div>
 
-                                {/* Inline Add Link Form */}
+                                {/* Multi-row Add Mega Link Form */}
                                 {isAddingLinkThis ? (
                                   <div
                                     style={{
                                       marginLeft: '30px',
                                       background: '#f8fafc',
-                                      padding: '10px',
+                                      padding: '12px',
                                       border: '1px solid #cbd5e1',
-                                      borderRadius: '5px',
-                                      marginBottom: '10px',
-                                      display: 'flex',
-                                      gap: '10px',
-                                      flexWrap: 'wrap'
+                                      borderRadius: '6px',
+                                      marginBottom: '10px'
                                     }}
                                   >
-                                    <input
-                                      type="text"
-                                      placeholder="লিংক টাইটেল"
-                                      value={newMegaLinkForm.title}
-                                      onChange={(e) =>
-                                        setNewMegaLinkForm({ ...newMegaLinkForm, title: e.target.value })
-                                      }
-                                      style={{ flex: 1, minWidth: '150px' }}
-                                    />
-                                    <input
-                                      type="text"
-                                      placeholder="URL"
-                                      value={newMegaLinkForm.url}
-                                      onChange={(e) =>
-                                        setNewMegaLinkForm({ ...newMegaLinkForm, url: e.target.value })
-                                      }
-                                      style={{ flex: 1, minWidth: '150px' }}
-                                    />
-                                    <button
-                                      className="btn btn-submit btn-sm"
-                                      onClick={() => saveNewMegaLink(mIdx, cIdx)}
-                                    >
-                                      <i className="fa-solid fa-floppy-disk"></i> Save
-                                    </button>
-                                    <button
-                                      className="btn btn-secondary btn-sm"
-                                      onClick={() => setActiveMegaLinkAdd(null)}
-                                    >
-                                      <i className="fa-solid fa-xmark"></i> Cancel
-                                    </button>
+                                    <div style={{ fontWeight: 'bold', fontSize: '13px', color: '#0284c7', marginBottom: '10px' }}>
+                                      <span>নতুন লিংক যোগ করুন:</span>
+                                    </div>
+
+                                    {newMegaLinkRows.map((row, rIdx) => (
+                                      <div key={rIdx} className="row" style={{ marginBottom: '8px', display: 'flex', gap: '10px', alignItems: 'center' }}>
+                                        <input
+                                          type="text"
+                                          placeholder="লিংক টাইটেল"
+                                          value={row.title}
+                                          onChange={(e) => updateNewMegaLinkRow(rIdx, 'title', e.target.value)}
+                                          style={{ flex: 1, minWidth: '150px' }}
+                                        />
+                                        <input
+                                          type="text"
+                                          placeholder="URL"
+                                          value={row.url}
+                                          onChange={(e) => updateNewMegaLinkRow(rIdx, 'url', e.target.value)}
+                                          style={{ flex: 1, minWidth: '150px' }}
+                                        />
+                                        <button
+                                          type="button"
+                                          className="btn btn-danger btn-sm"
+                                          onClick={() => removeNewMegaLinkRow(rIdx)}
+                                          title="মুছে ফেলুন"
+                                          style={{ height: '38px', display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}
+                                        >
+                                          <i className="fa-solid fa-trash"></i> Delete
+                                        </button>
+                                      </div>
+                                    ))}
+
+                                    <div className="card-actions" style={{ marginTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                      <div style={{ display: 'flex', gap: '8px' }}>
+                                        <button className="btn btn-submit btn-sm" onClick={() => saveAllNewMegaLinks(mIdx, cIdx)}>
+                                          <i className="fa-solid fa-floppy-disk"></i> Save
+                                        </button>
+                                        <button className="btn btn-secondary btn-sm" onClick={() => { setActiveMegaLinkAdd(null); setNewMegaLinkRows([]); }}>
+                                          <i className="fa-solid fa-xmark"></i> Cancel
+                                        </button>
+                                      </div>
+                                      <button
+                                        type="button"
+                                        className="btn btn-info btn-sm"
+                                        onClick={addNewMegaLinkRow}
+                                        title="আরও একটি লিংক যোগ করুন"
+                                      >
+                                        <i className="fa-solid fa-plus"></i> আরও লিংক যোগ করুন
+                                      </button>
+                                    </div>
                                   </div>
                                 ) : (
-                                  <div className="card-actions" style={{ marginLeft: '30px' }}>
+                                  <div style={{ marginLeft: '30px', marginTop: '6px', display: 'flex', justifyContent: 'flex-start' }}>
                                     <button
                                       className="btn btn-info btn-sm"
-                                      onClick={() => {
-                                        setActiveMegaLinkAdd({ mIdx, cIdx });
-                                        setNewMegaLinkForm({ title: '', url: '' });
-                                      }}
+                                      onClick={() => openAddMegaLinkForm(mIdx, cIdx)}
                                     >
                                       <i className="fa-solid fa-plus"></i> লিংক যোগ করুন
                                     </button>
@@ -2240,15 +3020,74 @@ export default function AdminHeaderDashboardPage() {
                       })
                     )}
                   </div>
+
+                  {/* Add Column Buttons */}
+                  <div
+                    style={{
+                      marginTop: '15px',
+                      paddingTop: '10px',
+                      borderTop: '1px dashed #cbd5e1',
+                      display: 'flex',
+                      gap: '10px',
+                      flexWrap: 'wrap',
+                      justifyContent: 'flex-start'
+                    }}
+                  >
+                    <button className="btn btn-info btn-sm" onClick={() => addMegaCol(mIdx, 'info')}>
+                      <i className="fa-solid fa-plus"></i> Info Column যোগ
+                    </button>
+                    <button className="btn btn-add btn-sm" onClick={() => addMegaCol(mIdx, 'links')}>
+                      <i className="fa-solid fa-plus"></i> Links Column যোগ
+                    </button>
+                    <button className="btn btn-warning btn-sm" onClick={() => addMegaCol(mIdx, 'image')} style={{ background: '#e056fd', color: 'white' }}>
+                      <i className="fa-solid fa-image"></i> Image Column যোগ
+                    </button>
+                    <button className="btn btn-primary btn-sm" onClick={() => addMegaCol(mIdx, 'icon')} style={{ background: '#0984e3', color: 'white' }}>
+                      <i className="fa-solid fa-icons"></i> Icon Column যোগ
+                    </button>
+                  </div>
                 </div>
               );
             })
           )}
         </div>
+
+        <div style={{ marginTop: '15px', display: 'flex', justifyContent: 'flex-start' }}>
+          <button className="btn btn-add" onClick={createNewMegaMenuBlock}>
+            <i className="fa-solid fa-plus"></i> নতুন মেগা মেনু তৈরি করুন
+          </button>
+        </div>
       </div>
 
+      {/* Floating Delete Confirmation Bar */}
+      {pendingDelete && (
+        <div id="delete-confirm-bar">
+          <span style={{ color: '#ffffff', fontWeight: 'bold', fontSize: '15px' }}>
+            {pendingDelete.message}
+          </span>
+          <button
+            className="btn btn-danger"
+            style={{ padding: '10px 20px', fontSize: '14px' }}
+            onClick={async () => {
+              const act = pendingDelete.action;
+              setPendingDelete(null);
+              if (act) await act();
+            }}
+          >
+            <i className="fa-solid fa-trash"></i> হ্যাঁ, মুছে ফেলুন
+          </button>
+          <button
+            className="btn btn-secondary"
+            style={{ padding: '10px 15px', fontSize: '14px' }}
+            onClick={() => setPendingDelete(null)}
+          >
+            <i className="fa-solid fa-xmark"></i> বাতিল করুন
+          </button>
+        </div>
+      )}
+
       {/* Drag & Drop Floating Save Action Bar */}
-      {isMenuReordered && (
+      {isMenuReordered && !pendingDelete && (
         <div id="reorder-action-bar">
           <span style={{ color: '#ffffff', fontWeight: 'bold', fontSize: '15px' }}>
             আপনি মেনু বা লিংকের ক্রম পরিবর্তন করেছেন। সেভ করতে বোতাম চাপুন।
