@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import AdminLogoutModal from './AdminLogoutModal';
 
 const DEFAULT_ADMIN_HEADER_BUTTONS = [
   { text: 'ওয়েবসাইট ভিজিট', url: '/', icon: 'fa-solid fa-globe', color: 'success', targetBlank: true },
@@ -17,6 +18,8 @@ export default function AdminHeaderBar() {
   const [headerButtons, setHeaderButtons] = useState(DEFAULT_ADMIN_HEADER_BUTTONS);
   const [user, setUser] = useState(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   useEffect(() => {
     try {
@@ -41,23 +44,30 @@ export default function AdminHeaderBar() {
 
     window.addEventListener('sidebar-toggle', handleSync);
 
+    // Close profile dropdown when clicking outside
+    const handleClickOutside = (e) => {
+      const container = document.getElementById('profile-dropdown-container');
+      if (container && !container.contains(e.target)) {
+        setIsProfileOpen(false);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+
     fetch('/api/sidebar-config')
       .then(res => res.json())
       .then(data => {
         if (data && data.headerButtons && data.headerButtons.length > 0) {
           setHeaderButtons(data.headerButtons);
         } else {
-          setHeaderButtons([
-            { text: 'ওয়েবসাইট ভিজিট', url: '/', icon: 'fa-solid fa-globe', color: 'success', targetBlank: true },
-            { text: 'হোম পেজ এডিটর', url: '/admin/home-dashboard', icon: 'fa-solid fa-sliders', color: 'primary' },
-            { text: 'প্রশ্ন ব্যাংক কন্ট্রোল', url: '/admin/questions-dashboard', icon: 'fa-solid fa-file-circle-question', color: 'info' },
-            { text: 'ইউজার লিস্ট', url: '/admin/users', icon: 'fa-solid fa-users', color: 'warning' }
-          ]);
+          setHeaderButtons(DEFAULT_ADMIN_HEADER_BUTTONS);
         }
       })
       .catch(() => {});
 
-    return () => window.removeEventListener('sidebar-toggle', handleSync);
+    return () => {
+      window.removeEventListener('sidebar-toggle', handleSync);
+      document.removeEventListener('click', handleClickOutside);
+    };
   }, [pathname]);
 
   const toggleDesktopSidebar = () => {
@@ -74,17 +84,12 @@ export default function AdminHeaderBar() {
     } catch (e) {}
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('quiz_token');
-    localStorage.removeItem('user');
-    localStorage.removeItem('quiz_user');
-    router.push('/login');
-  };
-
   const handleButtonClick = (btn) => {
     if (btn.action === 'logout' || btn.url === '#logout') {
-      handleLogout();
+      setIsProfileOpen(false);
+      setTimeout(() => {
+        setShowLogoutConfirm(true);
+      }, 50);
       return;
     }
 
@@ -193,7 +198,14 @@ export default function AdminHeaderBar() {
           color: #ffffff;
         }
 
-        /* Top Right Actions & Profile */
+        /* Top Right Actions & Profile Container */
+        .admin-header-right-container {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          overflow: visible;
+        }
+
         .admin-header-actions-wrapper {
           display: flex;
           align-items: center;
@@ -242,43 +254,31 @@ export default function AdminHeaderBar() {
           flex-shrink: 0;
           padding-left: 10px;
           border-left: 1px solid #334155;
+          position: relative;
         }
 
-        .admin-user-pill {
+        /* Clickable Profile Pill Button */
+        .admin-user-pill-btn {
           background: rgba(255, 255, 255, 0.1);
           color: #e2e8f0;
-          border: 1px solid rgba(255, 255, 255, 0.15);
-          padding: 5px 12px;
+          border: 1px solid rgba(255, 255, 255, 0.18);
+          padding: 6px 14px;
           border-radius: 20px;
-          font-size: 12.5px;
+          font-size: 13px;
           font-weight: 600;
           display: flex;
           align-items: center;
-          gap: 6px;
+          gap: 7px;
           white-space: nowrap;
-        }
-        .admin-user-pill i {
-          color: #38bdf8;
-        }
-
-        .admin-logout-button {
-          background: #dc2626;
-          color: #ffffff;
-          border: none;
-          padding: 6px 14px;
-          border-radius: 6px;
-          font-size: 13px;
-          font-weight: 600;
           cursor: pointer;
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
           transition: all 0.2s ease;
-          white-space: nowrap;
+          outline: none;
         }
-        .admin-logout-button:hover {
-          background: #b91c1c;
-          transform: translateY(-1px);
+        .admin-user-pill-btn:hover {
+          background: rgba(255, 255, 255, 0.2);
+          color: #ffffff;
+          border-color: #38bdf8;
+          box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
         }
 
         @media (max-width: 900px) {
@@ -304,7 +304,7 @@ export default function AdminHeaderBar() {
         }
       `}</style>
 
-      {/* 1. TOP LEFT: [ Collapse Toggle on LEFT ] + [ Brand: Unlock Icon + অ্য়াডমিন প্যানেল (Shows when NOT collapsed) ] */}
+      {/* 1. TOP LEFT: [ Collapse Toggle on LEFT ] + [ Brand: Unlock Icon + অ্যাডমিন প্যানেল ] */}
       <div className="admin-header-left">
         <button
           type="button"
@@ -342,39 +342,132 @@ export default function AdminHeaderBar() {
         )}
       </div>
 
-      {/* 2. TOP RIGHT: Dynamic Action Buttons + User Profile + Logout */}
-      <div className="admin-header-actions-wrapper">
-        <div className="admin-header-actions">
-          {headerButtons.map((btn, idx) => (
-            <button
-              key={idx}
-              type="button"
-              className="admin-action-button"
-              style={{ backgroundColor: getButtonBg(btn.color) }}
-              onClick={() => handleButtonClick(btn)}
-            >
-              {btn.icon && <i className={btn.icon}></i>}
-              <span>{btn.text}</span>
-            </button>
-          ))}
+      {/* 2. TOP RIGHT: Dynamic Action Buttons + Clickable User Profile Dropdown */}
+      <div className="admin-header-right-container">
+        <div className="admin-header-actions-wrapper">
+          <div className="admin-header-actions">
+            {headerButtons.map((btn, idx) => (
+              <button
+                key={idx}
+                type="button"
+                className="admin-action-button"
+                style={{ backgroundColor: getButtonBg(btn.color) }}
+                onClick={() => handleButtonClick(btn)}
+              >
+                {btn.icon && <i className={btn.icon}></i>}
+                <span>{btn.text}</span>
+              </button>
+            ))}
+          </div>
         </div>
 
-        <div className="admin-header-right">
-          <span className="admin-user-pill">
-            <i className="fa-solid fa-circle-user"></i>
-            {user?.name ? user.name.split(' ')[0] : 'Admin'}
-          </span>
+        <div className="admin-header-right" id="profile-dropdown-container">
           <button
             type="button"
-            onClick={handleLogout}
-            className="admin-logout-button"
-            title="লগআউট করুন"
+            className="admin-user-pill-btn"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsProfileOpen(!isProfileOpen);
+            }}
+            title="প্রোফাইল মেনু খুলুন"
           >
-            <i className="fa-solid fa-right-from-bracket"></i>
-            <span>লগআউট</span>
+            <i className="fa-solid fa-circle-user" style={{ color: '#38bdf8' }}></i>
+            <span>{user?.name ? user.name.split(' ')[0] : 'Admin'}</span>
+            <i className={`fa-solid fa-chevron-${isProfileOpen ? 'up' : 'down'}`} style={{ fontSize: '10px', color: '#94a3b8', marginLeft: '2px' }}></i>
           </button>
+
+          {/* Profile Dropdown Popup Menu */}
+          {isProfileOpen && (
+            <div
+              className="profile-popup-menu"
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                position: 'fixed',
+                top: '60px',
+                right: '20px',
+                width: '270px',
+                background: '#1e293b',
+                border: '1px solid #334155',
+                borderRadius: '12px',
+                boxShadow: '0 12px 35px rgba(0, 0, 0, 0.75)',
+                padding: '18px',
+                zIndex: 999999,
+                color: '#f8fafc'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div
+                  style={{
+                    width: '44px',
+                    height: '44px',
+                    borderRadius: '50%',
+                    background: '#0284c7',
+                    color: '#ffffff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '20px',
+                    flexShrink: 0,
+                    boxShadow: '0 2px 8px rgba(2, 132, 199, 0.4)'
+                  }}
+                >
+                  <i className="fa-solid fa-user-gear"></i>
+                </div>
+                <div style={{ overflow: 'hidden' }}>
+                  <div style={{ fontWeight: '700', fontSize: '15px', color: '#f8fafc', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {user?.name || 'Mosabber'}
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#94a3b8', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: '2px' }}>
+                    {user?.email || 'mosabber480@gmail.com'}
+                  </div>
+                  <span style={{ display: 'inline-block', marginTop: '6px', background: '#0369a1', color: '#e0f2fe', fontSize: '10px', fontWeight: '700', padding: '2px 8px', borderRadius: '10px', letterSpacing: '0.5px' }}>
+                    {user?.role ? user.role.toUpperCase() : 'OWNER'}
+                  </span>
+                </div>
+              </div>
+
+              <div style={{ height: '1px', background: '#334155', margin: '14px 0' }}></div>
+
+              <button
+                type="button"
+                className="btn-popup-logout"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  setIsProfileOpen(false);
+                  setTimeout(() => {
+                    setShowLogoutConfirm(true);
+                  }, 50);
+                }}
+                style={{
+                  width: '100%',
+                  background: '#dc2626',
+                  color: '#ffffff',
+                  border: 'none',
+                  padding: '10px 14px',
+                  borderRadius: '6px',
+                  fontSize: '13px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px'
+                }}
+              >
+                <i className="fa-solid fa-right-from-bracket"></i>
+                <span>লগআউট করুন</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Admin Logout Confirmation Modal */}
+      <AdminLogoutModal
+        isOpen={showLogoutConfirm}
+        onClose={() => setShowLogoutConfirm(false)}
+      />
     </header>
   );
 }
