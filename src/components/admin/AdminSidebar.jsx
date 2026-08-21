@@ -185,7 +185,7 @@ export default function AdminSidebar() {
 
           {/* Bottom Sidebar Footer */}
           <div className="sidebar-footer">
-            <Link href="/" className="sidebar-link" title="মূল ওয়েবসাইট">
+            <Link href="/" target="_blank" rel="noopener noreferrer" className="sidebar-link" title="মূল ওয়েবসাইট">
               <div className="link-content">
                 <i className="fa-solid fa-globe" style={{ color: '#38bdf8' }}></i>
                 <span>মূল ওয়েবসাইট</span>

@@ -91,6 +91,33 @@ export default function AdminHomeDashboardPage() {
   // Delete Confirmation Floating Bar State
   const [pendingDelete, setPendingDelete] = useState(null); // { message, action }
 
+  // Collapsible Accordion States (false by default = collapsed, true = expanded)
+  const [expandedSections, setExpandedSections] = useState({
+    sec0: false, // ০. SEO সেটিংস
+    sec1: false, // ১. স্লাইডার সেকশন
+    sec2: false, // ২. ফ্রি ডেমো কুইজ
+    sec3: false, // ৩. প্রিপারেশন প্যাকেজ
+    sec4: false  // ৪. আমাদের মিশন ও লক্ষ্য
+  });
+
+  const [expandedSliders, setExpandedSliders] = useState({});
+  const [expandedDemos, setExpandedDemos] = useState({});
+  const [expandedPackages, setExpandedPackages] = useState({});
+
+  const toggleSection = (secKey) => {
+    setExpandedSections((prev) => ({ ...prev, [secKey]: !prev[secKey] }));
+  };
+  const toggleSlider = (idx) => {
+    setExpandedSliders((prev) => ({ ...prev, [idx]: !prev[idx] }));
+  };
+  const toggleDemo = (idx) => {
+    setExpandedDemos((prev) => ({ ...prev, [idx]: !prev[idx] }));
+  };
+  const togglePackage = (idx) => {
+    setExpandedPackages((prev) => ({ ...prev, [idx]: !prev[idx] }));
+  };
+
+
   // -------------------------------------------------------------
   // Fetch Home Config
   // -------------------------------------------------------------
@@ -845,11 +872,35 @@ export default function AdminHomeDashboardPage() {
       `}</style>
 
       {/* ০. SEO SETTINGS CARD */}
-      <div className="section-card seo-card" id="card-seo">
-        <div className="section-title">
-          <i className="fa-solid fa-magnifying-glass" style={{ color: '#e83e8c' }}></i>
-          হোম পেজ SEO সেটিংস
+      <div className="section-card seo-card" id="card-seo" style={{ marginBottom: '20px' }}>
+        <div
+          className="section-title"
+          onClick={() => toggleSection('sec0')}
+          style={{
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            margin: 0,
+            padding: '14px 18px',
+            background: '#ffffff',
+            borderRadius: '8px',
+            border: '1px solid #e2e8f0',
+            userSelect: 'none',
+            boxShadow: '0 2px 5px rgba(0,0,0,0.03)'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '16px', fontWeight: 'bold' }}>
+            <i className="fa-solid fa-magnifying-glass" style={{ color: '#e83e8c' }}></i>
+            হোম পেজ SEO সেটিংস
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#64748b' }}>
+            <i className={'fa-solid fa-chevron-' + (expandedSections.sec0 ? 'down' : 'right')}></i>
+          </div>
         </div>
+
+        {expandedSections.sec0 && (
+          <div style={{ marginTop: '16px' }}>
 
         {isEditingSeo ? (
           <div className="read-box" style={{ borderLeft: '5px solid #007bff', background: '#ffffff' }}>
@@ -907,14 +958,40 @@ export default function AdminHomeDashboardPage() {
             <i className="fa-solid fa-plus"></i> SEO টাইটেল ও ডেসক্রিপশন যোগ করুন
           </button>
         )}
+          </div>
+        )}
       </div>
 
       {/* ১. SLIDERS MANAGER CARD */}
-      <div className="section-card slider-card" id="card-slider">
-        <div className="section-title">
-          <i className="fa-solid fa-images" style={{ color: 'var(--primary)' }}></i>
-          ১. স্লাইডার সেকশন (Sliders)
+      <div className="section-card slider-card" id="card-slider" style={{ marginBottom: '20px' }}>
+        <div
+          className="section-title"
+          onClick={() => toggleSection('sec1')}
+          style={{
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            margin: 0,
+            padding: '14px 18px',
+            background: '#ffffff',
+            borderRadius: '8px',
+            border: '1px solid #e2e8f0',
+            userSelect: 'none',
+            boxShadow: '0 2px 5px rgba(0,0,0,0.03)'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '16px', fontWeight: 'bold' }}>
+            <i className="fa-solid fa-images" style={{ color: 'var(--primary)' }}></i>
+            ১. স্লাইডার সেকশন (Sliders)
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#64748b' }}>
+            <i className={'fa-solid fa-chevron-' + (expandedSections.sec1 ? 'down' : 'right')}></i>
+          </div>
         </div>
+
+        {expandedSections.sec1 && (
+          <div style={{ marginTop: '16px' }}>
 
         {/* Existing Sliders List */}
         <div>
@@ -1031,10 +1108,18 @@ export default function AdminHomeDashboardPage() {
                   </div>
                 ) : (
                   <>
-                    <div className="card-header-flex">
+                    <div
+                      className="card-header-flex"
+                      onClick={(e) => {
+                        if (!e.target.closest('.card-actions') && !e.target.closest('button') && !e.target.closest('input')) {
+                          toggleSlider(index);
+                        }
+                      }}
+                      style={{ cursor: 'pointer', userSelect: 'none', marginBottom: expandedSliders[index] ? '10px' : '0' }}
+                    >
                       <div className="read-title">
-                        <i className="fa-solid fa-grip-vertical drag-handle" title="মাউস চেপে পজিশন পরিবর্তন করুন"></i>
-                        <div className="arrow-btn-group">
+                        <i className="fa-solid fa-grip-vertical drag-handle" title="মাউস চেপে পজিশন পরিবর্তন করুন" onClick={(e) => e.stopPropagation()}></i>
+                        <div className="arrow-btn-group" onClick={(e) => e.stopPropagation()}>
                           <button
                             type="button"
                             className="btn-arrow"
@@ -1053,8 +1138,9 @@ export default function AdminHomeDashboardPage() {
                           </button>
                         </div>
                         স্লাইডার #{index + 1}: {s.title || '(টাইটেল নেই)'}
+                        <i className={'fa-solid fa-chevron-' + (expandedSliders[index] ? 'down' : 'right')} style={{ fontSize: '13px', color: '#64748b', marginLeft: '8px' }}></i>
                       </div>
-                      <div className="card-actions">
+                      <div className="card-actions" onClick={(e) => e.stopPropagation()}>
                         <button className="btn btn-warning" onClick={() => startEditSlider(index)}>
                           <i className="fa-solid fa-pen-to-square"></i> Edit
                         </button>
@@ -1063,17 +1149,22 @@ export default function AdminHomeDashboardPage() {
                         </button>
                       </div>
                     </div>
-                    <div className="read-subtitle">
-                      <b>সাব-টাইটেল:</b> {s.subtitle || 'নাই'}
-                    </div>
-                    <div className="read-meta">
-                      <b>ইমেজ:</b> {s.bgImage || 'images/slider-01.jpg'} | <b>অপাসিটি:</b>{' '}
-                      {s.bgOpacity !== undefined ? s.bgOpacity : '0.5'}
-                    </div>
-                    <div className="read-preview-text">
-                      <b>বাটন ১:</b> {s.btn1Text || '🚀 কুইজ শুরু করুন'} ({s.btn1Link || 'all-mcq.html'}) |{' '}
-                      <b>বাটন ২:</b> {s.btn2Text || 'ফ্রি ডেমো দেখুন'} ({s.btn2Link || '#demo'})
-                    </div>
+
+                    {expandedSliders[index] && (
+                      <div>
+                        <div className="read-subtitle">
+                          <b>সাব-টাইটেল:</b> {s.subtitle || 'নাই'}
+                        </div>
+                        <div className="read-meta">
+                          <b>ইমেজ:</b> {s.bgImage || 'images/slider-01.jpg'} | <b>অপাসিটি:</b>{' '}
+                          {s.bgOpacity !== undefined ? s.bgOpacity : '0.5'}
+                        </div>
+                        <div className="read-preview-text">
+                          <b>বাটন ১:</b> {s.btn1Text || '🚀 কুইজ শুরু করুন'} ({s.btn1Link || 'all-mcq.html'}) |{' '}
+                          <b>বাটন ২:</b> {s.btn2Text || 'ফ্রি ডেমো দেখুন'} ({s.btn2Link || '#demo'})
+                        </div>
+                      </div>
+                    )}
                   </>
                 )}
               </div>
@@ -1203,14 +1294,40 @@ export default function AdminHomeDashboardPage() {
             </button>
           )}
         </div>
+          </div>
+        )}
       </div>
 
       {/* ২. DEMO QUIZZES CARD */}
-      <div className="section-card demo-card" id="card-demo">
-        <div className="section-title">
-          <i className="fa-solid fa-pen-to-square" style={{ color: 'var(--secondary)' }}></i>
-          ২. ফ্রি ডেমো কুইজ (Demo Quizzes)
+      <div className="section-card demo-card" id="card-demo" style={{ marginBottom: '20px' }}>
+        <div
+          className="section-title"
+          onClick={() => toggleSection('sec2')}
+          style={{
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            margin: 0,
+            padding: '14px 18px',
+            background: '#ffffff',
+            borderRadius: '8px',
+            border: '1px solid #e2e8f0',
+            userSelect: 'none',
+            boxShadow: '0 2px 5px rgba(0,0,0,0.03)'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '16px', fontWeight: 'bold' }}>
+            <i className="fa-solid fa-pen-to-square" style={{ color: 'var(--secondary)' }}></i>
+            ২. ফ্রি ডেমো কুইজ (Demo Quizzes)
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#64748b' }}>
+            <i className={'fa-solid fa-chevron-' + (expandedSections.sec2 ? 'down' : 'right')}></i>
+          </div>
         </div>
+
+        {expandedSections.sec2 && (
+          <div style={{ marginTop: '16px' }}>
 
         {/* Demo Section Header Info */}
         {isEditingDemoHeader ? (
@@ -1356,10 +1473,18 @@ export default function AdminHomeDashboardPage() {
                   </div>
                 ) : (
                   <>
-                    <div className="card-header-flex">
+                    <div
+                      className="card-header-flex"
+                      onClick={(e) => {
+                        if (!e.target.closest('.card-actions') && !e.target.closest('button') && !e.target.closest('input')) {
+                          toggleDemo(index);
+                        }
+                      }}
+                      style={{ cursor: 'pointer', userSelect: 'none', marginBottom: expandedDemos[index] ? '10px' : '0' }}
+                    >
                       <div className="read-title">
-                        <i className="fa-solid fa-grip-vertical drag-handle" title="মাউস চেপে পজিশন পরিবর্তন করুন"></i>
-                        <div className="arrow-btn-group">
+                        <i className="fa-solid fa-grip-vertical drag-handle" title="মাউস চেপে পজিশন পরিবর্তন করুন" onClick={(e) => e.stopPropagation()}></i>
+                        <div className="arrow-btn-group" onClick={(e) => e.stopPropagation()}>
                           <button
                             type="button"
                             className="btn-arrow"
@@ -1378,8 +1503,9 @@ export default function AdminHomeDashboardPage() {
                           </button>
                         </div>
                         ডেমো কুইজ #{index + 1}: {d.title || '(নাম নেই)'}
+                        <i className={'fa-solid fa-chevron-' + (expandedDemos[index] ? 'down' : 'right')} style={{ fontSize: '13px', color: '#64748b', marginLeft: '8px' }}></i>
                       </div>
-                      <div className="card-actions">
+                      <div className="card-actions" onClick={(e) => e.stopPropagation()}>
                         <button className="btn btn-warning" onClick={() => startEditDemo(index)}>
                           <i className="fa-solid fa-pen-to-square"></i> Edit
                         </button>
@@ -1388,15 +1514,20 @@ export default function AdminHomeDashboardPage() {
                         </button>
                       </div>
                     </div>
-                    <div className="read-subtitle">
-                      <b>ব্যাজ:</b> {d.badgeText || 'ফ্রি টেস্ট'}
-                    </div>
-                    <div className="read-meta">
-                      <b>বিবরণ:</b> {d.desc || 'নাই'}
-                    </div>
-                    <div className="read-preview-text">
-                      <b>কুইজ লিংক:</b> {d.link || 'নাই'}
-                    </div>
+
+                    {expandedDemos[index] && (
+                      <div>
+                        <div className="read-subtitle">
+                          <b>ব্যাজ:</b> {d.badgeText || 'ফ্রি টেস্ট'}
+                        </div>
+                        <div className="read-meta">
+                          <b>বিবরণ:</b> {d.desc || 'নাই'}
+                        </div>
+                        <div className="read-preview-text">
+                          <b>কুইজ লিংক:</b> {d.link || 'নাই'}
+                        </div>
+                      </div>
+                    )}
                   </>
                 )}
               </div>
@@ -1492,14 +1623,40 @@ export default function AdminHomeDashboardPage() {
             </button>
           )}
         </div>
+          </div>
+        )}
       </div>
 
       {/* ৩. PACKAGES CARD */}
-      <div className="section-card package-card" id="card-package">
-        <div className="section-title">
-          <i className="fa-solid fa-box-open" style={{ color: 'var(--warning)' }}></i>
-          ৩. প্রিপারেশন প্যাকেজ (Packages)
+      <div className="section-card package-card" id="card-package" style={{ marginBottom: '20px' }}>
+        <div
+          className="section-title"
+          onClick={() => toggleSection('sec3')}
+          style={{
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            margin: 0,
+            padding: '14px 18px',
+            background: '#ffffff',
+            borderRadius: '8px',
+            border: '1px solid #e2e8f0',
+            userSelect: 'none',
+            boxShadow: '0 2px 5px rgba(0,0,0,0.03)'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '16px', fontWeight: 'bold' }}>
+            <i className="fa-solid fa-box-open" style={{ color: 'var(--warning)' }}></i>
+            ৩. প্রিপারেশন প্যাকেজ (Packages)
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#64748b' }}>
+            <i className={'fa-solid fa-chevron-' + (expandedSections.sec3 ? 'down' : 'right')}></i>
+          </div>
         </div>
+
+        {expandedSections.sec3 && (
+          <div style={{ marginTop: '16px' }}>
 
         {/* Package Section Header Info */}
         {isEditingPackageHeader ? (
@@ -1664,10 +1821,18 @@ export default function AdminHomeDashboardPage() {
                   </div>
                 ) : (
                   <>
-                    <div className="card-header-flex">
+                    <div
+                      className="card-header-flex"
+                      onClick={(e) => {
+                        if (!e.target.closest('.card-actions') && !e.target.closest('button') && !e.target.closest('input')) {
+                          togglePackage(index);
+                        }
+                      }}
+                      style={{ cursor: 'pointer', userSelect: 'none', marginBottom: expandedPackages[index] ? '10px' : '0' }}
+                    >
                       <div className="read-title">
-                        <i className="fa-solid fa-grip-vertical drag-handle" title="মাউস চেপে পজিশন পরিবর্তন করুন"></i>
-                        <div className="arrow-btn-group">
+                        <i className="fa-solid fa-grip-vertical drag-handle" title="মাউস চেপে পজিশন পরিবর্তন করুন" onClick={(e) => e.stopPropagation()}></i>
+                        <div className="arrow-btn-group" onClick={(e) => e.stopPropagation()}>
                           <button
                             type="button"
                             className="btn-arrow"
@@ -1686,8 +1851,9 @@ export default function AdminHomeDashboardPage() {
                           </button>
                         </div>
                         প্যাকেজ #{index + 1}: {p.title || '(নাম নেই)'}
+                        <i className={'fa-solid fa-chevron-' + (expandedPackages[index] ? 'down' : 'right')} style={{ fontSize: '13px', color: '#64748b', marginLeft: '8px' }}></i>
                       </div>
-                      <div className="card-actions">
+                      <div className="card-actions" onClick={(e) => e.stopPropagation()}>
                         <button className="btn btn-warning" onClick={() => startEditPackage(index)}>
                           <i className="fa-solid fa-pen-to-square"></i> Edit
                         </button>
@@ -1696,15 +1862,20 @@ export default function AdminHomeDashboardPage() {
                         </button>
                       </div>
                     </div>
-                    <div className="read-subtitle">
-                      <b>মূল্য:</b> {p.price || '৳০'} | <b>মেয়াদ:</b> {p.duration || 'নাই'}
-                    </div>
-                    <div className="read-meta">
-                      <b>বিবরণ:</b> {p.desc || 'নাই'}
-                    </div>
-                    <div className="read-preview-text">
-                      <b>ইমেজ URL:</b> {p.imageUrl || 'নাই'} | <b>বাই লিংক:</b> {p.buyLink || '#contact'}
-                    </div>
+
+                    {expandedPackages[index] && (
+                      <div>
+                        <div className="read-subtitle">
+                          <b>মূল্য:</b> {p.price || '৳০'} | <b>মেয়াদ:</b> {p.duration || 'নাই'}
+                        </div>
+                        <div className="read-meta">
+                          <b>বিবরণ:</b> {p.desc || 'নাই'}
+                        </div>
+                        <div className="read-preview-text">
+                          <b>ইমেজ URL:</b> {p.imageUrl || 'নাই'} | <b>বাই লিংক:</b> {p.buyLink || '#contact'}
+                        </div>
+                      </div>
+                    )}
                   </>
                 )}
               </div>
@@ -1817,14 +1988,40 @@ export default function AdminHomeDashboardPage() {
             </button>
           )}
         </div>
+          </div>
+        )}
       </div>
 
       {/* ৪. MISSION & GOALS CARD */}
-      <div className="section-card mission-card" id="card-mission">
-        <div className="section-title">
-          <i className="fa-solid fa-bullseye" style={{ color: 'var(--purple-btn)' }}></i>
-          ৪. আমাদের মিশন ও লক্ষ্য (Mission & Goals)
+      <div className="section-card mission-card" id="card-mission" style={{ marginBottom: '20px' }}>
+        <div
+          className="section-title"
+          onClick={() => toggleSection('sec4')}
+          style={{
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            margin: 0,
+            padding: '14px 18px',
+            background: '#ffffff',
+            borderRadius: '8px',
+            border: '1px solid #e2e8f0',
+            userSelect: 'none',
+            boxShadow: '0 2px 5px rgba(0,0,0,0.03)'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '16px', fontWeight: 'bold' }}>
+            <i className="fa-solid fa-bullseye" style={{ color: 'var(--purple-btn)' }}></i>
+            ৪. আমাদের মিশন ও লক্ষ্য (Mission & Goals)
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#64748b' }}>
+            <i className={'fa-solid fa-chevron-' + (expandedSections.sec4 ? 'down' : 'right')}></i>
+          </div>
         </div>
+
+        {expandedSections.sec4 && (
+          <div style={{ marginTop: '16px' }}>
 
         {isEditingMission ? (
           <div className="read-box" style={{ borderLeft: '5px solid #007bff', background: '#ffffff' }}>
@@ -1922,6 +2119,8 @@ export default function AdminHomeDashboardPage() {
           <button className="btn btn-add" onClick={startEditMission}>
             <i className="fa-solid fa-plus"></i> মিশন ও লক্ষ্য তথ্য যোগ করুন
           </button>
+        )}
+          </div>
         )}
       </div>
 

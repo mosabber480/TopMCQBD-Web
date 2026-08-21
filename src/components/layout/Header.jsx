@@ -58,6 +58,22 @@ export default function Header({ headerData: initialHeader }) {
     }
   }, [pathname]);
 
+  // Prevent website body scroll when mobile menu is open
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      if (mobileMenuOpen) {
+        document.body.style.overflow = 'hidden';
+      } else {
+        document.body.style.overflow = '';
+      }
+    }
+    return () => {
+      if (typeof document !== 'undefined') {
+        document.body.style.overflow = '';
+      }
+    };
+  }, [mobileMenuOpen]);
+
   // Close mobile menu on route change
   useEffect(() => {
     setMobileMenuOpen(false);
@@ -153,31 +169,33 @@ export default function Header({ headerData: initialHeader }) {
                           if (col.type === 'info') {
                             return (
                               <div key={cIdx} className="mega-col mega-info-col">
-                                  <h4 className="mega-col-title">
-                                    {col.url ? (
-                                      <Link href={mapLegacyUrl(col.url)} onClick={() => { setMobileMenuOpen(false); setOpenDropdownIndex(null); }} style={{ color: 'inherit', textDecoration: 'none' }}>
-                                        {col.iconHtml ? (
-                                          col.iconHtml.trim().startsWith('<') ? (
-                                            <span dangerouslySetInnerHTML={{ __html: col.iconHtml }} style={{ marginRight: '6px' }} />
-                                          ) : (
-                                            <i className={col.iconHtml.trim()} style={{ marginRight: '6px', color: 'var(--primary)' }}></i>
-                                          )
-                                        ) : null}
-                                        {col.title || 'তথ্য'}
-                                      </Link>
-                                    ) : (
-                                      <>
-                                        {col.iconHtml ? (
-                                          col.iconHtml.trim().startsWith('<') ? (
-                                            <span dangerouslySetInnerHTML={{ __html: col.iconHtml }} style={{ marginRight: '6px' }} />
-                                          ) : (
-                                            <i className={col.iconHtml.trim()} style={{ marginRight: '6px', color: 'var(--primary)' }}></i>
-                                          )
-                                        ) : null}
-                                        {col.title || 'তথ্য'}
-                                      </>
-                                    )}
-                                  </h4>
+                                  {(col.title || col.iconHtml) ? (
+                                    <h4 className="mega-col-title">
+                                      {col.url ? (
+                                        <Link href={mapLegacyUrl(col.url)} onClick={() => { setMobileMenuOpen(false); setOpenDropdownIndex(null); }} style={{ color: 'inherit', textDecoration: 'none' }}>
+                                          {col.iconHtml ? (
+                                            col.iconHtml.trim().startsWith('<') ? (
+                                              <span dangerouslySetInnerHTML={{ __html: col.iconHtml }} style={{ marginRight: '6px' }} />
+                                            ) : (
+                                              <i className={col.iconHtml.trim()} style={{ marginRight: '6px', color: 'var(--primary)' }}></i>
+                                            )
+                                          ) : null}
+                                          {col.title || ''}
+                                        </Link>
+                                      ) : (
+                                        <>
+                                          {col.iconHtml ? (
+                                            col.iconHtml.trim().startsWith('<') ? (
+                                              <span dangerouslySetInnerHTML={{ __html: col.iconHtml }} style={{ marginRight: '6px' }} />
+                                            ) : (
+                                              <i className={col.iconHtml.trim()} style={{ marginRight: '6px', color: 'var(--primary)' }}></i>
+                                            )
+                                          ) : null}
+                                          {col.title || ''}
+                                        </>
+                                      )}
+                                    </h4>
+                                  ) : null}
                                 <div>
                                   <p style={{ fontSize: '14px', color: '#555', marginBottom: '15px', lineHeight: '1.6' }}>
                                     {col.text || ''}
@@ -199,14 +217,14 @@ export default function Header({ headerData: initialHeader }) {
                           if (col.type === 'image') {
                             return (
                               <div key={cIdx} className="mega-col mega-image-col">
-                                <h4 className="mega-col-title">{col.title || 'ব্যনার'}</h4>
+                                {col.title && col.title.trim() ? <h4 className="mega-col-title">{col.title}</h4> : null}
                                 <div className="mega-image-box">
                                   {col.url ? (
                                     <Link href={mapLegacyUrl(col.url)} onClick={() => { setMobileMenuOpen(false); setOpenDropdownIndex(null); }}>
-                                      <img src={formatURL(col.imageUrl || '/images/banner.jpg')} alt={col.title || ''} className="mega-banner-img" />
+                                      <img src={formatURL(col.imageUrl || '/images/topmcqbd-book-platform.jpg')} alt={col.title || ''} className="mega-banner-img" />
                                     </Link>
                                   ) : (
-                                    <img src={formatURL(col.imageUrl || '/images/banner.jpg')} alt={col.title || ''} className="mega-banner-img" />
+                                    <img src={formatURL(col.imageUrl || '/images/topmcqbd-book-platform.jpg')} alt={col.title || ''} className="mega-banner-img" />
                                   )}
                                   {col.text && <p className="mega-banner-desc">{col.text}</p>}
                                 </div>
@@ -218,7 +236,7 @@ export default function Header({ headerData: initialHeader }) {
                           if (col.type === 'icon') {
                             return (
                               <div key={cIdx} className="mega-col mega-icon-col">
-                                <h4 className="mega-col-title">{col.title || 'আইকন মেনু'}</h4>
+                                {col.title && col.title.trim() ? <h4 className="mega-col-title">{col.title}</h4> : null}
                                 <div className="mega-icon-cards">
                                   {(col.items || []).map((item, iIdx) => (
                                     <Link
@@ -251,7 +269,7 @@ export default function Header({ headerData: initialHeader }) {
                           // 4. LINKS COLUMN
                           return (
                             <div key={cIdx} className="mega-col mega-links-col">
-                              <h4 className="mega-col-title">{col.title || 'লিংক'}</h4>
+                              {col.title && col.title.trim() ? <h4 className="mega-col-title">{col.title}</h4> : null}
                               <div className="mega-col-links">
                                 {(col.links || []).map((lk, lIdx) => (
                                   <Link

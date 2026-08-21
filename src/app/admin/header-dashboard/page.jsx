@@ -100,6 +100,25 @@ export default function AdminHeaderDashboardPage() {
     url: ''
   });
 
+  // Level 1: Section Accordions State
+  const [expandedSecs, setExpandedSecs] = useState({ sec0: false, sec1: false, sec2: false, sec3: false, sec4: false });
+  const toggleSec = (secId) => setExpandedSecs(prev => ({ ...prev, [secId]: !prev[secId] }));
+
+  // Level 2: Navigation Menu Item Accordions State
+  const [expandedMenus, setExpandedMenus] = useState({});
+  const toggleMenu = (mIdx) => setExpandedMenus(prev => ({ ...prev, [mIdx]: !prev[mIdx] }));
+
+  // Level 2: Mega Menu Block Accordions State
+  const [expandedMegaBlocks, setExpandedMegaBlocks] = useState({});
+  const toggleMegaBlock = (mIdx) => setExpandedMegaBlocks(prev => ({ ...prev, [mIdx]: !prev[mIdx] }));
+
+  // Level 3: Mega Menu Column Accordions State
+  const [expandedMegaCols, setExpandedMegaCols] = useState({});
+  const toggleMegaCol = (mIdx, cIdx) => {
+    const key = `${mIdx}-${cIdx}`;
+    setExpandedMegaCols(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
   // Drag & Drop State
   const [dragItem, setDragItem] = useState(null); // { type, mIdx, idx2, idx3 }
   const [dropIndicator, setDropIndicator] = useState(null); // { id, position: 'above' | 'below' }
@@ -1289,12 +1308,20 @@ export default function AdminHeaderDashboardPage() {
 
       {/* ১. ANNOUNCEMENT BAR CARD */}
       <div className="section-card announce-card">
-        <div className="section-title">
+        <div
+          className="section-title"
+          onClick={() => toggleSec('sec0')}
+          style={{ cursor: 'pointer', userSelect: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: expandedSecs.sec0 ? '15px' : 0, paddingBottom: expandedSecs.sec0 ? '10px' : 0, borderBottom: expandedSecs.sec0 ? '1px dashed #e2e8f0' : 'none' }}
+        >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <i className="fa-solid fa-bullhorn" style={{ color: 'var(--warning)' }}></i>
             ১. অ্যানাউন্সমেন্ট বার (Notice Bar)
           </div>
+          <i className={'fa-solid fa-chevron-' + (expandedSecs.sec0 ? 'down' : 'right')} style={{ fontSize: '14px', color: '#64748b' }}></i>
         </div>
+
+        {expandedSecs.sec0 && (
+          <>
 
         {isEditingAnnounce ? (
           <div className="read-box" style={{ borderLeft: '5px solid #007bff', background: '#ffffff' }}>
@@ -1332,7 +1359,15 @@ export default function AdminHeaderDashboardPage() {
           </div>
         ) : hasAnnounce ? (
           <div className="read-box" style={{ borderLeft: '5px solid #ff9f43' }}>
-            <div className="card-header-flex" style={{ marginBottom: 0 }}>
+            <div
+                        className="card-header-flex"
+                        onClick={(e) => {
+                          if (!e.target.closest('.card-actions') && !e.target.closest('button') && !e.target.closest('input')) {
+                            toggleMenu(mIdx);
+                          }
+                        }}
+                        style={{ marginBottom: 0, cursor: 'pointer', userSelect: 'none' }}
+                      >
               <div>
                 <div className="read-title">
                   <i className="fa-solid fa-bullhorn"></i> {announceInfo.text || '(কোনো নোটিশ নেই)'}
@@ -1356,16 +1391,26 @@ export default function AdminHeaderDashboardPage() {
             <i className="fa-solid fa-plus"></i> অ্যানাউন্সমেন্ট যোগ করুন
           </button>
         )}
+          </>
+        )}
       </div>
 
       {/* ২.১ LOGO, TITLE, & FAVICON CARD */}
       <div className="section-card header-card">
-        <div className="section-title">
+        <div
+          className="section-title"
+          onClick={() => toggleSec('sec1')}
+          style={{ cursor: 'pointer', userSelect: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: expandedSecs.sec1 ? '15px' : 0, paddingBottom: expandedSecs.sec1 ? '10px' : 0, borderBottom: expandedSecs.sec1 ? '1px dashed #e2e8f0' : 'none' }}
+        >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <i className="fa-solid fa-id-card" style={{ color: 'var(--primary)' }}></i>
             ২.১ লোগো, টাইটেল ও ফেভিকন সেটিং
           </div>
+          <i className={'fa-solid fa-chevron-' + (expandedSecs.sec1 ? 'down' : 'right')} style={{ fontSize: '14px', color: '#64748b' }}></i>
         </div>
+
+        {expandedSecs.sec1 && (
+          <>
 
         {isEditingBrand ? (
           <div className="read-box" style={{ borderLeft: '5px solid #007bff', background: '#ffffff' }}>
@@ -1440,16 +1485,26 @@ export default function AdminHeaderDashboardPage() {
             <i className="fa-solid fa-plus"></i> ব্রান্ড তথ্য যোগ করুন
           </button>
         )}
+          </>
+        )}
       </div>
 
       {/* ২.২ HEADER BUTTON CARD */}
       <div className="section-card header-btn-card">
-        <div className="section-title">
+        <div
+          className="section-title"
+          onClick={() => toggleSec('sec2')}
+          style={{ cursor: 'pointer', userSelect: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: expandedSecs.sec2 ? '15px' : 0, paddingBottom: expandedSecs.sec2 ? '10px' : 0, borderBottom: expandedSecs.sec2 ? '1px dashed #e2e8f0' : 'none' }}
+        >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <i className="fa-solid fa-link" style={{ color: '#e83e8c' }}></i>
             ২.২ হেডার বাটন সেটিং
           </div>
+          <i className={'fa-solid fa-chevron-' + (expandedSecs.sec2 ? 'down' : 'right')} style={{ fontSize: '14px', color: '#64748b' }}></i>
         </div>
+
+        {expandedSecs.sec2 && (
+          <>
 
         {isEditingBtn ? (
           <div className="read-box" style={{ borderLeft: '5px solid #007bff', background: '#ffffff' }}>
@@ -1511,16 +1566,26 @@ export default function AdminHeaderDashboardPage() {
             <i className="fa-solid fa-plus"></i> হেডার বাটন যোগ করুন
           </button>
         )}
+          </>
+        )}
       </div>
 
       {/* ২.৩ MENU & SUB-MENU CARD */}
       <div className="section-card menu-card">
-        <div className="section-title">
+        <div
+          className="section-title"
+          onClick={() => toggleSec('sec3')}
+          style={{ cursor: 'pointer', userSelect: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: expandedSecs.sec3 ? '15px' : 0, paddingBottom: expandedSecs.sec3 ? '10px' : 0, borderBottom: expandedSecs.sec3 ? '1px dashed #e2e8f0' : 'none' }}
+        >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <i className="fa-solid fa-bars-staggered" style={{ color: '#20c997' }}></i>
             ২.৩ নেভিগেশন মেনু ও সাব-মেনু সেটিং
           </div>
+          <i className={'fa-solid fa-chevron-' + (expandedSecs.sec3 ? 'down' : 'right')} style={{ fontSize: '14px', color: '#64748b' }}></i>
         </div>
+
+        {expandedSecs.sec3 && (
+          <>
 
         {/* Menus List */}
         <div>
@@ -1587,11 +1652,19 @@ export default function AdminHeaderDashboardPage() {
                     </div>
                   ) : (
                     <div>
-                      <div className="card-header-flex">
+                      <div
+                        className="card-header-flex"
+                        onClick={(e) => {
+                          if (!e.target.closest('.card-actions') && !e.target.closest('button') && !e.target.closest('input')) {
+                            toggleMenu(mIdx);
+                          }
+                        }}
+                        style={{ cursor: 'pointer', userSelect: 'none', marginBottom: expandedMenus[mIdx] ? '12px' : 0 }}
+                      >
                         <div>
                           <div className="read-title" style={{ display: 'flex', alignItems: 'center' }}>
-                            <i className="fa-solid fa-grip-vertical drag-handle" title="Drag to reorder"></i>
-                            <div className="arrow-btn-group">
+                            <i className="fa-solid fa-grip-vertical drag-handle" title="Drag to reorder" onClick={(e) => e.stopPropagation()}></i>
+                            <div className="arrow-btn-group" onClick={(e) => e.stopPropagation()}>
                               <button
                                 type="button"
                                 className="btn-arrow"
@@ -1611,7 +1684,10 @@ export default function AdminHeaderDashboardPage() {
                               className="fa-solid fa-bars"
                               style={{ color: hasMega ? '#6f42c1' : '#20c997', marginRight: '6px' }}
                             ></i>
-                            {m.title || '(নাম নেই)'}
+                            <span style={{ fontWeight: 'bold', fontSize: '15px' }}>{m.title || '(নাম নেই)'}</span>
+                            <span style={{ fontSize: '13px', color: '#64748b', fontWeight: 'normal', marginLeft: '6px' }}>
+                              (URL: {m.url || '#'})
+                            </span>
                             {hasMega && (
                               <span
                                 style={{
@@ -1627,12 +1703,10 @@ export default function AdminHeaderDashboardPage() {
                                 <i className="fa-solid fa-layer-group"></i> Mega Menu Active
                               </span>
                             )}
-                          </div>
-                          <div className="read-subtitle" style={{ marginLeft: '55px' }}>
-                            <b>URL:</b> {m.url || '#'}
+                            <i className={'fa-solid fa-chevron-' + (expandedMenus[mIdx] ? 'down' : 'right')} style={{ fontSize: '13px', color: '#64748b', marginLeft: '8px' }}></i>
                           </div>
                         </div>
-                        <div className="card-actions">
+                        <div className="card-actions" onClick={(e) => e.stopPropagation()}>
                           <button className="btn btn-warning" onClick={() => startEditMainMenu(mIdx)}>
                             <i className="fa-solid fa-pen-to-square"></i> Edit Menu
                           </button>
@@ -1642,7 +1716,8 @@ export default function AdminHeaderDashboardPage() {
                         </div>
                       </div>
 
-                      <div style={{ marginLeft: '55px' }}>
+                      {expandedMenus[mIdx] && (
+                        <div style={{ marginLeft: '55px' }}>
                         {/* 1. If Mega Menu is Connected */}
                         {hasMega ? (
                           <div
@@ -1954,6 +2029,7 @@ export default function AdminHeaderDashboardPage() {
                           </div>
                         )}
                       </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -2012,6 +2088,14 @@ export default function AdminHeaderDashboardPage() {
             ))}
 
             <div className="card-actions" style={{ marginTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <button
+                type="button"
+                className="btn btn-info"
+                onClick={addNewMainMenuRow}
+                title="আরও একটি মূল মেনু যোগ করুন"
+              >
+                <i className="fa-solid fa-plus"></i> আরও মূল মেনু যোগ করুন
+              </button>
               <div style={{ display: 'flex', gap: '10px' }}>
                 <button className="btn btn-submit" onClick={saveAllNewMainMenus}>
                   <i className="fa-solid fa-floppy-disk"></i> Save Menu
@@ -2026,14 +2110,6 @@ export default function AdminHeaderDashboardPage() {
                   <i className="fa-solid fa-xmark"></i> Cancel
                 </button>
               </div>
-              <button
-                type="button"
-                className="btn btn-info"
-                onClick={addNewMainMenuRow}
-                title="আরও একটি মূল মেনু যোগ করুন"
-              >
-                <i className="fa-solid fa-plus"></i> আরও মূল মেনু যোগ করুন
-              </button>
             </div>
           </div>
         ) : (
@@ -2043,16 +2119,26 @@ export default function AdminHeaderDashboardPage() {
             </button>
           </div>
         )}
+          </>
+        )}
       </div>
 
       {/* ২.৪ MEGA MENU BUILDER CARD */}
       <div className="section-card mega-menu-card">
-        <div className="section-title">
+        <div
+          className="section-title"
+          onClick={() => toggleSec('sec4')}
+          style={{ cursor: 'pointer', userSelect: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: expandedSecs.sec4 ? '15px' : 0, paddingBottom: expandedSecs.sec4 ? '10px' : 0, borderBottom: expandedSecs.sec4 ? '1px dashed #e2e8f0' : 'none' }}
+        >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <i className="fa-solid fa-layer-group" style={{ color: '#6f42c1' }}></i>
             ২.৪ মেগা মেনু বিল্ডার (Multiple Mega Menus)
           </div>
+          <i className={'fa-solid fa-chevron-' + (expandedSecs.sec4 ? 'down' : 'right')} style={{ fontSize: '14px', color: '#64748b' }}></i>
         </div>
+
+        {expandedSecs.sec4 && (
+          <>
 
         <div>
           {megaMenus.length === 0 ? (
@@ -2077,13 +2163,20 @@ export default function AdminHeaderDashboardPage() {
                   {/* Mega Menu Block Header */}
                   <div
                     className="card-header-flex"
+                    onClick={(e) => {
+                      if (!e.target.closest('.card-actions') && !e.target.closest('button') && !e.target.closest('input')) {
+                        toggleMegaBlock(mIdx);
+                      }
+                    }}
                     style={{
                       background: '#f8fafc',
                       padding: '12px 18px',
                       borderRadius: '6px',
                       border: '1px solid #e2e8f0',
-                      marginBottom: '20px',
-                      alignItems: 'center'
+                      marginBottom: expandedMegaBlocks[mIdx] ? '18px' : 0,
+                      alignItems: 'center',
+                      cursor: 'pointer',
+                      userSelect: 'none'
                     }}
                   >
                     {isRenamingThisBlock ? (
@@ -2121,8 +2214,9 @@ export default function AdminHeaderDashboardPage() {
                           }}
                         >
                           <i className="fa-solid fa-cube"></i> মেগা মেনু ব্লক: {mega.title}
+                          <i className={'fa-solid fa-chevron-' + (expandedMegaBlocks[mIdx] ? 'down' : 'right')} style={{ fontSize: '14px', color: '#64748b', marginLeft: '10px' }}></i>
                         </h3>
-                        <div className="card-actions">
+                        <div className="card-actions" onClick={(e) => e.stopPropagation()}>
                           <button
                             className="btn btn-warning btn-sm"
                             onClick={() => startRenameMegaBlock(mIdx)}
@@ -2140,6 +2234,8 @@ export default function AdminHeaderDashboardPage() {
                     )}
                   </div>
 
+                  {expandedMegaBlocks[mIdx] && (
+                    <>
                   {/* Columns List */}
                   <div>
                     {!mega.columns || mega.columns.length === 0 ? (
@@ -2240,10 +2336,18 @@ export default function AdminHeaderDashboardPage() {
                                 </div>
                               ) : (
                                 <>
-                                  <div className="card-header-flex">
+                                  <div
+                                    className="card-header-flex"
+                                    onClick={(e) => {
+                                      if (!e.target.closest('.card-actions') && !e.target.closest('button') && !e.target.closest('input')) {
+                                        toggleMegaCol(mIdx, cIdx);
+                                      }
+                                    }}
+                                    style={{ cursor: 'pointer', userSelect: 'none', marginBottom: expandedMegaCols[`${mIdx}-${cIdx}`] ? '10px' : 0 }}
+                                  >
                                     <div className="read-title" style={{ display: 'flex', alignItems: 'center' }}>
-                                      <i className="fa-solid fa-grip-vertical drag-handle" title="Drag to reorder"></i>
-                                      <div className="arrow-btn-group">
+                                      <i className="fa-solid fa-grip-vertical drag-handle" title="Drag to reorder" onClick={(e) => e.stopPropagation()}></i>
+                                      <div className="arrow-btn-group" onClick={(e) => e.stopPropagation()}>
                                         <button
                                           type="button"
                                           className="btn-arrow"
@@ -2265,12 +2369,13 @@ export default function AdminHeaderDashboardPage() {
                                           __html: col.iconHtml || '<i class="fa-solid fa-circle-info"></i>'
                                         }}
                                       ></span>
-                                      {col.title}{' '}
+                                      {col.title && col.title.trim() ? col.title : <span style={{ color: '#94a3b8', fontStyle: 'italic' }}>Without Title</span>}{' '}
                                       <small style={{ color: '#777', fontWeight: 'normal', marginLeft: '8px' }}>
                                         (Info Column)
                                       </small>
+                                      <i className={'fa-solid fa-chevron-' + (expandedMegaCols[`${mIdx}-${cIdx}`] ? 'down' : 'right')} style={{ fontSize: '13px', color: '#64748b', marginLeft: '8px' }}></i>
                                     </div>
-                                    <div className="card-actions">
+                                    <div className="card-actions" onClick={(e) => e.stopPropagation()}>
                                       <button
                                         className="btn btn-warning btn-sm"
                                         onClick={() => startEditMegaInfo(mIdx, cIdx)}
@@ -2285,10 +2390,12 @@ export default function AdminHeaderDashboardPage() {
                                       </button>
                                     </div>
                                   </div>
-                                  <div style={{ marginLeft: '30px', fontSize: '13px', color: '#555' }}>
-                                    {col.text || 'কোনো বিবরণ নেই'}
-                                    {col.url && <div style={{ fontSize: '12px', color: '#007bff', marginTop: '4px' }}><b>URL:</b> {col.url}</div>}
-                                  </div>
+                                  {expandedMegaCols[`${mIdx}-${cIdx}`] && (
+                                    <div style={{ marginLeft: '30px', fontSize: '13px', color: '#555', marginTop: '6px' }}>
+                                      {col.text || 'কোনো বিবরণ নেই'}
+                                      {col.url && <div style={{ fontSize: '12px', color: '#007bff', marginTop: '4px' }}><b>URL:</b> {col.url}</div>}
+                                    </div>
+                                  )}
                                 </>
                               )}
                             </div>
@@ -2385,10 +2492,18 @@ export default function AdminHeaderDashboardPage() {
                                 </div>
                               ) : (
                                 <>
-                                  <div className="card-header-flex">
+                                  <div
+                                    className="card-header-flex"
+                                    onClick={(e) => {
+                                      if (!e.target.closest('.card-actions') && !e.target.closest('button') && !e.target.closest('input')) {
+                                        toggleMegaCol(mIdx, cIdx);
+                                      }
+                                    }}
+                                    style={{ cursor: 'pointer', userSelect: 'none', marginBottom: expandedMegaCols[`${mIdx}-${cIdx}`] ? '10px' : 0 }}
+                                  >
                                     <div className="read-title" style={{ display: 'flex', alignItems: 'center' }}>
-                                      <i className="fa-solid fa-grip-vertical drag-handle" title="Drag to reorder"></i>
-                                      <div className="arrow-btn-group">
+                                      <i className="fa-solid fa-grip-vertical drag-handle" title="Drag to reorder" onClick={(e) => e.stopPropagation()}></i>
+                                      <div className="arrow-btn-group" onClick={(e) => e.stopPropagation()}>
                                         <button
                                           type="button"
                                           className="btn-arrow"
@@ -2405,12 +2520,13 @@ export default function AdminHeaderDashboardPage() {
                                         </button>
                                       </div>
                                       <i className="fa-solid fa-image" style={{ color: '#e056fd', marginRight: '8px', fontSize: '18px' }}></i>
-                                      {col.title}{' '}
+                                      {col.title && col.title.trim() ? col.title : <span style={{ color: '#94a3b8', fontStyle: 'italic' }}>Without Title</span>}{' '}
                                       <small style={{ color: '#777', fontWeight: 'normal', marginLeft: '8px' }}>
                                         (Image Column)
                                       </small>
+                                      <i className={'fa-solid fa-chevron-' + (expandedMegaCols[`${mIdx}-${cIdx}`] ? 'down' : 'right')} style={{ fontSize: '13px', color: '#64748b', marginLeft: '8px' }}></i>
                                     </div>
-                                    <div className="card-actions">
+                                    <div className="card-actions" onClick={(e) => e.stopPropagation()}>
                                       <button
                                         className="btn btn-warning btn-sm"
                                         onClick={() => startEditMegaImage(mIdx, cIdx)}
@@ -2425,14 +2541,16 @@ export default function AdminHeaderDashboardPage() {
                                       </button>
                                     </div>
                                   </div>
-                                  <div style={{ marginLeft: '30px', marginTop: '6px' }}>
-                                    <img
-                                      src={col.imageUrl || '/images/banner.jpg'}
-                                      alt=""
-                                      style={{ maxWidth: '180px', maxHeight: '100px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #e2e8f0' }}
-                                    />
-                                    {col.text && <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>{col.text}</div>}
-                                  </div>
+                                  {expandedMegaCols[`${mIdx}-${cIdx}`] && (
+                                    <div style={{ marginLeft: '30px', marginTop: '6px' }}>
+                                      <img
+                                        src={col.imageUrl || '/images/banner.jpg'}
+                                        alt=""
+                                        style={{ maxWidth: '180px', maxHeight: '100px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #e2e8f0' }}
+                                      />
+                                      {col.text && <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>{col.text}</div>}
+                                    </div>
+                                  )}
                                 </>
                               )}
                             </div>
@@ -2493,10 +2611,18 @@ export default function AdminHeaderDashboardPage() {
                                 </div>
                               ) : (
                                 <>
-                                  <div className="card-header-flex">
+                                  <div
+                                    className="card-header-flex"
+                                    onClick={(e) => {
+                                      if (!e.target.closest('.card-actions') && !e.target.closest('button') && !e.target.closest('input')) {
+                                        toggleMegaCol(mIdx, cIdx);
+                                      }
+                                    }}
+                                    style={{ cursor: 'pointer', userSelect: 'none', marginBottom: expandedMegaCols[`${mIdx}-${cIdx}`] ? '10px' : 0 }}
+                                  >
                                     <div className="read-title" style={{ display: 'flex', alignItems: 'center' }}>
-                                      <i className="fa-solid fa-grip-vertical drag-handle" title="Drag to reorder"></i>
-                                      <div className="arrow-btn-group">
+                                      <i className="fa-solid fa-grip-vertical drag-handle" title="Drag to reorder" onClick={(e) => e.stopPropagation()}></i>
+                                      <div className="arrow-btn-group" onClick={(e) => e.stopPropagation()}>
                                         <button
                                           type="button"
                                           className="btn-arrow"
@@ -2513,12 +2639,13 @@ export default function AdminHeaderDashboardPage() {
                                         </button>
                                       </div>
                                       <i className="fa-solid fa-icons" style={{ color: '#0984e3', marginRight: '8px', fontSize: '18px' }}></i>
-                                      {col.title}{' '}
+                                      {col.title && col.title.trim() ? col.title : <span style={{ color: '#94a3b8', fontStyle: 'italic' }}>Without Title</span>}{' '}
                                       <small style={{ color: '#777', fontWeight: 'normal', marginLeft: '8px' }}>
                                         (Icon Column)
                                       </small>
+                                      <i className={'fa-solid fa-chevron-' + (expandedMegaCols[`${mIdx}-${cIdx}`] ? 'down' : 'right')} style={{ fontSize: '13px', color: '#64748b', marginLeft: '8px' }}></i>
                                     </div>
-                                    <div className="card-actions">
+                                    <div className="card-actions" onClick={(e) => e.stopPropagation()}>
                                       <button
                                         className="btn btn-warning btn-sm"
                                         onClick={() => startRenameMegaColTitle(mIdx, cIdx)}
@@ -2533,6 +2660,9 @@ export default function AdminHeaderDashboardPage() {
                                       </button>
                                     </div>
                                   </div>
+
+                                  {expandedMegaCols[`${mIdx}-${cIdx}`] && (
+                                    <>
 
                                   {/* Icon Items List */}
                                   <div style={{ marginLeft: '25px', marginTop: '10px' }}>
@@ -2717,8 +2847,10 @@ export default function AdminHeaderDashboardPage() {
                                       </button>
                                     )}
                                   </div>
-                                </>
-                              )}
+                                  </>
+                                  )}
+                                 </>
+                               )}
                             </div>
                           );
                         }
@@ -2776,10 +2908,18 @@ export default function AdminHeaderDashboardPage() {
                               </div>
                             ) : (
                               <>
-                                <div className="card-header-flex">
+                                                                <div
+                                  className="card-header-flex"
+                                    onClick={(e) => {
+                                      if (!e.target.closest('.card-actions') && !e.target.closest('button') && !e.target.closest('input')) {
+                                        toggleMegaCol(mIdx, cIdx);
+                                      }
+                                    }}
+                                    style={{ cursor: 'pointer', userSelect: 'none', marginBottom: expandedMegaCols[`${mIdx}-${cIdx}`] ? '10px' : 0 }}
+                                >
                                   <div className="read-title" style={{ display: 'flex', alignItems: 'center' }}>
-                                    <i className="fa-solid fa-grip-vertical drag-handle" title="Drag to reorder"></i>
-                                    <div className="arrow-btn-group">
+                                    <i className="fa-solid fa-grip-vertical drag-handle" title="Drag to reorder" onClick={(e) => e.stopPropagation()}></i>
+                                    <div className="arrow-btn-group" onClick={(e) => e.stopPropagation()}>
                                       <button
                                         type="button"
                                         className="btn-arrow"
@@ -2799,12 +2939,13 @@ export default function AdminHeaderDashboardPage() {
                                       className="fa-solid fa-list"
                                       style={{ color: '#28a745', marginRight: '5px' }}
                                     ></i>{' '}
-                                    {col.title}{' '}
+                                    {col.title && col.title.trim() ? col.title : <span style={{ color: '#94a3b8', fontStyle: 'italic' }}>Without Title</span>}{' '}
                                     <small style={{ color: '#777', fontWeight: 'normal', marginLeft: '8px' }}>
                                       (Links Column)
                                     </small>
+                                    <i className={'fa-solid fa-chevron-' + (expandedMegaCols[`${mIdx}-${cIdx}`] ? 'down' : 'right')} style={{ fontSize: '13px', color: '#64748b', marginLeft: '8px' }}></i>
                                   </div>
-                                  <div className="card-actions">
+                                  <div className="card-actions" onClick={(e) => e.stopPropagation()}>
                                     <button
                                       className="btn btn-warning btn-sm"
                                       onClick={() => startRenameMegaColTitle(mIdx, cIdx)}
@@ -2819,6 +2960,9 @@ export default function AdminHeaderDashboardPage() {
                                     </button>
                                   </div>
                                 </div>
+
+                                {expandedMegaCols[`${mIdx}-${cIdx}`] && (
+                                  <>
 
                                 {/* Links in this column */}
                                 <div style={{ marginLeft: '30px', paddingLeft: '10px', marginBottom: '10px', marginTop: '5px' }}>
@@ -2985,14 +3129,6 @@ export default function AdminHeaderDashboardPage() {
                                     ))}
 
                                     <div className="card-actions" style={{ marginTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                      <div style={{ display: 'flex', gap: '8px' }}>
-                                        <button className="btn btn-submit btn-sm" onClick={() => saveAllNewMegaLinks(mIdx, cIdx)}>
-                                          <i className="fa-solid fa-floppy-disk"></i> Save
-                                        </button>
-                                        <button className="btn btn-secondary btn-sm" onClick={() => { setActiveMegaLinkAdd(null); setNewMegaLinkRows([]); }}>
-                                          <i className="fa-solid fa-xmark"></i> Cancel
-                                        </button>
-                                      </div>
                                       <button
                                         type="button"
                                         className="btn btn-info btn-sm"
@@ -3001,6 +3137,14 @@ export default function AdminHeaderDashboardPage() {
                                       >
                                         <i className="fa-solid fa-plus"></i> আরও লিংক যোগ করুন
                                       </button>
+                                      <div style={{ display: 'flex', gap: '8px' }}>
+                                        <button className="btn btn-submit btn-sm" onClick={() => saveAllNewMegaLinks(mIdx, cIdx)}>
+                                          <i className="fa-solid fa-floppy-disk"></i> Save
+                                        </button>
+                                        <button className="btn btn-secondary btn-sm" onClick={() => { setActiveMegaLinkAdd(null); setNewMegaLinkRows([]); }}>
+                                          <i className="fa-solid fa-xmark"></i> Cancel
+                                        </button>
+                                      </div>
                                     </div>
                                   </div>
                                 ) : (
@@ -3015,6 +3159,8 @@ export default function AdminHeaderDashboardPage() {
                                 )}
                               </>
                             )}
+                          </>
+                        )}
                           </div>
                         );
                       })
@@ -3046,6 +3192,8 @@ export default function AdminHeaderDashboardPage() {
                       <i className="fa-solid fa-icons"></i> Icon Column যোগ
                     </button>
                   </div>
+                  </>
+                  )}
                 </div>
               );
             })
@@ -3057,6 +3205,8 @@ export default function AdminHeaderDashboardPage() {
             <i className="fa-solid fa-plus"></i> নতুন মেগা মেনু তৈরি করুন
           </button>
         </div>
+          </>
+        )}
       </div>
 
       {/* Floating Delete Confirmation Bar */}

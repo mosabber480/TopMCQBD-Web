@@ -56,6 +56,25 @@ export default function AdminMenuDashboardPage() {
   // Delete Confirmation Floating Bar State
   const [pendingDelete, setPendingDelete] = useState(null); // { message, action }
 
+  // Collapsible Accordion States (false by default = collapsed, true = expanded)
+  const [expandedSections, setExpandedSections] = useState({
+    sec1: false, // ১. সাইডবার মেনু কন্ট্রোল
+    sec2: false  // ২. অ্যাডমিন টপ হেডার বাটনসমূহ
+  });
+  const [expandedMenus, setExpandedMenus] = useState({});
+  const [expandedHeaderBtns, setExpandedHeaderBtns] = useState({});
+
+  const toggleSection = (secKey) => {
+    setExpandedSections((prev) => ({ ...prev, [secKey]: !prev[secKey] }));
+  };
+  const toggleMenu = (idx) => {
+    setExpandedMenus((prev) => ({ ...prev, [idx]: !prev[idx] }));
+  };
+  const toggleHeaderBtn = (idx) => {
+    setExpandedHeaderBtns((prev) => ({ ...prev, [idx]: !prev[idx] }));
+  };
+
+
   const fetchConfig = async () => {
     setLoading(true);
     try {
@@ -708,16 +727,40 @@ export default function AdminMenuDashboardPage() {
       `}</style>
 
       {/* 1. SIDEBAR MENUS BUILDER CARD */}
-      <div className="box" style={{ borderLeft: '6px solid #475569' }}>
-        <div style={{ marginBottom: '15px' }}>
-          <h2 style={{ margin: 0, fontSize: '20px' }}>
-            <i className="fa-solid fa-list-check" style={{ color: '#475569', marginRight: '8px' }}></i>
-            সাইডবার মেনু কন্ট্রোল (Sidebar Navigation Builder)
-          </h2>
-          <p style={{ color: '#64748b', fontSize: '13.5px', margin: '4px 0 0 0' }}>
-            অ্যাডমিন প্যানেলের সাইডবারে কোন কোন মেনু ও সাবমেনু দৃশ্যমান হবে তা এখান থেকে সাজান। (মাউস দিয়ে পজিশন ড্র্যাগ করা যাবে)
-          </p>
+      <div className="box" style={{ borderLeft: '6px solid #475569', marginBottom: '20px' }}>
+        <div
+          className="section-title"
+          onClick={() => toggleSection('sec1')}
+          style={{
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            margin: 0,
+            padding: '14px 18px',
+            background: '#ffffff',
+            borderRadius: '8px',
+            border: '1px solid #e2e8f0',
+            userSelect: 'none',
+            boxShadow: '0 2px 5px rgba(0,0,0,0.03)'
+          }}
+        >
+          <div>
+            <h2 style={{ margin: 0, fontSize: '18px', display: 'flex', alignItems: 'center' }}>
+              <i className="fa-solid fa-list-check" style={{ color: '#475569', marginRight: '8px' }}></i>
+              ১. সাইডবার মেনু কন্ট্রোল (Sidebar Navigation Builder)
+            </h2>
+            <p style={{ color: '#64748b', fontSize: '13px', margin: '4px 0 0 0' }}>
+              অ্যাডমিন প্যানেলের সাইডবারে কোন কোন মেনু ও সাবমেনু দৃশ্যমান হবে তা এখান থেকে সাজান।
+            </p>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#64748b' }}>
+            <i className={'fa-solid fa-chevron-' + (expandedSections.sec1 ? 'down' : 'right')}></i>
+          </div>
         </div>
+
+        {expandedSections.sec1 && (
+          <div style={{ marginTop: '16px' }}>
 
         {/* Menus List */}
         <div>
@@ -782,12 +825,20 @@ export default function AdminMenuDashboardPage() {
                 ) : (
                   /* READ VIEW */
                   <div>
-                    <div className="menu-item-header">
+                    <div
+                      className="menu-item-header"
+                      onClick={(e) => {
+                        if (!e.target.closest('.btn') && !e.target.closest('button') && !e.target.closest('input')) {
+                          toggleMenu(index);
+                        }
+                      }}
+                      style={{ cursor: 'pointer', userSelect: 'none' }}
+                    >
                       <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <span className="drag-handle" title="ড্র্যাগ করে ক্রম পরিবর্তন করুন">
+                        <span className="drag-handle" title="ড্র্যাগ করে ক্রম পরিবর্তন করুন" onClick={(e) => e.stopPropagation()}>
                           <i className="fa-solid fa-grip-vertical"></i>
                         </span>
-                        <div className="arrow-btn-group">
+                        <div className="arrow-btn-group" onClick={(e) => e.stopPropagation()}>
                           <button
                             type="button"
                             className="btn-arrow"
@@ -810,14 +861,17 @@ export default function AdminMenuDashboardPage() {
                           style={{ fontSize: '16px', color: '#007bff', marginRight: '10px' }}
                         ></i>
                         <div>
-                          <strong style={{ fontSize: '15px', color: '#1e293b' }}>{menu.label}</strong>
+                          <strong style={{ fontSize: '15px', color: '#1e293b' }}>
+                            {menu.label}
+                            <i className={'fa-solid fa-chevron-' + (expandedMenus[index] ? 'down' : 'right')} style={{ fontSize: '13px', color: '#64748b', marginLeft: '8px' }}></i>
+                          </strong>
                           <div style={{ fontSize: '12px', color: '#64748b' }}>
                             <code>{menu.href}</code> {subMenus.length > 0 && `• (${subMenus.length} সাবমেনু)`}
                           </div>
                         </div>
                       </div>
 
-                      <div style={{ display: 'flex', gap: '6px' }}>
+                      <div style={{ display: 'flex', gap: '6px' }} onClick={(e) => e.stopPropagation()}>
                         <button
                           type="button"
                           className="btn btn-info btn-sm"
@@ -841,6 +895,9 @@ export default function AdminMenuDashboardPage() {
                         </button>
                       </div>
                     </div>
+
+                    {expandedMenus[index] && (
+                      <>
 
                     {/* Submenus List */}
                     {subMenus.length > 0 && (
@@ -967,6 +1024,8 @@ export default function AdminMenuDashboardPage() {
                         </div>
                       </div>
                     )}
+                      </>
+                    )}
                   </div>
                 )}
               </div>
@@ -1049,17 +1108,45 @@ export default function AdminMenuDashboardPage() {
             </button>
           </div>
         )}
+          </div>
+        )}
       </div>
 
       {/* 2. HEADER QUICK ACTION BUTTONS CARD */}
-      <div className="box" style={{ borderLeft: '6px solid var(--secondary, #17a2b8)' }}>
-        <h2>
-          <i className="fa-solid fa-window-maximize" style={{ color: 'var(--secondary)', marginRight: '8px' }}></i>
-          অ্যাডমিন টপ হেডার বাটনসমূহ (Header Quick Actions)
-        </h2>
-        <p style={{ color: '#64748b', fontSize: '13.5px', marginTop: '4px' }}>
-          হেডারের ডানপাশে দৃশ্যমান কুইক অ্যাকশন বাটনগুলো পরিচালনা করুন। (মাউস দিয়ে পজিশন ড্র্যাগ করা যাবে)
-        </p>
+      <div className="box" style={{ borderLeft: '6px solid var(--secondary, #17a2b8)', marginBottom: '20px' }}>
+        <div
+          className="section-title"
+          onClick={() => toggleSection('sec2')}
+          style={{
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            margin: 0,
+            padding: '14px 18px',
+            background: '#ffffff',
+            borderRadius: '8px',
+            border: '1px solid #e2e8f0',
+            userSelect: 'none',
+            boxShadow: '0 2px 5px rgba(0,0,0,0.03)'
+          }}
+        >
+          <div>
+            <h2 style={{ margin: 0, fontSize: '18px', display: 'flex', alignItems: 'center' }}>
+              <i className="fa-solid fa-window-maximize" style={{ color: 'var(--secondary)', marginRight: '8px' }}></i>
+              ২. অ্যাডমিন টপ হেডার বাটনসমূহ (Header Quick Actions)
+            </h2>
+            <p style={{ color: '#64748b', fontSize: '13px', margin: '4px 0 0 0' }}>
+              হেডারের ডানপাশে দৃশ্যমান কুইক অ্যাকশন বাটনগুলো পরিচালনা করুন।
+            </p>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#64748b' }}>
+            <i className={'fa-solid fa-chevron-' + (expandedSections.sec2 ? 'down' : 'right')}></i>
+          </div>
+        </div>
+
+        {expandedSections.sec2 && (
+          <div style={{ marginTop: '16px' }}>
 
         {/* Header Buttons List */}
         <div style={{ marginTop: '15px' }}>
@@ -1132,12 +1219,20 @@ export default function AdminMenuDashboardPage() {
                 ) : (
                   /* READ VIEW */
                   <div>
-                    <div className="menu-item-header">
+                    <div
+                      className="menu-item-header"
+                      onClick={(e) => {
+                        if (!e.target.closest('.btn') && !e.target.closest('button') && !e.target.closest('input')) {
+                          toggleHeaderBtn(index);
+                        }
+                      }}
+                      style={{ cursor: 'pointer', userSelect: 'none' }}
+                    >
                       <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <span className="drag-handle" title="ড্র্যাগ করে ক্রম পরিবর্তন করুন">
+                        <span className="drag-handle" title="ড্র্যাগ করে ক্রম পরিবর্তন করুন" onClick={(e) => e.stopPropagation()}>
                           <i className="fa-solid fa-grip-vertical"></i>
                         </span>
-                        <div className="arrow-btn-group">
+                        <div className="arrow-btn-group" onClick={(e) => e.stopPropagation()}>
                           <button
                             type="button"
                             className="btn-arrow"
@@ -1160,14 +1255,17 @@ export default function AdminMenuDashboardPage() {
                           style={{ fontSize: '16px', color: '#17a2b8', marginRight: '10px' }}
                         ></i>
                         <div>
-                          <strong style={{ fontSize: '15px', color: '#1e293b' }}>{btn.text}</strong>
+                          <strong style={{ fontSize: '15px', color: '#1e293b' }}>
+                            {btn.text}
+                            <i className={'fa-solid fa-chevron-' + (expandedHeaderBtns[index] ? 'down' : 'right')} style={{ fontSize: '13px', color: '#64748b', marginLeft: '8px' }}></i>
+                          </strong>
                           <div style={{ fontSize: '12px', color: '#64748b' }}>
                             <code>{btn.url}</code> • Color: <span style={{ textTransform: 'capitalize', fontWeight: 'bold' }}>{btn.color || 'primary'}</span>
                           </div>
                         </div>
                       </div>
 
-                      <div style={{ display: 'flex', gap: '6px' }}>
+                      <div style={{ display: 'flex', gap: '6px' }} onClick={(e) => e.stopPropagation()}>
                         <button
                           type="button"
                           className="btn btn-warning btn-sm"
@@ -1275,6 +1373,8 @@ export default function AdminMenuDashboardPage() {
             <button className="btn btn-add" onClick={openAddHeaderBtnForm}>
               <i className="fa-solid fa-plus"></i> বাটন যোগ করুন
             </button>
+          </div>
+        )}
           </div>
         )}
       </div>

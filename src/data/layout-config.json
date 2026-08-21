@@ -52,11 +52,18 @@
     "megaMenus": [
       {
         "id": "mega_1787215391182",
-        "title": "নতুন মেগা মেনু 1",
+        "title": "মেগা মেনু 1",
         "columns": [
           {
+            "type": "image",
+            "title": "POSTS CAROUSEL",
+            "imageUrl": "/images/topmcqbd-book-platform.jpg",
+            "url": "",
+            "text": "কোনো রেজিস্ট্রেশন ছাড়াই এখনই নিচের কুইজগুলো প্র্যাকটিস করে দেখুন"
+          },
+          {
             "type": "links",
-            "title": "নতুন লিংক কলাম",
+            "title": "",
             "links": [
               {
                 "title": "বিসিএস প্রস্তুতি",
@@ -89,18 +96,34 @@
             ]
           },
           {
-            "type": "image",
-            "title": "POSTS CAROUSEL",
-            "imageUrl": "https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=600&q=80",
-            "url": "/all-mcq",
-            "text": "সর্বশেষ আপডেট ও কুইজ পোস্ট দেখতে ক্লিক করুন"
-          },
+            "type": "icon",
+            "title": "নতুন আইকন কলাম",
+            "items": [
+              {
+                "iconType": "fontawesome",
+                "iconValue": "fa-solid fa-building-columns",
+                "title": "Banking",
+                "desc": "Store, manage and move your funds safely.",
+                "url": "#"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "mega_1787314295206",
+        "title": "নতুন মেগা মেনু 2",
+        "columns": [
           {
             "type": "info",
-            "title": "কুইজ প্রস্তুতি তথ্য",
-            "text": "সবগুলো কুইজ বিসিএস ও সরকারি চাকরির সিলেবাস অনুযায়ী তৈরি করা হয়েছে।",
-            "iconHtml": "<i class=\"fa-solid fa-graduation-ca\"></i>",
-            "url": ""
+            "title": "নতুন তথ্য কলাম",
+            "text": "সাইট সম্পর্কে কিছু লিখুন...",
+            "iconHtml": "<i class=\"fa-solid fa-circle-info\"></i>"
+          },
+          {
+            "type": "links",
+            "title": "নতুন লিংক কলাম",
+            "links": []
           }
         ]
       }

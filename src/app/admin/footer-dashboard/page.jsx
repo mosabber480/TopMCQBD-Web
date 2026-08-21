@@ -123,6 +123,21 @@ export default function AdminFooterDashboardPage() {
   // Delete Confirmation Floating Bar State
   const [pendingDelete, setPendingDelete] = useState(null); // { message, action }
 
+  // Collapsible Accordion States (false by default = collapsed, true = expanded)
+  const [expandedSections, setExpandedSections] = useState({
+    sec3: false, // ৩. ফুটার সেটিং (Drag & Drop Columns)
+    sec4: false  // ৪. কপিরাইট ও ফুটনোট লিংক
+  });
+  const [expandedCols, setExpandedCols] = useState({});
+
+  const toggleSection = (secKey) => {
+    setExpandedSections((prev) => ({ ...prev, [secKey]: !prev[secKey] }));
+  };
+  const toggleCol = (colIdx) => {
+    setExpandedCols((prev) => ({ ...prev, [colIdx]: !prev[colIdx] }));
+  };
+
+
   // -------------------------------------------------------------
   // Fetch Layout Configuration
   // -------------------------------------------------------------
@@ -921,13 +936,35 @@ export default function AdminFooterDashboardPage() {
       `}</style>
 
       {/* ৩. FOOTER SETTINGS CARD */}
-      <div className="section-card footer-card">
-        <div className="section-title">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+      <div className="section-card footer-card" style={{ marginBottom: '20px' }}>
+        <div
+          className="section-title"
+          onClick={() => toggleSection('sec3')}
+          style={{
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            margin: 0,
+            padding: '14px 18px',
+            background: '#ffffff',
+            borderRadius: '8px',
+            border: '1px solid #e2e8f0',
+            userSelect: 'none',
+            boxShadow: '0 2px 5px rgba(0,0,0,0.03)'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '16px', fontWeight: 'bold' }}>
             <i className="fa-solid fa-table-columns" style={{ color: 'var(--secondary)' }}></i>
             ৩. ফুটার সেটিং (Drag & Drop Columns)
           </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#64748b' }}>
+            <i className={'fa-solid fa-chevron-' + (expandedSections.sec3 ? 'down' : 'right')}></i>
+          </div>
         </div>
+
+        {expandedSections.sec3 && (
+          <div style={{ marginTop: '16px' }}>
 
         {/* Footer Columns List */}
         <div>
@@ -1061,49 +1098,66 @@ export default function AdminFooterDashboardPage() {
                         </div>
                       </div>
                     ) : (
-                      <div className="card-header-flex">
-                        <div>
-                          <div className="read-title">
-                            <i
-                              className="fa-solid fa-grip-vertical col-drag-handle"
-                              title="কলামের পজিশন পরিবর্তন করতে ড্র্যাগ করুন"
-                            ></i>
-                            <div className="arrow-btn-group">
-                              <button
-                                type="button"
-                                className="btn-arrow"
-                                onClick={() => moveColumnPosition(colIdx, 'up')}
-                                title="উপরে তুলুন"
-                              >
-                                ▲
-                              </button>
-                              <button
-                                type="button"
-                                className="btn-arrow"
-                                onClick={() => moveColumnPosition(colIdx, 'down')}
-                                title="নিচে নামান"
-                              >
-                                ▼
-                              </button>
+                      <>
+                        <div
+                          className="card-header-flex"
+                          onClick={(e) => {
+                            if (!e.target.closest('.card-actions') && !e.target.closest('button') && !e.target.closest('input')) {
+                              toggleCol(colIdx);
+                            }
+                          }}
+                          style={{ cursor: 'pointer', userSelect: 'none', marginBottom: expandedCols[colIdx] ? '10px' : '0' }}
+                        >
+                          <div>
+                            <div className="read-title">
+                              <i
+                                className="fa-solid fa-grip-vertical col-drag-handle"
+                                title="কলামের পজিশন পরিবর্তন করতে ড্র্যাগ করুন"
+                                onClick={(e) => e.stopPropagation()}
+                              ></i>
+                              <div className="arrow-btn-group" onClick={(e) => e.stopPropagation()}>
+                                <button
+                                  type="button"
+                                  className="btn-arrow"
+                                  onClick={() => moveColumnPosition(colIdx, 'up')}
+                                  title="উপরে তুলুন"
+                                >
+                                  ▲
+                                </button>
+                                <button
+                                  type="button"
+                                  className="btn-arrow"
+                                  onClick={() => moveColumnPosition(colIdx, 'down')}
+                                  title="নিচে নামান"
+                                >
+                                  ▼
+                                </button>
+                              </div>
+                              <i className="fa-solid fa-circle-info" style={{ color: '#17a2b8' }}></i> {col.title}
+                              <i className={'fa-solid fa-chevron-' + (expandedCols[colIdx] ? 'down' : 'right')} style={{ fontSize: '13px', color: '#64748b', marginLeft: '8px' }}></i>
                             </div>
-                            <i className="fa-solid fa-circle-info" style={{ color: '#17a2b8' }}></i> {col.title}
                           </div>
-                          <div className="read-subtitle">
-                            <b>About Text:</b> {col.text}
-                          </div>
-                          <div className="read-meta">
-                            <b>Active Social Links:</b> {socialPreview}
+                          <div className="card-actions" onClick={(e) => e.stopPropagation()}>
+                            <button className="btn btn-warning" onClick={() => startEditFooterInfo(colIdx)}>
+                              <i className="fa-solid fa-pen-to-square"></i> Edit
+                            </button>
+                            <button className="btn btn-danger" onClick={() => deleteFooterColumn(colIdx)}>
+                              <i className="fa-solid fa-trash"></i> Delete Column
+                            </button>
                           </div>
                         </div>
-                        <div className="card-actions">
-                          <button className="btn btn-warning" onClick={() => startEditFooterInfo(colIdx)}>
-                            <i className="fa-solid fa-pen-to-square"></i> Edit
-                          </button>
-                          <button className="btn btn-danger" onClick={() => deleteFooterColumn(colIdx)}>
-                            <i className="fa-solid fa-trash"></i> Delete Column
-                          </button>
-                        </div>
-                      </div>
+
+                        {expandedCols[colIdx] && (
+                          <div>
+                            <div className="read-subtitle">
+                              <b>About Text:</b> {col.text}
+                            </div>
+                            <div className="read-meta">
+                              <b>Active Social Links:</b> {socialPreview}
+                            </div>
+                          </div>
+                        )}
+                      </>
                     )}
                   </div>
                 );
@@ -1148,14 +1202,23 @@ export default function AdminFooterDashboardPage() {
                     </div>
                   ) : (
                     <>
-                      <div className="card-header-flex">
+                      <div
+                        className="card-header-flex"
+                        onClick={(e) => {
+                          if (!e.target.closest('.card-actions') && !e.target.closest('button') && !e.target.closest('input')) {
+                            toggleCol(colIdx);
+                          }
+                        }}
+                        style={{ cursor: 'pointer', userSelect: 'none', marginBottom: expandedCols[colIdx] ? '10px' : '0' }}
+                      >
                         <div>
                           <div className="read-title">
                             <i
                               className="fa-solid fa-grip-vertical col-drag-handle"
                               title="কলামের পজিশন পরিবর্তন করতে ড্র্যাগ করুন"
+                              onClick={(e) => e.stopPropagation()}
                             ></i>
-                            <div className="arrow-btn-group">
+                            <div className="arrow-btn-group" onClick={(e) => e.stopPropagation()}>
                               <button
                                 type="button"
                                 className="btn-arrow"
@@ -1174,9 +1237,10 @@ export default function AdminFooterDashboardPage() {
                               </button>
                             </div>
                             <i className="fa-solid fa-list" style={{ color: '#17a2b8' }}></i> {col.title}
+                            <i className={'fa-solid fa-chevron-' + (expandedCols[colIdx] ? 'down' : 'right')} style={{ fontSize: '13px', color: '#64748b', marginLeft: '8px' }}></i>
                           </div>
                         </div>
-                        <div className="card-actions">
+                        <div className="card-actions" onClick={(e) => e.stopPropagation()}>
                           <button className="btn btn-warning" onClick={() => startEditFooterTitle(colIdx)}>
                             <i className="fa-solid fa-pen-to-square"></i> Edit Title
                           </button>
@@ -1186,8 +1250,10 @@ export default function AdminFooterDashboardPage() {
                         </div>
                       </div>
 
-                      {/* Links in this Column */}
-                      {linksList.length > 0 && (
+                      {expandedCols[colIdx] && (
+                        <>
+                          {/* Links in this Column */}
+                          {linksList.length > 0 && (
                         <div className="sub-menu-list footer-drag-container">
                           <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#555', marginBottom: '5px' }}>
                             লিংক সমূহ (মাউস দিয়ে পজিশন ড্র্যাগ করা যাবে):
@@ -1367,6 +1433,14 @@ export default function AdminFooterDashboardPage() {
                           ))}
 
                           <div className="card-actions" style={{ marginTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <button
+                              type="button"
+                              className="btn btn-info"
+                              onClick={addNewFooterLinkRow}
+                              title="আরও একটি লিংক রো যোগ করুন"
+                            >
+                              <i className="fa-solid fa-plus"></i> আরও যোগ করুন
+                            </button>
                             <div style={{ display: 'flex', gap: '8px' }}>
                               <button
                                 className="btn btn-submit"
@@ -1384,14 +1458,6 @@ export default function AdminFooterDashboardPage() {
                                 <i className="fa-solid fa-xmark"></i> Cancel
                               </button>
                             </div>
-                            <button
-                              type="button"
-                              className="btn btn-info"
-                              onClick={addNewFooterLinkRow}
-                              title="আরও একটি লিংক রো যোগ করুন"
-                            >
-                              <i className="fa-solid fa-plus"></i> আরও যোগ করুন
-                            </button>
                           </div>
                         </div>
                       )}
@@ -1406,7 +1472,9 @@ export default function AdminFooterDashboardPage() {
                           </button>
                         </div>
                       )}
-                    </>
+                      </>
+                      )}
+                      </>
                   )}
                 </div>
               );
@@ -1423,16 +1491,40 @@ export default function AdminFooterDashboardPage() {
             <i className="fa-solid fa-plus"></i> Links Column যোগ
           </button>
         </div>
+          </div>
+        )}
       </div>
 
       {/* ৪. COPYRIGHT SETTINGS CARD */}
-      <div className="section-card copy-card">
-        <div className="section-title">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+      <div className="section-card copy-card" style={{ marginBottom: '20px' }}>
+        <div
+          className="section-title"
+          onClick={() => toggleSection('sec4')}
+          style={{
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            margin: 0,
+            padding: '14px 18px',
+            background: '#ffffff',
+            borderRadius: '8px',
+            border: '1px solid #e2e8f0',
+            userSelect: 'none',
+            boxShadow: '0 2px 5px rgba(0,0,0,0.03)'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '16px', fontWeight: 'bold' }}>
             <i className="fa-solid fa-copyright" style={{ color: 'var(--purple-btn)' }}></i>
             ৪. কপিরাইট ও ফুটনোট লিংক
           </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#64748b' }}>
+            <i className={'fa-solid fa-chevron-' + (expandedSections.sec4 ? 'down' : 'right')}></i>
+          </div>
         </div>
+
+        {expandedSections.sec4 && (
+          <div style={{ marginTop: '16px' }}>
 
         {/* Copyright Text */}
         {isEditingCopyrightText ? (
@@ -1673,6 +1765,14 @@ export default function AdminFooterDashboardPage() {
             ))}
 
             <div className="card-actions" style={{ marginTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <button
+                type="button"
+                className="btn btn-info"
+                onClick={addNewCopyLinkRow}
+                title="আরও একটি লিংক রো যোগ করুন"
+              >
+                <i className="fa-solid fa-plus"></i> আরও যোগ করুন
+              </button>
               <div style={{ display: 'flex', gap: '8px' }}>
                 <button className="btn btn-submit" onClick={saveAllNewCopyLinks}>
                   <i className="fa-solid fa-floppy-disk"></i> Save Links
@@ -1687,14 +1787,6 @@ export default function AdminFooterDashboardPage() {
                   <i className="fa-solid fa-xmark"></i> Cancel
                 </button>
               </div>
-              <button
-                type="button"
-                className="btn btn-info"
-                onClick={addNewCopyLinkRow}
-                title="আরও একটি লিংক রো যোগ করুন"
-              >
-                <i className="fa-solid fa-plus"></i> আরও যোগ করুন
-              </button>
             </div>
           </div>
         ) : (
@@ -1702,6 +1794,8 @@ export default function AdminFooterDashboardPage() {
             <button className="btn btn-info" onClick={openAddCopyLinkForm}>
               <i className="fa-solid fa-plus"></i> কপিরাইট লিংক যোগ করুন
             </button>
+          </div>
+        )}
           </div>
         )}
       </div>
