@@ -282,12 +282,21 @@ function ModelTestContent() {
   const [onlineCounts, setOnlineCounts] = useState(() => {
     const initial = {};
     INITIAL_EXAMS.forEach(e => {
-      initial[e.id] = getWeightedOnlineCount();
+      initial[e.id] = e.onlineUsers || 30;
     });
     return initial;
   });
 
   useEffect(() => {
+    // Set initial random counts on client mount
+    setOnlineCounts(prev => {
+      const next = { ...prev };
+      INITIAL_EXAMS.forEach(e => {
+        next[e.id] = getWeightedOnlineCount(prev[e.id]);
+      });
+      return next;
+    });
+
     const interval = setInterval(() => {
       setOnlineCounts(prev => {
         const next = { ...prev };
