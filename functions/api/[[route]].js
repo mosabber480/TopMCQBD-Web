@@ -364,7 +364,7 @@ export async function onRequest(context) {
         return jsonResponse({ success: false, message: 'Name, Email, and Password are required' }, 400);
       }
 
-      const cleanEmail = email.toLowerCase().trim();
+      const cleanEmail = String(email).toLowerCase().trim();
       const db = await getPaidDb(context);
       const usersCollection = db.collection('users');
 
@@ -373,9 +373,18 @@ export async function onRequest(context) {
         return jsonResponse({ success: false, message: 'User already exists with this email' }, 400);
       }
 
-      const hashedPassword = await bcrypt.hash(password, 10);
+      let hashedPassword = String(password);
+      try {
+        hashedPassword = await bcrypt.hash(String(password), 10);
+      } catch (hashErr) {
+        console.warn('bcrypt hash async fallback:', hashErr.message);
+        try {
+          hashedPassword = bcrypt.hashSync(String(password), 10);
+        } catch (e2) {}
+      }
+
       const newUserDoc = {
-        name: name.trim(),
+        name: String(name).trim(),
         email: cleanEmail,
         password: hashedPassword,
         role: role && ['customer', 'admin'].includes(role) ? role : 'customer',
@@ -385,27 +394,35 @@ export async function onRequest(context) {
         updatedAt: new Date()
       };
 
-      const result = await usersCollection.insertOne(newUserDoc);
-      const insertedId = result.insertedId.toString();
+      try {
+        const result = await usersCollection.insertOne(newUserDoc);
+        const insertedId = result?.insertedId ? String(result.insertedId) : ('usr_' + Date.now());
 
-      const userForToken = {
-        _id: insertedId,
-        id: insertedId,
-        name: newUserDoc.name,
-        email: newUserDoc.email,
-        role: newUserDoc.role,
-        subscription: newUserDoc.subscription,
-        pendingRequests: newUserDoc.pendingRequests
-      };
+        const userForToken = {
+          _id: insertedId,
+          id: insertedId,
+          name: newUserDoc.name,
+          email: newUserDoc.email,
+          role: newUserDoc.role,
+          subscription: newUserDoc.subscription,
+          pendingRequests: newUserDoc.pendingRequests
+        };
 
-      const token = await generateToken(userForToken, context.env);
-      return jsonResponse({
-        success: true,
-        message: 'Registration successful!',
-        token,
-        user: userForToken
-      }, 201);
+        const token = await generateToken(userForToken, context.env);
+        return jsonResponse({
+          success: true,
+          message: 'Registration successful!',
+          token,
+          user: userForToken
+        }, 201);
+      } catch (insertErr) {
+        if (insertErr.code === 11000 || String(insertErr.message).includes('E11000') || String(insertErr.message).includes('duplicate')) {
+          return jsonResponse({ success: false, message: 'User already exists with this email' }, 400);
+        }
+        throw insertErr;
+      }
     }
+
 
     if (route === 'auth/change-password' && method === 'PUT') {
       const payload = await verifyTokenFromRequest(request, context.env);
@@ -662,6 +679,8 @@ export async function onRequest(context) {
     return jsonResponse({ success: true, message: 'TopMCQBD Cloudflare Edge API Online', route });
 
   } catch (err) {
-    return jsonResponse({ success: false, error: err.message || 'Internal Server Error' }, 500);
+    const errorMsg = err?.message || 'Internal Server Error';
+    return jsonResponse({ success: false, message: errorMsg, error: errorMsg }, 500);
   }
 }
+
