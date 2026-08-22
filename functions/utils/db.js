@@ -41,19 +41,19 @@ export async function getPaidDb(context) {
 
   if (!paidClientPromise) {
     paidClientPromise = (async () => {
+      const options = {
+        connectTimeoutMS: 15000,
+        serverSelectionTimeoutMS: 15000,
+        maxPoolSize: 10,
+        family: 4,
+      };
       try {
-        const client = new MongoClient(uri, {
-          connectTimeoutMS: 5000,
-          serverSelectionTimeoutMS: 5000,
-        });
+        const client = new MongoClient(uri, options);
         await client.connect();
         return client;
       } catch (err) {
         console.warn('Primary Paid MongoDB SRV connection failed, trying direct replica URI...', err.message);
-        const fallbackClient = new MongoClient(DIRECT_PAID_URI, {
-          connectTimeoutMS: 5000,
-          serverSelectionTimeoutMS: 5000,
-        });
+        const fallbackClient = new MongoClient(DIRECT_PAID_URI, options);
         await fallbackClient.connect();
         return fallbackClient;
       }
@@ -74,19 +74,19 @@ export async function getFreeDb(context) {
 
   if (!freeClientPromise) {
     freeClientPromise = (async () => {
+      const options = {
+        connectTimeoutMS: 15000,
+        serverSelectionTimeoutMS: 15000,
+        maxPoolSize: 10,
+        family: 4,
+      };
       try {
-        const client = new MongoClient(uri, {
-          connectTimeoutMS: 5000,
-          serverSelectionTimeoutMS: 5000,
-        });
+        const client = new MongoClient(uri, options);
         await client.connect();
         return client;
       } catch (err) {
         console.warn('Primary Free MongoDB SRV connection failed, trying direct replica URI...', err.message);
-        const fallbackClient = new MongoClient(DIRECT_FREE_URI, {
-          connectTimeoutMS: 5000,
-          serverSelectionTimeoutMS: 5000,
-        });
+        const fallbackClient = new MongoClient(DIRECT_FREE_URI, options);
         await fallbackClient.connect();
         return fallbackClient;
       }
@@ -99,4 +99,5 @@ export async function getFreeDb(context) {
   const client = await freeClientPromise;
   return client.db(dbName);
 }
+
 
