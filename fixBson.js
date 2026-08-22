@@ -11,7 +11,7 @@ if (fs.existsSync(bsonLibDir)) {
       let content = fs.readFileSync(filePath, 'utf8');
       if (content.includes('resetState')) {
         content = content
-          .replace(/this\.resetState/g, 'ObjectId.resetState')
+          .replace(/ObjectId\.resetState/g, 'this.resetState')
           .replace(/this\.index/g, 'ObjectId.index')
           .replace(/this\.PROCESS_UNIQUE/g, 'ObjectId.PROCESS_UNIQUE');
         fs.writeFileSync(filePath, content, 'utf8');
@@ -20,5 +20,6 @@ if (fs.existsSync(bsonLibDir)) {
     }
   }
 }
+
 
 
