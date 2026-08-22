@@ -2,10 +2,10 @@
 import { MongoClient } from 'mongodb';
 
 const DIRECT_PAID_URI = 'mongodb://mosabber480_db_user:EScirLEzwgQVVNaB@ac-472re4l-shard-00-00.3ajdj0u.mongodb.net:27017,ac-472re4l-shard-00-01.3ajdj0u.mongodb.net:27017,ac-472re4l-shard-00-02.3ajdj0u.mongodb.net:27017/TopMCQBD_DB?ssl=true&replicaSet=atlas-wzdf1e-shard-0&authSource=admin&appName=Mosabber';
-const DIRECT_FREE_URI = 'mongodb://mosabber480_db_user:VVcrE9PeIIyVlcKU@ac-rw27hdk-shard-00-00.pixb7fx.mongodb.net:27017,ac-rw27hdk-shard-00-01.pixb7fx.mongodb.net:27017,ac-rw27hdk-shard-00-02.pixb7fx.mongodb.net:27017/TopMCQBD_DB_Free?ssl=true&replicaSet=atlas-13msb7-shard-0&authSource=admin';
+const DIRECT_FREE_URI = 'mongodb://mosabber480_db_user:VVcrE9PeIIyVlcKU@ac-rw27hdk-shard-00-00.pixb7fx.mongodb.net:27017,ac-rw27hdk-shard-00-01.pixb7fx.mongodb.net:27017,ac-rw27hdk-shard-00-02.pixb7fx.mongodb.net:27017/TopMCQBD_DB_Free?ssl=true&replicaSet=atlas-bntyny-shard-0&authSource=admin';
 
-const DEFAULT_PAID_URI = 'mongodb+srv://mosabber480_db_user:EScirLEzwgQVVNaB@mosabber.3ajdj0u.mongodb.net/TopMCQBD_DB?retryWrites=true&w=majority';
-const DEFAULT_FREE_URI = 'mongodb+srv://mosabber480_db_user:VVcrE9PeIIyVlcKU@topmcqbd.pixb7fx.mongodb.net/TopMCQBD_DB_Free?retryWrites=true&w=majority';
+const DEFAULT_PAID_URI = DIRECT_PAID_URI;
+const DEFAULT_FREE_URI = DIRECT_FREE_URI;
 
 let paidClientPromise = null;
 let freeClientPromise = null;
@@ -52,7 +52,7 @@ export async function getPaidDb(context) {
         await client.connect();
         return client;
       } catch (err) {
-        console.warn('Primary Paid MongoDB SRV connection failed, trying direct replica URI...', err.message);
+        console.warn('Primary Paid MongoDB connection failed, trying direct replica URI...', err.message);
         const fallbackClient = new MongoClient(DIRECT_PAID_URI, options);
         await fallbackClient.connect();
         return fallbackClient;
@@ -85,7 +85,7 @@ export async function getFreeDb(context) {
         await client.connect();
         return client;
       } catch (err) {
-        console.warn('Primary Free MongoDB SRV connection failed, trying direct replica URI...', err.message);
+        console.warn('Primary Free MongoDB connection failed, trying direct replica URI...', err.message);
         const fallbackClient = new MongoClient(DIRECT_FREE_URI, options);
         await fallbackClient.connect();
         return fallbackClient;
@@ -99,5 +99,6 @@ export async function getFreeDb(context) {
   const client = await freeClientPromise;
   return client.db(dbName);
 }
+
 
 
