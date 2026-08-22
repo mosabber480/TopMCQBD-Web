@@ -11,20 +11,23 @@ if (fs.existsSync(bsonLibDir)) {
       let content = fs.readFileSync(filePath, 'utf8');
       if (content.includes('resetState')) {
         content = content
-          // Convert arrow function static property to static method so esbuild keeps it inside the class definition
+          // Initialize index with random value directly
+          .replace(/static\s+index\s*=\s*0;/g, 'static index = Math.floor(Math.random() * 0x1000000);')
+          // Convert resetState to static class method
           .replace(/static\s+resetState\s*=\s*\(\)\s*=>\s*\{/g, 'static resetState() {')
-          // Ensure index and PROCESS_UNIQUE refer to ObjectId
+          // Fix references inside resetState
           .replace(/this\.index/g, 'ObjectId.index')
           .replace(/this\.PROCESS_UNIQUE/g, 'ObjectId.PROCESS_UNIQUE')
-          // Make the static block initializer completely safe
-          .replace(/this\.resetState\?\.\(\);/g, 'if (typeof this?.resetState === "function") this.resetState();')
-          .replace(/ObjectId\.resetState\?\.\(\);/g, 'if (typeof ObjectId?.resetState === "function") ObjectId.resetState();');
+          // Remove the V8 snapshot static block completely to prevent esbuild IIFE `this` evaluation error on Cloudflare Workers
+          .replace(/static\s*\{[\s\S]*?addDeserializeCallback[\s\S]*?\}\s*\}/g, '');
+
         fs.writeFileSync(filePath, content, 'utf8');
         console.log(`✅ Patched BSON static initializer in ${file}`);
       }
     }
   }
 }
+
 
 
 
