@@ -134,13 +134,29 @@ function LoginComponent() {
 
       const data = await res.json();
 
-      if (res.ok && (data.success || data.token)) {
-        showAlert('Registration successful! Please login below.', true);
-        setRegName('');
-        setRegEmail('');
-        setRegPassword('');
-        setRegConfirmPassword('');
-        setTimeout(() => setCurrentMode('login'), 1500);
+      if (res.ok && data.success) {
+        if (data.token && data.user) {
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('quiz_token', data.token);
+          localStorage.setItem('user', JSON.stringify(data.user));
+          localStorage.setItem('quiz_user', JSON.stringify(data.user));
+          window.dispatchEvent(new Event('auth-change'));
+          showAlert('Registration successful! Logging you in...', true);
+          setRegName('');
+          setRegEmail('');
+          setRegPassword('');
+          setRegConfirmPassword('');
+          setTimeout(() => {
+            router.push('/profile');
+          }, 1000);
+        } else {
+          showAlert('Registration successful! Please login below.', true);
+          setRegName('');
+          setRegEmail('');
+          setRegPassword('');
+          setRegConfirmPassword('');
+          setTimeout(() => setCurrentMode('login'), 1500);
+        }
       } else {
         showAlert(data.message || 'Registration failed!');
       }

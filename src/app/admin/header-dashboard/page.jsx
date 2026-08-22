@@ -43,9 +43,9 @@ export default function AdminHeaderDashboardPage() {
   const [brandForm, setBrandForm] = useState({ siteTitle: '', logoUrl: '', faviconUrl: '' });
 
   // Header Button State
-  const [btnInfo, setBtnInfo] = useState({ btnText: '', btnLink: '' });
+  const [btnInfo, setBtnInfo] = useState({ btnText: '', btnLink: '', btnIcon: '' });
   const [isEditingBtn, setIsEditingBtn] = useState(false);
-  const [btnForm, setBtnForm] = useState({ btnText: '', btnLink: '' });
+  const [btnForm, setBtnForm] = useState({ btnText: '', btnLink: '', btnIcon: '' });
 
   // Navigation Menus & Mega Menus State
   const [menus, setMenus] = useState([]);
@@ -150,7 +150,8 @@ export default function AdminHeaderDashboardPage() {
 
       setBtnInfo({
         btnText: hdr.btnText || '',
-        btnLink: hdr.btnLink || ''
+        btnLink: hdr.btnLink || '',
+        btnIcon: hdr.btnIcon || ''
       });
 
       setMenus(hdr.menus ? JSON.parse(JSON.stringify(hdr.menus)) : []);
@@ -190,6 +191,7 @@ export default function AdminHeaderDashboardPage() {
         faviconUrl: currentBrand.faviconUrl,
         btnText: currentBtn.btnText,
         btnLink: currentBtn.btnLink,
+        btnIcon: currentBtn.btnIcon,
         menus: currentMenus,
         megaMenus: currentMegaMenus
       }
@@ -511,7 +513,8 @@ export default function AdminHeaderDashboardPage() {
   const editHeaderBtnSection = () => {
     setBtnForm({
       btnText: btnInfo.btnText || '',
-      btnLink: btnInfo.btnLink || ''
+      btnLink: btnInfo.btnLink || '',
+      btnIcon: btnInfo.btnIcon || ''
     });
     setIsEditingBtn(true);
   };
@@ -519,7 +522,8 @@ export default function AdminHeaderDashboardPage() {
   const saveHeaderBtnSection = async () => {
     const newBtn = {
       btnText: btnForm.btnText.trim(),
-      btnLink: btnForm.btnLink.trim()
+      btnLink: btnForm.btnLink.trim(),
+      btnIcon: btnForm.btnIcon.trim()
     };
     setBtnInfo(newBtn);
     setIsEditingBtn(false);
@@ -530,7 +534,7 @@ export default function AdminHeaderDashboardPage() {
     setPendingDelete({
       message: 'আপনি কি নিশ্চিত যে হেডার বাটন তথ্য মুছে ফেলতে চান?',
       action: async () => {
-        const newBtn = { btnText: '', btnLink: '' };
+        const newBtn = { btnText: '', btnLink: '', btnIcon: '' };
         setBtnInfo(newBtn);
         await saveLayoutConfig({ btn: newBtn });
       }
@@ -543,11 +547,11 @@ export default function AdminHeaderDashboardPage() {
   // Multi-row Main Menu Handlers
   const openAddMainMenuForm = () => {
     setIsAddingMainMenu(true);
-    setNewMainMenuRows([{ title: '', url: '' }]);
+    setNewMainMenuRows([{ title: '', url: '', icon: '', badgeText: '', badgeType: 'live', showExtra: false }]);
   };
 
   const addNewMainMenuRow = () => {
-    setNewMainMenuRows(prev => [...prev, { title: '', url: '' }]);
+    setNewMainMenuRows(prev => [...prev, { title: '', url: '', icon: '', badgeText: '', badgeType: 'live', showExtra: false }]);
   };
 
   const updateNewMainMenuRow = (index, field, value) => {
@@ -572,6 +576,9 @@ export default function AdminHeaderDashboardPage() {
       .map(r => ({
         title: r.title.trim(),
         url: r.url.trim() || '#',
+        icon: r.showExtra && r.icon ? r.icon.trim() : undefined,
+        badgeText: r.showExtra && r.badgeText ? r.badgeText.trim() : undefined,
+        badgeType: r.showExtra ? (r.badgeType || undefined) : undefined,
         subMenus: [],
         isMegaMenu: false,
         megaMenuId: null
@@ -604,7 +611,11 @@ export default function AdminHeaderDashboardPage() {
     setEditingMainMenuIdx(mIdx);
     setEditMainMenuForm({
       title: menus[mIdx].title || '',
-      url: menus[mIdx].url || ''
+      url: menus[mIdx].url || '',
+      icon: menus[mIdx].icon || '',
+      badgeText: menus[mIdx].badgeText || '',
+      badgeType: menus[mIdx].badgeType || 'live',
+      showExtra: false
     });
   };
 
@@ -612,6 +623,11 @@ export default function AdminHeaderDashboardPage() {
     const updated = [...menus];
     updated[mIdx].title = editMainMenuForm.title.trim();
     updated[mIdx].url = editMainMenuForm.url.trim() || '#';
+    if (editMainMenuForm.showExtra) {
+      updated[mIdx].icon = editMainMenuForm.icon.trim() || undefined;
+      updated[mIdx].badgeText = editMainMenuForm.badgeText.trim() || undefined;
+      updated[mIdx].badgeType = editMainMenuForm.badgeType || undefined;
+    }
     setMenus(updated);
     setEditingMainMenuIdx(null);
     await saveLayoutConfig({ menus: updated });
@@ -620,11 +636,11 @@ export default function AdminHeaderDashboardPage() {
   // Submenus Multi-row Handlers
   const openAddSubMenuForm = (mIdx) => {
     setActiveSubAddIdx(mIdx);
-    setNewSubMenuRows([{ title: '', url: '' }]);
+    setNewSubMenuRows([{ title: '', url: '', icon: '', badgeText: '', badgeType: 'live', showExtra: false }]);
   };
 
   const addNewSubMenuRow = () => {
-    setNewSubMenuRows(prev => [...prev, { title: '', url: '' }]);
+    setNewSubMenuRows(prev => [...prev, { title: '', url: '', icon: '', badgeText: '', badgeType: 'live', showExtra: false }]);
   };
 
   const updateNewSubMenuRow = (index, field, value) => {
@@ -646,7 +662,13 @@ export default function AdminHeaderDashboardPage() {
   const saveAllNewSubMenus = async (mIdx) => {
     const validRows = newSubMenuRows
       .filter(r => r.title.trim())
-      .map(r => ({ title: r.title.trim(), url: r.url.trim() || '#' }));
+      .map(r => ({
+        title: r.title.trim(),
+        url: r.url.trim() || '#',
+        icon: r.showExtra && r.icon ? r.icon.trim() : undefined,
+        badgeText: r.showExtra && r.badgeText ? r.badgeText.trim() : undefined,
+        badgeType: r.showExtra ? (r.badgeType || undefined) : undefined
+      }));
 
     if (validRows.length === 0) {
       showTopAlert('কমপক্ষে একটি সাব-মেনু পূরণ করুন!', 'warning');
@@ -676,9 +698,14 @@ export default function AdminHeaderDashboardPage() {
 
   const startEditSubMenu = (mIdx, smIdx) => {
     setEditingSubMenu({ mIdx, smIdx });
+    const sub = menus[mIdx].subMenus[smIdx];
     setEditSubMenuForm({
-      title: menus[mIdx].subMenus[smIdx].title || '',
-      url: menus[mIdx].subMenus[smIdx].url || ''
+      title: sub.title || '',
+      url: sub.url || '',
+      icon: sub.icon || '',
+      badgeText: sub.badgeText || '',
+      badgeType: sub.badgeType || 'live',
+      showExtra: false
     });
   };
 
@@ -686,6 +713,11 @@ export default function AdminHeaderDashboardPage() {
     const updated = [...menus];
     updated[mIdx].subMenus[smIdx].title = editSubMenuForm.title.trim();
     updated[mIdx].subMenus[smIdx].url = editSubMenuForm.url.trim() || '#';
+    if (editSubMenuForm.showExtra) {
+      updated[mIdx].subMenus[smIdx].icon = editSubMenuForm.icon.trim() || undefined;
+      updated[mIdx].subMenus[smIdx].badgeText = editSubMenuForm.badgeText.trim() || undefined;
+      updated[mIdx].subMenus[smIdx].badgeType = editSubMenuForm.badgeType || undefined;
+    }
     setMenus(updated);
     setEditingSubMenu(null);
     await saveLayoutConfig({ menus: updated });
@@ -1511,23 +1543,32 @@ export default function AdminHeaderDashboardPage() {
             <div style={{ fontWeight: 'bold', marginBottom: '12px', color: '#007bff' }}>
               {hasBtn ? 'হেডার বাটন এডিট করুন' : 'নতুন হেডার বাটন যোগ করুন'}
             </div>
-            <div className="row">
-              <div className="form-group" style={{ flex: 1, minWidth: '200px' }}>
+            <div className="row" style={{ gap: '12px', flexWrap: 'wrap' }}>
+              <div className="form-group" style={{ flex: 1, minWidth: '180px' }}>
                 <label>হেডার বাটন টেক্সট:</label>
                 <input
                   type="text"
                   value={btnForm.btnText}
                   onChange={(e) => setBtnForm({ ...btnForm, btnText: e.target.value })}
-                  placeholder="যেমন: যোগাযোগ"
+                  placeholder="যেমন: সহায়তা / যোগাযোগ"
                 />
               </div>
-              <div className="form-group" style={{ flex: 1, minWidth: '200px' }}>
+              <div className="form-group" style={{ flex: 1, minWidth: '180px' }}>
                 <label>হেডার বাটন লিংক (URL):</label>
                 <input
                   type="text"
                   value={btnForm.btnLink}
                   onChange={(e) => setBtnForm({ ...btnForm, btnLink: e.target.value })}
                   placeholder="যেমন: /contact"
+                />
+              </div>
+              <div className="form-group" style={{ flex: 1, minWidth: '180px' }}>
+                <label>বাটন আইকন (FontAwesome - Optional):</label>
+                <input
+                  type="text"
+                  value={btnForm.btnIcon || ''}
+                  onChange={(e) => setBtnForm({ ...btnForm, btnIcon: e.target.value })}
+                  placeholder="যেমন: fa-solid fa-headset (অপশনাল)"
                 />
               </div>
             </div>
@@ -1548,7 +1589,7 @@ export default function AdminHeaderDashboardPage() {
                   <i className="fa-solid fa-square-arrow-up-right" style={{ color: '#e83e8c' }}></i> হেডার বাটন
                 </div>
                 <div className="read-meta" style={{ marginTop: '4px' }}>
-                  <b>বাটন টেক্সট:</b> {btnInfo.btnText || '(নাই)'} | <b>বাটন লিংক (URL):</b> {btnInfo.btnLink || '(নাই)'}
+                  <b>বাটন টেক্সট:</b> {btnInfo.btnText || '(নাই)'} | <b>বাটন আইকন:</b> {btnInfo.btnIcon ? <span><i className={btnInfo.btnIcon} style={{ color: '#e83e8c', marginRight: '4px' }}></i><code>{btnInfo.btnIcon}</code></span> : '(নাই)'} | <b>বাটন লিংক (URL):</b> {btnInfo.btnLink || '(নাই)'}
                 </div>
               </div>
               <div className="card-actions">
@@ -1622,25 +1663,98 @@ export default function AdminHeaderDashboardPage() {
                 >
                   {isEditingThisMenu ? (
                     <div>
-                      <div style={{ fontWeight: 'bold', marginBottom: '10px', color: '#007bff' }}>
-                        মেনু এডিট করুন
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+                        <div style={{ fontWeight: 'bold', color: '#007bff' }}>
+                          মেনু এডিট করুন
+                        </div>
+                        <div
+                          onClick={() => setEditMainMenuForm({ ...editMainMenuForm, showExtra: !editMainMenuForm.showExtra })}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            cursor: 'pointer',
+                            userSelect: 'none',
+                            background: editMainMenuForm.showExtra ? '#e0f2fe' : '#f8fafc',
+                            padding: '4px 12px 4px 6px',
+                            borderRadius: '20px',
+                            border: `1px solid ${editMainMenuForm.showExtra ? '#38bdf8' : '#cbd5e1'}`,
+                            transition: 'all 0.25s ease'
+                          }}
+                        >
+                          <div
+                            style={{
+                              width: '34px',
+                              height: '18px',
+                              backgroundColor: editMainMenuForm.showExtra ? '#0284c7' : '#94a3b8',
+                              borderRadius: '10px',
+                              padding: '2px',
+                              transition: 'background-color 0.25s ease',
+                              display: 'flex',
+                              alignItems: 'center'
+                            }}
+                          >
+                            <div
+                              style={{
+                                width: '14px',
+                                height: '14px',
+                                backgroundColor: '#ffffff',
+                                borderRadius: '50%',
+                                transform: editMainMenuForm.showExtra ? 'translateX(16px)' : 'translateX(0px)',
+                                transition: 'transform 0.25s ease',
+                                boxShadow: '0 1px 3px rgba(0,0,0,0.25)'
+                              }}
+                            />
+                          </div>
+                          <span style={{ fontSize: '12px', fontWeight: 600, color: editMainMenuForm.showExtra ? '#0284c7' : '#64748b' }}>
+                            <i className="fa-solid fa-icons" style={{ marginRight: '4px' }}></i> আইকন ও ব্যাজ সেটিং
+                          </span>
+                        </div>
                       </div>
-                      <div className="row">
+                      <div className="row" style={{ gap: '10px', marginBottom: editMainMenuForm.showExtra ? '10px' : '15px' }}>
                         <input
                           type="text"
                           value={editMainMenuForm.title}
                           onChange={(e) => setEditMainMenuForm({ ...editMainMenuForm, title: e.target.value })}
-                          style={{ flex: 1, minWidth: '200px' }}
-                          placeholder="মেনু টাইটেল"
+                          style={{ flex: 1, minWidth: '180px' }}
+                          placeholder="মেনু টাইটেল (যেমন: লাইভ মডেল টেস্ট)"
                         />
                         <input
                           type="text"
                           value={editMainMenuForm.url}
                           onChange={(e) => setEditMainMenuForm({ ...editMainMenuForm, url: e.target.value })}
-                          style={{ flex: 1, minWidth: '200px' }}
-                          placeholder="URL"
+                          style={{ flex: 1, minWidth: '180px' }}
+                          placeholder="URL (যেমন: /model-test-demo)"
                         />
                       </div>
+                      {editMainMenuForm.showExtra && (
+                        <div className="row" style={{ gap: '10px', flexWrap: 'wrap', marginBottom: '12px', background: '#f8fafc', padding: '12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}>
+                          <input
+                            type="text"
+                            value={editMainMenuForm.icon || ''}
+                            onChange={(e) => setEditMainMenuForm({ ...editMainMenuForm, icon: e.target.value })}
+                            style={{ flex: 1, minWidth: '180px' }}
+                            placeholder="আইকন ক্লাস (অপশনাল, যেমন: fa-solid fa-house)"
+                          />
+                          <input
+                            type="text"
+                            value={editMainMenuForm.badgeText || ''}
+                            onChange={(e) => setEditMainMenuForm({ ...editMainMenuForm, badgeText: e.target.value })}
+                            style={{ flex: 1, minWidth: '140px' }}
+                            placeholder="ব্যাজ টেক্সট (অপশনাল, যেমন: LIVE, FREE)"
+                          />
+                          <select
+                            value={editMainMenuForm.badgeType || 'live'}
+                            onChange={(e) => setEditMainMenuForm({ ...editMainMenuForm, badgeType: e.target.value })}
+                            style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                          >
+                            <option value="live">LIVE (Pink/Red)</option>
+                            <option value="free">FREE (Green)</option>
+                            <option value="new">NEW (Purple)</option>
+                            <option value="popular">POPULAR (Amber)</option>
+                          </select>
+                        </div>
+                      )}
                       <div className="card-actions">
                         <button className="btn btn-submit" onClick={() => saveEditMainMenu(mIdx)}>
                           <i className="fa-solid fa-floppy-disk"></i> Save Changes
@@ -1662,7 +1776,7 @@ export default function AdminHeaderDashboardPage() {
                         style={{ cursor: 'pointer', userSelect: 'none', marginBottom: expandedMenus[mIdx] ? '12px' : 0 }}
                       >
                         <div>
-                          <div className="read-title" style={{ display: 'flex', alignItems: 'center' }}>
+                          <div className="read-title" style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '4px' }}>
                             <i className="fa-solid fa-grip-vertical drag-handle" title="Drag to reorder" onClick={(e) => e.stopPropagation()}></i>
                             <div className="arrow-btn-group" onClick={(e) => e.stopPropagation()}>
                               <button
@@ -1680,12 +1794,36 @@ export default function AdminHeaderDashboardPage() {
                                 ▼
                               </button>
                             </div>
-                            <i
-                              className="fa-solid fa-bars"
-                              style={{ color: hasMega ? '#6f42c1' : '#20c997', marginRight: '6px' }}
-                            ></i>
+                            {m.icon ? (
+                              <i className={m.icon} style={{ color: '#20c997', marginRight: '4px' }}></i>
+                            ) : (
+                              <i
+                                className="fa-solid fa-bars"
+                                style={{ color: hasMega ? '#6f42c1' : '#20c997', marginRight: '4px' }}
+                              ></i>
+                            )}
                             <span style={{ fontWeight: 'bold', fontSize: '15px' }}>{m.title || '(নাম নেই)'}</span>
-                            <span style={{ fontSize: '13px', color: '#64748b', fontWeight: 'normal', marginLeft: '6px' }}>
+                            {m.badgeText && (
+                              <span
+                                style={{
+                                  backgroundColor: m.badgeType === 'free' ? '#059669' : m.badgeType === 'new' ? '#7c3aed' : m.badgeType === 'popular' ? '#d97706' : '#ff4d6d',
+                                  color: '#ffffff',
+                                  fontSize: '9px',
+                                  fontWeight: 800,
+                                  padding: '0 7px',
+                                  height: '16px',
+                                  borderRadius: '10px',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  lineHeight: 1,
+                                  textTransform: 'uppercase'
+                                }}
+                              >
+                                <span style={{ transform: 'translateY(1px)' }}>{m.badgeText}</span>
+                              </span>
+                            )}
+                            <span style={{ fontSize: '13px', color: '#64748b', fontWeight: 'normal', marginLeft: '4px' }}>
                               (URL: {m.url || '#'})
                             </span>
                             {hasMega && (
@@ -1696,14 +1834,14 @@ export default function AdminHeaderDashboardPage() {
                                   padding: '2px 8px',
                                   borderRadius: '4px',
                                   fontSize: '10px',
-                                  marginLeft: '10px',
+                                  marginLeft: '6px',
                                   display: 'inline-block'
                                 }}
                               >
                                 <i className="fa-solid fa-layer-group"></i> Mega Menu Active
                               </span>
                             )}
-                            <i className={'fa-solid fa-chevron-' + (expandedMenus[mIdx] ? 'down' : 'right')} style={{ fontSize: '13px', color: '#64748b', marginLeft: '8px' }}></i>
+                            <i className={'fa-solid fa-chevron-' + (expandedMenus[mIdx] ? 'down' : 'right')} style={{ fontSize: '13px', color: '#64748b', marginLeft: '6px' }}></i>
                           </div>
                         </div>
                         <div className="card-actions" onClick={(e) => e.stopPropagation()}>
@@ -1784,14 +1922,63 @@ export default function AdminHeaderDashboardPage() {
                                 >
                                   {isEditingThisSub ? (
                                     <div>
-                                      <div className="row" style={{ marginBottom: '5px' }}>
+                                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '6px' }}>
+                                        <div style={{ fontWeight: 'bold', fontSize: '13px', color: '#0284c7' }}>
+                                          সাব-মেনু এডিট করুন
+                                        </div>
+                                        <div
+                                          onClick={() => setEditSubMenuForm({ ...editSubMenuForm, showExtra: !editSubMenuForm.showExtra })}
+                                          style={{
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            gap: '6px',
+                                            cursor: 'pointer',
+                                            userSelect: 'none',
+                                            background: editSubMenuForm.showExtra ? '#e0f2fe' : '#f8fafc',
+                                            padding: '3px 10px 3px 5px',
+                                            borderRadius: '20px',
+                                            border: `1px solid ${editSubMenuForm.showExtra ? '#38bdf8' : '#cbd5e1'}`,
+                                            transition: 'all 0.25s ease'
+                                          }}
+                                        >
+                                          <div
+                                            style={{
+                                              width: '30px',
+                                              height: '16px',
+                                              backgroundColor: editSubMenuForm.showExtra ? '#0284c7' : '#94a3b8',
+                                              borderRadius: '9px',
+                                              padding: '2px',
+                                              transition: 'background-color 0.25s ease',
+                                              display: 'flex',
+                                              alignItems: 'center'
+                                            }}
+                                          >
+                                            <div
+                                              style={{
+                                                width: '12px',
+                                                height: '12px',
+                                                backgroundColor: '#ffffff',
+                                                borderRadius: '50%',
+                                                transform: editSubMenuForm.showExtra ? 'translateX(14px)' : 'translateX(0px)',
+                                                transition: 'transform 0.25s ease',
+                                                boxShadow: '0 1px 3px rgba(0,0,0,0.25)'
+                                              }}
+                                            />
+                                          </div>
+                                          <span style={{ fontSize: '11px', fontWeight: 600, color: editSubMenuForm.showExtra ? '#0284c7' : '#64748b' }}>
+                                            <i className="fa-solid fa-icons"></i> আইকন ও ব্যাজ সেটিং
+                                          </span>
+                                        </div>
+                                      </div>
+                                      <div className="row" style={{ marginBottom: editSubMenuForm.showExtra ? '6px' : '10px', gap: '8px' }}>
                                         <input
                                           type="text"
                                           value={editSubMenuForm.title}
                                           onChange={(e) =>
                                             setEditSubMenuForm({ ...editSubMenuForm, title: e.target.value })
                                           }
-                                          style={{ flex: 1 }}
+                                          style={{ flex: 1, minWidth: '140px' }}
+                                          placeholder="সাব-মেনু টাইটেল"
                                         />
                                         <input
                                           type="text"
@@ -1799,9 +1986,44 @@ export default function AdminHeaderDashboardPage() {
                                           onChange={(e) =>
                                             setEditSubMenuForm({ ...editSubMenuForm, url: e.target.value })
                                           }
-                                          style={{ flex: 1 }}
+                                          style={{ flex: 1, minWidth: '140px' }}
+                                          placeholder="URL"
                                         />
                                       </div>
+                                      {editSubMenuForm.showExtra && (
+                                        <div className="row" style={{ gap: '8px', flexWrap: 'wrap', marginBottom: '8px', background: '#f8fafc', padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1' }}>
+                                          <input
+                                            type="text"
+                                            value={editSubMenuForm.icon || ''}
+                                            onChange={(e) =>
+                                              setEditSubMenuForm({ ...editSubMenuForm, icon: e.target.value })
+                                            }
+                                            style={{ flex: 1, minWidth: '140px' }}
+                                            placeholder="আইকন (যেমন: fa-solid fa-bolt)"
+                                          />
+                                          <input
+                                            type="text"
+                                            value={editSubMenuForm.badgeText || ''}
+                                            onChange={(e) =>
+                                              setEditSubMenuForm({ ...editSubMenuForm, badgeText: e.target.value })
+                                            }
+                                            style={{ flex: 1, minWidth: '110px' }}
+                                            placeholder="ব্যাজ (যেমন: FREE)"
+                                          />
+                                          <select
+                                            value={editSubMenuForm.badgeType || 'free'}
+                                            onChange={(e) =>
+                                              setEditSubMenuForm({ ...editSubMenuForm, badgeType: e.target.value })
+                                            }
+                                            style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '12px' }}
+                                          >
+                                            <option value="free">FREE (Green)</option>
+                                            <option value="live">LIVE (Pink/Red)</option>
+                                            <option value="new">NEW (Purple)</option>
+                                            <option value="popular">POPULAR (Amber)</option>
+                                          </select>
+                                        </div>
+                                      )}
                                       <div className="card-actions" style={{ marginTop: '5px' }}>
                                         <button
                                           className="btn btn-submit btn-sm"
@@ -1819,7 +2041,7 @@ export default function AdminHeaderDashboardPage() {
                                     </div>
                                   ) : (
                                     <>
-                                      <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+                                      <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '4px' }}>
                                         <i className="fa-solid fa-grip-vertical drag-handle" title="Drag to reorder"></i>
                                         <div className="arrow-btn-group">
                                           <button
@@ -1837,8 +2059,29 @@ export default function AdminHeaderDashboardPage() {
                                             ▼
                                           </button>
                                         </div>
+                                        {sm.icon && <i className={sm.icon} style={{ color: '#0284c7', marginRight: '4px' }}></i>}
                                         <b>{sm.title}</b>{' '}
-                                        <small style={{ color: '#777', marginLeft: '5px' }}>({sm.url || '#'})</small>
+                                        {sm.badgeText && (
+                                          <span
+                                            style={{
+                                              backgroundColor: sm.badgeType === 'live' ? '#ff4d6d' : sm.badgeType === 'new' ? '#7c3aed' : sm.badgeType === 'popular' ? '#d97706' : '#059669',
+                                              color: '#ffffff',
+                                              fontSize: '8px',
+                                              fontWeight: 800,
+                                              padding: '0 6px',
+                                              height: '15px',
+                                              borderRadius: '8px',
+                                              display: 'inline-flex',
+                                              alignItems: 'center',
+                                              justifyContent: 'center',
+                                              lineHeight: 1,
+                                              textTransform: 'uppercase'
+                                            }}
+                                          >
+                                            <span style={{ transform: 'translateY(1px)' }}>{sm.badgeText}</span>
+                                          </span>
+                                        )}
+                                        <small style={{ color: '#777', marginLeft: '4px' }}>({sm.url || '#'})</small>
                                       </span>
                                       <div style={{ display: 'flex', gap: '6px' }}>
                                         <button
@@ -1883,30 +2126,117 @@ export default function AdminHeaderDashboardPage() {
                             </div>
 
                             {newSubMenuRows.map((row, rIdx) => (
-                              <div key={rIdx} className="row" style={{ marginBottom: '8px', display: 'flex', gap: '10px', alignItems: 'center' }}>
-                                <input
-                                  type="text"
-                                  placeholder="সাব-মেনু টাইটেল"
-                                  value={row.title}
-                                  onChange={(e) => updateNewSubMenuRow(rIdx, 'title', e.target.value)}
-                                  style={{ flex: 1, minWidth: '150px' }}
-                                />
-                                <input
-                                  type="text"
-                                  placeholder="URL"
-                                  value={row.url}
-                                  onChange={(e) => updateNewSubMenuRow(rIdx, 'url', e.target.value)}
-                                  style={{ flex: 1, minWidth: '150px' }}
-                                />
-                                <button
-                                  type="button"
-                                  className="btn btn-danger btn-sm"
-                                  onClick={() => removeNewSubMenuRow(rIdx)}
-                                  title="মুছে ফেলুন"
-                                  style={{ height: '38px', display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}
-                                >
-                                  <i className="fa-solid fa-trash"></i> Delete
-                                </button>
+                              <div key={rIdx} style={{ marginBottom: '10px', background: '#ffffff', padding: '10px 12px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                                  <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#64748b' }}>সাব-মেনু #{rIdx + 1}</span>
+                                  <div
+                                    onClick={() => updateNewSubMenuRow(rIdx, 'showExtra', !row.showExtra)}
+                                    style={{
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      gap: '6px',
+                                      cursor: 'pointer',
+                                      userSelect: 'none',
+                                      background: row.showExtra ? '#e0f2fe' : '#f8fafc',
+                                      padding: '2px 8px 2px 4px',
+                                      borderRadius: '15px',
+                                      border: `1px solid ${row.showExtra ? '#38bdf8' : '#cbd5e1'}`,
+                                      transition: 'all 0.25s ease'
+                                    }}
+                                  >
+                                    <div
+                                      style={{
+                                        width: '28px',
+                                        height: '15px',
+                                        backgroundColor: row.showExtra ? '#0284c7' : '#94a3b8',
+                                        borderRadius: '8px',
+                                        padding: '2px',
+                                        transition: 'background-color 0.25s ease',
+                                        display: 'flex',
+                                        alignItems: 'center'
+                                      }}
+                                    >
+                                      <div
+                                        style={{
+                                          width: '11px',
+                                          height: '11px',
+                                          backgroundColor: '#ffffff',
+                                          borderRadius: '50%',
+                                          transform: row.showExtra ? 'translateX(13px)' : 'translateX(0px)',
+                                          transition: 'transform 0.25s ease',
+                                          boxShadow: '0 1px 3px rgba(0,0,0,0.25)'
+                                        }}
+                                      />
+                                    </div>
+                                    <span style={{ fontSize: '11px', fontWeight: 600, color: row.showExtra ? '#0284c7' : '#64748b' }}>
+                                      <i className="fa-solid fa-icons"></i> আইকন ও ব্যাজ সেটিং
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="row" style={{ marginBottom: row.showExtra ? '6px' : '0px', display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                  <input
+                                    type="text"
+                                    placeholder="সাব-মেনু টাইটেল (যেমন: ফ্রি কুইজ)"
+                                    value={row.title}
+                                    onChange={(e) => updateNewSubMenuRow(rIdx, 'title', e.target.value)}
+                                    style={{ flex: 1, minWidth: '150px' }}
+                                  />
+                                  <input
+                                    type="text"
+                                    placeholder="URL (যেমন: /quiz)"
+                                    value={row.url}
+                                    onChange={(e) => updateNewSubMenuRow(rIdx, 'url', e.target.value)}
+                                    style={{ flex: 1, minWidth: '150px' }}
+                                  />
+                                  {!row.showExtra && (
+                                    <button
+                                      type="button"
+                                      className="btn btn-danger btn-sm"
+                                      onClick={() => removeNewSubMenuRow(rIdx)}
+                                      title="মুছে ফেলুন"
+                                      style={{ height: '36px', display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}
+                                    >
+                                      <i className="fa-solid fa-trash"></i> Delete
+                                    </button>
+                                  )}
+                                </div>
+                                {row.showExtra && (
+                                  <div className="row" style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', marginTop: '6px' }}>
+                                    <input
+                                      type="text"
+                                      placeholder="আইকন ক্লাস (অপショナル, যেমন: fa-solid fa-bolt)"
+                                      value={row.icon || ''}
+                                      onChange={(e) => updateNewSubMenuRow(rIdx, 'icon', e.target.value)}
+                                      style={{ flex: 1, minWidth: '150px' }}
+                                    />
+                                    <input
+                                      type="text"
+                                      placeholder="ব্যাজ টেক্সট (অপশনাল, যেমন: FREE)"
+                                      value={row.badgeText || ''}
+                                      onChange={(e) => updateNewSubMenuRow(rIdx, 'badgeText', e.target.value)}
+                                      style={{ flex: 1, minWidth: '110px' }}
+                                    />
+                                    <select
+                                      value={row.badgeType || 'free'}
+                                      onChange={(e) => updateNewSubMenuRow(rIdx, 'badgeType', e.target.value)}
+                                      style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '12px' }}
+                                    >
+                                      <option value="free">FREE (Green)</option>
+                                      <option value="live">LIVE (Pink/Red)</option>
+                                      <option value="new">NEW (Purple)</option>
+                                      <option value="popular">POPULAR (Amber)</option>
+                                    </select>
+                                    <button
+                                      type="button"
+                                      className="btn btn-danger btn-sm"
+                                      onClick={() => removeNewSubMenuRow(rIdx)}
+                                      title="মুছে ফেলুন"
+                                      style={{ height: '36px', display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}
+                                    >
+                                      <i className="fa-solid fa-trash"></i> Delete
+                                    </button>
+                                  </div>
+                                )}
                               </div>
                             ))}
 
@@ -2048,42 +2378,124 @@ export default function AdminHeaderDashboardPage() {
             {newMainMenuRows.map((row, rIdx) => (
               <div
                 key={rIdx}
-                className="row"
                 style={{
-                  flexWrap: 'wrap',
                   background: '#f8fafc',
                   padding: '12px 15px',
                   border: '1px solid #cbd5e1',
                   borderRadius: '6px',
-                  marginBottom: '10px',
-                  display: 'flex',
-                  gap: '12px',
-                  alignItems: 'center'
+                  marginBottom: '10px'
                 }}
               >
-                <input
-                  type="text"
-                  placeholder="মেনু টাইটেল (যেমন: সাধারণ জ্ঞান)"
-                  value={row.title}
-                  onChange={(e) => updateNewMainMenuRow(rIdx, 'title', e.target.value)}
-                  style={{ flex: 1, minWidth: '200px' }}
-                />
-                <input
-                  type="text"
-                  placeholder="URL (যেমন: /all-mcq)"
-                  value={row.url}
-                  onChange={(e) => updateNewMainMenuRow(rIdx, 'url', e.target.value)}
-                  style={{ flex: 1, minWidth: '200px' }}
-                />
-                <button
-                  type="button"
-                  className="btn btn-danger btn-sm"
-                  onClick={() => removeNewMainMenuRow(rIdx)}
-                  title="মুছে ফেলুন"
-                  style={{ height: '38px', display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}
-                >
-                  <i className="fa-solid fa-trash"></i> Delete
-                </button>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '13px', fontWeight: 'bold', color: '#475569' }}>মূল মেনু #{rIdx + 1}</span>
+                  <div
+                    onClick={() => updateNewMainMenuRow(rIdx, 'showExtra', !row.showExtra)}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      cursor: 'pointer',
+                      userSelect: 'none',
+                      background: row.showExtra ? '#e0f2fe' : '#ffffff',
+                      padding: '3px 10px 3px 5px',
+                      borderRadius: '20px',
+                      border: `1px solid ${row.showExtra ? '#38bdf8' : '#cbd5e1'}`,
+                      transition: 'all 0.25s ease'
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: '32px',
+                        height: '17px',
+                        backgroundColor: row.showExtra ? '#0284c7' : '#94a3b8',
+                        borderRadius: '9px',
+                        padding: '2px',
+                        transition: 'background-color 0.25s ease',
+                        display: 'flex',
+                        alignItems: 'center'
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: '13px',
+                          height: '13px',
+                          backgroundColor: '#ffffff',
+                          borderRadius: '50%',
+                          transform: row.showExtra ? 'translateX(15px)' : 'translateX(0px)',
+                          transition: 'transform 0.25s ease',
+                          boxShadow: '0 1px 3px rgba(0,0,0,0.25)'
+                        }}
+                      />
+                    </div>
+                    <span style={{ fontSize: '12px', fontWeight: 600, color: row.showExtra ? '#0284c7' : '#64748b' }}>
+                      <i className="fa-solid fa-icons"></i> আইকন ও ব্যাজ সেটিং
+                    </span>
+                  </div>
+                </div>
+                <div className="row" style={{ gap: '10px', marginBottom: row.showExtra ? '8px' : '0px' }}>
+                  <input
+                    type="text"
+                    placeholder="মেনু টাইটেল (যেমন: ফ্রি কুইজ)"
+                    value={row.title}
+                    onChange={(e) => updateNewMainMenuRow(rIdx, 'title', e.target.value)}
+                    style={{ flex: 1, minWidth: '180px' }}
+                  />
+                  <input
+                    type="text"
+                    placeholder="URL (যেমন: /quiz)"
+                    value={row.url}
+                    onChange={(e) => updateNewMainMenuRow(rIdx, 'url', e.target.value)}
+                    style={{ flex: 1, minWidth: '180px' }}
+                  />
+                  {!row.showExtra && (
+                    <button
+                      type="button"
+                      className="btn btn-danger btn-sm"
+                      onClick={() => removeNewMainMenuRow(rIdx)}
+                      title="মুছে ফেলুন"
+                      style={{ height: '38px', display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}
+                    >
+                      <i className="fa-solid fa-trash"></i> Delete
+                    </button>
+                  )}
+                </div>
+                {row.showExtra && (
+                  <div className="row" style={{ gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
+                    <input
+                      type="text"
+                      placeholder="আইকন ক্লাস (অপশনাল, যেমন: fa-solid fa-bolt)"
+                      value={row.icon || ''}
+                      onChange={(e) => updateNewMainMenuRow(rIdx, 'icon', e.target.value)}
+                      style={{ flex: 1, minWidth: '180px' }}
+                    />
+                    <input
+                      type="text"
+                      placeholder="ব্যাজ টেক্সট (অপশনাল, যেমন: FREE, LIVE)"
+                      value={row.badgeText || ''}
+                      onChange={(e) => updateNewMainMenuRow(rIdx, 'badgeText', e.target.value)}
+                      style={{ flex: 1, minWidth: '140px' }}
+                    />
+                    <select
+                      value={row.badgeType || 'live'}
+                      onChange={(e) => updateNewMainMenuRow(rIdx, 'badgeType', e.target.value)}
+                      style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                    >
+                      <option value="live">LIVE (Pink/Red)</option>
+                      <option value="free">FREE (Green)</option>
+                      <option value="new">NEW (Purple)</option>
+                      <option value="popular">POPULAR (Amber)</option>
+                    </select>
+                    <button
+                      type="button"
+                      className="btn btn-danger btn-sm"
+                      onClick={() => removeNewMainMenuRow(rIdx)}
+                      title="মুছে ফেলুন"
+                      style={{ height: '38px', display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}
+                    >
+                      <i className="fa-solid fa-trash"></i> Delete
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
 

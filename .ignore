@@ -10,6 +10,7 @@ out/
 build/
 .open-next/
 
+
 # Cloudflare Wrangler local state & generated worker bundle
 .wrangler/
 _worker.bundle
@@ -31,3 +32,6 @@ Thumbs.db
 .vscode/
 .idea/
 *.tmp
+
+# Local demo folder (never push to GitHub)
+/TopMCQBD-Demo

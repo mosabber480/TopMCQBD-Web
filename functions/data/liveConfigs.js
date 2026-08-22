@@ -9,16 +9,20 @@ export const initialLayoutConfig = {
     "logoUrl": "/images/TopMCQ.png",
     "seoTitle": "TopMCQBD - সেরা অনলাইন কুইজ ও প্রস্তুতি প্ল্যাটফর্ম",
     "faviconUrl": "/images/favicon.ico",
-    "btnText": "সহায়তা",
+    "btnText": "যোগাযোগ",
     "btnLink": "/contact",
     "menus": [
       {
         "title": "হোম",
-        "url": "/"
+        "url": "/",
+        "icon": "fa-solid fa-house"
       },
       {
         "title": "কুইজ অনুশীলন",
         "url": "/quiz",
+        "icon": "fa-solid fa-bolt",
+        "badgeText": "FREE",
+        "badgeType": "free",
         "isMegaMenu": true,
         "megaMenuId": "mega_1787215391182",
         "subMenus": []
@@ -26,6 +30,7 @@ export const initialLayoutConfig = {
       {
         "title": "সকল MCQ",
         "url": "/all-mcq",
+        "icon": "fa-solid fa-layer-group",
         "subMenus": [
           {
             "title": "test",
@@ -39,11 +44,33 @@ export const initialLayoutConfig = {
       },
       {
         "title": "প্যাকেজসমূহ",
-        "url": "/packages"
+        "url": "/packages",
+        "icon": "fa-solid fa-box"
+      },
+      {
+        "title": "ডেমো পেজেস",
+        "url": "#",
+        "subMenus": [
+          {
+            "title": "মডেল টেস্ট",
+            "url": "/model-test-demo",
+            "icon": "fa-solid fa-layer-group",
+            "badgeText": "LIVE",
+            "badgeType": "live"
+          },
+          {
+            "title": "প্রশ্নব্যাংক",
+            "url": "/question-bank-demo",
+            "icon": "fa-solid fa-book-bookmark"
+          }
+        ],
+        "isMegaMenu": false,
+        "megaMenuId": null
       },
       {
         "title": "আমাদের সম্পর্কে",
-        "url": "/about-us"
+        "url": "/about-us",
+        "icon": "fa-solid fa-bullseye"
       },
       {
         "title": "যোগাযোগ",
@@ -53,22 +80,8 @@ export const initialLayoutConfig = {
     "megaMenus": [
       {
         "id": "mega_1787215391182",
-        "title": "নতুন মেগা মেনু 1",
+        "title": "মেগা মেনু 1",
         "columns": [
-          {
-            "type": "links",
-            "title": "নতুন লিংক কলাম",
-            "links": [
-              {
-                "title": "বিসিএস প্রস্তুতি",
-                "url": "/all-mcq"
-              },
-              {
-                "title": "প্রাথমিক শিক্ষক নিয়োগ",
-                "url": "/all-mcq"
-              }
-            ]
-          },
           {
             "type": "icon",
             "title": "আইকন সার্ভিস কলাম",
@@ -90,22 +103,50 @@ export const initialLayoutConfig = {
             ]
           },
           {
-            "type": "image",
-            "title": "POSTS CAROUSEL",
-            "imageUrl": "https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=600&q=80",
-            "url": "/all-mcq",
-            "text": "সর্বশেষ আপডেট ও কুইজ পোস্ট দেখতে ক্লিক করুন"
+            "type": "icon",
+            "title": "নতুন আইকন কলাম",
+            "items": [
+              {
+                "iconType": "fontawesome",
+                "iconValue": "fa-solid fa-building-columns",
+                "title": "Banking",
+                "desc": "Store, manage and move your funds safely.",
+                "url": "#"
+              }
+            ]
           },
           {
             "type": "info",
-            "title": "কুইজ প্রস্তুতি তথ্য",
-            "text": "সবগুলো কুইজ বিসিএস ও সরকারি চাকরির সিলেবাস অনুযায়ী তৈরি করা হয়েছে।",
-            "iconHtml": "<i class=\"fa-solid fa-graduation-ca\"></i>",
-            "url": ""
+            "title": "নতুন তথ্য কলাম",
+            "text": "সাইট সম্পর্কে কিছু লিখুন...",
+            "iconHtml": "<i class=\"fa-solid fa-circle-info\"></i>"
+          },
+          {
+            "type": "links",
+            "title": "নতুন লিংক কলাম",
+            "links": []
+          }
+        ]
+      },
+      {
+        "id": "mega_1787314295206",
+        "title": "নতুন মেগা মেনু 2",
+        "columns": [
+          {
+            "type": "info",
+            "title": "নতুন তথ্য কলাম",
+            "text": "সাইট সম্পর্কে কিছু লিখুন...",
+            "iconHtml": "<i class=\"fa-solid fa-circle-info\"></i>"
+          },
+          {
+            "type": "links",
+            "title": "নতুন লিংক কলাম",
+            "links": []
           }
         ]
       }
-    ]
+    ],
+    "btnIcon": "fa-solid fa-headset"
   },
   "footer": {
     "columns": [

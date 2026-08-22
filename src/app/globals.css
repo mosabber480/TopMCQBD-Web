@@ -1408,3 +1408,114 @@ body.sidebar-collapsed .admin-main-content {
     box-shadow: none !important;
     -webkit-tap-highlight-color: transparent !important;
 }
+
+/* ==========================================================================
+   HEADER MENU BADGE ANIMATION EFFECTS
+   ========================================================================== */
+.menu-badge-pill {
+    padding: 0 7px;
+    height: 16px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-left: 3px;
+    user-select: none;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.menu-badge-pill.live {
+    background-color: #ff4d6d;
+    color: #ffffff;
+    box-shadow: 0 0 0 0 rgba(255, 77, 109, 0.6);
+    animation: badgePulseLive 1.8s infinite ease-in-out;
+}
+
+.menu-badge-pill.free {
+    background-color: #059669;
+    color: #ffffff;
+    box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.5);
+    animation: badgePulseFree 2s infinite ease-in-out;
+}
+
+.menu-badge-pill.new {
+    background-color: #7c3aed;
+    color: #ffffff;
+    box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.5);
+    animation: badgePulseNew 2s infinite ease-in-out;
+}
+
+.menu-badge-pill.popular {
+    background-color: #d97706;
+    color: #ffffff;
+    box-shadow: 0 0 0 0 rgba(217, 119, 6, 0.5);
+    animation: badgePulsePopular 2s infinite ease-in-out;
+}
+
+/* Keyframes */
+@keyframes badgePulseLive {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 77, 109, 0.6);
+    }
+    50% {
+        transform: scale(1.08);
+        box-shadow: 0 0 10px 3px rgba(255, 77, 109, 0.45);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 77, 109, 0);
+    }
+}
+
+@keyframes badgePulseFree {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.5);
+    }
+    50% {
+        transform: scale(1.08);
+        box-shadow: 0 0 9px 3px rgba(5, 150, 105, 0.4);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(5, 150, 105, 0);
+    }
+}
+
+@keyframes badgePulseNew {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.5);
+    }
+    50% {
+        transform: scale(1.08);
+        box-shadow: 0 0 9px 3px rgba(124, 58, 237, 0.4);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(124, 58, 237, 0);
+    }
+}
+
+@keyframes badgePulsePopular {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(217, 119, 6, 0.5);
+    }
+    50% {
+        transform: scale(1.08);
+        box-shadow: 0 0 9px 3px rgba(217, 119, 6, 0.4);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(217, 119, 6, 0);
+    }
+}
+

@@ -196,7 +196,7 @@ const CHAPTERS_BY_SUBJECT = {
     },
     {
       id: 3,
-      title: "ব্রিটিশ আমল ও ভারতীয় উপমহাদেশ",
+      title: "ব্রিটিশ আমল ওভারতীয় উপমহাদেশ",
       desc: "পলাশীর যুদ্ধ, সিপাহি বিদ্রোহ, বঙ্গভঙ্গ, লাহোর প্রস্তাব ও দেশভাগ।"
     },
     {
@@ -262,7 +262,6 @@ function ModelTestContent() {
   const [searchQuery, setSearchQuery] = useState('');
 
   // Live dynamic Online User counts weighted distribution (8 to 48 range)
-  // 12-32: Most common (70%), 33-48: Moderate (20%), 8-11: Rare (10%)
   const getWeightedOnlineCount = (current) => {
     if (current && Math.random() < 0.85) {
       const delta = Math.floor(Math.random() * 5) - 2;
@@ -288,7 +287,6 @@ function ModelTestContent() {
   });
 
   useEffect(() => {
-    // Set initial random counts on client mount
     setOnlineCounts(prev => {
       const next = { ...prev };
       INITIAL_EXAMS.forEach(e => {
@@ -351,15 +349,15 @@ function ModelTestContent() {
           {/* Breadcrumb & Navigation */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '10px' }}>
             <div style={{ fontSize: '0.9rem', color: '#64748b' }}>
-              <Link href="/model-test" style={{ color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>MCQ</Link>
+              <Link href="/model-test-demo" style={{ color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>MCQ</Link>
               <span style={{ margin: '0 8px', color: '#cbd5e1' }}>/</span>
-              <Link href={`/model-test?examId=${selectedExam.id}&subject=${selectedSubject.id}`} style={{ color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>{selectedSubject.name}</Link>
+              <Link href={`/model-test-demo?examId=${selectedExam.id}&subject=${selectedSubject.id}`} style={{ color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>{selectedSubject.name}</Link>
               <span style={{ margin: '0 8px', color: '#cbd5e1' }}>/</span>
               <span style={{ color: '#0f172a', fontWeight: 700 }}>অধ্যায় {chapterId}</span>
             </div>
 
             <button
-              onClick={() => router.push(`/model-test?examId=${selectedExam.id}&subject=${selectedSubject.id}`)}
+              onClick={() => router.push(`/model-test-demo?examId=${selectedExam.id}&subject=${selectedSubject.id}`)}
               style={{
                 backgroundColor: '#ffffff',
                 color: '#334155',
@@ -368,19 +366,23 @@ function ModelTestContent() {
                 borderRadius: '6px',
                 fontSize: '0.85rem',
                 fontWeight: 600,
-                cursor: 'pointer'
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px'
               }}
             >
-              ← অধ্যায় তালিকায় ফিরে যান
+              <i className="fa-solid fa-arrow-left"></i>
+              <span>অধ্যায় তালিকায় ফিরে যান</span>
             </button>
           </div>
 
-          {/* Heading matching screenshot: টপিকসমূহ (27) */}
+          {/* Heading */}
           <h2 style={{ fontSize: '1.6rem', color: '#0f172a', fontWeight: 800, marginBottom: '20px' }}>
             টপিকসমূহ ({topicsList.length})
           </h2>
 
-          {/* 3-Column Topics Grid matching screenshot */}
+          {/* 3-Column Topics Grid */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(310px, 1fr))', gap: '16px' }}>
             {topicsList.map((top, idx) => (
               <div
@@ -449,7 +451,7 @@ function ModelTestContent() {
 
     return (
       <main style={{ backgroundColor: '#f8fafc', minHeight: 'calc(100vh - 200px)', paddingBottom: '80px' }}>
-        {/* Dark Teal/Green Banner Header matching screenshot */}
+        {/* Dark Teal/Green Banner Header */}
         <div style={{ backgroundColor: '#006a4e', color: '#ffffff', padding: '40px 20px', textAlign: 'left' }}>
           <div className="container" style={{ maxWidth: '1100px', margin: '0 auto' }}>
             <span style={{ fontSize: '0.85rem', letterSpacing: '1.5px', fontWeight: 700, opacity: 0.9, textTransform: 'uppercase' }}>
@@ -468,15 +470,15 @@ function ModelTestContent() {
         <div style={{ backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', padding: '12px 20px' }}>
           <div className="container" style={{ maxWidth: '1100px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
             <div style={{ fontSize: '0.9rem', color: '#64748b' }}>
-              <Link href="/model-test" style={{ color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>MCQ</Link>
+              <Link href="/model-test-demo" style={{ color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>MCQ</Link>
               <span style={{ margin: '0 8px', color: '#cbd5e1' }}>/</span>
-              <Link href={`/model-test?examId=${selectedExam.id}`} style={{ color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>{selectedExam.categoryName}</Link>
+              <Link href={`/model-test-demo?examId=${selectedExam.id}`} style={{ color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>{selectedExam.categoryName}</Link>
               <span style={{ margin: '0 8px', color: '#cbd5e1' }}>/</span>
               <span style={{ color: '#0f172a', fontWeight: 700 }}>{selectedSubject.name}</span>
             </div>
 
             <button
-              onClick={() => router.push(`/model-test?examId=${selectedExam.id}`)}
+              onClick={() => router.push(`/model-test-demo?examId=${selectedExam.id}`)}
               style={{
                 backgroundColor: '#f1f5f9',
                 color: '#334155',
@@ -485,10 +487,14 @@ function ModelTestContent() {
                 borderRadius: '6px',
                 fontSize: '0.85rem',
                 fontWeight: 600,
-                cursor: 'pointer'
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px'
               }}
             >
-              ← বিষয় তালিকায় ফিরে যান
+              <i className="fa-solid fa-arrow-left"></i>
+              <span>বিষয় তালিকায় ফিরে যান</span>
             </button>
           </div>
         </div>
@@ -547,7 +553,7 @@ function ModelTestContent() {
                     {ch.desc}
                   </p>
                   <button
-                    onClick={() => router.push(`/model-test?examId=${selectedExam.id}&subject=${selectedSubject.id}&chapterId=${ch.id}`)}
+                    onClick={() => router.push(`/model-test-demo?examId=${selectedExam.id}&subject=${selectedSubject.id}&chapterId=${ch.id}`)}
                     style={{
                       background: 'none',
                       border: 'none',
@@ -557,11 +563,11 @@ function ModelTestContent() {
                       cursor: 'pointer',
                       display: 'inline-flex',
                       alignItems: 'center',
-                      gap: '4px',
+                      gap: '6px',
                       padding: 0
                     }}
                   >
-                    <span>অধ্যায় দেখুন</span> →
+                    <span>অধ্যায় দেখুন</span> <i className="fa-solid fa-arrow-right" style={{ fontSize: '0.85rem' }}></i>
                   </button>
                 </div>
               </div>
@@ -583,13 +589,13 @@ function ModelTestContent() {
           {/* Breadcrumb & Navigation */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '10px' }}>
             <div style={{ fontSize: '0.9rem', color: '#64748b' }}>
-              <Link href="/model-test" style={{ color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>সকল মডেল টেস্ট</Link>
+              <Link href="/model-test-demo" style={{ color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>সকল মডেল টেস্ট</Link>
               <span style={{ margin: '0 8px', color: '#cbd5e1' }}>/</span>
               <span style={{ color: '#0f172a', fontWeight: 700 }}>{selectedExam.title}</span>
             </div>
 
             <button
-              onClick={() => router.push('/model-test')}
+              onClick={() => router.push('/model-test-demo')}
               style={{
                 backgroundColor: '#ffffff',
                 color: '#334155',
@@ -598,10 +604,14 @@ function ModelTestContent() {
                 borderRadius: '6px',
                 fontSize: '0.85rem',
                 fontWeight: 600,
-                cursor: 'pointer'
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px'
               }}
             >
-              ← অন্য মডেল টেস্ট বাছাই করুন
+              <i className="fa-solid fa-arrow-left"></i>
+              <span>অন্য মডেল টেস্ট বাছাই করুন</span>
             </button>
           </div>
 
@@ -620,7 +630,7 @@ function ModelTestContent() {
             {SUBJECTS_DATA.map(sub => (
               <div
                 key={sub.id}
-                onClick={() => router.push(`/model-test?examId=${selectedExam.id}&subject=${sub.id}`)}
+                onClick={() => router.push(`/model-test-demo?examId=${selectedExam.id}&subject=${sub.id}`)}
                 style={{
                   backgroundColor: '#ffffff',
                   borderRadius: '16px',
@@ -654,8 +664,8 @@ function ModelTestContent() {
                   </p>
                 </div>
 
-                <div style={{ color: '#006a4e', fontWeight: 700, fontSize: '0.92rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                  <span>{sub.chaptersCount} টি অধ্যায়</span> →
+                <div style={{ color: '#006a4e', fontWeight: 700, fontSize: '0.92rem', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <span>{sub.chaptersCount} টি অধ্যায়</span> <i className="fa-solid fa-arrow-right" style={{ fontSize: '0.85rem' }}></i>
                 </div>
               </div>
             ))}
@@ -667,7 +677,7 @@ function ModelTestContent() {
   }
 
   // -------------------------------------------------------------
-  // VIEW 1: ALL MODEL TESTS LIST VIEW (Default / Home of model-test)
+  // VIEW 1: ALL MODEL TESTS LIST VIEW (Default / Home of model-test-demo)
   // -------------------------------------------------------------
   return (
     <main style={{ padding: '40px 0 80px', backgroundColor: '#f8fafc', minHeight: 'calc(100vh - 200px)' }}>
@@ -677,7 +687,9 @@ function ModelTestContent() {
         <div style={{ textAlign: 'center', marginBottom: '40px' }}>
           <span
             style={{
-              display: 'inline-block',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
               padding: '6px 14px',
               borderRadius: '20px',
               backgroundColor: '#e0f2fe',
@@ -687,7 +699,8 @@ function ModelTestContent() {
               marginBottom: '12px'
             }}
           >
-            ✨ মডেল টেস্ট সম্ভার
+            <i className="fa-solid fa-wand-magic-sparkles"></i>
+            <span>মডেল টেস্ট সম্ভার</span>
           </span>
           <h1 style={{ fontSize: '2.4rem', color: '#0f172a', fontWeight: 800, marginBottom: '12px', letterSpacing: '-0.5px' }}>
             বিষয়ভিত্তিক ও পূর্ণাঙ্গ অনলাইন মডেল টেস্ট
@@ -761,7 +774,8 @@ function ModelTestContent() {
               onFocus={(e) => (e.target.style.borderColor = '#0284c7')}
               onBlur={(e) => (e.target.style.borderColor = '#cbd5e1')}
             />
-            <span
+            <i
+              className="fa-solid fa-magnifying-glass"
               style={{
                 position: 'absolute',
                 left: '12px',
@@ -770,9 +784,7 @@ function ModelTestContent() {
                 color: '#94a3b8',
                 fontSize: '0.9rem'
               }}
-            >
-              🔍
-            </span>
+            />
           </div>
         </div>
 
@@ -916,7 +928,7 @@ function ModelTestContent() {
                     </div>
                   </div>
 
-                  {/* Bottom Footer Action (No border line above) */}
+                  {/* Bottom Footer Action */}
                   <div
                     style={{
                       display: 'flex',
@@ -924,7 +936,7 @@ function ModelTestContent() {
                       alignItems: 'center'
                     }}
                   >
-                    {/* Live Online User Badge (Updates dynamically every 3.5s with pulse animation) */}
+                    {/* Live Online User Badge */}
                     <div
                       style={{
                         backgroundColor: '#ecfdf5',
@@ -985,7 +997,7 @@ function ModelTestContent() {
                       </span>
                     </div>
                     <button
-                      onClick={() => router.push(`/model-test?examId=${exam.id}`)}
+                      onClick={() => router.push(`/model-test-demo?examId=${exam.id}`)}
                       style={{
                         backgroundColor: '#0284c7',
                         color: '#ffffff',
@@ -1002,7 +1014,7 @@ function ModelTestContent() {
                         boxShadow: '0 2px 6px rgba(2, 132, 199, 0.3)'
                       }}
                     >
-                      <span>বিষয় ও টপিক দেখুন</span> ➔
+                      <span>বিষয় ও টপিক দেখুন</span> <i className="fa-solid fa-arrow-right" style={{ fontSize: '0.85rem' }}></i>
                     </button>
                   </div>
                 </div>
@@ -1032,11 +1044,11 @@ function ModelTestContent() {
   );
 }
 
-export default function ModelTestPage() {
+export default function ModelTestDemoPage() {
   return (
     <Suspense fallback={
       <div style={{ textAlign: 'center', padding: '80px 20px', color: '#64748b' }}>
-        মডেল টেস্ট পেজ লোড হচ্ছে...
+        মডেল টেস্ট ডেমো পেজ লোড হচ্ছে...
       </div>
     }>
       <ModelTestContent />
