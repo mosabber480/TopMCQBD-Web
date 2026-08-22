@@ -1,13 +1,13 @@
-import { parseClusterHost, getDbConfig } from '../utils/db.js';
+import { parseClusterHost, getDbConfig, getPaidDb, getFreeDb } from '../utils/db.js';
 import { generateToken, verifyTokenFromRequest, addPlanDuration, bcrypt } from '../utils/auth.js';
 import { sendResetEmail } from '../utils/brevo.js';
+import { ObjectId } from 'mongodb';
 import {
   initialLayoutConfig,
   initialHomeConfig,
   initialSidebarConfig,
   initialPolicy,
-  initialQuestions,
-  initialUsers
+  initialQuestions
 } from '../data/liveConfigs.js';
 
 // Live State for Edge Runtime (Synchronized directly with MongoDB Atlas data)
@@ -44,7 +44,6 @@ let liveSidebarConfig = (initialSidebarConfig && Object.keys(initialSidebarConfi
 
 let livePolicy = initialPolicy || "<h2>TopMCQBD রিফান্ড ও গোপনীয়তা নীতিমালা</h2>";
 let liveQuestions = Array.isArray(initialQuestions) && initialQuestions.length > 0 ? [...initialQuestions] : [];
-let liveUsers = Array.isArray(initialUsers) && initialUsers.length > 0 ? [...initialUsers] : [];
 
 function jsonResponse(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -319,22 +318,19 @@ export async function onRequest(context) {
       }
 
       const cleanEmail = email.toLowerCase().trim();
-      const user = liveUsers.find(u => (u.email || '').toLowerCase() === cleanEmail) || {
-        _id: 'admin_1',
-        name: 'Mosabber Admin',
-        email: cleanEmail,
-        password: '',
-        role: 'owner',
-        subscription: { plan: 'lifetime', active: true },
-        pendingRequests: []
-      };
+      const db = await getPaidDb(context);
+      const userDoc = await db.collection('users').findOne({ email: cleanEmail });
 
-      let isMatch = true;
-      if (user.password) {
-        if (user.password.startsWith('$2a$') || user.password.startsWith('$2b$') || user.password.startsWith('$2y$')) {
-          isMatch = await bcrypt.compare(password, user.password);
+      if (!userDoc) {
+        return jsonResponse({ success: false, message: 'Invalid Email or Password' }, 400);
+      }
+
+      let isMatch = false;
+      if (userDoc.password) {
+        if (userDoc.password.startsWith('$2a$') || userDoc.password.startsWith('$2b$') || userDoc.password.startsWith('$2y$')) {
+          isMatch = await bcrypt.compare(password, userDoc.password);
         } else {
-          isMatch = password === user.password;
+          isMatch = password === userDoc.password;
         }
       }
 
@@ -342,19 +338,23 @@ export async function onRequest(context) {
         return jsonResponse({ success: false, message: 'Invalid Email or Password' }, 400);
       }
 
-      const token = await generateToken(user, context.env);
+      const userIdStr = userDoc._id.toString();
+      const userForToken = {
+        _id: userIdStr,
+        id: userIdStr,
+        name: userDoc.name,
+        email: userDoc.email,
+        role: userDoc.role,
+        subscription: userDoc.subscription || { plan: 'none', active: false },
+        pendingRequests: userDoc.pendingRequests || []
+      };
+
+      const token = await generateToken(userForToken, context.env);
       return jsonResponse({
         success: true,
         message: 'Login successful!',
         token,
-        user: {
-          id: user._id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-          subscription: user.subscription,
-          pendingRequests: user.pendingRequests || []
-        }
+        user: userForToken
       });
     }
 
@@ -365,37 +365,45 @@ export async function onRequest(context) {
       }
 
       const cleanEmail = email.toLowerCase().trim();
-      const existing = liveUsers.find(u => (u.email || '').toLowerCase() === cleanEmail);
+      const db = await getPaidDb(context);
+      const usersCollection = db.collection('users');
+
+      const existing = await usersCollection.findOne({ email: cleanEmail });
       if (existing) {
         return jsonResponse({ success: false, message: 'User already exists with this email' }, 400);
       }
 
       const hashedPassword = await bcrypt.hash(password, 10);
-      const newUser = {
-        _id: 'u_' + Date.now(),
+      const newUserDoc = {
         name: name.trim(),
         email: cleanEmail,
         password: hashedPassword,
         role: role && ['customer', 'admin'].includes(role) ? role : 'customer',
         subscription: { plan: 'none', active: false },
         pendingRequests: [],
-        createdAt: new Date().toISOString()
+        createdAt: new Date(),
+        updatedAt: new Date()
       };
 
-      liveUsers.unshift(newUser);
-      const token = await generateToken(newUser, context.env);
+      const result = await usersCollection.insertOne(newUserDoc);
+      const insertedId = result.insertedId.toString();
+
+      const userForToken = {
+        _id: insertedId,
+        id: insertedId,
+        name: newUserDoc.name,
+        email: newUserDoc.email,
+        role: newUserDoc.role,
+        subscription: newUserDoc.subscription,
+        pendingRequests: newUserDoc.pendingRequests
+      };
+
+      const token = await generateToken(userForToken, context.env);
       return jsonResponse({
         success: true,
         message: 'Registration successful!',
         token,
-        user: {
-          id: newUser._id,
-          name: newUser.name,
-          email: newUser.email,
-          role: newUser.role,
-          subscription: newUser.subscription,
-          pendingRequests: newUser.pendingRequests
-        }
+        user: userForToken
       }, 201);
     }
 
@@ -404,18 +412,28 @@ export async function onRequest(context) {
       if (!payload) return jsonResponse({ success: false, message: 'Unauthorized' }, 401);
 
       const { currentPassword, newPassword } = await request.json().catch(() => ({}));
-      const user = liveUsers.find(u => String(u._id) === String(payload.userId));
-      if (user && user.password) {
-        let isMatch = false;
-        if (user.password.startsWith('$2a$') || user.password.startsWith('$2b$') || user.password.startsWith('$2y$')) {
-          isMatch = await bcrypt.compare(currentPassword, user.password);
-        } else {
-          isMatch = currentPassword === user.password;
-        }
-        if (!isMatch) return jsonResponse({ success: false, message: 'বর্তমান পাসওয়ার্ড সঠিক নয়।' }, 400);
-
-        user.password = await bcrypt.hash(newPassword, 10);
+      const db = await getPaidDb(context);
+      let query = { email: (payload.email || '').toLowerCase() };
+      if (payload.userId && ObjectId.isValid(payload.userId)) {
+        query = { _id: new ObjectId(payload.userId) };
       }
+
+      const userDoc = await db.collection('users').findOne(query);
+      if (!userDoc) return jsonResponse({ success: false, message: 'User not found' }, 404);
+
+      let isMatch = false;
+      if (userDoc.password) {
+        if (userDoc.password.startsWith('$2a$') || userDoc.password.startsWith('$2b$') || userDoc.password.startsWith('$2y$')) {
+          isMatch = await bcrypt.compare(currentPassword, userDoc.password);
+        } else {
+          isMatch = currentPassword === userDoc.password;
+        }
+      }
+
+      if (!isMatch) return jsonResponse({ success: false, message: 'বর্তমান পাসওয়ার্ড সঠিক নয়।' }, 400);
+
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      await db.collection('users').updateOne(query, { $set: { password: hashedPassword, updatedAt: new Date() } });
 
       return jsonResponse({ success: true, message: 'পাসওয়ার্ড সফলভাবে পরিবর্তন হয়েছে!' });
     }
@@ -425,13 +443,14 @@ export async function onRequest(context) {
       if (!email) return jsonResponse({ success: false, message: 'Email is required' }, 400);
 
       const cleanEmail = email.toLowerCase().trim();
-      const user = liveUsers.find(u => (u.email || '').toLowerCase() === cleanEmail);
-      if (!user) return jsonResponse({ success: false, message: 'এই ইমেইল দিয়ে কোনো অ্যাকাউন্ট পাওয়া যায়নি।' }, 404);
+      const db = await getPaidDb(context);
+      const userDoc = await db.collection('users').findOne({ email: cleanEmail });
+      if (!userDoc) return jsonResponse({ success: false, message: 'এই ইমেইল দিয়ে কোনো অ্যাকাউন্ট পাওয়া যায়নি।' }, 404);
 
       const resetToken = Math.random().toString(36).substring(2, 15);
       const resetLink = `${url.origin}/login?token=${resetToken}&email=${encodeURIComponent(cleanEmail)}`;
       try {
-        await sendResetEmail(user, resetLink, context.env);
+        await sendResetEmail(userDoc, resetLink, context.env);
       } catch (e) {
         console.warn('Brevo reset email error:', e.message);
       }
@@ -444,24 +463,27 @@ export async function onRequest(context) {
       if (!email || !newPassword) return jsonResponse({ success: false, message: 'All fields are required' }, 400);
 
       const cleanEmail = email.toLowerCase().trim();
-      const user = liveUsers.find(u => (u.email || '').toLowerCase() === cleanEmail);
-      if (user) {
-        user.password = await bcrypt.hash(newPassword, 10);
-      }
+      const db = await getPaidDb(context);
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      await db.collection('users').updateOne({ email: cleanEmail }, { $set: { password: hashedPassword, updatedAt: new Date() } });
+
       return jsonResponse({ success: true, message: 'পাসওয়ার্ড সফলভাবে রিসেট হয়েছে! এখন লগইন করুন।' });
     }
 
     // 9. USERS (/api/users, /api/users/me, /api/users/create-admin, /api/users/request-plan)
     if (route === 'users' && method === 'GET') {
+      const db = await getPaidDb(context);
+      const usersDocs = await db.collection('users').find({}).sort({ createdAt: -1 }).toArray();
+
       return jsonResponse({
         success: true,
-        users: liveUsers.map(u => ({
-          id: u._id,
-          _id: u._id,
+        users: usersDocs.map(u => ({
+          id: u._id.toString(),
+          _id: u._id.toString(),
           name: u.name,
           email: u.email,
           role: u.role,
-          subscription: u.subscription,
+          subscription: u.subscription || { plan: 'none', active: false },
           pendingRequests: u.pendingRequests || [],
           createdAt: u.createdAt,
           lastLogin: u.lastLogin
@@ -471,17 +493,32 @@ export async function onRequest(context) {
 
     if (route === 'users/me' && method === 'GET') {
       const payload = await verifyTokenFromRequest(request, context.env);
-      const user = (payload && liveUsers.find(u => String(u._id) === String(payload.userId))) || liveUsers[0];
+      if (!payload || (!payload.userId && !payload.email)) {
+        return jsonResponse({ success: false, message: 'Unauthorized' }, 401);
+      }
+
+      const db = await getPaidDb(context);
+      let query = { email: (payload.email || '').toLowerCase() };
+      if (payload.userId && ObjectId.isValid(payload.userId)) {
+        query = { _id: new ObjectId(payload.userId) };
+      }
+
+      const userDoc = await db.collection('users').findOne(query);
+      if (!userDoc) {
+        return jsonResponse({ success: false, message: 'User not found' }, 404);
+      }
+
+      const userIdStr = userDoc._id.toString();
       return jsonResponse({
         success: true,
         user: {
-          id: user._id,
-          _id: user._id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-          subscription: user.subscription,
-          pendingRequests: user.pendingRequests || []
+          id: userIdStr,
+          _id: userIdStr,
+          name: userDoc.name,
+          email: userDoc.email,
+          role: userDoc.role,
+          subscription: userDoc.subscription || { plan: 'none', active: false },
+          pendingRequests: userDoc.pendingRequests || []
         }
       });
     }
@@ -492,24 +529,37 @@ export async function onRequest(context) {
         return jsonResponse({ success: false, message: 'All fields are required' }, 400);
       }
 
+      const cleanEmail = email.toLowerCase().trim();
+      const db = await getPaidDb(context);
+      const usersCollection = db.collection('users');
+
+      const existing = await usersCollection.findOne({ email: cleanEmail });
+      if (existing) {
+        return jsonResponse({ success: false, message: 'User already exists with this email' }, 400);
+      }
+
       const hashedPassword = await bcrypt.hash(password, 10);
-      const newAdmin = {
-        _id: 'admin_' + Date.now(),
+      const newAdminDoc = {
         name: name.trim(),
-        email: email.toLowerCase().trim(),
+        email: cleanEmail,
         password: hashedPassword,
         role: 'admin',
-        subscription: { plan: 'lifetime', active: true, startDate: new Date().toISOString(), endDate: '2099-12-31' },
+        subscription: { plan: 'lifetime', active: true, startDate: new Date(), endDate: new Date('2099-12-31') },
         pendingRequests: [],
-        createdAt: new Date().toISOString()
+        createdAt: new Date(),
+        updatedAt: new Date()
       };
 
-      liveUsers.unshift(newAdmin);
+      await usersCollection.insertOne(newAdminDoc);
       return jsonResponse({ success: true, message: 'নতুন এডমিন অ্যাকাউন্ট তৈরি হয়েছে!' }, 201);
     }
 
     if (route === 'users/request-plan' && method === 'POST') {
       const payload = await verifyTokenFromRequest(request, context.env);
+      if (!payload) {
+        return jsonResponse({ success: false, message: 'Unauthorized' }, 401);
+      }
+
       const body = await request.json().catch(() => ({}));
       const { plan, paymentMethod, transactionId, amount, senderNumber } = body;
 
@@ -524,13 +574,16 @@ export async function onRequest(context) {
         requestedAt: new Date().toISOString()
       };
 
-      if (payload) {
-        const user = liveUsers.find(u => String(u._id) === String(payload.userId));
-        if (user) {
-          if (!user.pendingRequests) user.pendingRequests = [];
-          user.pendingRequests.push(newRequest);
-        }
+      const db = await getPaidDb(context);
+      let query = { email: (payload.email || '').toLowerCase() };
+      if (payload.userId && ObjectId.isValid(payload.userId)) {
+        query = { _id: new ObjectId(payload.userId) };
       }
+
+      await db.collection('users').updateOne(
+        query,
+        { $push: { pendingRequests: newRequest } }
+      );
 
       return jsonResponse({ success: true, message: 'আপনার সাবস্ক্রিপশন রিকোয়েস্ট জমা নেওয়া হয়েছে!', request: newRequest });
     }
@@ -538,11 +591,12 @@ export async function onRequest(context) {
     // 10. Single User operations (/api/users/:userId/...)
     if (routeParts[0] === 'users' && routeParts.length >= 2) {
       const targetUserId = routeParts[1];
-      const userIdx = liveUsers.findIndex(u => String(u._id) === String(targetUserId));
+      const db = await getPaidDb(context);
+      const query = ObjectId.isValid(targetUserId) ? { _id: new ObjectId(targetUserId) } : { _id: targetUserId };
 
       if (routeParts.length === 2 && method === 'DELETE') {
-        if (userIdx !== -1) {
-          liveUsers.splice(userIdx, 1);
+        const result = await db.collection('users').deleteOne(query);
+        if (result.deletedCount > 0) {
           return jsonResponse({ success: true, message: 'ইউজার মুছে ফেলা হয়েছে!' });
         }
         return jsonResponse({ success: false, message: 'User not found' }, 404);
@@ -550,40 +604,57 @@ export async function onRequest(context) {
 
       if (routeParts.length === 3 && routeParts[2] === 'subscription' && method === 'PUT') {
         const body = await request.json().catch(() => ({}));
-        if (userIdx !== -1) {
-          const now = new Date();
-          const endDate = addPlanDuration(now, body.plan || '1_month');
-          liveUsers[userIdx].subscription = {
-            plan: body.plan || 'custom',
-            active: body.plan !== 'none',
-            startDate: now.toISOString(),
-            endDate: endDate.toISOString()
-          };
-          return jsonResponse({ success: true, message: 'সাবস্ক্রিপশন আপডেট হয়েছে!', subscription: liveUsers[userIdx].subscription });
-        }
+        const now = new Date();
+        const endDate = addPlanDuration(now, body.plan || '1_month');
+        const subscription = {
+          plan: body.plan || 'custom',
+          active: body.plan !== 'none',
+          startDate: now.toISOString(),
+          endDate: endDate.toISOString()
+        };
+
+        await db.collection('users').updateOne(query, { $set: { subscription, updatedAt: new Date() } });
+        return jsonResponse({ success: true, message: 'সাবস্ক্রিপশন আপডেট হয়েছে!', subscription });
       }
 
       if (routeParts[2] === 'pending-requests' && routeParts.length === 5 && routeParts[4] === 'approve' && method === 'PUT') {
         const reqId = routeParts[3];
-        if (userIdx !== -1) {
-          const user = liveUsers[userIdx];
-          const req = (user.pendingRequests || []).find(r => String(r._id) === String(reqId) || String(r.id) === String(reqId));
-          if (req) req.status = 'approved';
+        const userDoc = await db.collection('users').findOne(query);
+        if (userDoc) {
+          const req = (userDoc.pendingRequests || []).find(r => String(r._id) === String(reqId) || String(r.id) === String(reqId));
+          const planToSet = req ? req.plan : '1_month';
           const now = new Date();
-          const endDate = addPlanDuration(now, req ? req.plan : '1_month');
-          user.subscription = { plan: req ? req.plan : '1_month', active: true, startDate: now.toISOString(), endDate: endDate.toISOString() };
-          return jsonResponse({ success: true, message: 'অনুমোদন সফল হয়েছে!', subscription: user.subscription });
+          const endDate = addPlanDuration(now, planToSet);
+          const subscription = { plan: planToSet, active: true, startDate: now.toISOString(), endDate: endDate.toISOString() };
+
+          await db.collection('users').updateOne(
+            query,
+            {
+              $set: {
+                subscription,
+                "pendingRequests.$[elem].status": "approved",
+                updatedAt: new Date()
+              }
+            },
+            { arrayFilters: [{ "elem._id": reqId }] }
+          );
+          return jsonResponse({ success: true, message: 'অনুমোদন সফল হয়েছে!', subscription });
         }
       }
 
       if (routeParts[2] === 'pending-requests' && routeParts.length === 5 && routeParts[4] === 'reject' && method === 'PUT') {
         const reqId = routeParts[3];
-        if (userIdx !== -1) {
-          const user = liveUsers[userIdx];
-          const req = (user.pendingRequests || []).find(r => String(r._id) === String(reqId) || String(r.id) === String(reqId));
-          if (req) req.status = 'rejected';
-          return jsonResponse({ success: true, message: 'Request reject করা হয়েছে।' });
-        }
+        await db.collection('users').updateOne(
+          query,
+          {
+            $set: {
+              "pendingRequests.$[elem].status": "rejected",
+              updatedAt: new Date()
+            }
+          },
+          { arrayFilters: [{ "elem._id": reqId }] }
+        );
+        return jsonResponse({ success: true, message: 'Request reject করা হয়েছে।' });
       }
     }
 
