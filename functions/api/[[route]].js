@@ -1,7 +1,6 @@
-import { parseClusterHost, getDbConfig, getUsersCollection } from '../utils/db.js';
+import { parseClusterHost, getDbConfig } from '../utils/db.js';
 import { generateToken, verifyTokenFromRequest, addPlanDuration, bcrypt } from '../utils/auth.js';
 import { sendResetEmail } from '../utils/brevo.js';
-import { ObjectId } from 'mongodb';
 import {
   initialLayoutConfig,
   initialHomeConfig,
@@ -46,36 +45,6 @@ let liveSidebarConfig = (initialSidebarConfig && Object.keys(initialSidebarConfi
 let livePolicy = initialPolicy || "<h2>TopMCQBD রিফান্ড ও গোপনীয়তা নীতিমালা</h2>";
 let liveQuestions = Array.isArray(initialQuestions) && initialQuestions.length > 0 ? [...initialQuestions] : [];
 let liveUsers = Array.isArray(initialUsers) && initialUsers.length > 0 ? [...initialUsers] : [];
-
-function toMongoId(idStr) {
-  try {
-    if (idStr && ObjectId.isValid(idStr)) {
-      return new ObjectId(idStr);
-    }
-  } catch {}
-  return idStr;
-}
-
-async function fetchAllUsersFromDb(context) {
-  try {
-    const usersCol = await getUsersCollection(context);
-    const users = await usersCol.find({}).sort({ createdAt: -1 }).toArray();
-    return users.map(u => ({
-      ...u,
-      _id: u._id.toString(),
-      id: u._id.toString(),
-      pendingRequests: u.pendingRequests || []
-    }));
-  } catch (err) {
-    console.warn('⚠️ Could not fetch users directly from MongoDB, using liveUsers fallback:', err.message);
-    return liveUsers.map(u => ({
-      ...u,
-      _id: String(u._id),
-      id: String(u._id),
-      pendingRequests: u.pendingRequests || []
-    }));
-  }
-}
 
 function jsonResponse(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -350,23 +319,7 @@ export async function onRequest(context) {
       }
 
       const cleanEmail = email.toLowerCase().trim();
-      let user = null;
-      try {
-        const usersCol = await getUsersCollection(context);
-        const doc = await usersCol.findOne({ email: cleanEmail });
-        if (doc) {
-          user = { ...doc, _id: doc._id.toString(), id: doc._id.toString() };
-        }
-      } catch (e) {
-        console.warn('⚠️ Auth login MongoDB query failed:', e.message);
-      }
-      if (!user) {
-        user = liveUsers.find(u => (u.email || '').toLowerCase() === cleanEmail);
-      }
-
-      if (!user) {
-        return jsonResponse({ success: false, message: 'Invalid Email or Password' }, 400);
-      }
+      const user = liveUsers.find(u => (u.email || '').toLowerCase() === cleanEmail);
 
       let isMatch = true;
       if (user.password) {
@@ -388,7 +341,6 @@ export async function onRequest(context) {
         token,
         user: {
           id: user._id,
-          _id: user._id,
           name: user.name,
           email: user.email,
           role: user.role,
@@ -405,21 +357,14 @@ export async function onRequest(context) {
       }
 
       const cleanEmail = email.toLowerCase().trim();
-      let existing = null;
-      try {
-        const usersCol = await getUsersCollection(context);
-        existing = await usersCol.findOne({ email: cleanEmail });
-      } catch (e) {}
-      if (!existing) {
-        existing = liveUsers.find(u => (u.email || '').toLowerCase() === cleanEmail);
-      }
-
+      const existing = liveUsers.find(u => (u.email || '').toLowerCase() === cleanEmail);
       if (existing) {
         return jsonResponse({ success: false, message: 'User already exists with this email' }, 400);
       }
 
       const hashedPassword = await bcrypt.hash(password, 10);
       const newUser = {
+        _id: 'u_' + Date.now(),
         name: name.trim(),
         email: cleanEmail,
         password: hashedPassword,
@@ -429,18 +374,7 @@ export async function onRequest(context) {
         createdAt: new Date().toISOString()
       };
 
-      try {
-        const usersCol = await getUsersCollection(context);
-        const res = await usersCol.insertOne(newUser);
-        newUser._id = res.insertedId.toString();
-        newUser.id = newUser._id;
-      } catch (e) {
-        console.warn('⚠️ Register MongoDB insertOne failed:', e.message);
-        newUser._id = 'u_' + Date.now();
-        newUser.id = newUser._id;
-        liveUsers.unshift(newUser);
-      }
-
+      liveUsers.unshift(newUser);
       const token = await generateToken(newUser, context.env);
       return jsonResponse({
         success: true,
@@ -448,7 +382,6 @@ export async function onRequest(context) {
         token,
         user: {
           id: newUser._id,
-          _id: newUser._id,
           name: newUser.name,
           email: newUser.email,
           role: newUser.role,
@@ -463,15 +396,7 @@ export async function onRequest(context) {
       if (!payload) return jsonResponse({ success: false, message: 'Unauthorized' }, 401);
 
       const { currentPassword, newPassword } = await request.json().catch(() => ({}));
-      let user = null;
-      try {
-        const usersCol = await getUsersCollection(context);
-        user = await usersCol.findOne({ $or: [{ _id: toMongoId(payload.userId) }, { _id: String(payload.userId) }] });
-      } catch (e) {}
-      if (!user) {
-        user = liveUsers.find(u => String(u._id) === String(payload.userId));
-      }
-
+      const user = liveUsers.find(u => String(u._id) === String(payload.userId));
       if (user && user.password) {
         let isMatch = false;
         if (user.password.startsWith('$2a$') || user.password.startsWith('$2b$') || user.password.startsWith('$2y$')) {
@@ -481,16 +406,7 @@ export async function onRequest(context) {
         }
         if (!isMatch) return jsonResponse({ success: false, message: 'বর্তমান পাসওয়ার্ড সঠিক নয়।' }, 400);
 
-        const newHashedPassword = await bcrypt.hash(newPassword, 10);
-        user.password = newHashedPassword;
-
-        try {
-          const usersCol = await getUsersCollection(context);
-          await usersCol.updateOne(
-            { $or: [{ _id: toMongoId(payload.userId) }, { _id: String(payload.userId) }] },
-            { $set: { password: newHashedPassword } }
-          );
-        } catch (e) {}
+        user.password = await bcrypt.hash(newPassword, 10);
       }
 
       return jsonResponse({ success: true, message: 'পাসওয়ার্ড সফলভাবে পরিবর্তন হয়েছে!' });
@@ -501,15 +417,7 @@ export async function onRequest(context) {
       if (!email) return jsonResponse({ success: false, message: 'Email is required' }, 400);
 
       const cleanEmail = email.toLowerCase().trim();
-      let user = null;
-      try {
-        const usersCol = await getUsersCollection(context);
-        user = await usersCol.findOne({ email: cleanEmail });
-      } catch (e) {}
-      if (!user) {
-        user = liveUsers.find(u => (u.email || '').toLowerCase() === cleanEmail);
-      }
-
+      const user = liveUsers.find(u => (u.email || '').toLowerCase() === cleanEmail);
       if (!user) return jsonResponse({ success: false, message: 'এই ইমেইল দিয়ে কোনো অ্যাকাউন্ট পাওয়া যায়নি।' }, 404);
 
       const resetToken = Math.random().toString(36).substring(2, 15);
@@ -528,27 +436,20 @@ export async function onRequest(context) {
       if (!email || !newPassword) return jsonResponse({ success: false, message: 'All fields are required' }, 400);
 
       const cleanEmail = email.toLowerCase().trim();
-      const hashedPassword = await bcrypt.hash(newPassword, 10);
-      try {
-        const usersCol = await getUsersCollection(context);
-        await usersCol.updateOne({ email: cleanEmail }, { $set: { password: hashedPassword } });
-      } catch (e) {}
-
       const user = liveUsers.find(u => (u.email || '').toLowerCase() === cleanEmail);
       if (user) {
-        user.password = hashedPassword;
+        user.password = await bcrypt.hash(newPassword, 10);
       }
       return jsonResponse({ success: true, message: 'পাসওয়ার্ড সফলভাবে রিসেট হয়েছে! এখন লগইন করুন।' });
     }
 
     // 9. USERS (/api/users, /api/users/me, /api/users/create-admin, /api/users/request-plan)
     if (route === 'users' && method === 'GET') {
-      const usersList = await fetchAllUsersFromDb(context);
       return jsonResponse({
         success: true,
-        users: usersList.map(u => ({
-          id: String(u._id),
-          _id: String(u._id),
+        users: liveUsers.map(u => ({
+          id: u._id,
+          _id: u._id,
           name: u.name,
           email: u.email,
           role: u.role,
@@ -562,25 +463,12 @@ export async function onRequest(context) {
 
     if (route === 'users/me' && method === 'GET') {
       const payload = await verifyTokenFromRequest(request, context.env);
-      let user = null;
-      if (payload?.userId) {
-        try {
-          const usersCol = await getUsersCollection(context);
-          const doc = await usersCol.findOne({ $or: [{ _id: toMongoId(payload.userId) }, { _id: String(payload.userId) }, { email: (payload.email || '').toLowerCase() }] });
-          if (doc) {
-            user = { ...doc, _id: doc._id.toString(), id: doc._id.toString() };
-          }
-        } catch (e) {}
-      }
-      if (!user) {
-        user = (payload && liveUsers.find(u => String(u._id) === String(payload.userId))) || liveUsers[0];
-      }
-
+      const user = (payload && liveUsers.find(u => String(u._id) === String(payload.userId))) || liveUsers[0];
       return jsonResponse({
         success: true,
         user: {
-          id: String(user._id),
-          _id: String(user._id),
+          id: user._id,
+          _id: user._id,
           name: user.name,
           email: user.email,
           role: user.role,
@@ -598,6 +486,7 @@ export async function onRequest(context) {
 
       const hashedPassword = await bcrypt.hash(password, 10);
       const newAdmin = {
+        _id: 'admin_' + Date.now(),
         name: name.trim(),
         email: email.toLowerCase().trim(),
         password: hashedPassword,
@@ -607,17 +496,7 @@ export async function onRequest(context) {
         createdAt: new Date().toISOString()
       };
 
-      try {
-        const usersCol = await getUsersCollection(context);
-        const res = await usersCol.insertOne(newAdmin);
-        newAdmin._id = res.insertedId.toString();
-        newAdmin.id = newAdmin._id;
-      } catch (e) {
-        newAdmin._id = 'admin_' + Date.now();
-        newAdmin.id = newAdmin._id;
-        liveUsers.unshift(newAdmin);
-      }
-
+      liveUsers.unshift(newAdmin);
       return jsonResponse({ success: true, message: 'নতুন এডমিন অ্যাকাউন্ট তৈরি হয়েছে!' }, 201);
     }
 
@@ -638,18 +517,10 @@ export async function onRequest(context) {
       };
 
       if (payload) {
-        try {
-          const usersCol = await getUsersCollection(context);
-          await usersCol.updateOne(
-            { $or: [{ _id: toMongoId(payload.userId) }, { _id: String(payload.userId) }, { email: (payload.email || '').toLowerCase() }] },
-            { $push: { pendingRequests: newRequest } }
-          );
-        } catch (e) {
-          const user = liveUsers.find(u => String(u._id) === String(payload.userId));
-          if (user) {
-            if (!user.pendingRequests) user.pendingRequests = [];
-            user.pendingRequests.push(newRequest);
-          }
+        const user = liveUsers.find(u => String(u._id) === String(payload.userId));
+        if (user) {
+          if (!user.pendingRequests) user.pendingRequests = [];
+          user.pendingRequests.push(newRequest);
         }
       }
 
@@ -662,19 +533,8 @@ export async function onRequest(context) {
       const userIdx = liveUsers.findIndex(u => String(u._id) === String(targetUserId));
 
       if (routeParts.length === 2 && method === 'DELETE') {
-        let deleted = false;
-        try {
-          const usersCol = await getUsersCollection(context);
-          const res = await usersCol.deleteOne({ $or: [{ _id: toMongoId(targetUserId) }, { _id: String(targetUserId) }] });
-          if (res.deletedCount > 0) deleted = true;
-        } catch (e) {}
-
         if (userIdx !== -1) {
           liveUsers.splice(userIdx, 1);
-          deleted = true;
-        }
-
-        if (deleted) {
           return jsonResponse({ success: true, message: 'ইউজার মুছে ফেলা হয়েছে!' });
         }
         return jsonResponse({ success: false, message: 'User not found' }, 404);
@@ -682,167 +542,38 @@ export async function onRequest(context) {
 
       if (routeParts.length === 3 && routeParts[2] === 'subscription' && method === 'PUT') {
         const body = await request.json().catch(() => ({}));
-        const now = new Date();
-        const endDate = addPlanDuration(now, body.plan || '1_month');
-        const subData = {
-          plan: body.plan || 'custom',
-          active: body.plan !== 'none',
-          startDate: now.toISOString(),
-          endDate: endDate.toISOString()
-        };
-
-        try {
-          const usersCol = await getUsersCollection(context);
-          await usersCol.updateOne(
-            { $or: [{ _id: toMongoId(targetUserId) }, { _id: String(targetUserId) }] },
-            { $set: { subscription: subData } }
-          );
-        } catch (e) {}
-
         if (userIdx !== -1) {
-          liveUsers[userIdx].subscription = subData;
+          const now = new Date();
+          const endDate = addPlanDuration(now, body.plan || '1_month');
+          liveUsers[userIdx].subscription = {
+            plan: body.plan || 'custom',
+            active: body.plan !== 'none',
+            startDate: now.toISOString(),
+            endDate: endDate.toISOString()
+          };
+          return jsonResponse({ success: true, message: 'সাবস্ক্রিপশন আপডেট হয়েছে!', subscription: liveUsers[userIdx].subscription });
         }
-        return jsonResponse({ success: true, message: 'সাবস্ক্রিপশন আপডেট হয়েছে!', subscription: subData });
       }
 
-      // Add Payment Entry in History (/api/users/:userId/pending-requests POST)
-      if (routeParts.length === 3 && routeParts[2] === 'pending-requests' && method === 'POST') {
-        const body = await request.json().catch(() => ({}));
-        const newReq = {
-          _id: 'req_' + Date.now(),
-          plan: (body.plan || '1_month').trim(),
-          paymentMethod: body.paymentMethod || 'bkash',
-          phone: (body.phone || '').trim(),
-          transactionId: (body.transactionId || '').trim(),
-          status: body.status || 'approved',
-          requestedAt: new Date().toISOString()
-        };
-
-        try {
-          const usersCol = await getUsersCollection(context);
-          await usersCol.updateOne(
-            { $or: [{ _id: toMongoId(targetUserId) }, { _id: String(targetUserId) }] },
-            { $push: { pendingRequests: newReq } }
-          );
-        } catch (e) {}
-
-        if (userIdx !== -1) {
-          if (!liveUsers[userIdx].pendingRequests) liveUsers[userIdx].pendingRequests = [];
-          liveUsers[userIdx].pendingRequests.push(newReq);
-        }
-
-        return jsonResponse({ success: true, message: 'Payment record added successfully!', request: newReq }, 201);
-      }
-
-      // Single Payment Entry Operations (/api/users/:userId/pending-requests/:requestId ...)
-      if (routeParts.length >= 4 && routeParts[2] === 'pending-requests') {
+      if (routeParts[2] === 'pending-requests' && routeParts.length === 5 && routeParts[4] === 'approve' && method === 'PUT') {
         const reqId = routeParts[3];
-
-        // Edit Payment Entry (PUT /api/users/:userId/pending-requests/:requestId)
-        if (routeParts.length === 4 && method === 'PUT') {
-          const body = await request.json().catch(() => ({}));
-          try {
-            const usersCol = await getUsersCollection(context);
-            await usersCol.updateOne(
-              { $or: [{ _id: toMongoId(targetUserId) }, { _id: String(targetUserId) }] },
-              {
-                $set: {
-                  "pendingRequests.$[elem].plan": body.plan,
-                  "pendingRequests.$[elem].paymentMethod": body.paymentMethod,
-                  "pendingRequests.$[elem].phone": body.phone,
-                  "pendingRequests.$[elem].transactionId": body.transactionId
-                }
-              },
-              { arrayFilters: [{ $or: [{ "elem._id": reqId }, { "elem.id": reqId }] }] }
-            );
-          } catch (e) {}
-
-          if (userIdx !== -1 && liveUsers[userIdx].pendingRequests) {
-            const r = liveUsers[userIdx].pendingRequests.find(it => String(it._id) === String(reqId) || String(it.id) === String(reqId));
-            if (r) {
-              if (body.plan) r.plan = body.plan;
-              if (body.paymentMethod) r.paymentMethod = body.paymentMethod;
-              if (body.phone) r.phone = body.phone;
-              if (body.transactionId) r.transactionId = body.transactionId;
-            }
-          }
-
-          return jsonResponse({ success: true, message: 'Payment record updated successfully!' });
+        if (userIdx !== -1) {
+          const user = liveUsers[userIdx];
+          const req = (user.pendingRequests || []).find(r => String(r._id) === String(reqId) || String(r.id) === String(reqId));
+          if (req) req.status = 'approved';
+          const now = new Date();
+          const endDate = addPlanDuration(now, req ? req.plan : '1_month');
+          user.subscription = { plan: req ? req.plan : '1_month', active: true, startDate: now.toISOString(), endDate: endDate.toISOString() };
+          return jsonResponse({ success: true, message: 'অনুমোদন সফল হয়েছে!', subscription: user.subscription });
         }
+      }
 
-        // Delete Payment Entry (DELETE /api/users/:userId/pending-requests/:requestId)
-        if (routeParts.length === 4 && method === 'DELETE') {
-          try {
-            const usersCol = await getUsersCollection(context);
-            await usersCol.updateOne(
-              { $or: [{ _id: toMongoId(targetUserId) }, { _id: String(targetUserId) }] },
-              { $pull: { pendingRequests: { $or: [{ _id: reqId }, { id: reqId }] } } }
-            );
-          } catch (e) {}
-
-          if (userIdx !== -1 && liveUsers[userIdx].pendingRequests) {
-            liveUsers[userIdx].pendingRequests = liveUsers[userIdx].pendingRequests.filter(it => String(it._id) !== String(reqId) && String(it.id) !== String(reqId));
-          }
-
-          return jsonResponse({ success: true, message: 'Payment record deleted successfully!' });
-        }
-
-        // Approve Request (PUT /api/users/:userId/pending-requests/:requestId/approve)
-        if (routeParts.length === 5 && routeParts[4] === 'approve' && method === 'PUT') {
-          let req = null;
-          let subData = null;
-          try {
-            const usersCol = await getUsersCollection(context);
-            const userDoc = await usersCol.findOne({ $or: [{ _id: toMongoId(targetUserId) }, { _id: String(targetUserId) }] });
-            if (userDoc) {
-              req = (userDoc.pendingRequests || []).find(r => String(r._id) === String(reqId) || String(r.id) === String(reqId));
-              const now = new Date();
-              const endDate = addPlanDuration(now, req ? req.plan : '1_month');
-              subData = { plan: req ? req.plan : '1_month', active: true, startDate: now.toISOString(), endDate: endDate.toISOString() };
-
-              await usersCol.updateOne(
-                { $or: [{ _id: toMongoId(targetUserId) }, { _id: String(targetUserId) }] },
-                {
-                  $set: {
-                    "pendingRequests.$[elem].status": "approved",
-                    subscription: subData
-                  }
-                },
-                { arrayFilters: [{ $or: [{ "elem._id": reqId }, { "elem.id": reqId }] }] }
-              );
-            }
-          } catch (e) {}
-
-          if (userIdx !== -1) {
-            const user = liveUsers[userIdx];
-            req = (user.pendingRequests || []).find(r => String(r._id) === String(reqId) || String(r.id) === String(reqId));
-            if (req) req.status = 'approved';
-            const now = new Date();
-            const endDate = addPlanDuration(now, req ? req.plan : '1_month');
-            subData = { plan: req ? req.plan : '1_month', active: true, startDate: now.toISOString(), endDate: endDate.toISOString() };
-            user.subscription = subData;
-          }
-
-          return jsonResponse({ success: true, message: 'অনুমোদন সফল হয়েছে!', subscription: subData });
-        }
-
-        // Reject Request (PUT /api/users/:userId/pending-requests/:requestId/reject)
-        if (routeParts.length === 5 && routeParts[4] === 'reject' && method === 'PUT') {
-          try {
-            const usersCol = await getUsersCollection(context);
-            await usersCol.updateOne(
-              { $or: [{ _id: toMongoId(targetUserId) }, { _id: String(targetUserId) }] },
-              { $set: { "pendingRequests.$[elem].status": "rejected" } },
-              { arrayFilters: [{ $or: [{ "elem._id": reqId }, { "elem.id": reqId }] }] }
-            );
-          } catch (e) {}
-
-          if (userIdx !== -1) {
-            const user = liveUsers[userIdx];
-            const req = (user.pendingRequests || []).find(r => String(r._id) === String(reqId) || String(r.id) === String(reqId));
-            if (req) req.status = 'rejected';
-          }
-
+      if (routeParts[2] === 'pending-requests' && routeParts.length === 5 && routeParts[4] === 'reject' && method === 'PUT') {
+        const reqId = routeParts[3];
+        if (userIdx !== -1) {
+          const user = liveUsers[userIdx];
+          const req = (user.pendingRequests || []).find(r => String(r._id) === String(reqId) || String(r.id) === String(reqId));
+          if (req) req.status = 'rejected';
           return jsonResponse({ success: true, message: 'Request reject করা হয়েছে।' });
         }
       }
