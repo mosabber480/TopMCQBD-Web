@@ -16,57 +16,37 @@ export default function FreeMcqsPage() {
   const [showAnswer, setShowAnswer] = useState(false);
   const [showExplanation, setShowExplanation] = useState(true);
 
+  const FREE_API = process.env.NEXT_PUBLIC_FREE_API_URL || 'https://topmcqbd-web-free.pages.dev/api';
+
   useEffect(() => {
-    // Fetch categories
-    fetch('/api/categories')
+    // Fetch categories directly from 2nd Cloudflare Account
+    fetch(`${FREE_API}/categories`)
       .then(res => res.json())
       .then(data => {
         const cats = data.categories || data.data || [];
         setCategories(cats);
       })
       .catch(() => {});
-  }, []);
+  }, [FREE_API]);
 
   useEffect(() => {
     setLoading(true);
     const url = selectedCategory && selectedCategory !== 'all'
-      ? `/api/questions/free?category=${encodeURIComponent(selectedCategory)}`
-      : '/api/questions/free';
+      ? `${FREE_API}/questions?category=${encodeURIComponent(selectedCategory)}`
+      : `${FREE_API}/questions`;
 
     fetch(url)
       .then(res => res.json())
       .then(data => {
         let list = data.questions || data.mcqs || [];
-        if (list.length === 0) {
-          // Fallback to regular questions
-          fetch('/api/questions?limit=25')
-            .then(r => r.json())
-            .then(d => {
-              setQuestions(d.questions || d.mcqs || []);
-              setLoading(false);
-            })
-            .catch(() => {
-              setQuestions([]);
-              setLoading(false);
-            });
-        } else {
-          setQuestions(list);
-          setLoading(false);
-        }
+        setQuestions(list);
+        setLoading(false);
       })
       .catch(() => {
-        fetch('/api/questions?limit=25')
-          .then(r => r.json())
-          .then(d => {
-            setQuestions(d.questions || d.mcqs || []);
-            setLoading(false);
-          })
-          .catch(() => {
-            setQuestions([]);
-            setLoading(false);
-          });
+        setQuestions([]);
+        setLoading(false);
       });
-  }, [selectedCategory]);
+  }, [selectedCategory, FREE_API]);
 
   const handleAnswerClick = (qIndex, optIndex) => {
     if (isReadMode) return;

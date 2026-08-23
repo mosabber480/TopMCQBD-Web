@@ -203,9 +203,8 @@
 6. MONGODB ATLAS NETWORK ACCESS / IP WHITELIST GUIDE
 ===============================================================================
 
-MongoDB Atlas ক্লাস্টার কানেকশন নিশ্চিত করতে:
-1. Paid ও Free উভয় প্রজেক্টে Security ➔ Network Access সেকশনে যান।
-2. IP Whitelist-এ `0.0.0.0/0` (Allow Access from Anywhere) নিশ্চিত করুন।
+MongoDB Atlas ক্লাস্টার কানেকশন নিশ্চিত:
+2. IP Whitelist-এ `0.0.0.0/0` (Allow Access from Anywhere) নিশ্চিত ।
    (যেহেতু Cloudflare Pages Functions ডায়নামিক আইপি ব্যবহার করে সার্ভারলেস এক্সিকিউট হয়, তাই `0.0.0.0/0` এনাবল থাকা বাধ্যতামূলক)।
 
 
