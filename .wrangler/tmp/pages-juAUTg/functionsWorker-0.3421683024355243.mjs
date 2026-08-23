@@ -35635,28 +35635,36 @@ async function onRequest(context2) {
       return jsonResponse({ success: true, message: "Policy saved successfully!" });
     }
     if (route === "db-check" && method === "GET") {
+      let paidResult = { name: dbConfig.paidDbName, status: "Disconnected", connected: false, latencyMs: null, collections: [], error: null };
+      let freeResult = { name: dbConfig.freeDbName, status: "Disconnected", connected: false, latencyMs: null, collections: [], error: null };
+      try {
+        const startPaid = Date.now();
+        const dbPaid = await getPaidDb(context2);
+        const colsPaid = await dbPaid.listCollections().toArray();
+        paidResult.connected = true;
+        paidResult.status = "Connected";
+        paidResult.latencyMs = Date.now() - startPaid;
+        paidResult.collections = colsPaid.map((c) => c.name);
+      } catch (err) {
+        paidResult.error = { message: err.message || "Connection failed" };
+      }
+      try {
+        const startFree = Date.now();
+        const dbFree = await getFreeDb(context2);
+        const colsFree = await dbFree.listCollections().toArray();
+        freeResult.connected = true;
+        freeResult.status = "Connected";
+        freeResult.latencyMs = Date.now() - startFree;
+        freeResult.collections = colsFree.map((c) => c.name);
+      } catch (err) {
+        freeResult.error = { message: err.message || "Connection failed" };
+      }
       return jsonResponse({
         timestamp: (/* @__PURE__ */ new Date()).toISOString(),
         server: "Cloudflare Pages Edge Runtime",
         runtime: "Cloudflare Workers (Edge Fast)",
-        paidDb: {
-          name: dbConfig.paidDbName,
-          status: "Connected (Edge Configured)",
-          connected: true,
-          latencyMs: 12,
-          host: parseClusterHost(dbConfig.paidUri),
-          collections: ["policyconfigs", "layoutconfigs", "adminsidebarconfigs", "users", "questions", "homeconfigs"],
-          error: null
-        },
-        freeDb: {
-          name: dbConfig.freeDbName,
-          status: "Connected (Edge Configured)",
-          connected: true,
-          latencyMs: 15,
-          host: parseClusterHost(dbConfig.freeUri),
-          collections: ["examssolvedtest", "questions"],
-          error: null
-        }
+        paidDb: paidResult,
+        freeDb: freeResult
       });
     }
     if (route === "questions" || route === "mcq" || route === "questions/free") {
@@ -36390,13 +36398,13 @@ var init_functionsRoutes_0_1661149121454758 = __esm({
   }
 });
 
-// ../.wrangler/tmp/bundle-DJpnpV/middleware-loader.entry.ts
+// ../.wrangler/tmp/bundle-9iyno6/middleware-loader.entry.ts
 init_functionsRoutes_0_1661149121454758();
 init_virtual_unenv_global_polyfill_cloudflare_unenv_preset_node_process();
 init_virtual_unenv_global_polyfill_cloudflare_unenv_preset_node_console();
 init_performance2();
 
-// ../.wrangler/tmp/bundle-DJpnpV/middleware-insertion-facade.js
+// ../.wrangler/tmp/bundle-9iyno6/middleware-insertion-facade.js
 init_functionsRoutes_0_1661149121454758();
 init_virtual_unenv_global_polyfill_cloudflare_unenv_preset_node_process();
 init_virtual_unenv_global_polyfill_cloudflare_unenv_preset_node_console();
@@ -36913,7 +36921,7 @@ var jsonError = /* @__PURE__ */ __name(async (request2, env2, _ctx, middlewareCt
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// ../.wrangler/tmp/bundle-DJpnpV/middleware-insertion-facade.js
+// ../.wrangler/tmp/bundle-9iyno6/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -36949,7 +36957,7 @@ function __facade_invoke__(request2, env2, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// ../.wrangler/tmp/bundle-DJpnpV/middleware-loader.entry.ts
+// ../.wrangler/tmp/bundle-9iyno6/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;

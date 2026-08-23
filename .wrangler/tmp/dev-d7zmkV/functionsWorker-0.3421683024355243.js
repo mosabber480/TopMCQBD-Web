@@ -37059,28 +37059,36 @@ async function onRequest(context2) {
       return jsonResponse({ success: true, message: "Policy saved successfully!" });
     }
     if (route === "db-check" && method === "GET") {
+      let paidResult = { name: dbConfig.paidDbName, status: "Disconnected", connected: false, latencyMs: null, collections: [], error: null };
+      let freeResult = { name: dbConfig.freeDbName, status: "Disconnected", connected: false, latencyMs: null, collections: [], error: null };
+      try {
+        const startPaid = Date.now();
+        const dbPaid = await getPaidDb(context2);
+        const colsPaid = await dbPaid.listCollections().toArray();
+        paidResult.connected = true;
+        paidResult.status = "Connected";
+        paidResult.latencyMs = Date.now() - startPaid;
+        paidResult.collections = colsPaid.map((c) => c.name);
+      } catch (err) {
+        paidResult.error = { message: err.message || "Connection failed" };
+      }
+      try {
+        const startFree = Date.now();
+        const dbFree = await getFreeDb(context2);
+        const colsFree = await dbFree.listCollections().toArray();
+        freeResult.connected = true;
+        freeResult.status = "Connected";
+        freeResult.latencyMs = Date.now() - startFree;
+        freeResult.collections = colsFree.map((c) => c.name);
+      } catch (err) {
+        freeResult.error = { message: err.message || "Connection failed" };
+      }
       return jsonResponse({
         timestamp: (/* @__PURE__ */ new Date()).toISOString(),
         server: "Cloudflare Pages Edge Runtime",
         runtime: "Cloudflare Workers (Edge Fast)",
-        paidDb: {
-          name: dbConfig.paidDbName,
-          status: "Connected (Edge Configured)",
-          connected: true,
-          latencyMs: 12,
-          host: parseClusterHost(dbConfig.paidUri),
-          collections: ["policyconfigs", "layoutconfigs", "adminsidebarconfigs", "users", "questions", "homeconfigs"],
-          error: null
-        },
-        freeDb: {
-          name: dbConfig.freeDbName,
-          status: "Connected (Edge Configured)",
-          connected: true,
-          latencyMs: 15,
-          host: parseClusterHost(dbConfig.freeUri),
-          collections: ["examssolvedtest", "questions"],
-          error: null
-        }
+        paidDb: paidResult,
+        freeDb: freeResult
       });
     }
     if (route === "questions" || route === "mcq" || route === "questions/free") {
