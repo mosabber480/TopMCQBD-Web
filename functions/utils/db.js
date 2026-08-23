@@ -29,10 +29,12 @@ export async function getMongoClient(context) {
   for (const uri of urisToTry) {
     try {
       const client = new MongoClient(uri, {
-        connectTimeoutMS: 4000,
-        serverSelectionTimeoutMS: 4000,
-        maxPoolSize: 5,
+        connectTimeoutMS: 15000,
+        serverSelectionTimeoutMS: 15000,
+        socketTimeoutMS: 20000,
+        maxPoolSize: 10,
         minPoolSize: 1,
+        tls: true,
       });
       await client.connect();
       _cachedClient = client;
