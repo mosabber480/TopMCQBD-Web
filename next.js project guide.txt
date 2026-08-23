@@ -38,114 +38,149 @@
 3. NEXT.JS PROJECT STRUCTURE & DIRECTORY GUIDE
 ===============================================================================
 
-📂 TopMCQBD-NextJS/
+📂 TopMCQBD-Web/                              # Project Root
 │
-├── 📁 public/                         # Public Static Assets
-│   ├── 📄 favicon.ico
-│   └── 📁 images/                     # Static Web Images
-│       ├── 📄 TopMCQ.png
-│       ├── 📄 favicon.png
-│       ├── 📄 slider-01.jpg
-│       └── 📄 slider-02.jpg
+├── 📄 next.js project guide.txt              # প্রজেক্ট গাইড ডকুমেন্ট (এই ফাইল)
+├── 📄 package.json                            # Dependencies, Scripts & Package Info
+├── 📄 package-lock.json                       # Dependency Lock File
+├── 📄 next.config.mjs                         # Next.js Framework Configuration
+├── 📄 jsconfig.json                           # Path Aliases Config (@/*)
+├── 📄 wrangler.toml                           # Cloudflare Pages & nodejs_compat Config
+├── 📄 .env                                    # Local Environment Secret Variables
+├── 📄 .dev.vars                               # Cloudflare Local Dev Secret Variables
+├── 📄 .gitignore                              # Git Ignore Rules
+├── 📄 .npmrc                                  # NPM Registry Config
+├── 📄 copyAssets.js                           # Build: MongoDB Snapshot + Asset Sync Script
+├── 📄 fixBson.js                              # Build: BSON & ReadPreference Static Initializer Patcher
+├── 📄 seedUsers.js                            # Utility: Database Initial Users Seeding Script
+│
+├── 📁 public/                                 # Public Static Assets (served as-is)
+│   ├── 📄 favicon.ico                         # Site Favicon (ICO)
+│   ├── 📄 favicon.png                         # Site Favicon (PNG)
+│   ├── 📄 _redirects                          # Cloudflare Pages SPA Redirect Rules
+│   └── 📁 images/                             # Static Web Images
+│       ├── 📄 TopMCQ.png                      # Site Logo
+│       ├── 📄 slider-01.jpg                   # Homepage Slider Image 1
+│       └── 📄 slider-02.jpg                   # Homepage Slider Image 2
 │
 ├── 📁 src/
-│   ├── 📁 app/                        # Next.js App Router System
-│   │   ├── 📄 layout.jsx              # Global Root Layout
-│   │   ├── 📄 globals.css             # Global CSS Directives & Tailwind Styles
-│   │   ├── 📄 page.jsx                # Home Page (/)
+│   ├── 📁 app/                                # Next.js App Router System
+│   │   ├── 📄 layout.jsx                      # Global Root Layout (HTML, fonts, metadata)
+│   │   ├── 📄 page.jsx                        # Home Page Entry (/) — renders HomeClient
+│   │   ├── 📄 HomeClient.jsx                  # Home Page Client Component (Sliders, Packages, Demo Quiz)
+│   │   ├── 📄 globals.css                     # Global CSS & Tailwind Directives
 │   │   │
-│   │   ├── 📁 quiz/
-│   │   │   └── 📄 page.jsx            # Paid MCQ Exam Page (/quiz)
-│   │   ├── 📁 all-mcq/
-│   │   │   └── 📄 page.jsx            # All MCQ Library Page (/all-mcq)
-│   │   ├── 📁 free-mcqs/
-│   │   │   └── 📄 page.jsx            # Free MCQs Page (/free-mcqs)
-│   │   ├── 📁 packages/
-│   │   │   └── 📄 page.jsx            # Subscription & Pricing Packages (/packages)
-│   │   ├── 📁 profile/
-│   │   │   └── 📄 page.jsx            # User Dashboard & Profile (/profile)
-│   │   ├── 📁 login/
-│   │   │   └── 📄 page.jsx            # User & Admin Login (/login)
-│   │   ├── 📁 about-us/
-│   │   │   └── 📄 page.jsx            # About Us Page (/about-us)
-│   │   ├── 📁 contact/
-│   │   │   └── 📄 page.jsx            # Contact Us Page (/contact)
-│   │   ├── 📁 faq/
-│   │   │   └── 📄 page.jsx            # Frequently Asked Questions (/faq)
-│   │   ├── 📁 privacy-and-refund-policy/
-│   │   │   └── 📄 page.jsx            # Privacy & Policy Page (/privacy-and-refund-policy)
-│   │   ├── 📁 status/
-│   │   │   └── 📄 page.jsx            # System Status Page (/status)
+│   │   ├── 📁 about-us/page.jsx               # About Us Page (/about-us)
+│   │   ├── 📁 contact/page.jsx                # Contact Us Page (/contact)
+│   │   ├── 📁 faq/page.jsx                    # FAQ Page (/faq)
+│   │   ├── 📁 privacy-and-refund-policy/page.jsx  # Policy Page (/privacy-and-refund-policy)
+│   │   ├── 📁 packages/page.jsx               # Subscription Packages (/packages)
+│   │   ├── 📁 login/page.jsx                  # User & Admin Login (/login)
+│   │   ├── 📁 profile/page.jsx                # User Dashboard & Profile (/profile)
+│   │   ├── 📁 all-mcq/page.jsx                # All MCQ Library (/all-mcq)
+│   │   ├── 📁 free-mcqs/page.jsx              # Free MCQs Page (/free-mcqs)
+│   │   ├── 📁 model-test/page.jsx             # Model Test / Exam (/model-test)
+│   │   ├── 📁 questions/page.jsx              # Questions Page (/questions)
+│   │   ├── 📁 quiz/page.jsx                   # Paid MCQ Exam (/quiz)
+│   │   ├── 📁 db-connection-check/page.jsx    # DB Connection Status (/db-connection-check)
 │   │   │
-│   │   ├── 📁 admin/                  # Admin Dashboard Module
-│   │   │   ├── 📄 layout.jsx          # Admin Panel Layout Wrapper
-│   │   │   ├── 📄 page.jsx / dashboard/page.jsx # Admin Overview Dashboard (/admin)
-│   │   │   ├── 📁 quiz-dashboard/
-│   │   │   │   └── 📄 page.jsx        # Quiz & Question Management (/admin/quiz-dashboard)
-│   │   │   ├── 📁 users/
-│   │   │   │   └── 📄 page.jsx        # User & Admin Role Management (/admin/users)
-│   │   │   ├── 📁 home-dashboard/
-│   │   │   │   └── 📄 page.jsx        # Home Page Dynamic Editor (/admin/home-dashboard)
-│   │   │   ├── 📁 header-dashboard/
-│   │   │   │   └── 📄 page.jsx        # Header Navigation Config (/admin/header-dashboard)
-│   │   │   ├── 📁 footer-dashboard/
-│   │   │   │   └── 📄 page.jsx        # Footer Config Editor (/admin/footer-dashboard)
-│   │   │   ├── 📁 policy-dashboard/
-│   │   │   │   └── 📄 page.jsx        # Policy & Terms Editor (/admin/policy-dashboard)
-│   │   │   ├── 📁 admin-menu-dashboard/
-│   │   │   │   └── 📄 page.jsx        # Admin Sidebar & Menu Editor (/admin/admin-menu-dashboard)
-│   │   │   ├── 📁 admin-profile/
-│   │   │   │   └── 📄 page.jsx        # Admin Profile Settings (/admin/admin-profile)
-│   │   │   ├── 📁 about-dashboard/
-│   │   │   │   └── 📄 page.jsx        # About Us Page Editor (/admin/about-dashboard)
-│   │   │   ├── 📁 packages-dashboard/
-│   │   │   │   └── 📄 page.jsx        # Pricing Packages Editor (/admin/packages-dashboard)
-│   │   │   └── 📁 free-mcqs-dashboard/
-│   │   │       └── 📄 page.jsx        # Free MCQs Config Editor (/admin/free-mcqs-dashboard)
+│   │   ├── 📁 admin/                          # Admin Dashboard Module
+│   │   │   ├── 📄 layout.jsx                  # Admin Panel Layout Wrapper
+│   │   │   ├── 📄 page.jsx                    # Admin Redirect (/admin)
+│   │   │   ├── 📁 dashboard/page.jsx          # Admin Overview Dashboard (/admin/dashboard)
+│   │   │   ├── 📁 users/page.jsx              # User & Subscription Management (/admin/users)
+│   │   │   ├── 📁 questions-dashboard/page.jsx  # MCQ Upload & Editor (/admin/questions-dashboard)
+│   │   │   ├── 📁 quiz-dashboard/page.jsx     # Quiz Dashboard (/admin/quiz-dashboard)
+│   │   │   ├── 📁 home-dashboard/page.jsx     # Home Page Editor (/admin/home-dashboard)
+│   │   │   ├── 📁 header-dashboard/page.jsx   # Header Config (/admin/header-dashboard)
+│   │   │   ├── 📁 footer-dashboard/page.jsx   # Footer Config (/admin/footer-dashboard)
+│   │   │   ├── 📁 policy-dashboard/page.jsx   # Policy Editor (/admin/policy-dashboard)
+│   │   │   ├── 📁 admin-menu-dashboard/page.jsx  # Sidebar Menu Editor (/admin/admin-menu-dashboard)
+│   │   │   ├── 📁 admin-profile/page.jsx      # Admin Profile Settings (/admin/admin-profile)
+│   │   │   ├── 📁 about-dashboard/page.jsx    # About Page Editor (/admin/about-dashboard)
+│   │   │   ├── 📁 packages-dashboard/page.jsx # Packages Editor (/admin/packages-dashboard)
+│   │   │   └── 📁 free-mcqs-dashboard/page.jsx  # Free MCQs Editor (/admin/free-mcqs-dashboard)
 │   │   │
-│   │   └── 📁 api/                    # Next.js Route Handlers (20 Endpoints)
-│   │       ├── 📁 auth/               # Authentication API Endpoints
-│   │       ├── 📁 users/              # User Profile & Management APIs
-│   │       ├── 📁 questions/          # Paid & Free Quiz Data APIs
-│   │       └── 📁 admin/              # Admin Panel Control APIs
+│   │   └── 📁 api/                            # Next.js Route Handlers (Localhost Dev API)
+│   │       ├── 📁 auth/
+│   │       │   ├── 📁 login/route.js           # POST /api/auth/login
+│   │       │   ├── 📁 register/route.js        # POST /api/auth/register
+│   │       │   ├── 📁 change-password/route.js # PUT  /api/auth/change-password
+│   │       │   ├── 📁 forgot-password/route.js # POST /api/auth/forgot-password
+│   │       │   └── 📁 reset-password/route.js  # POST /api/auth/reset-password
+│   │       ├── 📁 users/
+│   │       │   ├── 📄 route.js                 # GET  /api/users (Live MongoDB query)
+│   │       │   ├── 📁 me/route.js              # GET  /api/users/me
+│   │       │   ├── 📁 create-admin/route.js    # POST /api/users/create-admin
+│   │       │   ├── 📁 request-plan/route.js    # POST /api/users/request-plan
+│   │       │   └── 📁 [userId]/
+│   │       │       ├── 📄 route.js              # DELETE /api/users/[userId]
+│   │       │       ├── 📁 subscription/route.js # PUT    /api/users/[userId]/subscription
+│   │       │       └── 📁 pending-requests/[requestId]/
+│   │       │           ├── 📁 approve/route.js  # PUT approve pending request
+│   │       │           └── 📁 reject/route.js   # PUT reject pending request
+│   │       ├── 📁 questions/
+│   │       │   ├── 📄 route.js                 # GET/POST /api/questions
+│   │       │   ├── 📁 [id]/route.js            # GET/PUT/DELETE /api/questions/[id]
+│   │       │   └── 📁 upload-csv/route.js      # POST /api/questions/upload-csv
+│   │       ├── 📁 categories/route.js          # GET/POST/DELETE /api/categories
+│   │       ├── 📁 mcq/route.js                 # GET /api/mcq
+│   │       ├── 📁 home-config/route.js         # GET/POST /api/home-config
+│   │       ├── 📁 layout-config/route.js       # GET/POST /api/layout-config
+│   │       ├── 📁 sidebar-config/route.js      # GET/POST /api/sidebar-config
+│   │       ├── 📁 policy/get/route.js          # GET  /api/policy/get
+│   │       ├── 📁 policy/save/route.js         # POST /api/policy/save
+│   │       └── 📁 db-check/route.js            # GET  /api/db-check
 │   │
-│   ├── 📁 components/                 # Reusable UI Components
-│   │   ├── 📁 layout/                 # Layout Specific Components
-│   │   │   ├── 📄 Header.jsx          # Top Navigation Header
-│   │   │   ├── 📄 Footer.jsx          # Site Footer
-│   │   │   ├── 📄 AnnouncementBar.jsx # Announcement Bar Banner
-│   │   │   └── 📄 TopAlert.jsx        # Top Alert Notification
-│   │   └── 📁 admin/                  # Admin Specific Components
-│   │       ├── 📄 AdminSidebar.jsx    # Admin Sidebar Navigation
-│   │       └── 📄 AdminHeader.jsx     # Admin Top Header
+│   ├── 📁 components/                         # Reusable UI Components
+│   │   ├── 📁 layout/
+│   │   │   ├── 📄 Header.jsx                  # Top Navigation Header (Dynamic Menu)
+│   │   │   ├── 📄 Footer.jsx                  # Site Footer (Dynamic Links)
+│   │   │   ├── 📄 AnnouncementBar.jsx          # Top Announcement Banner
+│   │   │   ├── 📄 AppLayoutWrapper.jsx         # App-wide Layout Provider (fetches layout config)
+│   │   │   └── 📄 TopAlert.jsx                # Top Alert Notification Bar
+│   │   └── 📁 admin/
+│   │       ├── 📄 AdminSidebar.jsx            # Admin Sidebar Navigation (Dynamic Menu)
+│   │       ├── 📄 AdminHeaderBar.jsx           # Admin Top Header Bar (User Info, Buttons)
+│   │       └── 📄 AdminLogoutModal.jsx         # Admin Logout Confirmation Modal
 │   │
-│   ├── 📁 lib/                        # Backend Utility Libraries & Handlers
-│   │   ├── 📄 db.js                   # Native MongoDB Connection Helper
-│   │   ├── 📄 auth.js                 # JWT Authentication & Authorization Helper
-│   │   ├── 📄 brevo.js                # Brevo Transactional Email Sending Handler
-│   │   └── 📄 config.js               # Application Global Configuration & Endpoints
+│   ├── 📁 lib/                                # Backend Utility Libraries
+│   │   ├── 📄 db.js                           # Native MongoDB MongoClient Connection Helper
+│   │   ├── 📄 auth.js                         # JWT Auth & Authorization Helper
+│   │   ├── 📄 brevo.js                        # Brevo Transactional Email Handler
+│   │   └── 📄 config.js                       # App Config, URL Formatter & Route Mapper
 │   │
-│   └── 📁 models/                     # Mongoose Schemas & Database Models
-│       ├── 📄 User.js                 # User Schema & Profile Definition
-│       ├── 📄 Question.js             # MCQ Question & Quiz Schema
-│       ├── 📄 HomeConfig.js           # Home Page Customizer Schema
-│       ├── 📄 LayoutConfig.js         # Header & Layout Config Schema
-│       ├── 📄 AdminSidebarConfig.js   # Admin Menu & Sidebar Schema
-│       └── 📄 PolicyConfig.js         # Privacy Policy & Terms Schema
+│   ├── 📁 models/                             # Mongoose Schemas & Database Models
+│   │   ├── 📄 User.js                         # User Schema & Profile Definition
+│   │   ├── 📄 Question.js                     # MCQ Question & Quiz Schema
+│   │   ├── 📄 HomeConfig.js                   # Home Page Config Schema
+│   │   ├── 📄 LayoutConfig.js                 # Header & Layout Config Schema
+│   │   ├── 📄 AdminSidebarConfig.js           # Admin Menu & Sidebar Schema
+│   │   └── 📄 PolicyConfig.js                 # Privacy Policy & Terms Schema
+│   │
+│   └── 📁 data/                               # Local JSON Config Files
+│       ├── 📄 home-config.json                # Home Sliders, Packages, Demo Quiz Config
+│       ├── 📄 layout-config.json              # Header Menus, Footer Links Config
+│       ├── 📄 sidebar-config.json             # Admin Sidebar Menu Config
+│       ├── 📄 policy-config.json              # Privacy & Refund Policy Content
+│       ├── 📄 about-data.json                 # About Us Page Content
+│       ├── 📄 faq-data.json                   # FAQ Questions & Answers
+│       └── 📄 packages-data.json              # Pricing Packages Data
 │
-├── 📁 functions/                      # Cloudflare Pages Serverless Edge Functions
-│   ├── 📁 api/                        # Edge Route Handlers ([[route]].js, db-check.js, etc.)
-│   ├── 📁 utils/                      # Edge Utilities (db.js with MongoClient, auth.js, brevo.js)
-│   └── 📁 data/                       # Fallback Snapshot Data (liveConfigs.js)
-│
-├── 📄 copyAssets.js                   # Build Asset & Snapshot Synchronizer Script
-├── 📄 seedUsers.js                    # Database Initial Users Seeding Script
-├── 📄 wrangler.toml                   # Cloudflare Pages & nodejs_compat Config
-├── 📄 .env / .dev.vars                # Environment Secret Variables
-├── 📄 next.config.mjs                 # Next.js Framework Configuration
-├── 📄 jsconfig.json                   # Path Aliases Config (@/*)
-├── 📄 package.json                    # Dependencies, Scripts & Package Info
-└── 📄 package-lock.json
+└── 📁 functions/                              # Cloudflare Pages Serverless Edge Functions
+    ├── 📄 _middleware.js                      # Global Cloudflare Edge Middleware (CORS, SPA routing)
+    ├── 📁 api/
+    │   └── 📄 [[route]].js                    # Unified Edge API Handler (all /api/* routes)
+    │                                          # ⚡ /api/users → Live MongoDB Atlas query per request
+    │                                          # 📦 Configs  → In-memory from liveConfigs.js snapshot
+    ├── 📁 utils/
+    │   ├── 📄 db.js                           # Edge MongoClient: getMongoClient, getPaidDb, getDbConfig
+    │   ├── 📄 auth.js                         # Edge JWT: generateToken, verifyTokenFromRequest, bcrypt
+    │   └── 📄 brevo.js                        # Edge Email: sendResetEmail via Brevo REST API
+    └── 📁 data/
+        └── 📄 liveConfigs.js                  # Auto-generated snapshot (layout, home, sidebar, policy, users fallback)
+
+
 
 
 ===============================================================================
