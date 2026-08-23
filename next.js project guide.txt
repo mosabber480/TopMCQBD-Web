@@ -203,10 +203,9 @@
 6. MONGODB ATLAS NETWORK ACCESS / IP WHITELIST GUIDE
 ===============================================================================
 
-MongoDB Atlas ক্লাস্টার কানেকশন নিশ্চিত করতে:
-1. Paid ও Free উভয় প্রজেক্টে Security ➔ Network Access সেকশনে যান।
-2. IP Whitelist-এ `0.0.0.0/0` (Allow Access from Anywhere) নিশ্চিত করুন।
-   (যেহেতু Cloudflare Pages Functions ডায়নামিক আইপি ব্যবহার করে সার্ভারলেস এক্সিকিউট হয়, তাই `0.0.0.0/0` এনাবল থাকা বাধ্যতামূলক)।
+✅ MongoDB Atlas ক্লাস্টার কানেকশন নিশ্চিতকরণের অবস্থা:
+   - IP Whitelist-এ `0.0.0.0/0` (Allow Access from Anywhere) সফলভাবে যুক্ত ও অ্যাক্টিভ আছে (Comment: Render Backend)।
+   - যেহেতু Cloudflare Pages Functions ডায়নামিক আইপি ব্যবহার করে সার্ভারলেস এক্সিকিউট হয়, তাই `0.0.0.0/0` অ্যাক্টিভ রাখা সম্পন্ন হয়েছে।
 
 
 ===============================================================================
@@ -236,4 +235,47 @@ MongoDB Atlas ক্লাস্টার কানেকশন নিশ্চ�
 5. JWT_SECRET           = "topmcqbd_super_secret_jwt_key_2026"
 6. BREVO_API_KEY        = "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"
 7. BREVO_SENDER_EMAIL   = "mosabber480@gmail.com"
+
+
+===============================================================================
+9. DUAL CLOUDFLARE ACCOUNT KEYS MAPPING & DATA ARCHITECTURE
+===============================================================================
+
+📋 ১. Cloudflare Account 1: TopMCQBD-Web (Main Site: topmcqbd.pages.dev)
+   - Scope: Main Web App, User Auth/Login, Paid MCQs, Admin Dashboard, Profile
+   - Database: Paid MongoDB Cluster (TopMCQBD_DB)
+   - Environment Variables for Account 1:
+     1. MONGODB_URI_PAID    = "mongodb+srv://mosabber480_db_user:EScirLEzwgQVVNaB@mosabber.3ajdj0u.mongodb.net/TopMCQBD_DB?retryWrites=true&w=majority"
+     2. MONGODB_DB_NAME_PAID = "TopMCQBD_DB"
+     3. JWT_SECRET          = "topmcqbd_super_secret_jwt_key_2026"
+     4. BREVO_API_KEY       = "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"
+     5. BREVO_SENDER_EMAIL  = "mosabber480@gmail.com"
+
+📋 ২. Cloudflare Account 2: TopMCQBD-Web-Free (Free API Backend: topmcqbd-web-free.pages.dev)
+   - Scope: Free MCQs Serving & Dedicated Free API
+   - Database: Free MongoDB Cluster (TopMCQBD_DB_Free)
+   - Environment Variables for Account 2:
+     1. MONGODB_URI_FREE    = "mongodb+srv://mosabber480_db_user:VVcrE9PeIIyVlcKU@topmcqbd.pixb7fx.mongodb.net/TopMCQBD_DB_Free?retryWrites=true&w=majority"
+     2. MONGODB_DB_NAME_FREE = "TopMCQBD_DB_Free"
+     3. JWT_SECRET          = "topmcqbd_super_secret_jwt_key_2026"
+
+
+===============================================================================
+10. DATA SOURCE ISOLATION (MONGODB vs LOCAL JSON FILES)
+===============================================================================
+
+✅ MongoDB Database Source:
+   - User Registration, Profile & Login Authentication (users collection)
+   - All MCQ Questions, Quizzes & Examinations (questions collection)
+&
+   - Paid System & Auth Request: https://topmcqbd.pages.dev/api (১ম সার্ভারে হিট করবে)
+   - Free MCQ Request: https://topmcqbd-web-free.pages.dev/api (২য় সার্ভারে হিট করবে)
+
+✅ Local JSON Files Source (src/data/*.json & Cloudflare Functions liveConfigs.js):
+   - Home Page Config (home-config.json)
+   - Header & Footer Navigation Menu (layout-config.json)
+   - Admin Sidebar Menu Config (sidebar-config.json)
+   - Privacy, Terms & Refund Policy (policy-config.json)
+   - Static pages (About Us, Contact, FAQ, Status, etc.)
+
 ===============================================================================

@@ -27,6 +27,33 @@ const UserSchema = new mongoose.Schema({
 
 const User = mongoose.models.User || mongoose.model('User', UserSchema);
 
+const seedUsersList = [
+  {
+    name: 'Mosabber Owner',
+    email: 'mosabber.tech@gmail.com',
+    password: 'ownerpassword1234',
+    role: 'owner',
+    subscription: {
+      plan: '3_years',
+      startDate: new Date(),
+      endDate: new Date(Date.now() + 3 * 365 * 24 * 60 * 60 * 1000),
+      active: true
+    }
+  },
+  {
+    name: 'Test User',
+    email: 'user@example.com',
+    password: 'userpassword123',
+    role: 'customer',
+    subscription: {
+      plan: 'none',
+      startDate: null,
+      endDate: null,
+      active: false
+    }
+  }
+];
+
 async function seed() {
   try {
     console.log('Connecting to MongoDB...');
@@ -37,32 +64,31 @@ async function seed() {
     }
     console.log('✅ Connected to MongoDB');
 
-    const totalUsers = await User.countDocuments();
-    console.log(`Current users in database: ${totalUsers}`);
+    for (const userData of seedUsersList) {
+      const hashedPassword = await bcrypt.hash(userData.password, 10);
+      const existingUser = await User.findOne({ email: userData.email.toLowerCase() });
 
-    const existingAdmin = await User.findOne({ role: { $in: ['owner', 'admin'] } });
-    if (existingAdmin) {
-      console.log(`Found existing admin user: ${existingAdmin.email} (${existingAdmin.role})`);
-    } else {
-      console.log('No admin found. Creating default admin user...');
-      const hashedPassword = await bcrypt.hash('admin123456', 10);
-      const newAdmin = new User({
-        name: 'Mosabber Admin',
-        email: 'mosabber480@gmail.com',
-        password: hashedPassword,
-        role: 'owner',
-        subscription: {
-          plan: '3_years',
-          startDate: new Date(),
-          endDate: new Date(Date.now() + 3 * 365 * 24 * 60 * 60 * 1000),
-          active: true
-        }
-      });
-      await newAdmin.save();
-      console.log('✅ Default admin user created successfully: mosabber480@gmail.com');
+      if (existingUser) {
+        existingUser.name = userData.name;
+        existingUser.password = hashedPassword;
+        existingUser.role = userData.role;
+        existingUser.subscription = userData.subscription;
+        await existingUser.save();
+        console.log(`✅ Updated existing seed user: ${userData.email} (${userData.role})`);
+      } else {
+        const newUser = new User({
+          ...userData,
+          email: userData.email.toLowerCase(),
+          password: hashedPassword
+        });
+        await newUser.save();
+        console.log(`✅ Created seed user: ${userData.email} (${userData.role})`);
+      }
     }
 
-    console.log('Database verification complete!');
+    const totalUsers = await User.countDocuments();
+    console.log(`Current total users in database: ${totalUsers}`);
+    console.log('Database verification & seeding complete!');
   } catch (error) {
     console.error('❌ Error seeding database:', error);
   } finally {
