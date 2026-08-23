@@ -417,21 +417,5 @@ export const initialUsers = [
     "pendingRequests": [],
     "createdAt": "2026-08-23T15:29:08.190Z",
     "lastLogin": null
-  },
-  {
-    "_id": "6a8b13dd530b2ea8ca63615d",
-    "name": "U200",
-    "email": "usertest200@gmail.com",
-    "password": "$2b$10$0/W2xeT7Q/fr01MmzRe8E.db.DXCqqXRAcNbO2CDyg55ZeDD8CT4K",
-    "role": "customer",
-    "subscription": {
-      "plan": "none",
-      "startDate": null,
-      "endDate": null,
-      "active": false
-    },
-    "pendingRequests": [],
-    "createdAt": "2026-08-23T15:38:05.389Z",
-    "lastLogin": null
   }
 ];
