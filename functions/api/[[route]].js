@@ -449,8 +449,6 @@ export async function onRequest(context) {
       try {
         const db = await getPaidDb(context);
         const users = await db.collection('users').find({}).sort({ createdAt: -1 }).toArray();
-        // Sync in-memory fallback
-        liveUsers = users.map(u => ({ ...u, _id: u._id.toString() }));
         return jsonResponse({
           success: true,
           users: users.map(u => ({
@@ -466,21 +464,12 @@ export async function onRequest(context) {
           }))
         });
       } catch (dbErr) {
-        console.warn('⚠️ MongoDB live users fetch failed, using in-memory fallback:', dbErr.message);
+        console.error('❌ MongoDB live users fetch error:', dbErr.message);
         return jsonResponse({
-          success: true,
-          users: liveUsers.map(u => ({
-            id: u._id,
-            _id: u._id,
-            name: u.name,
-            email: u.email,
-            role: u.role,
-            subscription: u.subscription,
-            pendingRequests: u.pendingRequests || [],
-            createdAt: u.createdAt,
-            lastLogin: u.lastLogin
-          }))
-        });
+          success: false,
+          message: `MongoDB Error: ${dbErr.message}`,
+          users: []
+        }, 500);
       }
     }
 

@@ -21,23 +21,30 @@ export async function getMongoClient(context) {
 
   const { paidUri } = getDbConfig(context);
 
-  // Try SRV URI first, fallback to direct replica set URI
-  for (const uri of [paidUri, DIRECT_PAID_URI]) {
+  // In Cloudflare Edge runtime (nodejs_compat), SRV lookups (mongodb+srv) often hang or fail.
+  // Direct replica set URI connects directly via TCP socket without DNS SRV lookup delays.
+  const urisToTry = [DIRECT_PAID_URI, paidUri];
+
+  let lastError = null;
+  for (const uri of urisToTry) {
     try {
       const client = new MongoClient(uri, {
-        connectTimeoutMS: 8000,
-        serverSelectionTimeoutMS: 8000,
+        connectTimeoutMS: 4000,
+        serverSelectionTimeoutMS: 4000,
+        maxPoolSize: 5,
+        minPoolSize: 1,
       });
       await client.connect();
       _cachedClient = client;
       console.log('✅ MongoDB connected via Cloudflare Edge Function');
       return client;
     } catch (err) {
+      lastError = err;
       console.warn(`⚠️ MongoDB connection failed (${uri.startsWith('mongodb+srv') ? 'SRV' : 'Direct'}): ${err.message}`);
     }
   }
 
-  throw new Error('❌ Could not connect to MongoDB Atlas from Cloudflare Edge');
+  throw new Error(`❌ MongoDB Atlas connection error: ${lastError?.message || 'Failed to connect'}`);
 }
 
 export async function getPaidDb(context) {
