@@ -19,20 +19,15 @@
 
 
 ===============================================================================
-2. GITHUB REPOSITORIES & LIVE DEPLOYMENT SETUP
+2. GITHUB REPOSITORY & LIVE DEPLOYMENT SETUP
 ===============================================================================
 
-১. মেইন ও পেইড রিপোজিটরি (Main / Paid System):
+✅ একক কেন্দ্রীয় রিপোজিটরি (Unified Single System):
    - GitHub Repository: https://github.com/mosabber480/TopMCQBD-Web.git
    - Cloudflare Live URL: https://topmcqbd.pages.dev
    - ডাটাবেজ: Cloudflare D1 SQL Database (`topmcqbd-db`)
-   - মূল দায়িত্ব: মেইন ওয়েব অ্যাপ, পেইড কুইজ, ইউজার প্রোফাইল, অথেনটিকেশন ও এডমিন প্যানেল
+   - দায়িত্ব: মেইন ওয়েব অ্যাপ, পেইড কুইজ, ফ্রি MCQ, ইউজার প্রোফাইল, অথেনটিকেশন ও পূর্ণাঙ্গ এডমিন প্যানেল
 
-২. ফ্রি এমসিকিউ রিপোজিটরি (Free MCQ API Backend):
-   - GitHub Repository: https://github.com/mosabber480/TopMCQBD-Web-Free.git
-   - Cloudflare Live URL: https://topmcqbd-web-free.pages.dev
-   - ডাটাবেজ: Cloudflare D1 / Dedicated Edge Storage
-   - মূল দায়িত্ব: ফ্রি এমসিকিউ ডেটা সরবরাহ এবং ফ্রি কুইজ এপিআই সার্ভিস
 
 
 ===============================================================================
@@ -183,26 +178,20 @@
 
 
 ===============================================================================
-4. CLOUDFLARE DUAL-ACCOUNT & ARCHITECTURE GUIDE (২ লাখ ফ্রি রিকোয়েস্ট)
+4. UNIFIED CLOUDFLARE PAGES & D1 ARCHITECTURE
 ===============================================================================
 
-১. ক্লাউডফ্লেয়ার ডুয়াল অ্যাকাউন্ট সিস্টেম (১ লাখ + ১ লাখ = ২ লাখ Daily Limit):
-   - ১ম Cloudflare Account (TopMCQBD-Web Repository):
-     * GitHub Repo: https://github.com/mosabber480/TopMCQBD-Web.git
-     * Live Domain: https://topmcqbd.pages.dev
-     * Scope: Main App, Paid Quiz, User Authentication, Admin Panel
-     * ডাটাবেজ: Cloudflare D1 SQL Database (`topmcqbd-db`)
-     * দৈনিক রিকোয়েস্ট লিমিট: ১,০০,০০০
-   
-   - ২য় Cloudflare Account (TopMCQBD-Web-Free Repository):
-     * GitHub Repo: https://github.com/mosabber480/TopMCQBD-Web-Free.git
-     * Live Domain: https://topmcqbd-web-free.pages.dev
-     * Scope: Free MCQs Serving & API Backend
-     * দৈনিক রিকোয়েস্ট লিমিট: ১,০০,০০০
+১. একক কেন্দ্রীয় ক্লাউডফ্লেয়ার আর্কিটেকচার:
+   - GitHub Repository: https://github.com/mosabber480/TopMCQBD-Web.git
+   - Live Domain: https://topmcqbd.pages.dev
+   - ডাটাবেজ: Cloudflare D1 SQL Database (`topmcqbd-db`)
+   - স্টোরেজ: ৫ GB (5,000 MB) সম্পূর্ণ ফ্রি (লাখ লাখ MCQ ও ইউজার সাপোর্ট)
+   - দৈনিক রিড লিমিট: ৫০,০০,০০০ (৫০ লাখ) Rows Read / Day
+   - দৈনিক রাইট লিমিট: ১,০০,০০০ Rows Write / Day
 
 ২. এপিআই রাউটিং নিয়ম (src/lib/config.js):
-   - Paid System & Auth Request: https://topmcqbd.pages.dev/api (১ম সার্ভারে হিট করবে)
-   - Free MCQ Request: https://topmcqbd-web-free.pages.dev/api (২য় সার্ভারে হিট করবে)
+   - সমস্ত এপিআই রিকোয়েস্ট (Auth, Paid, Free MCQ, Admin) সরাসরি `https://topmcqbd.pages.dev/api` তে ক্যাশ ও D1 এর মাধ্যমে অপ্টিমাইজডভাবে হ্যান্ডেল হবে।
+
 
 
 ===============================================================================
