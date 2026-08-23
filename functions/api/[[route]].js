@@ -1,4 +1,4 @@
-import { parseClusterHost, getDbConfig, getPaidDb } from '../utils/db.js';
+import { parseClusterHost, getDbConfig } from '../utils/db.js';
 import { generateToken, verifyTokenFromRequest, addPlanDuration, bcrypt } from '../utils/auth.js';
 import { sendResetEmail } from '../utils/brevo.js';
 import {
@@ -319,16 +319,7 @@ export async function onRequest(context) {
       }
 
       const cleanEmail = email.toLowerCase().trim();
-      let user = null;
-      try {
-        const db = await getPaidDb(context);
-        user = await db.collection('users').findOne({ email: cleanEmail });
-      } catch (dbErr) {
-        console.warn('MongoDB login query error:', dbErr.message);
-      }
-      if (!user) {
-        user = liveUsers.find(u => (u.email || '').toLowerCase() === cleanEmail);
-      }
+      const user = liveUsers.find(u => (u.email || '').toLowerCase() === cleanEmail);
 
       let isMatch = true;
       if (user.password) {
@@ -454,29 +445,6 @@ export async function onRequest(context) {
 
     // 9. USERS (/api/users, /api/users/me, /api/users/create-admin, /api/users/request-plan)
     if (route === 'users' && method === 'GET') {
-      try {
-        const db = await getPaidDb(context);
-        const dbUsers = await db.collection('users').find({}).sort({ createdAt: -1 }).toArray();
-        if (dbUsers && dbUsers.length > 0) {
-          return jsonResponse({
-            success: true,
-            users: dbUsers.map(u => ({
-              id: u._id.toString(),
-              _id: u._id.toString(),
-              name: u.name || 'No Name',
-              email: u.email,
-              role: u.role || 'customer',
-              subscription: u.subscription || { plan: 'none', active: false },
-              pendingRequests: u.pendingRequests || [],
-              createdAt: u.createdAt,
-              lastLogin: u.lastLogin
-            }))
-          });
-        }
-      } catch (dbErr) {
-        console.warn('MongoDB fetch users error in Edge Function, using liveUsers fallback:', dbErr.message);
-      }
-
       return jsonResponse({
         success: true,
         users: liveUsers.map(u => ({
