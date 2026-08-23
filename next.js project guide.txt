@@ -178,7 +178,16 @@
     │   ├── 📄 auth.js                         # Edge JWT: generateToken, verifyTokenFromRequest, bcrypt
     │   └── 📄 brevo.js                        # Edge Email: sendResetEmail via Brevo REST API
     └── 📁 data/
-        └── 📄 liveConfigs.js                  # Auto-generated snapshot (layout, home, sidebar, policy, users fallback)
+        └── 📄 liveConfigs.js                  # ⚠️ Build-time snapshot — শুধুমাত্র নিচের ডেটা auto-generate করে:
+        #                                          #   ✅ initialLayoutConfig  (header/footer menu config)
+        #                                          #   ✅ initialHomeConfig    (home sliders, packages)
+        #                                          #   ✅ initialSidebarConfig (admin sidebar menu)
+        #                                          #   ✅ initialPolicy        (privacy policy content)
+        #                                          #   ✅ initialUsers         (ONLY as fallback — যদি MongoDB connect ব্যর্থ হয়)
+        #                                          #
+        #                                          #   ❌ লগইন auto-generate করে না — লগইন সরাসরি MongoDB থেকে হয়
+        #                                          #   ❌ নতুন user auto-generate করে না — user সরাসরি MongoDB-তে save হয়
+        #                                          #   ❌ MCQ/Questions auto-generate করে না — questions সরাসরি MongoDB থেকে আসে
 
 
 
