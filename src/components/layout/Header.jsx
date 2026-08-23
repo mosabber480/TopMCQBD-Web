@@ -23,35 +23,6 @@ const DEFAULT_HEADER = layoutConfigData?.header || {
   megaMenus: []
 };
 
-const renderMenuContent = (item) => {
-  const iconClass = item?.icon && item.icon.trim() ? item.icon.trim() : null;
-  const badgeText = item?.badgeText && item.badgeText.trim() ? item.badgeText.trim() : null;
-  const badgeType = item?.badgeType || 'live';
-
-  let badgeBg = '#ff4d6d';
-  let badgeColor = '#ffffff';
-
-  if (badgeType === 'free') {
-    badgeBg = '#059669';
-  } else if (badgeType === 'new') {
-    badgeBg = '#7c3aed';
-  } else if (badgeType === 'popular') {
-    badgeBg = '#d97706';
-  }
-
-  return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-      {iconClass && <i className={iconClass} style={{ fontSize: '0.92em' }}></i>}
-      <span>{item.title}</span>
-      {badgeText && (
-        <span className={`menu-badge-pill ${badgeType}`}>
-          <span style={{ transform: 'translateY(1px)' }}>{badgeText}</span>
-        </span>
-      )}
-    </span>
-  );
-};
-
 export default function Header({ headerData: initialHeader }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openDropdownIndex, setOpenDropdownIndex] = useState(null);
@@ -188,7 +159,7 @@ export default function Header({ headerData: initialHeader }) {
                         }
                       }}
                     >
-                      {renderMenuContent(menu)} <i className="fa-solid fa-chevron-down" style={{ fontSize: '11px', marginLeft: '3px' }}></i>
+                      {menu.title} <i className="fa-solid fa-chevron-down" style={{ fontSize: '11px', marginLeft: '3px' }}></i>
                     </Link>
 
                     <div className="mega-menu">
@@ -340,7 +311,7 @@ export default function Header({ headerData: initialHeader }) {
                         }
                       }}
                     >
-                      {renderMenuContent(menu)} <i className="fa-solid fa-chevron-down" style={{ fontSize: '11px', marginLeft: '3px' }}></i>
+                      {menu.title} <i className="fa-solid fa-chevron-down" style={{ fontSize: '11px', marginLeft: '3px' }}></i>
                     </Link>
 
                     <ul className="dropdown-menu">
@@ -353,7 +324,7 @@ export default function Header({ headerData: initialHeader }) {
                               setOpenDropdownIndex(null);
                             }}
                           >
-                            {renderMenuContent(sub)}
+                            {sub.title}
                           </Link>
                         </li>
                       ))}
@@ -372,7 +343,7 @@ export default function Header({ headerData: initialHeader }) {
                       setOpenDropdownIndex(null);
                     }}
                   >
-                    {renderMenuContent(menu)}
+                    {menu.title}
                   </Link>
                 </li>
               );
@@ -383,7 +354,7 @@ export default function Header({ headerData: initialHeader }) {
           <div className="header-btn-group">
             {h.btnText && h.btnText.trim() && (
               <Link href={mapLegacyUrl(h.btnLink || '/contact')} className="btn-primary-head">
-                {h.btnIcon && h.btnIcon.trim() && <i className={h.btnIcon.trim()}></i>} {h.btnText.trim()}
+                <i className="fa-solid fa-headset"></i> {h.btnText.trim()}
               </Link>
             )}
 

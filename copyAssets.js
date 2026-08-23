@@ -73,6 +73,7 @@ export const initialHomeConfig = ${JSON.stringify(home || {}, null, 2)};
 export const initialSidebarConfig = ${JSON.stringify(sidebar || {}, null, 2)};
 export const initialPolicy = ${JSON.stringify(policy?.content || '<h2>TopMCQBD রিফান্ড ও গোপনীয়তা নীতিমালা</h2>', null, 2)};
 export const initialQuestions = [];
+export const initialUsers = [];
 `;
 
     fs.writeFileSync(path.join(functionsDataDir, 'liveConfigs.js'), liveConfigsJs, 'utf8');

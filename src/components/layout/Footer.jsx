@@ -56,8 +56,7 @@ const DEFAULT_COPYRIGHT = layoutConfigData?.copyright || {
   text: "© 2026 TopMCQBD. সর্বস্বত্ব সংরক্ষিত।",
   links: [
     { title: "FAQ", url: "/faq" },
-    { title: "Privacy & Refund Policy", url: "/privacy-and-refund-policy" },
-    { title: "System Status", url: "/status" }
+    { title: "Privacy & Refund Policy", url: "/privacy-and-refund-policy" }
   ]
 };
 

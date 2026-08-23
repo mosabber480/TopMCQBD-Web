@@ -83,6 +83,25 @@ export default function DBConnectionCheck() {
 
   // On page load/reload, check cache first
   useEffect(() => {
+    try {
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed && parsed.data) {
+          setData(parsed.data);
+          const timeString = parsed.savedAt
+            ? formatDateTime(parsed.savedAt)
+            : parsed.lastChecked;
+          setLastChecked(timeString || formatDateTime(new Date()));
+          setIsFromCache(true);
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn('Unable to read from localStorage:', e);
+    }
+
+    // If no cache found, run initial check
     checkConnection();
   }, []);
 

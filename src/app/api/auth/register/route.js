@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { connectDB } from '@/lib/db';
 import User from '@/models/User';
-import { generateToken } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -40,24 +39,8 @@ export async function POST(request) {
 
     await user.save();
 
-    const token = generateToken(user);
-
-    const userResponse = {
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      subscription: user.subscription,
-      createdAt: user.createdAt
-    };
-
     return NextResponse.json(
-      { 
-        success: true, 
-        message: 'User registered successfully!',
-        token,
-        user: userResponse
-      },
+      { success: true, message: 'User registered successfully!' },
       { status: 201 }
     );
   } catch (err) {

@@ -57,13 +57,13 @@ export function mapLegacyUrl(url) {
   if (url === 'profile.html') return '/profile';
   if (url === 'quiz.html' || url === 'questions.html') return '/questions';
   if (url === 'all-mcq.html') return '/all-mcq';
+  if (url === 'exams.html' || url === 'modeltest.html' || url === 'modeltest' || url === 'model-test' || url === 'model-test.html') return '/model-test';
   if (url === 'packages.html') return '/packages';
   if (url === 'about-us.html') return '/about-us';
   if (url === 'contact.html') return '/contact';
   if (url === 'FAQ.html' || url === 'faq.html') return '/faq';
   if (url === 'privacy-and-refund-policy.html') return '/privacy-and-refund-policy';
   if (url === 'free-mcqs.html') return '/free-mcqs';
-  if (url === 'status.html') return '/status';
   if (url.includes('admin/dashboard.html')) return '/admin/dashboard';
   if (url.includes('admin/quiz-dashboard.html') || url.includes('admin/questions-dashboard.html')) return '/admin/questions-dashboard';
   if (url.includes('admin/users.html')) return '/admin/users';

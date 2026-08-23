@@ -11,7 +11,6 @@ Antigravity must strictly avoid reading, scanning, or processing generated, comp
 6. `_worker.bundle` - Compiled worker bundle file
 7. `package-lock.json` - Large dependency lockfile
 8. `*.log` - Execution log files
-9. `TopMCQBD-Demo/` - Local demo folder (must never be tracked/uploaded)
 
 ### Allowed & Primary Focus Areas:
 - Source code in `src/` (components, pages, API routes, app layout)

@@ -33,50 +33,39 @@ export function addPlanDuration(baseDate, plan) {
  * Cryptographically sign JWT using Web Crypto API (HMAC SHA-256)
  */
 export async function generateToken(user, env) {
-  try {
-    const secret = getJwtSecret(env);
-    const header = { alg: 'HS256', typ: 'JWT' };
-    const payload = {
-      userId: String(user._id || user.id || 'usr_' + Date.now()),
-      role: user.role || 'customer',
-      subscription: user.subscription || { plan: 'none', active: false },
-      exp: Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60)
-    };
+  const secret = getJwtSecret(env);
+  const header = { alg: 'HS256', typ: 'JWT' };
+  const payload = {
+    userId: String(user._id || user.id || 'usr_' + Date.now()),
+    role: user.role || 'customer',
+    subscription: user.subscription || { plan: 'none', active: false },
+    exp: Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60)
+  };
 
-    const encodedHeader = base64UrlEncode(JSON.stringify(header));
-    const encodedPayload = base64UrlEncode(JSON.stringify(payload));
-    const dataToSign = `${encodedHeader}.${encodedPayload}`;
+  const encodedHeader = base64UrlEncode(JSON.stringify(header));
+  const encodedPayload = base64UrlEncode(JSON.stringify(payload));
+  const dataToSign = `${encodedHeader}.${encodedPayload}`;
 
-    const enc = new TextEncoder();
-    const key = await crypto.subtle.importKey(
-      'raw',
-      enc.encode(secret),
-      { name: 'HMAC', hash: 'SHA-256' },
-      false,
-      ['sign']
-    );
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    'raw',
+    enc.encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
 
-    const signatureBuffer = await crypto.subtle.sign(
-      'HMAC',
-      key,
-      enc.encode(dataToSign)
-    );
+  const signatureBuffer = await crypto.subtle.sign(
+    'HMAC',
+    key,
+    enc.encode(dataToSign)
+  );
 
-    const signatureBytes = new Uint8Array(signatureBuffer);
-    let binaryStr = '';
-    for (let i = 0; i < signatureBytes.length; i++) {
-      binaryStr += String.fromCharCode(signatureBytes[i]);
-    }
-    const signatureBase64 = base64UrlEncode(binaryStr);
+  const signatureArray = Array.from(new Uint8Array(signatureBuffer));
+  const signatureBase64 = base64UrlEncode(String.fromCharCode.apply(null, signatureArray));
 
-    return `${dataToSign}.${signatureBase64}`;
-  } catch (tokenErr) {
-    console.error('JWT Token Gen Error:', tokenErr);
-    const fallbackPayload = base64UrlEncode(JSON.stringify({ userId: String(user._id || user.id || 'usr_' + Date.now()), role: user.role || 'customer' }));
-    return `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.${fallbackPayload}.fallback_sig`;
-  }
+  return `${dataToSign}.${signatureBase64}`;
 }
-
 
 /**
  * Cryptographically verify JWT using Web Crypto API (HMAC SHA-256)
