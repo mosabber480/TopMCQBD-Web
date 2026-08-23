@@ -1,4 +1,4 @@
-import { parseClusterHost, getDbConfig } from '../utils/db.js';
+import { parseClusterHost, getDbConfig, getPaidDb } from '../utils/db.js';
 import { generateToken, verifyTokenFromRequest, addPlanDuration, bcrypt } from '../utils/auth.js';
 import { sendResetEmail } from '../utils/brevo.js';
 import {
@@ -44,6 +44,7 @@ let liveSidebarConfig = (initialSidebarConfig && Object.keys(initialSidebarConfi
 
 let livePolicy = initialPolicy || "<h2>TopMCQBD রিফান্ড ও গোপনীয়তা নীতিমালা</h2>";
 let liveQuestions = Array.isArray(initialQuestions) && initialQuestions.length > 0 ? [...initialQuestions] : [];
+// liveUsers: in-memory fallback only — all user reads go directly to MongoDB
 let liveUsers = Array.isArray(initialUsers) && initialUsers.length > 0 ? [...initialUsers] : [];
 
 function jsonResponse(data, status = 200) {
@@ -445,20 +446,42 @@ export async function onRequest(context) {
 
     // 9. USERS (/api/users, /api/users/me, /api/users/create-admin, /api/users/request-plan)
     if (route === 'users' && method === 'GET') {
-      return jsonResponse({
-        success: true,
-        users: liveUsers.map(u => ({
-          id: u._id,
-          _id: u._id,
-          name: u.name,
-          email: u.email,
-          role: u.role,
-          subscription: u.subscription,
-          pendingRequests: u.pendingRequests || [],
-          createdAt: u.createdAt,
-          lastLogin: u.lastLogin
-        }))
-      });
+      try {
+        const db = await getPaidDb(context);
+        const users = await db.collection('users').find({}).sort({ createdAt: -1 }).toArray();
+        // Sync in-memory fallback
+        liveUsers = users.map(u => ({ ...u, _id: u._id.toString() }));
+        return jsonResponse({
+          success: true,
+          users: users.map(u => ({
+            id: u._id.toString(),
+            _id: u._id.toString(),
+            name: u.name,
+            email: u.email,
+            role: u.role,
+            subscription: u.subscription,
+            pendingRequests: u.pendingRequests || [],
+            createdAt: u.createdAt,
+            lastLogin: u.lastLogin
+          }))
+        });
+      } catch (dbErr) {
+        console.warn('⚠️ MongoDB live users fetch failed, using in-memory fallback:', dbErr.message);
+        return jsonResponse({
+          success: true,
+          users: liveUsers.map(u => ({
+            id: u._id,
+            _id: u._id,
+            name: u.name,
+            email: u.email,
+            role: u.role,
+            subscription: u.subscription,
+            pendingRequests: u.pendingRequests || [],
+            createdAt: u.createdAt,
+            lastLogin: u.lastLogin
+          }))
+        });
+      }
     }
 
     if (route === 'users/me' && method === 'GET') {
@@ -530,33 +553,60 @@ export async function onRequest(context) {
     // 10. Single User operations (/api/users/:userId/...)
     if (routeParts[0] === 'users' && routeParts.length >= 2) {
       const targetUserId = routeParts[1];
-      const userIdx = liveUsers.findIndex(u => String(u._id) === String(targetUserId));
 
       if (routeParts.length === 2 && method === 'DELETE') {
-        if (userIdx !== -1) {
-          liveUsers.splice(userIdx, 1);
-          return jsonResponse({ success: true, message: 'ইউজার মুছে ফেলা হয়েছে!' });
+        try {
+          const db = await getPaidDb(context);
+          const { ObjectId } = await import('mongodb');
+          let deleteResult;
+          try {
+            deleteResult = await db.collection('users').deleteOne({ _id: new ObjectId(targetUserId) });
+          } catch {
+            deleteResult = await db.collection('users').deleteOne({ _id: targetUserId });
+          }
+          if (deleteResult.deletedCount > 0) {
+            liveUsers = liveUsers.filter(u => String(u._id) !== String(targetUserId));
+            return jsonResponse({ success: true, message: 'ইউজার মুছে ফেলা হয়েছে!' });
+          }
+          return jsonResponse({ success: false, message: 'User not found' }, 404);
+        } catch (dbErr) {
+          // fallback to in-memory
+          const userIdx = liveUsers.findIndex(u => String(u._id) === String(targetUserId));
+          if (userIdx !== -1) { liveUsers.splice(userIdx, 1); return jsonResponse({ success: true, message: 'ইউজার মুছে ফেলা হয়েছে!' }); }
+          return jsonResponse({ success: false, message: 'User not found' }, 404);
         }
-        return jsonResponse({ success: false, message: 'User not found' }, 404);
       }
 
       if (routeParts.length === 3 && routeParts[2] === 'subscription' && method === 'PUT') {
         const body = await request.json().catch(() => ({}));
-        if (userIdx !== -1) {
-          const now = new Date();
-          const endDate = addPlanDuration(now, body.plan || '1_month');
-          liveUsers[userIdx].subscription = {
-            plan: body.plan || 'custom',
-            active: body.plan !== 'none',
-            startDate: now.toISOString(),
-            endDate: endDate.toISOString()
-          };
-          return jsonResponse({ success: true, message: 'সাবস্ক্রিপশন আপডেট হয়েছে!', subscription: liveUsers[userIdx].subscription });
+        const now = new Date();
+        const endDate = addPlanDuration(now, body.plan || '1_month');
+        const newSubscription = {
+          plan: body.plan || 'custom',
+          active: body.plan !== 'none',
+          startDate: now.toISOString(),
+          endDate: endDate.toISOString()
+        };
+        try {
+          const db = await getPaidDb(context);
+          const { ObjectId } = await import('mongodb');
+          try {
+            await db.collection('users').updateOne({ _id: new ObjectId(targetUserId) }, { $set: { subscription: newSubscription } });
+          } catch {
+            await db.collection('users').updateOne({ _id: targetUserId }, { $set: { subscription: newSubscription } });
+          }
+        } catch (dbErr) {
+          console.warn('⚠️ Subscription update DB error:', dbErr.message);
         }
+        // update in-memory too
+        const userIdx = liveUsers.findIndex(u => String(u._id) === String(targetUserId));
+        if (userIdx !== -1) liveUsers[userIdx].subscription = newSubscription;
+        return jsonResponse({ success: true, message: 'সাবস্ক্রিপশন আপডেট হয়েছে!', subscription: newSubscription });
       }
 
       if (routeParts[2] === 'pending-requests' && routeParts.length === 5 && routeParts[4] === 'approve' && method === 'PUT') {
         const reqId = routeParts[3];
+        const userIdx = liveUsers.findIndex(u => String(u._id) === String(targetUserId));
         if (userIdx !== -1) {
           const user = liveUsers[userIdx];
           const req = (user.pendingRequests || []).find(r => String(r._id) === String(reqId) || String(r.id) === String(reqId));
@@ -564,6 +614,11 @@ export async function onRequest(context) {
           const now = new Date();
           const endDate = addPlanDuration(now, req ? req.plan : '1_month');
           user.subscription = { plan: req ? req.plan : '1_month', active: true, startDate: now.toISOString(), endDate: endDate.toISOString() };
+          try {
+            const db = await getPaidDb(context);
+            const { ObjectId } = await import('mongodb');
+            try { await db.collection('users').updateOne({ _id: new ObjectId(targetUserId) }, { $set: { subscription: user.subscription, pendingRequests: user.pendingRequests } }); } catch { await db.collection('users').updateOne({ _id: targetUserId }, { $set: { subscription: user.subscription, pendingRequests: user.pendingRequests } }); }
+          } catch (dbErr) { console.warn('⚠️ Approve DB update error:', dbErr.message); }
           return jsonResponse({ success: true, message: 'অনুমোদন সফল হয়েছে!', subscription: user.subscription });
         }
       }
