@@ -34517,8 +34517,8 @@ async function getPaidDb(context2) {
   const dbConfig = getDbConfig(context2);
   let uri = dbConfig.paidUri || DEFAULT_PAID_URI;
   const dbName = dbConfig.paidDbName || "TopMCQBD_DB";
-  if (uri.startsWith("mongodb+srv://")) {
-    uri = DIRECT_PAID_URI;
+  if (uri.startsWith("mongodb+srv://") || !uri.includes("directConnection=true")) {
+    uri = SINGLE_NODE_PAID_URI;
   }
   if (!paidClientPromise) {
     paidClientPromise = (async () => {
@@ -34526,15 +34526,17 @@ async function getPaidDb(context2) {
         connectTimeoutMS: 5e3,
         serverSelectionTimeoutMS: 5e3,
         maxPoolSize: 5,
-        family: 4
+        family: 4,
+        directConnection: true,
+        tls: true
       };
       try {
         const client2 = new import_mongodb.MongoClient(uri, options);
         await client2.connect();
         return client2;
       } catch (err) {
-        console.warn("Primary Paid MongoDB connection failed, trying direct replica URI...", err.message);
-        const fallbackClient = new import_mongodb.MongoClient(DIRECT_PAID_URI, options);
+        console.warn("Primary Paid MongoDB connection failed, trying fallback single node URI...", err.message);
+        const fallbackClient = new import_mongodb.MongoClient(SINGLE_NODE_PAID_URI, options);
         await fallbackClient.connect();
         return fallbackClient;
       }
@@ -34551,8 +34553,8 @@ async function getFreeDb(context2) {
   const dbConfig = getDbConfig(context2);
   let uri = dbConfig.freeUri || DEFAULT_FREE_URI;
   const dbName = dbConfig.freeDbName || "TopMCQBD_DB_Free";
-  if (uri.startsWith("mongodb+srv://")) {
-    uri = DIRECT_FREE_URI;
+  if (uri.startsWith("mongodb+srv://") || !uri.includes("directConnection=true")) {
+    uri = SINGLE_NODE_FREE_URI;
   }
   if (!freeClientPromise) {
     freeClientPromise = (async () => {
@@ -34560,15 +34562,17 @@ async function getFreeDb(context2) {
         connectTimeoutMS: 5e3,
         serverSelectionTimeoutMS: 5e3,
         maxPoolSize: 5,
-        family: 4
+        family: 4,
+        directConnection: true,
+        tls: true
       };
       try {
         const client2 = new import_mongodb.MongoClient(uri, options);
         await client2.connect();
         return client2;
       } catch (err) {
-        console.warn("Primary Free MongoDB connection failed, trying direct replica URI...", err.message);
-        const fallbackClient = new import_mongodb.MongoClient(DIRECT_FREE_URI, options);
+        console.warn("Primary Free MongoDB connection failed, trying fallback single node URI...", err.message);
+        const fallbackClient = new import_mongodb.MongoClient(SINGLE_NODE_FREE_URI, options);
         await fallbackClient.connect();
         return fallbackClient;
       }
@@ -34582,8 +34586,8 @@ async function getFreeDb(context2) {
 }
 __name(getFreeDb, "getFreeDb");
 var import_mongodb;
-var DIRECT_PAID_URI;
-var DIRECT_FREE_URI;
+var SINGLE_NODE_PAID_URI;
+var SINGLE_NODE_FREE_URI;
 var DEFAULT_PAID_URI;
 var DEFAULT_FREE_URI;
 var paidClientPromise;
@@ -34595,10 +34599,10 @@ var init_db = __esm({
     init_virtual_unenv_global_polyfill_cloudflare_unenv_preset_node_console();
     init_performance2();
     import_mongodb = __toESM(require_lib2(), 1);
-    DIRECT_PAID_URI = "mongodb://mosabber480_db_user:EScirLEzwgQVVNaB@ac-472re4l-shard-00-00.3ajdj0u.mongodb.net:27017,ac-472re4l-shard-00-01.3ajdj0u.mongodb.net:27017,ac-472re4l-shard-00-02.3ajdj0u.mongodb.net:27017/TopMCQBD_DB?ssl=true&replicaSet=atlas-wzdf1e-shard-0&authSource=admin&appName=Mosabber";
-    DIRECT_FREE_URI = "mongodb://mosabber480_db_user:VVcrE9PeIIyVlcKU@ac-rw27hdk-shard-00-00.pixb7fx.mongodb.net:27017,ac-rw27hdk-shard-00-01.pixb7fx.mongodb.net:27017,ac-rw27hdk-shard-00-02.pixb7fx.mongodb.net:27017/TopMCQBD_DB_Free?ssl=true&replicaSet=atlas-bntyny-shard-0&authSource=admin";
-    DEFAULT_PAID_URI = DIRECT_PAID_URI;
-    DEFAULT_FREE_URI = DIRECT_FREE_URI;
+    SINGLE_NODE_PAID_URI = "mongodb://mosabber480_db_user:EScirLEzwgQVVNaB@ac-472re4l-shard-00-00.3ajdj0u.mongodb.net:27017/TopMCQBD_DB?ssl=true&authSource=admin&directConnection=true";
+    SINGLE_NODE_FREE_URI = "mongodb://mosabber480_db_user:VVcrE9PeIIyVlcKU@ac-rw27hdk-shard-00-00.pixb7fx.mongodb.net:27017/TopMCQBD_DB_Free?ssl=true&authSource=admin&directConnection=true";
+    DEFAULT_PAID_URI = SINGLE_NODE_PAID_URI;
+    DEFAULT_FREE_URI = SINGLE_NODE_FREE_URI;
     paidClientPromise = null;
     freeClientPromise = null;
     __name2(parseClusterHost, "parseClusterHost");

@@ -33142,8 +33142,8 @@ async function getPaidDb(context2) {
   const dbConfig = getDbConfig(context2);
   let uri = dbConfig.paidUri || DEFAULT_PAID_URI;
   const dbName = dbConfig.paidDbName || "TopMCQBD_DB";
-  if (uri.startsWith("mongodb+srv://")) {
-    uri = DIRECT_PAID_URI;
+  if (uri.startsWith("mongodb+srv://") || !uri.includes("directConnection=true")) {
+    uri = SINGLE_NODE_PAID_URI;
   }
   if (!paidClientPromise) {
     paidClientPromise = (async () => {
@@ -33151,15 +33151,17 @@ async function getPaidDb(context2) {
         connectTimeoutMS: 5e3,
         serverSelectionTimeoutMS: 5e3,
         maxPoolSize: 5,
-        family: 4
+        family: 4,
+        directConnection: true,
+        tls: true
       };
       try {
         const client2 = new import_mongodb.MongoClient(uri, options);
         await client2.connect();
         return client2;
       } catch (err) {
-        console.warn("Primary Paid MongoDB connection failed, trying direct replica URI...", err.message);
-        const fallbackClient = new import_mongodb.MongoClient(DIRECT_PAID_URI, options);
+        console.warn("Primary Paid MongoDB connection failed, trying fallback single node URI...", err.message);
+        const fallbackClient = new import_mongodb.MongoClient(SINGLE_NODE_PAID_URI, options);
         await fallbackClient.connect();
         return fallbackClient;
       }
@@ -33175,8 +33177,8 @@ async function getFreeDb(context2) {
   const dbConfig = getDbConfig(context2);
   let uri = dbConfig.freeUri || DEFAULT_FREE_URI;
   const dbName = dbConfig.freeDbName || "TopMCQBD_DB_Free";
-  if (uri.startsWith("mongodb+srv://")) {
-    uri = DIRECT_FREE_URI;
+  if (uri.startsWith("mongodb+srv://") || !uri.includes("directConnection=true")) {
+    uri = SINGLE_NODE_FREE_URI;
   }
   if (!freeClientPromise) {
     freeClientPromise = (async () => {
@@ -33184,15 +33186,17 @@ async function getFreeDb(context2) {
         connectTimeoutMS: 5e3,
         serverSelectionTimeoutMS: 5e3,
         maxPoolSize: 5,
-        family: 4
+        family: 4,
+        directConnection: true,
+        tls: true
       };
       try {
         const client2 = new import_mongodb.MongoClient(uri, options);
         await client2.connect();
         return client2;
       } catch (err) {
-        console.warn("Primary Free MongoDB connection failed, trying direct replica URI...", err.message);
-        const fallbackClient = new import_mongodb.MongoClient(DIRECT_FREE_URI, options);
+        console.warn("Primary Free MongoDB connection failed, trying fallback single node URI...", err.message);
+        const fallbackClient = new import_mongodb.MongoClient(SINGLE_NODE_FREE_URI, options);
         await fallbackClient.connect();
         return fallbackClient;
       }
@@ -33204,7 +33208,7 @@ async function getFreeDb(context2) {
   const client = await freeClientPromise;
   return client.db(dbName);
 }
-var import_mongodb, DIRECT_PAID_URI, DIRECT_FREE_URI, DEFAULT_PAID_URI, DEFAULT_FREE_URI, paidClientPromise, freeClientPromise;
+var import_mongodb, SINGLE_NODE_PAID_URI, SINGLE_NODE_FREE_URI, DEFAULT_PAID_URI, DEFAULT_FREE_URI, paidClientPromise, freeClientPromise;
 var init_db = __esm({
   "utils/db.js"() {
     init_functionsRoutes_0_1661149121454758();
@@ -33212,10 +33216,10 @@ var init_db = __esm({
     init_virtual_unenv_global_polyfill_cloudflare_unenv_preset_node_console();
     init_performance2();
     import_mongodb = __toESM(require_lib2(), 1);
-    DIRECT_PAID_URI = "mongodb://mosabber480_db_user:EScirLEzwgQVVNaB@ac-472re4l-shard-00-00.3ajdj0u.mongodb.net:27017,ac-472re4l-shard-00-01.3ajdj0u.mongodb.net:27017,ac-472re4l-shard-00-02.3ajdj0u.mongodb.net:27017/TopMCQBD_DB?ssl=true&replicaSet=atlas-wzdf1e-shard-0&authSource=admin&appName=Mosabber";
-    DIRECT_FREE_URI = "mongodb://mosabber480_db_user:VVcrE9PeIIyVlcKU@ac-rw27hdk-shard-00-00.pixb7fx.mongodb.net:27017,ac-rw27hdk-shard-00-01.pixb7fx.mongodb.net:27017,ac-rw27hdk-shard-00-02.pixb7fx.mongodb.net:27017/TopMCQBD_DB_Free?ssl=true&replicaSet=atlas-bntyny-shard-0&authSource=admin";
-    DEFAULT_PAID_URI = DIRECT_PAID_URI;
-    DEFAULT_FREE_URI = DIRECT_FREE_URI;
+    SINGLE_NODE_PAID_URI = "mongodb://mosabber480_db_user:EScirLEzwgQVVNaB@ac-472re4l-shard-00-00.3ajdj0u.mongodb.net:27017/TopMCQBD_DB?ssl=true&authSource=admin&directConnection=true";
+    SINGLE_NODE_FREE_URI = "mongodb://mosabber480_db_user:VVcrE9PeIIyVlcKU@ac-rw27hdk-shard-00-00.pixb7fx.mongodb.net:27017/TopMCQBD_DB_Free?ssl=true&authSource=admin&directConnection=true";
+    DEFAULT_PAID_URI = SINGLE_NODE_PAID_URI;
+    DEFAULT_FREE_URI = SINGLE_NODE_FREE_URI;
     paidClientPromise = null;
     freeClientPromise = null;
     __name(parseClusterHost, "parseClusterHost");
@@ -36398,13 +36402,13 @@ var init_functionsRoutes_0_1661149121454758 = __esm({
   }
 });
 
-// ../.wrangler/tmp/bundle-9iyno6/middleware-loader.entry.ts
+// ../.wrangler/tmp/bundle-4rEQmy/middleware-loader.entry.ts
 init_functionsRoutes_0_1661149121454758();
 init_virtual_unenv_global_polyfill_cloudflare_unenv_preset_node_process();
 init_virtual_unenv_global_polyfill_cloudflare_unenv_preset_node_console();
 init_performance2();
 
-// ../.wrangler/tmp/bundle-9iyno6/middleware-insertion-facade.js
+// ../.wrangler/tmp/bundle-4rEQmy/middleware-insertion-facade.js
 init_functionsRoutes_0_1661149121454758();
 init_virtual_unenv_global_polyfill_cloudflare_unenv_preset_node_process();
 init_virtual_unenv_global_polyfill_cloudflare_unenv_preset_node_console();
@@ -36921,7 +36925,7 @@ var jsonError = /* @__PURE__ */ __name(async (request2, env2, _ctx, middlewareCt
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// ../.wrangler/tmp/bundle-9iyno6/middleware-insertion-facade.js
+// ../.wrangler/tmp/bundle-4rEQmy/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -36957,7 +36961,7 @@ function __facade_invoke__(request2, env2, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// ../.wrangler/tmp/bundle-9iyno6/middleware-loader.entry.ts
+// ../.wrangler/tmp/bundle-4rEQmy/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;

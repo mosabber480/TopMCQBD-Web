@@ -1,11 +1,11 @@
 // Edge-Safe Database & Configuration Helper for Cloudflare Pages Functions
 import { MongoClient } from 'mongodb';
 
-const DIRECT_PAID_URI = 'mongodb://mosabber480_db_user:EScirLEzwgQVVNaB@ac-472re4l-shard-00-00.3ajdj0u.mongodb.net:27017,ac-472re4l-shard-00-01.3ajdj0u.mongodb.net:27017,ac-472re4l-shard-00-02.3ajdj0u.mongodb.net:27017/TopMCQBD_DB?ssl=true&replicaSet=atlas-wzdf1e-shard-0&authSource=admin&appName=Mosabber';
-const DIRECT_FREE_URI = 'mongodb://mosabber480_db_user:VVcrE9PeIIyVlcKU@ac-rw27hdk-shard-00-00.pixb7fx.mongodb.net:27017,ac-rw27hdk-shard-00-01.pixb7fx.mongodb.net:27017,ac-rw27hdk-shard-00-02.pixb7fx.mongodb.net:27017/TopMCQBD_DB_Free?ssl=true&replicaSet=atlas-bntyny-shard-0&authSource=admin';
+const SINGLE_NODE_PAID_URI = 'mongodb://mosabber480_db_user:EScirLEzwgQVVNaB@ac-472re4l-shard-00-00.3ajdj0u.mongodb.net:27017/TopMCQBD_DB?ssl=true&authSource=admin&directConnection=true';
+const SINGLE_NODE_FREE_URI = 'mongodb://mosabber480_db_user:VVcrE9PeIIyVlcKU@ac-rw27hdk-shard-00-00.pixb7fx.mongodb.net:27017/TopMCQBD_DB_Free?ssl=true&authSource=admin&directConnection=true';
 
-const DEFAULT_PAID_URI = DIRECT_PAID_URI;
-const DEFAULT_FREE_URI = DIRECT_FREE_URI;
+const DEFAULT_PAID_URI = SINGLE_NODE_PAID_URI;
+const DEFAULT_FREE_URI = SINGLE_NODE_FREE_URI;
 
 let paidClientPromise = null;
 let freeClientPromise = null;
@@ -39,10 +39,8 @@ export async function getPaidDb(context) {
   let uri = dbConfig.paidUri || DEFAULT_PAID_URI;
   const dbName = dbConfig.paidDbName || 'TopMCQBD_DB';
 
-  // In Cloudflare Edge runtime, mongodb+srv:// SRV lookup often fails or takes 15s.
-  // Prefer direct replica URI if SRV URI is provided.
-  if (uri.startsWith('mongodb+srv://')) {
-    uri = DIRECT_PAID_URI;
+  if (uri.startsWith('mongodb+srv://') || !uri.includes('directConnection=true')) {
+    uri = SINGLE_NODE_PAID_URI;
   }
 
   if (!paidClientPromise) {
@@ -52,14 +50,16 @@ export async function getPaidDb(context) {
         serverSelectionTimeoutMS: 5000,
         maxPoolSize: 5,
         family: 4,
+        directConnection: true,
+        tls: true,
       };
       try {
         const client = new MongoClient(uri, options);
         await client.connect();
         return client;
       } catch (err) {
-        console.warn('Primary Paid MongoDB connection failed, trying direct replica URI...', err.message);
-        const fallbackClient = new MongoClient(DIRECT_PAID_URI, options);
+        console.warn('Primary Paid MongoDB connection failed, trying fallback single node URI...', err.message);
+        const fallbackClient = new MongoClient(SINGLE_NODE_PAID_URI, options);
         await fallbackClient.connect();
         return fallbackClient;
       }
@@ -78,8 +78,8 @@ export async function getFreeDb(context) {
   let uri = dbConfig.freeUri || DEFAULT_FREE_URI;
   const dbName = dbConfig.freeDbName || 'TopMCQBD_DB_Free';
 
-  if (uri.startsWith('mongodb+srv://')) {
-    uri = DIRECT_FREE_URI;
+  if (uri.startsWith('mongodb+srv://') || !uri.includes('directConnection=true')) {
+    uri = SINGLE_NODE_FREE_URI;
   }
 
   if (!freeClientPromise) {
@@ -89,14 +89,16 @@ export async function getFreeDb(context) {
         serverSelectionTimeoutMS: 5000,
         maxPoolSize: 5,
         family: 4,
+        directConnection: true,
+        tls: true,
       };
       try {
         const client = new MongoClient(uri, options);
         await client.connect();
         return client;
       } catch (err) {
-        console.warn('Primary Free MongoDB connection failed, trying direct replica URI...', err.message);
-        const fallbackClient = new MongoClient(DIRECT_FREE_URI, options);
+        console.warn('Primary Free MongoDB connection failed, trying fallback single node URI...', err.message);
+        const fallbackClient = new MongoClient(SINGLE_NODE_FREE_URI, options);
         await fallbackClient.connect();
         return fallbackClient;
       }
