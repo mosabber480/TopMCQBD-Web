@@ -10,14 +10,24 @@ if (fs.existsSync(bsonLibDir)) {
       const filePath = path.join(bsonLibDir, file);
       let content = fs.readFileSync(filePath, 'utf8');
       let modified = false;
+
+      if (content.includes('ObjectId.resetState?.();')) {
+        content = content.replace(/ObjectId\.resetState\?\.\(\);/g, 'try { typeof ObjectId !== "undefined" && ObjectId?.resetState?.(); } catch (e) {}');
+        modified = true;
+      }
       if (content.includes('this.resetState();')) {
-        content = content.replace(/this\.resetState\(\);/g, 'ObjectId.resetState?.();');
+        content = content.replace(/this\.resetState\(\);/g, 'try { typeof ObjectId !== "undefined" && ObjectId?.resetState?.(); } catch (e) {}');
         modified = true;
       }
-      if (content.includes('this.resetState')) {
-        content = content.replace(/this\.resetState/g, 'ObjectId.resetState');
+      if (content.includes('startupSnapshot?.addDeserializeCallback?.(ObjectId.resetState);')) {
+        content = content.replace(/startupSnapshot\?\.\addDeserializeCallback\?\.\(ObjectId\.resetState\);/g, 'try { if (typeof ObjectId !== "undefined" && ObjectId?.resetState) startupSnapshot?.addDeserializeCallback?.(ObjectId.resetState); } catch (e) {}');
         modified = true;
       }
+      if (content.includes('startupSnapshot?.addDeserializeCallback?.(this.resetState);')) {
+        content = content.replace(/startupSnapshot\?\.\addDeserializeCallback\?\.\(this\.resetState\);/g, 'try { if (typeof ObjectId !== "undefined" && ObjectId?.resetState) startupSnapshot?.addDeserializeCallback?.(ObjectId.resetState); } catch (e) {}');
+        modified = true;
+      }
+
       if (modified) {
         fs.writeFileSync(filePath, content, 'utf8');
         console.log(`✅ Patched BSON static initializer in ${file}`);
@@ -25,3 +35,4 @@ if (fs.existsSync(bsonLibDir)) {
     }
   }
 }
+
