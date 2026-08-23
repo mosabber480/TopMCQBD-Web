@@ -328,7 +328,15 @@ export async function onRequest(context) {
       let isMatch = false;
       if (userDoc.password) {
         if (userDoc.password.startsWith('$2a$') || userDoc.password.startsWith('$2b$') || userDoc.password.startsWith('$2y$')) {
-          isMatch = await bcrypt.compare(password, userDoc.password);
+          try {
+            isMatch = await bcrypt.compare(password, userDoc.password);
+          } catch (e1) {
+            try {
+              isMatch = bcrypt.compareSync(password, userDoc.password);
+            } catch (e2) {
+              isMatch = false;
+            }
+          }
         } else {
           isMatch = password === userDoc.password;
         }
@@ -375,11 +383,10 @@ export async function onRequest(context) {
 
       let hashedPassword = String(password);
       try {
-        hashedPassword = await bcrypt.hash(String(password), 10);
+        hashedPassword = await bcrypt.hash(String(password), 6);
       } catch (hashErr) {
-        console.warn('bcrypt hash async fallback:', hashErr.message);
         try {
-          hashedPassword = bcrypt.hashSync(String(password), 10);
+          hashedPassword = bcrypt.hashSync(String(password), 6);
         } catch (e2) {}
       }
 

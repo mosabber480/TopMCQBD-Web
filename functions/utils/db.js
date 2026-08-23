@@ -36,15 +36,21 @@ export function getDbConfig(context) {
 
 export async function getPaidDb(context) {
   const dbConfig = getDbConfig(context);
-  const uri = dbConfig.paidUri || DEFAULT_PAID_URI;
+  let uri = dbConfig.paidUri || DEFAULT_PAID_URI;
   const dbName = dbConfig.paidDbName || 'TopMCQBD_DB';
+
+  // In Cloudflare Edge runtime, mongodb+srv:// SRV lookup often fails or takes 15s.
+  // Prefer direct replica URI if SRV URI is provided.
+  if (uri.startsWith('mongodb+srv://')) {
+    uri = DIRECT_PAID_URI;
+  }
 
   if (!paidClientPromise) {
     paidClientPromise = (async () => {
       const options = {
-        connectTimeoutMS: 15000,
-        serverSelectionTimeoutMS: 15000,
-        maxPoolSize: 10,
+        connectTimeoutMS: 5000,
+        serverSelectionTimeoutMS: 5000,
+        maxPoolSize: 5,
         family: 4,
       };
       try {
@@ -69,15 +75,19 @@ export async function getPaidDb(context) {
 
 export async function getFreeDb(context) {
   const dbConfig = getDbConfig(context);
-  const uri = dbConfig.freeUri || DEFAULT_FREE_URI;
+  let uri = dbConfig.freeUri || DEFAULT_FREE_URI;
   const dbName = dbConfig.freeDbName || 'TopMCQBD_DB_Free';
+
+  if (uri.startsWith('mongodb+srv://')) {
+    uri = DIRECT_FREE_URI;
+  }
 
   if (!freeClientPromise) {
     freeClientPromise = (async () => {
       const options = {
-        connectTimeoutMS: 15000,
-        serverSelectionTimeoutMS: 15000,
-        maxPoolSize: 10,
+        connectTimeoutMS: 5000,
+        serverSelectionTimeoutMS: 5000,
+        maxPoolSize: 5,
         family: 4,
       };
       try {

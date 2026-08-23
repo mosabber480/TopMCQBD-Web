@@ -1,5 +1,5 @@
-async function testAdminLoginRaw() {
-  console.log('\n--- Testing Admin Login raw output ---');
+async function testCloudflareLogin() {
+  console.log('\n--- Testing /api/auth/login raw error text ---');
   try {
     const res = await fetch('http://localhost:8788/api/auth/login', {
       method: 'POST',
@@ -9,10 +9,10 @@ async function testAdminLoginRaw() {
     const status = res.status;
     const text = await res.text();
     console.log(`Status: ${status}`);
-    console.log('Raw Response:', text);
+    console.log('Raw Response Text:\n', text);
   } catch (err) {
-    console.error('Login error:', err.message);
+    console.error('Login fetch error:', err.message);
   }
 }
 
-testAdminLoginRaw();
+testCloudflareLogin();
