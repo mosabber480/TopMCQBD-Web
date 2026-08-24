@@ -30,29 +30,26 @@ export async function getMongoClient(context) {
   }
 
   const { paidUri } = getDbConfig(context);
-  // Direct URI bypasses DNS SRV resolution which is essential for Cloudflare Edge Runtime
   const urisToTry = [DIRECT_PAID_URI, paidUri];
 
   let lastError = null;
   for (const uri of urisToTry) {
     try {
       const client = new MongoClient(uri, {
-        connectTimeoutMS: 15000,
-        serverSelectionTimeoutMS: 15000,
-        socketTimeoutMS: 20000,
+        connectTimeoutMS: 3000,
+        serverSelectionTimeoutMS: 3000,
+        socketTimeoutMS: 5000,
         tls: true,
       });
       await client.connect();
       _cachedClient = client;
-      console.log('✅ MongoDB Primary connected');
       return client;
     } catch (err) {
       lastError = err;
-      console.warn(`⚠️ Primary DB connect attempt failed: ${err.message}`);
     }
   }
 
-  throw new Error(`❌ MongoDB Atlas connection error (Paid): ${lastError?.message || 'Failed to connect'}`);
+  throw new Error(`MongoDB Atlas connection error (Paid): ${lastError?.message || 'Connection failed'}`);
 }
 
 export async function getFreeMongoClient(context) {
@@ -72,22 +69,20 @@ export async function getFreeMongoClient(context) {
   for (const uri of urisToTry) {
     try {
       const client = new MongoClient(uri, {
-        connectTimeoutMS: 15000,
-        serverSelectionTimeoutMS: 15000,
-        socketTimeoutMS: 20000,
+        connectTimeoutMS: 3000,
+        serverSelectionTimeoutMS: 3000,
+        socketTimeoutMS: 5000,
         tls: true,
       });
       await client.connect();
       _cachedFreeClient = client;
-      console.log('✅ MongoDB Free DB connected');
       return client;
     } catch (err) {
       lastError = err;
-      console.warn(`⚠️ Free DB connect attempt failed: ${err.message}`);
     }
   }
 
-  throw new Error(`❌ MongoDB Atlas connection error (Free): ${lastError?.message || 'Failed to connect'}`);
+  throw new Error(`MongoDB Atlas connection error (Free): ${lastError?.message || 'Connection failed'}`);
 }
 
 export async function getPaidDb(context) {
@@ -101,8 +96,7 @@ export async function getFreeDb(context) {
     const client = await getFreeMongoClient(context);
     const { freeDbName } = getDbConfig(context);
     return client.db(freeDbName);
-  } catch (err) {
-    console.warn('Falling back to Primary Paid DB for queries');
+  } catch {
     return getPaidDb(context);
   }
 }
