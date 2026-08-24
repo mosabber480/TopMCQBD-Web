@@ -253,7 +253,7 @@ export default function DbCheckPage() {
                   </div>
                   {item.createdAt && (
                     <div style={{ fontSize: '0.8rem', color: '#818cf8', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span>🕒</span>
+                      <i className="fa-regular fa-clock" style={{ fontSize: '0.78rem' }}></i>
                       <span>তারিখ ও সময়: {formatItemDate(item.createdAt)}</span>
                     </div>
                   )}

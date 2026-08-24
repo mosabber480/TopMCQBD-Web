@@ -497,9 +497,10 @@ export default function DBConnectionCheck() {
           }}
         >
           {/* Header */}
+          {/* Card Header with Collection Name */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.5rem' }}>
             <h2 style={{ fontSize: '1.4rem', fontWeight: '700', color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <span>📝</span> MongoDB Collection: <span style={{ color: '#818cf8' }}>db-test-text</span>
+              <i className="fa-solid fa-database" style={{ color: '#818cf8' }}></i> MongoDB Collection: <span style={{ color: '#818cf8' }}>db-test-text</span>
             </h2>
           </div>
 
@@ -542,7 +543,8 @@ export default function DBConnectionCheck() {
                   transition: 'all 0.2s ease',
                 }}
               >
-                <span>➕</span> নতুন টেক্সট যোগ করুন
+                <i className="fa-solid fa-plus"></i>
+                <span>নতুন টেক্সট যোগ করুন</span>
               </button>
             </div>
           ) : (
@@ -558,7 +560,8 @@ export default function DBConnectionCheck() {
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
                 <span style={{ fontSize: '1rem', fontWeight: 600, color: '#c7d2fe', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span>✍️</span> নতুন টেক্সট এন্ট্রি (একাধিক টেক্সট একসাথে যুক্ত করতে পারেন)
+                  <i className="fa-solid fa-pen-to-square" style={{ color: '#818cf8' }}></i>
+                  <span>নতুন টেক্সট এন্ট্রি (একাধিক টেক্সট একসাথে যুক্ত করতে পারেন)</span>
                 </span>
                 <button
                   onClick={() => setShowAddForm(false)}
@@ -569,10 +572,13 @@ export default function DBConnectionCheck() {
                     color: '#94a3b8',
                     fontSize: '0.85rem',
                     cursor: 'pointer',
-                    textDecoration: 'underline',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
                   }}
                 >
-                  ✕ বন্ধ করুন
+                  <i className="fa-solid fa-xmark"></i>
+                  <span>বন্ধ করুন</span>
                 </button>
               </div>
 
@@ -614,10 +620,12 @@ export default function DBConnectionCheck() {
                           color: '#f87171',
                           cursor: 'pointer',
                           fontSize: '0.85rem',
-                          fontWeight: 600,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
                         }}
                       >
-                        🗑️
+                        <i className="fa-solid fa-trash-can"></i>
                       </button>
                     )}
                   </div>
@@ -641,10 +649,11 @@ export default function DBConnectionCheck() {
                     cursor: 'pointer',
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '6px',
+                    gap: '8px',
                   }}
                 >
-                  <span>➕</span> আরও টেক্সট ফিল্ড যোগ করুন
+                  <i className="fa-solid fa-plus" style={{ color: '#818cf8' }}></i>
+                  <span>আরও টেক্সট ফিল্ড যোগ করুন</span>
                 </button>
 
                 <div style={{ display: 'flex', gap: '10px' }}>
@@ -665,7 +674,7 @@ export default function DBConnectionCheck() {
                     বাতিল
                   </button>
 
-                  {/* GREEN SAVE BUTTON */}
+                  {/* GREEN SAVE BUTTON with FontAwesome Floppy Disk */}
                   <button
                     type="button"
                     onClick={handleSaveAllFields}
@@ -686,7 +695,8 @@ export default function DBConnectionCheck() {
                       transition: 'all 0.2s ease',
                     }}
                   >
-                    <span>💾</span> সেভ করুন
+                    <i className="fa-solid fa-floppy-disk" style={{ fontSize: '0.95rem' }}></i>
+                    <span>সেভ করুন</span>
                   </button>
                 </div>
               </div>
@@ -784,10 +794,14 @@ export default function DBConnectionCheck() {
                               fontSize: '0.8rem',
                               fontWeight: 700,
                               cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '5px',
                               boxShadow: '0 2px 8px rgba(16, 185, 129, 0.35)',
                             }}
                           >
-                            💾 সেভ
+                            <i className="fa-solid fa-floppy-disk"></i>
+                            <span>সেভ</span>
                           </button>
                           <button
                             onClick={() => { setEditingId(null); setEditText(''); }}
@@ -818,7 +832,7 @@ export default function DBConnectionCheck() {
                           </div>
                           {item.createdAt && (
                             <div style={{ fontSize: '0.78rem', color: '#818cf8', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                              <span>🕒</span>
+                              <i className="fa-regular fa-clock" style={{ fontSize: '0.78rem' }}></i>
                               <span>তারিখ ও সময়: {formatDateTime(item.createdAt)}</span>
                             </div>
                           )}
@@ -844,9 +858,6 @@ export default function DBConnectionCheck() {
                             fontSize: '0.85rem',
                             fontWeight: 500,
                             cursor: 'pointer',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '6px',
                             transition: 'all 0.2s ease',
                           }}
                         >
@@ -864,9 +875,6 @@ export default function DBConnectionCheck() {
                             fontSize: '0.85rem',
                             fontWeight: 500,
                             cursor: 'pointer',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '6px',
                             transition: 'all 0.2s ease',
                           }}
                         >

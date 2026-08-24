@@ -1,12 +1,11 @@
 # Terminal & Git Rules
 
-- **Allowed Git & Dev Commands**:
+- **Strict Git Push Rule**:
+  - Do NOT run `git push` or `git commit` automatically/autonomously.
+  - ONLY run `git push` / `git commit` when the USER explicitly commands you to do so (e.g. "git push koro", "push koro").
+- **Allowed Read-Only Git Commands**:
   - `git status` (Read-only status check)
   - `git remote -v` (Read-only remote list)
-  - `npm run dev` (Start / manage development server)
+- **Dev & Build Commands**:
+  - `npm.cmd run dev` (Start / manage development server)
   - Build/test validation commands when needed.
-- **Strictly Prohibited Git Commands**:
-  - Do NOT run `git add`
-  - Do NOT run `git commit`
-  - Do NOT run `git push`
-  - The USER will handle all git staging, commits, and pushes manually.
