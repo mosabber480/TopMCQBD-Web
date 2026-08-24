@@ -12,10 +12,10 @@
 * Styling: Vanilla CSS & Tailwind CSS (`src/app/globals.css`)
 * Backend API: Next.js Route Handlers (`src/app/api/`) & Cloudflare Pages Functions (`functions/api/`)
 * Deployment & Hosting: Cloudflare Pages (`npm run build:cloudflare`)
-* Database Engine: MongoDB Atlas (M0 Free Tier Multi-Cluster Architecture)
-* Dual Database Architecture:
+* Database Engine: MongoDB Atlas (Primary Paid Database)
+* Database Architecture:
   1. Primary Paid DB (TopMCQBD_DB) — ইউজার, অথেনটিকেশন, পেইড MCQ, সাবস্ক্রিপশন, ডায়নামিক কনফিগ
-  2. Secondary Free DB (TopMCQBD_DB_Free) — উন্মুক্ত ফ্রি MCQ লাইব্রেরি ও প্র্যাকটিস ডাটা
+  2. Secondary Free DB (TopMCQBD_DB_Free) — [ভবিষ্যতে চালু করা হবে / আপাতত স্থগিত]
 * Email Gateway: Brevo (Sendinblue) REST API for Password Reset & System Notifications
 * Authentication: JWT Token (HS256) + Bcrypt Password Hashing
 
@@ -27,8 +27,8 @@
 ✅ একক কেন্দ্রীয় রিপোজিটরি (Unified Single System):
    - GitHub Repository: https://github.com/mosabber480/TopMCQBD-Web.git
    - Cloudflare Live URL: https://topmcqbd.pages.dev
-   - ডাটাবেজ: MongoDB Atlas (Dual Database: TopMCQBD_DB & TopMCQBD_DB_Free)
-   - দায়িত্ব: মেইন ওয়েব অ্যাপ, পেইড কুইজ, ফ্রি MCQ, ইউজার প্রোফাইল, অথেনটিকেশন ও পূর্ণাঙ্গ এডমিন প্যানেল
+   - ডাটাবেজ: MongoDB Atlas (Primary DB: TopMCQBD_DB)
+   - দায়িত্ব: মেইন ওয়েব অ্যাপ, পেইড কুইজ, ইউজার প্রোফাইল, অথেনটিকেশন ও পূর্ণাঙ্গ এডমিন প্যানেল
 
 
 ===============================================================================
@@ -134,14 +134,14 @@
 
 
 ===============================================================================
-4. MONGODB ATLAS DUAL DATABASE CONFIGURATION
+4. MONGODB ATLAS DATABASE CONFIGURATION
 ===============================================================================
 
 ১. ডাটাবেজ আর্কিটেকচার:
-   - Primary Database: `TopMCQBD_DB` (পেইড ইউজার, এডমিন, পেইড এমসিকিউ, সাইট সেটিংস)
-   - Secondary Database: `TopMCQBD_DB_Free` (উন্মুক্ত ফ্রি এমসিকিউ ডাটাবেজ)
+   - Primary Database (Active): `TopMCQBD_DB` (পেইড ইউজার, এডমিন, পেইড এমসিকিউ, সাইট সেটিংস)
+   - Secondary Database (Optional / Future): `TopMCQBD_DB_Free` (আপাতত স্থগিত, পরবর্তীতে ফ্রি ফিচারের জন্য যুক্ত করা হবে)
 
-২. MongoDB Collections:
+২. MongoDB Collections (TopMCQBD_DB):
    1. `users` — ইউজার অ্যাকাউন্ট, পাসওয়ার্ড (bcrypt), রোল (owner, admin, customer), সাবস্ক্রিপশন প্ল্যান, পেমেন্ট রিকোয়েস্ট
    2. `questions` — এমসিকিউ প্রশ্নসমূহ, অপশনস, সঠিক উত্তর (ইনডেক্স), বিস্তারিত ব্যাখ্যা, ক্যাটেগরি
    3. `configs` / Config Collections — হোমপেজ ব্যানার, হেডার মেনু, ফুটার লিংকস, সাইডবার ও পলিসি কনফিগারেশন
@@ -178,19 +178,25 @@
 📋 প্রোডাকশন ও লোকাল এনভায়রনমেন্ট সিক্রেট ভ্যারিয়েবলসমূহ (.env, .dev.vars এবং Cloudflare Dashboard):
 
 ```env
+# --- ১. একটিভ সিক্রেট ভ্যারিয়েবলসমূহ (Primary Paid Setup) ---
 MONGODB_URI_PAID="mongodb+srv://mosabber480_db_user:EScirLEzwgQVVNaB@mosabber.3ajdj0u.mongodb.net/TopMCQBD_DB?retryWrites=true&w=majority"
-MONGODB_URI_FREE="mongodb+srv://mosabber480_db_user:VVcrE9PeIIyVlcKU@topmcqbd.pixb7fx.mongodb.net/TopMCQBD_DB_Free?retryWrites=true&w=majority"
 MONGODB_DB_NAME_PAID="TopMCQBD_DB"
-MONGODB_DB_NAME_FREE="TopMCQBD_DB_Free"
+
 JWT_SECRET="topmcqbd_super_secret_jwt_key_2026"
 BREVO_API_KEY="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"
 BREVO_SENDER_EMAIL="mosabber480@gmail.com"
 NEXT_PUBLIC_APP_URL="https://topmcqbd.pages.dev"
+
+# --- ২. অপশনাল / ভবিষ্যতের জন্য সংরক্ষিত (Secondary Free Setup) ---
+# Free MCQ Cloudflare https://topmcqbd-web-free.pages.dev
+# MONGODB_URI_FREE="mongodb+srv://mosabber480_db_user:VVcrE9PeIIyVlcKU@topmcqbd.pixb7fx.mongodb.net/TopMCQBD_DB_Free?retryWrites=true&w=majority"
+# MONGODB_DB_NAME_FREE="TopMCQBD_DB_Free"
+# JWT_SECRET="topmcqbd_super_secret_jwt_key_2026"
 ```
 
-📌 Direct ReplicaSet Connections (Auto-fallback to avoid Windows/ISP DNS SRV Timeout):
+📌 Direct ReplicaSet Connection (Auto-fallback to avoid Windows/ISP DNS SRV Timeout):
 - Paid Direct URI: `mongodb://mosabber480_db_user:EScirLEzwgQVVNaB@ac-472re4l-shard-00-00.3ajdj0u.mongodb.net:27017,ac-472re4l-shard-00-01.3ajdj0u.mongodb.net:27017,ac-472re4l-shard-00-02.3ajdj0u.mongodb.net:27017/TopMCQBD_DB?ssl=true&replicaSet=atlas-wzdf1e-shard-0&authSource=admin`
-- Free Direct URI: `mongodb://mosabber480_db_user:VVcrE9PeIIyVlcKU@ac-rw27hdk-shard-00-00.pixb7fx.mongodb.net:27017,ac-rw27hdk-shard-00-01.pixb7fx.mongodb.net:27017,ac-rw27hdk-shard-00-02.pixb7fx.mongodb.net:27017/TopMCQBD_DB_Free?ssl=true&replicaSet=atlas-bntyny-shard-0&authSource=admin`
+- Free Direct URI (Optional): `mongodb://mosabber480_db_user:VVcrE9PeIIyVlcKU@ac-rw27hdk-shard-00-00.pixb7fx.mongodb.net:27017,ac-rw27hdk-shard-00-01.pixb7fx.mongodb.net:27017,ac-rw27hdk-shard-00-02.pixb7fx.mongodb.net:27017/TopMCQBD_DB_Free?ssl=true&replicaSet=atlas-bntyny-shard-0&authSource=admin`
 
 ✅ Cloudflare Environment Variables: Cloudflare Dashboard > Pages > Settings > Environment variables সেকশনে উপরের সকল সিক্রেট ভ্যারিয়েবল সফলভাবে কনফিগার ও একটিভ করা হয়েছে।
 ✅ Local Secrets: `.env` এবং `.dev.vars` উভয় ফাইলেই সকল সিক্রেট সঠিকভাবে সংরক্ষিত রয়েছে।

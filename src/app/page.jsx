@@ -5,7 +5,7 @@ import React from 'react';
 export default function HomePage() {
   return (
     <main className="home-wrapper">
-      {/* Background Ambient Elements */}
+      {/* Background Ambient Elements matching Logo Royal Blue */}
       <div className="bg-grid-pattern" />
       <div className="glow-orb orb-top-center" />
       <div className="glow-orb orb-bottom-left" />
@@ -13,7 +13,7 @@ export default function HomePage() {
 
       {/* Hero Center Section */}
       <section className="hero-center">
-        {/* Clean Logo Directly without Box */}
+        {/* Brand Logo Presentation */}
         <div className="logo-direct-container">
           <img
             src="/images/TopMCQ.png"
@@ -22,25 +22,20 @@ export default function HomePage() {
           />
         </div>
 
-        {/* Brand Heading */}
-        <h1 className="brand-heading">
-          TopMCQ<span>BD</span>
-        </h1>
+        {/* Coming Soon Badge */}
+        <div className="coming-soon-pill">
+          <span className="live-indicator-light" />
+          <span className="coming-soon-text">Coming Soon</span>
+          <span className="pill-dot">•</span>
+          <span className="coming-soon-bn">শীঘ্রই আসছি</span>
+        </div>
 
-        {/* Bangla Subtitle Text */}
+        {/* Bangla Subtitle Text matching Logo Colors */}
         <p className="bangla-tagline">
           বিসিএস, ব্যাংক, প্রাথমিক শিক্ষক নিয়োগ এবং বিশ্ববিদ্যালয়ের ভর্তি পরীক্ষার জন্য একটি আধুনিক ও স্বয়ংসম্পূর্ণ অনলাইন প্রস্তুতি প্ল্যাটফর্ম।
         </p>
 
-        {/* Coming Soon Badge */}
-        <div className="coming-soon-pill">
-          <span className="live-indicator-light"></span>
-          <span className="coming-soon-text">Coming Soon</span>
-          <span style={{ color: 'rgba(255,255,255,0.3)' }}>•</span>
-          <span className="coming-soon-bn">শীঘ্রই আসছি</span>
-        </div>
-
-        {/* Feature Highlights Grid */}
+        {/* Feature Highlights Grid (4 Items matching Royal Blue theme) */}
         <div className="feature-grid">
           <div className="feature-box">
             <span className="feature-icon">🎯</span>
