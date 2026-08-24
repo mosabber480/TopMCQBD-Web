@@ -1,10 +1,11 @@
 import { MongoClient } from 'mongodb';
 
 const DEFAULT_PAID_URI = 'mongodb+srv://mosabber480_db_user:EScirLEzwgQVVNaB@mosabber.3ajdj0u.mongodb.net/TopMCQBD_DB?retryWrites=true&w=majority';
-const DIRECT_PAID_URI = 'mongodb://mosabber480_db_user:EScirLEzwgQVVNaB@ac-472re4l-shard-00-00.3ajdj0u.mongodb.net:27017,ac-472re4l-shard-00-01.3ajdj0u.mongodb.net:27017,ac-472re4l-shard-00-02.3ajdj0u.mongodb.net:27017/TopMCQBD_DB?ssl=true&replicaSet=atlas-wzdf1e-shard-0&authSource=admin';
+const DIRECT_PAID_REPLICA_URI = 'mongodb://mosabber480_db_user:EScirLEzwgQVVNaB@ac-472re4l-shard-00-00.3ajdj0u.mongodb.net:27017,ac-472re4l-shard-00-01.3ajdj0u.mongodb.net:27017,ac-472re4l-shard-00-02.3ajdj0u.mongodb.net:27017/TopMCQBD_DB?ssl=true&replicaSet=atlas-wzdf1e-shard-0&authSource=admin';
+const DIRECT_PAID_SINGLE_URI = 'mongodb://mosabber480_db_user:EScirLEzwgQVVNaB@ac-472re4l-shard-00-00.3ajdj0u.mongodb.net:27017/TopMCQBD_DB?ssl=true&authSource=admin&directConnection=true';
 
 const DEFAULT_FREE_URI = 'mongodb+srv://mosabber480_db_user:VVcrE9PeIIyVlcKU@topmcqbd.pixb7fx.mongodb.net/TopMCQBD_DB_Free?retryWrites=true&w=majority';
-const DIRECT_FREE_URI = 'mongodb://mosabber480_db_user:VVcrE9PeIIyVlcKU@ac-rw27hdk-shard-00-00.pixb7fx.mongodb.net:27017,ac-rw27hdk-shard-00-01.pixb7fx.mongodb.net:27017,ac-rw27hdk-shard-00-02.pixb7fx.mongodb.net:27017/TopMCQBD_DB_Free?ssl=true&replicaSet=atlas-bntyny-shard-0&authSource=admin';
+const DIRECT_FREE_REPLICA_URI = 'mongodb://mosabber480_db_user:VVcrE9PeIIyVlcKU@ac-rw27hdk-shard-00-00.pixb7fx.mongodb.net:27017,ac-rw27hdk-shard-00-01.pixb7fx.mongodb.net:27017,ac-rw27hdk-shard-00-02.pixb7fx.mongodb.net:27017/TopMCQBD_DB_Free?ssl=true&replicaSet=atlas-bntyny-shard-0&authSource=admin';
 
 let _cachedClient = null;
 let _cachedFreeClient = null;
@@ -30,26 +31,27 @@ export async function getMongoClient(context) {
   }
 
   const { paidUri } = getDbConfig(context);
-  const urisToTry = [DIRECT_PAID_URI, paidUri];
+  const urisToTry = [paidUri, DIRECT_PAID_REPLICA_URI, DIRECT_PAID_SINGLE_URI];
 
   let lastError = null;
   for (const uri of urisToTry) {
     try {
       const client = new MongoClient(uri, {
-        connectTimeoutMS: 3000,
-        serverSelectionTimeoutMS: 3000,
-        socketTimeoutMS: 5000,
+        connectTimeoutMS: 5000,
+        serverSelectionTimeoutMS: 5000,
         tls: true,
       });
       await client.connect();
       _cachedClient = client;
+      console.log('✅ MongoDB Primary Atlas connected successfully');
       return client;
     } catch (err) {
       lastError = err;
+      console.warn(`Attempt with URI failed: ${err.message}`);
     }
   }
 
-  throw new Error(`MongoDB Atlas connection error (Paid): ${lastError?.message || 'Connection failed'}`);
+  throw new Error(`MongoDB Atlas connection error: ${lastError?.message || 'Connection failed'}`);
 }
 
 export async function getFreeMongoClient(context) {
@@ -63,15 +65,14 @@ export async function getFreeMongoClient(context) {
   }
 
   const { freeUri } = getDbConfig(context);
-  const urisToTry = [DIRECT_FREE_URI, freeUri];
+  const urisToTry = [freeUri, DIRECT_FREE_REPLICA_URI];
 
   let lastError = null;
   for (const uri of urisToTry) {
     try {
       const client = new MongoClient(uri, {
-        connectTimeoutMS: 3000,
-        serverSelectionTimeoutMS: 3000,
-        socketTimeoutMS: 5000,
+        connectTimeoutMS: 5000,
+        serverSelectionTimeoutMS: 5000,
         tls: true,
       });
       await client.connect();
