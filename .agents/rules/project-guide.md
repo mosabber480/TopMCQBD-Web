@@ -17,3 +17,8 @@ Antigravity AI must automatically recognize, read, and adhere to the project gui
 
 4. **Security & Deployment Isolation**:
    - `next.js project guide.txt` is a local-only developer reference. It MUST remain in `.gitignore` and untracked so it is never pushed to GitHub or deployed to Cloudflare.
+
+5. **STRICT IMMUTABILITY (NEVER EDIT / NEVER ASK PERMISSION)**:
+   - `next.js project guide.txt` and any guide files are **STRICTLY READ-ONLY**.
+   - **NEVER** edit, update, overwrite, delete, or touch this file.
+   - **NEVER** ask the user for permission to edit this file. Assume it is permanent, immutable reference only.

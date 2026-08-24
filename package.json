@@ -5,17 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "next dev",
-    "build": "next build && node copyAssets.js",
-    "build:cloudflare": "node fixBson.js && next build && node copyAssets.js",
-    "postinstall": "node fixBson.js",
-    "preview": "next start",
-    "start": "next start",
-    "seed": "node seedUsers.js"
+    "build": "next build",
+    "start": "next start"
   },
   "dependencies": {
-    "@getbrevo/brevo": "^6.0.2",
-    "bcryptjs": "^3.0.3",
-    "jsonwebtoken": "^9.0.3",
     "mongodb": "^7.5.0",
     "mongoose": "^8.5.2",
     "next": "^14.2.5",

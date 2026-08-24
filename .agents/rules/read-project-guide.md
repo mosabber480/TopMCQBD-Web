@@ -17,6 +17,11 @@ At the very beginning of **every new conversation** in this workspace, you MUST:
 
 3. Do NOT ask the user to explain the project — you already know it from the guide.
 
+4. **STRICT IMMUTABILITY**:
+   - `next.js project guide.txt` is **STRICTLY READ-ONLY**.
+   - **NEVER** edit, update, overwrite, or delete this file.
+   - **NEVER** ask the user for permission to edit this file.
+
 ## Key Facts to Remember After Reading
 
 - **Build command:** `npm run build:cloudflare` (= fixBson.js + next build + copyAssets.js)
