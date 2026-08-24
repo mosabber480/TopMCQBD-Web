@@ -1,5 +1,10 @@
 import { getPaidDb } from '../utils/db.js';
 
+async function getObjectIdConstructor() {
+  const mod = await import('mongodb');
+  return mod.ObjectId || mod.default?.ObjectId || mod.default;
+}
+
 function jsonResponse(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
@@ -95,7 +100,7 @@ export async function onRequestPut(context) {
       return jsonResponse({ success: false, error: 'Text field cannot be empty' }, 400);
     }
 
-    const { ObjectId } = await import('mongodb');
+    const ObjectId = await getObjectIdConstructor();
     const db = await getPaidDb(context);
     const collection = db.collection('db-test-text');
 
@@ -132,7 +137,7 @@ export async function onRequestDelete(context) {
       return jsonResponse({ success: false, error: 'Item ID is required for deletion' }, 400);
     }
 
-    const { ObjectId } = await import('mongodb');
+    const ObjectId = await getObjectIdConstructor();
     const db = await getPaidDb(context);
     const collection = db.collection('db-test-text');
     const deleteRes = await collection.deleteOne({ _id: new ObjectId(id) });

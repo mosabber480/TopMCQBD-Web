@@ -7,6 +7,11 @@ const DIRECT_FREE_URI = 'mongodb://mosabber480_db_user:VVcrE9PeIIyVlcKU@ac-rw27h
 let _cachedClient = null;
 let _cachedFreeClient = null;
 
+async function getClientConstructor() {
+  const mod = await import('mongodb');
+  return mod.MongoClient || mod.default?.MongoClient || mod.default;
+}
+
 export function getDbConfig(context) {
   const env = context?.env || {};
   return {
@@ -20,9 +25,7 @@ export function getDbConfig(context) {
 export async function getMongoClient(context) {
   if (_cachedClient) return _cachedClient;
 
-  // Dynamic import avoids Cloudflare Worker global initialization restrictions
-  const { MongoClient } = await import('mongodb');
-
+  const MongoClient = await getClientConstructor();
   const { paidUri } = getDbConfig(context);
   const urisToTry = [DIRECT_PAID_URI, paidUri];
 
@@ -53,9 +56,7 @@ export async function getMongoClient(context) {
 export async function getFreeMongoClient(context) {
   if (_cachedFreeClient) return _cachedFreeClient;
 
-  // Dynamic import avoids Cloudflare Worker global initialization restrictions
-  const { MongoClient } = await import('mongodb');
-
+  const MongoClient = await getClientConstructor();
   const { freeUri } = getDbConfig(context);
   const urisToTry = [DIRECT_FREE_URI, freeUri];
 
