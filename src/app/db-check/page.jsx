@@ -79,8 +79,8 @@ export default function DbCheckPage() {
       }
     } catch {}
 
-    setItems(DEFAULT_ITEMS);
-    setLastUpdated(new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true }));
+    setItems([]);
+    setLastUpdated(null);
     setIsLiveDatabase(false);
   }, []);
 
@@ -224,10 +224,11 @@ export default function DbCheckPage() {
                 background: 'rgba(15, 23, 42, 0.5)',
                 border: '1px dashed rgba(255, 255, 255, 0.1)',
                 color: '#94a3b8',
-                fontSize: '1rem',
+                fontSize: '0.95rem',
+                lineHeight: '1.6',
               }}
             >
-              বর্তমানে কোনো টেক্সট নেই।
+              লোকাল মেমোরিতে কোনো ডাটা সেভ নেই। MongoDB থেকে ডাটা দেখতে নিচের &quot;রিফ্রেশ&quot; বাটনে ক্লিক করুন।
             </div>
           ) : (
             items.map((item, idx) => (

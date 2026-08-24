@@ -7,11 +7,6 @@ const DIRECT_FREE_URI = 'mongodb://mosabber480_db_user:VVcrE9PeIIyVlcKU@ac-rw27h
 let _cachedClient = null;
 let _cachedFreeClient = null;
 
-async function getClientConstructor() {
-  const mod = await import('mongodb');
-  return mod.MongoClient || mod.default?.MongoClient || mod.default;
-}
-
 export function getDbConfig(context) {
   const env = context?.env || {};
   return {
@@ -25,7 +20,18 @@ export function getDbConfig(context) {
 export async function getMongoClient(context) {
   if (_cachedClient) return _cachedClient;
 
-  const MongoClient = await getClientConstructor();
+  let MongoClient = null;
+  try {
+    const mod = await import('mongodb');
+    MongoClient = mod.MongoClient || (mod.default && (mod.default.MongoClient || mod.default));
+  } catch (e) {
+    console.warn('MongoDB module import warning:', e);
+  }
+
+  if (typeof MongoClient !== 'function') {
+    throw new Error('MongoClient constructor is not available in current Edge environment');
+  }
+
   const { paidUri } = getDbConfig(context);
   const urisToTry = [DIRECT_PAID_URI, paidUri];
 
@@ -56,7 +62,18 @@ export async function getMongoClient(context) {
 export async function getFreeMongoClient(context) {
   if (_cachedFreeClient) return _cachedFreeClient;
 
-  const MongoClient = await getClientConstructor();
+  let MongoClient = null;
+  try {
+    const mod = await import('mongodb');
+    MongoClient = mod.MongoClient || (mod.default && (mod.default.MongoClient || mod.default));
+  } catch (e) {
+    console.warn('MongoDB module import warning:', e);
+  }
+
+  if (typeof MongoClient !== 'function') {
+    throw new Error('MongoClient constructor is not available in current Edge environment');
+  }
+
   const { freeUri } = getDbConfig(context);
   const urisToTry = [DIRECT_FREE_URI, freeUri];
 
