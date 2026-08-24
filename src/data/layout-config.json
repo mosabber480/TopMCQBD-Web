@@ -1,0 +1,200 @@
+{
+  "announcement": {
+    "text": "বিসিএস ও সরকারি চাকরির প্রস্তুতি হোক শতভাগ নির্ভুল ও আধুনিক",
+    "link": ""
+  },
+  "header": {
+    "siteTitle": "TopMCQBD",
+    "logoUrl": "/images/TopMCQ.png",
+    "seoTitle": "TopMCQBD - সেরা অনলাইন কুইজ ও প্রস্তুতি প্ল্যাটফর্ম",
+    "faviconUrl": "/images/favicon.ico",
+    "btnText": "যোগাযোগ",
+    "btnLink": "/contact",
+    "menus": [
+      {
+        "title": "হোম",
+        "url": "/",
+        "icon": "fa-solid fa-house"
+      },
+      {
+        "title": "কুইজ অনুশীলন",
+        "url": "/quiz",
+        "icon": "fa-solid fa-bolt",
+        "badgeText": "FREE",
+        "badgeType": "free",
+        "isMegaMenu": true,
+        "megaMenuId": "mega_1787215391182",
+        "subMenus": []
+      },
+      {
+        "title": "সকল MCQ",
+        "url": "/all-mcq",
+        "icon": "fa-solid fa-layer-group",
+        "subMenus": [
+          {
+            "title": "test",
+            "url": "test"
+          },
+          {
+            "title": "check",
+            "url": "test"
+          }
+        ]
+      },
+      {
+        "title": "প্যাকেজসমূহ",
+        "url": "/packages",
+        "icon": "fa-solid fa-box"
+      },
+      {
+        "title": "ডেমো পেজেস",
+        "url": "#",
+        "subMenus": [
+          {
+            "title": "মডেল টেস্ট",
+            "url": "/model-test-demo",
+            "icon": "fa-solid fa-layer-group",
+            "badgeText": "LIVE",
+            "badgeType": "live"
+          },
+          {
+            "title": "প্রশ্নব্যাংক",
+            "url": "/question-bank-demo",
+            "icon": "fa-solid fa-book-bookmark"
+          }
+        ],
+        "isMegaMenu": false,
+        "megaMenuId": null
+      },
+      {
+        "title": "আমাদের সম্পর্কে",
+        "url": "/about-us",
+        "icon": "fa-solid fa-bullseye"
+      },
+      {
+        "title": "যোগাযোগ",
+        "url": "/contact"
+      }
+    ],
+    "megaMenus": [
+      {
+        "id": "mega_1787215391182",
+        "title": "মেগা মেনু 1",
+        "columns": [
+          {
+            "type": "icon",
+            "title": "আইকন সার্ভিস কলাম",
+            "items": [
+              {
+                "iconType": "fontawesome",
+                "iconValue": "fa-solid fa-building-columns",
+                "title": "Banking",
+                "desc": "Store, manage and move your funds safely.",
+                "url": "/all-mcq"
+              },
+              {
+                "iconType": "flaticon",
+                "iconValue": "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
+                "title": "Online Quiz",
+                "desc": "Test your knowledge with daily quizzes.",
+                "url": "/all-mcq"
+              }
+            ]
+          },
+          {
+            "type": "icon",
+            "title": "নতুন আইকন কলাম",
+            "items": [
+              {
+                "iconType": "fontawesome",
+                "iconValue": "fa-solid fa-building-columns",
+                "title": "Banking",
+                "desc": "Store, manage and move your funds safely.",
+                "url": "#"
+              }
+            ]
+          },
+          {
+            "type": "info",
+            "title": "নতুন তথ্য কলাম",
+            "text": "সাইট সম্পর্কে কিছু লিখুন...",
+            "iconHtml": "<i class=\"fa-solid fa-circle-info\"></i>"
+          },
+          {
+            "type": "links",
+            "title": "নতুন লিংক কলাম",
+            "links": []
+          }
+        ]
+      },
+      {
+        "id": "mega_1787314295206",
+        "title": "নতুন মেগা মেনু 2",
+        "columns": [
+          {
+            "type": "info",
+            "title": "নতুন তথ্য কলাম",
+            "text": "সাইট সম্পর্কে কিছু লিখুন...",
+            "iconHtml": "<i class=\"fa-solid fa-circle-info\"></i>"
+          },
+          {
+            "type": "links",
+            "title": "নতুন লিংক কলাম",
+            "links": []
+          }
+        ]
+      }
+    ],
+    "btnIcon": "fa-solid fa-headset"
+  },
+  "footer": {
+    "columns": [
+      {
+        "type": "info",
+        "title": "সাইট তথ্য ও সোশাল লিংক",
+        "text": "বিসিএস, ব্যাংক, প্রাথমিক শিক্ষক নিয়োগ এবং বিশ্ববিদ্যালয়ের ভর্তি পরীক্ষার জন্য একটি আধুনিক ও স্বয়ংসম্পূর্ণ অনলাইন প্রস্তুতি প্ল্যাটফর্ম।",
+        "fb": "",
+        "yt": "",
+        "wa": "",
+        "tw": "",
+        "tg": "",
+        "ln": ""
+      },
+      {
+        "type": "links",
+        "title": "প্রয়োজনীয় লিংক",
+        "links": [
+          {
+            "title": "হোম পেজ",
+            "url": "/"
+          },
+          {
+            "title": "কুইজ অনুশীলন",
+            "url": "/quiz"
+          },
+          {
+            "title": "সকল প্রশ্ন ক্যাটাগরি",
+            "url": "/all-mcq"
+          }
+        ]
+      }
+    ]
+  },
+  "copyright": {
+    "text": "© 2026 TopMCQBD. সর্বস্বত্ব সংরক্ষিত।",
+    "links": [
+      {
+        "title": "FAQ",
+        "url": "/faq"
+      },
+      {
+        "title": "Privacy & Refund Policy",
+        "url": "/privacy-and-refund-policy"
+      },
+      {
+        "title": "System Status",
+        "url": "/status"
+      }
+    ]
+  }
+}

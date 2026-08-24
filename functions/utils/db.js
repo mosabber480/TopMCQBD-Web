@@ -1,14 +1,28 @@
+// Edge-Safe Database & Configuration Helper for Cloudflare Pages Functions
 import { MongoClient } from 'mongodb';
 
-const DEFAULT_PAID_URI = 'mongodb+srv://mosabber480_db_user:EScirLEzwgQVVNaB@mosabber.3ajdj0u.mongodb.net/TopMCQBD_DB?retryWrites=true&w=majority';
-const DIRECT_PAID_REPLICA_URI = 'mongodb://mosabber480_db_user:EScirLEzwgQVVNaB@ac-472re4l-shard-00-00.3ajdj0u.mongodb.net:27017,ac-472re4l-shard-00-01.3ajdj0u.mongodb.net:27017,ac-472re4l-shard-00-02.3ajdj0u.mongodb.net:27017/TopMCQBD_DB?ssl=true&replicaSet=atlas-wzdf1e-shard-0&authSource=admin';
-const DIRECT_PAID_SINGLE_URI = 'mongodb://mosabber480_db_user:EScirLEzwgQVVNaB@ac-472re4l-shard-00-00.3ajdj0u.mongodb.net:27017/TopMCQBD_DB?ssl=true&authSource=admin&directConnection=true';
+const SINGLE_NODE_PAID_URI = 'mongodb://mosabber480_db_user:EScirLEzwgQVVNaB@ac-472re4l-shard-00-00.3ajdj0u.mongodb.net:27017/TopMCQBD_DB?ssl=true&authSource=admin&directConnection=true';
+const SINGLE_NODE_FREE_URI = 'mongodb://mosabber480_db_user:VVcrE9PeIIyVlcKU@ac-rw27hdk-shard-00-00.pixb7fx.mongodb.net:27017/TopMCQBD_DB_Free?ssl=true&authSource=admin&directConnection=true';
 
-const DEFAULT_FREE_URI = 'mongodb+srv://mosabber480_db_user:VVcrE9PeIIyVlcKU@topmcqbd.pixb7fx.mongodb.net/TopMCQBD_DB_Free?retryWrites=true&w=majority';
-const DIRECT_FREE_REPLICA_URI = 'mongodb://mosabber480_db_user:VVcrE9PeIIyVlcKU@ac-rw27hdk-shard-00-00.pixb7fx.mongodb.net:27017,ac-rw27hdk-shard-00-01.pixb7fx.mongodb.net:27017,ac-rw27hdk-shard-00-02.pixb7fx.mongodb.net:27017/TopMCQBD_DB_Free?ssl=true&replicaSet=atlas-bntyny-shard-0&authSource=admin';
+const DEFAULT_PAID_URI = SINGLE_NODE_PAID_URI;
+const DEFAULT_FREE_URI = SINGLE_NODE_FREE_URI;
 
-let _cachedClient = null;
-let _cachedFreeClient = null;
+let paidClientPromise = null;
+let freeClientPromise = null;
+
+export function parseClusterHost(uri) {
+  try {
+    if (!uri) return 'Not Configured';
+    const atSplit = uri.split('@');
+    if (atSplit.length > 1) {
+      const hostPart = atSplit[1].split('/')[0];
+      return hostPart || 'MongoDB Cluster';
+    }
+    return 'Configured';
+  } catch {
+    return 'Configured';
+  }
+}
 
 export function getDbConfig(context) {
   const env = context?.env || {};
@@ -20,95 +34,83 @@ export function getDbConfig(context) {
   };
 }
 
-export async function getMongoClient(context) {
-  if (_cachedClient) {
-    try {
-      await _cachedClient.db('TopMCQBD_DB').command({ ping: 1 });
-      return _cachedClient;
-    } catch {
-      _cachedClient = null;
-    }
-  }
-
-  const { paidUri } = getDbConfig(context);
-  const urisToTry = [paidUri, DIRECT_PAID_REPLICA_URI, DIRECT_PAID_SINGLE_URI];
-
-  let lastError = null;
-  for (const uri of urisToTry) {
-    try {
-      const client = new MongoClient(uri, {
-        connectTimeoutMS: 5000,
-        serverSelectionTimeoutMS: 5000,
-        tls: true,
-      });
-      await client.connect();
-      _cachedClient = client;
-      console.log('✅ MongoDB Primary Atlas connected successfully');
-      return client;
-    } catch (err) {
-      lastError = err;
-      console.warn(`Attempt with URI failed: ${err.message}`);
-    }
-  }
-
-  throw new Error(`MongoDB Atlas connection error: ${lastError?.message || 'Connection failed'}`);
-}
-
-export async function getFreeMongoClient(context) {
-  if (_cachedFreeClient) {
-    try {
-      await _cachedFreeClient.db('TopMCQBD_DB_Free').command({ ping: 1 });
-      return _cachedFreeClient;
-    } catch {
-      _cachedFreeClient = null;
-    }
-  }
-
-  const { freeUri } = getDbConfig(context);
-  const urisToTry = [freeUri, DIRECT_FREE_REPLICA_URI];
-
-  let lastError = null;
-  for (const uri of urisToTry) {
-    try {
-      const client = new MongoClient(uri, {
-        connectTimeoutMS: 5000,
-        serverSelectionTimeoutMS: 5000,
-        tls: true,
-      });
-      await client.connect();
-      _cachedFreeClient = client;
-      return client;
-    } catch (err) {
-      lastError = err;
-    }
-  }
-
-  throw new Error(`MongoDB Atlas connection error (Free): ${lastError?.message || 'Connection failed'}`);
-}
-
 export async function getPaidDb(context) {
-  const client = await getMongoClient(context);
-  const { paidDbName } = getDbConfig(context);
-  return client.db(paidDbName);
+  const dbConfig = getDbConfig(context);
+  let uri = dbConfig.paidUri || DEFAULT_PAID_URI;
+  const dbName = dbConfig.paidDbName || 'TopMCQBD_DB';
+
+  if (uri.startsWith('mongodb+srv://') || !uri.includes('directConnection=true')) {
+    uri = SINGLE_NODE_PAID_URI;
+  }
+
+  if (!paidClientPromise) {
+    paidClientPromise = (async () => {
+      const options = {
+        connectTimeoutMS: 5000,
+        serverSelectionTimeoutMS: 5000,
+        maxPoolSize: 5,
+        family: 4,
+        directConnection: true,
+        tls: true,
+      };
+      try {
+        const client = new MongoClient(uri, options);
+        await client.connect();
+        return client;
+      } catch (err) {
+        console.warn('Primary Paid MongoDB connection failed, trying fallback single node URI...', err.message);
+        const fallbackClient = new MongoClient(SINGLE_NODE_PAID_URI, options);
+        await fallbackClient.connect();
+        return fallbackClient;
+      }
+    })().catch((err) => {
+      paidClientPromise = null;
+      throw err;
+    });
+  }
+
+  const client = await paidClientPromise;
+  return client.db(dbName);
 }
 
 export async function getFreeDb(context) {
-  try {
-    const client = await getFreeMongoClient(context);
-    const { freeDbName } = getDbConfig(context);
-    return client.db(freeDbName);
-  } catch {
-    return getPaidDb(context);
+  const dbConfig = getDbConfig(context);
+  let uri = dbConfig.freeUri || DEFAULT_FREE_URI;
+  const dbName = dbConfig.freeDbName || 'TopMCQBD_DB_Free';
+
+  if (uri.startsWith('mongodb+srv://') || !uri.includes('directConnection=true')) {
+    uri = SINGLE_NODE_FREE_URI;
   }
+
+  if (!freeClientPromise) {
+    freeClientPromise = (async () => {
+      const options = {
+        connectTimeoutMS: 5000,
+        serverSelectionTimeoutMS: 5000,
+        maxPoolSize: 5,
+        family: 4,
+        directConnection: true,
+        tls: true,
+      };
+      try {
+        const client = new MongoClient(uri, options);
+        await client.connect();
+        return client;
+      } catch (err) {
+        console.warn('Primary Free MongoDB connection failed, trying fallback single node URI...', err.message);
+        const fallbackClient = new MongoClient(SINGLE_NODE_FREE_URI, options);
+        await fallbackClient.connect();
+        return fallbackClient;
+      }
+    })().catch((err) => {
+      freeClientPromise = null;
+      throw err;
+    });
+  }
+
+  const client = await freeClientPromise;
+  return client.db(dbName);
 }
 
-export function parseClusterHost(uri) {
-  try {
-    if (!uri) return 'Not Configured';
-    const atSplit = uri.split('@');
-    if (atSplit.length > 1) return atSplit[1].split('/')[0] || 'MongoDB Cluster';
-    return 'Configured';
-  } catch {
-    return 'Configured';
-  }
-}
+
+

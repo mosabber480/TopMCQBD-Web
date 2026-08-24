@@ -33,4 +33,9 @@ _worker.bundle
 next.js project guide.txt
 Old-Project/
 Old-Mosabber-Quiz-App/
+
+# Local demo & build scratch folder (never push to GitHub)
 TopMCQBD-Demo/
+scratch/
+.wrangler/
+.agents/

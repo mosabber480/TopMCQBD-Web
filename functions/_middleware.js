@@ -13,7 +13,13 @@ export async function onRequest(context) {
   }
 
   const response = await context.next();
-  response.headers.set('Access-Control-Allow-Origin', '*');
-  response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-access-token');
-  return response;
+  const newHeaders = new Headers(response.headers);
+  newHeaders.set('Access-Control-Allow-Origin', '*');
+  newHeaders.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-access-token');
+
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: newHeaders
+  });
 }
