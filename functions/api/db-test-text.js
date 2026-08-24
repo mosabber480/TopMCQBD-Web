@@ -1,13 +1,6 @@
 import { getPaidDb } from '../utils/db.js';
 
-let _inMemoryItems = [
-  {
-    _id: 'edge_item_1',
-    text: 'DB Connection Check',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-];
+let _inMemoryItems = [];
 
 function jsonResponse(data, status = 200) {
   return new Response(JSON.stringify(data), {
