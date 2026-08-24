@@ -1,3 +1,5 @@
+import { MongoClient } from 'mongodb';
+
 const DEFAULT_PAID_URI = 'mongodb+srv://mosabber480_db_user:EScirLEzwgQVVNaB@mosabber.3ajdj0u.mongodb.net/TopMCQBD_DB?retryWrites=true&w=majority';
 const DIRECT_PAID_URI = 'mongodb://mosabber480_db_user:EScirLEzwgQVVNaB@ac-472re4l-shard-00-00.3ajdj0u.mongodb.net:27017,ac-472re4l-shard-00-01.3ajdj0u.mongodb.net:27017,ac-472re4l-shard-00-02.3ajdj0u.mongodb.net:27017/TopMCQBD_DB?ssl=true&replicaSet=atlas-wzdf1e-shard-0&authSource=admin';
 
@@ -18,21 +20,17 @@ export function getDbConfig(context) {
 }
 
 export async function getMongoClient(context) {
-  if (_cachedClient) return _cachedClient;
-
-  let MongoClient = null;
-  try {
-    const mod = await import('mongodb');
-    MongoClient = mod.MongoClient || (mod.default && (mod.default.MongoClient || mod.default));
-  } catch (e) {
-    console.warn('MongoDB module import warning:', e);
-  }
-
-  if (typeof MongoClient !== 'function') {
-    throw new Error('MongoClient constructor is not available in current Edge environment');
+  if (_cachedClient) {
+    try {
+      await _cachedClient.db('TopMCQBD_DB').command({ ping: 1 });
+      return _cachedClient;
+    } catch {
+      _cachedClient = null;
+    }
   }
 
   const { paidUri } = getDbConfig(context);
+  // Direct URI bypasses DNS SRV resolution which is essential for Cloudflare Edge Runtime
   const urisToTry = [DIRECT_PAID_URI, paidUri];
 
   let lastError = null;
@@ -42,8 +40,6 @@ export async function getMongoClient(context) {
         connectTimeoutMS: 15000,
         serverSelectionTimeoutMS: 15000,
         socketTimeoutMS: 20000,
-        maxPoolSize: 10,
-        minPoolSize: 1,
         tls: true,
       });
       await client.connect();
@@ -60,18 +56,13 @@ export async function getMongoClient(context) {
 }
 
 export async function getFreeMongoClient(context) {
-  if (_cachedFreeClient) return _cachedFreeClient;
-
-  let MongoClient = null;
-  try {
-    const mod = await import('mongodb');
-    MongoClient = mod.MongoClient || (mod.default && (mod.default.MongoClient || mod.default));
-  } catch (e) {
-    console.warn('MongoDB module import warning:', e);
-  }
-
-  if (typeof MongoClient !== 'function') {
-    throw new Error('MongoClient constructor is not available in current Edge environment');
+  if (_cachedFreeClient) {
+    try {
+      await _cachedFreeClient.db('TopMCQBD_DB_Free').command({ ping: 1 });
+      return _cachedFreeClient;
+    } catch {
+      _cachedFreeClient = null;
+    }
   }
 
   const { freeUri } = getDbConfig(context);
@@ -84,8 +75,6 @@ export async function getFreeMongoClient(context) {
         connectTimeoutMS: 15000,
         serverSelectionTimeoutMS: 15000,
         socketTimeoutMS: 20000,
-        maxPoolSize: 10,
-        minPoolSize: 1,
         tls: true,
       });
       await client.connect();

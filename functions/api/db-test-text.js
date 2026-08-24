@@ -1,6 +1,5 @@
 import { getPaidDb } from '../utils/db.js';
-
-let _inMemoryItems = [];
+import { ObjectId } from 'mongodb';
 
 function jsonResponse(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -33,31 +32,24 @@ export async function onRequestGet(context) {
     const items = await collection.find({}).sort({ createdAt: -1 }).toArray();
 
     const formatted = items.map((item) => ({
-      _id: item._id ? item._id.toString() : String(Date.now()),
+      _id: item._id.toString(),
       text: item.text || '',
       createdAt: item.createdAt || null,
       updatedAt: item.updatedAt || null,
     }));
 
-    if (formatted.length > 0) {
-      _inMemoryItems = formatted;
-    }
-
     return jsonResponse({
       success: true,
       count: formatted.length,
       items: formatted,
-      latestText: formatted.length > 0 ? formatted[0].text : 'DB Connection Check',
+      latestText: formatted.length > 0 ? formatted[0].text : '',
     });
   } catch (err) {
-    console.warn('Falling back to Edge in-memory store:', err.message);
     return jsonResponse({
-      success: true,
-      count: _inMemoryItems.length,
-      items: _inMemoryItems,
-      latestText: _inMemoryItems.length > 0 ? _inMemoryItems[0].text : 'DB Connection Check',
-      note: 'Loaded from Edge Fallback Store',
-    });
+      success: false,
+      error: `MongoDB query failed: ${err.message}`,
+      items: [],
+    }, 500);
   }
 }
 
@@ -70,31 +62,27 @@ export async function onRequestPost(context) {
       return jsonResponse({ success: false, error: 'Text field is required' }, 400);
     }
 
-    const newItem = {
-      _id: 'text_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+    const db = await getPaidDb(context);
+    const collection = db.collection('db-test-text');
+    const doc = {
       text,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
     };
 
-    try {
-      const db = await getPaidDb(context);
-      const collection = db.collection('db-test-text');
-      const insertDoc = { text, createdAt: new Date(), updatedAt: new Date() };
-      const res = await collection.insertOne(insertDoc);
-      newItem._id = res.insertedId.toString();
-    } catch (e) {
-      console.warn('MongoDB direct insert failed, saved to Edge store:', e.message);
-    }
-
-    _inMemoryItems = [newItem, ..._inMemoryItems];
+    const result = await collection.insertOne(doc);
 
     return jsonResponse({
       success: true,
-      item: newItem,
+      item: {
+        _id: result.insertedId.toString(),
+        text: doc.text,
+        createdAt: doc.createdAt,
+        updatedAt: doc.updatedAt,
+      },
     });
   } catch (err) {
-    return jsonResponse({ success: false, error: err.message }, 500);
+    return jsonResponse({ success: false, error: `MongoDB insert failed: ${err.message}` }, 500);
   }
 }
 
@@ -111,53 +99,25 @@ export async function onRequestPut(context) {
       return jsonResponse({ success: false, error: 'Text field cannot be empty' }, 400);
     }
 
-    let updatedItem = null;
+    const db = await getPaidDb(context);
+    const collection = db.collection('db-test-text');
 
-    try {
-      let ObjectId = null;
-      try {
-        const mod = await import('mongodb');
-        ObjectId = mod.ObjectId || (mod.default && mod.default.ObjectId);
-      } catch {}
-
-      const db = await getPaidDb(context);
-      const collection = db.collection('db-test-text');
-      const filter = ObjectId ? { _id: new ObjectId(id) } : { _id: id };
-      const updateRes = await collection.findOneAndUpdate(
-        filter,
-        { $set: { text, updatedAt: new Date() } },
-        { returnDocument: 'after' }
-      );
-      if (updateRes) {
-        updatedItem = {
-          _id: updateRes._id.toString(),
-          text: updateRes.text,
-          updatedAt: updateRes.updatedAt,
-        };
-      }
-    } catch (e) {
-      console.warn('MongoDB direct update failed, updating in Edge store:', e.message);
-    }
-
-    _inMemoryItems = _inMemoryItems.map((it) => {
-      if (it._id === id) {
-        const up = { ...it, text, updatedAt: new Date().toISOString() };
-        if (!updatedItem) updatedItem = up;
-        return up;
-      }
-      return it;
-    });
-
-    if (!updatedItem) {
-      updatedItem = { _id: id, text, updatedAt: new Date().toISOString() };
-    }
+    const updateRes = await collection.findOneAndUpdate(
+      { _id: new ObjectId(id) },
+      { $set: { text, updatedAt: new Date() } },
+      { returnDocument: 'after' }
+    );
 
     return jsonResponse({
       success: true,
-      item: updatedItem,
+      item: updateRes ? {
+        _id: updateRes._id.toString(),
+        text: updateRes.text,
+        updatedAt: updateRes.updatedAt,
+      } : null,
     });
   } catch (err) {
-    return jsonResponse({ success: false, error: err.message }, 500);
+    return jsonResponse({ success: false, error: `MongoDB update failed: ${err.message}` }, 500);
   }
 }
 
@@ -175,28 +135,15 @@ export async function onRequestDelete(context) {
       return jsonResponse({ success: false, error: 'Item ID is required for deletion' }, 400);
     }
 
-    try {
-      let ObjectId = null;
-      try {
-        const mod = await import('mongodb');
-        ObjectId = mod.ObjectId || (mod.default && mod.default.ObjectId);
-      } catch {}
-
-      const db = await getPaidDb(context);
-      const collection = db.collection('db-test-text');
-      const filter = ObjectId ? { _id: new ObjectId(id) } : { _id: id };
-      await collection.deleteOne(filter);
-    } catch (e) {
-      console.warn('MongoDB direct delete failed, deleting from Edge store:', e.message);
-    }
-
-    _inMemoryItems = _inMemoryItems.filter((it) => it._id !== id);
+    const db = await getPaidDb(context);
+    const collection = db.collection('db-test-text');
+    const deleteRes = await collection.deleteOne({ _id: new ObjectId(id) });
 
     return jsonResponse({
       success: true,
-      deletedCount: 1,
+      deletedCount: deleteRes.deletedCount,
     });
   } catch (err) {
-    return jsonResponse({ success: false, error: err.message }, 500);
+    return jsonResponse({ success: false, error: `MongoDB delete failed: ${err.message}` }, 500);
   }
 }
