@@ -8,10 +8,8 @@ try {
   // Ignore in environments where setServers is restricted
 }
 
-const DIRECT_PAID_URI = 'mongodb://mosabber480_db_user:EScirLEzwgQVVNaB@ac-472re4l-shard-00-00.3ajdj0u.mongodb.net:27017,ac-472re4l-shard-00-01.3ajdj0u.mongodb.net:27017,ac-472re4l-shard-00-02.3ajdj0u.mongodb.net:27017/TopMCQBD_DB?ssl=true&replicaSet=atlas-wzdf1e-shard-0&authSource=admin&appName=Mosabber';
-
-const MONGODB_URI_PAID = process.env.MONGODB_URI_PAID || process.env.MONGO_URI || DIRECT_PAID_URI;
-const MONGODB_URI_FREE = process.env.MONGODB_URI_FREE || 'mongodb+srv://mosabber480_db_user:VVcrE9PeIIyVlcKU@topmcqbd.pixb7fx.mongodb.net/TopMCQBD_DB_Free?retryWrites=true&w=majority';
+const MONGODB_URI_PAID = process.env.MONGODB_URI_PAID || process.env.MONGO_URI;
+const MONGODB_URI_FREE = process.env.MONGODB_URI_FREE;
 
 if (!global.mongooseCache) {
   global.mongooseCache = {
@@ -28,6 +26,10 @@ const cached = global.mongooseCache;
  * Connect to Primary (Paid) Database
  */
 export async function connectDB() {
+  if (!MONGODB_URI_PAID) {
+    throw new Error('Please define the MONGODB_URI_PAID environment variable inside .env');
+  }
+
   if (cached.paidConn && (cached.paidConn.connection?.readyState === 1 || cached.paidConn.readyState === 1)) {
     return cached.paidConn;
   }
@@ -44,17 +46,10 @@ export async function connectDB() {
         console.log('✅ Connected to MongoDB (Paid/Primary DB)');
         return mongooseInstance;
       })
-      .catch(async (err) => {
-        console.warn('⚠️ Initial MongoDB connect failed, retrying with direct replica set URI...', err.message);
-        try {
-          const directConn = await mongoose.connect(DIRECT_PAID_URI, opts);
-          console.log('✅ Connected to MongoDB via Direct ReplicaSet URI');
-          return directConn;
-        } catch (directErr) {
-          cached.paidPromise = null;
-          console.error('❌ MongoDB Connection Error (Paid):', directErr);
-          throw directErr;
-        }
+      .catch((err) => {
+        cached.paidPromise = null;
+        console.error('❌ MongoDB Connection Error (Paid):', err);
+        throw err;
       });
   }
 
@@ -72,6 +67,10 @@ export async function connectDB() {
  * Connect to Secondary (Free) Database connection if needed
  */
 export async function connectFreeDB() {
+  if (!MONGODB_URI_FREE) {
+    throw new Error('Please define the MONGODB_URI_FREE environment variable inside .env');
+  }
+
   if (cached.freeConn && cached.freeConn.readyState === 1) {
     return cached.freeConn;
   }

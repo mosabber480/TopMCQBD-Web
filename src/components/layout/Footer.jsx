@@ -82,7 +82,12 @@ export default function Footer({ footerData: initialFooter, copyrightData: initi
   }, [initialFooter, initialCopyright]);
 
   // Hide Main Website Footer on all Admin and Diagnostic routes
-  if (pathname && (pathname.startsWith('/admin') || pathname.startsWith('/db-connection-check'))) {
+  if (pathname && (
+    pathname.startsWith('/admin') ||
+    pathname.startsWith('/db-connection-check') ||
+    pathname.startsWith('/dbpaid') ||
+    pathname.startsWith('/dbfree')
+  )) {
     return null;
   }
 

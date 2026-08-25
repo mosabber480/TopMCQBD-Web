@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import DbNavBox from '@/components/common/DbNavBox';
 
 const CACHE_KEY = 'topmcqbd_db_check_cache';
 
@@ -236,7 +237,9 @@ export default function DBConnectionCheck() {
               </div>
               <div className={`status-pill ${paidData?.connected ? 'pill-success' : 'pill-danger'}`}>
                 <span className="status-dot" />
-                {loading ? 'Checking...' : paidData?.connected ? 'Connected' : 'Disconnected'}
+                <span style={{ transform: 'translateY(0.5px)', display: 'inline-flex', alignItems: 'center' }}>
+                  {loading ? 'Checking...' : paidData?.connected ? 'Connected' : 'Disconnected'}
+                </span>
               </div>
             </div>
 
@@ -291,7 +294,9 @@ export default function DBConnectionCheck() {
               </div>
               <div className={`status-pill ${freeData?.connected ? 'pill-success' : 'pill-danger'}`}>
                 <span className="status-dot" />
-                {loading ? 'Checking...' : freeData?.connected ? 'Connected' : 'Disconnected'}
+                <span style={{ transform: 'translateY(0.5px)', display: 'inline-flex', alignItems: 'center' }}>
+                  {loading ? 'Checking...' : freeData?.connected ? 'Connected' : 'Disconnected'}
+                </span>
               </div>
             </div>
 
@@ -336,10 +341,31 @@ export default function DBConnectionCheck() {
           </div>
         </div>
 
-        {/* Back Link */}
-        <div className="back-bar">
-          <Link href="/" className="back-link">
-            ← হোম পেজে ফিরে যান
+        {/* 5-Button Database Navigation Box */}
+        <DbNavBox activeRoute="/db-connection-check" />
+
+        {/* Bottom Navigation Links Bar */}
+        <div
+          className="bottom-nav-bar"
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            width: '100%',
+            marginTop: '24px',
+            padding: '8px 4px 0 4px',
+            flexWrap: 'wrap',
+            gap: '12px',
+            boxSizing: 'border-box',
+          }}
+        >
+          <Link href="/" className="bottom-nav-link left-link">
+            <i className="fa-solid fa-arrow-left" style={{ marginRight: '6px' }} />
+            ওয়েবসাইট ভিজিট
+          </Link>
+          <Link href="/admin/dashboard" className="bottom-nav-link right-link">
+            অ্যাডমিন প্যানেল
+            <i className="fa-solid fa-arrow-right" style={{ marginLeft: '6px' }} />
           </Link>
         </div>
       </div>

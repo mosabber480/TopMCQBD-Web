@@ -10,8 +10,13 @@ import TopAlert from './TopAlert';
 export default function AppLayoutWrapper({ children, initialLayoutData }) {
   const pathname = usePathname();
 
-  // Admin routes & DB diagnostic route have their own dedicated layouts
-  const isAdminOrDiagnostic = pathname && (pathname.startsWith('/admin') || pathname.startsWith('/db-connection-check'));
+  // Admin routes & DB diagnostic/manager routes have their own dedicated layouts
+  const isAdminOrDiagnostic = pathname && (
+    pathname.startsWith('/admin') ||
+    pathname.startsWith('/db-connection-check') ||
+    pathname.startsWith('/dbpaid') ||
+    pathname.startsWith('/dbfree')
+  );
 
   if (isAdminOrDiagnostic) {
     return (

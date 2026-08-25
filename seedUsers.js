@@ -10,9 +10,10 @@ try {
   // Ignore in environments where setServers is restricted
 }
 
-// Get Mongo URI from environment variable with fallback
-const DIRECT_PAID_URI = 'mongodb://mosabber480_db_user:EScirLEzwgQVVNaB@ac-472re4l-shard-00-00.3ajdj0u.mongodb.net:27017,ac-472re4l-shard-00-01.3ajdj0u.mongodb.net:27017,ac-472re4l-shard-00-02.3ajdj0u.mongodb.net:27017/TopMCQBD_DB?ssl=true&replicaSet=atlas-wzdf1e-shard-0&authSource=admin&appName=Mosabber';
-const MONGO_URI = process.env.MONGODB_URI_PAID || process.env.MONGO_URI || DIRECT_PAID_URI;
+import dotenv from 'dotenv';
+dotenv.config();
+
+const MONGO_URI = process.env.MONGODB_URI_PAID || process.env.MONGO_URI;
 
 const initialUsers = [
     {
@@ -31,12 +32,11 @@ const initialUsers = [
 
 async function seedSystemUsers() {
     try {
-        console.log('Connecting to MongoDB...');
-        try {
-            await mongoose.connect(MONGO_URI);
-        } catch {
-            await mongoose.connect(DIRECT_PAID_URI);
+        if (!MONGO_URI) {
+            throw new Error('MONGODB_URI_PAID environment variable is missing in .env');
         }
+        console.log('Connecting to MongoDB...');
+        await mongoose.connect(MONGO_URI);
         console.log('✅ Connected to MongoDB Atlas...');
 
         // ১. পুরোনো সব ইউজার ডাটাবেজ থেকে মুছে ফেলা
