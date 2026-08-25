@@ -40,18 +40,25 @@ export default function DBConnectionCheck() {
   const [fetchError, setFetchError] = useState(null);
   const [lastChecked, setLastChecked] = useState(null);
   const [isFromCache, setIsFromCache] = useState(false);
+  const [activeBackend, setActiveBackend] = useState('https://topmcqbd-paid-api.onrender.com');
 
   // Determine the correct backend API URL
-  const getBackendApiUrl = () => {
+  const getBackendApiUrl = useCallback(() => {
     if (typeof window !== 'undefined') {
       const hostname = window.location.hostname;
-      // If hosted on Cloudflare Pages (or custom frontend domain), use Render backend
-      if (hostname.includes('pages.dev') || hostname.includes('cloudflare')) {
-        return process.env.NEXT_PUBLIC_PAID_API_URL || 'https://topmcqbd-paid-api.onrender.com';
+      // If running on local Next.js dev server, can use local /api/db-check or Render
+      if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        return '';
       }
+      // On Cloudflare Pages (topmcqbd.pages.dev) or custom domain, always use live Render API
+      return 'https://topmcqbd-paid-api.onrender.com';
     }
-    return process.env.NEXT_PUBLIC_PAID_API_URL || '';
-  };
+    return 'https://topmcqbd-paid-api.onrender.com';
+  }, []);
+
+  useEffect(() => {
+    setActiveBackend(getBackendApiUrl() || 'Local API');
+  }, [getBackendApiUrl]);
 
   // Save result to localStorage
   const saveToCache = (payload, timestamp) => {
@@ -95,12 +102,12 @@ export default function DBConnectionCheck() {
       saveToCache(json, currentTime);
     } catch (err) {
       setFetchError(
-        `${err.message || 'Failed to fetch database diagnostic endpoint'}. Render সার্ভার স্লিপে থাকলে প্রথমবার টেস্টে ৩০-৪০ সেকেন্ড লাগতে পারে।`
+        `${err.message || 'Failed to fetch database diagnostic endpoint'}. (টিপস: Render ব্যাকএন্ড স্লিপে থাকলে প্রথমবার টেস্টে ৩০-৪০ সেকেন্ড লাগতে পারে।)`
       );
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [getBackendApiUrl]);
 
   // On page load/reload: Read from localStorage first. If no cache exists, run live check once.
   useEffect(() => {
@@ -138,6 +145,9 @@ export default function DBConnectionCheck() {
           <p className="db-subtitle">
             Render Backend ও MongoDB ক্লাস্টারের মধ্যকার রিয়েল-টাইম কানেকশন স্ট্যাটাস
           </p>
+          <div style={{ marginTop: '8px', fontSize: '13px', color: '#94a3b8' }}>
+            সার্ভার লিংক: <code style={{ background: '#1e293b', padding: '2px 8px', borderRadius: '4px', color: '#38bdf8' }}>{activeBackend}</code>
+          </div>
         </div>
 
         {/* Action Bar */}
@@ -185,7 +195,7 @@ export default function DBConnectionCheck() {
             </div>
             <p className="alert-msg">{fetchError}</p>
             <small className="alert-hint">
-              * টিপস: Render ব্যাকএন্ড স্লিপে থাকলে প্রথম রিকোয়েস্টে ব্যাকএন্ড জেগে উঠতে ৩০ সেকেন্ড সময় নিতে পারে। একটু পর আবার "পুনরায় টেস্ট করুন" বাটনে চাপুন।
+              * টিপস: Render ব্যাকএন্ড স্লিপে থাকলে প্রথম রিকোয়েস্টে ব্যাকএন্ড জেগে উঠতে ৩০-৪০ সেকেন্ড সময় নিতে পারে। একটু অপেক্ষা করে আবার "পুনরায় টেস্ট করুন" বাটনে চাপুন।
             </small>
           </div>
         )}
