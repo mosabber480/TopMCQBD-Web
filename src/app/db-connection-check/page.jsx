@@ -41,6 +41,18 @@ export default function DBConnectionCheck() {
   const [lastChecked, setLastChecked] = useState(null);
   const [isFromCache, setIsFromCache] = useState(false);
 
+  // Determine the correct backend API URL
+  const getBackendApiUrl = () => {
+    if (typeof window !== 'undefined') {
+      const hostname = window.location.hostname;
+      // If hosted on Cloudflare Pages (or custom frontend domain), use Render backend
+      if (hostname.includes('pages.dev') || hostname.includes('cloudflare')) {
+        return process.env.NEXT_PUBLIC_PAID_API_URL || 'https://topmcqbd-paid-api.onrender.com';
+      }
+    }
+    return process.env.NEXT_PUBLIC_PAID_API_URL || '';
+  };
+
   // Save result to localStorage
   const saveToCache = (payload, timestamp) => {
     try {
@@ -60,10 +72,19 @@ export default function DBConnectionCheck() {
     setLoading(true);
     setFetchError(null);
     try {
-      const res = await fetch('/api/db-check', { cache: 'no-store' });
+      const backendBase = getBackendApiUrl();
+      const endpoint = `${backendBase}/api/db-check`;
+      
+      const res = await fetch(endpoint, { 
+        method: 'GET',
+        cache: 'no-store',
+        headers: {
+          'Accept': 'application/json',
+        }
+      });
 
       if (!res.ok) {
-        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        throw new Error(`HTTP ${res.status}: ${res.statusText} from ${endpoint}`);
       }
       const json = await res.json();
       const currentTime = formatDateTime(new Date());
@@ -73,7 +94,9 @@ export default function DBConnectionCheck() {
       setIsFromCache(false);
       saveToCache(json, currentTime);
     } catch (err) {
-      setFetchError(err.message || 'Failed to fetch database diagnostic endpoint');
+      setFetchError(
+        `${err.message || 'Failed to fetch database diagnostic endpoint'}. Render সার্ভার স্লিপে থাকলে প্রথমবার টেস্টে ৩০-৪০ সেকেন্ড লাগতে পারে।`
+      );
     } finally {
       setLoading(false);
     }
@@ -113,7 +136,7 @@ export default function DBConnectionCheck() {
           <div className="db-badge">Diagnostic Tool</div>
           <h1 className="db-title">DB Connection Check</h1>
           <p className="db-subtitle">
-            Cloudflare Pages ও MongoDB ক্লাস্টারের মধ্যকার রিয়েল-টাইম কানেকশন স্ট্যাটাস
+            Render Backend ও MongoDB ক্লাস্টারের মধ্যকার রিয়েল-টাইম কানেকশন স্ট্যাটাস
           </p>
         </div>
 
@@ -158,11 +181,11 @@ export default function DBConnectionCheck() {
           <div className="alert-card alert-error">
             <div className="alert-header">
               <span className="alert-icon">⚠️</span>
-              <strong>এপিআই রিকোয়েস্ট ব্যর্থ হয়েছে:</strong>
+              <strong>এপিআই রিকোয়েস্ট সমস্যা:</strong>
             </div>
             <p className="alert-msg">{fetchError}</p>
             <small className="alert-hint">
-              * যদি আপনি লাইভ ক্লাউডফ্লেয়ার ডোমেইন সিলেক্ট করে থাকেন, নিশ্চিত করুন যে ফাংশনটি ডেপ্লয় হয়েছে এবং CORS এনাবল আছে।
+              * টিপস: Render ব্যাকএন্ড স্লিপে থাকলে প্রথম রিকোয়েস্টে ব্যাকএন্ড জেগে উঠতে ৩০ সেকেন্ড সময় নিতে পারে। একটু পর আবার "পুনরায় টেস্ট করুন" বাটনে চাপুন।
             </small>
           </div>
         )}

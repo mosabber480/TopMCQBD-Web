@@ -7,6 +7,19 @@ const DIRECT_FREE_URI = 'mongodb://mosabber480_db_user:VVcrE9PeIIyVlcKU@ac-rw27h
 
 export const dynamic = 'force-dynamic';
 
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+};
+
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 200,
+    headers: CORS_HEADERS,
+  });
+}
+
 export async function GET() {
   try {
     dns.setServers(['8.8.8.8', '1.1.1.1', '8.8.4.4']);
@@ -19,7 +32,7 @@ export async function GET() {
 
   const results = {
     timestamp: new Date().toISOString(),
-    server: 'Localhost / Next.js Development Server',
+    server: 'TopMCQBD Render Backend Server',
     paidDb: {
       name: MONGODB_DB_NAME_PAID,
       status: 'pending',
@@ -134,9 +147,7 @@ export async function GET() {
   return NextResponse.json(results, {
     headers: {
       'Content-Type': 'application/json; charset=utf-8',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
+      ...CORS_HEADERS,
       'Cache-Control': 'no-cache, no-store, must-revalidate',
     }
   });
