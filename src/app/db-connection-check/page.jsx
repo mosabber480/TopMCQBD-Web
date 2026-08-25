@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 
 const CACHE_KEY = 'topmcqbd_db_check_cache';
@@ -21,14 +21,14 @@ const formatDateTime = (dateVal) => {
     : d.toLocaleDateString('en-GB', {
         day: '2-digit',
         month: 'short',
-        year: 'numeric'
+        year: 'numeric',
       });
 
   const timeStr = d.toLocaleTimeString('en-US', {
     hour: '2-digit',
     minute: '2-digit',
     second: '2-digit',
-    hour12: true
+    hour12: true,
   });
 
   return `${dateStr}, ${timeStr}`;
@@ -41,24 +41,22 @@ export default function DBConnectionCheck() {
   const [lastChecked, setLastChecked] = useState(null);
   const [isFromCache, setIsFromCache] = useState(false);
 
-  // Function to save result to cache (localStorage & Cookie)
+  // Save result to localStorage
   const saveToCache = (payload, timestamp) => {
     try {
       const cacheObj = {
         data: payload,
         lastChecked: timestamp,
-        savedAt: Date.now()
+        savedAt: Date.now(),
       };
       localStorage.setItem(CACHE_KEY, JSON.stringify(cacheObj));
-      // Also save in cookie (expires in 7 days)
-      document.cookie = `${CACHE_KEY}=true; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`;
     } catch (e) {
       console.warn('Unable to write to localStorage:', e);
     }
   };
 
-  // Perform a live connection check
-  const checkConnection = async () => {
+  // Perform live database connection check
+  const checkConnection = useCallback(async () => {
     setLoading(true);
     setFetchError(null);
     try {
@@ -69,7 +67,7 @@ export default function DBConnectionCheck() {
       }
       const json = await res.json();
       const currentTime = formatDateTime(new Date());
-      
+
       setData(json);
       setLastChecked(currentTime);
       setIsFromCache(false);
@@ -79,12 +77,29 @@ export default function DBConnectionCheck() {
     } finally {
       setLoading(false);
     }
-  };
-
-  // On page load/reload, check cache first
-  useEffect(() => {
-    checkConnection();
   }, []);
+
+  // On page load/reload: Read from localStorage first. If no cache exists, run live check once.
+  useEffect(() => {
+    try {
+      const cachedRaw = localStorage.getItem(CACHE_KEY);
+      if (cachedRaw) {
+        const cached = JSON.parse(cachedRaw);
+        if (cached && cached.data) {
+          setData(cached.data);
+          setLastChecked(cached.lastChecked || formatDateTime(cached.savedAt));
+          setIsFromCache(true);
+          setLoading(false);
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn('Error reading from localStorage cache:', err);
+    }
+
+    // If no cache exists in localStorage, perform initial live check
+    checkConnection();
+  }, [checkConnection]);
 
   return (
     <main className="db-page-container">
@@ -109,9 +124,9 @@ export default function DBConnectionCheck() {
               <div className="status-badge-row">
                 <span>সর্বশেষ টেস্ট: <strong>{lastChecked}</strong></span>
                 {isFromCache ? (
-                  <span className="cache-indicator-badge">📦 আগের যাচাইকৃত ফলাফল</span>
+                  <span className="cache-indicator-badge">📦 লোকাল স্টোরেজের পূর্ববর্তী ফলাফল</span>
                 ) : (
-                  <span className="live-indicator-badge">⚡ সদ্য যাচাইকৃত ফলাফল</span>
+                  <span className="live-indicator-badge">⚡ লাইভ টেস্ট ফলাফল</span>
                 )}
               </div>
             ) : (
