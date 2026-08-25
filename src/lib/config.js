@@ -13,6 +13,14 @@ export const APP_CONFIG = {
 };
 
 /**
+ * Live Render API Endpoints Configuration
+ */
+export const API_CONFIG = {
+  PAID_API_URL: process.env.NEXT_PUBLIC_PAID_API_URL || 'https://topmcqbd-paid-api.onrender.com',
+  FREE_API_URL: process.env.NEXT_PUBLIC_FREE_API_URL || 'https://topmcqbd-free-api.onrender.com',
+};
+
+/**
  * Format URL safely for external, internal, and asset links
  */
 export function formatURL(url) {

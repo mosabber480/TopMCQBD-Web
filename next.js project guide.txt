@@ -1,48 +1,87 @@
 ===============================================================================
-                 TopMCQBD: Pure Next.js Project & Architecture Guide
-          (Next.js App Router + Cloudflare Pages / Static & Functions Setup)
+                 TopMCQBD: Complete Architecture & Deployment Guide
+         (Cloudflare Frontend/CDN + 2x Render Node.js Backends + 2x MongoDB Clusters)
 ===============================================================================
 
 -------------------------------------------------------------------------------
 1. PROJECT ARCHITECTURE OVERVIEW (প্রজেক্ট আর্কিটেকচার ওভারভিউ)
 -------------------------------------------------------------------------------
 
-* Framework: Next.js (App Router Architecture)
-* Language/Syntax: JavaScript (ES Modules, JSX)
+* Frontend & CDN/DNS: Cloudflare (Cloudflare Pages & Cloudflare DNS / CDN)
+* Backend API Services: 2x Render Web Services (Full Node.js Runtime - No Edge/Function Restrictions)
+* Database Layer: 2x MongoDB Atlas Clusters (Paid & Free Dedicated Clusters)
+* Dual Render + Dual MongoDB System:
+  - 1st Render Service (Main/Paid) -> Connected to Paid MongoDB (TopMCQBD_DB)
+  - 2nd Render Service (Free MCQ)  -> Connected to Free MongoDB (TopMCQBD_DB_Free)
+* Framework: Next.js (App Router Architecture) / Node.js
 * Styling: Tailwind CSS & Global CSS (`src/app/globals.css`)
-* Backend API: Next.js Route Handlers (`src/app/api/`)
-* Deployment & Hosting: Cloudflare Pages (`npm run build:cloudflare`)
-* Dual Account System: 2 Cloudflare Accounts (100,000 + 100,000 = 200,000 Free Daily Requests)
-* Database Connection: Native MongoDB Node.js Driver (`MongoClient`) with `nodejs_compat`
+* Database Driver: Native MongoDB Node.js Driver (`MongoClient`) & Mongoose
 * Email Gateway: Brevo API Integration for Password Reset & System Notifications
 
 
 ===============================================================================
-2. GITHUB REPOSITORIES & LIVE DEPLOYMENT SETUP
+2. SYSTEM ARCHITECTURE & WORKFLOW DIAGRAM
 ===============================================================================
 
-১. মেইন ও পেইড রিপোজিটরি (Main / Paid System):
+                        ┌─────────────────────────────────┐
+                        │        CLOUDFLARE LAYER         │
+                        │   • DNS & Global CDN Caching    │
+                        │   • Cloudflare Pages (Frontend) │
+                        └───────────────┬─────────────────┘
+                                        │
+                    ┌───────────────────┴───────────────────┐
+                    ▼                                       ▼
+    ┌───────────────────────────────┐       ┌───────────────────────────────┐
+    │     RENDER SERVICE 1 (PAID)   │       │     RENDER SERVICE 2 (FREE)   │
+    │  • Main Web App & Paid APIs   │       │  • Dedicated Free MCQ API     │
+    │  • User Auth, JWT & Profile   │       │  • Free Quizzes & Data Serving│
+    │  • Admin Panel & Brevo Email  │       │  • High-Speed Free Endpoints  │
+    └───────────────┬───────────────┘       └───────────────┬───────────────┘
+                    │                                       │
+                    ▼                                       ▼
+    ┌───────────────────────────────┐       ┌───────────────────────────────┐
+    │   MONGODB CLUSTER 1 (PAID)    │       │   MONGODB CLUSTER 2 (FREE)    │
+    │  • DB: TopMCQBD_DB            │       │  • DB: TopMCQBD_DB_Free       │
+    │  • Collections: users,        │       │  • Collections: questions,    │
+    │    questions (paid), configs  │       │    free_quizzes               │
+    └───────────────────────────────┘       └───────────────────────────────┘
+
+
+===============================================================================
+3. REPOSITORIES, RENDER SERVICES & DATABASE MAPPING
+===============================================================================
+
+১. ১ম সার্ভিস: মেইন ও পেইড ব্যাকএন্ড (Main & Paid Web Service):
    - GitHub Repository: https://github.com/mosabber480/TopMCQBD-Web.git
-   - Cloudflare Live URL: https://topmcqbd.pages.dev
+   - Cloudflare Frontend: https://topmcqbd.pages.dev (অথবা কাস্টম ডোমেইন)
+   - Render Web Service: https://topmcqbd-paid-api.onrender.com (Node.js Web Service)
    - ডাটাবেজ: Paid MongoDB Cluster (TopMCQBD_DB)
-   - মূল দায়িত্ব: মেইন ওয়েব অ্যাপ, পেইড কুইজ, ইউজার প্রোফাইল, অথেনটিকেশন ও এডমিন প্যানেল
+   - মূল দায়িত্ব: 
+     * মেইন ইউজার ইন্টারফেস ও কুইজ এক্সাম
+     * ইউজার রেজিস্ট্রেশন, লগইন ও প্রোফাইল ডাটাবেজ
+     * পেইড প্যাকেজ অ্যাক্টিভেশন ও ভেরিফিকেশন
+     * সম্পূর্ণ অ্যাডমিন প্যানেল ম্যানেজমেন্ট
+     * Brevo API এর মাধ্যমে পাসওয়ার্ড রিসেট ও ইমেইল পাঠানো
 
-২. ফ্রি এমসিকিউ রিপোজিটরি (Free MCQ API Backend):
+২. ২য় সার্ভিস: ফ্রি এমসিকিউ ব্যাকএন্ড (Free MCQ Dedicated Service):
    - GitHub Repository: https://github.com/mosabber480/TopMCQBD-Web-Free.git
-   - Cloudflare Live URL: https://topmcqbd-web-free.pages.dev
+   - Render Web Service: https://topmcqbd-free-api.onrender.com (Node.js Web Service)
    - ডাটাবেজ: Free MongoDB Cluster (TopMCQBD_DB_Free)
-   - মূল দায়িত্ব: ফ্রি এমসিকিউ ডেটা সরবরাহ এবং ফ্রি কুইজ এপিআই সার্ভিস
+   - মূল দায়িত্ব:
+     * আনলিমিটেড ফ্রি এমসিকিউ ডেটা ডেলিভারি
+     * ফ্রি কুইজ এক্সাম লোডিং ও স্পিড অপটিমাইজেশন
+     * ফ্রি ইউজারদের ট্রাফিক মেইন ডাটাবেজ থেকে আলাদা রাখা
 
 
 ===============================================================================
-3. NEXT.JS PROJECT STRUCTURE & DIRECTORY GUIDE
+4. NEXT.JS PROJECT STRUCTURE & DIRECTORY GUIDE (সম্পূর্ণ পেজ ও ফাইল ট্রি)
 ===============================================================================
 
-📂 TopMCQBD-NextJS/
+📂 TopMCQBD-Web/
 │
 ├── 📁 public/                         # Public Static Assets
 │   ├── 📄 favicon.ico
-│   └── 📁 images/                     # Static Web Images
+│   └── 📁 images/                     # Static Web Images & Banners
 │       ├── 📄 TopMCQ.png
 │       ├── 📄 favicon.png
 │       ├── 📄 slider-01.jpg
@@ -52,20 +91,23 @@
 │   ├── 📁 app/                        # Next.js App Router System
 │   │   ├── 📄 layout.jsx              # Global Root Layout
 │   │   ├── 📄 globals.css             # Global CSS Directives & Tailwind Styles
-│   │   ├── 📄 page.jsx                # Home Page (/)
+│   │   ├── 📄 page.jsx                # Home Page Root (/)
+│   │   ├── 📄 HomeClient.jsx          # Home Client Interactive View
 │   │   │
 │   │   ├── 📁 quiz/
 │   │   │   └── 📄 page.jsx            # Paid MCQ Exam Page (/quiz)
+│   │   ├── 📁 questions/
+│   │   │   └── 📄 page.jsx            # Question Bank & Filter Page (/questions)
 │   │   ├── 📁 all-mcq/
 │   │   │   └── 📄 page.jsx            # All MCQ Library Page (/all-mcq)
 │   │   ├── 📁 free-mcqs/
-│   │   │   └── 📄 page.jsx            # Free MCQs Page (/free-mcqs)
+│   │   │   └── 📄 page.jsx            # Free MCQs Section (/free-mcqs)
 │   │   ├── 📁 packages/
 │   │   │   └── 📄 page.jsx            # Subscription & Pricing Packages (/packages)
 │   │   ├── 📁 profile/
 │   │   │   └── 📄 page.jsx            # User Dashboard & Profile (/profile)
 │   │   ├── 📁 login/
-│   │   │   └── 📄 page.jsx            # User & Admin Login (/login)
+│   │   │   └── 📄 page.jsx            # User & Admin Login / Sign Up (/login)
 │   │   ├── 📁 about-us/
 │   │   │   └── 📄 page.jsx            # About Us Page (/about-us)
 │   │   ├── 📁 contact/
@@ -76,18 +118,30 @@
 │   │   │   └── 📄 page.jsx            # Privacy & Policy Page (/privacy-and-refund-policy)
 │   │   ├── 📁 status/
 │   │   │   └── 📄 page.jsx            # System Status Page (/status)
+│   │   ├── 📁 db-connection-check/
+│   │   │   └── 📄 page.jsx            # Live Database Connection Check (/db-connection-check)
+│   │   ├── 📁 model-test-demo/
+│   │   │   └── 📄 page.jsx            # Model Test Live Demo Exam (/model-test-demo)
+│   │   ├── 📁 question-bank/
+│   │   │   └── 📄 page.jsx            # Question Bank Archive Page (/question-bank)
+│   │   ├── 📁 question-bank-demo/
+│   │   │   └── 📄 page.jsx            # Question Bank Interactive Demo (/question-bank-demo)
 │   │   │
 │   │   ├── 📁 admin/                  # Admin Dashboard Module
 │   │   │   ├── 📄 layout.jsx          # Admin Panel Layout Wrapper
-│   │   │   ├── 📄 page.jsx / dashboard/page.jsx # Admin Overview Dashboard (/admin)
+│   │   │   ├── 📄 page.jsx            # Admin Overview Redirect (/admin)
+│   │   │   ├── 📁 dashboard/
+│   │   │   │   └── 📄 page.jsx        # Admin Dashboard Analytics (/admin/dashboard)
 │   │   │   ├── 📁 quiz-dashboard/
-│   │   │   │   └── 📄 page.jsx        # Quiz & Question Management (/admin/quiz-dashboard)
+│   │   │   │   └── 📄 page.jsx        # Quiz & Examination Management (/admin/quiz-dashboard)
+│   │   │   ├── 📁 questions-dashboard/
+│   │   │   │   └── 📄 page.jsx        # MCQ Question Bank CRUD & Filter (/admin/questions-dashboard)
 │   │   │   ├── 📁 users/
 │   │   │   │   └── 📄 page.jsx        # User & Admin Role Management (/admin/users)
 │   │   │   ├── 📁 home-dashboard/
 │   │   │   │   └── 📄 page.jsx        # Home Page Dynamic Editor (/admin/home-dashboard)
 │   │   │   ├── 📁 header-dashboard/
-│   │   │   │   └── 📄 page.jsx        # Header Navigation Config (/admin/header-dashboard)
+│   │   │   │   └── 📄 page.jsx        # Header & Mega Navigation Config (/admin/header-dashboard)
 │   │   │   ├── 📁 footer-dashboard/
 │   │   │   │   └── 📄 page.jsx        # Footer Config Editor (/admin/footer-dashboard)
 │   │   │   ├── 📁 policy-dashboard/
@@ -103,27 +157,60 @@
 │   │   │   └── 📁 free-mcqs-dashboard/
 │   │   │       └── 📄 page.jsx        # Free MCQs Config Editor (/admin/free-mcqs-dashboard)
 │   │   │
-│   │   └── 📁 api/                    # Next.js Route Handlers (20 Endpoints)
-│   │       ├── 📁 auth/               # Authentication API Endpoints
-│   │       ├── 📁 users/              # User Profile & Management APIs
-│   │       ├── 📁 questions/          # Paid & Free Quiz Data APIs
-│   │       └── 📁 admin/              # Admin Panel Control APIs
+│   │   └── 📁 api/                    # Next.js Route Handlers (23 APIs)
+│   │       ├── 📁 auth/               # Authentication APIs
+│   │       │   ├── 📁 login/          # POST /api/auth/login
+│   │       │   ├── 📁 register/       # POST /api/auth/register
+│   │       │   ├── 📁 me/             # GET  /api/auth/me
+│   │       │   ├── 📁 change-password/# POST /api/auth/change-password
+│   │       │   ├── 📁 forgot-password/# POST /api/auth/forgot-password
+│   │       │   └── 📁 reset-password/ # POST /api/auth/reset-password
+│   │       ├── 📁 users/              # User Profile & Plan APIs
+│   │       │   ├── 📄 route.js        # GET, POST /api/users
+│   │       │   ├── 📁 me/             # GET, POST /api/users/me
+│   │       │   ├── 📁 create-admin/   # POST /api/users/create-admin
+│   │       │   ├── 📁 request-plan/   # POST /api/users/request-plan
+│   │       │   └── 📁 [userId]/       # GET, PATCH, DELETE /api/users/[userId]
+│   │       │       ├── 📁 subscription/ # PATCH /api/users/[userId]/subscription
+│   │       │       └── 📁 pending-requests/[requestId]/ # approve & reject APIs
+│   │       ├── 📁 questions/          # Paid Questions APIs
+│   │       │   ├── 📄 route.js        # GET, POST /api/questions
+│   │       │   ├── 📁 [id]/           # GET, PUT, DELETE /api/questions/[id]
+│   │       │   └── 📁 upload-csv/     # POST /api/questions/upload-csv
+│   │       ├── 📁 categories/         # GET  /api/categories
+│   │       ├── 📁 mcq/                # GET  /api/mcq
+│   │       ├── 📁 home-config/        # GET, POST /api/home-config
+│   │       ├── 📁 layout-config/      # GET, POST /api/layout-config
+│   │       ├── 📁 sidebar-config/     # GET, POST /api/sidebar-config
+│   │       ├── 📁 policy/             # GET, POST /api/policy
+│   │       └── 📁 db-check/           # GET  /api/db-check
 │   │
-│   ├── 📁 components/                 # Reusable UI Components
+│   ├── 📁 components/                 # Reusable UI & Admin Components
 │   │   ├── 📁 layout/                 # Layout Specific Components
-│   │   │   ├── 📄 Header.jsx          # Top Navigation Header
-│   │   │   ├── 📄 Footer.jsx          # Site Footer
-│   │   │   ├── 📄 AnnouncementBar.jsx # Announcement Bar Banner
-│   │   │   └── 📄 TopAlert.jsx        # Top Alert Notification
+│   │   │   ├── 📄 Header.jsx          # Top Navigation & Mega Menu Header
+│   │   │   ├── 📄 Footer.jsx          # Site Footer & Social Links
+│   │   │   ├── 📄 AnnouncementBar.jsx # Top Notice Banner
+│   │   │   ├── 📄 AppLayoutWrapper.jsx# Route-based Layout Renderer
+│   │   │   └── 📄 TopAlert.jsx        # Notification Bar
 │   │   └── 📁 admin/                  # Admin Specific Components
 │   │       ├── 📄 AdminSidebar.jsx    # Admin Sidebar Navigation
-│   │       └── 📄 AdminHeader.jsx     # Admin Top Header
+│   │       ├── 📄 AdminHeaderBar.jsx  # Admin Top Navigation & Action Buttons
+│   │       └── 📄 AdminLogoutModal.jsx# Admin Logout Confirmation Modal
 │   │
-│   ├── 📁 lib/                        # Backend Utility Libraries & Handlers
-│   │   ├── 📄 db.js                   # Native MongoDB Connection Helper
-│   │   ├── 📄 auth.js                 # JWT Authentication & Authorization Helper
-│   │   ├── 📄 brevo.js                # Brevo Transactional Email Sending Handler
-│   │   └── 📄 config.js               # Application Global Configuration & Endpoints
+│   ├── 📁 data/                       # Local Static & Fallback JSON Data (7 Files)
+│   │   ├── 📄 home-config.json        # Home Page Hero, Sliders & Mission Config
+│   │   ├── 📄 layout-config.json      # Navbar, Mega Menus, Footer & Copyright
+│   │   ├── 📄 sidebar-config.json     # Admin Sidebar Menu & Quick Buttons
+│   │   ├── 📄 policy-config.json      # Privacy & Refund Policy HTML Content
+│   │   ├── 📄 packages-data.json      # Subscription Tiers & Pricing Features
+│   │   ├── 📄 about-data.json         # About Us Descriptions & Feature Points
+│   │   └── 📄 faq-data.json           # Frequently Asked Questions & Answers
+│   │
+│   ├── 📁 lib/                        # Utility Libraries & DB Handlers
+│   │   ├── 📄 db.js                   # Dual MongoDB Native Connection Pool
+│   │   ├── 📄 auth.js                 # JWT Verification & Cookie Helper
+│   │   ├── 📄 brevo.js                # Brevo Transactional Email Service
+│   │   └── 📄 config.js               # Global Constants, URLs & Dynamic Endpoints
 │   │
 │   └── 📁 models/                     # Mongoose Schemas & Database Models
 │       ├── 📄 User.js                 # User Schema & Profile Definition
@@ -133,149 +220,124 @@
 │       ├── 📄 AdminSidebarConfig.js   # Admin Menu & Sidebar Schema
 │       └── 📄 PolicyConfig.js         # Privacy Policy & Terms Schema
 │
-├── 📁 functions/                      # Cloudflare Pages Serverless Edge Functions
-│   ├── 📁 api/                        # Edge Route Handlers ([[route]].js, db-check.js, etc.)
-│   ├── 📁 utils/                      # Edge Utilities (db.js with MongoClient, auth.js, brevo.js)
-│   └── 📁 data/                       # Fallback Snapshot Data (liveConfigs.js)
-│
-├── 📄 copyAssets.js                   # Build Asset & Snapshot Synchronizer Script
-├── 📄 seedUsers.js                    # Database Initial Users Seeding Script
-├── 📄 wrangler.toml                   # Cloudflare Pages & nodejs_compat Config
-├── 📄 .env / .dev.vars                # Environment Secret Variables
-├── 📄 next.config.mjs                 # Next.js Framework Configuration
-├── 📄 jsconfig.json                   # Path Aliases Config (@/*)
-├── 📄 package.json                    # Dependencies, Scripts & Package Info
+├── 📄 seedUsers.js                    # Database Initial Admin/User Seeder
+├── 📄 .env                            # Environment Variables (Secret Keys)
+├── 📄 next.config.mjs                 # Next.js Server & Bundle Config
+├── 📄 package.json                    # Dependencies & Scripts
 └── 📄 package-lock.json
 
 
 ===============================================================================
-4. CLOUDFLARE DUAL-ACCOUNT & ARCHITECTURE GUIDE (২ লাখ ফ্রি রিকোয়েস্ট)
+5. LOCAL JSON DATA FILES SPECIFICATIONS (src/data/*.json)
 ===============================================================================
 
-১. ক্লাউডফ্লেয়ার ডুয়াল অ্যাকাউন্ট সিস্টেম (১ লাখ + ১ লাখ = ২ লাখ Daily Limit):
-   - ১ম Cloudflare Account (TopMCQBD-Web Repository):
-     * GitHub Repo: https://github.com/mosabber480/TopMCQBD-Web.git
-     * Live Domain: https://topmcqbd.pages.dev
-     * Scope: Main App, Paid Quiz, User Authentication, Admin Panel
-     * ডাটাবেজ: Paid MongoDB Cluster (TopMCQBD_DB)
-     * দৈনিক রিকোয়েস্ট লিমিট: ১,০০,০০০
-   
-   - ২য় Cloudflare Account (TopMCQBD-Web-Free Repository):
-     * GitHub Repo: https://github.com/mosabber480/TopMCQBD-Web-Free.git
-     * Live Domain: https://topmcqbd-web-free.pages.dev
-     * Scope: Free MCQs Serving & API Backend
-     * ডাটাবেজ: Free MongoDB Cluster (TopMCQBD_DB_Free)
-     * দৈনিক রিকোয়েস্ট লিমিট: ১,০০,০০০
-
-২. এপিআই রাউটিং নিয়ম (src/lib/config.js):
-   - Paid System & Auth Request: https://topmcqbd.pages.dev/api (১ম সার্ভারে হিট করবে)
-   - Free MCQ Request: https://topmcqbd-web-free.pages.dev/api (২য় সার্ভারে হিট করবে)
+1. `src/data/home-config.json` -> হোম পেজের SEO মেটাডাটা, ব্যানার স্লাইডার, ডেমো কুইজ ও মিশন/লক্ষ্য সেকশন।
+2. `src/data/layout-config.json` -> অ্যানাউন্সমেন্ট বার, নেভিগেশন বার, মেগা মেনু ও ফুটার সোশাল লিংক।
+3. `src/data/sidebar-config.json` -> অ্যাডমিন প্যানেল মেনু তালিকা এবং টপ কুইক অ্যাকশন বাটনসমূহ।
+4. `src/data/policy-config.json` -> রিফান্ড, প্রাইভেসি ও টার্মস পলিসির এইচটিএমএল কনটেন্ট।
+5. `src/data/packages-data.json` -> ১ মাস, ৩ মাস, ৬ মাস ও লাইফটাইম প্যাকেজের মূল্য ও বৈশিষ্ট্যের তালিকা।
+6. `src/data/about-data.json` -> 'আমাদের সম্পর্কে' পেজের পরিচিতি ও প্ল্যাটফর্মের বৈশিষ্ট্যসমূহ।
+7. `src/data/faq-data.json` -> শিক্ষার্থীদের সচরাচর জিজ্ঞাসিত প্রশ্ন (FAQ) এবং সমাধানমূলক উত্তর।
 
 
 ===============================================================================
-5. CLOUDFLARE PAGES BUILD & RUNTIME CONFIGURATION
+6. RENDER SETUP GUIDE (2x WEB SERVICES)
 ===============================================================================
 
-১. Build Configuration (Cloudflare Pages Dashboard > Settings > Builds & deployments):
-┌─────────────────────┬────────────────────────────────────────────────────────┐
-│ Setting Field       │ Value / Configuration                                  │
-├─────────────────────┼────────────────────────────────────────────────────────┤
-│ Build command       │ npm run build:cloudflare                               │
-│ Build output        │ out                                                    │
-│ Root directory      │ (খালি থাকবে / Repository Root)                         │
-│ Build comments      │ Enabled                                                │
-└─────────────────────┴────────────────────────────────────────────────────────┘
+-------------------------------------------------------------------------------
+📌 Render Service 1: Main & Paid Backend (TopMCQBD-Web)
+-------------------------------------------------------------------------------
+1. Render ড্যাশবোর্ডে গিয়ে `New +` -> `Web Service` সিলেক্ট করুন।
+2. GitHub Repository কানেক্ট করুন: `mosabber480/TopMCQBD-Web`
+3. নিচের কনফিগারেশনগুলো দিন:
+   - Name: `topmcqbd-api`
+   - Region: `Singapore` (বাংলাদেশের জন্য সর্বনিম্ন ল্যাটেন্সি)
+   - Branch: `main`
+   - Runtime: `Node`
+   - Build Command: `npm install && npm run build`
+   - Start Command: `npm start`
+   - Plan Type: `Free`
+4. Environment Variables সেকশনে ভ্যারিয়েবলগুলো যুক্ত করুন:
+   - `NODE_ENV` = `production`
+   - `MONGODB_URI_PAID` = (Paid MongoDB Connection String)
+   - `MONGODB_DB_NAME_PAID` = `TopMCQBD_DB`
+   - `JWT_SECRET` = `topmcqbd_super_secret_jwt_key_2026`
+   - `BREVO_API_KEY` = `xkeysib-...`
+   - `BREVO_SENDER_EMAIL` = `mosabber480@gmail.com`
+   - `NEXT_PUBLIC_APP_URL` = `https://topmcqbd.pages.dev`
 
-২. Functions Runtime Configuration (Cloudflare Pages Dashboard > Settings > Functions > Runtime):
-┌─────────────────────┬────────────────────────────────────────────────────────┐
-│ Setting Field       │ Value / Configuration                                  │
-├─────────────────────┼────────────────────────────────────────────────────────┤
-│ Placement           │ Default                                                │
-│ Compatibility date  │ 2026-08-14 (Latest Working Compatible Date)             │
-│ Compatibility flags │ nodejs_compat                                          │
-│ Fail open/closed    │ Fail open                                              │
-└─────────────────────┴────────────────────────────────────────────────────────┘
-
-💡 নোট: `nodejs_compat` ফ্ল্যাগটি এনাবল থাকলে Native MongoDB Driver ও Node.js ক্রিপ্টো/মডিউলগুলো ক্লাউডফ্লেয়ার সার্ভারলেস ফাংশনে নির্বিঘ্নে কাজ করবে।
-
-
-===============================================================================
-6. MONGODB ATLAS NETWORK ACCESS / IP WHITELIST GUIDE
-===============================================================================
-
-✅ MongoDB Atlas ক্লাস্টার কানেকশন নিশ্চিতকরণের অবস্থা:
-   - IP Whitelist-এ `0.0.0.0/0` (Allow Access from Anywhere) সফলভাবে যুক্ত ও অ্যাক্টিভ আছে (Comment: Render Backend)।
-   - যেহেতু Cloudflare Pages Functions ডায়নামিক আইপি ব্যবহার করে সার্ভারলেস এক্সিকিউট হয়, তাই `0.0.0.0/0` অ্যাক্টিভ রাখা সম্পন্ন হয়েছে।
-
-
-===============================================================================
-7. IMPORTANT: MONGODB DATABASE CONNECTION & DRIVER GUIDE
-===============================================================================
-
-⚠️ MONGODB APP ID & KEY সংক্রান্ত তথ্য (কেন ব্যবহার করা হয়নি):
-   - MongoDB Atlas তাদের পুরনো "Data API / App Services" সুবিধাটি Deprecate/বন্ধ করে দিয়েছে। 
-   - নতুন তৈরি করা কোনো MongoDB ক্লাস্টারে এখন আর Data API App ID বা Data API Key জেনারেট করা যায় না।
-   - সুতরাং, `MONGODB_APP_ID_PAID`, `MONGODB_API_KEY_PAID` বা HTTP REST API URL (`services.cloud.mongodb.com`) প্রজেক্টে ব্যবহার করা হয়নি।
-
-✅ প্রজেক্টে বর্তমানে যা ব্যবহৃত হচ্ছে (Native MongoDB Driver System):
-   - প্রজেক্টের `package.json` থেকে অফিশিয়াল `mongodb` NPM ড্রাইভারে থাকা `MongoClient` ব্যবহার করে সরাসরি ডাটাবেসে কানেক্ট করা হয় (`npm install mongodb`)।
-   - Cloudflare Pages Functions-এ Native Driver চালানোর জন্য `wrangler.toml` ফাইল ও ড্যাশবোর্ডে `compatibility_flags = ["nodejs_compat"]` এনাবল রাখা হয়েছে।
+-------------------------------------------------------------------------------
+📌 Render Service 2: Free MCQ Backend (TopMCQBD-Web-Free)
+-------------------------------------------------------------------------------
+1. Render ড্যাশবোর্ডে গিয়ে `New +` -> `Web Service` সিলেক্ট করুন।
+2. GitHub Repository কানেক্ট করুন: `mosabber480/TopMCQBD-Web-Free`
+3. নিচের কনফিগারেশনগুলো দিন:
+   - Name: `topmcqbd-free-api`
+   - Region: `Singapore`
+   - Branch: `main`
+   - Runtime: `Node`
+   - Build Command: `npm install && npm run build`
+   - Start Command: `npm start`
+   - Plan Type: `Free`
+4. Environment Variables সেকশনে ভ্যারিয়েবলগুলো যুক্ত করুন:
+   - `NODE_ENV` = `production`
+   - `MONGODB_URI_FREE` = (Free MongoDB Connection String)
+   - `MONGODB_DB_NAME_FREE` = `TopMCQBD_DB_Free`
+   - `JWT_SECRET` = `topmcqbd_super_secret_jwt_key_2026`
 
 
 ===============================================================================
-8. ENVIRONMENT VARIABLES & SECRETS CONFIGURATION
+7. CLOUDFLARE SETUP (FRONTEND, CDN & DNS)
 ===============================================================================
 
-📋 বর্তমান ফাইনাল সিক্রেট ভ্যারিয়েবলসমূহ (.env, .dev.vars এবং Cloudflare Dashboard):
+১. Cloudflare Pages (Frontend Hosting):
+   - GitHub Repo: `mosabber480/TopMCQBD-Web`
+   - Framework Preset: `Next.js`
+   - সুবিধা: ক্লাউডফ্লেয়ারের গ্লোবাল CDN এর মাধ্যমে এসেট সুপারফাস্ট লোড হবে।
 
-1. MONGODB_URI_PAID     = "mongodb+srv://mosabber480_db_user:EScirLEzwgQVVNaB@mosabber.3ajdj0u.mongodb.net/TopMCQBD_DB?retryWrites=true&w=majority"
-2. MONGODB_URI_FREE     = "mongodb+srv://mosabber480_db_user:VVcrE9PeIIyVlcKU@topmcqbd.pixb7fx.mongodb.net/TopMCQBD_DB_Free?retryWrites=true&w=majority"
-3. MONGODB_DB_NAME_PAID  = "TopMCQBD_DB"
-4. MONGODB_DB_NAME_FREE  = "TopMCQBD_DB_Free"
-5. JWT_SECRET           = "topmcqbd_super_secret_jwt_key_2026"
-6. BREVO_API_KEY        = "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"
-7. BREVO_SENDER_EMAIL   = "mosabber480@gmail.com"
+২. Cloudflare DNS & Custom Domain:
+   - কাস্টম ডোমেইন `topmcqbd.com` যুক্ত করে `CNAME` রেকর্ড দিয়ে Frontend ও Render Backend সাবডোমেইনে রুট করুন।
 
 
 ===============================================================================
-9. DUAL CLOUDFLARE ACCOUNT KEYS MAPPING & DATA ARCHITECTURE
+8. DUAL MONGODB ATLAS CLUSTER CONFIGURATION
 ===============================================================================
 
-📋 ১. Cloudflare Account 1: TopMCQBD-Web (Main Site: topmcqbd.pages.dev)
-   - Scope: Main Web App, User Auth/Login, Paid MCQs, Admin Dashboard, Profile
-   - Database: Paid MongoDB Cluster (TopMCQBD_DB)
-   - Environment Variables for Account 1:
-     1. MONGODB_URI_PAID    = "mongodb+srv://mosabber480_db_user:EScirLEzwgQVVNaB@mosabber.3ajdj0u.mongodb.net/TopMCQBD_DB?retryWrites=true&w=majority"
-     2. MONGODB_DB_NAME_PAID = "TopMCQBD_DB"
-     3. JWT_SECRET          = "topmcqbd_super_secret_jwt_key_2026"
-     4. BREVO_API_KEY       = "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"
-     5. BREVO_SENDER_EMAIL  = "mosabber480@gmail.com"
+✅ ১. ১ম ক্লাস্টার: Paid MongoDB Cluster (TopMCQBD_DB)
+   - Database Name: `TopMCQBD_DB`
+   - দায়িত্ব: ইউজার অ্যাকাউন্ট, পেইড সাবস্ক্রিপশন, পেইড মডেল টেস্ট, সাইট কনফিগারেশন।
+   - Network Access (IP Whitelist): `0.0.0.0/0` (Allow Access from Anywhere)।
+   - Connection String:
+     `mongodb+srv://mosabber480_db_user:EScirLEzwgQVVNaB@mosabber.3ajdj0u.mongodb.net/TopMCQBD_DB?retryWrites=true&w=majority`
 
-📋 ২. Cloudflare Account 2: TopMCQBD-Web-Free (Free API Backend: topmcqbd-web-free.pages.dev)
-   - Scope: Free MCQs Serving & Dedicated Free API
-   - Database: Free MongoDB Cluster (TopMCQBD_DB_Free)
-   - Environment Variables for Account 2:
-     1. MONGODB_URI_FREE    = "mongodb+srv://mosabber480_db_user:VVcrE9PeIIyVlcKU@topmcqbd.pixb7fx.mongodb.net/TopMCQBD_DB_Free?retryWrites=true&w=majority"
-     2. MONGODB_DB_NAME_FREE = "TopMCQBD_DB_Free"
-     3. JWT_SECRET          = "topmcqbd_super_secret_jwt_key_2026"
+✅ ২. ২য় ক্লাস্টার: Free MongoDB Cluster (TopMCQBD_DB_Free)
+   - Database Name: `TopMCQBD_DB_Free`
+   - দায়িত্ব: সকল ফ্রি এমসিকিউ প্রশ্ন, ক্যাটাগরি ও ফ্রি কুইজ ডাটা।
+   - Network Access (IP Whitelist): `0.0.0.0/0` (Allow Access from Anywhere)।
+   - Connection String:
+     `mongodb+srv://mosabber480_db_user:VVcrE9PeIIyVlcKU@topmcqbd.pixb7fx.mongodb.net/TopMCQBD_DB_Free?retryWrites=true&w=majority`
 
 
 ===============================================================================
-10. DATA SOURCE ISOLATION (MONGODB vs LOCAL JSON FILES)
+9. ENVIRONMENT VARIABLES MASTER LIST (.env & RENDER SECRETS)
 ===============================================================================
 
-✅ MongoDB Database Source:
-   - User Registration, Profile & Login Authentication (users collection)
-   - All MCQ Questions, Quizzes & Examinations (questions collection)
-&
-   - Paid System & Auth Request: https://topmcqbd.pages.dev/api (১ম সার্ভারে হিট করবে)
-   - Free MCQ Request: https://topmcqbd-web-free.pages.dev/api (২য় সার্ভারে হিট করবে)
+# --- 1. Database Connections ---
+MONGODB_URI_PAID="mongodb+srv://mosabber480_db_user:EScirLEzwgQVVNaB@mosabber.3ajdj0u.mongodb.net/TopMCQBD_DB?retryWrites=true&w=majority"
+MONGODB_URI_FREE="mongodb+srv://mosabber480_db_user:VVcrE9PeIIyVlcKU@topmcqbd.pixb7fx.mongodb.net/TopMCQBD_DB_Free?retryWrites=true&w=majority"
+MONGODB_DB_NAME_PAID="TopMCQBD_DB"
+MONGODB_DB_NAME_FREE="TopMCQBD_DB_Free"
 
-✅ Local JSON Files Source (src/data/*.json & Cloudflare Functions liveConfigs.js):
-   - Home Page Config (home-config.json)
-   - Header & Footer Navigation Menu (layout-config.json)
-   - Admin Sidebar Menu Config (sidebar-config.json)
-   - Privacy, Terms & Refund Policy (policy-config.json)
-   - Static pages (About Us, Contact, FAQ, Status, etc.)
+# --- 2. Security & Authentication ---
+JWT_SECRET="topmcqbd_super_secret_jwt_key_2026"
+
+# --- 3. Transactional Email Gateway (Brevo) ---
+BREVO_API_KEY="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"
+BREVO_SENDER_EMAIL="mosabber480@gmail.com"
+
+# --- 4. Application URLs ---
+NEXT_PUBLIC_APP_URL="https://topmcqbd.pages.dev"
+NEXT_PUBLIC_PAID_API_URL="https://topmcqbd-paid-api.onrender.com"
+NEXT_PUBLIC_FREE_API_URL="https://topmcqbd-free-api.onrender.com"
 
 ===============================================================================
