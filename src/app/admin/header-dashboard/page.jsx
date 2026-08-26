@@ -134,7 +134,7 @@ export default function AdminHeaderDashboardPage() {
   const fetchLayoutConfig = async () => {
     setLoading(true);
     try {
-      const res = await fetch(getPaidApiUrl('/api/layout-config'));
+      const res = await fetch('/api/layout-config');
       const data = await res.json();
 
       const ann = data.announcement || null;
@@ -199,7 +199,7 @@ export default function AdminHeaderDashboardPage() {
     };
 
     try {
-      const res = await fetch(getPaidApiUrl('/api/layout-config'), {
+      const res = await fetch('/api/layout-config', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -217,7 +217,7 @@ export default function AdminHeaderDashboardPage() {
           localStorage.setItem('layout_config_data', JSON.stringify({ ...prev, ...payload }));
         } catch (e) {}
         if (typeof window !== 'undefined') {
-          window.dispatchEvent(new Event('layout-updated'));
+          window.dispatchEvent(new CustomEvent('layout-updated', { detail: payload }));
         }
         return true;
       } else {
@@ -610,13 +610,15 @@ export default function AdminHeaderDashboardPage() {
 
   const startEditMainMenu = (mIdx) => {
     setEditingMainMenuIdx(mIdx);
+    const m = menus[mIdx];
+    const hasExtra = Boolean(m.icon || m.badgeText);
     setEditMainMenuForm({
-      title: menus[mIdx].title || '',
-      url: menus[mIdx].url || '',
-      icon: menus[mIdx].icon || '',
-      badgeText: menus[mIdx].badgeText || '',
-      badgeType: menus[mIdx].badgeType || 'live',
-      showExtra: false
+      title: m.title || '',
+      url: m.url || '',
+      icon: m.icon || '',
+      badgeText: m.badgeText || '',
+      badgeType: m.badgeType || 'live',
+      showExtra: hasExtra
     });
   };
 
@@ -624,10 +626,17 @@ export default function AdminHeaderDashboardPage() {
     const updated = [...menus];
     updated[mIdx].title = editMainMenuForm.title.trim();
     updated[mIdx].url = editMainMenuForm.url.trim() || '#';
-    if (editMainMenuForm.showExtra) {
-      updated[mIdx].icon = editMainMenuForm.icon.trim() || undefined;
-      updated[mIdx].badgeText = editMainMenuForm.badgeText.trim() || undefined;
-      updated[mIdx].badgeType = editMainMenuForm.badgeType || undefined;
+    if (editMainMenuForm.icon && editMainMenuForm.icon.trim()) {
+      updated[mIdx].icon = editMainMenuForm.icon.trim();
+    } else {
+      delete updated[mIdx].icon;
+    }
+    if (editMainMenuForm.badgeText && editMainMenuForm.badgeText.trim()) {
+      updated[mIdx].badgeText = editMainMenuForm.badgeText.trim();
+      updated[mIdx].badgeType = editMainMenuForm.badgeType || 'live';
+    } else {
+      delete updated[mIdx].badgeText;
+      delete updated[mIdx].badgeType;
     }
     setMenus(updated);
     setEditingMainMenuIdx(null);
@@ -663,13 +672,18 @@ export default function AdminHeaderDashboardPage() {
   const saveAllNewSubMenus = async (mIdx) => {
     const validRows = newSubMenuRows
       .filter(r => r.title.trim())
-      .map(r => ({
-        title: r.title.trim(),
-        url: r.url.trim() || '#',
-        icon: r.showExtra && r.icon ? r.icon.trim() : undefined,
-        badgeText: r.showExtra && r.badgeText ? r.badgeText.trim() : undefined,
-        badgeType: r.showExtra ? (r.badgeType || undefined) : undefined
-      }));
+      .map(r => {
+        const item = {
+          title: r.title.trim(),
+          url: r.url.trim() || '#'
+        };
+        if (r.icon && r.icon.trim()) item.icon = r.icon.trim();
+        if (r.badgeText && r.badgeText.trim()) {
+          item.badgeText = r.badgeText.trim();
+          item.badgeType = r.badgeType || 'live';
+        }
+        return item;
+      });
 
     if (validRows.length === 0) {
       showTopAlert('কমপক্ষে একটি সাব-মেনু পূরণ করুন!', 'warning');
@@ -700,13 +714,14 @@ export default function AdminHeaderDashboardPage() {
   const startEditSubMenu = (mIdx, smIdx) => {
     setEditingSubMenu({ mIdx, smIdx });
     const sub = menus[mIdx].subMenus[smIdx];
+    const hasExtra = Boolean(sub.icon || sub.badgeText);
     setEditSubMenuForm({
       title: sub.title || '',
       url: sub.url || '',
       icon: sub.icon || '',
       badgeText: sub.badgeText || '',
       badgeType: sub.badgeType || 'live',
-      showExtra: false
+      showExtra: hasExtra
     });
   };
 
@@ -714,10 +729,17 @@ export default function AdminHeaderDashboardPage() {
     const updated = [...menus];
     updated[mIdx].subMenus[smIdx].title = editSubMenuForm.title.trim();
     updated[mIdx].subMenus[smIdx].url = editSubMenuForm.url.trim() || '#';
-    if (editSubMenuForm.showExtra) {
-      updated[mIdx].subMenus[smIdx].icon = editSubMenuForm.icon.trim() || undefined;
-      updated[mIdx].subMenus[smIdx].badgeText = editSubMenuForm.badgeText.trim() || undefined;
-      updated[mIdx].subMenus[smIdx].badgeType = editSubMenuForm.badgeType || undefined;
+    if (editSubMenuForm.icon && editSubMenuForm.icon.trim()) {
+      updated[mIdx].subMenus[smIdx].icon = editSubMenuForm.icon.trim();
+    } else {
+      delete updated[mIdx].subMenus[smIdx].icon;
+    }
+    if (editSubMenuForm.badgeText && editSubMenuForm.badgeText.trim()) {
+      updated[mIdx].subMenus[smIdx].badgeText = editSubMenuForm.badgeText.trim();
+      updated[mIdx].subMenus[smIdx].badgeType = editSubMenuForm.badgeType || 'live';
+    } else {
+      delete updated[mIdx].subMenus[smIdx].badgeText;
+      delete updated[mIdx].subMenus[smIdx].badgeType;
     }
     setMenus(updated);
     setEditingSubMenu(null);

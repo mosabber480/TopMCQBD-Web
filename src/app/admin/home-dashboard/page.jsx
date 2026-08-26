@@ -125,7 +125,7 @@ export default function AdminHomeDashboardPage() {
   const fetchHomeConfig = async () => {
     setLoading(true);
     try {
-      const res = await fetch(getPaidApiUrl('/api/home-config'));
+      const res = await fetch('/api/home-config');
       const data = await res.json();
 
       setSeoInfo({
@@ -189,7 +189,7 @@ export default function AdminHomeDashboardPage() {
     };
 
     try {
-      const res = await fetch(getPaidApiUrl('/api/home-config'), {
+      const res = await fetch('/api/home-config', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

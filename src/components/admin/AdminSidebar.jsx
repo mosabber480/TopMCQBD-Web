@@ -69,8 +69,24 @@ export default function AdminSidebar() {
     return () => window.removeEventListener('sidebar-toggle', handleSync);
   }, []);
 
-  // Close mobile sidebar on navigation
+  // Close mobile sidebar and refresh config on navigation
   useEffect(() => {
+    fetch('/api/sidebar-config')
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.menus && data.menus.length > 0) {
+          setMenuItems(
+            data.menus.map(item => ({
+              href: item.url,
+              icon: item.icon || 'fa-solid fa-circle',
+              label: item.title,
+              subMenus: item.subMenus || []
+            }))
+          );
+        }
+      })
+      .catch(() => {});
+
     setMobileOpen(false);
     const sidebar = document.getElementById('adminSidebar');
     const overlay = document.querySelector('.sidebar-overlay');

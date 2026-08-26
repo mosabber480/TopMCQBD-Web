@@ -145,7 +145,7 @@ export default function AdminFooterDashboardPage() {
   const fetchLayoutConfig = async () => {
     setLoading(true);
     try {
-      const res = await fetch(getPaidApiUrl('/api/layout-config'));
+      const res = await fetch('/api/layout-config');
       const data = await res.json();
 
       setConfig(data || defaultFooterConfig);
@@ -200,7 +200,7 @@ export default function AdminFooterDashboardPage() {
     };
 
     try {
-      const res = await fetch(getPaidApiUrl('/api/layout-config'), {
+      const res = await fetch('/api/layout-config', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -219,7 +219,7 @@ export default function AdminFooterDashboardPage() {
           localStorage.setItem('layout_config_data', JSON.stringify({ ...prev, ...payload }));
         } catch (e) {}
         if (typeof window !== 'undefined') {
-          window.dispatchEvent(new Event('layout-updated'));
+          window.dispatchEvent(new CustomEvent('layout-updated', { detail: payload }));
         }
         return true;
       } else {

@@ -8,10 +8,15 @@ export default function PrivacyPolicyPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (policyConfigData?.content) {
-      setContent(policyConfigData.content);
-      setLoading(false);
-    }
+    fetch('/api/policy/get')
+      .then(res => res.json())
+      .then(data => {
+        if (data?.content) {
+          setContent(data.content);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
   return (

@@ -50,9 +50,23 @@ export default function HomeClient({ initialHomeData }) {
     if (initialHomeData) {
       setHomeData(initialHomeData);
     }
+    const loadLatest = () => {
+      fetch('/api/home-config')
+        .then(res => res.json())
+        .then(data => {
+          if (data && (data.sliders || data.demoQuizzes || data.packages)) {
+            setHomeData(data);
+          }
+        })
+        .catch(() => {});
+    };
+    loadLatest();
+
     const handleUpdate = (e) => {
       if (e && e.detail) {
         setHomeData(e.detail);
+      } else {
+        loadLatest();
       }
     };
     window.addEventListener('home-config-updated', handleUpdate);

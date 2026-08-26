@@ -349,15 +349,15 @@ function ModelTestContent() {
           {/* Breadcrumb & Navigation */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '10px' }}>
             <div style={{ fontSize: '0.9rem', color: '#64748b' }}>
-              <Link href="/model-test-demo" style={{ color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>MCQ</Link>
+              <Link href="/subjective-model-test-demo" style={{ color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>MCQ</Link>
               <span style={{ margin: '0 8px', color: '#cbd5e1' }}>/</span>
-              <Link href={`/model-test-demo?examId=${selectedExam.id}&subject=${selectedSubject.id}`} style={{ color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>{selectedSubject.name}</Link>
+              <Link href={`/subjective-model-test-demo?examId=${selectedExam.id}&subject=${selectedSubject.id}`} style={{ color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>{selectedSubject.name}</Link>
               <span style={{ margin: '0 8px', color: '#cbd5e1' }}>/</span>
               <span style={{ color: '#0f172a', fontWeight: 700 }}>অধ্যায় {chapterId}</span>
             </div>
 
             <button
-              onClick={() => router.push(`/model-test-demo?examId=${selectedExam.id}&subject=${selectedSubject.id}`)}
+              onClick={() => router.push(`/subjective-model-test-demo?examId=${selectedExam.id}&subject=${selectedSubject.id}`)}
               style={{
                 backgroundColor: '#ffffff',
                 color: '#334155',
@@ -470,15 +470,15 @@ function ModelTestContent() {
         <div style={{ backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', padding: '12px 20px' }}>
           <div className="container" style={{ maxWidth: '1100px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
             <div style={{ fontSize: '0.9rem', color: '#64748b' }}>
-              <Link href="/model-test-demo" style={{ color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>MCQ</Link>
+              <Link href="/subjective-model-test-demo" style={{ color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>MCQ</Link>
               <span style={{ margin: '0 8px', color: '#cbd5e1' }}>/</span>
-              <Link href={`/model-test-demo?examId=${selectedExam.id}`} style={{ color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>{selectedExam.categoryName}</Link>
+              <Link href={`/subjective-model-test-demo?examId=${selectedExam.id}`} style={{ color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>{selectedExam.categoryName}</Link>
               <span style={{ margin: '0 8px', color: '#cbd5e1' }}>/</span>
               <span style={{ color: '#0f172a', fontWeight: 700 }}>{selectedSubject.name}</span>
             </div>
 
             <button
-              onClick={() => router.push(`/model-test-demo?examId=${selectedExam.id}`)}
+              onClick={() => router.push(`/subjective-model-test-demo?examId=${selectedExam.id}`)}
               style={{
                 backgroundColor: '#f1f5f9',
                 color: '#334155',
@@ -553,7 +553,7 @@ function ModelTestContent() {
                     {ch.desc}
                   </p>
                   <button
-                    onClick={() => router.push(`/model-test-demo?examId=${selectedExam.id}&subject=${selectedSubject.id}&chapterId=${ch.id}`)}
+                    onClick={() => router.push(`/subjective-model-test-demo?examId=${selectedExam.id}&subject=${selectedSubject.id}&chapterId=${ch.id}`)}
                     style={{
                       background: 'none',
                       border: 'none',
@@ -589,13 +589,13 @@ function ModelTestContent() {
           {/* Breadcrumb & Navigation */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '10px' }}>
             <div style={{ fontSize: '0.9rem', color: '#64748b' }}>
-              <Link href="/model-test-demo" style={{ color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>সকল মডেল টেস্ট</Link>
+              <Link href="/subjective-model-test-demo" style={{ color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>সকল মডেল টেস্ট</Link>
               <span style={{ margin: '0 8px', color: '#cbd5e1' }}>/</span>
               <span style={{ color: '#0f172a', fontWeight: 700 }}>{selectedExam.title}</span>
             </div>
 
             <button
-              onClick={() => router.push('/model-test-demo')}
+              onClick={() => router.push('/subjective-model-test-demo')}
               style={{
                 backgroundColor: '#ffffff',
                 color: '#334155',
@@ -630,7 +630,7 @@ function ModelTestContent() {
             {SUBJECTS_DATA.map(sub => (
               <div
                 key={sub.id}
-                onClick={() => router.push(`/model-test-demo?examId=${selectedExam.id}&subject=${sub.id}`)}
+                onClick={() => router.push(`/subjective-model-test-demo?examId=${selectedExam.id}&subject=${sub.id}`)}
                 style={{
                   backgroundColor: '#ffffff',
                   borderRadius: '16px',
@@ -703,7 +703,7 @@ function ModelTestContent() {
             <span>মডেল টেস্ট সম্ভার</span>
           </span>
           <h1 style={{ fontSize: '2.4rem', color: '#0f172a', fontWeight: 800, marginBottom: '12px', letterSpacing: '-0.5px' }}>
-            বিষয়ভিত্তিক ও পূর্ণাঙ্গ অনলাইন মডেল টেস্ট
+            বিষয়ভিত্তিক অনলাইন মডেল টেস্ট
           </h1>
           <p style={{ color: '#64748b', fontSize: '1.05rem', maxWidth: '650px', margin: '0 auto', lineHeight: '1.6' }}>
             আপনার পছন্দের ক্যাটাগরি বাছাই করুন এবং নির্ধারিত সময়ের মধ্যে পরীক্ষা দিয়ে রিয়েল-টাইম মেরিট অবস্থান যাচাই করুন।
@@ -997,7 +997,7 @@ function ModelTestContent() {
                       </span>
                     </div>
                     <button
-                      onClick={() => router.push(`/model-test-demo?examId=${exam.id}`)}
+                      onClick={() => router.push(`/subjective-model-test-demo?examId=${exam.id}`)}
                       style={{
                         backgroundColor: '#0284c7',
                         color: '#ffffff',
