@@ -31,6 +31,10 @@ _worker.bundle
 
 # Custom Local Guides & Reference Folders
 next.js project guide.txt
+project-guide.local.txt
+*.local.txt
+*guide*.txt
+*.guide
 Old-Project/
 Old-Mosabber-Quiz-App/
 
