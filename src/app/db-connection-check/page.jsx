@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import DbNavBox from '@/components/common/DbNavBox';
+import DbAuthGuard from '@/components/common/DbAuthGuard';
 
 const CACHE_KEY = 'topmcqbd_db_check_cache';
 
@@ -159,216 +160,218 @@ export default function DBConnectionCheck() {
   }, [checkConnection]);
 
   return (
-    <main className="db-page-container">
-      {/* Background Orbs */}
-      <div className="glow-orb orb-1" />
-      <div className="glow-orb orb-2" />
+    <DbAuthGuard activeRoute="/db-connection-check">
+      <main className="db-page-container">
+        {/* Background Orbs */}
+        <div className="glow-orb orb-1" />
+        <div className="glow-orb orb-2" />
 
-      <div className="db-content-card">
-        {/* Header */}
-        <div className="db-header">
-          <div className="db-badge">Diagnostic Tool</div>
-          <h1 className="db-title">DB Connection Check</h1>
-          <p className="db-subtitle">
-            Render Backend ও MongoDB ক্লাস্টারের মধ্যকার রিয়েল-টাইম কানেকশন স্ট্যাটাস
-          </p>
-        </div>
-
-        {/* Action Bar */}
-        <div className="db-control-bar">
-          <div className="status-info-text">
-            {lastChecked ? (
-              <div className="status-badge-row">
-                <span>সর্বশেষ টেস্ট: <strong>{lastChecked}</strong></span>
-                {isFromCache ? (
-                  <span className="cache-indicator-badge">📦 লোকাল স্টোরেজের পূর্ববর্তী ফলাফল</span>
-                ) : (
-                  <span className="live-indicator-badge">⚡ লাইভ টেস্ট ফলাফল</span>
-                )}
-              </div>
-            ) : (
-              <span>ডাটাবেস কানেকশন স্ট্যাটাস চেক করা হচ্ছে...</span>
-            )}
+        <div className="db-content-card">
+          {/* Header */}
+          <div className="db-header">
+            <div className="db-badge">Diagnostic Tool</div>
+            <h1 className="db-title">DB Connection Check</h1>
+            <p className="db-subtitle">
+              Render Backend ও MongoDB ক্লাস্টারের মধ্যকার রিয়েল-টাইম কানেকশন স্ট্যাটাস
+            </p>
           </div>
 
-          <button
-            onClick={checkConnection}
-            disabled={loading}
-            className="recheck-btn"
+          {/* Action Bar */}
+          <div className="db-control-bar">
+            <div className="status-info-text">
+              {lastChecked ? (
+                <div className="status-badge-row">
+                  <span>সর্বশেষ টেস্ট: <strong>{lastChecked}</strong></span>
+                  {isFromCache ? (
+                    <span className="cache-indicator-badge">📦 লোকাল স্টোরেজের পূর্ববর্তী ফলাফল</span>
+                  ) : (
+                    <span className="live-indicator-badge">⚡ লাইভ টেস্ট ফলাফল</span>
+                  )}
+                </div>
+              ) : (
+                <span>ডাটাবেস কানেকশন স্ট্যাটাস চেক করা হচ্ছে...</span>
+              )}
+            </div>
+
+            <button
+              onClick={checkConnection}
+              disabled={loading}
+              className="recheck-btn"
+            >
+              {loading ? (
+                <>
+                  <span className="btn-spinner" />
+                  চেক করা হচ্ছে...
+                </>
+              ) : (
+                <>
+                  <span>🔄</span>
+                  পুনরায় টেস্ট করুন
+                </>
+              )}
+            </button>
+          </div>
+
+          {/* API Fetch Error */}
+          {fetchError && (
+            <div className="alert-card alert-error">
+              <div className="alert-header">
+                <span className="alert-icon">⚠️</span>
+                <strong>সার্ভার রেসপন্স ইনফো:</strong>
+              </div>
+              <p className="alert-msg">{fetchError}</p>
+              <small className="alert-hint">
+                * টিপস: Render ব্যাকএন্ড স্লিপে থাকলে প্রথমবার ব্যাকএন্ড জেগে উঠতে ৩০-৪০ সেকেন্ড লাগতে পারে। একটু পর আবার "পুনরায় টেস্ট করুন" বাটনে চাপুন।
+              </small>
+            </div>
+          )}
+
+          {/* Database Status Cards Grid */}
+          <div className="db-grid">
+            {/* Paid MongoDB Card */}
+            <div className={`status-card ${paidData?.connected ? 'card-success' : 'card-danger'}`}>
+              <div className="card-header">
+                <div>
+                  <div className="card-type-tag">Primary / Paid Cluster</div>
+                  <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px' }}>
+                    Render: <code>topmcqbd-paid-api</code>
+                  </div>
+                </div>
+                <div className={`status-pill ${paidData?.connected ? 'pill-success' : 'pill-danger'}`}>
+                  <span className="status-dot" />
+                  <span style={{ transform: 'translateY(0.5px)', display: 'inline-flex', alignItems: 'center' }}>
+                    {loading ? 'Checking...' : paidData?.connected ? 'Connected' : 'Disconnected'}
+                  </span>
+                </div>
+              </div>
+
+              <h3 className="card-db-name">
+                📁 {paidData?.name || 'TopMCQBD_DB'}
+              </h3>
+
+              <div className="meta-list">
+                <div className="meta-row">
+                  <span className="meta-label">কানেকশন রেসপন্স টাইম:</span>
+                  <span className="meta-value">
+                    {paidData?.latencyMs !== null && paidData?.latencyMs !== undefined
+                      ? `${paidData.latencyMs} ms`
+                      : 'N/A'}
+                  </span>
+                </div>
+                <div className="meta-row">
+                  <span className="meta-label">ডাটাবেজ কালেকশনস:</span>
+                  <span className="meta-value">
+                    {paidData?.collections ? `${paidData.collections.length} টি কালেকশন` : '0'}
+                  </span>
+                </div>
+              </div>
+
+              {paidData?.collections && paidData.collections.length > 0 && (
+                <div className="collections-box">
+                  <span className="box-title">কালেকশন তালিকা:</span>
+                  <div className="tags-container">
+                    {paidData.collections.map((col, idx) => (
+                      <span key={idx} className="col-tag">{col}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {paidData?.error && (
+                <div className="error-box">
+                  <strong className="error-title">❌ এরর বিস্তারিত:</strong>
+                  <pre className="error-code">{paidData.error.message || JSON.stringify(paidData.error)}</pre>
+                </div>
+              )}
+            </div>
+
+            {/* Free MongoDB Card */}
+            <div className={`status-card ${freeData?.connected ? 'card-success' : 'card-danger'}`}>
+              <div className="card-header">
+                <div>
+                  <div className="card-type-tag">Secondary / Free Cluster</div>
+                  <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px' }}>
+                    Render: <code>topmcqbd-free-api</code>
+                  </div>
+                </div>
+                <div className={`status-pill ${freeData?.connected ? 'pill-success' : 'pill-danger'}`}>
+                  <span className="status-dot" />
+                  <span style={{ transform: 'translateY(0.5px)', display: 'inline-flex', alignItems: 'center' }}>
+                    {loading ? 'Checking...' : freeData?.connected ? 'Connected' : 'Disconnected'}
+                  </span>
+                </div>
+              </div>
+
+              <h3 className="card-db-name">
+                📁 {freeData?.name || 'TopMCQBD_DB_Free'}
+              </h3>
+
+              <div className="meta-list">
+                <div className="meta-row">
+                  <span className="meta-label">কানেকশন রেসপন্স টাইম:</span>
+                  <span className="meta-value">
+                    {freeData?.latencyMs !== null && freeData?.latencyMs !== undefined
+                      ? `${freeData.latencyMs} ms`
+                      : 'N/A'}
+                  </span>
+                </div>
+                <div className="meta-row">
+                  <span className="meta-label">ডাটাবেজ কালেকশনস:</span>
+                  <span className="meta-value">
+                    {freeData?.collections ? `${freeData.collections.length} টি কালেকশন` : '0'}
+                  </span>
+                </div>
+              </div>
+
+              {freeData?.collections && freeData.collections.length > 0 && (
+                <div className="collections-box">
+                  <span className="box-title">কালেকশন তালিকা:</span>
+                  <div className="tags-container">
+                    {freeData.collections.map((col, idx) => (
+                      <span key={idx} className="col-tag">{col}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {freeData?.error && (
+                <div className="error-box">
+                  <strong className="error-title">❌ এরর বিস্তারিত:</strong>
+                  <pre className="error-code">{freeData.error.message || JSON.stringify(freeData.error)}</pre>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* 5-Button Database Navigation Box */}
+          <DbNavBox activeRoute="/db-connection-check" />
+
+          {/* Bottom Navigation Links Bar */}
+          <div
+            className="bottom-nav-bar"
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              width: '100%',
+              marginTop: '24px',
+              padding: '8px 4px 0 4px',
+              flexWrap: 'wrap',
+              gap: '12px',
+              boxSizing: 'border-box',
+            }}
           >
-            {loading ? (
-              <>
-                <span className="btn-spinner" />
-                চেক করা হচ্ছে...
-              </>
-            ) : (
-              <>
-                <span>🔄</span>
-                পুনরায় টেস্ট করুন
-              </>
-            )}
-          </button>
-        </div>
-
-        {/* API Fetch Error */}
-        {fetchError && (
-          <div className="alert-card alert-error">
-            <div className="alert-header">
-              <span className="alert-icon">⚠️</span>
-              <strong>সার্ভার রেসপন্স ইনফো:</strong>
-            </div>
-            <p className="alert-msg">{fetchError}</p>
-            <small className="alert-hint">
-              * টিপস: Render ব্যাকএন্ড স্লিপে থাকলে প্রথমবার ব্যাকএন্ড জেগে উঠতে ৩০-৪০ সেকেন্ড লাগতে পারে। একটু পর আবার "পুনরায় টেস্ট করুন" বাটনে চাপুন।
-            </small>
-          </div>
-        )}
-
-        {/* Database Status Cards Grid */}
-        <div className="db-grid">
-          {/* Paid MongoDB Card */}
-          <div className={`status-card ${paidData?.connected ? 'card-success' : 'card-danger'}`}>
-            <div className="card-header">
-              <div>
-                <div className="card-type-tag">Primary / Paid Cluster</div>
-                <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px' }}>
-                  Render: <code>topmcqbd-paid-api</code>
-                </div>
-              </div>
-              <div className={`status-pill ${paidData?.connected ? 'pill-success' : 'pill-danger'}`}>
-                <span className="status-dot" />
-                <span style={{ transform: 'translateY(0.5px)', display: 'inline-flex', alignItems: 'center' }}>
-                  {loading ? 'Checking...' : paidData?.connected ? 'Connected' : 'Disconnected'}
-                </span>
-              </div>
-            </div>
-
-            <h3 className="card-db-name">
-              📁 {paidData?.name || 'TopMCQBD_DB'}
-            </h3>
-
-            <div className="meta-list">
-              <div className="meta-row">
-                <span className="meta-label">কানেকশন রেসপন্স টাইম:</span>
-                <span className="meta-value">
-                  {paidData?.latencyMs !== null && paidData?.latencyMs !== undefined
-                    ? `${paidData.latencyMs} ms`
-                    : 'N/A'}
-                </span>
-              </div>
-              <div className="meta-row">
-                <span className="meta-label">ডাটাবেজ কালেকশনস:</span>
-                <span className="meta-value">
-                  {paidData?.collections ? `${paidData.collections.length} টি কালেকশন` : '0'}
-                </span>
-              </div>
-            </div>
-
-            {paidData?.collections && paidData.collections.length > 0 && (
-              <div className="collections-box">
-                <span className="box-title">কালেকশন তালিকা:</span>
-                <div className="tags-container">
-                  {paidData.collections.map((col, idx) => (
-                    <span key={idx} className="col-tag">{col}</span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {paidData?.error && (
-              <div className="error-box">
-                <strong className="error-title">❌ এরর বিস্তারিত:</strong>
-                <pre className="error-code">{paidData.error.message || JSON.stringify(paidData.error)}</pre>
-              </div>
-            )}
-          </div>
-
-          {/* Free MongoDB Card */}
-          <div className={`status-card ${freeData?.connected ? 'card-success' : 'card-danger'}`}>
-            <div className="card-header">
-              <div>
-                <div className="card-type-tag">Secondary / Free Cluster</div>
-                <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px' }}>
-                  Render: <code>topmcqbd-free-api</code>
-                </div>
-              </div>
-              <div className={`status-pill ${freeData?.connected ? 'pill-success' : 'pill-danger'}`}>
-                <span className="status-dot" />
-                <span style={{ transform: 'translateY(0.5px)', display: 'inline-flex', alignItems: 'center' }}>
-                  {loading ? 'Checking...' : freeData?.connected ? 'Connected' : 'Disconnected'}
-                </span>
-              </div>
-            </div>
-
-            <h3 className="card-db-name">
-              📁 {freeData?.name || 'TopMCQBD_DB_Free'}
-            </h3>
-
-            <div className="meta-list">
-              <div className="meta-row">
-                <span className="meta-label">কানেকশন রেসপন্স টাইম:</span>
-                <span className="meta-value">
-                  {freeData?.latencyMs !== null && freeData?.latencyMs !== undefined
-                    ? `${freeData.latencyMs} ms`
-                    : 'N/A'}
-                </span>
-              </div>
-              <div className="meta-row">
-                <span className="meta-label">ডাটাবেজ কালেকশনস:</span>
-                <span className="meta-value">
-                  {freeData?.collections ? `${freeData.collections.length} টি কালেকশন` : '0'}
-                </span>
-              </div>
-            </div>
-
-            {freeData?.collections && freeData.collections.length > 0 && (
-              <div className="collections-box">
-                <span className="box-title">কালেকশন তালিকা:</span>
-                <div className="tags-container">
-                  {freeData.collections.map((col, idx) => (
-                    <span key={idx} className="col-tag">{col}</span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {freeData?.error && (
-              <div className="error-box">
-                <strong className="error-title">❌ এরর বিস্তারিত:</strong>
-                <pre className="error-code">{freeData.error.message || JSON.stringify(freeData.error)}</pre>
-              </div>
-            )}
+            <Link href="/" className="bottom-nav-link left-link">
+              <i className="fa-solid fa-arrow-left" style={{ marginRight: '6px' }} />
+              ওয়েবসাইট ভিজিট
+            </Link>
+            <Link href="/admin/dashboard" className="bottom-nav-link right-link">
+              অ্যাডমিন প্যানেল
+              <i className="fa-solid fa-arrow-right" style={{ marginLeft: '6px' }} />
+            </Link>
           </div>
         </div>
-
-        {/* 5-Button Database Navigation Box */}
-        <DbNavBox activeRoute="/db-connection-check" />
-
-        {/* Bottom Navigation Links Bar */}
-        <div
-          className="bottom-nav-bar"
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            width: '100%',
-            marginTop: '24px',
-            padding: '8px 4px 0 4px',
-            flexWrap: 'wrap',
-            gap: '12px',
-            boxSizing: 'border-box',
-          }}
-        >
-          <Link href="/" className="bottom-nav-link left-link">
-            <i className="fa-solid fa-arrow-left" style={{ marginRight: '6px' }} />
-            ওয়েবসাইট ভিজিট
-          </Link>
-          <Link href="/admin/dashboard" className="bottom-nav-link right-link">
-            অ্যাডমিন প্যানেল
-            <i className="fa-solid fa-arrow-right" style={{ marginLeft: '6px' }} />
-          </Link>
-        </div>
-      </div>
-    </main>
+      </main>
+    </DbAuthGuard>
   );
 }

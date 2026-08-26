@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import DbNavBox from '@/components/common/DbNavBox';
+import DbAuthGuard from '@/components/common/DbAuthGuard';
 
 const CACHE_KEY = 'topmcqbd_dbpaid_test_cache';
 
@@ -133,7 +134,8 @@ export default function DBPaidTestPage() {
   };
 
   return (
-    <main className="db-page-container">
+    <DbAuthGuard activeRoute="/dbpaid-test">
+      <main className="db-page-container">
       {/* Background Ambient Orbs */}
       <div className="glow-orb orb-1" />
       <div className="glow-orb orb-2" />
@@ -277,7 +279,7 @@ export default function DBPaidTestPage() {
           )}
         </div>
 
-        {/* Global Navigation Box */}
+        {/* 5-Button Database Navigation Box */}
         <DbNavBox activeRoute="/dbpaid-test" />
 
         {/* Bottom Navigation Links Bar */}
@@ -508,5 +510,6 @@ export default function DBPaidTestPage() {
         }
       `}</style>
     </main>
+    </DbAuthGuard>
   );
 }

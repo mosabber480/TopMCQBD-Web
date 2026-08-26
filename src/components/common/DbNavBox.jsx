@@ -37,6 +37,17 @@ export default function DbNavBox({ activeRoute }) {
     },
   ];
 
+  const handleLogout = () => {
+    try {
+      localStorage.removeItem('topmcqbd_db_suite_authenticated_v1');
+      localStorage.removeItem('topmcqbd_db_suite_user_name');
+      sessionStorage.removeItem('topmcqbd_db_suite_authenticated_v1');
+      window.location.reload();
+    } catch (e) {
+      console.error('Logout error:', e);
+    }
+  };
+
   return (
     <div className="db-nav-box-wrapper">
       <div className="nav-box-title">
@@ -47,7 +58,30 @@ export default function DbNavBox({ activeRoute }) {
           </span>
           <span className="nav-heading">Database Testing & Admin Suite</span>
         </div>
-        <small className="nav-sub">৫টি ডাটাবেজ পেজ দ্রুত সুইচ করুন</small>
+        <div className="title-right" style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          <small className="nav-sub">৫টি ডাটাবেজ পেজ দ্রুত সুইচ করুন</small>
+          <button
+            onClick={handleLogout}
+            style={{
+              background: 'rgba(239, 68, 68, 0.15)',
+              border: '1px solid rgba(239, 68, 68, 0.35)',
+              color: '#fca5a5',
+              padding: '4px 10px',
+              borderRadius: '6px',
+              fontSize: '11.5px',
+              fontWeight: '700',
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '5px',
+              transition: 'all 0.2s ease',
+            }}
+            title="ডাটাবেজ পেজ লকিং ভেরিফিকেশন রিসেট করুন"
+          >
+            <i className="fa-solid fa-lock" style={{ fontSize: '11px' }} />
+            <span>লগআউট</span>
+          </button>
+        </div>
       </div>
 
       <div className="admin-actions-row">

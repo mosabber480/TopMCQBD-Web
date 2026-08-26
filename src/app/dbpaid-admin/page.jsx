@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import DbNavBox from '@/components/common/DbNavBox';
+import DbAuthGuard from '@/components/common/DbAuthGuard';
 
 const CACHE_KEY = 'topmcqbd_dbpaid_admin_cache';
 
@@ -282,7 +283,8 @@ export default function DBPaidAdminPage() {
   }, [items, searchQuery]);
 
   return (
-    <main className="db-page-container">
+    <DbAuthGuard activeRoute="/dbpaid-admin">
+      <main className="db-page-container">
       {/* Background Ambient Orbs */}
       <div className="glow-orb orb-1" />
       <div className="glow-orb orb-2" />
@@ -604,8 +606,7 @@ export default function DBPaidAdminPage() {
           </div>
         </div>
 
-
-        {/* 4-Button Database Navigation Box */}
+        {/* 5-Button Database Navigation Box */}
         <DbNavBox activeRoute="/dbpaid-admin" />
 
         {/* Bottom Navigation Links Bar */}
@@ -1122,5 +1123,6 @@ export default function DBPaidAdminPage() {
         }
       `}</style>
     </main>
+    </DbAuthGuard>
   );
 }

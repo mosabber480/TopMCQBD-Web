@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import DbNavBox from '@/components/common/DbNavBox';
+import DbAuthGuard from '@/components/common/DbAuthGuard';
 
 const CACHE_KEY = 'topmcqbd_dbfree_test_cache';
 
@@ -133,7 +134,8 @@ export default function DBFreeTestPage() {
   };
 
   return (
-    <main className="db-page-container">
+    <DbAuthGuard activeRoute="/dbfree-test">
+      <main className="db-page-container">
       {/* Background Ambient Orbs */}
       <div className="glow-orb orb-1" />
       <div className="glow-orb orb-2" />
@@ -281,7 +283,7 @@ export default function DBFreeTestPage() {
           )}
         </div>
 
-        {/* Global Navigation Box */}
+        {/* 5-Button Database Navigation Box */}
         <DbNavBox activeRoute="/dbfree-test" />
 
         {/* Bottom Navigation Links Bar */}
@@ -511,5 +513,6 @@ export default function DBFreeTestPage() {
         }
       `}</style>
     </main>
+    </DbAuthGuard>
   );
 }
