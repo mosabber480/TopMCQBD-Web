@@ -612,7 +612,7 @@ function QuestionBankContent() {
                         <i className="fa-regular fa-folder-open"></i> <span>ব্যাখ্যা পড়ুন</span>
                       </button>
                       <button onClick={() => router.push('/quiz')} className="btn-start-exam">
-                        <i className="fa-solid fa-id-badge"></i> <span>পরীক্ষা দিন</span>
+                        <span>পরীক্ষা দিন</span> <i className="fa-solid fa-arrow-right"></i>
                       </button>
                     </div>
                   </div>
