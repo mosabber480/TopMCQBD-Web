@@ -10,6 +10,18 @@ const toBengaliNumber = (num) => {
   return String(num).split('').map(d => bnDigits[parseInt(d)] || d).join('');
 };
 
+// Helper to convert English digits in string to Bengali digits
+const toBengaliNumberStr = (str) => {
+  const bnDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+  return String(str).replace(/[0-9]/g, (d) => bnDigits[parseInt(d)]);
+};
+
+// Helper to convert Bengali digits in string to English digits
+const toEnglishNumberStr = (str) => {
+  const enDigits = {'০':'0', '১':'1', '২':'2', '৩':'3', '৪':'4', '৫':'5', '৬':'6', '৭':'7', '৮':'8', '৯':'9'};
+  return String(str).replace(/[০-৯]/g, (d) => enDigits[d] || d);
+};
+
 // Generate BCS Exams from 50th down to 10th
 const generateBcsExams = () => {
   const list = [];
@@ -22,19 +34,21 @@ const generateBcsExams = () => {
 
     list.push({
       id: `bcs-${i}`,
-      year: `${bnNum}${suffix} বিসিএস প্রিলিমিনারি`,
+      year: `${bnNum}${suffix} বিসিএস প্রিলিমিনারি পরীক্ষা`,
       category: "BCS",
       date: bnYear,
       totalQ: 200,
       time: "২ ঘণ্টা",
-      subjectStats: i >= 35 ? "বাংলা ৩৫, ইংরেজি ৩৫, গণিত ১৫, সাধারণ জ্ঞান ৫০" : "বাংলা ৪০, ইংরেজি ৪০, সাধারণ জ্ঞান ৮০, গণিত ৪০",
-      status: "সম্পূর্ণ সমাধানসহ উপলব্ধ"
+      subjectStats: i >= 35 ? "বাংলা ৩৫, ইংরেজি ৩৫, গণিত ১৫, বিজ্ঞান ১৫, কম্পিউটার ১৫, সাধারণ জ্ঞান ৫০" : "বাংলা ৪০, ইংরেজি ৪০, সাধারণ জ্ঞান ৮০, গণিত ৪০",
+      status: "সম্পূর্ণ সমাধানসহ উপলব্ধ",
+      tags: ['BCS', `${i}th BCS`, `${i}th`, 'BCS Preliminary', 'Prelims', `${i}`, `${yearAD}`, 'bcs exam'],
+      displayTag: `${i}th`
     });
   }
   return list;
 };
 
-// Generate Primary Teacher Exams from 2024 down to 2020 (1st, 2nd, 3rd steps)
+// Generate Primary Teacher Exams
 const generatePrimaryExams = () => {
   const list = [];
   const years = [2024, 2023, 2022, 2021, 2020];
@@ -55,7 +69,9 @@ const generatePrimaryExams = () => {
         totalQ: 80,
         time: "১ ঘণ্টা",
         subjectStats: "বাংলা ২০, ইংরেজি ২০, গণিত ২০, সাধারণ জ্ঞান ২০",
-        status: "ব্যাখ্যামূলক সমাধান"
+        status: "ব্যাখ্যামূলক সমাধান",
+        tags: ['Primary', 'Primary Teacher', 'Assistant Teacher', `Primary ${year}`, `Step ${step.num}`, `Step-${step.num}`, `Step${step.num}`, `${step.num}rd Step`, `${step.num}nd Step`, `${step.num}st Step`, `${year}`, 'primary school'],
+        displayTag: `Step-${step.num}`
       });
     });
   });
@@ -63,23 +79,12 @@ const generatePrimaryExams = () => {
   return list;
 };
 
-// Generate NTRCA Exams from 18th down to 6th (College, School, School-2 levels)
+// Generate NTRCA Exams
 const generateNtrcaExams = () => {
   const list = [];
   const yearsMap = {
-    18: '২০২৪',
-    17: '২০২৩',
-    16: '২০১৯',
-    15: '২০১৮',
-    14: '২০১৭',
-    13: '২০১৬',
-    12: '২০১৫',
-    11: '২০১৪',
-    10: '২০১৪',
-    9: '২০১৩',
-    8: '২০১২',
-    7: '২০১১',
-    6: '২০১০'
+    18: '২০২৪', 17: '২০২৩', 16: '২০১৯', 15: '২০১৮', 14: '২০১৭',
+    13: '২০১৬', 12: '২০১৫', 11: '২০১৪', 10: '২০১৪', 9: '২০১৩', 8: '২০১২', 7: '২০১১', 6: '২০১০'
   };
 
   const levels = ['কলেজ পর্যায়', 'স্কুল পর্যায়', 'স্কুল-২ পর্যায়'];
@@ -97,7 +102,9 @@ const generateNtrcaExams = () => {
         totalQ: 100,
         time: "১ ঘণ্টা",
         subjectStats: "বাংলা ২৫, ইংরেজি ২৫, গণিত ২৫, সাধারণ জ্ঞান ২৫",
-        status: "ব্যাখ্যামূলক সমাধান"
+        status: "ব্যাখ্যামূলক সমাধান",
+        tags: ['NTRCA', 'Teacher Registration', `${i}th NTRCA`, `${i}th`, level, 'school', 'college'],
+        displayTag: `${i}th`
       });
     });
   }
@@ -108,45 +115,10 @@ const generateNtrcaExams = () => {
 // Generate Bank Job Question Banks
 const generateBankExams = () => {
   return [
-    // 1. বাংলাদেশ ব্যাংক (Bangladesh Bank)
-    { id: "bb-ad-2024", year: "বাংলাদেশ ব্যাংক সহকারী পরিচালক (AD)", category: "Bank", date: "২০২৪", totalQ: 100, time: "১ ঘণ্টা", subjectStats: "English 25, Math 25, Bangla 20, GK 20, ICT 10", status: "ব্যাখ্যামূলক সমাধান" },
-    { id: "bb-off-2024", year: "বাংলাদেশ ব্যাংক অফিসার (General)", category: "Bank", date: "২০২৪", totalQ: 100, time: "১ ঘণ্টা", subjectStats: "English 25, Math 25, Bangla 20, GK 20, ICT 10", status: "ব্যাখ্যামূলক সমাধান" },
-    { id: "bb-off-2023", year: "বাংলাদেশ ব্যাংক অফিসার (General)", category: "Bank", date: "২০২৩", totalQ: 100, time: "১ ঘণ্টা", subjectStats: "English 25, Math 25, Bangla 20, GK 20, ICT 10", status: "ব্যাখ্যামূলক সমাধান" },
-    { id: "bb-sr-2023", year: "বাংলাদেশ ব্যাংক সিনিয়র অফিসার", category: "Bank", date: "২০২৩", totalQ: 100, time: "১ ঘণ্টা", subjectStats: "English 25, Math 25, Bangla 20, GK 20, ICT 10", status: "ব্যাখ্যামূলক সমাধান" },
-    { id: "bb-cash-2022", year: "বাংলাদেশ ব্যাংক অফিসার (Cash)", category: "Bank", date: "২০২২", totalQ: 100, time: "১ ঘণ্টা", subjectStats: "English 25, Math 25, Bangla 20, GK 20, ICT 10", status: "ব্যাখ্যামূলক সমাধান" },
-    { id: "bb-sr-2022", year: "বাংলাদেশ ব্যাংক সিনিয়র অফিসার", category: "Bank", date: "২০২২", totalQ: 100, time: "১ ঘণ্টা", subjectStats: "English 25, Math 25, Bangla 20, GK 20, ICT 10", status: "ব্যাখ্যামূলক সমাধান" },
-    { id: "bb-off-2021", year: "বাংলাদেশ ব্যাংক অফিসার (General)", category: "Bank", date: "২০২১", totalQ: 100, time: "১ ঘণ্টা", subjectStats: "English 25, Math 25, Bangla 20, GK 20, ICT 10", status: "ব্যাখ্যামূলক সমাধান" },
-    { id: "bb-cash-2021", year: "বাংলাদেশ ব্যাংক অফিসার (Cash)", category: "Bank", date: "২০২১", totalQ: 100, time: "১ ঘণ্টা", subjectStats: "English 25, Math 25, Bangla 20, GK 20, ICT 10", status: "ব্যাখ্যামূলক সমাধান" },
-    { id: "bb-sr-2020", year: "বাংলাদেশ ব্যাংক সিনিয়র অফিসার", category: "Bank", date: "২০২০", totalQ: 100, time: "১ ঘণ্টা", subjectStats: "English 25, Math 25, Bangla 20, GK 20, ICT 10", status: "ব্যাখ্যামূলক সমাধান" },
-    { id: "bb-off-2020", year: "বাংলাদেশ ব্যাংক অফিসার (General)", category: "Bank", date: "২০২০", totalQ: 100, time: "১ ঘণ্টা", subjectStats: "English 25, Math 25, Bangla 20, GK 20, ICT 10", status: "ব্যাখ্যামূলক সমাধান" },
-    { id: "bb-cash-2019", year: "বাংলাদেশ ব্যাংক অফিসার (Cash)", category: "Bank", date: "২০১৯", totalQ: 100, time: "১ ঘণ্টা", subjectStats: "English 25, Math 25, Bangla 20, GK 20, ICT 10", status: "ব্যাখ্যামূলক সমাধান" },
-
-    // 2. ব্যাংকার্স সিলেকশন কমিটি (BSC - Combined Banks)
-    { id: "bsc-off-2024", year: "BSC কম্বাইন্ড ৮ ব্যাংক অফিসার (General)", category: "Bank", date: "২০২৪", totalQ: 100, time: "১ ঘণ্টা", subjectStats: "English 25, Math 25, Bangla 20, GK 20, ICT 10", status: "ব্যাখ্যামূলক সমাধান" },
-    { id: "bsc-cash-2024", year: "BSC কম্বাইন্ড ৮ ব্যাংক অফিসার (Cash)", category: "Bank", date: "২০২৪", totalQ: 100, time: "১ ঘণ্টা", subjectStats: "English 25, Math 25, Bangla 20, GK 20, ICT 10", status: "ব্যাখ্যামূলক সমাধান" },
-    { id: "bsc-off-2023", year: "BSC কম্বাইন্ড ৮ ব্যাংক অফিসার (General)", category: "Bank", date: "২০২৩", totalQ: 100, time: "১ ঘণ্টা", subjectStats: "English 25, Math 25, Bangla 20, GK 20, ICT 10", status: "ব্যাখ্যামূলক সমাধান" },
-    { id: "bsc-cash-2023", year: "BSC কম্বাইন্ড ৮ ব্যাংক অফিসার (Cash)", category: "Bank", date: "২০২৩", totalQ: 100, time: "১ ঘণ্টা", subjectStats: "English 25, Math 25, Bangla 20, GK 20, ICT 10", status: "ব্যাখ্যামূলক সমাধান" },
-    { id: "bsc-sr-2022", year: "BSC কম্বাইন্ড ৫ ব্যাংক সিনিয়র অফিসার", category: "Bank", date: "২০২২", totalQ: 100, time: "১ ঘণ্টা", subjectStats: "English 25, Math 25, Bangla 20, GK 20, ICT 10", status: "ব্যাখ্যামূলক সমাধান" },
-    { id: "bsc-cash-2022", year: "BSC কম্বাইন্ড ৮ ব্যাংক অফিসার (Cash)", category: "Bank", date: "২০২২", totalQ: 100, time: "১ ঘণ্টা", subjectStats: "English 25, Math 25, Bangla 20, GK 20, ICT 10", status: "ব্যাখ্যামূলক সমাধান" },
-    { id: "bsc-off-2021", year: "BSC কম্বাইন্ড ৮ ব্যাংক অফিসার (General)", category: "Bank", date: "২০২১", totalQ: 100, time: "১ ঘণ্টা", subjectStats: "English 25, Math 25, Bangla 20, GK 20, ICT 10", status: "ব্যাখ্যামূলক সমাধান" },
-    { id: "bsc-cash-2021", year: "BSC কম্বাইন্ড ৮ ব্যাংক অফিসার (Cash)", category: "Bank", date: "২০২১", totalQ: 100, time: "১ ঘণ্টা", subjectStats: "English 25, Math 25, Bangla 20, GK 20, ICT 10", status: "ব্যাখ্যামূলক সমাধান" },
-    { id: "bsc-sr-2020", year: "BSC কম্বাইন্ড ৫ ব্যাংক সিনিয়র অফিসার", category: "Bank", date: "২০২০", totalQ: 100, time: "১ ঘণ্টা", subjectStats: "English 25, Math 25, Bangla 20, GK 20, ICT 10", status: "ব্যাখ্যামূলক সমাধান" },
-    { id: "bsc-off-2020", year: "BSC কম্বাইন্ড ৮ ব্যাংক অফিসার (General)", category: "Bank", date: "২০২০", totalQ: 100, time: "১ ঘণ্টা", subjectStats: "English 25, Math 25, Bangla 20, GK 20, ICT 10", status: "ব্যাখ্যামূলক সমাধান" },
-    { id: "bsc-cash-2019", year: "BSC কম্বাইন্ড ৮ ব্যাংক অফিসার (Cash)", category: "Bank", date: "২০১৯", totalQ: 100, time: "১ ঘণ্টা", subjectStats: "English 25, Math 25, Bangla 20, GK 20, ICT 10", status: "ব্যাখ্যামূলক সমাধান" },
-
-    // 3. সরকারি ব্যাংক (Sonali, Janata, Agrani, Rupali, BKB, RAKUB, BDBL)
-    { id: "sonali-off-2024", year: "সোনালী ব্যাংক অফিসার (General)", category: "Bank", date: "২০২৪", totalQ: 100, time: "১ ঘণ্টা", subjectStats: "English 25, Math 25, Bangla 20, GK 20, ICT 10", status: "ব্যাখ্যামূলক সমাধান" },
-    { id: "sonali-sr-2023", year: "সোনালী ব্যাংক সিনিয়র অফিসার", category: "Bank", date: "২০২৩", totalQ: 100, time: "১ ঘণ্টা", subjectStats: "English 25, Math 25, Bangla 20, GK 20, ICT 10", status: "ব্যাখ্যামূলক সমাধান" },
-    { id: "janata-off-2023", year: "জনতা ব্যাংক অফিসার (General)", category: "Bank", date: "২০২৩", totalQ: 100, time: "১ ঘণ্টা", subjectStats: "English 25, Math 25, Bangla 20, GK 20, ICT 10", status: "ব্যাখ্যামূলক সমাধান" },
-    { id: "agrani-sr-2022", year: "অগ্রণী ব্যাংক সিনিয়র অফিসার", category: "Bank", date: "২০২২", totalQ: 100, time: "১ ঘণ্টা", subjectStats: "English 25, Math 25, Bangla 20, GK 20, ICT 10", status: "ব্যাখ্যামূলক সমাধান" },
-    { id: "rupali-cash-2022", year: "রূপালী ব্যাংক অফিসার (Cash)", category: "Bank", date: "২০২২", totalQ: 100, time: "১ ঘণ্টা", subjectStats: "English 25, Math 25, Bangla 20, GK 20, ICT 10", status: "ব্যাখ্যামূলক সমাধান" },
-    { id: "bdbl-off-2020", year: "বাংলাদেশ ডেভেলপমেন্ট ব্যাংক (BDBL) অফিসার", category: "Bank", date: "২০২০", totalQ: 100, time: "১ ঘণ্টা", subjectStats: "English 25, Math 25, Bangla 20, GK 20, ICT 10", status: "ব্যাখ্যামূলক সমাধান" },
-
-    // 4. বিশেষায়িত ব্যাংক (PKB, Karmasangsthan, BKB, RAKUB)
-    { id: "pkb-off-2024", year: "প্রবাসী কল্যাণ ব্যাংক অফিসার", category: "Bank", date: "২০২৪", totalQ: 100, time: "১ ঘণ্টা", subjectStats: "English 25, Math 25, Bangla 20, GK 20, ICT 10", status: "ব্যাখ্যামূলক সমাধান" },
-    { id: "kb-off-2023", year: "কর্মসংস্থান ব্যাংক অফিসার", category: "Bank", date: "২০২৩", totalQ: 100, time: "১ ঘণ্টা", subjectStats: "English 25, Math 25, Bangla 20, GK 20, ICT 10", status: "ব্যাখ্যামূলক সমাধান" },
-    { id: "bkb-sr-2022", year: "বাংলাদেশ কৃষি ব্যাংক সিনিয়র অফিসার", category: "Bank", date: "২০২২", totalQ: 100, time: "১ ঘণ্টা", subjectStats: "English 25, Math 25, Bangla 20, GK 20, ICT 10", status: "ব্যাখ্যামূলক সমাধান" },
-    { id: "rakub-off-2021", year: "রাজশাহী কৃষি উন্নয়ন ব্যাংক অফিসার", category: "Bank", date: "২০২১", totalQ: 100, time: "১ ঘণ্টা", subjectStats: "English 25, Math 25, Bangla 20, GK 20, ICT 10", status: "ব্যাখ্যামূলক সমাধান" }
+    { id: "bb-ad-2024", year: "বাংলাদেশ ব্যাংক সহকারী পরিচালক (AD)", category: "Bank", date: "২০২৪", totalQ: 100, time: "১ ঘণ্টা", subjectStats: "English 25, Math 25, Bangla 20, GK 20, ICT 10", status: "ব্যাখ্যামূলক সমাধান", tags: ['Bank', 'Bank Job', 'Bangladesh Bank', 'AD', 'Assistant Director', '2024'], displayTag: 'AD' },
+    { id: "bb-off-2024", year: "বাংলাদেশ ব্যাংক অফিসার (General)", category: "Bank", date: "২০২৪", totalQ: 100, time: "১ ঘণ্টা", subjectStats: "English 25, Math 25, Bangla 20, GK 20, ICT 10", status: "ব্যাখ্যামূলক সমাধান", tags: ['Bank', 'Bank Job', 'Bangladesh Bank', 'Officer', 'General Officer', '2024'], displayTag: 'Officer' },
+    { id: "bsc-off-2024", year: "BSC কম্বাইন্ড ৮ ব্যাংক অফিসার (General)", category: "Bank", date: "২০২৪", totalQ: 100, time: "১ ঘণ্টা", subjectStats: "English 25, Math 25, Bangla 20, GK 20, ICT 10", status: "ব্যাখ্যামূলক সমাধান", tags: ['Bank', 'Bank Job', 'BSC Bank', 'Combined Bank', '8 Bank', '2024'], displayTag: 'Combined' },
+    { id: "sonali-off-2024", year: "সোনালী ব্যাংক অফিসার (General)", category: "Bank", date: "২০২৪", totalQ: 100, time: "১ ঘণ্টা", subjectStats: "English 25, Math 25, Bangla 20, GK 20, ICT 10", status: "ব্যাখ্যামূলক সমাধান", tags: ['Bank', 'Bank Job', 'Sonali Bank', 'Officer', '2024'], displayTag: 'Sonali Officer' }
   ];
 };
 
@@ -163,231 +135,490 @@ function QuestionBankContent() {
   const [searchQuery, setSearchQuery] = useState('');
 
   const filterTags = [
-    { id: 'All', label: 'সকল প্রশ্নব্যাংক' },
-    { id: 'BCS', label: 'বিসিএস' },
-    { id: 'Bank', label: 'ব্যাংক জব' },
-    { id: 'Primary', label: 'প্রাথমিক শিক্ষক' },
-    { id: 'NTRCA', label: 'NTRCA' }
+    { id: 'All', label: 'সকল ক্যাটাগরি', count: QUESTION_BANK_DATA.length },
+    { id: 'BCS', label: 'বিসিএস প্রিলি', count: QUESTION_BANK_DATA.filter(i => i.category === 'BCS').length },
+    { id: 'Bank', label: 'ব্যাংক জবস', count: QUESTION_BANK_DATA.filter(i => i.category === 'Bank').length },
+    { id: 'Primary', label: 'প্রাথমিক শিক্ষক', count: QUESTION_BANK_DATA.filter(i => i.category === 'Primary').length },
+    { id: 'NTRCA', label: 'শিক্ষক নিবন্ধন', count: QUESTION_BANK_DATA.filter(i => i.category === 'NTRCA').length }
   ];
 
   const filteredData = QUESTION_BANK_DATA.filter(item => {
     const matchTag = currentTag === 'All' || item.category === currentTag;
     const q = searchQuery.toLowerCase().trim();
-    const matchSearch = !q || item.year.toLowerCase().includes(q) || item.date.toLowerCase().includes(q) || item.subjectStats.toLowerCase().includes(q);
-    return matchTag && matchSearch;
+    if (!q) return matchTag;
+
+    const qBn = toBengaliNumberStr(q);
+    const qClean = q.replace(/[-_\s]/g, '');
+    const qSpaced = q.replace(/[-_]/g, ' ');
+    const itemYearEn = toEnglishNumberStr(item.year).toLowerCase();
+    const itemDateEn = toEnglishNumberStr(item.date).toLowerCase();
+
+    // Remove 'th', 'st', 'nd', 'rd' or special characters from query if searching numbers e.g. 50th -> 50
+    const cleanNumQuery = q.replace(/(st|nd|rd|th)/g, '');
+    const cleanNumQueryNoSymbol = cleanNumQuery.replace(/[-_\s]/g, '');
+
+    const checkMatch = (targetStr) => {
+      if (!targetStr) return false;
+      const str = String(targetStr).toLowerCase();
+      const strClean = str.replace(/[-_\s]/g, '');
+      const strSpaced = str.replace(/[-_]/g, ' ');
+
+      return (
+        str.includes(q) ||
+        str.includes(qBn) ||
+        str.includes(qSpaced) ||
+        strClean.includes(qClean) ||
+        (cleanNumQuery && strClean.includes(cleanNumQueryNoSymbol))
+      );
+    };
+
+    const textMatch = 
+      checkMatch(item.year) ||
+      checkMatch(itemYearEn) ||
+      checkMatch(item.date) ||
+      checkMatch(itemDateEn) ||
+      checkMatch(item.category) ||
+      checkMatch(item.displayTag) ||
+      checkMatch(item.subjectStats) ||
+      (item.tags && item.tags.some(t => checkMatch(t)));
+
+    return matchTag && textMatch;
   });
 
   return (
-    <main style={{ padding: '40px 0 80px', backgroundColor: '#f8fafc', minHeight: 'calc(100vh - 200px)' }}>
-      <div className="container" style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 20px' }}>
+    <main className="qb-demo-wrapper">
+      <style jsx>{`
+        .qb-demo-wrapper {
+          padding: 40px 0 80px;
+          background-color: #f8fafc;
+          min-height: calc(100vh - 200px);
+          font-family: inherit;
+        }
+
+        .header-section {
+          text-align: center;
+          margin-bottom: 35px;
+        }
+
+        .badge-archive {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 6px 16px;
+          border-radius: 20px;
+          background-color: #fef3c7;
+          color: #d97706;
+          font-size: 0.88rem;
+          font-weight: 700;
+          margin-bottom: 12px;
+        }
+
+        .title-main {
+          font-size: 2.4rem;
+          color: #0f172a;
+          font-weight: 800;
+          margin-bottom: 12px;
+          letter-spacing: -0.5px;
+        }
+
+        .desc-sub {
+          color: #64748b;
+          font-size: 1.05rem;
+          max-width: 650px;
+          margin: 0 auto;
+          line-height: 1.6;
+        }
+
+        .filter-control-card {
+          background: #ffffff;
+          border-radius: 14px;
+          padding: 14px 20px;
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+          border: 1px solid #e2e8f0;
+          margin-bottom: 35px;
+          display: flex;
+          flex-wrap: wrap;
+          gap: 16px;
+          align-items: center;
+          justify-content: space-between;
+        }
+
+        .pills-group {
+          display: flex;
+          gap: 8px;
+          flex-wrap: wrap;
+          align-items: center;
+        }
+
+        .filter-btn {
+          padding: 8px 16px;
+          border-radius: 8px;
+          font-size: 0.92rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          white-space: nowrap;
+        }
+
+        .filter-btn.active {
+          border: 1px solid #5b50e6;
+          background-color: #5b50e6;
+          color: #ffffff;
+          box-shadow: 0 3px 10px rgba(91, 80, 230, 0.3);
+        }
+
+        .filter-btn.active .count-badge {
+          background: rgba(255, 255, 255, 0.22);
+          color: #ffffff;
+        }
+
+        .filter-btn.inactive {
+          border: 1px solid #e2e8f0;
+          background-color: #f1f5f9;
+          color: #475569;
+        }
+
+        .filter-btn.inactive:hover {
+          background-color: #e2e8f0;
+          color: #0f172a;
+        }
+
+        .filter-btn.inactive .count-badge {
+          background: #cbd5e1;
+          color: #334155;
+        }
+
+        .count-badge {
+          padding: 1px 7px;
+          border-radius: 10px;
+          font-size: 0.75rem;
+          font-weight: 700;
+        }
+
+        .search-box-wrapper {
+          position: relative;
+          min-width: 250px;
+          flex: 0 1 320px;
+        }
+
+        .search-input {
+          width: 100%;
+          padding: 9px 14px 9px 36px;
+          border-radius: 8px;
+          border: 1px solid #cbd5e1;
+          font-size: 0.9rem;
+          outline: none;
+          background-color: #ffffff;
+          color: #0f172a;
+          transition: border-color 0.2s ease;
+        }
+
+        .search-input:focus {
+          border-color: #5b50e6;
+          box-shadow: 0 0 0 3px rgba(91, 80, 230, 0.15);
+        }
+
+        .search-icon {
+          position: absolute;
+          left: 12px;
+          top: 50%;
+          transform: translateY(-50%);
+          color: #94a3b8;
+          font-size: 0.9rem;
+        }
+
+        /* Demo Cards Grid Layout */
+        .cards-grid-layout {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+          gap: 24px;
+        }
+
+        .hub-card-item {
+          background-color: #ffffff;
+          border-radius: 16px;
+          padding: 22px;
+          border: 1px solid #e2e8f0;
+          border-left: 5px solid #0284c7;
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          position: relative;
+          transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .hub-card-item:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+          border-color: #0284c7;
+        }
+
+        .card-header-badges {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          margin-top: 4px;
+          margin-bottom: 14px;
+          flex-wrap: wrap;
+        }
+
+        .category-chip {
+          background-color: #e0f2fe;
+          color: #0284c7;
+          font-size: 0.8rem;
+          font-weight: 700;
+          padding: 4px 12px;
+          border-radius: 20px;
+          border: 1px solid rgba(2, 132, 199, 0.2);
+          transition: all 0.2s ease;
+        }
+
+        .category-chip:hover {
+          background-color: #0284c7;
+          color: #ffffff;
+        }
+
+        .tag-chip {
+          background-color: #f1f5f9;
+          color: #475569;
+          font-size: 0.8rem;
+          font-weight: 700;
+          padding: 4px 12px;
+          border-radius: 20px;
+          border: 1px solid #e2e8f0;
+          transition: all 0.2s ease;
+        }
+
+        .tag-chip:hover {
+          background-color: #6366f1;
+          color: #ffffff;
+          border-color: #6366f1;
+        }
+
+        .difficulty-chip {
+          font-size: 0.78rem;
+          color: #d97706;
+          font-weight: 700;
+        }
+
+        .card-exam-title {
+          font-size: 1.15rem;
+          font-weight: 800;
+          color: #0f172a;
+          margin: 0 0 10px 0;
+          line-height: 1.4;
+        }
+
+        .subject-breakdown-box {
+          font-size: 0.85rem;
+          color: #334155;
+          background-color: #f8fafc;
+          padding: 10px 14px;
+          border-radius: 10px;
+          margin-bottom: 18px;
+          border: 1px solid #e2e8f0;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+          line-height: 1.5;
+        }
+
+        .meta-stats-row {
+          display: flex;
+          justify-content: space-between;
+          font-size: 0.82rem;
+          color: #64748b;
+          margin-bottom: 16px;
+          font-weight: 600;
+        }
+
+        .card-buttons-flex {
+          display: flex;
+          gap: 10px;
+        }
+
+        .btn-read-solution {
+          flex: 1;
+          background-color: #f8fafc;
+          color: #334155;
+          border: 1px solid #cbd5e1;
+          padding: 10px;
+          border-radius: 8px;
+          font-size: 0.88rem;
+          font-weight: 700;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          transition: all 0.2s ease;
+        }
+
+        .btn-read-solution:hover {
+          background-color: #e2e8f0;
+          color: #0f172a;
+        }
+
+        .btn-start-exam {
+          flex: 1.2;
+          background-color: #0284c7;
+          color: #ffffff;
+          border: none;
+          padding: 10px;
+          border-radius: 8px;
+          font-size: 0.88rem;
+          font-weight: 700;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          box-shadow: 0 2px 8px rgba(2, 132, 199, 0.3);
+          transition: all 0.2s ease;
+        }
+
+        .btn-start-exam:hover {
+          background-color: #0369a1;
+          box-shadow: 0 4px 12px rgba(2, 132, 199, 0.4);
+        }
+
+        .no-data-box {
+          text-align: center;
+          padding: 60px 20px;
+          background: #ffffff;
+          border-radius: 16px;
+          border: 1px dashed #cbd5e1;
+        }
+
+        @media (max-width: 768px) {
+          .title-main { font-size: 1.8rem; }
+          .cards-grid-layout { grid-template-columns: 1fr; }
+        }
+      `}</style>
+
+      <div className="container" style={{ maxWidth: '1300px', margin: '0 auto', padding: '0 20px' }}>
         
-        {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-          <span
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '6px 14px',
-              borderRadius: '20px',
-              backgroundColor: '#fef3c7',
-              color: '#d97706',
-              fontSize: '0.88rem',
-              fontWeight: 700,
-              marginBottom: '12px'
-            }}
-          >
+        {/* Header Section */}
+        <div className="header-section">
+          <span className="badge-archive">
             <i className="fa-solid fa-book-open"></i>
             <span>প্রশ্নব্যাংক আর্কাইভ</span>
           </span>
-          <h1 style={{ fontSize: '2.4rem', color: '#0f172a', fontWeight: 800, marginBottom: '12px', letterSpacing: '-0.5px' }}>
+          <h1 className="title-main">
             বিগত সালের প্রশ্ন ও নির্ভুল ব্যাখ্যা
           </h1>
-          <p style={{ color: '#64748b', fontSize: '1.05rem', maxWidth: '650px', margin: '0 auto', lineHeight: '1.6' }}>
+          <p className="desc-sub">
             বিসিএস, ব্যাংক, প্রাথমিক শিক্ষক ও NTRCA শিক্ষক নিবন্ধন পরীক্ষার বিগত প্রশ্ন সমাধান পড়ুন অথবা সরাসরি পরীক্ষা দিন।
           </p>
         </div>
 
-        {/* Filters & Search Box */}
-        <div
-          style={{
-            background: '#ffffff',
-            borderRadius: '16px',
-            padding: '18px 24px',
-            boxShadow: '0 2px 10px rgba(0,0,0,0.04)',
-            border: '1px solid #e2e8f0',
-            marginBottom: '35px',
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: '16px',
-            alignItems: 'center',
-            justifyContent: 'space-between'
-          }}
-        >
-          {/* Category Filter Pills */}
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+        {/* Filters & Search Control Card */}
+        <div className="filter-control-card">
+          <div className="pills-group">
             {filterTags.map(tag => {
               const isActive = currentTag === tag.id;
               return (
                 <button
                   key={tag.id}
                   onClick={() => setCurrentTag(tag.id)}
-                  style={{
-                    padding: '8px 18px',
-                    borderRadius: '8px',
-                    fontSize: '0.92rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    border: isActive ? '1px solid #0284c7' : '1px solid #cbd5e1',
-                    backgroundColor: isActive ? '#0284c7' : '#ffffff',
-                    color: isActive ? '#ffffff' : '#334155',
-                    boxShadow: isActive ? '0 2px 8px rgba(2, 132, 199, 0.25)' : 'none'
-                  }}
+                  className={`filter-btn ${isActive ? 'active' : 'inactive'}`}
                 >
-                  {tag.label}
+                  <span>{tag.label}</span>
+                  <span className="count-badge">{toBengaliNumber(tag.count)}</span>
                 </button>
               );
             })}
           </div>
 
-          {/* Search Input Bar */}
-          <div style={{ position: 'relative', minWidth: '260px', flex: '0 1 300px' }}>
+          <div className="search-box-wrapper">
             <input
               type="text"
+              className="search-input"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="সাল বা পরীক্ষা দিয়ে সার্চ করুন..."
-              style={{
-                width: '100%',
-                padding: '9px 14px 9px 36px',
-                borderRadius: '8px',
-                border: '1.5px solid #cbd5e1',
-                fontSize: '0.92rem',
-                outline: 'none',
-                backgroundColor: '#ffffff',
-                color: '#0f172a',
-                transition: 'border-color 0.2s ease'
-              }}
-              onFocus={(e) => (e.target.style.borderColor = '#0284c7')}
-              onBlur={(e) => (e.target.style.borderColor = '#cbd5e1')}
+              placeholder="খুঁজুন (যেমন: 50th, BCS)..."
             />
-            <i
-              className="fa-solid fa-magnifying-glass"
-              style={{
-                position: 'absolute',
-                left: '12px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                color: '#94a3b8',
-                fontSize: '0.9rem'
-              }}
-            />
+            <i className="fa-solid fa-magnifying-glass search-icon" />
           </div>
         </div>
 
-        {/* Question Bank List */}
+        {/* Question Bank Cards Grid */}
         {filteredData.length === 0 ? (
-          <div
-            style={{
-              textAlign: 'center',
-              padding: '60px 20px',
-              background: '#ffffff',
-              borderRadius: '16px',
-              border: '1px dashed #cbd5e1'
-            }}
-          >
+          <div className="no-data-box">
             <p style={{ fontSize: '1.1rem', color: '#64748b', margin: 0 }}>
               কোনো প্রশ্নব্যাংক পাওয়া যায়নি।
             </p>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            {filteredData.map(item => (
-              <div
-                key={item.id}
-                style={{
-                  backgroundColor: '#ffffff',
-                  borderRadius: '16px',
-                  padding: '24px 28px',
-                  border: '1px solid #e2e8f0',
-                  borderLeft: '5px solid #0284c7',
-                  boxShadow: '0 2px 10px rgba(0,0,0,0.03)',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  flexWrap: 'wrap',
-                  gap: '20px',
-                  transition: 'transform 0.2s ease, box-shadow 0.2s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.06)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'none';
-                  e.currentTarget.style.boxShadow = '0 2px 10px rgba(0,0,0,0.03)';
-                }}
-              >
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-                    <span
-                      style={{
-                        backgroundColor: '#e0f2fe',
-                        color: '#0284c7',
-                        padding: '4px 10px',
-                        borderRadius: '6px',
-                        fontSize: '0.8rem',
-                        fontWeight: 700
-                      }}
-                    >
-                      {item.category}
-                    </span>
-                    <span style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>
-                      সাল: {item.date}
-                    </span>
+          <div className="cards-grid-layout">
+            {filteredData.map(item => {
+              return (
+                <div key={item.id} className="hub-card-item">
+                  <div>
+                    {/* Header Chips with Search Tags */}
+                    <div className="card-header-badges">
+                      <span 
+                        className="category-chip"
+                        onClick={() => setSearchQuery(item.category)}
+                        style={{ cursor: 'pointer' }}
+                        title="ক্লিক করে এই ক্যাটাগরিতে সার্চ করুন"
+                      >
+                        {item.category}
+                      </span>
+                      
+                      {item.displayTag && (
+                        <span 
+                          className="tag-chip"
+                          onClick={() => setSearchQuery(item.displayTag)}
+                          style={{ cursor: 'pointer' }}
+                          title="ক্লিক করে এই পদ/ব্যাচে সার্চ করুন"
+                        >
+                          {item.displayTag}
+                        </span>
+                      )}
+
+                      <span 
+                        className="tag-chip"
+                        onClick={() => setSearchQuery(toEnglishNumberStr(item.date))}
+                        style={{ cursor: 'pointer' }}
+                        title="ক্লিক করে এই সালে সার্চ করুন"
+                      >
+                        {toEnglishNumberStr(item.date)}
+                      </span>
+                    </div>
+
+                    {/* Title */}
+                    <h3 className="card-exam-title">{item.year}</h3>
+
+                    {/* Subject Breakdown Box */}
+                    <div className="subject-breakdown-box">
+                      {item.subjectStats}
+                    </div>
                   </div>
 
-                  <h3 style={{ fontSize: '1.3rem', color: '#0f172a', fontWeight: 700, marginBottom: '6px' }}>
-                    {item.year}
-                  </h3>
-                  <p style={{ color: '#64748b', fontSize: '0.92rem', marginBottom: '12px' }}>
-                    বন্টন: {item.subjectStats}
-                  </p>
+                  <div>
+                    {/* Meta Stats Row */}
+                    <div className="meta-stats-row">
+                      <span><strong>প্রশ্ন:</strong> {item.totalQ} টি</span>
+                      <span><strong>সময়:</strong> {item.time}</span>
+                      <span><strong>সাল:</strong> {item.date}</span>
+                    </div>
 
-                  <div style={{ display: 'flex', gap: '16px', fontSize: '0.85rem', color: '#475569', flexWrap: 'wrap' }}>
-                    <span><strong>মোট প্রশ্ন:</strong> {item.totalQ} টি</span>
-                    <span>•</span>
-                    <span><strong>সময়:</strong> {item.time}</span>
-                    <span>•</span>
-                    <span style={{ color: '#16a34a', fontWeight: 600 }}>{item.status}</span>
+                    {/* Dual Action Buttons */}
+                    <div className="card-buttons-flex">
+                      <button onClick={() => router.push('/questions')} className="btn-read-solution">
+                        <i className="fa-regular fa-folder-open"></i> <span>ব্যাখ্যা পড়ুন</span>
+                      </button>
+                      <button onClick={() => router.push('/quiz')} className="btn-start-exam">
+                        <i className="fa-solid fa-id-badge"></i> <span>পরীক্ষা দিন</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
-
-                <div>
-                  <button
-                    onClick={() => router.push('/quiz')}
-                    style={{
-                      backgroundColor: '#0284c7',
-                      color: '#ffffff',
-                      padding: '10px 20px',
-                      borderRadius: '8px',
-                      fontSize: '0.9rem',
-                      fontWeight: 700,
-                      border: 'none',
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      transition: 'background-color 0.2s ease',
-                      boxShadow: '0 2px 6px rgba(2, 132, 199, 0.3)'
-                    }}
-                  >
-                    <span>অনুশীলন করুন</span> <i className="fa-solid fa-arrow-right" style={{ fontSize: '0.85rem' }}></i>
-                  </button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 
