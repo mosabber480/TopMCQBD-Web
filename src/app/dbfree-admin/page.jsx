@@ -411,7 +411,7 @@ export default function DBFreeAdminPage() {
                 <span className="box-title">কালেকশন তালিকা:</span>
                 <div className="tags-container">
                   {statusData.collections.map((col, idx) => (
-                    <span key={idx} className="col-tag" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#6ee7b7', borderColor: 'rgba(16, 185, 129, 0.3)' }}>
+                    <span key={idx} className="col-tag">
                       {col}
                     </span>
                   ))}
@@ -425,7 +425,7 @@ export default function DBFreeAdminPage() {
         <div className="crud-container">
           <div className="crud-header">
             <h3>
-              <i className="fa-solid fa-pen-nib" style={{ marginRight: '8px', color: '#34d399' }} />
+              <i className="fa-solid fa-pen-nib" style={{ marginRight: '8px', color: '#0080c3' }} />
               ডাটা যোগ ও সম্পাদনা প্যানেল (db-free-test)
             </h3>
             <p>নিচের বক্সে টেক্সট লিখে যোগ করুন। এটি সরাসরি Free MongoDB ক্লাস্টারে সেভ হবে এবং <code>/dbfree-test</code> পেজে লাইভ আপডেট হবে।</p>
@@ -435,17 +435,17 @@ export default function DBFreeAdminPage() {
           <div className="summary-grid">
             <div className="summary-card">
               <span className="summary-label">ডাটাবেজ ক্লাস্টার</span>
-              <strong className="summary-val" style={{ color: '#6ee7b7' }}>
+              <strong className="summary-val" style={{ color: '#0080c3' }}>
                 {statusData?.cluster || 'TopMCQBD_DB_Free'}
               </strong>
             </div>
             <div className="summary-card">
               <span className="summary-label">টার্গেট কালেকশন</span>
-              <strong className="summary-val" style={{ color: '#34d399' }}>db-free-test</strong>
+              <strong className="summary-val" style={{ color: '#0080c3' }}>db-free-test</strong>
             </div>
             <div className="summary-card">
               <span className="summary-label">মোট সংরক্ষিত ডাটা</span>
-              <strong className="summary-val" style={{ color: '#4ade80' }}>
+              <strong className="summary-val" style={{ color: '#16a34a' }}>
                 {items.length} টি আইটেম
               </strong>
             </div>
@@ -630,15 +630,16 @@ export default function DBFreeAdminPage() {
         .server-status-indicator {
           margin-top: 10px;
           font-size: 13px;
-          color: #94a3b8;
+          color: #64748b;
         }
         .server-status-indicator code {
-          background: rgba(30, 41, 59, 0.7);
-          border: 1px solid rgba(255, 255, 255, 0.08);
+          background: #f1f5f9;
+          border: 1px solid #e2e8f0;
           padding: 3px 10px;
           border-radius: 6px;
-          color: #38bdf8;
+          color: #0080c3;
           font-size: 12px;
+          font-weight: 600;
         }
         .control-btn-group {
           display: flex;
@@ -647,40 +648,41 @@ export default function DBFreeAdminPage() {
           flex-wrap: wrap;
         }
         .view-test-link {
-          background: rgba(16, 185, 129, 0.15);
-          color: #34d399;
-          border: 1px solid rgba(16, 185, 129, 0.35);
+          background: #eff6ff;
+          color: #0080c3;
+          border: 1px solid #bae6fd;
           padding: 9px 16px;
-          border-radius: 10px;
+          border-radius: 8px;
           font-size: 13px;
-          font-weight: 600;
+          font-weight: 700;
           text-decoration: none;
           display: inline-flex;
           align-items: center;
           transition: all 0.2s;
         }
         .view-test-link:hover {
-          background: rgba(16, 185, 129, 0.25);
+          background: #e0f2fe;
         }
         .clear-cache-btn {
-          background: rgba(234, 179, 8, 0.12);
-          color: #facc15;
-          border: 1px solid rgba(234, 179, 8, 0.3);
+          background: #fefce8;
+          color: #ca8a04;
+          border: 1px solid #fde047;
           padding: 9px 14px;
-          border-radius: 10px;
+          border-radius: 8px;
           font-size: 13px;
+          font-weight: 700;
           cursor: pointer;
           transition: all 0.2s;
         }
         .clear-cache-btn:hover {
-          background: rgba(234, 179, 8, 0.22);
+          background: #fef08a;
         }
         .action-feedback {
           padding: 12px 18px;
           border-radius: 10px;
           margin-bottom: 20px;
           font-size: 13px;
-          font-weight: 500;
+          font-weight: 600;
           display: flex;
           align-items: center;
         }
@@ -694,10 +696,10 @@ export default function DBFreeAdminPage() {
           .summary-grid { grid-template-columns: 1fr; }
         }
         .summary-card {
-          background: rgba(30, 41, 59, 0.5);
-          border: 1px solid rgba(255, 255, 255, 0.08);
+          background: #f7f7f7;
+          border: 1px solid #e2e8f0;
           padding: 18px 16px;
-          border-radius: 14px;
+          border-radius: 12px;
           display: flex;
           flex-direction: column;
           gap: 6px;
@@ -705,70 +707,70 @@ export default function DBFreeAdminPage() {
         }
         .summary-label {
           font-size: 11.5px;
-          color: #94a3b8;
+          color: #64748b;
           text-transform: uppercase;
           letter-spacing: 0.5px;
-          font-weight: 600;
+          font-weight: 700;
         }
         .summary-val {
           font-size: 17px;
           font-weight: 700;
+          color: #1e293b;
         }
         .msg-success {
-          background: rgba(34, 197, 94, 0.15);
-          border: 1px solid rgba(34, 197, 94, 0.4);
-          color: #4ade80;
+          background: #f7f7f7;
+          border: 1px solid #86efac;
+          color: #15803d;
         }
         .msg-error {
-          background: rgba(239, 68, 68, 0.15);
-          border: 1px solid rgba(239, 68, 68, 0.4);
-          color: #f87171;
+          background: #fef2f2;
+          border: 1px solid #fca5a5;
+          color: #b91c1c;
         }
         .crud-container {
-          background: rgba(30, 41, 59, 0.5);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          border-radius: 18px;
+          background: #f7f7f7;
+          border: 1px solid #e2e8f0;
+          border-radius: 16px;
           padding: 26px;
           margin-bottom: 28px;
         }
         .crud-header h3 {
           margin: 0 0 6px 0;
           font-size: 18px;
-          color: #f8fafc;
+          color: #1e293b;
           font-weight: 700;
         }
         .crud-header p {
           margin: 0 0 18px 0;
           font-size: 13px;
-          color: #94a3b8;
+          color: #64748b;
           line-height: 1.5;
         }
         .btn-add-main {
-          background: #059669;
+          background: #0080c3;
           color: #ffffff;
           border: none;
           padding: 12px 26px;
-          border-radius: 10px;
+          border-radius: 8px;
           font-size: 14px;
           font-weight: 700;
           cursor: pointer;
           transition: all 0.2s ease;
           display: inline-flex;
           align-items: center;
-          box-shadow: 0 4px 12px rgba(5, 150, 105, 0.35);
+          box-shadow: 0 2px 8px rgba(0, 128, 195, 0.25);
         }
         .btn-add-main:hover {
-          background: #047857;
-          transform: translateY(-2px);
-          box-shadow: 0 6px 16px rgba(5, 150, 105, 0.45);
+          background: #006da6;
+          transform: translateY(-1px);
         }
         .add-rows-container {
-          background: rgba(15, 23, 42, 0.85);
-          border: 1px solid rgba(16, 185, 129, 0.3);
-          border-radius: 14px;
+          background: #ffffff;
+          border: 1px solid #bae6fd;
+          border-radius: 12px;
           padding: 20px;
           margin-bottom: 24px;
-          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+          box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
         }
         .add-rows-header {
           margin-bottom: 14px;
@@ -776,7 +778,7 @@ export default function DBFreeAdminPage() {
         .add-rows-title {
           font-size: 14px;
           font-weight: 700;
-          color: #34d399;
+          color: #0080c3;
           display: flex;
           align-items: center;
         }
@@ -790,14 +792,14 @@ export default function DBFreeAdminPage() {
           display: flex;
           align-items: center;
           gap: 10px;
-          background: rgba(30, 41, 59, 0.6);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          border-radius: 10px;
+          background: #f8fafc;
+          border: 1px solid #cbd5e1;
+          border-radius: 8px;
           padding: 8px 12px;
         }
         .row-num-badge {
-          background: rgba(16, 185, 129, 0.2);
-          color: #6ee7b7;
+          background: #e0f2fe;
+          color: #0284c7;
           font-size: 12px;
           font-weight: 700;
           padding: 4px 8px;
@@ -808,22 +810,22 @@ export default function DBFreeAdminPage() {
           flex: 1;
           background: transparent;
           border: none;
-          color: #f8fafc;
+          color: #1e293b;
           font-size: 14px;
           outline: none;
           padding: 6px 0;
         }
         .add-row-input::placeholder {
-          color: #64748b;
+          color: #94a3b8;
         }
         .btn-row-delete {
-          background: rgba(239, 68, 68, 0.15);
-          border: 1px solid rgba(239, 68, 68, 0.3);
-          color: #fca5a5;
+          background: #fee2e2;
+          border: 1px solid #fca5a5;
+          color: #b91c1c;
           padding: 6px 12px;
           border-radius: 6px;
           font-size: 12px;
-          font-weight: 600;
+          font-weight: 700;
           cursor: pointer;
           transition: all 0.2s;
           display: inline-flex;
@@ -841,23 +843,23 @@ export default function DBFreeAdminPage() {
           gap: 12px;
           flex-wrap: wrap;
           padding-top: 12px;
-          border-top: 1px dashed rgba(255, 255, 255, 0.1);
+          border-top: 1px dashed #e2e8f0;
         }
         .btn-add-more-rows {
-          background: #0d9488;
+          background: #0284c7;
           color: #ffffff;
           border: none;
           padding: 9px 18px;
           border-radius: 8px;
           font-size: 13px;
-          font-weight: 600;
+          font-weight: 700;
           cursor: pointer;
           transition: all 0.2s;
           display: inline-flex;
           align-items: center;
         }
         .btn-add-more-rows:hover {
-          background: #0f766e;
+          background: #0369a1;
           transform: translateY(-1px);
         }
         .save-cancel-group {
@@ -865,38 +867,38 @@ export default function DBFreeAdminPage() {
           gap: 8px;
         }
         .btn-save-all-rows {
-          background: #059669;
+          background: #0080c3;
           color: #ffffff;
           border: none;
           padding: 9px 20px;
           border-radius: 8px;
           font-size: 13px;
-          font-weight: 600;
+          font-weight: 700;
           cursor: pointer;
           transition: all 0.2s;
           display: inline-flex;
           align-items: center;
         }
         .btn-save-all-rows:hover:not(:disabled) {
-          background: #047857;
+          background: #006da6;
           transform: translateY(-1px);
         }
         .btn-cancel-all-rows {
-          background: rgba(148, 163, 184, 0.2);
-          color: #cbd5e1;
-          border: 1px solid rgba(255, 255, 255, 0.1);
+          background: #f1f5f9;
+          color: #64748b;
+          border: 1px solid #cbd5e1;
           padding: 9px 18px;
           border-radius: 8px;
           font-size: 13px;
-          font-weight: 600;
+          font-weight: 700;
           cursor: pointer;
           transition: all 0.2s;
           display: inline-flex;
           align-items: center;
         }
         .btn-cancel-all-rows:hover {
-          background: rgba(148, 163, 184, 0.35);
-          color: #ffffff;
+          background: #e2e8f0;
+          color: #1e293b;
         }
         .admin-search-wrap {
           display: flex;
@@ -909,8 +911,8 @@ export default function DBFreeAdminPage() {
         .search-box-inner {
           display: flex;
           align-items: center;
-          background: rgba(15, 23, 42, 0.7);
-          border: 1px solid rgba(255, 255, 255, 0.08);
+          background: #ffffff;
+          border: 1px solid #cbd5e1;
           border-radius: 8px;
           padding: 6px 12px;
           gap: 8px;
@@ -919,35 +921,36 @@ export default function DBFreeAdminPage() {
         }
         .search-icon {
           font-size: 12px;
-          opacity: 0.6;
+          color: #64748b;
         }
         .admin-search-input {
           background: transparent;
           border: none;
-          color: #f8fafc;
-          font-size: 12px;
+          color: #1e293b;
+          font-size: 13px;
           width: 100%;
           outline: none;
         }
         .clear-btn {
           background: transparent;
           border: none;
-          color: #94a3b8;
+          color: #64748b;
           cursor: pointer;
           font-size: 11px;
         }
         .admin-count-text {
           font-size: 12px;
-          color: #94a3b8;
+          color: #64748b;
+          font-weight: 600;
         }
         .empty-box {
           text-align: center;
           padding: 32px 20px;
-          color: #94a3b8;
+          color: #64748b;
           font-size: 13px;
-          background: rgba(15, 23, 42, 0.5);
+          background: #f8fafc;
           border-radius: 12px;
-          border: 1px dashed rgba(255, 255, 255, 0.1);
+          border: 1px dashed #cbd5e1;
         }
         .items-list {
           display: flex;
@@ -955,8 +958,8 @@ export default function DBFreeAdminPage() {
           gap: 10px;
         }
         .item-row {
-          background: rgba(15, 23, 42, 0.75);
-          border: 1px solid rgba(255, 255, 255, 0.08);
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
           border-radius: 12px;
           padding: 14px 18px;
           display: flex;
@@ -964,11 +967,12 @@ export default function DBFreeAdminPage() {
           align-items: center;
           gap: 14px;
           flex-wrap: wrap;
-          transition: border-color 0.2s, background 0.2s;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+          transition: border-color 0.2s, box-shadow 0.2s;
         }
         .item-row:hover {
-          border-color: rgba(16, 185, 129, 0.4);
-          background: rgba(15, 23, 42, 0.95);
+          border-color: #6ee7b7;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
         }
         .item-content {
           display: flex;
@@ -982,7 +986,7 @@ export default function DBFreeAdminPage() {
           gap: 10px;
         }
         .item-text {
-          color: #f1f5f9;
+          color: #1e293b;
           font-size: 14px;
           word-break: break-word;
         }
@@ -996,12 +1000,12 @@ export default function DBFreeAdminPage() {
         }
         .item-id-tag {
           font-family: monospace;
-          color: #475569;
+          color: #64748b;
         }
         .id-copy-btn {
-          background: rgba(30, 41, 59, 0.8);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          color: #94a3b8;
+          background: #f1f5f9;
+          border: 1px solid #cbd5e1;
+          color: #64748b;
           padding: 2px 7px;
           border-radius: 5px;
           font-size: 10px;
@@ -1009,8 +1013,9 @@ export default function DBFreeAdminPage() {
           transition: all 0.2s;
         }
         .id-copy-btn:hover {
-          color: #fff;
-          background: #334155;
+          color: #0080c3;
+          border-color: #7dd3fc;
+          background: #f0f9ff;
         }
         .item-actions {
           display: flex;
@@ -1019,25 +1024,25 @@ export default function DBFreeAdminPage() {
         .action-btn {
           border: none;
           padding: 6px 12px;
-          border-radius: 8px;
+          border-radius: 6px;
           font-size: 12px;
           cursor: pointer;
-          font-weight: 600;
+          font-weight: 700;
           transition: all 0.2s;
         }
         .edit-btn {
-          background: rgba(2, 132, 199, 0.15);
-          color: #38bdf8;
-          border: 1px solid rgba(2, 132, 199, 0.35);
+          background: #eff6ff;
+          color: #0284c7;
+          border: 1px solid #bae6fd;
         }
         .edit-btn:hover {
           background: #0284c7;
           color: #fff;
         }
         .del-btn {
-          background: rgba(220, 38, 38, 0.15);
-          color: #f87171;
-          border: 1px solid rgba(220, 38, 38, 0.35);
+          background: #fee2e2;
+          color: #dc2626;
+          border: 1px solid #fca5a5;
         }
         .del-btn:hover {
           background: #dc2626;
@@ -1052,11 +1057,11 @@ export default function DBFreeAdminPage() {
         .edit-input {
           flex: 1;
           min-width: 200px;
-          background: #1e293b;
-          border: 1px solid #10b981;
-          border-radius: 8px;
+          background: #ffffff;
+          border: 1px solid #0080c3;
+          border-radius: 6px;
           padding: 8px 12px;
-          color: #fff;
+          color: #1e293b;
           font-size: 13px;
         }
         .edit-btn-group {
@@ -1064,20 +1069,21 @@ export default function DBFreeAdminPage() {
           gap: 6px;
         }
         .btn-save {
+          background: #0080c3;
           color: #fff;
           border: none;
           padding: 8px 14px;
-          border-radius: 8px;
+          border-radius: 6px;
           font-size: 12px;
-          font-weight: 600;
+          font-weight: 700;
           cursor: pointer;
         }
         .btn-cancel {
-          background: #475569;
+          background: #64748b;
           color: #fff;
           border: none;
           padding: 8px 14px;
-          border-radius: 8px;
+          border-radius: 6px;
           font-size: 12px;
           cursor: pointer;
         }
@@ -1091,33 +1097,26 @@ export default function DBFreeAdminPage() {
           gap: 12px;
         }
         .bottom-nav-link {
-          color: #94a3b8;
+          color: #0080c3;
           font-size: 13.5px;
-          font-weight: 600;
+          font-weight: 700;
           text-decoration: none;
           display: inline-flex;
           align-items: center;
           padding: 9px 16px;
           border-radius: 8px;
-          background: rgba(30, 41, 59, 0.6);
-          border: 1px solid rgba(255, 255, 255, 0.08);
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
           transition: all 0.2s ease;
         }
         .bottom-nav-link:hover {
-          color: #f8fafc;
-          background: rgba(30, 41, 59, 0.95);
-          border-color: rgba(255, 255, 255, 0.2);
+          color: #006093;
+          background: #f0f9ff;
+          border-color: #bae6fd;
           transform: translateY(-1px);
         }
-        .orb-1 {
-          background: #10b981;
-          top: 10%;
-          left: 15%;
-        }
-        .orb-2 {
-          background: #06b6d4;
-          bottom: 10%;
-          right: 15%;
+        .orb-1, .orb-2 {
+          display: none !important;
         }
       `}</style>
     </main>

@@ -63,10 +63,10 @@ export default function DbNavBox({ activeRoute }) {
           <button
             onClick={handleLogout}
             style={{
-              background: 'rgba(239, 68, 68, 0.15)',
-              border: '1px solid rgba(239, 68, 68, 0.35)',
-              color: '#fca5a5',
-              padding: '4px 10px',
+              background: '#fee2e2',
+              border: '1px solid #fca5a5',
+              color: '#dc2626',
+              padding: '5px 12px',
               borderRadius: '6px',
               fontSize: '11.5px',
               fontWeight: '700',
@@ -105,9 +105,9 @@ export default function DbNavBox({ activeRoute }) {
                 fontSize: '12.5px',
                 fontWeight: '700',
                 boxShadow: isActive
-                  ? '0 4px 14px rgba(0,0,0,0.45)'
-                  : '0 2px 6px rgba(0,0,0,0.25)',
-                filter: isActive ? 'brightness(1.1)' : 'none',
+                  ? '0 4px 14px rgba(0,0,0,0.25)'
+                  : '0 2px 6px rgba(0,0,0,0.12)',
+                filter: isActive ? 'brightness(1.05)' : 'none',
                 cursor: 'pointer',
                 whiteSpace: 'nowrap',
                 lineHeight: 'normal',
@@ -171,12 +171,12 @@ export default function DbNavBox({ activeRoute }) {
 
       <style jsx>{`
         .db-nav-box-wrapper {
-          background: rgba(15, 23, 42, 0.75);
-          border: 1px solid rgba(255, 255, 255, 0.1);
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
           border-radius: 14px;
           padding: 18px 22px;
           margin-top: 30px;
-          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
           text-align: left;
         }
 
@@ -202,9 +202,9 @@ export default function DbNavBox({ activeRoute }) {
           font-size: 11px;
           font-weight: 700;
           letter-spacing: 0.5px;
-          color: #38bdf8;
-          background: rgba(56, 189, 248, 0.12);
-          border: 1px solid rgba(56, 189, 248, 0.3);
+          color: #2563eb;
+          background: #eff6ff;
+          border: 1px solid #bfdbfe;
           padding: 3px 10px;
           border-radius: 20px;
         }
@@ -212,12 +212,12 @@ export default function DbNavBox({ activeRoute }) {
         .nav-heading {
           font-size: 15px;
           font-weight: 700;
-          color: #f1f5f9;
+          color: #1e293b;
         }
 
         .nav-sub {
           font-size: 12px;
-          color: #94a3b8;
+          color: #64748b;
         }
 
         .admin-actions-row {

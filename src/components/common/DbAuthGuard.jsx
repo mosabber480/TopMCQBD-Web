@@ -79,20 +79,24 @@ export default function DbAuthGuard({ children, activeRoute = '' }) {
         <p>কানেকশন ভেরিফাই করা হচ্ছে...</p>
         <style jsx>{`
           .db-auth-loading-screen {
-            min-height: 80vh;
+            min-height: 100vh;
+            min-height: 100dvh;
+            width: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            color: #94a3b8;
+            color: #64748b;
             font-family: inherit;
             gap: 16px;
+            background-color: #ffffff;
+            box-sizing: border-box;
           }
           .auth-spinner {
             width: 36px;
             height: 36px;
-            border: 3px solid rgba(56, 189, 248, 0.2);
-            border-top-color: #38bdf8;
+            border: 3px solid rgba(0, 123, 255, 0.2);
+            border-top-color: #007bff;
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
           }
@@ -109,13 +113,9 @@ export default function DbAuthGuard({ children, activeRoute = '' }) {
     return <>{children}</>;
   }
 
-  // Otherwise, display high-end Login Gate Card
+  // Otherwise, display clean white Login Gate Card matching /login page
   return (
     <div className="db-auth-gate-container">
-      {/* Background ambient orbs */}
-      <div className="gate-orb gate-orb-1" />
-      <div className="gate-orb gate-orb-2" />
-
       <div className="db-auth-card">
         {/* Card Header Icon & Titles */}
         <div className="auth-card-header">
@@ -144,7 +144,7 @@ export default function DbAuthGuard({ children, activeRoute = '' }) {
           {/* Username Field */}
           <div className="form-group">
             <label className="form-label" htmlFor="db-suite-username">
-              <i className="fa-solid fa-user" /> ইউজারনেম (Username)
+              <i className="fa-solid fa-user" /> ইউজারনেম (Username):
             </label>
             <div className="input-wrapper">
               <input
@@ -152,7 +152,7 @@ export default function DbAuthGuard({ children, activeRoute = '' }) {
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="ইউজারনেম লিখুন..."
+                placeholder="Enter username or email..."
                 className="auth-input"
                 required
                 autoComplete="username"
@@ -163,7 +163,7 @@ export default function DbAuthGuard({ children, activeRoute = '' }) {
           {/* Password Field */}
           <div className="form-group">
             <label className="form-label" htmlFor="db-suite-password">
-              <i className="fa-solid fa-key" /> পাসওয়ার্ড (Password)
+              <i className="fa-solid fa-key" /> পাসওয়ার্ড (Password):
             </label>
             <div className="input-wrapper">
               <input
@@ -171,7 +171,7 @@ export default function DbAuthGuard({ children, activeRoute = '' }) {
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="পাসওয়ার্ড লিখুন..."
+                placeholder="Enter password..."
                 className="auth-input"
                 required
                 autoComplete="current-password"
@@ -192,7 +192,7 @@ export default function DbAuthGuard({ children, activeRoute = '' }) {
           <button type="submit" disabled={loading} className="auth-submit-btn">
             {loading ? (
               <>
-                <span className="btn-spinner" />
+                <i className="fa-solid fa-spinner fa-spin" />
                 ভেরিফাই করা হচ্ছে...
               </>
             ) : (
@@ -214,85 +214,58 @@ export default function DbAuthGuard({ children, activeRoute = '' }) {
 
       <style jsx>{`
         .db-auth-gate-container {
-          min-height: 85vh;
+          min-height: 100vh;
+          min-height: 100dvh;
+          width: 100%;
           display: flex;
           align-items: center;
           justify-content: center;
-          padding: 30px 16px;
-          position: relative;
-          overflow: hidden;
+          padding: 24px 20px;
+          background-color: #ffffff;
+          box-sizing: border-box;
           font-family: inherit;
         }
 
-        .gate-orb {
-          position: absolute;
-          border-radius: 50%;
-          filter: blur(90px);
-          opacity: 0.35;
-          pointer-events: none;
-          z-index: 0;
-        }
-
-        .gate-orb-1 {
-          width: 320px;
-          height: 320px;
-          background: #4f46e5;
-          top: 10%;
-          left: 15%;
-        }
-
-        .gate-orb-2 {
-          width: 280px;
-          height: 280px;
-          background: #0284c7;
-          bottom: 10%;
-          right: 15%;
-        }
-
         .db-auth-card {
-          position: relative;
-          z-index: 1;
+          background: #ffffff;
+          padding: 35px 30px;
+          border-radius: 12px;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
           width: 100%;
           max-width: 440px;
-          background: rgba(15, 23, 42, 0.82);
-          backdrop-filter: blur(16px);
-          -webkit-backdrop-filter: blur(16px);
-          border: 1px solid rgba(255, 255, 255, 0.12);
-          border-radius: 20px;
-          padding: 36px 30px;
-          box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 30px rgba(79, 70, 229, 0.15);
+          border: 1px solid #e2e8f0;
           text-align: center;
+          box-sizing: border-box;
         }
 
         .auth-card-header {
           display: flex;
           flex-direction: column;
           align-items: center;
-          margin-bottom: 24px;
+          margin-bottom: 22px;
         }
 
         .lock-icon-badge {
-          width: 64px;
-          height: 64px;
-          background: linear-gradient(135deg, rgba(79, 70, 229, 0.2), rgba(2, 132, 199, 0.3));
-          border: 1px solid rgba(99, 102, 241, 0.4);
-          border-radius: 18px;
+          width: 56px;
+          height: 56px;
+          background: rgba(0, 123, 255, 0.08);
+          border: 1px solid rgba(0, 123, 255, 0.2);
+          border-radius: 14px;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 28px;
-          color: #38bdf8;
-          margin-bottom: 16px;
-          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+          font-size: 26px;
+          color: var(--primary, #007bff);
+          margin-bottom: 12px;
         }
 
         .security-tag {
-          font-size: 10.5px;
-          font-weight: 800;
-          letter-spacing: 1px;
-          color: #38bdf8;
-          background: rgba(56, 189, 248, 0.12);
-          border: 1px solid rgba(56, 189, 248, 0.3);
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.8px;
+          color: #0284c7;
+          background: #f0f9ff;
+          border: 1px solid #bae6fd;
           padding: 3px 10px;
           border-radius: 20px;
           margin-bottom: 12px;
@@ -302,39 +275,39 @@ export default function DbAuthGuard({ children, activeRoute = '' }) {
         }
 
         .auth-title {
-          font-size: 20px;
-          font-weight: 800;
-          color: #f8fafc;
-          margin: 0 0 8px 0;
-          letter-spacing: -0.3px;
+          font-size: 22px;
+          font-weight: 700;
+          color: var(--dark, #2c3e50);
+          margin: 0 0 6px 0;
+          letter-spacing: -0.2px;
         }
 
         .auth-subtitle {
-          font-size: 13px;
-          color: #94a3b8;
+          font-size: 13.5px;
+          color: #64748b;
           margin: 0;
           line-height: 1.5;
         }
 
         .auth-error-banner {
-          background: rgba(239, 68, 68, 0.12);
-          border: 1px solid rgba(239, 68, 68, 0.35);
-          color: #fca5a5;
+          background-color: #f8d7da;
+          color: #721c24;
+          border: 1px solid #f5c6cb;
           padding: 10px 14px;
-          border-radius: 10px;
-          font-size: 12.5px;
+          border-radius: 6px;
+          font-size: 13.5px;
           font-weight: 600;
           display: flex;
           align-items: center;
           gap: 8px;
-          margin-bottom: 20px;
+          margin-bottom: 18px;
           text-align: left;
         }
 
         .auth-form {
           display: flex;
           flex-direction: column;
-          gap: 18px;
+          gap: 16px;
           text-align: left;
         }
 
@@ -345,12 +318,17 @@ export default function DbAuthGuard({ children, activeRoute = '' }) {
         }
 
         .form-label {
-          font-size: 12px;
-          font-weight: 700;
-          color: #cbd5e1;
+          font-size: 14px;
+          font-weight: bold;
+          color: #555555;
           display: flex;
           align-items: center;
           gap: 6px;
+        }
+
+        .form-label i {
+          color: var(--primary, #007bff);
+          font-size: 13px;
         }
 
         .input-wrapper {
@@ -361,25 +339,24 @@ export default function DbAuthGuard({ children, activeRoute = '' }) {
 
         .auth-input {
           width: 100%;
-          background: rgba(30, 41, 59, 0.8);
-          border: 1px solid rgba(255, 255, 255, 0.15);
-          border-radius: 10px;
-          padding: 12px 42px 12px 14px;
-          color: #f8fafc;
+          background: #ffffff;
+          border: 1px solid #cbd5e1;
+          border-radius: 6px;
+          padding: 11px 40px 11px 14px;
+          color: #1e293b;
           font-size: 14px;
           outline: none;
-          transition: all 0.2s ease;
+          transition: border-color 0.2s ease, box-shadow 0.2s ease;
           box-sizing: border-box;
         }
 
         .auth-input:focus {
-          border-color: #6366f1;
-          box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
-          background: rgba(30, 41, 59, 0.95);
+          border-color: var(--primary, #007bff);
+          box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
         }
 
         .auth-input::placeholder {
-          color: #64748b;
+          color: #94a3b8;
         }
 
         .toggle-pw-btn {
@@ -387,8 +364,8 @@ export default function DbAuthGuard({ children, activeRoute = '' }) {
           right: 12px;
           background: transparent;
           border: none;
-          color: #94a3b8;
-          font-size: 14px;
+          color: #777777;
+          font-size: 15px;
           cursor: pointer;
           padding: 4px;
           display: flex;
@@ -398,32 +375,30 @@ export default function DbAuthGuard({ children, activeRoute = '' }) {
         }
 
         .toggle-pw-btn:hover {
-          color: #38bdf8;
+          color: var(--primary, #007bff);
         }
 
         .auth-submit-btn {
-          margin-top: 6px;
+          margin-top: 8px;
           width: 100%;
-          background: linear-gradient(135deg, #4f46e5, #0284c7);
+          background-color: var(--primary, #007bff);
           color: #ffffff;
           border: none;
-          padding: 13px;
-          border-radius: 10px;
-          font-size: 14px;
-          font-weight: 700;
+          padding: 12px;
+          border-radius: 6px;
+          font-size: 15px;
+          font-weight: bold;
           cursor: pointer;
           display: flex;
           align-items: center;
           justify-content: center;
           gap: 8px;
-          box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
-          transition: all 0.2s ease;
+          box-shadow: 0 2px 8px rgba(0, 123, 255, 0.25);
+          transition: background-color 0.2s ease, transform 0.1s ease;
         }
 
         .auth-submit-btn:hover:not(:disabled) {
-          filter: brightness(1.1);
-          transform: translateY(-1px);
-          box-shadow: 0 6px 20px rgba(79, 70, 229, 0.5);
+          background-color: var(--primary-dark, #0056b3);
         }
 
         .auth-submit-btn:disabled {
@@ -431,26 +406,17 @@ export default function DbAuthGuard({ children, activeRoute = '' }) {
           cursor: not-allowed;
         }
 
-        .btn-spinner {
-          width: 16px;
-          height: 16px;
-          border: 2px solid rgba(255, 255, 255, 0.3);
-          border-top-color: #ffffff;
-          border-radius: 50%;
-          animation: spin 0.8s linear infinite;
-        }
-
         .auth-card-footer {
-          margin-top: 24px;
-          padding-top: 16px;
-          border-top: 1px solid rgba(255, 255, 255, 0.08);
+          margin-top: 20px;
+          padding-top: 15px;
+          border-top: 1px solid #f1f5f9;
         }
 
         :global(.back-home-link) {
-          color: #94a3b8 !important;
+          color: var(--primary, #007bff) !important;
           text-decoration: none !important;
-          font-size: 12.5px;
-          font-weight: 600;
+          font-size: 13.5px;
+          font-weight: bold;
           display: inline-flex;
           align-items: center;
           gap: 6px;
@@ -458,7 +424,8 @@ export default function DbAuthGuard({ children, activeRoute = '' }) {
         }
 
         :global(.back-home-link:hover) {
-          color: #38bdf8 !important;
+          text-decoration: underline !important;
+          color: var(--primary-dark, #0056b3) !important;
         }
 
         @keyframes spin {

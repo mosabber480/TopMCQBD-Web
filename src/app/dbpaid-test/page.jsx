@@ -159,14 +159,30 @@ export default function DBPaidTestPage() {
             {lastRefreshed ? (
               <div className="status-badge-row">
                 <span>সর্বশেষ রিফ্রেশ: <strong>{lastRefreshed}</strong></span>
-                <span className="cache-pill" style={{ background: isFromCache ? 'rgba(59, 130, 246, 0.15)' : 'rgba(34, 197, 94, 0.15)', color: isFromCache ? '#60a5fa' : '#4ade80', border: `1px solid ${isFromCache ? 'rgba(59, 130, 246, 0.3)' : 'rgba(34, 197, 94, 0.3)'}`, padding: '3px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: '600' }}>
-                  {isFromCache ? '⚡ LocalStorage Cache' : '🟢 Live MongoDB'}
-                </span>
+                {isFromCache ? (
+                  <span className="cache-pill">
+                    <span>⚡</span> LocalStorage Cache
+                  </span>
+                ) : (
+                  <span className="live-pill">
+                    <span className="live-bullet-wrapper">
+                      <span className="live-bullet-ring" />
+                      <span className="live-bullet-core" />
+                    </span>
+                    <span>Live MongoDB</span>
+                  </span>
+                )}
                 {dbInfo?.latencyMs !== undefined && (
                   <span className="latency-pill">⚡ {dbInfo.latencyMs} ms</span>
                 )}
                 {dbInfo?.connected && (
-                  <span className="live-indicator-badge">● Connected</span>
+                  <span className="live-indicator-badge">
+                    <span className="live-bullet-wrapper">
+                      <span className="live-bullet-ring" />
+                      <span className="live-bullet-core" />
+                    </span>
+                    <span>Connected</span>
+                  </span>
                 )}
               </div>
             ) : (
@@ -299,15 +315,16 @@ export default function DBPaidTestPage() {
         .server-status-indicator {
           margin-top: 10px;
           font-size: 13px;
-          color: #94a3b8;
+          color: #64748b;
         }
         .server-status-indicator code {
-          background: rgba(30, 41, 59, 0.7);
-          border: 1px solid rgba(255, 255, 255, 0.08);
+          background: #f1f5f9;
+          border: 1px solid #e2e8f0;
           padding: 3px 10px;
           border-radius: 6px;
-          color: #38bdf8;
+          color: #0284c7;
           font-size: 12px;
+          font-weight: 600;
         }
         .control-btn-group {
           display: flex;
@@ -316,29 +333,101 @@ export default function DBPaidTestPage() {
           flex-wrap: wrap;
         }
         .admin-link-btn {
-          background: rgba(59, 130, 246, 0.15);
-          color: #60a5fa;
-          border: 1px solid rgba(59, 130, 246, 0.35);
+          background: #eff6ff;
+          color: #2563eb;
+          border: 1px solid #bfdbfe;
           padding: 9px 16px;
-          border-radius: 10px;
+          border-radius: 8px;
           font-size: 13px;
-          font-weight: 600;
+          font-weight: 700;
           text-decoration: none;
           display: inline-flex;
           align-items: center;
           transition: all 0.2s;
         }
         .admin-link-btn:hover {
-          background: rgba(59, 130, 246, 0.25);
+          background: #dbeafe;
+        }
+        .live-pill,
+        .cache-pill,
+        .latency-pill,
+        .live-indicator-badge {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 7px;
+          height: 28px;
+          padding: 0 10px;
+          border-radius: 6px;
+          font-size: 12px;
+          font-weight: 700;
+          line-height: 1;
+          box-sizing: border-box;
+          white-space: nowrap;
+        }
+        .live-pill {
+          background: #f0fdf4;
+          color: #15803d;
+          border: 1px solid #86efac;
+        }
+        .cache-pill {
+          background: #eff6ff;
+          color: #1d4ed8;
+          border: 1px solid #bfdbfe;
         }
         .latency-pill {
-          background: rgba(34, 197, 94, 0.15);
-          color: #4ade80;
-          border: 1px solid rgba(34, 197, 94, 0.3);
-          padding: 3px 8px;
-          border-radius: 6px;
-          font-size: 11px;
-          font-weight: 600;
+          background: #f0fdf4;
+          color: #15803d;
+          border: 1px solid #86efac;
+        }
+        .live-indicator-badge {
+          background: #f0fdf4;
+          color: #15803d;
+          border: 1px solid #86efac;
+        }
+        .live-bullet-wrapper {
+          position: relative;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 8px;
+          height: 8px;
+          flex-shrink: 0;
+          margin-top: -1px;
+        }
+        .live-bullet-core {
+          width: 6px;
+          height: 6px;
+          background-color: #16a34a;
+          border-radius: 50%;
+          position: relative;
+          z-index: 2;
+        }
+        .live-bullet-ring {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          border-radius: 50%;
+          background-color: #22c55e;
+          opacity: 0.9;
+          animation: liveRadarPing 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+          z-index: 1;
+        }
+        @keyframes liveRadarPing {
+          0% {
+            transform: scale(0.8);
+            opacity: 0.9;
+          }
+          70% {
+            transform: scale(2.8);
+            opacity: 0;
+          }
+          100% {
+            transform: scale(2.8);
+            opacity: 0;
+          }
         }
         .summary-grid {
           display: grid;
@@ -350,10 +439,10 @@ export default function DBPaidTestPage() {
           .summary-grid { grid-template-columns: 1fr; }
         }
         .summary-card {
-          background: rgba(30, 41, 59, 0.5);
-          border: 1px solid rgba(255, 255, 255, 0.08);
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
           padding: 16px;
-          border-radius: 14px;
+          border-radius: 12px;
           display: flex;
           flex-direction: column;
           gap: 4px;
@@ -361,13 +450,15 @@ export default function DBPaidTestPage() {
         }
         .summary-label {
           font-size: 11px;
-          color: #94a3b8;
+          color: #64748b;
           text-transform: uppercase;
           letter-spacing: 0.5px;
-          font-weight: 600;
+          font-weight: 700;
         }
         .summary-val {
           font-size: 16px;
+          font-weight: 700;
+          color: #1e293b;
         }
         .search-bar-wrap {
           display: flex;
@@ -382,20 +473,20 @@ export default function DBPaidTestPage() {
           min-width: 220px;
           display: flex;
           align-items: center;
-          background: rgba(15, 23, 42, 0.8);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          border-radius: 10px;
+          background: #ffffff;
+          border: 1px solid #cbd5e1;
+          border-radius: 8px;
           padding: 8px 14px;
           gap: 8px;
         }
         .search-icon {
           font-size: 13px;
-          opacity: 0.6;
+          color: #64748b;
         }
         .search-input {
           background: transparent;
           border: none;
-          color: #f8fafc;
+          color: #1e293b;
           font-size: 13px;
           width: 100%;
           outline: none;
@@ -403,13 +494,14 @@ export default function DBPaidTestPage() {
         .clear-search-btn {
           background: transparent;
           border: none;
-          color: #94a3b8;
+          color: #64748b;
           cursor: pointer;
           font-size: 12px;
         }
         .result-counter {
           font-size: 12px;
-          color: #94a3b8;
+          color: #64748b;
+          font-weight: 600;
         }
         .cards-grid {
           display: flex;
@@ -418,26 +510,20 @@ export default function DBPaidTestPage() {
           margin-bottom: 28px;
         }
         .data-card {
-          background: rgba(15, 23, 42, 0.8);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          border-radius: 14px;
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
+          border-radius: 12px;
           padding: 18px 22px;
           display: flex;
           flex-direction: column;
           gap: 8px;
-          transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
-        }
-        .data-card:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
-          border-color: rgba(59, 130, 246, 0.5);
-          background: rgba(15, 23, 42, 0.95);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
         }
         .card-title-text {
           font-size: 16px;
           font-weight: 600;
           line-height: 1.5;
-          color: #f1f5f9;
+          color: #1e293b;
           word-break: break-word;
         }
         .card-date-bottom {
@@ -449,26 +535,27 @@ export default function DBPaidTestPage() {
         .empty-box {
           text-align: center;
           padding: 40px 20px;
-          color: #94a3b8;
-          background: rgba(15, 23, 42, 0.5);
-          border-radius: 16px;
-          border: 1px dashed rgba(255, 255, 255, 0.1);
+          color: #64748b;
+          background: #f8fafc;
+          border-radius: 14px;
+          border: 1px dashed #cbd5e1;
         }
         .add-data-btn, .reset-filter-btn {
-          background: #2563eb;
+          background: #007bff;
           color: #fff;
           padding: 10px 22px;
-          border-radius: 10px;
+          border-radius: 8px;
           font-size: 13px;
-          font-weight: 600;
+          font-weight: 700;
           text-decoration: none;
           display: inline-block;
           border: none;
           cursor: pointer;
+          box-shadow: 0 2px 8px rgba(0, 123, 255, 0.25);
           transition: background 0.2s;
         }
         .add-data-btn:hover, .reset-filter-btn:hover {
-          background: #1d4ed8;
+          background: #0056b3;
         }
         .bottom-nav-bar {
           display: flex;
@@ -480,33 +567,26 @@ export default function DBPaidTestPage() {
           gap: 12px;
         }
         .bottom-nav-link {
-          color: #94a3b8;
+          color: #007bff;
           font-size: 13.5px;
-          font-weight: 600;
+          font-weight: 700;
           text-decoration: none;
           display: inline-flex;
           align-items: center;
           padding: 9px 16px;
           border-radius: 8px;
-          background: rgba(30, 41, 59, 0.6);
-          border: 1px solid rgba(255, 255, 255, 0.08);
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
           transition: all 0.2s ease;
         }
         .bottom-nav-link:hover {
-          color: #f8fafc;
-          background: rgba(30, 41, 59, 0.95);
-          border-color: rgba(255, 255, 255, 0.2);
+          color: #0056b3;
+          background: #eff6ff;
+          border-color: #bfdbfe;
           transform: translateY(-1px);
         }
-        .orb-1 {
-          background: #3b82f6;
-          top: 10%;
-          left: 15%;
-        }
-        .orb-2 {
-          background: #6366f1;
-          bottom: 10%;
-          right: 15%;
+        .orb-1, .orb-2 {
+          display: none !important;
         }
       `}</style>
     </main>
