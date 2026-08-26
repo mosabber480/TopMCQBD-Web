@@ -2,13 +2,14 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { getPaidApiUrl } from '@/lib/config';
 
 export default function AdminFreeMcqsDashboardPage() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/categories')
+    fetch(getPaidApiUrl('/api/categories'))
       .then((res) => res.json())
       .then((data) => {
         setCategories(data.categories || data.data || []);

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { showTopAlert } from '@/components/layout/TopAlert';
+import { getPaidApiUrl } from '@/lib/config';
 
 const defaultFooterConfig = {
   announcement: { text: '', link: '' },
@@ -144,7 +145,7 @@ export default function AdminFooterDashboardPage() {
   const fetchLayoutConfig = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/layout-config');
+      const res = await fetch(getPaidApiUrl('/api/layout-config'));
       const data = await res.json();
 
       setConfig(data || defaultFooterConfig);
@@ -199,7 +200,7 @@ export default function AdminFooterDashboardPage() {
     };
 
     try {
-      const res = await fetch('/api/layout-config', {
+      const res = await fetch(getPaidApiUrl('/api/layout-config'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

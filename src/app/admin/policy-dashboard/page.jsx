@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { showTopAlert } from '@/components/layout/TopAlert';
+import { getPaidApiUrl } from '@/lib/config';
 
 export default function AdminPolicyDashboardPage() {
   const [currentPolicyContent, setCurrentPolicyContent] = useState('');
@@ -24,7 +25,7 @@ export default function AdminPolicyDashboardPage() {
     const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
 
     try {
-      const response = await fetch('/api/policy/get', {
+      const response = await fetch(getPaidApiUrl('/api/policy/get'), {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -86,7 +87,7 @@ export default function AdminPolicyDashboardPage() {
     }
 
     try {
-      const response = await fetch('/api/policy/save', {
+      const response = await fetch(getPaidApiUrl('/api/policy/save'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

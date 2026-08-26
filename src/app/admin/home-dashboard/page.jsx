@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { showTopAlert } from '@/components/layout/TopAlert';
+import { getPaidApiUrl } from '@/lib/config';
 
 const defaultHomeConfig = {
   seoTitle: '',
@@ -124,7 +125,7 @@ export default function AdminHomeDashboardPage() {
   const fetchHomeConfig = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/home-config');
+      const res = await fetch(getPaidApiUrl('/api/home-config'));
       const data = await res.json();
 
       setSeoInfo({
@@ -188,7 +189,7 @@ export default function AdminHomeDashboardPage() {
     };
 
     try {
-      const res = await fetch('/api/home-config', {
+      const res = await fetch(getPaidApiUrl('/api/home-config'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

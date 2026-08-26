@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { showTopAlert } from '@/components/layout/TopAlert';
+import { getPaidApiUrl } from '@/lib/config';
 
 const DEFAULT_PACKAGES = [
   {
@@ -150,7 +151,7 @@ export default function PackagesPage() {
 
   const fetchCurrentUserState = async () => {
     const token = localStorage.getItem('quiz_token') || localStorage.getItem('token');
-    const res = await fetch('/api/users/me', {
+    const res = await fetch(getPaidApiUrl('/api/users/me'), {
       headers: { Authorization: `Bearer ${token}` }
     });
     const data = await res.json();
@@ -224,7 +225,7 @@ export default function PackagesPage() {
     const token = localStorage.getItem('quiz_token') || localStorage.getItem('token');
 
     try {
-      const res = await fetch('/api/users/request-plan', {
+      const res = await fetch(getPaidApiUrl('/api/users/request-plan'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

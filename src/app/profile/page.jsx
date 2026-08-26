@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { showTopAlert } from '@/components/layout/TopAlert';
+import { getPaidApiUrl } from '@/lib/config';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -27,7 +28,7 @@ export default function ProfilePage() {
         return;
       }
 
-      const res = await fetch('/api/users/me', {
+      const res = await fetch(getPaidApiUrl('/api/users/me'), {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -63,7 +64,7 @@ export default function ProfilePage() {
     setPwSubmitting(true);
     try {
       const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
-      const res = await fetch('/api/auth/change-password', {
+      const res = await fetch(getPaidApiUrl('/api/auth/change-password'), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { showTopAlert } from '@/components/layout/TopAlert';
+import { getPaidApiUrl } from '@/lib/config';
 
 const defaultMenus = [
   { href: '/admin/dashboard', icon: 'fa-solid fa-gauge-high', label: 'ড্যাশবোর্ড', subMenus: [] },
@@ -78,7 +79,7 @@ export default function AdminMenuDashboardPage() {
   const fetchConfig = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/sidebar-config');
+      const res = await fetch(getPaidApiUrl('/api/sidebar-config'));
       const data = await res.json();
       if (data && data.menus && data.menus.length > 0) {
         setMenus(
@@ -125,7 +126,7 @@ export default function AdminMenuDashboardPage() {
     }));
 
     try {
-      const res = await fetch('/api/sidebar-config', {
+      const res = await fetch(getPaidApiUrl('/api/sidebar-config'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

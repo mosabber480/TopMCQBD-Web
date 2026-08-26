@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { getPaidApiUrl } from '@/lib/config';
 
 export default function AllMcqPage() {
   const [loading, setLoading] = useState(true);
@@ -12,8 +13,8 @@ export default function AllMcqPage() {
     async function loadCategories() {
       try {
         const [catRes, qRes] = await Promise.all([
-          fetch('/api/categories').catch(() => null),
-          fetch('/api/questions').catch(() => null)
+          fetch(getPaidApiUrl('/api/categories')).catch(() => null),
+          fetch(getPaidApiUrl('/api/questions')).catch(() => null)
         ]);
 
         const tree = {};

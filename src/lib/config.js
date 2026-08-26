@@ -21,6 +21,27 @@ export const API_CONFIG = {
 };
 
 /**
+ * Get full API endpoint URL for Paid Render Backend Service
+ */
+export function getPaidApiUrl(endpoint = '') {
+  const baseUrl = process.env.NEXT_PUBLIC_PAID_API_URL || 'https://topmcqbd-paid-api.onrender.com';
+  if (!endpoint) return baseUrl;
+  if (endpoint.startsWith('http://') || endpoint.startsWith('https://')) return endpoint;
+
+  const cleanEndpoint = endpoint.startsWith('/') ? endpoint : '/' + endpoint;
+
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
+    if (!isLocalhost || process.env.NEXT_PUBLIC_PAID_API_URL) {
+      return `${baseUrl.replace(/\/$/, '')}${cleanEndpoint}`;
+    }
+  }
+  return cleanEndpoint;
+}
+
+
+/**
  * Format URL safely for external, internal, and asset links
  */
 export function formatURL(url) {

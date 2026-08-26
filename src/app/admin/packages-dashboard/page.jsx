@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { showTopAlert } from '@/components/layout/TopAlert';
+import { getPaidApiUrl } from '@/lib/config';
 
 export default function AdminPackagesDashboardPage() {
   const [packages, setPackages] = useState([]);
@@ -12,7 +13,7 @@ export default function AdminPackagesDashboardPage() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    fetch('/api/home-config')
+    fetch(getPaidApiUrl('/api/home-config'))
       .then((res) => res.json())
       .then((data) => {
         if (data) {
@@ -29,10 +30,10 @@ export default function AdminPackagesDashboardPage() {
     const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
 
     try {
-      const getRes = await fetch('/api/home-config');
+      const getRes = await fetch(getPaidApiUrl('/api/home-config'));
       const currentConfig = await getRes.json();
 
-      const res = await fetch('/api/home-config', {
+      const res = await fetch(getPaidApiUrl('/api/home-config'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

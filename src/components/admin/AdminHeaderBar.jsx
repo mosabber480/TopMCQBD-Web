@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import AdminLogoutModal from './AdminLogoutModal';
+import { getPaidApiUrl } from '@/lib/config';
 
 const DEFAULT_ADMIN_HEADER_BUTTONS = [
   { text: 'ওয়েবসাইট ভিজিট', url: '/', icon: 'fa-solid fa-globe', color: 'success', targetBlank: true },
@@ -53,7 +54,7 @@ export default function AdminHeaderBar() {
     };
     document.addEventListener('click', handleClickOutside);
 
-    fetch('/api/sidebar-config')
+    fetch(getPaidApiUrl('/api/sidebar-config'))
       .then(res => res.json())
       .then(data => {
         if (data && data.headerButtons && data.headerButtons.length > 0) {

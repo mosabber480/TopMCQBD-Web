@@ -3,6 +3,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { getPaidApiUrl } from '@/lib/config';
 
 function QuestionsComponent() {
   const searchParams = useSearchParams();
@@ -59,7 +60,7 @@ function QuestionsComponent() {
       ? `/api/questions?category=${encodeURIComponent(categoryParam)}`
       : '/api/questions';
 
-    fetch(url)
+    fetch(getPaidApiUrl(url))
       .then((res) => res.json())
       .then((data) => {
         const list = data.questions || data.mcqs || [];

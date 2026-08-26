@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { getPaidApiUrl } from '@/lib/config';
 
 export const AUTH_STORAGE_KEY = 'topmcqbd_db_suite_authenticated_v1';
 export const AUTH_USER_KEY = 'topmcqbd_db_suite_user_name';
@@ -42,7 +43,7 @@ export default function DbAuthGuard({ children, activeRoute = '' }) {
     setErrorMsg('');
 
     try {
-      const res = await fetch('/api/db-suite-auth', {
+      const res = await fetch(getPaidApiUrl('/api/db-suite-auth'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

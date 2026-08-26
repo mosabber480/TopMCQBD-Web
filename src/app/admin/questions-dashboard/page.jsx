@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { showTopAlert } from '@/components/layout/TopAlert';
+import { getPaidApiUrl } from '@/lib/config';
 
 export default function AdminQuestionsDashboardPage() {
   // Category Tree State
@@ -106,7 +107,7 @@ export default function AdminQuestionsDashboardPage() {
     }
 
     try {
-      const res = await fetch('/api/categories');
+      const res = await fetch(getPaidApiUrl('/api/categories'));
       const data = await res.json();
 
       let rawCategories = [];
@@ -365,7 +366,7 @@ export default function AdminQuestionsDashboardPage() {
 
     try {
       const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
-      await fetch(`/api/categories?category=${encodeURIComponent(catName)}`, {
+      await fetch(getPaidApiUrl(`/api/categories?category=${encodeURIComponent(catName)}`), {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -385,7 +386,7 @@ export default function AdminQuestionsDashboardPage() {
 
     try {
       const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
-      await fetch(`/api/categories?category=${encodeURIComponent(main + '/' + sub)}`, {
+      await fetch(getPaidApiUrl(`/api/categories?category=${encodeURIComponent(main + '/' + sub)}`), {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -410,7 +411,7 @@ export default function AdminQuestionsDashboardPage() {
 
     try {
       const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
-      await fetch(`/api/categories?category=${encodeURIComponent(main + '/' + sub + '/' + topic)}`, {
+      await fetch(getPaidApiUrl(`/api/categories?category=${encodeURIComponent(main + '/' + sub + '/' + topic)}`), {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -492,7 +493,7 @@ export default function AdminQuestionsDashboardPage() {
     setLoadingQuestions(true);
     try {
       const token = localStorage.getItem('token') || localStorage.getItem('quiz_token') || '';
-      const res = await fetch(`/api/questions?category=${encodeURIComponent(targetCategoryPath)}`, {
+      const res = await fetch(getPaidApiUrl(`/api/questions?category=${encodeURIComponent(targetCategoryPath)}`), {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
@@ -562,7 +563,7 @@ export default function AdminQuestionsDashboardPage() {
     };
 
     try {
-      const res = await fetch(`/api/questions/${id}`, {
+      const res = await fetch(getPaidApiUrl(`/api/questions/${id}`), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -589,7 +590,7 @@ export default function AdminQuestionsDashboardPage() {
 
     try {
       const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
-      await fetch(`/api/questions/${id}`, {
+      await fetch(getPaidApiUrl(`/api/questions/${id}`), {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -613,7 +614,7 @@ export default function AdminQuestionsDashboardPage() {
 
     try {
       const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
-      const res = await fetch(`/api/questions?category=${encodeURIComponent(targetCategoryPath)}`, {
+      const res = await fetch(getPaidApiUrl(`/api/questions?category=${encodeURIComponent(targetCategoryPath)}`), {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -657,7 +658,7 @@ export default function AdminQuestionsDashboardPage() {
 
     setIsUploadingCsv(true);
     try {
-      const res = await fetch('/api/questions/upload-csv', {
+      const res = await fetch(getPaidApiUrl('/api/questions/upload-csv'), {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
         body: formData
@@ -734,7 +735,7 @@ export default function AdminQuestionsDashboardPage() {
       };
 
       try {
-        const response = await fetch('/api/questions', {
+        const response = await fetch(getPaidApiUrl('/api/questions'), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { showTopAlert } from '@/components/layout/TopAlert';
+import { getPaidApiUrl } from '@/lib/config';
 
 export default function AdminProfilePage() {
   const [currentUser, setCurrentUser] = useState({});
@@ -49,7 +50,7 @@ export default function AdminProfilePage() {
     setLoading(true);
     const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
     try {
-      const res = await fetch(`/api/users?t=${Date.now()}`, {
+      const res = await fetch(getPaidApiUrl(`/api/users?t=${Date.now()}`), {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
@@ -137,7 +138,7 @@ export default function AdminProfilePage() {
     const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
 
     try {
-      const res = await fetch('/api/auth/change-password', {
+      const res = await fetch(getPaidApiUrl('/api/auth/change-password'), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -168,7 +169,7 @@ export default function AdminProfilePage() {
     const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
 
     try {
-      const res = await fetch('/api/users/create-admin', {
+      const res = await fetch(getPaidApiUrl('/api/users/create-admin'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -203,7 +204,7 @@ export default function AdminProfilePage() {
     const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
 
     try {
-      const res = await fetch(`/api/users/${userId}/subscription`, {
+      const res = await fetch(getPaidApiUrl(`/api/users/${userId}/subscription`), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -229,7 +230,7 @@ export default function AdminProfilePage() {
 
     const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
     try {
-      const res = await fetch(`/api/users/${userId}`, {
+      const res = await fetch(getPaidApiUrl(`/api/users/${userId}`), {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });

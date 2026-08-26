@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { showTopAlert } from '@/components/layout/TopAlert';
+import { getPaidApiUrl } from '@/lib/config';
 
 // Remaining Time Calculator Helper
 function getRemainingTime(endDateStr) {
@@ -87,7 +88,7 @@ export default function AdminUsersPage() {
       const u = JSON.parse(localStorage.getItem('user') || localStorage.getItem('quiz_user') || '{}');
       setCurrentUser(u);
 
-      const res = await fetch(`/api/users?t=${Date.now()}`, {
+      const res = await fetch(getPaidApiUrl(`/api/users?t=${Date.now()}`), {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
@@ -180,7 +181,7 @@ export default function AdminUsersPage() {
 
     const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
     try {
-      const res = await fetch(`/api/users/${userId}/subscription`, {
+      const res = await fetch(getPaidApiUrl(`/api/users/${userId}/subscription`), {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ plan: 'none' })
@@ -211,7 +212,7 @@ export default function AdminUsersPage() {
 
     const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
     try {
-      const res = await fetch(`/api/users/${userId}/subscription`, {
+      const res = await fetch(getPaidApiUrl(`/api/users/${userId}/subscription`), {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(payload)
@@ -242,7 +243,7 @@ export default function AdminUsersPage() {
 
     const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
     try {
-      const res = await fetch(`/api/users/${userId}/pending-requests/${requestId}/approve`, {
+      const res = await fetch(getPaidApiUrl(`/api/users/${userId}/pending-requests/${requestId}/approve`), {
         method: 'PUT',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -264,7 +265,7 @@ export default function AdminUsersPage() {
 
     const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
     try {
-      const res = await fetch(`/api/users/${userId}/pending-requests/${requestId}/reject`, {
+      const res = await fetch(getPaidApiUrl(`/api/users/${userId}/pending-requests/${requestId}/reject`), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -323,7 +324,7 @@ export default function AdminUsersPage() {
 
     const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
     try {
-      const res = await fetch(`/api/users/${userId}/pending-requests/${requestId}`, {
+      const res = await fetch(getPaidApiUrl(`/api/users/${userId}/pending-requests/${requestId}`), {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ plan, paymentMethod, phone, transactionId })
@@ -347,7 +348,7 @@ export default function AdminUsersPage() {
 
     const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
     try {
-      const res = await fetch(`/api/users/${userId}/pending-requests/${requestId}`, {
+      const res = await fetch(getPaidApiUrl(`/api/users/${userId}/pending-requests/${requestId}`), {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -394,7 +395,7 @@ export default function AdminUsersPage() {
 
     const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
     try {
-      const res = await fetch(`/api/users/${userId}/pending-requests`, {
+      const res = await fetch(getPaidApiUrl(`/api/users/${userId}/pending-requests`), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ plan, status, phone, transactionId, paymentMethod })
@@ -418,7 +419,7 @@ export default function AdminUsersPage() {
 
     const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
     try {
-      const res = await fetch(`/api/users/${userId}`, {
+      const res = await fetch(getPaidApiUrl(`/api/users/${userId}`), {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });

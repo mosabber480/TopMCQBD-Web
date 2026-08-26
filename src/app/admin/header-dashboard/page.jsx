@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { showTopAlert } from '@/components/layout/TopAlert';
+import { getPaidApiUrl } from '@/lib/config';
 
 const defaultLayoutConfig = {
   announcement: {
@@ -133,7 +134,7 @@ export default function AdminHeaderDashboardPage() {
   const fetchLayoutConfig = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/layout-config');
+      const res = await fetch(getPaidApiUrl('/api/layout-config'));
       const data = await res.json();
 
       const ann = data.announcement || null;
@@ -198,7 +199,7 @@ export default function AdminHeaderDashboardPage() {
     };
 
     try {
-      const res = await fetch('/api/layout-config', {
+      const res = await fetch(getPaidApiUrl('/api/layout-config'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
