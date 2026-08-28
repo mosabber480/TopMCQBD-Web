@@ -43,7 +43,13 @@ export default function AnnouncementBar({ announcement: initialAnnouncement }) {
   }, [initialAnnouncement, pathname]);
 
   // Hide Announcement Bar on all Admin and Diagnostic routes
-  if (pathname && (pathname.startsWith('/admin') || pathname.startsWith('/db-connection-check'))) {
+  if (pathname && (
+    pathname.startsWith('/admin') ||
+    pathname.startsWith('/db-connection') ||
+    pathname.startsWith('/dbpaid') ||
+    pathname.startsWith('/dbfree') ||
+    pathname.startsWith('/dbd1')
+  )) {
     return null;
   }
 

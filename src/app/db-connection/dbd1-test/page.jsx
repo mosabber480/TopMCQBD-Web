@@ -155,7 +155,7 @@ export default function DBD1TestPage() {
   ];
 
   return (
-    <DbAuthGuard activeRoute="/dbd1-test">
+    <DbAuthGuard activeRoute="/db-connection/dbd1-test">
       <main className="db-page-container">
         {/* Background Ambient Orbs */}
         <div className="glow-orb orb-1" />
@@ -303,7 +303,7 @@ export default function DBD1TestPage() {
                     ? 'সার্চের সাথে মিল রেখে কোনো রো পাওয়া যায়নি।'
                     : '"db-d1-test" কালেকশনে এখনো কোনো রো নেই। অ্যাডমিন প্যানেল থেকে রো যোগ করুন।'}
                 </p>
-                <Link href="/dbd1-admin" className="goto-admin-btn" style={{ background: '#ea580c' }}>
+                <Link href="/db-connection/dbd1-admin" className="goto-admin-btn" style={{ background: '#ea580c' }}>
                   <i className="fa-solid fa-sliders" style={{ marginRight: '6px' }} />
                   D1 অ্যাডমিন প্যানেলে যান
                 </Link>
@@ -354,7 +354,7 @@ export default function DBD1TestPage() {
           </div>
 
           {/* Database Navigation Box */}
-          <DbNavBox activeRoute="/dbd1-test" />
+          <DbNavBox activeRoute="/db-connection/dbd1-test" />
 
           {/* Bottom Navigation Links Bar */}
           <div

@@ -186,7 +186,7 @@ export default function DBConnectionCheck() {
   }, [checkConnection]);
 
   return (
-    <DbAuthGuard activeRoute="/db-connection-check">
+    <DbAuthGuard activeRoute="/db-connection">
       <main className="db-page-container">
         <div className="db-content-card">
           {/* Header */}
@@ -421,7 +421,7 @@ export default function DBConnectionCheck() {
           </div>
 
           {/* Database Navigation Box */}
-          <DbNavBox activeRoute="/db-connection-check" />
+          <DbNavBox activeRoute="/db-connection" />
 
           {/* Bottom Navigation Links Bar */}
           <div

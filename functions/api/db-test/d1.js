@@ -1,6 +1,6 @@
 /**
  * Cloudflare Pages Function: /api/db-test/d1
- * Cloudflare D1 Diagnostics and CRUD for "db-d1-test" collection / table
+ * Cloudflare D1 Row CRUD for key = "db-d1-test" in app_configs table
  */
 
 function jsonResponse(data, status = 200) {
@@ -19,19 +19,47 @@ export async function onRequestOptions() {
   return jsonResponse({}, 200);
 }
 
-// Ensure table exists helper
-async function ensureD1TestTable(db) {
+// Ensure app_configs table exists
+async function ensureAppConfigsTable(db) {
   await db.prepare(`
-    CREATE TABLE IF NOT EXISTS "db-d1-test" (
-      id TEXT PRIMARY KEY,
-      text TEXT NOT NULL,
-      createdAt TEXT DEFAULT (datetime('now', 'localtime')),
-      updatedAt TEXT DEFAULT (datetime('now', 'localtime'))
+    CREATE TABLE IF NOT EXISTS app_configs (
+      key TEXT PRIMARY KEY,
+      data TEXT NOT NULL,
+      created_at TEXT DEFAULT (datetime('now', 'localtime')),
+      updated_at TEXT DEFAULT (datetime('now', 'localtime'))
     )
   `).run();
 }
 
-// GET: Fetch status and all items from db-d1-test
+// Helper to get items array from app_configs WHERE key = 'db-d1-test'
+async function getD1TestItems(db) {
+  await ensureAppConfigsTable(db);
+  const row = await db.prepare('SELECT data FROM app_configs WHERE key = ?').bind('db-d1-test').first();
+  if (!row || !row.data) return [];
+  try {
+    const parsed = JSON.parse(row.data);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+// Helper to save items array into app_configs WHERE key = 'db-d1-test'
+async function saveD1TestItems(db, items) {
+  await ensureAppConfigsTable(db);
+  const jsonStr = JSON.stringify(items);
+  const now = new Date().toISOString();
+
+  await db.prepare(`
+    INSERT INTO app_configs (key, data, created_at, updated_at)
+    VALUES ('db-d1-test', ?, ?, ?)
+    ON CONFLICT(key) DO UPDATE SET
+      data = excluded.data,
+      updated_at = excluded.updated_at
+  `).bind(jsonStr, now, now).run();
+}
+
+// GET: Fetch all items from key = "db-d1-test" in app_configs
 export async function onRequestGet(context) {
   const { env } = context;
   const start = Date.now();
@@ -47,24 +75,25 @@ export async function onRequestGet(context) {
       }, 500);
     }
 
-    await ensureD1TestTable(env.DB);
+    await ensureAppConfigsTable(env.DB);
 
     // Ping check
     await env.DB.prepare("SELECT 1").first();
     const pingTimeMs = Date.now() - start;
 
-    // Fetch all items
-    const { results } = await env.DB.prepare(
-      'SELECT id, text, createdAt, updatedAt FROM "db-d1-test" ORDER BY datetime(createdAt) DESC'
-    ).all();
+    // 1. Fetch items from db-d1-test row
+    const items = await getD1TestItems(env.DB);
 
-    const formattedItems = (results || []).map((row, index) => ({
-      id: row.id,
-      text: row.text,
-      createdAt: row.createdAt,
-      updatedAt: row.updatedAt,
-      index: index + 1
-    }));
+    // 2. Fetch all row keys from app_configs table
+    let configKeys = [];
+    try {
+      const configRes = await env.DB.prepare('SELECT key FROM app_configs').all();
+      configKeys = (configRes?.results || []).map((r) => r.key);
+    } catch (e) {}
+
+    if (!configKeys.includes('db-d1-test')) {
+      configKeys.push('db-d1-test');
+    }
 
     return jsonResponse({
       success: true,
@@ -72,12 +101,16 @@ export async function onRequestGet(context) {
       status: 'Connected',
       database: 'topmcqbd-db (Cloudflare D1)',
       databaseName: 'topmcqbd-db',
+      table: 'app_configs',
+      rowKey: 'db-d1-test',
       collection: 'db-d1-test',
       collectionName: 'db-d1-test',
-      totalCount: formattedItems.length,
-      itemCount: formattedItems.length,
+      collections: configKeys,
+      keys: configKeys,
+      totalCount: items.length || configKeys.length,
+      itemCount: items.length,
       pingTimeMs,
-      items: formattedItems,
+      items,
       timestamp: new Date().toISOString()
     }, 200);
   } catch (err) {
@@ -92,99 +125,120 @@ export async function onRequestGet(context) {
   }
 }
 
-// POST: Add new item to db-d1-test
+// POST: Add new item(s) to db-d1-test row in app_configs
 export async function onRequestPost(context) {
   const { env, request } = context;
 
   try {
-    const body = await request.json();
-    const { text } = body;
+    if (!env || !env.DB) {
+      return jsonResponse({ success: false, error: 'D1 binding missing' }, 500);
+    }
 
-    if (!text || !text.trim()) {
+    const body = await request.json();
+    if (!body || (!body.text && !body.items)) {
       return jsonResponse({ success: false, error: 'Text content is required' }, 400);
     }
 
-    if (!env || !env.DB) {
-      throw new Error('Cloudflare D1 binding (DB) is missing.');
+    const currentItems = await getD1TestItems(env.DB);
+    const itemsToAdd = Array.isArray(body.items) ? body.items : [body];
+    const createdItems = [];
+
+    for (const it of itemsToAdd) {
+      const textVal = String(it.text || '').trim();
+      if (!textVal) continue;
+
+      const id = it.id || `d1_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
+      const now = new Date().toISOString();
+      const newItem = { id, text: textVal, createdAt: now, updatedAt: now };
+
+      currentItems.unshift(newItem);
+      createdItems.push(newItem);
     }
 
-    await ensureD1TestTable(env.DB);
-
-    const id = `d1_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
-    const nowStr = new Date().toLocaleString('en-GB');
-
-    await env.DB.prepare(`
-      INSERT INTO "db-d1-test" (id, text, createdAt, updatedAt)
-      VALUES (?, ?, datetime('now', 'localtime'), datetime('now', 'localtime'))
-    `).bind(id, text.trim()).run();
+    await saveD1TestItems(env.DB, currentItems);
 
     return jsonResponse({
       success: true,
-      message: 'Item added to db-d1-test successfully!',
-      item: { id, text: text.trim(), createdAt: nowStr }
-    }, 200);
+      message: `${createdItems.length} item(s) saved in D1 row 'db-d1-test'`,
+      items: createdItems
+    }, 201);
   } catch (err) {
     return jsonResponse({ success: false, error: err.message }, 500);
   }
 }
 
-// PUT: Update an item in db-d1-test
+// PUT: Update item in db-d1-test row
 export async function onRequestPut(context) {
   const { env, request } = context;
 
   try {
-    const body = await request.json();
-    const { id, text } = body;
-
-    if (!id || !text || !text.trim()) {
-      return jsonResponse({ success: false, error: 'ID and Text are required' }, 400);
-    }
-
     if (!env || !env.DB) {
-      throw new Error('Cloudflare D1 binding (DB) is missing.');
+      return jsonResponse({ success: false, error: 'D1 binding missing' }, 500);
     }
 
-    await ensureD1TestTable(env.DB);
+    const body = await request.json();
+    const { id, text } = body || {};
 
-    await env.DB.prepare(`
-      UPDATE "db-d1-test" 
-      SET text = ?, updatedAt = datetime('now', 'localtime')
-      WHERE id = ?
-    `).bind(text.trim(), id).run();
+    if (!id || !text) {
+      return jsonResponse({ success: false, error: 'id and text are required' }, 400);
+    }
+
+    const currentItems = await getD1TestItems(env.DB);
+    const now = new Date().toISOString();
+    let updated = false;
+
+    for (let i = 0; i < currentItems.length; i++) {
+      if (currentItems[i].id === id) {
+        currentItems[i].text = String(text).trim();
+        currentItems[i].updatedAt = now;
+        updated = true;
+        break;
+      }
+    }
+
+    if (!updated) {
+      return jsonResponse({ success: false, error: 'Item ID not found' }, 404);
+    }
+
+    await saveD1TestItems(env.DB, currentItems);
 
     return jsonResponse({
       success: true,
-      message: 'Item updated in db-d1-test successfully!',
-      item: { id, text: text.trim() }
+      message: 'Item updated successfully in D1 row',
+      id,
+      text,
+      updatedAt: now
     }, 200);
   } catch (err) {
     return jsonResponse({ success: false, error: err.message }, 500);
   }
 }
 
-// DELETE: Delete an item from db-d1-test
+// DELETE: Remove item from db-d1-test row
 export async function onRequestDelete(context) {
   const { env, request } = context;
 
   try {
+    if (!env || !env.DB) {
+      return jsonResponse({ success: false, error: 'D1 binding missing' }, 500);
+    }
+
     const url = new URL(request.url);
     const id = url.searchParams.get('id');
 
     if (!id) {
-      return jsonResponse({ success: false, error: 'ID is required' }, 400);
+      return jsonResponse({ success: false, error: 'id parameter is required' }, 400);
     }
 
-    if (!env || !env.DB) {
-      throw new Error('Cloudflare D1 binding (DB) is missing.');
-    }
+    const currentItems = await getD1TestItems(env.DB);
+    const filtered = currentItems.filter((it) => it.id !== id);
 
-    await ensureD1TestTable(env.DB);
-
-    await env.DB.prepare('DELETE FROM "db-d1-test" WHERE id = ?').bind(id).run();
+    await saveD1TestItems(env.DB, filtered);
 
     return jsonResponse({
       success: true,
-      message: 'Item deleted from db-d1-test successfully!'
+      message: 'Item deleted from D1 row',
+      id
     }, 200);
   } catch (err) {
     return jsonResponse({ success: false, error: err.message }, 500);

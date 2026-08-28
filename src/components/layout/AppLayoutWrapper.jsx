@@ -13,9 +13,10 @@ export default function AppLayoutWrapper({ children, initialLayoutData }) {
   // Admin routes & DB diagnostic/manager routes have their own dedicated layouts
   const isAdminOrDiagnostic = pathname && (
     pathname.startsWith('/admin') ||
-    pathname.startsWith('/db-connection-check') ||
+    pathname.startsWith('/db-connection') ||
     pathname.startsWith('/dbpaid') ||
-    pathname.startsWith('/dbfree')
+    pathname.startsWith('/dbfree') ||
+    pathname.startsWith('/dbd1')
   );
 
   if (isAdminOrDiagnostic) {

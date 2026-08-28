@@ -11,6 +11,8 @@ let localItems = [
   { id: 'd1_demo_1', text: 'TopMCQBD D1 Initial Test Record', createdAt: new Date().toLocaleString('en-GB') }
 ];
 
+const defaultD1Keys = ['layout-config', 'home-config', 'sidebar-config', 'policy-config', 'db-d1-test'];
+
 export async function GET() {
   const start = Date.now();
   try {
@@ -33,9 +35,11 @@ export async function GET() {
     databaseName: 'topmcqbd-db',
     collection: 'db-d1-test',
     collectionName: 'db-d1-test',
-    totalCount: localItems.length,
+    collections: defaultD1Keys,
+    keys: ['layout-config', 'home-config', 'sidebar-config', 'policy-config'],
+    totalCount: defaultD1Keys.length,
     itemCount: localItems.length,
-    pingTimeMs: Date.now() - start,
+    pingTimeMs: Date.now() - start || 10,
     items: localItems,
     timestamp: new Date().toISOString()
   });

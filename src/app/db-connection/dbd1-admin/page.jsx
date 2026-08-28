@@ -286,7 +286,7 @@ export default function DBD1AdminPage() {
   ];
 
   return (
-    <DbAuthGuard activeRoute="/dbd1-admin">
+    <DbAuthGuard activeRoute="/db-connection/dbd1-admin">
       <main className="db-page-container">
         {/* Background Ambient Orbs */}
         <div className="glow-orb orb-1" />
@@ -638,7 +638,7 @@ export default function DBD1AdminPage() {
           </div>
 
           {/* Database Navigation Box */}
-          <DbNavBox activeRoute="/dbd1-admin" />
+          <DbNavBox activeRoute="/db-connection/dbd1-admin" />
 
           {/* Bottom Navigation Links Bar */}
           <div
