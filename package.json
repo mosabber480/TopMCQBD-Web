@@ -9,7 +9,8 @@
     "build:cloudflare": "next build && node copyAssets.js",
     "preview": "next start",
     "start": "next start",
-    "seed": "node seedUsers.js"
+    "seed": "node seedUsers.js",
+    "sync:d1": "node syncConfigs.js"
   },
   "dependencies": {
     "@getbrevo/brevo": "^6.0.2",
