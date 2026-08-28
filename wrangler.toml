@@ -1,0 +1,8 @@
+name = "topmcqbd-web"
+compatibility_date = "2024-04-01"
+pages_build_output_dir = "out"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "topmcqbd-db"
+database_id = "6717c9b8-4836-438d-a042-f2a8a65124c6"
