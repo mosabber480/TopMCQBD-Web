@@ -165,30 +165,31 @@ export default function DBConnectionCheck() {
   // On page load/reload: Read from localStorage first. If no cache exists, run live check once.
   useEffect(() => {
     try {
-      const cached = localStorage.getItem(CACHE_KEY);
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (parsed && (parsed.paidData || parsed.freeData || parsed.d1Data)) {
-          setPaidData(parsed.paidData);
-          setFreeData(parsed.freeData);
-          setD1Data(parsed.d1Data);
-          setLastChecked(parsed.lastChecked || formatDateTime(parsed.savedAt));
+      const cachedRaw = localStorage.getItem(CACHE_KEY);
+      if (cachedRaw) {
+        const cached = JSON.parse(cachedRaw);
+        if (cached && (cached.paidData || cached.data || cached.d1Data)) {
+          setPaidData(cached.paidData || cached.data?.paidDb || null);
+          setFreeData(cached.freeData || cached.data?.freeDb || null);
+          setD1Data(cached.d1Data || null);
+          setLastChecked(cached.lastChecked || formatDateTime(cached.savedAt));
           setIsFromCache(true);
           setLoading(false);
           return;
         }
       }
     } catch (e) {
-      console.warn('LocalStorage error:', e);
+      console.warn('Unable to read from localStorage:', e);
     }
 
+    // If no cache found, run initial check
     checkConnection();
   }, [checkConnection]);
 
   return (
     <DbAuthGuard activeRoute="/db-connection-check">
       <main className="db-page-container">
-        {/* Background Ambient Orbs */}
+        {/* Background Orbs */}
         <div className="glow-orb orb-1" />
         <div className="glow-orb orb-2" />
 
@@ -202,7 +203,7 @@ export default function DBConnectionCheck() {
             </p>
           </div>
 
-          {/* Action & Status Bar */}
+          {/* Action Bar */}
           <div className="db-control-bar">
             <div className="status-info-text">
               {lastChecked ? (
@@ -252,9 +253,9 @@ export default function DBConnectionCheck() {
             </div>
           )}
 
-          {/* Database Status Cards Grid: Row 1 has 2 boxes, Row 2 has 1 box on the left */}
+          {/* Database Status Cards Grid */}
           <div className="db-grid">
-            {/* 1. Paid MongoDB Card (Top Left) */}
+            {/* Paid MongoDB Card */}
             <div className={`status-card ${paidData?.connected ? 'card-success' : 'card-danger'}`}>
               <div className="card-header">
                 <div>
@@ -311,7 +312,7 @@ export default function DBConnectionCheck() {
               )}
             </div>
 
-            {/* 2. Free MongoDB Card (Top Right) */}
+            {/* Free MongoDB Card */}
             <div className={`status-card ${freeData?.connected ? 'card-success' : 'card-danger'}`}>
               <div className="card-header">
                 <div>
@@ -368,7 +369,7 @@ export default function DBConnectionCheck() {
               )}
             </div>
 
-            {/* 3. Cloudflare D1 Card (Bottom Left) */}
+            {/* Cloudflare D1 Card */}
             <div className={`status-card ${d1Data?.connected ? 'card-success' : 'card-danger'}`}>
               <div className="card-header">
                 <div>
