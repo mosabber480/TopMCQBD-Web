@@ -14,16 +14,15 @@ export default function DBD1AdminPage() {
   const [fetchError, setFetchError] = useState(null);
   const [lastChecked, setLastChecked] = useState(null);
   const [isFromCache, setIsFromCache] = useState(false);
+  const [activeBackendUrl, setActiveBackendUrl] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [copiedId, setCopiedId] = useState(null);
 
   // Form states
   const [isAddingData, setIsAddingData] = useState(false);
-  const [newKey, setNewKey] = useState('');
-  const [newDataValue, setNewDataValue] = useState('');
+  const [newDataRows, setNewDataRows] = useState([{ text: '' }]);
   const [submitting, setSubmitting] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  const [editKey, setEditKey] = useState('');
   const [editText, setEditText] = useState('');
   const [actionMsg, setActionMsg] = useState(null);
 
@@ -56,6 +55,10 @@ export default function DBD1AdminPage() {
     return `${dateStr}, ${timeStr}`;
   };
 
+  useEffect(() => {
+    setActiveBackendUrl(process.env.NEXT_PUBLIC_APP_URL || 'https://topmcqbd.pages.dev');
+  }, []);
+
   const saveToCache = (dataObj, itemsArr, timestamp) => {
     try {
       const cacheObj = {
@@ -70,6 +73,7 @@ export default function DBD1AdminPage() {
     }
   };
 
+  // Live fetch from D1 API
   const fetchD1Data = useCallback(async () => {
     setLoading(true);
     setFetchError(null);
@@ -85,44 +89,35 @@ export default function DBD1AdminPage() {
       }
 
       const json = await res.json();
-      const freshItems = json.items || [];
-      const timestamp = formatDateTime(new Date());
+      const currentTime = formatDateTime(new Date());
 
       setStatusData(json);
-      setItems(freshItems);
-      setLastChecked(timestamp);
+      setItems(json.items || []);
+      setLastChecked(currentTime);
       setIsFromCache(false);
-
-      saveToCache(json, freshItems, timestamp);
+      saveToCache(json, json.items || [], currentTime);
     } catch (err) {
-      setFetchError(err.message || 'Failed to fetch Cloudflare D1 data');
-      try {
-        const cached = localStorage.getItem(CACHE_KEY);
-        if (cached) {
-          const parsed = JSON.parse(cached);
-          if (parsed && parsed.statusData) {
-            setStatusData(parsed.statusData);
-            setItems(parsed.items || []);
-            setLastChecked(parsed.lastChecked || formatDateTime(new Date()));
-            setIsFromCache(true);
-          }
-        }
-      } catch (e) {}
+      setFetchError(
+        `${err.message || 'Failed to connect'}. (Cloudflare D1-এ টেবিল বা বাইন্ডিং কনফিগারেশন চেক করুন।)`
+      );
     } finally {
       setLoading(false);
     }
   }, []);
 
+  // Initial load
   useEffect(() => {
     try {
-      const cached = localStorage.getItem(CACHE_KEY);
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (parsed && parsed.statusData) {
-          setStatusData(parsed.statusData);
-          setItems(parsed.items || []);
-          setLastChecked(parsed.lastChecked || formatDateTime(new Date()));
+      const raw = localStorage.getItem(CACHE_KEY);
+      if (raw) {
+        const cached = JSON.parse(raw);
+        if (cached && cached.statusData) {
+          setStatusData(cached.statusData);
+          setItems(cached.items || []);
+          setLastChecked(cached.lastChecked || formatDateTime(cached.savedAt));
           setIsFromCache(true);
+          setLoading(false);
+          return;
         }
       }
     } catch (e) {}
@@ -130,12 +125,127 @@ export default function DBD1AdminPage() {
     fetchD1Data();
   }, [fetchD1Data]);
 
-  const handleCopyId = (id) => {
+  // Multi-Row Add Data Handlers
+  const openAddDataForm = () => {
+    setIsAddingData(true);
+    setNewDataRows([{ text: '' }]);
+    setActionMsg(null);
+  };
+
+  const addNewDataRow = () => {
+    setNewDataRows((prev) => [...prev, { text: '' }]);
+  };
+
+  const updateNewDataRow = (index, value) => {
+    const rows = [...newDataRows];
+    rows[index].text = value;
+    setNewDataRows(rows);
+  };
+
+  const removeNewDataRow = (index) => {
+    const rows = newDataRows.filter((_, i) => i !== index);
+    if (rows.length === 0) {
+      setIsAddingData(false);
+      setNewDataRows([{ text: '' }]);
+    } else {
+      setNewDataRows(rows);
+    }
+  };
+
+  const saveAllNewData = async () => {
+    const validRows = newDataRows.filter((r) => r.text && r.text.trim());
+    if (validRows.length === 0) {
+      setActionMsg({ type: 'error', text: 'কমপক্ষে একটি বক্সে ডাটা বা টেক্সট লিখুন!' });
+      return;
+    }
+
+    setSubmitting(true);
+    setActionMsg(null);
     try {
-      navigator.clipboard.writeText(id);
-      setCopiedId(id);
-      setTimeout(() => setCopiedId(null), 2000);
-    } catch (e) {}
+      for (const row of validRows) {
+        const res = await fetch('/api/db-test/d1', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: row.text.trim() }),
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          throw new Error(data.error || 'ডাটা যুক্ত করতে সমস্যা হয়েছে।');
+        }
+      }
+
+      setIsAddingData(false);
+      setNewDataRows([{ text: '' }]);
+      try { localStorage.removeItem('topmcqbd_dbd1_test_cache'); } catch (e) {}
+      setActionMsg({ type: 'success', text: `✅ ${validRows.length} টি ডাটা সফলভাবে "db-d1-test" কালেকশনে যুক্ত হয়েছে!` });
+      fetchD1Data();
+    } catch (err) {
+      setActionMsg({ type: 'error', text: `❌ ${err.message}` });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Handle Edit Text
+  const handleSaveEdit = async (id) => {
+    if (!editText.trim()) return;
+
+    setSubmitting(true);
+    setActionMsg(null);
+    try {
+      const res = await fetch('/api/db-test/d1', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, text: editText.trim() }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'আপডেট করা সম্ভব হয়নি।');
+      }
+
+      setEditingId(null);
+      setEditText('');
+      try { localStorage.removeItem('topmcqbd_dbd1_test_cache'); } catch (e) {}
+      setActionMsg({ type: 'success', text: '✅ টেক্সট সফলভাবে আপডেট করা হয়েছে!' });
+      fetchD1Data();
+    } catch (err) {
+      setActionMsg({ type: 'error', text: `❌ ${err.message}` });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Handle Delete Text
+  const handleDeleteText = async (id) => {
+    if (!window.confirm('আপনি কি নিশ্চিত এই টেক্সটটি মুছে ফেলতে চান?')) return;
+
+    setSubmitting(true);
+    setActionMsg(null);
+    try {
+      const res = await fetch(`/api/db-test/d1?id=${id}`, {
+        method: 'DELETE',
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'মুছে ফেলা সম্ভব হয়নি।');
+      }
+
+      try { localStorage.removeItem('topmcqbd_dbd1_test_cache'); } catch (e) {}
+      setActionMsg({ type: 'success', text: '🗑️ টেক্সট সফলভাবে মুছে ফেলা হয়েছে!' });
+      fetchD1Data();
+    } catch (err) {
+      setActionMsg({ type: 'error', text: `❌ ${err.message}` });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const copyToClipboard = (text, id) => {
+    navigator.clipboard.writeText(text);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
   };
 
   const filteredItems = useMemo(() => {
@@ -143,735 +253,1073 @@ export default function DBD1AdminPage() {
     const q = searchQuery.toLowerCase();
     return items.filter(
       (item) =>
-        (item.key && item.key.toLowerCase().includes(q)) ||
         (item.text && item.text.toLowerCase().includes(q)) ||
-        (item.rawData && item.rawData.toLowerCase().includes(q))
+        (item.id && item.id.toLowerCase().includes(q))
     );
   }, [items, searchQuery]);
 
-  const handleCreate = async (e) => {
-    e.preventDefault();
-    if (!newKey.trim()) {
-      alert('অনুগ্রহ করে Key নাম লিখুন');
-      return;
-    }
-    setSubmitting(true);
-    setActionMsg(null);
-    try {
-      const res = await fetch('/api/db-test/d1', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ key: newKey.trim(), data: newDataValue }),
-      });
-      const data = await res.json();
-      if (!res.ok || !data.success) throw new Error(data.message || 'Create failed');
-
-      setActionMsg({ type: 'success', text: `Key '${newKey}' সফলভাবে Cloudflare D1-এ সেভ হয়েছে!` });
-      setNewKey('');
-      setNewDataValue('');
-      setIsAddingData(false);
-      fetchD1Data();
-    } catch (err) {
-      setActionMsg({ type: 'error', text: err.message });
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleUpdate = async (e) => {
-    e.preventDefault();
-    setSubmitting(true);
-    setActionMsg(null);
-    try {
-      const res = await fetch('/api/db-test/d1', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ key: editKey, data: editText }),
-      });
-      const data = await res.json();
-      if (!res.ok || !data.success) throw new Error(data.message || 'Update failed');
-
-      setActionMsg({ type: 'success', text: `Key '${editKey}' সফলভাবে আপডেট হয়েছে!` });
-      setEditingId(null);
-      fetchD1Data();
-    } catch (err) {
-      setActionMsg({ type: 'error', text: err.message });
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleDelete = async (key) => {
-    if (!window.confirm(`আপনি কি নিশ্চিত যে '${key}' মুছে ফেলতে চান?`)) return;
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/db-test/d1?key=${encodeURIComponent(key)}`, {
-        method: 'DELETE',
-      });
-      const data = await res.json();
-      if (!res.ok || !data.success) throw new Error(data.message || 'Delete failed');
-
-      setActionMsg({ type: 'success', text: `Key '${key}' সফলভাবে মুছে ফেলা হয়েছে!` });
-      fetchD1Data();
-    } catch (err) {
-      setActionMsg({ type: 'error', text: err.message });
-      setLoading(false);
-    }
-  };
-
   return (
-    <DbAuthGuard>
-      <div className="d1-admin-page-container">
-        {/* Header Hero */}
-        <div className="d1-hero">
-          <div className="hero-content">
-            <div className="d1-badge">
-              <i className="fa-solid fa-bolt" />
-              <span>CLOUDFLARE D1 ADMIN SUITE</span>
+    <DbAuthGuard activeRoute="/dbd1-admin">
+      <main className="db-page-container">
+        {/* Background Ambient Orbs */}
+        <div className="glow-orb orb-1" />
+        <div className="glow-orb orb-2" />
+
+        <div className="db-content-card">
+          {/* Header */}
+          <div className="db-header">
+            <div className="db-badge" style={{ borderColor: 'rgba(234, 88, 12, 0.4)', color: '#fb923c', background: 'rgba(234, 88, 12, 0.1)' }}>
+              D1 Admin Diagnostic & Manager
             </div>
-            <h1>Cloudflare D1 Database Control</h1>
-            <p className="hero-desc">
-              হেডার, ফুটার, অ্যানাউন্সমেন্ট, স্লাইডার এবং সাইট কনফিগারেশনের এজ ডাটাবেজ (Serverless SQLite on Cloudflare Edge)
+            <h1 className="db-title">Cloudflare D1 Database Manager</h1>
+            <p className="db-subtitle">
+              Serverless Edge SQL (<strong>topmcqbd-db</strong>) ও <code>db-d1-test</code> কালেকশন ম্যানেজমেন্ট ও লাইভ ডায়াগনস্টিক
             </p>
-          </div>
-
-          <div className="hero-actions">
-            <button
-              onClick={() => fetchD1Data()}
-              disabled={loading}
-              className="refresh-btn"
-            >
-              <i className={`fa-solid fa-arrows-rotate ${loading ? 'fa-spin' : ''}`} />
-              <span>{loading ? 'লোড হচ্ছে...' : 'রিফ্রেশ ডাটা'}</span>
-            </button>
-            <button
-              onClick={() => setIsAddingData(!isAddingData)}
-              className="add-new-btn"
-            >
-              <i className={`fa-solid ${isAddingData ? 'fa-xmark' : 'fa-plus'}`} />
-              <span>{isAddingData ? 'বাতিল' : 'নতুন Config Key যোগ করুন'}</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Status Metrics Bar */}
-        <div className="metrics-grid">
-          <div className="metric-card">
-            <div className="metric-icon" style={{ background: '#ffedd5', color: '#ea580c' }}>
-              <i className="fa-solid fa-database" />
-            </div>
-            <div className="metric-details">
-              <span className="metric-label">Database Name</span>
-              <span className="metric-val">{statusData?.database || 'topmcqbd-db'}</span>
+            <div className="server-status-indicator">
+              <span>কানেক্টেড এন্ডপয়েন্ট:</span> <code>{activeBackendUrl}</code>
             </div>
           </div>
 
-          <div className="metric-card">
-            <div className="metric-icon" style={{ background: '#dcfce7', color: '#16a34a' }}>
-              <i className="fa-solid fa-server" />
+          {/* Action & Status Bar */}
+          <div className="db-control-bar">
+            <div className="status-info-text">
+              {lastChecked ? (
+                <div className="status-badge-row">
+                  <span>সর্বশেষ টেস্ট: <strong>{lastChecked}</strong></span>
+                  {isFromCache ? (
+                    <span className="cache-indicator-badge">📦 আগের সংরক্ষিত ফলাফল</span>
+                  ) : (
+                    <span className="live-indicator-badge" style={{ background: 'rgba(234, 88, 12, 0.15)', color: '#fb923c', border: '1px solid rgba(234, 88, 12, 0.3)' }}>
+                      ⚡ সদ্য যাচাইকৃত লাইভ ফলাফল
+                    </span>
+                  )}
+                </div>
+              ) : (
+                <span>ডাটাবেস কানেকশন স্ট্যাটাস চেক করা হচ্ছে...</span>
+              )}
             </div>
-            <div className="metric-details">
-              <span className="metric-label">Connection Status</span>
-              <span className="metric-val" style={{ color: '#16a34a' }}>
-                <i className="fa-solid fa-circle-check" style={{ marginRight: '6px' }} />
-                Connected (Edge Active)
-              </span>
+
+            <div className="control-btn-group">
+              <button onClick={fetchD1Data} disabled={loading} className="recheck-btn" style={{ background: '#ea580c' }}>
+                {loading ? (
+                  <>
+                    <span className="btn-spinner" />
+                    চেক করা হচ্ছে...
+                  </>
+                ) : (
+                  <>
+                    <span>🔄</span>
+                    পুনরায় টেস্ট করুন
+                  </>
+                )}
+              </button>
             </div>
           </div>
 
-          <div className="metric-card">
-            <div className="metric-icon" style={{ background: '#e0e7ff', color: '#4f46e5' }}>
-              <i className="fa-solid fa-table-cells" />
+          {/* Error Alert */}
+          {fetchError && (
+            <div className="alert-card alert-error">
+              <div className="alert-header">
+                <i className="fa-solid fa-triangle-exclamation" style={{ color: '#f87171', marginRight: '6px' }} />
+                <strong>এপিআই রিকোয়েস্ট ব্যর্থ হয়েছে:</strong>
+              </div>
+              <p className="alert-msg">{fetchError}</p>
+              <small className="alert-hint">
+                * নিশ্চিত করুন যে Cloudflare Pages ফাংশন সক্রিয় আছে এবং D1 binding <code>DB</code> কনফিগার করা আছে।
+              </small>
             </div>
-            <div className="metric-details">
-              <span className="metric-label">Total Config Keys</span>
-              <span className="metric-val">{items.length} Rows</span>
+          )}
+
+          {/* Action Message Alert */}
+          {actionMsg && (
+            <div className={`action-feedback ${actionMsg.type === 'success' ? 'msg-success' : 'msg-error'}`}>
+              <i className={`fa-solid ${actionMsg.type === 'success' ? 'fa-circle-check' : 'fa-circle-xmark'}`} style={{ marginRight: '8px' }} />
+              {actionMsg.text}
+            </div>
+          )}
+
+          {/* Single Database Diagnostic Card */}
+          <div className="db-grid" style={{ gridTemplateColumns: '1fr', marginBottom: '24px' }}>
+            <div className={`status-card ${statusData?.connected ? 'card-success' : 'card-danger'}`}>
+              <div className="card-header">
+                <div>
+                  <div className="card-type-tag" style={{ color: '#fb923c' }}>Serverless Edge SQL / D1</div>
+                  <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '3px' }}>
+                    টার্গেট কালেকশন: <strong style={{ color: '#fb923c' }}>db-d1-test</strong>
+                  </div>
+                </div>
+                <div className={`status-pill ${statusData?.connected ? 'pill-success' : 'pill-danger'}`}>
+                  <span className="status-dot" />
+                  <span style={{ transform: 'translateY(0.5px)', display: 'inline-flex', alignItems: 'center' }}>
+                    {loading ? 'Checking...' : statusData?.connected ? 'Connected' : 'Disconnected'}
+                  </span>
+                </div>
+              </div>
+
+              <h3 className="card-db-name">
+                <i className="fa-solid fa-bolt" style={{ marginRight: '8px', color: '#fb923c' }} />
+                {statusData?.databaseName || statusData?.database || 'topmcqbd-db'}
+              </h3>
+
+              <div className="meta-list">
+                <div className="meta-row">
+                  <span className="meta-label">কানেকশন রেসপন্স টাইম (Latency):</span>
+                  <span className="meta-value">
+                    {statusData?.pingTimeMs !== null && statusData?.pingTimeMs !== undefined
+                      ? `${statusData.pingTimeMs} ms`
+                      : 'N/A'}
+                  </span>
+                </div>
+                <div className="meta-row">
+                  <span className="meta-label">db-d1-test কালেকশনে মোট ডাটা:</span>
+                  <span className="meta-value" style={{ color: '#fb923c', fontSize: '15px' }}>
+                    {items.length} টি আইটেম
+                  </span>
+                </div>
+                <div className="meta-row">
+                  <span className="meta-label">ডাটাবেজের স্কোপ:</span>
+                  <span className="meta-value">
+                    Serverless SQLite on Cloudflare Global Edge
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="metric-card">
-            <div className="metric-icon" style={{ background: '#f1f5f9', color: '#475569' }}>
-              <i className="fa-solid fa-gauge-high" />
+          {/* Interactive CRUD Box */}
+          <div className="crud-container">
+            <div className="crud-header">
+              <h3>
+                <i className="fa-solid fa-pen-nib" style={{ marginRight: '8px', color: '#fb923c' }} />
+                ডাটা যোগ ও সম্পাদনা প্যানেল (db-d1-test)
+              </h3>
+              <p>নিচের বক্সে টেক্সট লিখে যোগ করুন। এটি সরাসরি Cloudflare D1 ডাটাবেজে সেভ হবে এবং <code>/dbd1-test</code> পেজে লাইভ আপডেট হবে।</p>
             </div>
-            <div className="metric-details">
-              <span className="metric-label">Latency / Response</span>
-              <span className="metric-val">{statusData?.pingTimeMs !== undefined ? `${statusData.pingTimeMs} ms` : '12 ms'}</span>
+
+            {/* Diagnostic Meta Cards Grid inside CRUD Box */}
+            <div className="summary-grid">
+              <div className="summary-card">
+                <span className="summary-label">ডাটাবেজ ইঞ্জিন</span>
+                <strong className="summary-val" style={{ color: '#fb923c' }}>
+                  {statusData?.databaseName || 'topmcqbd-db'}
+                </strong>
+              </div>
+              <div className="summary-card">
+                <span className="summary-label">টার্গেট কালেকশন</span>
+                <strong className="summary-val" style={{ color: '#fdba74' }}>db-d1-test</strong>
+              </div>
+              <div className="summary-card">
+                <span className="summary-label">মোট সংরক্ষিত ডাটা</span>
+                <strong className="summary-val" style={{ color: '#4ade80' }}>
+                  {items.length} টি আইটেম
+                </strong>
+              </div>
             </div>
-          </div>
-        </div>
 
-        {actionMsg && (
-          <div className={`action-alert ${actionMsg.type}`}>
-            <i className={`fa-solid ${actionMsg.type === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation'}`} />
-            <span>{actionMsg.text}</span>
-          </div>
-        )}
+            {/* Open / Close Add Button */}
+            {!isAddingData ? (
+              <div className="add-btn-wrapper" style={{ marginTop: '16px' }}>
+                <button onClick={openAddDataForm} className="add-open-btn" style={{ background: '#ea580c' }}>
+                  <i className="fa-solid fa-plus" style={{ marginRight: '6px' }} />
+                  + নতুন ডাটা যুক্ত করুন (db-d1-test)
+                </button>
+              </div>
+            ) : (
+              <div className="multi-row-form-box" style={{ marginTop: '16px' }}>
+                <div className="form-box-title">
+                  <span>নতুন ডাটা এন্ট্রি (মাল্টিপল রো যোগ করুন)</span>
+                  <span className="row-counter-tag">{newDataRows.length} টি রো প্রস্তুত</span>
+                </div>
 
-        {/* Add Form */}
-        {isAddingData && (
-          <div className="crud-form-card">
-            <h3>
-              <i className="fa-solid fa-plus-circle" />
-              <span>নতুন Config Key ও Data যুক্ত করুন</span>
-            </h3>
-            <form onSubmit={handleCreate}>
-              <div className="form-group">
-                <label>Key Name (যেমন: layout-config, banner-config):</label>
+                <div className="table-responsive" style={{ maxHeight: '350px', overflowY: 'auto' }}>
+                  <table className="add-rows-table">
+                    <thead>
+                      <tr>
+                        <th style={{ width: '40px' }}>#</th>
+                        <th>টেক্সট / ডাটা কন্টেন্ট</th>
+                        <th style={{ width: '60px' }}>মুছুন</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {newDataRows.map((row, idx) => (
+                        <tr key={idx}>
+                          <td className="row-num-cell">{idx + 1}</td>
+                          <td>
+                            <input
+                              type="text"
+                              value={row.text}
+                              onChange={(e) => updateNewDataRow(idx, e.target.value)}
+                              placeholder={`রো #${idx + 1} এর জন্য যেকোনো টেক্সট বা ডাটা লিখুন...`}
+                              className="table-input"
+                              autoFocus={idx === newDataRows.length - 1}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  e.preventDefault();
+                                  addNewDataRow();
+                                }
+                              }}
+                            />
+                          </td>
+                          <td style={{ textAlign: 'center' }}>
+                            <button
+                              type="button"
+                              onClick={() => removeNewDataRow(idx)}
+                              className="remove-row-btn"
+                              title="এই রো মুছে ফেলুন"
+                            >
+                              <i className="fa-solid fa-trash-can" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="multi-form-actions">
+                  <button type="button" onClick={addNewDataRow} className="add-more-row-btn">
+                    <i className="fa-solid fa-circle-plus" style={{ marginRight: '6px' }} />
+                    + আরও ১টি রো যোগ করুন
+                  </button>
+
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button
+                      type="button"
+                      onClick={() => setIsAddingData(false)}
+                      className="cancel-form-btn"
+                    >
+                      বাতিল
+                    </button>
+                    <button
+                      type="button"
+                      onClick={saveAllNewData}
+                      disabled={submitting}
+                      className="save-all-btn"
+                      style={{ background: '#ea580c' }}
+                    >
+                      {submitting ? 'সংরক্ষণ হচ্ছে...' : 'সবগুলো সংরক্ষণ করুন'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Data List & Search Section */}
+          <div className="data-table-container">
+            <div className="table-top-bar">
+              <div className="search-box-wrapper">
+                <i className="fa-solid fa-magnifying-glass search-icon" />
                 <input
                   type="text"
-                  placeholder="key_name"
-                  value={newKey}
-                  onChange={(e) => setNewKey(e.target.value)}
-                  required
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="সার্চ করুন (ID বা টেক্সট)..."
+                  className="search-input"
                 />
-              </div>
-              <div className="form-group">
-                <label>JSON Data / Value:</label>
-                <textarea
-                  rows="5"
-                  placeholder='{"title": "Demo", "text": "Value"}'
-                  value={newDataValue}
-                  onChange={(e) => setNewDataValue(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="form-actions">
-                <button type="submit" disabled={submitting} className="save-btn">
-                  {submitting ? 'সংরক্ষণ হচ্ছে...' : 'সংরক্ষণ করুন'}
-                </button>
-                <button type="button" onClick={() => setIsAddingData(false)} className="cancel-btn">
-                  বাতিল
-                </button>
-              </div>
-            </form>
-          </div>
-        )}
-
-        {/* Edit Modal */}
-        {editingId && (
-          <div className="modal-overlay">
-            <div className="crud-form-card modal-card">
-              <h3>
-                <i className="fa-solid fa-pen-to-square" />
-                <span>Edit Config: {editKey}</span>
-              </h3>
-              <form onSubmit={handleUpdate}>
-                <div className="form-group">
-                  <label>Config Key (Read Only):</label>
-                  <input type="text" value={editKey} disabled />
-                </div>
-                <div className="form-group">
-                  <label>JSON Data Content:</label>
-                  <textarea
-                    rows="8"
-                    value={editText}
-                    onChange={(e) => setEditText(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="form-actions">
-                  <button type="submit" disabled={submitting} className="save-btn">
-                    {submitting ? 'আপডেট হচ্ছে...' : 'আপডেট সেভ করুন'}
+                {searchQuery && (
+                  <button onClick={() => setSearchQuery('')} className="clear-search-btn">
+                    <i className="fa-solid fa-xmark" />
                   </button>
-                  <button type="button" onClick={() => setEditingId(null)} className="cancel-btn">
-                    বাতিল
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* Search and Table */}
-        <div className="table-section-card">
-          <div className="table-header">
-            <div className="search-box">
-              <i className="fa-solid fa-magnifying-glass" />
-              <input
-                type="text"
-                placeholder="Key বা কনটেন্ট দিয়ে সার্চ করুন..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            <div className="table-count">
-              দেখাচ্ছে: <b>{filteredItems.length}</b> টি Row
-            </div>
-          </div>
-
-          <div className="table-responsive">
-            <table className="d1-data-table">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Key Name</th>
-                  <th>Data Content Preview</th>
-                  <th>Updated Time</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredItems.length === 0 ? (
-                  <tr>
-                    <td colSpan="5" className="empty-table-msg">
-                      কোনো ডাটা পাওয়া যায়নি।
-                    </td>
-                  </tr>
-                ) : (
-                  filteredItems.map((item, idx) => (
-                    <tr key={item.key || idx}>
-                      <td>{idx + 1}</td>
-                      <td>
-                        <div className="key-pill">
-                          <span>{item.key}</span>
-                          <button
-                            onClick={() => handleCopyId(item.key)}
-                            title="Copy Key"
-                            className="copy-key-btn"
-                          >
-                            <i className={`fa-solid ${copiedId === item.key ? 'fa-check' : 'fa-copy'}`} />
-                          </button>
-                        </div>
-                      </td>
-                      <td>
-                        <div className="data-preview" title={item.rawData || item.text}>
-                          {item.text || item.rawData}
-                        </div>
-                      </td>
-                      <td>
-                        <span className="time-badge">{formatDateTime(item.updatedAt || item.createdAt)}</span>
-                      </td>
-                      <td>
-                        <div className="row-actions">
-                          <button
-                            onClick={() => {
-                              setEditingId(item.key);
-                              setEditKey(item.key);
-                              setEditText(item.rawData || item.text || '');
-                            }}
-                            className="edit-row-btn"
-                            title="সম্পাদনা করুন"
-                          >
-                            <i className="fa-solid fa-pen" />
-                            <span>এডিট</span>
-                          </button>
-                          <button
-                            onClick={() => handleDelete(item.key)}
-                            className="delete-row-btn"
-                            title="মুছে ফেলুন"
-                          >
-                            <i className="fa-solid fa-trash" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
                 )}
-              </tbody>
-            </table>
+              </div>
+              <div className="items-count-badge">
+                মোট ফলাফল: <strong>{filteredItems.length}</strong> / {items.length} টি
+              </div>
+            </div>
+
+            {filteredItems.length === 0 ? (
+              <div className="empty-state">
+                <i className="fa-regular fa-folder-open" style={{ fontSize: '32px', color: '#64748b', marginBottom: '12px' }} />
+                <p>{searchQuery ? 'সার্চের সাথে মিল রেখে কোনো ডাটা পাওয়া যায়নি।' : '"db-d1-test" কালেকশনে কোনো ডাটা নেই। উপরে "+ নতুন ডাটা যুক্ত করুন" বাটনে ক্লিক করে ডাটা যোগ করুন।'}</p>
+              </div>
+            ) : (
+              <div className="table-responsive">
+                <table className="custom-data-table">
+                  <thead>
+                    <tr>
+                      <th style={{ width: '40px' }}>#</th>
+                      <th style={{ width: '220px' }}>Data ID</th>
+                      <th>Text / Data Content</th>
+                      <th style={{ width: '170px' }}>Created Date & Time</th>
+                      <th style={{ width: '130px', textAlign: 'center' }}>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredItems.map((item, idx) => (
+                      <tr key={item.id || idx}>
+                        <td className="row-idx">{idx + 1}</td>
+                        <td>
+                          <div className="id-cell">
+                            <code>{item.id}</code>
+                            <button
+                              onClick={() => copyToClipboard(item.id, item.id)}
+                              className="copy-mini-btn"
+                              title="Copy ID"
+                            >
+                              <i className={`fa-solid ${copiedId === item.id ? 'fa-check' : 'fa-copy'}`} />
+                            </button>
+                          </div>
+                        </td>
+                        <td>
+                          {editingId === item.id ? (
+                            <div className="inline-edit-box">
+                              <input
+                                type="text"
+                                value={editText}
+                                onChange={(e) => setEditText(e.target.value)}
+                                className="inline-edit-input"
+                                autoFocus
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') handleSaveEdit(item.id);
+                                  if (e.key === 'Escape') setEditingId(null);
+                                }}
+                              />
+                              <button
+                                onClick={() => handleSaveEdit(item.id)}
+                                disabled={submitting}
+                                className="inline-save-btn"
+                                style={{ background: '#ea580c' }}
+                              >
+                                {submitting ? '...' : 'সেভ'}
+                              </button>
+                              <button onClick={() => setEditingId(null)} className="inline-cancel-btn">
+                                বাতিল
+                              </button>
+                            </div>
+                          ) : (
+                            <span className="text-display">{item.text}</span>
+                          )}
+                        </td>
+                        <td className="date-cell">
+                          {formatDateTime(item.createdAt || item.updatedAt)}
+                        </td>
+                        <td>
+                          <div className="action-btns-group">
+                            <button
+                              onClick={() => {
+                                setEditingId(item.id);
+                                setEditText(item.text || '');
+                              }}
+                              className="action-edit-btn"
+                              title="Edit"
+                            >
+                              <i className="fa-solid fa-pen" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteText(item.id)}
+                              className="action-delete-btn"
+                              title="Delete"
+                            >
+                              <i className="fa-solid fa-trash-can" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
+          {/* 7-Button Database Navigation Box */}
+          <DbNavBox activeRoute="/dbd1-admin" />
+
+          {/* Bottom Navigation Links Bar */}
+          <div
+            className="bottom-nav-bar"
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              width: '100%',
+              marginTop: '24px',
+              padding: '8px 4px 0 4px',
+              flexWrap: 'wrap',
+              gap: '12px',
+              boxSizing: 'border-box',
+            }}
+          >
+            <Link href="/" className="bottom-nav-link left-link">
+              <i className="fa-solid fa-arrow-left" style={{ marginRight: '6px' }} />
+              ওয়েবসাইট ভিজিট
+            </Link>
+            <Link href="/admin/dashboard" className="bottom-nav-link right-link">
+              অ্যাডমিন প্যানেল
+              <i className="fa-solid fa-arrow-right" style={{ marginLeft: '6px' }} />
+            </Link>
           </div>
         </div>
 
-        {/* Bottom Nav Suite */}
-        <DbNavBox activeRoute="/dbd1-admin" />
-
         <style jsx>{`
-          .d1-admin-page-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 30px 20px 60px;
+          .db-page-container {
+            min-height: 100vh;
+            background-color: #0b0f19;
+            color: #f8fafc;
+            padding: 40px 20px 80px;
+            position: relative;
+            overflow-x: hidden;
             font-family: inherit;
+            display: flex;
+            justify-content: center;
           }
 
-          .d1-hero {
+          .glow-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            z-index: 0;
+            pointer-events: none;
+          }
+
+          .orb-1 {
+            width: 400px;
+            height: 400px;
+            background: rgba(234, 88, 12, 0.12);
+            top: -50px;
+            left: -50px;
+          }
+
+          .orb-2 {
+            width: 350px;
+            height: 350px;
+            background: rgba(249, 115, 22, 0.08);
+            bottom: 50px;
+            right: -50px;
+          }
+
+          .db-content-card {
+            width: 100%;
+            max-width: 1050px;
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 36px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            position: relative;
+            z-index: 1;
+          }
+
+          .db-header {
+            text-align: center;
+            margin-bottom: 28px;
+          }
+
+          .db-badge {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            padding: 5px 14px;
+            border-radius: 20px;
+            margin-bottom: 12px;
+          }
+
+          .db-title {
+            font-size: 26px;
+            font-weight: 800;
+            color: #ffffff;
+            margin: 0 0 8px;
+            letter-spacing: -0.5px;
+          }
+
+          .db-subtitle {
+            font-size: 13.5px;
+            color: #94a3b8;
+            margin: 0;
+          }
+
+          .server-status-indicator {
+            margin-top: 10px;
+            font-size: 12px;
+            color: #64748b;
+          }
+
+          .server-status-indicator code {
+            color: #fdba74;
+            background: rgba(234, 88, 12, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+          }
+
+          .db-control-bar {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
-            color: #ffffff;
-            padding: 28px 32px;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(234, 88, 12, 0.2);
-            margin-bottom: 25px;
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 12px;
+            padding: 12px 18px;
+            margin-bottom: 24px;
             flex-wrap: wrap;
-            gap: 20px;
+            gap: 12px;
           }
 
-          .d1-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(255, 255, 255, 0.2);
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            margin-bottom: 10px;
-          }
-
-          .d1-hero h1 {
-            font-size: 24px;
-            font-weight: 800;
-            margin: 0 0 6px;
-          }
-
-          .hero-desc {
-            font-size: 13.5px;
-            opacity: 0.92;
-            margin: 0;
-            max-width: 600px;
-          }
-
-          .hero-actions {
+          .status-badge-row {
             display: flex;
+            align-items: center;
             gap: 10px;
+            font-size: 13px;
+            color: #cbd5e1;
             flex-wrap: wrap;
           }
 
-          .refresh-btn, .add-new-btn {
+          .cache-indicator-badge {
+            background: rgba(234, 179, 8, 0.15);
+            color: #facc15;
+            border: 1px solid rgba(234, 179, 8, 0.3);
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 11.5px;
+            font-weight: 600;
+          }
+
+          .live-indicator-badge {
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 11.5px;
+            font-weight: 600;
+          }
+
+          .recheck-btn {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 10px 16px;
+            color: #ffffff;
+            border: none;
+            padding: 8px 16px;
             border-radius: 8px;
             font-size: 13px;
             font-weight: 700;
             cursor: pointer;
-            border: none;
+            box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
             transition: all 0.2s ease;
           }
 
-          .refresh-btn {
-            background: rgba(255, 255, 255, 0.2);
-            color: #ffffff;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-          }
-
-          .refresh-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-          }
-
-          .add-new-btn {
-            background: #ffffff;
-            color: #ea580c;
-          }
-
-          .add-new-btn:hover {
-            background: #f8fafc;
+          .recheck-btn:hover:not(:disabled) {
+            filter: brightness(1.1);
             transform: translateY(-1px);
           }
 
-          .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 16px;
-            margin-bottom: 25px;
+          .btn-spinner {
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
           }
 
-          .metric-card {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
+          .alert-card {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
             border-radius: 12px;
             padding: 16px;
+            margin-bottom: 24px;
+          }
+
+          .alert-header {
             display: flex;
             align-items: center;
-            gap: 14px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-          }
-
-          .metric-icon {
-            width: 44px;
-            height: 44px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            flex-shrink: 0;
-          }
-
-          .metric-details {
-            display: flex;
-            flex-direction: column;
-          }
-
-          .metric-label {
-            font-size: 11.5px;
-            color: #64748b;
-            font-weight: 600;
-          }
-
-          .metric-val {
             font-size: 14px;
-            font-weight: 700;
-            color: #0f172a;
-          }
-
-          .action-alert {
-            padding: 12px 18px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 13.5px;
-            font-weight: 600;
-          }
-
-          .action-alert.success {
-            background: #f0fdf4;
-            border: 1px solid #bbf7d0;
-            color: #16a34a;
-          }
-
-          .action-alert.error {
-            background: #fef2f2;
-            border: 1px solid #fecaca;
-            color: #dc2626;
-          }
-
-          .crud-form-card {
-            background: #ffffff;
-            border: 1px solid #fed7aa;
-            border-radius: 14px;
-            padding: 24px;
-            margin-bottom: 25px;
-            box-shadow: 0 4px 15px rgba(234, 88, 12, 0.06);
-          }
-
-          .crud-form-card h3 {
-            font-size: 16px;
-            font-weight: 700;
-            color: #ea580c;
-            margin: 0 0 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-          }
-
-          .form-group {
-            margin-bottom: 14px;
-          }
-
-          .form-group label {
-            display: block;
-            font-size: 12.5px;
-            font-weight: 700;
-            color: #334155;
+            color: #f87171;
             margin-bottom: 6px;
           }
 
-          .form-group input, .form-group textarea {
-            width: 100%;
-            padding: 10px 14px;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            font-size: 13.5px;
-            font-family: monospace;
-            outline: none;
-            transition: border-color 0.2s;
-          }
-
-          .form-group input:focus, .form-group textarea:focus {
-            border-color: #ea580c;
-          }
-
-          .form-actions {
-            display: flex;
-            gap: 10px;
-          }
-
-          .save-btn {
-            background: #ea580c;
-            color: #ffffff;
-            border: none;
-            padding: 9px 20px;
-            border-radius: 7px;
+          .alert-msg {
+            color: #fca5a5;
             font-size: 13px;
-            font-weight: 700;
-            cursor: pointer;
+            margin: 0 0 6px;
           }
 
-          .cancel-btn {
-            background: #f1f5f9;
-            color: #475569;
-            border: none;
-            padding: 9px 16px;
-            border-radius: 7px;
-            font-size: 13px;
-            font-weight: 700;
-            cursor: pointer;
+          .alert-hint {
+            color: #94a3b8;
+            font-size: 11.5px;
           }
 
-          .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            padding: 20px;
-          }
-
-          .modal-card {
-            width: 100%;
-            max-width: 650px;
-            margin: 0;
-          }
-
-          .table-section-card {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 14px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
-          }
-
-          .table-header {
-            padding: 16px 20px;
-            border-bottom: 1px solid #f1f5f9;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 14px;
-            flex-wrap: wrap;
-          }
-
-          .search-box {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: #f8fafc;
-            border: 1px solid #cbd5e1;
-            padding: 7px 12px;
-            border-radius: 8px;
-            width: 300px;
-          }
-
-          .search-box input {
-            border: none;
-            background: transparent;
-            outline: none;
-            font-size: 13px;
-            width: 100%;
-          }
-
-          .table-count {
-            font-size: 12.5px;
-            color: #64748b;
-          }
-
-          .table-responsive {
-            overflow-x: auto;
-          }
-
-          .d1-data-table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-            font-size: 13px;
-          }
-
-          .d1-data-table th {
-            background: #f8fafc;
+          .action-feedback {
             padding: 12px 16px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 13.5px;
+            font-weight: 600;
+          }
+
+          .msg-success {
+            background: rgba(34, 197, 94, 0.12);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #4ade80;
+          }
+
+          .msg-error {
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #f87171;
+          }
+
+          .status-card {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 22px;
+          }
+
+          .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 14px;
+          }
+
+          .card-type-tag {
+            font-size: 11.5px;
             font-weight: 700;
-            color: #475569;
-            border-bottom: 1px solid #e2e8f0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
           }
 
-          .d1-data-table td {
-            padding: 14px 16px;
-            border-bottom: 1px solid #f1f5f9;
-            vertical-align: middle;
-          }
-
-          .key-pill {
+          .status-pill {
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            background: #fff7ed;
-            color: #ea580c;
-            border: 1px solid #ffedd5;
-            padding: 3px 8px;
-            border-radius: 6px;
-            font-family: monospace;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11.5px;
             font-weight: 700;
           }
 
-          .copy-key-btn {
-            background: transparent;
-            border: none;
-            color: #ea580c;
-            cursor: pointer;
-            padding: 0;
-            font-size: 11px;
+          .pill-success {
+            background: rgba(34, 197, 94, 0.15);
+            color: #4ade80;
+            border: 1px solid rgba(34, 197, 94, 0.3);
           }
 
-          .data-preview {
-            max-width: 380px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            color: #334155;
-            font-family: monospace;
-            font-size: 12px;
+          .pill-danger {
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.3);
           }
 
-          .time-badge {
-            font-size: 11.5px;
-            color: #64748b;
-            white-space: nowrap;
+          .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background-color: currentColor;
           }
 
-          .row-actions {
+          .card-db-name {
+            font-size: 18px;
+            font-weight: 800;
+            color: #ffffff;
+            margin: 0 0 16px;
+          }
+
+          .meta-list {
             display: flex;
-            align-items: center;
+            flex-direction: column;
             gap: 8px;
           }
 
-          .edit-row-btn {
-            background: #eff6ff;
-            border: 1px solid #bfdbfe;
-            color: #2563eb;
-            padding: 5px 10px;
-            border-radius: 6px;
-            font-size: 12px;
+          .meta-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 6px;
+          }
+
+          .meta-label {
+            color: #94a3b8;
+          }
+
+          .meta-value {
+            color: #e2e8f0;
+            font-weight: 600;
+          }
+
+          .crud-container {
+            background: rgba(30, 41, 59, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 22px;
+            margin-bottom: 24px;
+          }
+
+          .crud-header h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #ffffff;
+            margin: 0 0 6px;
+          }
+
+          .crud-header p {
+            font-size: 12.5px;
+            color: #94a3b8;
+            margin: 0 0 16px;
+          }
+
+          .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+          }
+
+          .summary-card {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 10px;
+            padding: 12px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+          }
+
+          .summary-label {
+            font-size: 11px;
+            color: #94a3b8;
+          }
+
+          .summary-val {
+            font-size: 13.5px;
+          }
+
+          .add-open-btn {
+            width: 100%;
+            color: #ffffff;
+            border: none;
+            padding: 11px;
+            border-radius: 9px;
+            font-size: 13.5px;
             font-weight: 700;
             cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
+            transition: all 0.2s ease;
           }
 
-          .delete-row-btn {
-            background: #fef2f2;
-            border: 1px solid #fecaca;
-            color: #dc2626;
-            padding: 5px 8px;
-            border-radius: 6px;
+          .add-open-btn:hover {
+            filter: brightness(1.1);
+          }
+
+          .multi-row-form-box {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(234, 88, 12, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+          }
+
+          .form-box-title {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            font-weight: 700;
+            color: #fdba74;
+            margin-bottom: 12px;
+          }
+
+          .row-counter-tag {
+            font-size: 11px;
+            background: rgba(234, 88, 12, 0.2);
+            color: #fdba74;
+            padding: 2px 6px;
+            border-radius: 4px;
+          }
+
+          .add-rows-table {
+            width: 100%;
+            border-collapse: collapse;
+          }
+
+          .add-rows-table th {
+            text-align: left;
+            font-size: 11.5px;
+            color: #94a3b8;
+            padding: 6px 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+          }
+
+          .add-rows-table td {
+            padding: 6px 8px;
+          }
+
+          .row-num-cell {
+            color: #64748b;
             font-size: 12px;
+            font-weight: 700;
+          }
+
+          .table-input {
+            width: 100%;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #ffffff;
+            padding: 8px 12px;
+            border-radius: 7px;
+            font-size: 13px;
+            outline: none;
+          }
+
+          .table-input:focus {
+            border-color: #ea580c;
+          }
+
+          .remove-row-btn {
+            background: transparent;
+            border: none;
+            color: #f87171;
+            cursor: pointer;
+            padding: 6px;
+            font-size: 12px;
+          }
+
+          .multi-form-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 14px;
+            flex-wrap: wrap;
+            gap: 10px;
+          }
+
+          .add-more-row-btn {
+            background: rgba(255, 255, 255, 0.08);
+            color: #e2e8f0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 7px 12px;
+            border-radius: 7px;
+            font-size: 12px;
+            font-weight: 600;
             cursor: pointer;
           }
 
-          .empty-table-msg {
-            text-align: center;
+          .cancel-form-btn {
+            background: rgba(255, 255, 255, 0.06);
+            color: #cbd5e1;
+            border: none;
+            padding: 7px 14px;
+            border-radius: 7px;
+            font-size: 12.5px;
+            cursor: pointer;
+          }
+
+          .save-all-btn {
+            color: #ffffff;
+            border: none;
+            padding: 7px 16px;
+            border-radius: 7px;
+            font-size: 12.5px;
+            font-weight: 700;
+            cursor: pointer;
+          }
+
+          .data-table-container {
+            background: rgba(30, 41, 59, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 20px;
+          }
+
+          .table-top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 12px;
+          }
+
+          .search-box-wrapper {
+            position: relative;
+            width: 280px;
+          }
+
+          .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+            font-size: 12px;
+          }
+
+          .search-input {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            padding: 7px 12px 7px 32px;
+            border-radius: 7px;
+            font-size: 12.5px;
+            outline: none;
+          }
+
+          .search-input:focus {
+            border-color: #ea580c;
+          }
+
+          .clear-search-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
             color: #94a3b8;
-            padding: 30px !important;
+            cursor: pointer;
+          }
+
+          .items-count-badge {
+            font-size: 12.5px;
+            color: #94a3b8;
+          }
+
+          .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #94a3b8;
+            font-size: 13.5px;
+          }
+
+          .custom-data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+          }
+
+          .custom-data-table th {
+            text-align: left;
+            background: rgba(15, 23, 42, 0.6);
+            color: #94a3b8;
+            padding: 10px 12px;
+            font-size: 11.5px;
+            font-weight: 700;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+          }
+
+          .custom-data-table td {
+            padding: 11px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: #e2e8f0;
+          }
+
+          .id-cell {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(15, 23, 42, 0.7);
+            padding: 3px 6px;
+            border-radius: 5px;
+            font-size: 11.5px;
+            color: #fdba74;
+            font-family: monospace;
+          }
+
+          .copy-mini-btn {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            padding: 0;
+            font-size: 10.5px;
+          }
+
+          .inline-edit-box {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+          }
+
+          .inline-edit-input {
+            flex: 1;
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid #ea580c;
+            color: #ffffff;
+            padding: 4px 8px;
+            border-radius: 5px;
+            font-size: 12.5px;
+          }
+
+          .inline-save-btn {
+            color: #ffffff;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 5px;
+            font-size: 11.5px;
+            cursor: pointer;
+          }
+
+          .inline-cancel-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: #cbd5e1;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 5px;
+            font-size: 11.5px;
+            cursor: pointer;
+          }
+
+          .action-btns-group {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+          }
+
+          .action-edit-btn {
+            background: rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: #60a5fa;
+            padding: 5px 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 11.5px;
+          }
+
+          .action-delete-btn {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #f87171;
+            padding: 5px 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 11.5px;
+          }
+
+          .date-cell {
+            font-size: 12px;
+            color: #94a3b8;
+          }
+
+          .bottom-nav-link {
+            font-size: 13px;
+            color: #94a3b8;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            transition: color 0.2s;
+          }
+
+          .bottom-nav-link:hover {
+            color: #ffffff;
+          }
+
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
           }
 
           @media (max-width: 768px) {
-            .metrics-grid {
-              grid-template-columns: repeat(2, 1fr);
+            .db-content-card {
+              padding: 20px;
+            }
+            .summary-grid {
+              grid-template-columns: 1fr;
             }
           }
         `}</style>
-      </div>
+      </main>
     </DbAuthGuard>
   );
 }
