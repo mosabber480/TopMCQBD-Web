@@ -3,11 +3,11 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
-export default function LowercaseDbRedirectPage() {
+export default function DbRedirectPage() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace('/db-connection-check');
+    router.replace('/db-connection');
   }, [router]);
 
   return (
@@ -23,12 +23,12 @@ export default function LowercaseDbRedirectPage() {
         width: '40px',
         height: '40px',
         border: '4px solid #f3f3f3',
-        borderTop: '4px solid #3b82f6',
+        borderTop: '4px solid #0080c3',
         borderRadius: '50%',
         animation: 'spin 1s linear infinite'
       }} />
       <p style={{ marginTop: '16px', color: '#64748b', fontSize: '15px' }}>
-        Redirecting to Database Connection Check...
+        Redirecting to Database Connection Suite...
       </p>
       <style jsx>{`
         @keyframes spin {

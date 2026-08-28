@@ -5,12 +5,17 @@ const nextConfig = {
     return [
       {
         source: '/DB',
-        destination: '/db-connection-check',
+        destination: '/db-connection',
         permanent: false,
       },
       {
         source: '/db',
-        destination: '/db-connection-check',
+        destination: '/db-connection',
+        permanent: false,
+      },
+      {
+        source: '/db-connection-check',
+        destination: '/db-connection',
         permanent: false,
       },
     ];
