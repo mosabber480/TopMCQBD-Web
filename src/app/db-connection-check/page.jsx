@@ -184,7 +184,7 @@ export default function DBConnectionCheck() {
 
   return (
     <DbAuthGuard activeRoute="/db-connection-check">
-      <div className="db-check-wrapper">
+      <main className="db-page-container">
         <div className="db-card">
           {/* Header */}
           <div className="header-flex">
@@ -414,18 +414,23 @@ export default function DBConnectionCheck() {
         </div>
 
         <style jsx>{`
-          .db-check-wrapper {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 30px 20px 60px;
+          .db-page-container {
+            min-height: 100vh;
+            background-color: #f8fafc;
+            color: #0f172a;
+            padding: 40px 20px 80px;
             font-family: inherit;
+            display: flex;
+            justify-content: center;
           }
 
           .db-card {
+            width: 100%;
+            max-width: 1050px;
             background: #ffffff;
             border: 1px solid #e2e8f0;
             border-radius: 16px;
-            padding: 30px;
+            padding: 32px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
           }
 
@@ -452,7 +457,7 @@ export default function DBConnectionCheck() {
           }
 
           .title {
-            font-size: 24px;
+            font-size: 26px;
             font-weight: 800;
             color: #0f172a;
             margin: 0 0 6px;
@@ -642,7 +647,7 @@ export default function DBConnectionCheck() {
             }
           }
         `}</style>
-      </div>
+      </main>
     </DbAuthGuard>
   );
 }
