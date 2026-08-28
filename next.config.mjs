@@ -1,6 +1,20 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: false,
+  async redirects() {
+    return [
+      {
+        source: '/DB',
+        destination: '/db-connection-check',
+        permanent: false,
+      },
+      {
+        source: '/db',
+        destination: '/db-connection-check',
+        permanent: false,
+      },
+    ];
+  },
   async headers() {
     return [
       {
