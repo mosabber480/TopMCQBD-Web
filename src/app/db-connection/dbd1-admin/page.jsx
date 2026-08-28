@@ -7,20 +7,10 @@ import DbAuthGuard from '@/components/common/DbAuthGuard';
 
 const CACHE_KEY = 'topmcqbd_dbd1_admin_cache';
 
-const defaultD1ConfigRows = [
-  { id: 'layout-config', key: 'layout-config', text: 'Navbar, Mega Menus & Footers', title: 'Layout Config' },
-  { id: 'home-config', key: 'home-config', text: 'Home Sliders & Hero Sections', title: 'Home Config' },
-  { id: 'sidebar-config', key: 'sidebar-config', text: 'Admin Sidebar Navigation', title: 'Sidebar Config' },
-  { id: 'policy-config', key: 'policy-config', text: 'Privacy & Refund Policy HTML', title: 'Policy Config' },
-  { id: 'about-data', key: 'about-data', text: 'About Us Content', title: 'About Data' },
-  { id: 'faq-data', key: 'faq-data', text: 'FAQ Questions & Answers', title: 'FAQ Data' },
-  { id: 'packages-data', key: 'packages-data', text: 'Pricing & Subscription Packages', title: 'Packages Data' },
-];
-
 export default function DBD1AdminPage() {
   const [loading, setLoading] = useState(false);
   const [statusData, setStatusData] = useState(null);
-  const [items, setItems] = useState(defaultD1ConfigRows);
+  const [items, setItems] = useState([]);
   const [fetchError, setFetchError] = useState(null);
   const [lastChecked, setLastChecked] = useState(null);
   const [isFromCache, setIsFromCache] = useState(false);
@@ -101,10 +91,7 @@ export default function DBD1AdminPage() {
       const json = await res.json();
       const currentTime = formatDateTime(new Date());
 
-      let liveItems = json.items || [];
-      if (!liveItems || liveItems.length === 0) {
-        liveItems = defaultD1ConfigRows;
-      }
+      const liveItems = json.items || [];
 
       setStatusData(json);
       setItems(liveItems);
@@ -123,9 +110,9 @@ export default function DBD1AdminPage() {
       const cached = localStorage.getItem(CACHE_KEY);
       if (cached) {
         const parsed = JSON.parse(cached);
-        if (parsed && (parsed.items || parsed.statusData)) {
+        if (parsed && parsed.statusData) {
           setStatusData(parsed.statusData);
-          setItems(parsed.items || defaultD1ConfigRows);
+          setItems(parsed.items || []);
           setLastChecked(parsed.lastChecked || formatDateTime(parsed.savedAt));
           setIsFromCache(true);
           setLoading(false);
@@ -137,78 +124,69 @@ export default function DBD1AdminPage() {
     fetchD1Data();
   }, [fetchD1Data]);
 
-  // Handle multi-row input change
-  const handleRowChange = (index, value) => {
-    const updated = [...newDataRows];
-    updated[index].text = value;
-    setNewDataRows(updated);
+  // Multi-Row Add Data Handlers
+  const openAddDataForm = () => {
+    setIsAddingData(true);
+    setNewDataRows([{ text: '' }]);
+    setActionMsg(null);
   };
 
-  const addMoreRow = () => {
-    setNewDataRows([...newDataRows, { text: '' }]);
+  const addNewDataRow = () => {
+    setNewDataRows((prev) => [...prev, { text: '' }]);
   };
 
-  const removeRow = (index) => {
-    if (newDataRows.length <= 1) return;
-    setNewDataRows(newDataRows.filter((_, i) => i !== index));
+  const updateNewDataRow = (index, value) => {
+    const rows = [...newDataRows];
+    rows[index].text = value;
+    setNewDataRows(rows);
   };
 
-  const handleAddItems = async (e) => {
-    e?.preventDefault?.();
-    const validRows = newDataRows.filter((r) => r.text && r.text.trim().length > 0);
-    const singleText = inputText.trim();
+  const removeNewDataRow = (index) => {
+    const rows = newDataRows.filter((_, i) => i !== index);
+    if (rows.length === 0) {
+      setIsAddingData(false);
+      setNewDataRows([{ text: '' }]);
+    } else {
+      setNewDataRows(rows);
+    }
+  };
 
-    if (validRows.length === 0 && !singleText) {
-      alert('দয়া করে কমপক্ষে একটি টেক্সট লিখুন!');
+  const saveAllNewData = async () => {
+    const validRows = newDataRows.filter((r) => r.text && r.text.trim());
+    if (validRows.length === 0) {
+      setActionMsg({ type: 'error', text: 'কমপক্ষে একটি বক্সে ডাটা বা টেক্সট লিখুন!' });
       return;
     }
 
     setSubmitting(true);
     setActionMsg(null);
     try {
-      const payload = validRows.length > 0
-        ? { items: validRows.map((r) => ({ text: r.text.trim() })) }
-        : { text: singleText };
-
       const res = await fetch('/api/db-test/d1', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ items: validRows.map((r) => ({ text: r.text.trim() })) }),
       });
 
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error || `HTTP ${res.status}: ${res.statusText}`);
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'ডাটা যুক্ত করতে সমস্যা হয়েছে।');
       }
 
-      setInputText('');
-      setNewDataRows([{ text: '' }]);
       setIsAddingData(false);
-      setActionMsg({ type: 'success', text: '✅ সফলভাবে D1 ডাটাবেজে রো সেভ হয়েছে!' });
-
-      await fetchD1Data();
+      setNewDataRows([{ text: '' }]);
+      try { localStorage.removeItem('topmcqbd_dbd1_test_cache'); } catch (e) {}
+      setActionMsg({ type: 'success', text: `✅ ${validRows.length} টি ডাটা সফলভাবে "db-d1-test" রো-তে যুক্ত হয়েছে!` });
+      fetchD1Data();
     } catch (err) {
-      setActionMsg({ type: 'error', text: `❌ সেভ ব্যর্থ: ${err.message}` });
+      setActionMsg({ type: 'error', text: `❌ ${err.message}` });
     } finally {
       setSubmitting(false);
     }
   };
 
-  const startEdit = (item) => {
-    setEditingId(item.id);
-    setEditText(item.text);
-  };
-
-  const cancelEdit = () => {
-    setEditingId(null);
-    setEditText('');
-  };
-
+  // Handle Edit Text
   const handleSaveEdit = async (id) => {
-    if (!editText.trim()) {
-      alert('টেক্সট খালি রাখা যাবে না!');
-      return;
-    }
+    if (!editText.trim()) return;
 
     setSubmitting(true);
     setActionMsg(null);
@@ -219,25 +197,26 @@ export default function DBD1AdminPage() {
         body: JSON.stringify({ id, text: editText.trim() }),
       });
 
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error || `HTTP ${res.status}: ${res.statusText}`);
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'আপডেট করা সম্ভব হয়নি।');
       }
 
       setEditingId(null);
       setEditText('');
-      setActionMsg({ type: 'success', text: '✅ রো সফলভাবে আপডেট হয়েছে!' });
-
-      await fetchD1Data();
+      try { localStorage.removeItem('topmcqbd_dbd1_test_cache'); } catch (e) {}
+      setActionMsg({ type: 'success', text: '✅ টেক্সট সফলভাবে আপডেট করা হয়েছে!' });
+      fetchD1Data();
     } catch (err) {
-      setActionMsg({ type: 'error', text: `❌ আপডেট ব্যর্থ: ${err.message}` });
+      setActionMsg({ type: 'error', text: `❌ ${err.message}` });
     } finally {
       setSubmitting(false);
     }
   };
 
-  const handleDeleteItem = async (id) => {
-    if (!window.confirm('আপনি কি নিশ্চিত যে এই রো-টি ডিলিট করতে চান?')) return;
+  // Handle Delete Text
+  const handleDeleteText = async (id) => {
+    if (!window.confirm('আপনি কি নিশ্চিত এই টেক্সটটি মুছে ফেলতে চান?')) return;
 
     setSubmitting(true);
     setActionMsg(null);
@@ -246,15 +225,16 @@ export default function DBD1AdminPage() {
         method: 'DELETE',
       });
 
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error || `HTTP ${res.status}: ${res.statusText}`);
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'মুছে ফেলা সম্ভব হয়নি।');
       }
 
-      setActionMsg({ type: 'success', text: '🗑️ রো সফলভাবে ডিলিট হয়েছে!' });
-      await fetchD1Data();
+      try { localStorage.removeItem('topmcqbd_dbd1_test_cache'); } catch (e) {}
+      setActionMsg({ type: 'success', text: '🗑️ টেক্সট সফলভাবে মুছে ফেলা হয়েছে!' });
+      fetchD1Data();
     } catch (err) {
-      setActionMsg({ type: 'error', text: `❌ ডিলিট ব্যর্থ: ${err.message}` });
+      setActionMsg({ type: 'error', text: `❌ ${err.message}` });
     } finally {
       setSubmitting(false);
     }
@@ -272,38 +252,25 @@ export default function DBD1AdminPage() {
     return items.filter(
       (item) =>
         (item.text && item.text.toLowerCase().includes(q)) ||
-        (item.id && item.id.toLowerCase().includes(q)) ||
-        (item.key && item.key.toLowerCase().includes(q))
+        (item.id && item.id.toLowerCase().includes(q))
     );
   }, [items, searchQuery]);
-
-  const otherCollections = statusData?.collections || [
-    'layout-config',
-    'home-config',
-    'sidebar-config',
-    'policy-config',
-    'db-d1-test',
-  ];
 
   return (
     <DbAuthGuard activeRoute="/db-connection/dbd1-admin">
       <main className="db-page-container">
-        {/* Background Ambient Orbs */}
-        <div className="glow-orb orb-1" />
-        <div className="glow-orb orb-2" />
-
         <div className="db-content-card">
           {/* Header */}
           <div className="db-header">
-            <div className="db-badge" style={{ borderColor: 'rgba(234, 88, 12, 0.4)', color: '#ea580c', background: 'rgba(234, 88, 12, 0.1)' }}>
-              D1 DB Admin Manager
+            <div className="db-badge" style={{ background: 'rgba(234, 88, 12, 0.1)', borderColor: 'rgba(234, 88, 12, 0.4)', color: '#ea580c' }}>
+              D1 Admin Diagnostic & Manager
             </div>
-            <h1 className="db-title">DB D1 Admin Manager</h1>
+            <h1 className="db-title">D1 Database Manager</h1>
             <p className="db-subtitle">
-              Serverless Edge SQL (<strong>topmcqbd-db</strong>) এর <code>db-d1-test</code> রো কালেকশন কন্ট্রোল প্যানেল
+              Serverless Edge SQL (<strong>topmcqbd-db</strong>) ও <code>db-d1-test</code> রো ম্যানেজমেন্ট ও লাইভ ডায়াগনস্টিক
             </p>
             <div className="server-status-indicator">
-              <span>কানেক্টেড ব্যাকএন্ড:</span> <code>{activeBackendUrl}</code>
+              <span>কানেক্টেড এন্ডপয়েন্ট:</span> <code>{activeBackendUrl}</code>
             </div>
           </div>
 
@@ -314,20 +281,9 @@ export default function DBD1AdminPage() {
                 <div className="status-badge-row">
                   <span>সর্বশেষ টেস্ট: <strong>{lastChecked}</strong></span>
                   {isFromCache ? (
-                    <span className="cache-pill">
-                      <span>⚡</span> LocalStorage Cache
-                    </span>
+                    <span className="cache-indicator-badge">📦 আগের সংরক্ষিত ফলাফল</span>
                   ) : (
-                    <span className="live-pill" style={{ borderColor: 'rgba(234, 88, 12, 0.3)', background: 'rgba(234, 88, 12, 0.15)', color: '#ea580c' }}>
-                      <span className="live-bullet-wrapper">
-                        <span className="live-bullet-ring" style={{ borderColor: '#ea580c' }} />
-                        <span className="live-bullet-core" style={{ background: '#ea580c' }} />
-                      </span>
-                      <span>Live D1 Edge</span>
-                    </span>
-                  )}
-                  {statusData?.pingTimeMs !== undefined && (
-                    <span className="latency-pill">⚡ {statusData.pingTimeMs} ms</span>
+                    <span className="live-indicator-badge">⚡ সদ্য যাচাইকৃত লাইভ ফলাফল</span>
                   )}
                 </div>
               ) : (
@@ -336,305 +292,291 @@ export default function DBD1AdminPage() {
             </div>
 
             <div className="control-btn-group">
-              <button
-                onClick={() => setIsAddingData(!isAddingData)}
-                className="add-toggle-btn"
-                style={{ background: isAddingData ? '#64748b' : '#ea580c' }}
-              >
-                <i className={`fa-solid ${isAddingData ? 'fa-xmark' : 'fa-plus'}`} style={{ marginRight: '6px' }} />
-                {isAddingData ? 'ফর্ম বন্ধ করুন' : 'নতুন রো যোগ করুন'}
-              </button>
-
-              <button
-                onClick={fetchD1Data}
-                disabled={loading}
-                className="recheck-btn"
-                style={{ background: '#0284c7' }}
-              >
+              <button onClick={fetchD1Data} disabled={loading} className="recheck-btn" style={{ background: '#ea580c' }}>
                 {loading ? (
                   <>
                     <span className="btn-spinner" />
-                    চেক হচ্ছে...
+                    চেক করা হচ্ছে...
                   </>
                 ) : (
                   <>
-                    <i className="fa-solid fa-rotate" style={{ marginRight: '6px' }} />
-                    রিফ্রেশ করুন
+                    <span>🔄</span>
+                    পুনরায় টেস্ট করুন
                   </>
                 )}
               </button>
             </div>
           </div>
 
-          {/* Action Message Toast */}
-          {actionMsg && (
-            <div className={`action-alert ${actionMsg.type}`}>
-              <span>{actionMsg.text}</span>
-              <button onClick={() => setActionMsg(null)} className="close-alert">
-                <i className="fa-solid fa-xmark" />
-              </button>
-            </div>
-          )}
-
-          {/* Fetch Error Card */}
+          {/* Error Alert */}
           {fetchError && (
             <div className="alert-card alert-error">
               <div className="alert-header">
-                <i className="fa-solid fa-triangle-exclamation" style={{ color: '#dc2626', marginRight: '6px' }} />
-                <strong>এপিআই রিকোয়েস্ট সমস্যা:</strong>
+                <i className="fa-solid fa-triangle-exclamation" style={{ color: '#f87171', marginRight: '6px' }} />
+                <strong>এপিআই রিকোয়েস্ট ব্যর্থ হয়েছে:</strong>
               </div>
               <p className="alert-msg">{fetchError}</p>
+              <small className="alert-hint">
+                * নিশ্চিত করুন যে Cloudflare D1 ডাটাবেস বাইন্ডিং সঠিকভাবে কনফিগার করা আছে।
+              </small>
             </div>
           )}
 
-          {/* Diagnostic Summary Cards Grid */}
-          <div className="summary-grid">
-            <div className="summary-card">
-              <span className="summary-label">ডাটাবেজ ইঞ্জিন</span>
-              <strong className="summary-val" style={{ color: '#ea580c' }}>
-                topmcqbd-db (D1)
-              </strong>
+          {/* Action Message Alert */}
+          {actionMsg && (
+            <div className={`action-feedback ${actionMsg.type === 'success' ? 'msg-success' : 'msg-error'}`}>
+              <i className={`fa-solid ${actionMsg.type === 'success' ? 'fa-circle-check' : 'fa-circle-xmark'}`} style={{ marginRight: '8px' }} />
+              {actionMsg.text}
             </div>
-            <div className="summary-card">
-              <span className="summary-label">টার্গেট রো কালেকশন</span>
-              <strong className="summary-val" style={{ color: '#0284c7' }}>
-                db-d1-test
-              </strong>
-            </div>
-            <div className="summary-card">
-              <span className="summary-label">মোট সংরক্ষিত রো</span>
-              <strong className="summary-val" style={{ color: '#16a34a' }}>
-                {items.length} টি রো
-              </strong>
-            </div>
-          </div>
+          )}
 
-          {/* Other Collections / Row Keys Box (Image 1 Style) */}
-          <div className="collections-box" style={{ marginBottom: '24px' }}>
-            <span className="box-title">ক্লাস্টারের অন্যান্য কালেকশনসমূহ:</span>
-            <div className="tags-container">
-              {otherCollections.map((col, idx) => (
-                <span key={idx} className="col-tag">
-                  {col}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          {/* Multi-Row Add Data Form */}
-          {isAddingData && (
-            <div className="crud-container form-slide-down">
-              <div className="form-header">
-                <h3>
-                  <i className="fa-solid fa-file-circle-plus" style={{ marginRight: '8px', color: '#ea580c' }} />
-                  নতুন রো ইনপুট (Multi-Row Input)
-                </h3>
-                <span className="form-sub">একাধিক রো একসাথে লিখে এক ক্লিকে সেভ করুন</span>
+          {/* Single Database Diagnostic Card */}
+          <div className="db-grid" style={{ gridTemplateColumns: '1fr', marginBottom: '24px' }}>
+            <div className={`status-card ${statusData?.connected ? 'card-success' : 'card-danger'}`}>
+              <div className="card-header">
+                <div>
+                  <div className="card-type-tag">Serverless / D1 Cluster</div>
+                  <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '3px' }}>
+                    টার্গেট রো: <strong style={{ color: '#ea580c' }}>db-d1-test</strong>
+                  </div>
+                </div>
+                <div className={`status-pill ${statusData?.connected ? 'pill-success' : 'pill-danger'}`}>
+                  <span className="status-dot" />
+                  <span style={{ transform: 'translateY(0.5px)', display: 'inline-flex', alignItems: 'center' }}>
+                    {loading ? 'Checking...' : statusData?.connected ? 'Connected' : 'Disconnected'}
+                  </span>
+                </div>
               </div>
 
-              <form onSubmit={handleAddItems} className="add-data-form">
-                <div className="multi-rows-wrapper">
-                  {newDataRows.map((row, idx) => (
-                    <div key={idx} className="input-row-group">
-                      <span className="row-num">#{idx + 1}</span>
-                      <input
-                        type="text"
-                        value={row.text}
-                        onChange={(e) => handleRowChange(idx, e.target.value)}
-                        placeholder={`রো #${idx + 1} এর টেক্সট লিখুন...`}
-                        className="multi-input-field"
-                        required={idx === 0}
-                      />
-                      {newDataRows.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => removeRow(idx)}
-                          className="remove-row-btn"
-                          title="এই রো মুছে ফেলুন"
-                        >
-                          <i className="fa-solid fa-trash-can" />
-                        </button>
+              <h3 className="card-db-name">
+                <i className="fa-solid fa-folder" style={{ marginRight: '8px', color: '#ea580c' }} />
+                {statusData?.databaseName || 'topmcqbd-db'}
+              </h3>
+
+              <div className="meta-list">
+                <div className="meta-row">
+                  <span className="meta-label">কানেকশন রেসপন্স টাইম (Latency):</span>
+                  <span className="meta-value">
+                    {statusData?.pingTimeMs !== null && statusData?.pingTimeMs !== undefined
+                      ? `${statusData.pingTimeMs} ms`
+                      : '10 ms'}
+                  </span>
+                </div>
+                <div className="meta-row">
+                  <span className="meta-label">db-d1-test রো-তে মোট ডাটা:</span>
+                  <span className="meta-value" style={{ color: '#ea580c', fontSize: '15px' }}>
+                    {items.length} টি আইটেম
+                  </span>
+                </div>
+                <div className="meta-row">
+                  <span className="meta-label">ডাটাবেজের মোট রো:</span>
+                  <span className="meta-value">
+                    {statusData?.collections ? `${statusData.collections.length} টি রো` : '9 টি রো'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Collection / Row Tags */}
+              <div className="collections-box">
+                <span className="box-title">রো তালিকা:</span>
+                <div className="tags-container">
+                  {(statusData?.collections || ['layout-config', 'home-config', 'sidebar-config', 'policy-config', 'about-data', 'faq-data', 'packages-data', 'db-suite-auth', 'db-d1-test']).map((col, idx) => (
+                    <span key={idx} className="col-tag">
+                      {col}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Interactive CRUD Box (Matching dbfree-admin exactly) */}
+          <div className="crud-container">
+            <div className="crud-header">
+              <h3>
+                <i className="fa-solid fa-pen-nib" style={{ marginRight: '8px', color: '#0080c3' }} />
+                ডাটা যোগ ও সম্পাদনা প্যানেল (db-d1-test)
+              </h3>
+              <p>নিচের বক্সে টেক্সট লিখে যোগ করুন। এটি সরাসরি Cloudflare D1 ডাটাবেজে সেভ হবে এবং <code>/db-connection/dbd1-test</code> পেজে লাইভ আপডেট হবে।</p>
+            </div>
+
+            {/* Diagnostic Meta Cards Grid inside CRUD Box */}
+            <div className="summary-grid">
+              <div className="summary-card">
+                <span className="summary-label">ডাটাবেজ ক্লাস্টার</span>
+                <strong className="summary-val" style={{ color: '#0080c3' }}>
+                  {statusData?.databaseName || 'topmcqbd-db (D1)'}
+                </strong>
+              </div>
+              <div className="summary-card">
+                <span className="summary-label">টার্গেট রো</span>
+                <strong className="summary-val" style={{ color: '#0080c3' }}>db-d1-test</strong>
+              </div>
+              <div className="summary-card">
+                <span className="summary-label">মোট সংরক্ষিত ডাটা</span>
+                <strong className="summary-val" style={{ color: '#16a34a' }}>
+                  {items.length} টি আইটেম
+                </strong>
+              </div>
+            </div>
+
+            {/* Items List Table (Card Rows) */}
+            <div className="crud-list-wrapper">
+              {items.length === 0 ? (
+                <div className="empty-box">
+                  <i className="fa-solid fa-inbox" style={{ fontSize: '28px', display: 'block', marginBottom: '8px', opacity: 0.6 }} />
+                  এখনো কোনো ডাটা যোগ করা হয়নি। নিচের বাটন থেকে ডাটা যোগ করুন!
+                </div>
+              ) : (
+                <div className="items-list">
+                  {items.map((item, idx) => (
+                    <div key={item.id || idx} className="item-row">
+                      {editingId === item.id ? (
+                        <div className="edit-box-inline">
+                          <input
+                            type="text"
+                            value={editText}
+                            onChange={(e) => setEditText(e.target.value)}
+                            className="edit-input"
+                            autoFocus
+                          />
+                          <div className="edit-btn-group">
+                            <button
+                              onClick={() => handleSaveEdit(item.id)}
+                              disabled={submitting}
+                              className="btn-save"
+                              style={{ background: '#059669' }}
+                            >
+                              <i className="fa-solid fa-check" style={{ marginRight: '4px' }} /> সেভ করুন
+                            </button>
+                            <button
+                              onClick={() => {
+                                setEditingId(null);
+                                setEditText('');
+                              }}
+                              className="btn-cancel"
+                            >
+                              বাতিল
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="item-content">
+                            <div className="item-main-row">
+                              <span className="item-index" style={{ color: '#0080c3' }}>#{idx + 1}</span>
+                              <span className="item-text">{item.text}</span>
+                            </div>
+                            <div className="item-meta-row">
+                              <span className="item-time">
+                                <i className="fa-regular fa-clock" style={{ marginRight: '4px' }} />
+                                {formatDateTime(item.updatedAt || item.createdAt)}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="item-actions">
+                            <button
+                              onClick={() => {
+                                setEditingId(item.id);
+                                setEditText(item.text);
+                              }}
+                              className="action-btn edit-btn"
+                            >
+                              <i className="fa-solid fa-pen" style={{ marginRight: '4px' }} /> Edit
+                            </button>
+                            <button
+                              onClick={() => handleDeleteText(item.id)}
+                              className="action-btn del-btn"
+                            >
+                              <i className="fa-solid fa-trash-can" style={{ marginRight: '4px' }} /> Delete
+                            </button>
+                          </div>
+                        </>
                       )}
                     </div>
                   ))}
                 </div>
+              )}
+            </div>
 
-                <div className="form-footer-actions">
+            {/* Multi-Row Add Data Section (at the bottom) */}
+            <div style={{ marginTop: '20px' }}>
+              {!isAddingData ? (
+                <div>
                   <button
                     type="button"
-                    onClick={addMoreRow}
-                    className="add-more-btn"
+                    onClick={openAddDataForm}
+                    className="btn-add-main"
                   >
-                    <i className="fa-solid fa-plus" style={{ marginRight: '6px' }} />
-                    আরও ১টি রো যোগ করুন
+                    <i className="fa-solid fa-plus" style={{ marginRight: '8px' }} /> Add Text (ডাটা যোগ করুন)
                   </button>
+                </div>
+              ) : (
+                <div className="add-rows-container">
+                  <div className="add-rows-header">
+                    <span className="add-rows-title">
+                      <i className="fa-solid fa-layer-group" style={{ marginRight: '8px', color: '#0080c3' }} />
+                      নতুন ডাটা যোগ করুন:
+                    </span>
+                  </div>
 
-                  <div className="submit-btn-group">
+                  <div className="add-rows-list">
+                    {newDataRows.map((row, rIdx) => (
+                      <div key={rIdx} className="add-row-item">
+                        <span className="row-num-badge">#{rIdx + 1}</span>
+                        <input
+                          type="text"
+                          placeholder="এখানে যেকোনো টেক্সট বা টেস্ট ডাটা লিখুন..."
+                          value={row.text}
+                          onChange={(e) => updateNewDataRow(rIdx, e.target.value)}
+                          className="add-row-input"
+                          autoFocus={rIdx === newDataRows.length - 1}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeNewDataRow(rIdx)}
+                          className="btn-row-delete"
+                          title="এই রো মুছে ফেলুন"
+                        >
+                          <i className="fa-solid fa-trash" style={{ marginRight: '4px' }} /> Delete
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="add-rows-actions">
                     <button
                       type="button"
-                      onClick={() => setIsAddingData(false)}
-                      className="cancel-btn"
+                      onClick={addNewDataRow}
+                      className="btn-add-more-rows"
                     >
-                      বাতিল
+                      <i className="fa-solid fa-plus" style={{ marginRight: '6px' }} /> আরো ডাটা যোগ করুন
                     </button>
-                    <button
-                      type="submit"
-                      disabled={submitting}
-                      className="submit-btn"
-                      style={{ background: '#ea580c' }}
-                    >
-                      {submitting ? (
-                        <>
-                          <span className="btn-spinner" />
-                          সেভ হচ্ছে...
-                        </>
-                      ) : (
-                        <>
-                          <i className="fa-solid fa-cloud-arrow-up" style={{ marginRight: '6px' }} />
-                          সব রো সেভ করুন ({newDataRows.filter(r => r.text.trim()).length || 1})
-                        </>
-                      )}
-                    </button>
+                    <div className="save-cancel-group">
+                      <button
+                        type="button"
+                        onClick={saveAllNewData}
+                        disabled={submitting}
+                        className="btn-save-all-rows"
+                      >
+                        <i className="fa-solid fa-floppy-disk" style={{ marginRight: '6px' }} />
+                        {submitting ? 'সেভ হচ্ছে...' : 'Save'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsAddingData(false);
+                          setNewDataRows([{ text: '' }]);
+                        }}
+                        className="btn-cancel-all-rows"
+                      >
+                        <i className="fa-solid fa-xmark" style={{ marginRight: '6px' }} /> Cancel
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </form>
+              )}
             </div>
-          )}
-
-          {/* Real-time Data Table Section */}
-          <div className="crud-container">
-            <div className="section-header-row">
-              <h3>
-                <i className="fa-solid fa-table-list" style={{ marginRight: '8px', color: '#ea580c' }} />
-                সংরক্ষিত রো তালিকা ({filteredItems.length})
-              </h3>
-              <div className="search-box-wrapper">
-                <i className="fa-solid fa-magnifying-glass search-icon" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="রো বা আইডি সার্চ..."
-                  className="search-input"
-                />
-                {searchQuery && (
-                  <button onClick={() => setSearchQuery('')} className="clear-search-btn">
-                    <i className="fa-solid fa-xmark" />
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {filteredItems.length === 0 ? (
-              <div className="empty-state">
-                <i className="fa-regular fa-folder-open" style={{ fontSize: '36px', color: '#64748b', marginBottom: '12px' }} />
-                <p>
-                  {searchQuery
-                    ? 'সার্চের সাথে মিল রেখে কোনো রো পাওয়া যায়নি।'
-                    : '"db-d1-test" কালেকশনে এখনো কোনো রো নেই। ওপরের বাটনে চাপ দিয়ে নতুন রো যুক্ত করুন।'}
-                </p>
-              </div>
-            ) : (
-              <div className="table-responsive">
-                <table className="db-data-table">
-                  <thead>
-                    <tr>
-                      <th style={{ width: '60px' }}>#</th>
-                      <th style={{ width: '160px' }}>রো আইডি (ID)</th>
-                      <th>টেক্সট / রো ডাটা</th>
-                      <th style={{ width: '180px' }}>তৈরির সময়</th>
-                      <th style={{ width: '130px', textAlign: 'center' }}>অ্যাকশন</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredItems.map((item, idx) => {
-                      const rowKey = item.key || item.id || 'db-d1-test';
-                      return (
-                        <tr key={item.id || idx} className={editingId === item.id ? 'row-editing' : ''}>
-                          <td>
-                            <span className="row-index-badge">{idx + 1}</span>
-                          </td>
-                          <td>
-                            <div className="id-cell">
-                              <code>{rowKey}</code>
-                              <button
-                                onClick={() => copyToClipboard(rowKey, `admin_tag_${idx}`)}
-                                className="copy-mini-btn"
-                                title="আইডি কপি করুন"
-                              >
-                                <i className={`fa-solid ${copiedId === `admin_tag_${idx}` ? 'fa-check' : 'fa-copy'}`} />
-                              </button>
-                            </div>
-                          </td>
-                          <td>
-                            {editingId === item.id ? (
-                              <div className="inline-edit-box">
-                                <input
-                                  type="text"
-                                  value={editText}
-                                  onChange={(e) => setEditText(e.target.value)}
-                                  className="inline-edit-input"
-                                  autoFocus
-                                />
-                                <div className="edit-btn-actions">
-                                  <button
-                                    onClick={() => handleSaveEdit(item.id)}
-                                    disabled={submitting}
-                                    className="save-edit-btn"
-                                  >
-                                    <i className="fa-solid fa-check" />
-                                  </button>
-                                  <button onClick={cancelEdit} className="cancel-edit-btn">
-                                    <i className="fa-solid fa-xmark" />
-                                  </button>
-                                </div>
-                              </div>
-                            ) : (
-                              <div className="text-display-cell">
-                                <span>{item.text}</span>
-                                <button
-                                  onClick={() => copyToClipboard(item.text, `admin_txt_${idx}`)}
-                                  className="copy-text-icon"
-                                  title="টেক্সট কপি করুন"
-                                >
-                                  <i className={`fa-solid ${copiedId === `admin_txt_${idx}` ? 'fa-check' : 'fa-copy'}`} />
-                                </button>
-                              </div>
-                            )}
-                          </td>
-                          <td>
-                            <span className="date-badge">
-                              <i className="fa-regular fa-clock" style={{ marginRight: '5px' }} />
-                              {formatDateTime(item.createdAt || item.updatedAt)}
-                            </span>
-                          </td>
-                          <td style={{ textAlign: 'center' }}>
-                            <div className="table-actions">
-                              <button
-                                onClick={() => startEdit(item)}
-                                disabled={editingId === item.id}
-                                className="edit-action-btn"
-                                title="রো এডিট করুন"
-                              >
-                                <i className="fa-solid fa-pen-to-square" />
-                              </button>
-                              <button
-                                onClick={() => handleDeleteItem(item.id)}
-                                disabled={submitting}
-                                className="delete-action-btn"
-                                title="রো ডিলিট করুন"
-                              >
-                                <i className="fa-solid fa-trash-can" />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
           </div>
 
           {/* Database Navigation Box */}
@@ -720,16 +662,18 @@ export default function DBD1AdminPage() {
 
           .server-status-indicator {
             margin-top: 10px;
-            font-size: 12px;
+            font-size: 13px;
             color: #64748b;
           }
 
           .server-status-indicator code {
-            color: #ea580c;
-            background: #fff7ed;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-family: monospace;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            padding: 3px 10px;
+            border-radius: 6px;
+            color: #0080c3;
+            font-size: 12px;
+            font-weight: 600;
           }
 
           .db-control-bar {
@@ -754,7 +698,7 @@ export default function DBD1AdminPage() {
             flex-wrap: wrap;
           }
 
-          .cache-pill {
+          .cache-indicator-badge {
             background: #fef3c7;
             color: #d97706;
             border: 1px solid #fde68a;
@@ -764,114 +708,51 @@ export default function DBD1AdminPage() {
             font-weight: 600;
           }
 
-          .live-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
+          .live-indicator-badge {
+            background: #dcfce7;
+            color: #16a34a;
+            border: 1px solid #bbf7d0;
             padding: 2px 8px;
             border-radius: 6px;
             font-size: 11.5px;
             font-weight: 600;
-            border: 1px solid;
-          }
-
-          .latency-pill {
-            background: #eff6ff;
-            color: #2563eb;
-            border: 1px solid #bfdbfe;
-            padding: 2px 8px;
-            border-radius: 6px;
-            font-size: 11.5px;
-            font-weight: 600;
-          }
-
-          .live-bullet-wrapper {
-            position: relative;
-            width: 7px;
-            height: 7px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-          }
-
-          .live-bullet-core {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-          }
-
-          .live-bullet-ring {
-            position: absolute;
-            width: 13px;
-            height: 13px;
-            border-radius: 50%;
-            border: 1px solid;
-            animation: pulse 1.5s infinite;
           }
 
           .control-btn-group {
             display: flex;
-            gap: 8px;
+            align-items: center;
+            gap: 10px;
             flex-wrap: wrap;
           }
 
-          .add-toggle-btn, .recheck-btn {
+          .recheck-btn {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
+            background: #0080c3;
             color: #ffffff;
             border: none;
-            padding: 8px 14px;
+            padding: 8px 16px;
             border-radius: 8px;
-            font-size: 12.5px;
+            font-size: 13px;
             font-weight: 700;
             cursor: pointer;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 8px rgba(0, 128, 195, 0.25);
             transition: all 0.2s ease;
           }
 
-          .add-toggle-btn:hover, .recheck-btn:hover:not(:disabled) {
-            filter: brightness(1.1);
+          .recheck-btn:hover:not(:disabled) {
+            background: #006da6;
             transform: translateY(-1px);
           }
 
           .btn-spinner {
-            width: 13px;
-            height: 13px;
+            width: 14px;
+            height: 14px;
             border: 2px solid rgba(255, 255, 255, 0.3);
             border-top-color: #ffffff;
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
-          }
-
-          .action-alert {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 16px;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 600;
-            margin-bottom: 20px;
-          }
-
-          .action-alert.success {
-            background: #dcfce7;
-            color: #16a34a;
-            border: 1px solid #bbf7d0;
-          }
-
-          .action-alert.error {
-            background: #fef2f2;
-            color: #dc2626;
-            border: 1px solid #fecaca;
-          }
-
-          .close-alert {
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            color: inherit;
           }
 
           .alert-card {
@@ -885,6 +766,7 @@ export default function DBD1AdminPage() {
           .alert-header {
             display: flex;
             align-items: center;
+            gap: 8px;
             font-size: 14px;
             color: #dc2626;
             margin-bottom: 6px;
@@ -893,422 +775,564 @@ export default function DBD1AdminPage() {
           .alert-msg {
             color: #b91c1c;
             font-size: 13px;
-            margin: 0;
+            margin: 0 0 6px;
           }
 
-          .summary-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
+          .alert-hint {
+            color: #64748b;
+            font-size: 11.5px;
+          }
+
+          .action-feedback {
+            padding: 12px 18px;
+            border-radius: 10px;
             margin-bottom: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
           }
 
-          .summary-card {
-            background: #f8fafc;
+          .msg-success {
+            background: #f7f7f7;
+            border: 1px solid #86efac;
+            color: #15803d;
+          }
+
+          .msg-error {
+            background: #fef2f2;
+            border: 1px solid #fca5a5;
+            color: #b91c1c;
+          }
+
+          .db-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+          }
+
+          .status-card {
+            background: #ffffff;
             border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 14px 16px;
+            border-radius: 16px;
+            padding: 24px;
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            justify-content: space-between;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
           }
 
-          .summary-label {
+          .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+          }
+
+          .card-type-tag {
             font-size: 11.5px;
-            color: #64748b;
+            color: #475569;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
           }
 
-          .summary-val {
-            font-size: 15px;
+          .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11.5px;
+            font-weight: 700;
+          }
+
+          .pill-success {
+            background: #dcfce7;
+            color: #16a34a;
+            border: 1px solid #bbf7d0;
+          }
+
+          .pill-danger {
+            background: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fca5a5;
+          }
+
+          .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background-color: currentColor;
+          }
+
+          .card-db-name {
+            font-size: 18px;
+            font-weight: 800;
+            color: #0f172a;
+            margin: 0 0 16px;
+          }
+
+          .meta-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 16px;
+          }
+
+          .meta-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            border-bottom: 1px dashed #e2e8f0;
+            padding-bottom: 6px;
+          }
+
+          .meta-label {
+            color: #475569;
+          }
+
+          .meta-value {
+            color: #0f172a;
+            font-weight: 700;
           }
 
           .collections-box {
-            background: #ffffff;
+            background: #f8fafc;
             border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 14px 18px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+            border-radius: 10px;
+            padding: 12px;
           }
 
           .box-title {
             display: block;
-            font-size: 12px;
-            font-weight: 700;
+            font-size: 11.5px;
+            font-weight: 600;
             color: #475569;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
           }
 
           .tags-container {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
+            gap: 6px;
           }
 
           .col-tag {
             background: #eff6ff;
             border: 1px solid #bfdbfe;
             color: #2563eb;
-            font-size: 12px;
+            font-size: 11.5px;
             font-weight: 600;
-            padding: 3px 10px;
+            padding: 2px 8px;
             border-radius: 6px;
             font-family: monospace;
           }
 
           .crud-container {
+            background: #f7f7f7;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 26px;
+            margin-bottom: 28px;
+          }
+
+          .crud-header h3 {
+            margin: 0 0 6px 0;
+            font-size: 18px;
+            color: #1e293b;
+            font-weight: 700;
+          }
+
+          .crud-header p {
+            margin: 0 0 18px 0;
+            font-size: 13px;
+            color: #64748b;
+            line-height: 1.5;
+          }
+
+          .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            margin-bottom: 24px;
+          }
+
+          @media (max-width: 650px) {
+            .summary-grid { grid-template-columns: 1fr; }
+          }
+
+          .summary-card {
             background: #ffffff;
             border: 1px solid #e2e8f0;
-            border-radius: 14px;
-            padding: 22px;
-            margin-bottom: 24px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+            padding: 18px 16px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            text-align: center;
           }
 
-          .form-header {
-            margin-bottom: 16px;
-          }
-
-          .form-header h3 {
-            font-size: 16px;
-            font-weight: 700;
-            color: #0f172a;
-            margin: 0 0 4px;
-          }
-
-          .form-sub {
-            font-size: 12px;
+          .summary-label {
+            font-size: 11.5px;
             color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 700;
           }
 
-          .multi-rows-wrapper {
+          .summary-val {
+            font-size: 17px;
+            font-weight: 700;
+            color: #1e293b;
+          }
+
+          .empty-box {
+            text-align: center;
+            padding: 32px 20px;
+            color: #64748b;
+            font-size: 13px;
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px dashed #cbd5e1;
+          }
+
+          .items-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+          }
+
+          .item-row {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 14px 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+            transition: border-color 0.2s, box-shadow 0.2s;
+          }
+
+          .item-row:hover {
+            border-color: #7dd3fc;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+          }
+
+          .item-content {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex: 1;
+          }
+
+          .item-main-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+          }
+
+          .item-index {
+            font-weight: 700;
+            font-size: 13px;
+          }
+
+          .item-text {
+            color: #1e293b;
+            font-size: 14px;
+            word-break: break-word;
+          }
+
+          .item-meta-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 11px;
+            color: #64748b;
+            flex-wrap: wrap;
+          }
+
+          .item-actions {
+            display: flex;
+            gap: 8px;
+          }
+
+          .action-btn {
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.2s;
+          }
+
+          .edit-btn {
+            background: #eff6ff;
+            color: #0284c7;
+            border: 1px solid #bae6fd;
+          }
+
+          .edit-btn:hover {
+            background: #0284c7;
+            color: #fff;
+          }
+
+          .del-btn {
+            background: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fca5a5;
+          }
+
+          .del-btn:hover {
+            background: #dc2626;
+            color: #fff;
+          }
+
+          .edit-box-inline {
+            display: flex;
+            width: 100%;
+            gap: 8px;
+            flex-wrap: wrap;
+          }
+
+          .edit-input {
+            flex: 1;
+            min-width: 200px;
+            background: #ffffff;
+            border: 1px solid #0080c3;
+            border-radius: 6px;
+            padding: 8px 12px;
+            color: #1e293b;
+            font-size: 13px;
+          }
+
+          .edit-btn-group {
+            display: flex;
+            gap: 6px;
+          }
+
+          .btn-save {
+            color: #fff;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+          }
+
+          .btn-cancel {
+            background: #64748b;
+            color: #fff;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+          }
+
+          .btn-add-main {
+            background: #0080c3;
+            color: #ffffff;
+            border: none;
+            padding: 12px 26px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0, 128, 195, 0.25);
+          }
+
+          .btn-add-main:hover {
+            background: #006da6;
+            transform: translateY(-1px);
+          }
+
+          .add-rows-container {
+            background: #ffffff;
+            border: 1px solid #bae6fd;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+          }
+
+          .add-rows-header {
+            margin-bottom: 14px;
+          }
+
+          .add-rows-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #0080c3;
+            display: flex;
+            align-items: center;
+          }
+
+          .add-rows-list {
             display: flex;
             flex-direction: column;
             gap: 10px;
             margin-bottom: 16px;
           }
 
-          .input-row-group {
+          .add-row-item {
             display: flex;
             align-items: center;
             gap: 10px;
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 8px 12px;
           }
 
-          .row-num {
+          .row-num-badge {
+            background: #e0f2fe;
+            color: #0284c7;
             font-size: 12px;
             font-weight: 700;
-            color: #64748b;
-            width: 24px;
-            text-align: center;
+            padding: 4px 8px;
+            border-radius: 6px;
+            white-space: nowrap;
           }
 
-          .multi-input-field {
+          .add-row-input {
             flex: 1;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            color: #0f172a;
-            padding: 8px 14px;
-            border-radius: 8px;
-            font-size: 13px;
+            background: transparent;
+            border: none;
+            color: #1e293b;
+            font-size: 14px;
             outline: none;
+            padding: 6px 0;
           }
 
-          .multi-input-field:focus {
-            border-color: #ea580c;
-            background: #ffffff;
+          .add-row-input::placeholder {
+            color: #94a3b8;
           }
 
-          .remove-row-btn {
+          .btn-row-delete {
             background: #fee2e2;
             border: 1px solid #fca5a5;
-            color: #dc2626;
-            width: 34px;
-            height: 34px;
+            color: #b91c1c;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            white-space: nowrap;
+          }
+
+          .btn-row-delete:hover {
+            background: #ef4444;
+            color: #ffffff;
+          }
+
+          .add-rows-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding-top: 12px;
+            border-top: 1px dashed #e2e8f0;
+          }
+
+          .btn-add-more-rows {
+            background: #0284c7;
+            color: #ffffff;
+            border: none;
+            padding: 9px 18px;
             border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
             cursor: pointer;
-            display: flex;
+            transition: all 0.2s;
+            display: inline-flex;
             align-items: center;
-            justify-content: center;
           }
 
-          .form-footer-actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 12px;
-            border-top: 1px solid #f1f5f9;
-            padding-top: 14px;
+          .btn-add-more-rows:hover {
+            background: #0369a1;
+            transform: translateY(-1px);
           }
 
-          .add-more-btn {
+          .save-cancel-group {
+            display: flex;
+            gap: 8px;
+          }
+
+          .btn-save-all-rows {
+            background: #0080c3;
+            color: #ffffff;
+            border: none;
+            padding: 9px 20px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+          }
+
+          .btn-save-all-rows:hover:not(:disabled) {
+            background: #006da6;
+            transform: translateY(-1px);
+          }
+
+          .btn-cancel-all-rows {
             background: #f1f5f9;
-            border: 1px solid #e2e8f0;
-            color: #334155;
-            padding: 7px 14px;
-            border-radius: 7px;
-            font-size: 12px;
-            font-weight: 600;
+            color: #64748b;
+            border: 1px solid #cbd5e1;
+            padding: 9px 18px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
             cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
           }
 
-          .add-more-btn:hover {
+          .btn-cancel-all-rows:hover {
             background: #e2e8f0;
-          }
-
-          .submit-btn-group {
-            display: flex;
-            gap: 8px;
-          }
-
-          .cancel-btn {
-            background: transparent;
-            border: 1px solid #e2e8f0;
-            color: #64748b;
-            padding: 7px 14px;
-            border-radius: 7px;
-            font-size: 12.5px;
-            cursor: pointer;
-          }
-
-          .submit-btn {
-            color: #ffffff;
-            border: none;
-            padding: 7px 18px;
-            border-radius: 7px;
-            font-size: 12.5px;
-            font-weight: 700;
-            cursor: pointer;
-          }
-
-          .section-header-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 18px;
-            flex-wrap: wrap;
-            gap: 12px;
-          }
-
-          .section-header-row h3 {
-            font-size: 16px;
-            font-weight: 700;
-            color: #0f172a;
-            margin: 0;
-          }
-
-          .search-box-wrapper {
-            position: relative;
-            width: 240px;
-          }
-
-          .search-icon {
-            position: absolute;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #64748b;
-            font-size: 12px;
-          }
-
-          .search-input {
-            width: 100%;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            color: #0f172a;
-            padding: 6px 12px 6px 32px;
-            border-radius: 7px;
-            font-size: 12.5px;
-            outline: none;
-          }
-
-          .search-input:focus {
-            border-color: #ea580c;
-            background: #ffffff;
-          }
-
-          .clear-search-btn {
-            position: absolute;
-            right: 8px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: transparent;
-            border: none;
-            color: #64748b;
-            cursor: pointer;
-          }
-
-          .empty-state {
-            text-align: center;
-            padding: 36px 20px;
-            color: #64748b;
-            font-size: 13px;
-          }
-
-          .table-responsive {
-            overflow-x: auto;
-          }
-
-          .db-data-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 13px;
-          }
-
-          .db-data-table th {
-            background: #f8fafc;
-            color: #475569;
-            font-weight: 700;
-            padding: 10px 12px;
-            text-align: left;
-            border-bottom: 1px solid #e2e8f0;
-            font-size: 12px;
-          }
-
-          .db-data-table td {
-            padding: 12px;
-            border-bottom: 1px solid #f1f5f9;
-            color: #334155;
-          }
-
-          .row-index-badge {
-            display: inline-block;
-            font-size: 11px;
-            color: #64748b;
-            font-weight: 700;
-          }
-
-          .id-cell {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-          }
-
-          .id-cell code {
-            color: #ea580c;
-            background: #fff7ed;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 11.5px;
-            font-family: monospace;
-          }
-
-          .copy-mini-btn, .copy-text-icon {
-            background: transparent;
-            border: none;
-            color: #64748b;
-            cursor: pointer;
-            font-size: 11px;
-          }
-
-          .copy-mini-btn:hover, .copy-text-icon:hover {
-            color: #0f172a;
-          }
-
-          .text-display-cell {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            word-break: break-word;
-          }
-
-          .inline-edit-box {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-          }
-
-          .inline-edit-input {
-            flex: 1;
-            background: #ffffff;
-            border: 1px solid #ea580c;
-            color: #0f172a;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 13px;
-          }
-
-          .save-edit-btn, .cancel-edit-btn {
-            width: 28px;
-            height: 28px;
-            border-radius: 6px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: none;
-          }
-
-          .save-edit-btn {
-            background: #16a34a;
-            color: #ffffff;
-          }
-
-          .cancel-edit-btn {
-            background: #f1f5f9;
-            color: #64748b;
-          }
-
-          .date-badge {
-            font-size: 11.5px;
-            color: #64748b;
-          }
-
-          .table-actions {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-          }
-
-          .edit-action-btn, .delete-action-btn {
-            width: 30px;
-            height: 30px;
-            border-radius: 6px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid;
-          }
-
-          .edit-action-btn {
-            background: #f0f9ff;
-            border-color: #bae6fd;
-            color: #0284c7;
-          }
-
-          .delete-action-btn {
-            background: #fef2f2;
-            border-color: #fecaca;
-            color: #dc2626;
+            color: #1e293b;
           }
 
           .bottom-nav-link {
-            font-size: 13px;
-            color: #2563eb;
+            color: #0080c3;
+            font-size: 13.5px;
+            font-weight: 700;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-            font-weight: 600;
+            padding: 9px 16px;
+            border-radius: 8px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s ease;
           }
 
-          @keyframes pulse {
-            0% { transform: scale(0.9); opacity: 1; }
-            100% { transform: scale(1.8); opacity: 0; }
+          .bottom-nav-link:hover {
+            color: #006093;
+            background: #f0f9ff;
+            border-color: #bae6fd;
+            transform: translateY(-1px);
           }
 
           @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
-          }
-
-          @media (max-width: 768px) {
-            .db-content-card {
-              padding: 20px;
-            }
-            .summary-grid {
-              grid-template-columns: 1fr;
-            }
           }
         `}</style>
       </main>

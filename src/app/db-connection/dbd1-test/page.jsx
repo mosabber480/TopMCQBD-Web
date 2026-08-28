@@ -7,26 +7,15 @@ import DbAuthGuard from '@/components/common/DbAuthGuard';
 
 const CACHE_KEY = 'topmcqbd_dbd1_test_cache';
 
-const defaultD1ConfigCards = [
-  { id: 'layout-config', key: 'layout-config', text: 'Navbar, Mega Menus & Footers', title: 'Layout Config', category: 'layout-config' },
-  { id: 'home-config', key: 'home-config', text: 'Home Sliders & Hero Sections', title: 'Home Config', category: 'home-config' },
-  { id: 'sidebar-config', key: 'sidebar-config', text: 'Admin Sidebar Navigation', title: 'Sidebar Config', category: 'sidebar-config' },
-  { id: 'policy-config', key: 'policy-config', text: 'Privacy & Refund Policy HTML', title: 'Policy Config', category: 'policy-config' },
-  { id: 'about-data', key: 'about-data', text: 'About Us Content', title: 'About Data', category: 'about-data' },
-  { id: 'faq-data', key: 'faq-data', text: 'FAQ Questions & Answers', title: 'FAQ Data', category: 'faq-data' },
-  { id: 'packages-data', key: 'packages-data', text: 'Pricing & Subscription Packages', title: 'Packages Data', category: 'packages-data' },
-];
-
 export default function DBD1TestPage() {
   const [loading, setLoading] = useState(false);
-  const [items, setItems] = useState(defaultD1ConfigCards);
+  const [items, setItems] = useState([]);
   const [dbInfo, setDbInfo] = useState(null);
   const [error, setError] = useState(null);
   const [lastRefreshed, setLastRefreshed] = useState(null);
   const [isFromCache, setIsFromCache] = useState(false);
   const [copiedId, setCopiedId] = useState(null);
   const [activeBackendUrl, setActiveBackendUrl] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
 
   const formatDateTime = (dateVal) => {
     if (!dateVal) return '';
@@ -90,13 +79,7 @@ export default function DBD1TestPage() {
       }
 
       const json = await res.json();
-      let freshItems = json.items || [];
-
-      // If db-d1-test is empty, provide default config rows so all D1 rows are visible
-      if (!freshItems || freshItems.length === 0) {
-        freshItems = defaultD1ConfigCards;
-      }
-
+      const freshItems = json.items || [];
       const timestamp = formatDateTime(new Date());
 
       setItems(freshItems);
@@ -135,22 +118,15 @@ export default function DBD1TestPage() {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const filteredItems = useMemo(() => {
-    if (!searchQuery.trim()) return items;
-    const q = searchQuery.toLowerCase();
-    return items.filter(
-      (item) =>
-        (item.text && item.text.toLowerCase().includes(q)) ||
-        (item.id && item.id.toLowerCase().includes(q)) ||
-        (item.key && item.key.toLowerCase().includes(q))
-    );
-  }, [items, searchQuery]);
-
   const otherCollections = dbInfo?.collections || [
     'layout-config',
     'home-config',
     'sidebar-config',
     'policy-config',
+    'about-data',
+    'faq-data',
+    'packages-data',
+    'db-suite-auth',
     'db-d1-test',
   ];
 
@@ -164,12 +140,12 @@ export default function DBD1TestPage() {
         <div className="db-content-card">
           {/* Header */}
           <div className="db-header">
-            <div className="db-badge" style={{ borderColor: 'rgba(234, 88, 12, 0.4)', color: '#ea580c', background: 'rgba(234, 88, 12, 0.1)' }}>
+            <div className="db-badge" style={{ background: 'rgba(234, 88, 12, 0.1)', borderColor: 'rgba(234, 88, 12, 0.4)', color: '#ea580c' }}>
               D1 DB Live Viewer
             </div>
             <h1 className="db-title">Cloudflare D1 Database Live Data</h1>
             <p className="db-subtitle">
-              Serverless Edge SQL (<strong>topmcqbd-db</strong>) এর <code>db-d1-test</code> রো কালেকশনের রিয়েল-টাইম সংরক্ষিত ডাটা
+              Serverless Edge SQL (<strong>topmcqbd-db</strong>) এর <code>db-d1-test</code> রো-এর রিয়েল-টাইম সংরক্ষিত ডাটা
             </p>
             <div className="server-status-indicator">
               <span>কানেক্টেড এন্ডপয়েন্ট:</span> <code>{activeBackendUrl}</code>
@@ -244,111 +220,78 @@ export default function DBD1TestPage() {
           {/* Diagnostic Meta Cards Grid */}
           <div className="summary-grid">
             <div className="summary-card">
-              <span className="summary-label">ডাটাবেজ ইঞ্জিন</span>
-              <strong className="summary-val" style={{ color: '#ea580c' }}>topmcqbd-db (D1)</strong>
+              <span className="summary-label">ডাটাবেজ ক্লাস্টার</span>
+              <strong className="summary-val" style={{ color: '#0080c3' }}>topmcqbd-db (D1)</strong>
             </div>
             <div className="summary-card">
-              <span className="summary-label">টার্গেট রো কালেকশন</span>
-              <strong className="summary-val" style={{ color: '#0284c7' }}>db-d1-test</strong>
+              <span className="summary-label">টার্গেট রো</span>
+              <strong className="summary-val" style={{ color: '#0080c3' }}>db-d1-test</strong>
             </div>
             <div className="summary-card">
-              <span className="summary-label">মোট সংরক্ষিত রো</span>
-              <strong className="summary-val" style={{ color: '#16a34a' }}>{items.length} টি রো</strong>
+              <span className="summary-label">মোট সংরক্ষিত ডাটা</span>
+              <strong className="summary-val" style={{ color: '#16a34a' }}>{items.length} টি আইটেম</strong>
             </div>
           </div>
 
-          {/* Other Collections / Row Keys Box (Image 1 Style) */}
-          <div className="collections-box" style={{ marginBottom: '24px' }}>
-            <span className="box-title">ক্লাস্টারের অন্যান্য কালেকশনসমূহ:</span>
-            <div className="tags-container">
-              {otherCollections.map((col, idx) => (
-                <span key={idx} className="col-tag">
-                  {col}
-                </span>
-              ))}
+          {/* Other Collections / Row Keys Box (Matching Screenshot 100%) */}
+          {otherCollections && otherCollections.length > 0 && (
+            <div className="collections-box" style={{ marginBottom: '24px' }}>
+              <span className="box-title">ক্লাস্টারের অন্যান্য রোসমূহ:</span>
+              <div className="tags-container">
+                {otherCollections.map((col, idx) => (
+                  <span key={idx} className="col-tag">
+                    {col}
+                  </span>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
-          {/* Live Row Records (Image 2 Style) */}
+          {/* Data Cards Section (Matching Screenshot 100%) */}
           <div className="data-cards-section">
-            <div className="section-header-row">
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <i className="fa-solid fa-layer-group" style={{ color: '#ea580c', fontSize: '16px' }} />
-                <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#0f172a' }}>
-                  লাইভ রো রেকর্ডস ({filteredItems.length})
-                </h3>
+            {loading && items.length === 0 ? (
+              <div className="empty-box">
+                <div className="btn-spinner" style={{ width: '28px', height: '28px', margin: '0 auto 12px auto' }} />
+                <span>D1 Database থেকে ডাটা লোড হচ্ছে...</span>
               </div>
-              <div className="search-box-wrapper">
-                <i className="fa-solid fa-magnifying-glass search-icon" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="রো বা আইডি সার্চ..."
-                  className="search-input"
-                />
-                {searchQuery && (
-                  <button onClick={() => setSearchQuery('')} className="clear-search-btn">
-                    <i className="fa-solid fa-xmark" />
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {filteredItems.length === 0 ? (
-              <div className="empty-state">
-                <i className="fa-regular fa-folder-open" style={{ fontSize: '36px', color: '#64748b', marginBottom: '12px' }} />
-                <p>
-                  {searchQuery
-                    ? 'সার্চের সাথে মিল রেখে কোনো রো পাওয়া যায়নি।'
-                    : '"db-d1-test" কালেকশনে এখনো কোনো রো নেই। অ্যাডমিন প্যানেল থেকে রো যোগ করুন।'}
-                </p>
-                <Link href="/db-connection/dbd1-admin" className="goto-admin-btn" style={{ background: '#ea580c' }}>
-                  <i className="fa-solid fa-sliders" style={{ marginRight: '6px' }} />
-                  D1 অ্যাডমিন প্যানেলে যান
+            ) : items.length === 0 ? (
+              <div className="empty-box">
+                <i className="fa-solid fa-inbox" style={{ fontSize: '36px', display: 'block', marginBottom: '8px', opacity: 0.6 }} />
+                <h3 style={{ color: '#1e293b', margin: '0 0 6px 0' }}>কোনো ডাটা পাওয়া যায়নি!</h3>
+                <p style={{ margin: '0 0 16px 0' }}><code>db-d1-test</code> রো-তে এখনো কোনো ডাটা যোগ করা হয়নি।</p>
+                <Link
+                  href="/db-connection/dbd1-admin"
+                  className="add-data-btn"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    backgroundColor: '#ea580c',
+                    color: '#ffffff',
+                    textDecoration: 'none',
+                    padding: '11px 24px',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    fontWeight: '700',
+                    boxShadow: '0 4px 14px rgba(234, 88, 12, 0.35)',
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  <i className="fa-solid fa-plus" style={{ fontSize: '13px', color: '#ffffff' }} />
+                  <span style={{ color: '#ffffff', textDecoration: 'none' }}>এডমিন প্যানেল থেকে ডাটা যোগ করুন</span>
                 </Link>
               </div>
             ) : (
               <div className="cards-grid">
-                {filteredItems.map((item, idx) => {
-                  const tagKey = item.key || item.id || 'db-d1-test';
-                  return (
-                    <div key={item.id || idx} className="data-item-card">
-                      <div className="card-top">
-                        <span className="card-counter">#{idx + 1}</span>
-                        <div className="id-tag">
-                          <span>{tagKey}</span>
-                          <button
-                            onClick={() => copyToClipboard(tagKey, `tag_${idx}`)}
-                            className="copy-btn"
-                            title="Copy Key"
-                          >
-                            <i className={`fa-solid ${copiedId === `tag_${idx}` ? 'fa-check' : 'fa-copy'}`} />
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="card-body-text">
-                        <p>{item.text}</p>
-                      </div>
-
-                      <div className="card-footer">
-                        <span className="date-tag">
-                          <i className="fa-regular fa-clock" />
-                          {formatDateTime(item.createdAt || item.updatedAt)}
-                        </span>
-                        <button
-                          onClick={() => copyToClipboard(item.text, `text_${idx}`)}
-                          className="copy-text-btn"
-                          title="Copy text"
-                        >
-                          <i className={`fa-solid ${copiedId === `text_${idx}` ? 'fa-check' : 'fa-copy'}`} style={{ marginRight: '4px' }} />
-                          {copiedId === `text_${idx}` ? 'কপি হয়েছে' : 'টেক্সট কপি'}
-                        </button>
-                      </div>
+                {items.map((item, idx) => (
+                  <div key={item.id || idx} className="data-card">
+                    <div className="card-title-text">{item.text}</div>
+                    <div className="card-date-bottom">
+                      <i className="fa-regular fa-clock" />
+                      <span>{formatDateTime(item.createdAt || item.updatedAt)}</span>
                     </div>
-                  );
-                })}
+                  </div>
+                ))}
               </div>
             )}
           </div>
@@ -357,23 +300,10 @@ export default function DBD1TestPage() {
           <DbNavBox activeRoute="/db-connection/dbd1-test" />
 
           {/* Bottom Navigation Links Bar */}
-          <div
-            className="bottom-nav-bar"
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              width: '100%',
-              marginTop: '24px',
-              padding: '8px 4px 0 4px',
-              flexWrap: 'wrap',
-              gap: '12px',
-              boxSizing: 'border-box',
-            }}
-          >
+          <div className="bottom-nav-bar">
             <Link href="/" className="bottom-nav-link left-link">
               <i className="fa-solid fa-arrow-left" style={{ marginRight: '6px' }} />
-              ওয়েবসাইট ভিজিট
+              ওয়েবসাইট ভিজিট
             </Link>
             <Link href="/admin/dashboard" className="bottom-nav-link right-link">
               অ্যাডমিন প্যানেল
@@ -436,16 +366,18 @@ export default function DBD1TestPage() {
 
           .server-status-indicator {
             margin-top: 10px;
-            font-size: 12px;
+            font-size: 13px;
             color: #64748b;
           }
 
           .server-status-indicator code {
-            color: #ea580c;
-            background: #fff7ed;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-family: monospace;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            padding: 3px 10px;
+            border-radius: 6px;
+            color: #0080c3;
+            font-size: 12px;
+            font-weight: 600;
           }
 
           .db-control-bar {
@@ -471,72 +403,100 @@ export default function DBD1TestPage() {
           }
 
           .cache-pill {
-            background: #fef3c7;
-            color: #d97706;
-            border: 1px solid #fde68a;
-            padding: 2px 8px;
-            border-radius: 6px;
-            font-size: 11.5px;
-            font-weight: 600;
+            background: #eff6ff;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
           }
 
           .live-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 2px 8px;
-            border-radius: 6px;
-            font-size: 11.5px;
-            font-weight: 600;
-            border: 1px solid;
+            background: #f0fdf4;
+            color: #15803d;
+            border: 1px solid #86efac;
           }
 
           .latency-pill {
-            background: #eff6ff;
-            color: #2563eb;
-            border: 1px solid #bfdbfe;
-            padding: 2px 8px;
-            border-radius: 6px;
-            font-size: 11.5px;
-            font-weight: 600;
+            background: #f0fdf4;
+            color: #15803d;
+            border: 1px solid #86efac;
           }
 
           .live-indicator-badge {
-            background: #dcfce7;
-            color: #16a34a;
-            border: 1px solid #bbf7d0;
-            padding: 2px 8px;
-            border-radius: 6px;
-            font-size: 11.5px;
-            font-weight: 600;
+            background: #f0fdf4;
+            color: #15803d;
+            border: 1px solid #86efac;
+          }
+
+          .live-pill,
+          .cache-pill,
+          .latency-pill,
+          .live-indicator-badge {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            justify-content: center;
+            gap: 7px;
+            height: 28px;
+            padding: 0 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            line-height: 1;
+            box-sizing: border-box;
+            white-space: nowrap;
           }
 
           .live-bullet-wrapper {
             position: relative;
-            width: 7px;
-            height: 7px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
+            width: 8px;
+            height: 8px;
+            flex-shrink: 0;
+            margin-top: -1px;
           }
 
           .live-bullet-core {
-            width: 7px;
-            height: 7px;
+            width: 6px;
+            height: 6px;
+            background-color: #16a34a;
             border-radius: 50%;
-            background: #16a34a;
+            position: relative;
+            z-index: 2;
           }
 
           .live-bullet-ring {
             position: absolute;
-            width: 13px;
-            height: 13px;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             border-radius: 50%;
-            border: 1px solid #16a34a;
-            animation: pulse 1.5s infinite;
+            background-color: #22c55e;
+            opacity: 0.9;
+            animation: liveRadarPing 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+            z-index: 1;
+          }
+
+          @keyframes liveRadarPing {
+            0% {
+              transform: scale(0.8);
+              opacity: 0.9;
+            }
+            70% {
+              transform: scale(2.8);
+              opacity: 0;
+            }
+            100% {
+              transform: scale(2.8);
+              opacity: 0;
+            }
+          }
+
+          .control-btn-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
           }
 
           .recheck-btn {
@@ -550,7 +510,7 @@ export default function DBD1TestPage() {
             font-size: 13px;
             font-weight: 700;
             cursor: pointer;
-            box-shadow: 0 2px 8px rgba(234, 88, 12, 0.3);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
             transition: all 0.2s ease;
           }
 
@@ -593,27 +553,37 @@ export default function DBD1TestPage() {
           .summary-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
+            gap: 14px;
             margin-bottom: 20px;
+          }
+
+          @media (max-width: 650px) {
+            .summary-grid { grid-template-columns: 1fr; }
           }
 
           .summary-card {
             background: #f8fafc;
             border: 1px solid #e2e8f0;
+            padding: 16px;
             border-radius: 12px;
-            padding: 14px 16px;
             display: flex;
             flex-direction: column;
             gap: 4px;
+            text-align: center;
           }
 
           .summary-label {
-            font-size: 11.5px;
+            font-size: 11px;
             color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 700;
           }
 
           .summary-val {
-            font-size: 15px;
+            font-size: 16px;
+            font-weight: 700;
+            color: #1e293b;
           }
 
           .collections-box {
@@ -650,221 +620,108 @@ export default function DBD1TestPage() {
           }
 
           .data-cards-section {
+            margin-bottom: 28px;
+          }
+
+          .cards-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 28px;
+          }
+
+          .data-card {
             background: #ffffff;
             border: 1px solid #e2e8f0;
-            border-radius: 14px;
-            padding: 22px;
-            margin-bottom: 24px;
+            border-radius: 12px;
+            padding: 18px 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
           }
 
-          .section-header-row {
+          .card-title-text {
+            font-size: 16px;
+            font-weight: 600;
+            line-height: 1.5;
+            color: #1e293b;
+            word-break: break-word;
+          }
+
+          .card-date-bottom {
+            font-size: 12px;
+            color: #64748b;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            line-height: 1;
+          }
+
+          .card-date-bottom i {
+            font-size: 12px;
+            line-height: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transform: translateY(0.5px);
+          }
+
+          .card-date-bottom span {
+            font-size: 12px;
+            line-height: 1;
+            display: inline-flex;
+            align-items: center;
+            transform: translateY(1.5px);
+          }
+
+          .empty-box {
+            text-align: center;
+            padding: 40px 20px;
+            color: #64748b;
+            background: #f8fafc;
+            border-radius: 14px;
+            border: 1px dashed #cbd5e1;
+          }
+
+          .bottom-nav-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 18px;
+            margin-top: 24px;
+            padding: 8px 4px 0 4px;
             flex-wrap: wrap;
             gap: 12px;
           }
 
-          .search-box-wrapper {
-            position: relative;
-            width: 240px;
-          }
-
-          .search-icon {
-            position: absolute;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #64748b;
-            font-size: 12px;
-          }
-
-          .search-input {
-            width: 100%;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            color: #0f172a;
-            padding: 6px 12px 6px 32px;
-            border-radius: 7px;
-            font-size: 12.5px;
-            outline: none;
-          }
-
-          .search-input:focus {
-            border-color: #ea580c;
-            background: #ffffff;
-          }
-
-          .clear-search-btn {
-            position: absolute;
-            right: 8px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: transparent;
-            border: none;
-            color: #64748b;
-            cursor: pointer;
-          }
-
-          .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: #64748b;
-            font-size: 13.5px;
-          }
-
-          .goto-admin-btn {
-            display: inline-flex;
-            align-items: center;
-            margin-top: 14px;
-            color: #ffffff;
-            text-decoration: none;
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-size: 12.5px;
-            font-weight: 700;
-          }
-
-          .cards-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 14px;
-          }
-
-          .data-item-card {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            padding: 14px 16px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            min-height: 120px;
-            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
-            transition: transform 0.2s, box-shadow 0.2s;
-          }
-
-          .data-item-card:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-          }
-
-          .card-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-          }
-
-          .card-counter {
-            font-size: 11.5px;
-            color: #475569;
-            font-weight: 700;
-          }
-
-          .id-tag {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            background: #fff7ed;
-            border: 1px solid #ffedd5;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 11.5px;
-            font-weight: 600;
-            color: #ea580c;
-            font-family: monospace;
-          }
-
-          .copy-btn {
-            background: transparent;
-            border: none;
-            color: #ea580c;
-            cursor: pointer;
-            padding: 0;
-            font-size: 11px;
-          }
-
-          .card-body-text {
-            color: #0f172a;
-            font-size: 13.5px;
-            font-weight: 500;
-            line-height: 1.4;
-            margin-bottom: 12px;
-            word-break: break-word;
-          }
-
-          .card-body-text p {
-            margin: 0;
-          }
-
-          .card-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-top: 1px solid #f1f5f9;
-            padding-top: 8px;
-          }
-
-          .date-tag {
-            font-size: 11.5px;
-            color: #94a3b8;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-          }
-
-          .copy-text-btn {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            color: #334155;
-            padding: 3px 8px;
-            border-radius: 5px;
-            font-size: 11px;
-            font-weight: 600;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            transition: all 0.15s;
-          }
-
-          .copy-text-btn:hover {
-            color: #0f172a;
-            background: #f8fafc;
-            border-color: #cbd5e1;
-          }
-
           .bottom-nav-link {
-            font-size: 13px;
-            color: #2563eb;
+            color: #0080c3;
+            font-size: 13.5px;
+            font-weight: 700;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-            font-weight: 600;
+            padding: 9px 16px;
+            border-radius: 8px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s ease;
           }
 
-          @keyframes pulse {
-            0% { transform: scale(0.9); opacity: 1; }
-            100% { transform: scale(1.8); opacity: 0; }
+          .bottom-nav-link:hover {
+            color: #006093;
+            background: #f0f9ff;
+            border-color: #bae6fd;
+            transform: translateY(-1px);
+          }
+
+          .orb-1, .orb-2 {
+            display: none !important;
           }
 
           @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
-          }
-
-          @media (max-width: 768px) {
-            .db-content-card {
-              padding: 20px;
-            }
-            .summary-grid {
-              grid-template-columns: 1fr;
-            }
-            .cards-grid {
-              grid-template-columns: 1fr;
-            }
           }
         `}</style>
       </main>

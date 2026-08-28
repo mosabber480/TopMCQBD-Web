@@ -8,10 +8,21 @@ const getCloudflareBaseUrl = () => {
 
 // In-memory fallback for local dev when offline
 let localItems = [
-  { id: 'd1_demo_1', text: 'TopMCQBD D1 Initial Test Record', createdAt: new Date().toLocaleString('en-GB') }
+  { id: 'd1_demo_1', text: 'TopMCQBD D1 Cloudflare Edge Database Test Record', createdAt: 'Today, 01:00:00 AM', updatedAt: 'Today, 01:00:00 AM' },
+  { id: 'd1_demo_2', text: 'Serverless Edge SQL CRUD Operations Active', createdAt: 'Today, 01:05:00 AM', updatedAt: 'Today, 01:05:00 AM' }
 ];
 
-const defaultD1Keys = ['layout-config', 'home-config', 'sidebar-config', 'policy-config', 'db-d1-test'];
+const allD1Keys = [
+  'layout-config',
+  'home-config',
+  'sidebar-config',
+  'policy-config',
+  'about-data',
+  'faq-data',
+  'packages-data',
+  'db-suite-auth',
+  'db-d1-test'
+];
 
 export async function GET() {
   const start = Date.now();
@@ -35,9 +46,9 @@ export async function GET() {
     databaseName: 'topmcqbd-db',
     collection: 'db-d1-test',
     collectionName: 'db-d1-test',
-    collections: defaultD1Keys,
-    keys: ['layout-config', 'home-config', 'sidebar-config', 'policy-config'],
-    totalCount: defaultD1Keys.length,
+    collections: allD1Keys,
+    keys: allD1Keys,
+    totalCount: allD1Keys.length,
     itemCount: localItems.length,
     pingTimeMs: Date.now() - start || 10,
     items: localItems,

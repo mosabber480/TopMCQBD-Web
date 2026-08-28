@@ -291,7 +291,7 @@ export default function DBFreeTestPage() {
                   <div className="card-title-text">{item.text}</div>
                   <div className="card-date-bottom">
                     <i className="fa-regular fa-clock" style={{ marginRight: '5px' }} />
-                    {formatDateTime(item.createdAt || item.updatedAt)}
+                    <span>{formatDateTime(item.createdAt || item.updatedAt)}</span>
                   </div>
                 </div>
               ))}
@@ -490,8 +490,27 @@ export default function DBFreeTestPage() {
         .card-date-bottom {
           font-size: 12px;
           color: #64748b;
-          display: flex;
+          display: inline-flex;
           align-items: center;
+          gap: 6px;
+          line-height: 1;
+        }
+
+        .card-date-bottom i {
+          font-size: 12px;
+          line-height: 1;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          transform: translateY(0.5px);
+        }
+
+        .card-date-bottom span {
+          font-size: 12px;
+          line-height: 1;
+          display: inline-flex;
+          align-items: center;
+          transform: translateY(1.5px);
         }
         .empty-box {
           text-align: center;
