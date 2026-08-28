@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 
 export default function DbNavBox({ activeRoute }) {
-  const buttons = [
+  const primaryButtons = [
     {
       text: 'ALL DB Test',
       url: '/db-connection-check',
@@ -35,6 +35,9 @@ export default function DbNavBox({ activeRoute }) {
       icon: 'fa-solid fa-globe',
       bg: '#0080c3',
     },
+  ];
+
+  const d1Buttons = [
     {
       text: 'DB D1 Admin',
       url: '/dbd1-admin',
@@ -58,6 +61,85 @@ export default function DbNavBox({ activeRoute }) {
     } catch (e) {
       console.error('Logout error:', e);
     }
+  };
+
+  const renderNavBtn = (btn) => {
+    const isActive = activeRoute === btn.url;
+    return (
+      <Link
+        key={btn.url}
+        href={btn.url}
+        className={`db-nav-btn ${isActive ? 'active-db-btn' : ''}`}
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '6px',
+          backgroundColor: btn.bg,
+          color: '#ffffff',
+          textDecoration: 'none',
+          padding: '9px 12px',
+          borderRadius: '7px',
+          fontSize: '12px',
+          fontWeight: '700',
+          boxShadow: isActive
+            ? '0 4px 14px rgba(0,0,0,0.25)'
+            : '0 2px 6px rgba(0,0,0,0.12)',
+          filter: isActive ? 'brightness(1.05)' : 'none',
+          cursor: 'pointer',
+          whiteSpace: 'nowrap',
+          lineHeight: 'normal',
+          border: 'none',
+          outline: 'none',
+          transition: 'all 0.2s ease',
+        }}
+      >
+        <i
+          className={btn.icon}
+          style={{
+            fontSize: '12px',
+            width: '12px',
+            height: '12px',
+            lineHeight: '12px',
+            color: '#ffffff',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            textAlign: 'center',
+            flexShrink: 0,
+          }}
+        />
+        <span
+          style={{
+            color: '#ffffff',
+            textDecoration: 'none',
+            fontSize: '12px',
+            fontWeight: '700',
+            lineHeight: '1',
+            display: 'inline-block',
+          }}
+        >
+          {btn.text}
+        </span>
+        {isActive && (
+          <span
+            style={{
+              backgroundColor: 'rgba(0, 0, 0, 0.35)',
+              color: '#ffffff',
+              fontSize: '9px',
+              fontWeight: '800',
+              letterSpacing: '0.5px',
+              padding: '2px 4px',
+              borderRadius: '4px',
+              marginLeft: '2px',
+              lineHeight: '1',
+            }}
+          >
+            ACTIVE
+          </span>
+        )}
+      </Link>
+    );
   };
 
   return (
@@ -96,85 +178,14 @@ export default function DbNavBox({ activeRoute }) {
         </div>
       </div>
 
-      <div className="admin-actions-row">
-        {buttons.map((btn) => {
-          const isActive = activeRoute === btn.url;
-          return (
-            <Link
-              key={btn.url}
-              href={btn.url}
-              className={`db-nav-btn ${isActive ? 'active-db-btn' : ''}`}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '6px',
-                backgroundColor: btn.bg,
-                color: '#ffffff',
-                textDecoration: 'none',
-                padding: '9px 10px',
-                borderRadius: '7px',
-                fontSize: '12px',
-                fontWeight: '700',
-                boxShadow: isActive
-                  ? '0 4px 14px rgba(0,0,0,0.25)'
-                  : '0 2px 6px rgba(0,0,0,0.12)',
-                filter: isActive ? 'brightness(1.05)' : 'none',
-                cursor: 'pointer',
-                whiteSpace: 'nowrap',
-                lineHeight: 'normal',
-                border: 'none',
-                outline: 'none',
-                transition: 'all 0.2s ease',
-              }}
-            >
-              <i
-                className={btn.icon}
-                style={{
-                  fontSize: '12px',
-                  width: '12px',
-                  height: '12px',
-                  lineHeight: '12px',
-                  color: '#ffffff',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  textAlign: 'center',
-                  flexShrink: 0,
-                }}
-              />
-              <span
-                style={{
-                  color: '#ffffff',
-                  textDecoration: 'none',
-                  fontSize: '12px',
-                  fontWeight: '700',
-                  lineHeight: '1',
-                  display: 'inline-block',
-                }}
-              >
-                {btn.text}
-              </span>
-              {isActive && (
-                <span
-                  style={{
-                    backgroundColor: 'rgba(0, 0, 0, 0.35)',
-                    color: '#ffffff',
-                    fontSize: '9px',
-                    fontWeight: '800',
-                    letterSpacing: '0.5px',
-                    padding: '2px 4px',
-                    borderRadius: '4px',
-                    marginLeft: '2px',
-                    lineHeight: '1',
-                  }}
-                >
-                  ACTIVE
-                </span>
-              )}
-            </Link>
-          );
-        })}
+      {/* Row 1: Primary 5 Buttons */}
+      <div className="admin-actions-row-top">
+        {primaryButtons.map(renderNavBtn)}
+      </div>
+
+      {/* Row 2: D1 2 Buttons below on the left */}
+      <div className="admin-actions-row-bottom">
+        {d1Buttons.map(renderNavBtn)}
       </div>
 
       <style jsx>{`
@@ -228,9 +239,17 @@ export default function DbNavBox({ activeRoute }) {
           color: #64748b;
         }
 
-        .admin-actions-row {
+        .admin-actions-row-top {
           display: grid;
-          grid-template-columns: repeat(7, 1fr);
+          grid-template-columns: repeat(5, 1fr);
+          gap: 8px;
+          width: 100%;
+          margin-bottom: 8px;
+        }
+
+        .admin-actions-row-bottom {
+          display: grid;
+          grid-template-columns: repeat(5, 1fr);
           gap: 8px;
           width: 100%;
         }
@@ -273,21 +292,24 @@ export default function DbNavBox({ activeRoute }) {
           align-items: center !important;
         }
 
-        @media (max-width: 1100px) {
-          .admin-actions-row {
-            grid-template-columns: repeat(4, 1fr);
+        @media (max-width: 960px) {
+          .admin-actions-row-top,
+          .admin-actions-row-bottom {
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
           }
         }
 
         @media (max-width: 600px) {
-          .admin-actions-row {
+          .admin-actions-row-top,
+          .admin-actions-row-bottom {
             grid-template-columns: repeat(2, 1fr);
             gap: 8px;
           }
         }
 
         @media (max-width: 380px) {
-          .admin-actions-row {
+          .admin-actions-row-top,
+          .admin-actions-row-bottom {
             grid-template-columns: 1fr;
           }
         }
