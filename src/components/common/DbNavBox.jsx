@@ -35,6 +35,18 @@ export default function DbNavBox({ activeRoute }) {
       icon: 'fa-solid fa-globe',
       bg: '#0080c3',
     },
+    {
+      text: 'DB D1 Admin',
+      url: '/dbd1-admin',
+      icon: 'fa-solid fa-bolt',
+      bg: '#ea580c',
+    },
+    {
+      text: 'DB D1 Test',
+      url: '/dbd1-test',
+      icon: 'fa-solid fa-database',
+      bg: '#ea580c',
+    },
   ];
 
   const handleLogout = () => {
@@ -59,7 +71,7 @@ export default function DbNavBox({ activeRoute }) {
           <span className="nav-heading">Database Testing & Admin Suite</span>
         </div>
         <div className="title-right" style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-          <small className="nav-sub">৫টি ডাটাবেজ পেজ দ্রুত সুইচ করুন</small>
+          <small className="nav-sub">৭টি ডাটাবেজ পেজ দ্রুত সুইচ করুন</small>
           <button
             onClick={handleLogout}
             style={{
@@ -102,7 +114,7 @@ export default function DbNavBox({ activeRoute }) {
                 textDecoration: 'none',
                 padding: '9px 10px',
                 borderRadius: '7px',
-                fontSize: '12.5px',
+                fontSize: '12px',
                 fontWeight: '700',
                 boxShadow: isActive
                   ? '0 4px 14px rgba(0,0,0,0.25)'
@@ -119,28 +131,26 @@ export default function DbNavBox({ activeRoute }) {
               <i
                 className={btn.icon}
                 style={{
-                  fontSize: '13px',
-                  width: '13px',
-                  height: '13px',
-                  lineHeight: '13px',
+                  fontSize: '12px',
+                  width: '12px',
+                  height: '12px',
+                  lineHeight: '12px',
                   color: '#ffffff',
                   display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   textAlign: 'center',
                   flexShrink: 0,
-                  transform: 'translateY(-0.5px)',
                 }}
               />
               <span
                 style={{
                   color: '#ffffff',
                   textDecoration: 'none',
-                  fontSize: '12.5px',
+                  fontSize: '12px',
                   fontWeight: '700',
                   lineHeight: '1',
                   display: 'inline-block',
-                  transform: 'translateY(1.5px)',
                 }}
               >
                 {btn.text}
@@ -150,15 +160,13 @@ export default function DbNavBox({ activeRoute }) {
                   style={{
                     backgroundColor: 'rgba(0, 0, 0, 0.35)',
                     color: '#ffffff',
-                    fontSize: '9.5px',
+                    fontSize: '9px',
                     fontWeight: '800',
                     letterSpacing: '0.5px',
-                    padding: '2px 5px',
+                    padding: '2px 4px',
                     borderRadius: '4px',
                     marginLeft: '2px',
                     lineHeight: '1',
-                    display: 'inline-block',
-                    transform: 'translateY(0.5px)',
                   }}
                 >
                   ACTIVE
@@ -222,7 +230,7 @@ export default function DbNavBox({ activeRoute }) {
 
         .admin-actions-row {
           display: grid;
-          grid-template-columns: repeat(5, 1fr);
+          grid-template-columns: repeat(7, 1fr);
           gap: 8px;
           width: 100%;
         }
@@ -245,17 +253,16 @@ export default function DbNavBox({ activeRoute }) {
 
         :global(.db-nav-btn i),
         :global(.db-nav-btn svg) {
-          font-size: 13px !important;
-          width: 13px !important;
-          height: 13px !important;
-          max-width: 13px !important;
-          max-height: 13px !important;
+          font-size: 12px !important;
+          width: 12px !important;
+          height: 12px !important;
+          max-width: 12px !important;
+          max-height: 12px !important;
           color: #ffffff !important;
           display: inline-flex !important;
           align-items: center !important;
           justify-content: center !important;
           line-height: 1 !important;
-          vertical-align: baseline !important;
         }
 
         :global(.db-nav-btn span) {
@@ -266,9 +273,9 @@ export default function DbNavBox({ activeRoute }) {
           align-items: center !important;
         }
 
-        @media (max-width: 960px) {
+        @media (max-width: 1100px) {
           .admin-actions-row {
-            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            grid-template-columns: repeat(4, 1fr);
           }
         }
 

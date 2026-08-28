@@ -1,6 +1,6 @@
 {
   "announcement": {
-    "text": "বিসিএস ও সরকারি চাকরির প্রস্তুতি",
+    "text": "বিসিএস ও সরকারি চাকরির পরীক্ষায় সফলতার জন্য পূর্ণাঙ্গ প্রস্তুতি",
     "link": ""
   },
   "header": {
@@ -10,6 +10,7 @@
     "faviconUrl": "/images/favicon.ico",
     "btnText": "যোগাযোগ",
     "btnLink": "/contact",
+    "btnIcon": "fa-solid fa-headset",
     "menus": [
       {
         "title": "হোম",
@@ -153,8 +154,7 @@
           }
         ]
       }
-    ],
-    "btnIcon": "fa-solid fa-headset"
+    ]
   },
   "footer": {
     "columns": [
