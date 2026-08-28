@@ -41,20 +41,20 @@ const formatDateTime = (dateVal) => {
 
 export default function DBConnectionCheck() {
   const [loading, setLoading] = useState(false);
-  const [d1Data, setD1Data] = useState(null);
   const [paidData, setPaidData] = useState(null);
   const [freeData, setFreeData] = useState(null);
+  const [d1Data, setD1Data] = useState(null);
   const [fetchError, setFetchError] = useState(null);
   const [lastChecked, setLastChecked] = useState(null);
   const [isFromCache, setIsFromCache] = useState(false);
 
   // Save results to localStorage
-  const saveToCache = (d1, paid, free, timestamp) => {
+  const saveToCache = (paid, free, d1, timestamp) => {
     try {
       const cacheObj = {
-        d1Data: d1,
         paidData: paid,
         freeData: free,
+        d1Data: d1,
         lastChecked: timestamp,
         savedAt: Date.now(),
       };
@@ -64,23 +64,13 @@ export default function DBConnectionCheck() {
     }
   };
 
-  // Perform live database connection check on D1 + BOTH Render APIs
+  // Perform live database connection check on BOTH Render APIs + Cloudflare D1
   const checkConnection = useCallback(async () => {
     setLoading(true);
     setFetchError(null);
 
     try {
-      // 1. Fetch D1 Database
-      const d1Promise = fetch('/api/db-test/d1', {
-        method: 'GET',
-        cache: 'no-store',
-        headers: { Accept: 'application/json' },
-      }).then(async (res) => {
-        if (!res.ok) throw new Error(`D1 API HTTP ${res.status}`);
-        return res.json();
-      });
-
-      // 2. Fetch Paid Database from Paid Render API
+      // 1. Fetch Paid Database from Paid Render API
       const paidPromise = fetch(`${PAID_API_URL}/api/db-check`, {
         method: 'GET',
         cache: 'no-store',
@@ -90,7 +80,7 @@ export default function DBConnectionCheck() {
         return res.json();
       });
 
-      // 3. Fetch Free Database from Free Render API
+      // 2. Fetch Free Database from Free Render API
       const freePromise = fetch(`${FREE_API_URL}/api/db-check`, {
         method: 'GET',
         cache: 'no-store',
@@ -100,24 +90,22 @@ export default function DBConnectionCheck() {
         return res.json();
       });
 
-      const [d1Res, paidRes, freeRes] = await Promise.allSettled([d1Promise, paidPromise, freePromise]);
+      // 3. Fetch Cloudflare D1 Database
+      const d1Promise = fetch('/api/db-test/d1', {
+        method: 'GET',
+        cache: 'no-store',
+        headers: { Accept: 'application/json' },
+      }).then(async (res) => {
+        if (!res.ok) throw new Error(`D1 API HTTP ${res.status}`);
+        return res.json();
+      });
 
-      let newD1 = null;
+      const [paidRes, freeRes, d1Res] = await Promise.allSettled([paidPromise, freePromise, d1Promise]);
+
       let newPaid = null;
       let newFree = null;
+      let newD1 = null;
       const errors = [];
-
-      if (d1Res.status === 'fulfilled') {
-        newD1 = d1Res.value;
-      } else {
-        errors.push(`Cloudflare D1: ${d1Res.reason.message}`);
-        newD1 = {
-          name: 'topmcqbd-db',
-          connected: false,
-          status: 'Error',
-          error: { message: d1Res.reason.message },
-        };
-      }
 
       if (paidRes.status === 'fulfilled') {
         newPaid = paidRes.value.paidDb || paidRes.value;
@@ -143,10 +131,22 @@ export default function DBConnectionCheck() {
         };
       }
 
+      if (d1Res.status === 'fulfilled') {
+        newD1 = d1Res.value;
+      } else {
+        errors.push(`Cloudflare D1: ${d1Res.reason.message}`);
+        newD1 = {
+          name: 'topmcqbd-db',
+          connected: false,
+          status: 'Error',
+          error: { message: d1Res.reason.message },
+        };
+      }
+
       const currentTime = formatDateTime(new Date());
-      setD1Data(newD1);
       setPaidData(newPaid);
       setFreeData(newFree);
+      setD1Data(newD1);
       setLastChecked(currentTime);
       setIsFromCache(false);
 
@@ -154,7 +154,7 @@ export default function DBConnectionCheck() {
         setFetchError(errors.join(' | '));
       }
 
-      saveToCache(newD1, newPaid, newFree, currentTime);
+      saveToCache(newPaid, newFree, newD1, currentTime);
     } catch (err) {
       setFetchError(err.message || 'Failed to fetch diagnostic data');
     } finally {
@@ -162,21 +162,25 @@ export default function DBConnectionCheck() {
     }
   }, []);
 
+  // On page load/reload: Read from localStorage first. If no cache exists, run live check once.
   useEffect(() => {
     try {
       const cached = localStorage.getItem(CACHE_KEY);
       if (cached) {
         const parsed = JSON.parse(cached);
-        if (parsed.paidData || parsed.freeData || parsed.d1Data) {
-          setD1Data(parsed.d1Data);
+        if (parsed && (parsed.paidData || parsed.freeData || parsed.d1Data)) {
           setPaidData(parsed.paidData);
           setFreeData(parsed.freeData);
-          setLastChecked(parsed.lastChecked || formatDateTime(new Date()));
+          setD1Data(parsed.d1Data);
+          setLastChecked(parsed.lastChecked || formatDateTime(parsed.savedAt));
           setIsFromCache(true);
+          setLoading(false);
           return;
         }
       }
-    } catch (e) {}
+    } catch (e) {
+      console.warn('LocalStorage error:', e);
+    }
 
     checkConnection();
   }, [checkConnection]);
@@ -191,10 +195,10 @@ export default function DBConnectionCheck() {
         <div className="db-content-card">
           {/* Header */}
           <div className="db-header">
-            <div className="db-badge">Multi-Database Diagnostics</div>
-            <h1 className="db-title">Database Live Connection Hub</h1>
+            <div className="db-badge">Database Diagnostics & Live Check</div>
+            <h1 className="db-title">Database Connection Hub</h1>
             <p className="db-subtitle">
-              Cloudflare D1 (Edge SQL) + Render Paid MongoDB Atlas + Render Free MongoDB Atlas
+              Dual Render API Backends (<strong>Paid API</strong> & <strong>Free API</strong>) এবং <strong>Cloudflare D1</strong> এর লাইভ কানেকশন টেস্ট
             </p>
           </div>
 
@@ -248,55 +252,9 @@ export default function DBConnectionCheck() {
             </div>
           )}
 
-          {/* Database Status Cards Grid */}
+          {/* Database Status Cards Grid: Row 1 has 2 boxes, Row 2 has 1 box on the left */}
           <div className="db-grid">
-            {/* Cloudflare D1 Card */}
-            <div className={`status-card ${d1Data?.connected ? 'card-success' : 'card-danger'}`}>
-              <div className="card-header">
-                <div>
-                  <div className="card-type-tag" style={{ color: '#fb923c' }}>Serverless Edge SQL</div>
-                  <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px' }}>
-                    Cloudflare: <code>topmcqbd-db</code>
-                  </div>
-                </div>
-                <div className={`status-pill ${d1Data?.connected ? 'pill-success' : 'pill-danger'}`}>
-                  <span className="status-dot" />
-                  <span style={{ transform: 'translateY(0.5px)', display: 'inline-flex', alignItems: 'center' }}>
-                    {loading ? 'Checking...' : d1Data?.connected ? 'Connected (0ms)' : 'Disconnected'}
-                  </span>
-                </div>
-              </div>
-
-              <h3 className="card-db-name">
-                <i className="fa-solid fa-bolt" style={{ marginRight: '8px', color: '#fb923c' }} />
-                {d1Data?.databaseName || 'topmcqbd-db'}
-              </h3>
-
-              <div className="meta-list">
-                <div className="meta-row">
-                  <span className="meta-label">কানেকশন রেসপন্স টাইম:</span>
-                  <span className="meta-value">
-                    {d1Data?.pingTimeMs !== null && d1Data?.pingTimeMs !== undefined
-                      ? `${d1Data.pingTimeMs} ms`
-                      : '10 ms'}
-                  </span>
-                </div>
-                <div className="meta-row">
-                  <span className="meta-label">D1 টার্গেট কালেকশন:</span>
-                  <span className="meta-value" style={{ color: '#fdba74' }}>
-                    db-d1-test ({d1Data?.totalCount || d1Data?.itemCount || 0} items)
-                  </span>
-                </div>
-                <div className="meta-row">
-                  <span className="meta-label">ডাটাবেজ স্কোপ:</span>
-                  <span className="meta-value">
-                    Header, Footer, Sliders, Policies & Configs
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Paid MongoDB Card */}
+            {/* 1. Paid MongoDB Card (Top Left) */}
             <div className={`status-card ${paidData?.connected ? 'card-success' : 'card-danger'}`}>
               <div className="card-header">
                 <div>
@@ -353,7 +311,7 @@ export default function DBConnectionCheck() {
               )}
             </div>
 
-            {/* Free MongoDB Card */}
+            {/* 2. Free MongoDB Card (Top Right) */}
             <div className={`status-card ${freeData?.connected ? 'card-success' : 'card-danger'}`}>
               <div className="card-header">
                 <div>
@@ -406,6 +364,67 @@ export default function DBConnectionCheck() {
                 <div className="error-box">
                   <strong className="error-title">❌ এরর বিস্তারিত:</strong>
                   <pre className="error-code">{freeData.error.message || JSON.stringify(freeData.error)}</pre>
+                </div>
+              )}
+            </div>
+
+            {/* 3. Cloudflare D1 Card (Bottom Left) */}
+            <div className={`status-card ${d1Data?.connected ? 'card-success' : 'card-danger'}`}>
+              <div className="card-header">
+                <div>
+                  <div className="card-type-tag" style={{ color: '#fb923c' }}>Serverless Edge SQL / D1</div>
+                  <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px' }}>
+                    Cloudflare Pages: <code>topmcqbd-db</code>
+                  </div>
+                </div>
+                <div className={`status-pill ${d1Data?.connected ? 'pill-success' : 'pill-danger'}`}>
+                  <span className="status-dot" />
+                  <span style={{ transform: 'translateY(0.5px)', display: 'inline-flex', alignItems: 'center' }}>
+                    {loading ? 'Checking...' : d1Data?.connected ? 'Connected' : 'Disconnected'}
+                  </span>
+                </div>
+              </div>
+
+              <h3 className="card-db-name">
+                <i className="fa-solid fa-bolt" style={{ marginRight: '8px', color: '#fb923c' }} />
+                {d1Data?.databaseName || 'topmcqbd-db'}
+              </h3>
+
+              <div className="meta-list">
+                <div className="meta-row">
+                  <span className="meta-label">কানেকশন রেসপন্স টাইম:</span>
+                  <span className="meta-value">
+                    {d1Data?.pingTimeMs !== null && d1Data?.pingTimeMs !== undefined
+                      ? `${d1Data.pingTimeMs} ms`
+                      : '10 ms'}
+                  </span>
+                </div>
+                <div className="meta-row">
+                  <span className="meta-label">D1 টার্গেট কালেকশন:</span>
+                  <span className="meta-value" style={{ color: '#fdba74' }}>
+                    db-d1-test ({d1Data?.totalCount || d1Data?.itemCount || 0} টি আইটেম)
+                  </span>
+                </div>
+                <div className="meta-row">
+                  <span className="meta-label">ডাটাবেজ স্কোপ:</span>
+                  <span className="meta-value">
+                    Header, Footer, Sliders, Policies & Configs
+                  </span>
+                </div>
+              </div>
+
+              <div className="collections-box">
+                <span className="box-title">কালেকশন তালিকা:</span>
+                <div className="tags-container">
+                  <span className="col-tag">app_configs</span>
+                  <span className="col-tag">db-d1-test</span>
+                </div>
+              </div>
+
+              {d1Data?.error && (
+                <div className="error-box">
+                  <strong className="error-title">❌ এরর বিস্তারিত:</strong>
+                  <pre className="error-code">{d1Data.error.message || JSON.stringify(d1Data.error)}</pre>
                 </div>
               )}
             </div>
@@ -625,7 +644,7 @@ export default function DBConnectionCheck() {
 
           .db-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(2, 1fr);
             gap: 20px;
           }
 
@@ -793,7 +812,7 @@ export default function DBConnectionCheck() {
             100% { transform: rotate(360deg); }
           }
 
-          @media (max-width: 960px) {
+          @media (max-width: 800px) {
             .db-grid {
               grid-template-columns: 1fr;
             }
