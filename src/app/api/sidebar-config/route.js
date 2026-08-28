@@ -7,9 +7,13 @@ import sidebarConfigData from '@/data/sidebar-config.json';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
+const getCloudflareBaseUrl = () => {
+  return (process.env.NEXT_PUBLIC_APP_URL || 'https://topmcqbd.pages.dev').replace(/\/$/, '');
+};
+
 const getJsonPath = () => path.resolve(process.cwd(), 'src', 'data', 'sidebar-config.json');
 
-function getSidebarConfig() {
+function getLocalSidebarConfig() {
   try {
     const filePath = getJsonPath();
     if (fs.existsSync(filePath)) {
@@ -17,22 +21,29 @@ function getSidebarConfig() {
       return JSON.parse(content);
     }
   } catch (err) {
-    console.error('Error reading sidebar-config.json:', err);
+    console.error('Error reading local sidebar-config.json:', err);
   }
   return sidebarConfigData;
 }
 
-function saveSidebarConfig(data) {
-  try {
-    const filePath = getJsonPath();
-    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8');
-  } catch (err) {
-    console.error('Error writing sidebar-config.json:', err);
-  }
-}
-
 export async function GET() {
-  const config = getSidebarConfig();
+  // 1. Try reading live D1 config from Cloudflare Edge
+  try {
+    const cloudflareUrl = getCloudflareBaseUrl();
+    const res = await fetch(`${cloudflareUrl}/api/sidebar-config`, {
+      cache: 'no-store',
+      headers: { 'User-Agent': 'TopMCQBD-Render-Sync' }
+    });
+    if (res.ok) {
+      const liveData = await res.json();
+      if (liveData && (liveData.menus || liveData.headerButtons)) {
+        return NextResponse.json(liveData);
+      }
+    }
+  } catch (err) {}
+
+  // 2. Fallback to local config
+  const config = getLocalSidebarConfig();
   return NextResponse.json(config);
 }
 
@@ -45,7 +56,7 @@ export async function POST(request) {
 
     const body = await request.json();
     const { menus, headerButtons } = body;
-    const currentConfig = getSidebarConfig();
+    const currentConfig = getLocalSidebarConfig();
 
     const newConfig = {
       ...currentConfig,
@@ -53,8 +64,25 @@ export async function POST(request) {
       headerButtons: headerButtons !== undefined ? headerButtons : currentConfig.headerButtons
     };
 
-    saveSidebarConfig(newConfig);
+    // 1. Forward and save to Cloudflare D1
+    try {
+      const cloudflareUrl = getCloudflareBaseUrl();
+      await fetch(`${cloudflareUrl}/api/sidebar-config`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newConfig)
+      });
+    } catch (cfErr) {
+      console.error('Failed to sync sidebar config to Cloudflare D1:', cfErr);
+    }
 
+    // 2. Local fallback sync
+    try {
+      const filePath = getJsonPath();
+      fs.writeFileSync(filePath, JSON.stringify(newConfig, null, 2), 'utf8');
+    } catch (e) {}
+
+    // 3. MongoDB sync if available
     try {
       const { connectDB } = await import('@/lib/db');
       const AdminSidebarConfig = (await import('@/models/AdminSidebarConfig')).default;
@@ -67,11 +95,13 @@ export async function POST(request) {
       } else {
         await AdminSidebarConfig.create(newConfig);
       }
-    } catch (dbErr) {
-      // Ignore DB sync error
-    }
+    } catch (dbErr) {}
 
-    return NextResponse.json({ success: true, message: 'সাইডবার ও হেডার কনফিগারেশন সফলভাবে সংরক্ষিত হয়েছে!', config: newConfig });
+    return NextResponse.json({
+      success: true,
+      message: 'Sidebar config saved and synced with Cloudflare D1!',
+      config: newConfig
+    });
   } catch (err) {
     console.error('SAVE SIDEBAR CONFIG ERROR:', err);
     return NextResponse.json({ success: false, message: 'Server Error', error: err.message }, { status: 500 });

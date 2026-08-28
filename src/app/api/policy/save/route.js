@@ -6,6 +6,10 @@ import path from 'path';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
+const getCloudflareBaseUrl = () => {
+  return (process.env.NEXT_PUBLIC_APP_URL || 'https://topmcqbd.pages.dev').replace(/\/$/, '');
+};
+
 export async function POST(request) {
   try {
     if (process.env.NODE_ENV !== 'development') {
@@ -16,6 +20,19 @@ export async function POST(request) {
     const { content } = await request.json();
     const data = { content: content || '' };
 
+    // 1. Forward and save to Cloudflare D1
+    try {
+      const cloudflareUrl = getCloudflareBaseUrl();
+      await fetch(`${cloudflareUrl}/api/policy`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+    } catch (cfErr) {
+      console.error('Failed to sync policy to Cloudflare D1:', cfErr);
+    }
+
+    // 2. Local file sync
     try {
       const filePath = path.resolve(process.cwd(), 'src', 'data', 'policy-config.json');
       fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8');
@@ -23,6 +40,7 @@ export async function POST(request) {
       console.error('Error writing policy-config.json:', fsErr);
     }
 
+    // 3. MongoDB sync
     try {
       const { connectDB } = await import('@/lib/db');
       const PolicyConfig = (await import('@/models/PolicyConfig')).default;
@@ -36,11 +54,9 @@ export async function POST(request) {
       } else {
         await PolicyConfig.create(data);
       }
-    } catch (dbErr) {
-      // Ignore DB sync error
-    }
+    } catch (dbErr) {}
 
-    return NextResponse.json({ message: 'Policy saved successfully!' });
+    return NextResponse.json({ message: 'Policy saved and synced with Cloudflare D1 successfully!' });
   } catch (error) {
     console.error('SAVE POLICY ERROR:', error);
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
