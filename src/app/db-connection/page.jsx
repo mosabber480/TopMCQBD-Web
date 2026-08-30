@@ -5,10 +5,7 @@ import Link from 'next/link';
 import DbNavBox from '@/components/common/DbNavBox';
 import DbAuthGuard from '@/components/common/DbAuthGuard';
 
-const CACHE_KEY = 'topmcqbd_db_check_cache';
-
-const PAID_API_URL = process.env.NEXT_PUBLIC_PAID_API_URL || 'https://topmcqbd-paid-api.onrender.com';
-const FREE_API_URL = process.env.NEXT_PUBLIC_FREE_API_URL || 'https://topmcqbd-free-api.onrender.com';
+const CACHE_KEY = 'topmcqbd_db_check_cache_v2';
 
 const formatDateTime = (dateVal) => {
   if (!dateVal) return '';
@@ -42,6 +39,9 @@ const formatDateTime = (dateVal) => {
 export default function DBConnectionCheck() {
   const [loading, setLoading] = useState(false);
   const [paidData, setPaidData] = useState(null);
+  const [subjectiveData, setSubjectiveData] = useState(null);
+  const [liveExamData, setLiveExamData] = useState(null);
+  const [writtenData, setWrittenData] = useState(null);
   const [freeData, setFreeData] = useState(null);
   const [d1Data, setD1Data] = useState(null);
   const [fetchError, setFetchError] = useState(null);
@@ -49,12 +49,10 @@ export default function DBConnectionCheck() {
   const [isFromCache, setIsFromCache] = useState(false);
 
   // Save results to localStorage
-  const saveToCache = (paid, free, d1, timestamp) => {
+  const saveToCache = (stateObj, timestamp) => {
     try {
       const cacheObj = {
-        paidData: paid,
-        freeData: free,
-        d1Data: d1,
+        ...stateObj,
         lastChecked: timestamp,
         savedAt: Date.now(),
       };
@@ -64,24 +62,54 @@ export default function DBConnectionCheck() {
     }
   };
 
-  // Perform live database connection check on BOTH Render APIs + Cloudflare D1
+  // Perform live database connection check on all 5 MongoDBs + Cloudflare D1
   const checkConnection = useCallback(async () => {
     setLoading(true);
     setFetchError(null);
 
     try {
-      // 1. Fetch Paid Database from Paid Render API
-      const paidPromise = fetch(`${PAID_API_URL}/api/db-check`, {
+      // 1. Paid Core DB
+      const paidPromise = fetch('/api/db-test/paid', {
         method: 'GET',
         cache: 'no-store',
         headers: { Accept: 'application/json' },
       }).then(async (res) => {
-        if (!res.ok) throw new Error(`Paid API HTTP ${res.status}`);
+        if (!res.ok) throw new Error(`Paid Core API HTTP ${res.status}`);
         return res.json();
       });
 
-      // 2. Fetch Free Database from Free Render API
-      const freePromise = fetch(`${FREE_API_URL}/api/db-check`, {
+      // 2. Subjective MCQs DB
+      const subjectivePromise = fetch('/api/db-test/subjective', {
+        method: 'GET',
+        cache: 'no-store',
+        headers: { Accept: 'application/json' },
+      }).then(async (res) => {
+        if (!res.ok) throw new Error(`Subjective API HTTP ${res.status}`);
+        return res.json();
+      });
+
+      // 3. Live Exam Engine DB
+      const liveExamPromise = fetch('/api/db-test/live-exam', {
+        method: 'GET',
+        cache: 'no-store',
+        headers: { Accept: 'application/json' },
+      }).then(async (res) => {
+        if (!res.ok) throw new Error(`Live Exam API HTTP ${res.status}`);
+        return res.json();
+      });
+
+      // 4. Written Exam DB
+      const writtenPromise = fetch('/api/db-test/written', {
+        method: 'GET',
+        cache: 'no-store',
+        headers: { Accept: 'application/json' },
+      }).then(async (res) => {
+        if (!res.ok) throw new Error(`Written Exam API HTTP ${res.status}`);
+        return res.json();
+      });
+
+      // 5. Free MCQ DB
+      const freePromise = fetch('/api/db-test/free', {
         method: 'GET',
         cache: 'no-store',
         headers: { Accept: 'application/json' },
@@ -90,7 +118,7 @@ export default function DBConnectionCheck() {
         return res.json();
       });
 
-      // 3. Fetch Cloudflare D1 Database
+      // 6. Cloudflare D1 Database
       const d1Promise = fetch('/api/db-test/d1', {
         method: 'GET',
         cache: 'no-store',
@@ -100,51 +128,44 @@ export default function DBConnectionCheck() {
         return res.json();
       });
 
-      const [paidRes, freeRes, d1Res] = await Promise.allSettled([paidPromise, freePromise, d1Promise]);
+      const [paidRes, subjRes, liveRes, writRes, freeRes, d1Res] = await Promise.allSettled([
+        paidPromise,
+        subjectivePromise,
+        liveExamPromise,
+        writtenPromise,
+        freePromise,
+        d1Promise,
+      ]);
 
-      let newPaid = null;
-      let newFree = null;
-      let newD1 = null;
       const errors = [];
 
-      if (paidRes.status === 'fulfilled') {
-        newPaid = paidRes.value.paidDb || paidRes.value;
-      } else {
-        errors.push(`Paid Render API: ${paidRes.reason.message}`);
-        newPaid = {
-          name: 'TopMCQBD_DB',
-          connected: false,
-          status: 'Error',
-          error: { message: paidRes.reason.message },
-        };
-      }
+      const extractData = (res, defaultName, errorLabel) => {
+        if (res.status === 'fulfilled') {
+          return res.value.paidDb || res.value.freeDb || res.value;
+        } else {
+          errors.push(`${errorLabel}: ${res.reason.message}`);
+          return {
+            cluster: defaultName,
+            name: defaultName,
+            connected: false,
+            status: 'Error',
+            error: { message: res.reason.message },
+          };
+        }
+      };
 
-      if (freeRes.status === 'fulfilled') {
-        newFree = freeRes.value.freeDb || freeRes.value;
-      } else {
-        errors.push(`Free Render API: ${freeRes.reason.message}`);
-        newFree = {
-          name: 'TopMCQBD_DB_Free',
-          connected: false,
-          status: 'Error',
-          error: { message: freeRes.reason.message },
-        };
-      }
-
-      if (d1Res.status === 'fulfilled') {
-        newD1 = d1Res.value;
-      } else {
-        errors.push(`Cloudflare D1: ${d1Res.reason.message}`);
-        newD1 = {
-          name: 'topmcqbd-db',
-          connected: false,
-          status: 'Error',
-          error: { message: d1Res.reason.message },
-        };
-      }
+      const newPaid = extractData(paidRes, 'TopMCQBD_DB', 'Paid Core DB');
+      const newSubjective = extractData(subjRes, 'TopMCQBD_DB_Subjective', 'Subjective MCQs DB');
+      const newLiveExam = extractData(liveRes, 'TopMCQBD_DB_Live_Exam', 'Live Exam DB');
+      const newWritten = extractData(writRes, 'TopMCQBD_DB_written', 'Written Exam DB');
+      const newFree = extractData(freeRes, 'TopMCQBD_DB_Free', 'Free MCQ DB');
+      const newD1 = extractData(d1Res, 'topmcqbd-db', 'Cloudflare D1');
 
       const currentTime = formatDateTime(new Date());
       setPaidData(newPaid);
+      setSubjectiveData(newSubjective);
+      setLiveExamData(newLiveExam);
+      setWrittenData(newWritten);
       setFreeData(newFree);
       setD1Data(newD1);
       setLastChecked(currentTime);
@@ -154,7 +175,17 @@ export default function DBConnectionCheck() {
         setFetchError(errors.join(' | '));
       }
 
-      saveToCache(newPaid, newFree, newD1, currentTime);
+      saveToCache(
+        {
+          paidData: newPaid,
+          subjectiveData: newSubjective,
+          liveExamData: newLiveExam,
+          writtenData: newWritten,
+          freeData: newFree,
+          d1Data: newD1,
+        },
+        currentTime
+      );
     } catch (err) {
       setFetchError(err.message || 'Failed to fetch diagnostic data');
     } finally {
@@ -162,15 +193,18 @@ export default function DBConnectionCheck() {
     }
   }, []);
 
-  // On page load/reload: Read from localStorage first. If no cache exists, run live check once.
+  // On page load/reload: Read from localStorage first.
   useEffect(() => {
     try {
       const cachedRaw = localStorage.getItem(CACHE_KEY);
       if (cachedRaw) {
         const cached = JSON.parse(cachedRaw);
-        if (cached && (cached.paidData || cached.data || cached.d1Data)) {
-          setPaidData(cached.paidData || cached.data?.paidDb || null);
-          setFreeData(cached.freeData || cached.data?.freeDb || null);
+        if (cached && (cached.paidData || cached.subjectiveData || cached.d1Data)) {
+          setPaidData(cached.paidData || null);
+          setSubjectiveData(cached.subjectiveData || null);
+          setLiveExamData(cached.liveExamData || null);
+          setWrittenData(cached.writtenData || null);
+          setFreeData(cached.freeData || null);
           setD1Data(cached.d1Data || null);
           setLastChecked(cached.lastChecked || formatDateTime(cached.savedAt));
           setIsFromCache(true);
@@ -191,10 +225,10 @@ export default function DBConnectionCheck() {
         <div className="db-content-card">
           {/* Header */}
           <div className="db-header">
-            <div className="db-badge">Diagnostic Tool</div>
-            <h1 className="db-title">DB Connection Check</h1>
+            <div className="db-badge">Master Diagnostic Hub</div>
+            <h1 className="db-title">All Database Connections</h1>
             <p className="db-subtitle">
-              Render Backend ও MongoDB ক্লাস্টারের মধ্যকার রিয়েল-টাইম কানেকশন স্ট্যাটাস
+              Cloudflare D1, 4x Dedicated Paid MongoDB Clusters ও 1x Free MongoDB ক্লাস্টারের রিয়েল-টাইম কানেকশন স্ট্যাটাস
             </p>
           </div>
 
@@ -248,13 +282,61 @@ export default function DBConnectionCheck() {
             </div>
           )}
 
-          {/* Database Status Cards Grid */}
+          {/* 6 Database Status Cards Grid */}
           <div className="db-grid">
-            {/* Paid MongoDB Card */}
+            {/* 1. Cloudflare D1 SQL Card */}
+            <div className={`status-card ${d1Data?.connected ? 'card-success' : 'card-danger'}`}>
+              <div className="card-header">
+                <div>
+                  <div className="card-type-tag" style={{ color: '#ea580c' }}>1. SERVERLESS / D1 CLUSTER</div>
+                  <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
+                    Cloudflare Pages: <code>topmcqbd-db</code>
+                  </div>
+                </div>
+                <div className={`status-pill ${d1Data?.connected ? 'pill-success' : 'pill-danger'}`}>
+                  <span className="status-dot" />
+                  <span style={{ transform: 'translateY(0.5px)', display: 'inline-flex', alignItems: 'center' }}>
+                    {loading ? 'Checking...' : d1Data?.connected ? 'Connected' : 'Disconnected'}
+                  </span>
+                </div>
+              </div>
+
+              <h3 className="card-db-name" style={{ color: '#ea580c' }}>
+                📁 {d1Data?.databaseName || 'topmcqbd-db'}
+              </h3>
+
+              <div className="meta-list">
+                <div className="meta-row">
+                  <span className="meta-label">কানেকশন রেসপন্স টাইম:</span>
+                  <span className="meta-value">
+                    {d1Data?.pingTimeMs !== null && d1Data?.pingTimeMs !== undefined
+                      ? `${d1Data.pingTimeMs} ms`
+                      : '10 ms'}
+                  </span>
+                </div>
+                <div className="meta-row">
+                  <span className="meta-label">ডাটাবেজ রো:</span>
+                  <span className="meta-value">
+                    {d1Data?.totalCount ? `${d1Data.totalCount} টি রো` : (d1Data?.collections?.length ? `${d1Data.collections.length} টি রো` : '5 টি রো')}
+                  </span>
+                </div>
+              </div>
+
+              <div className="collections-box">
+                <span className="box-title">রো কালেকশন তালিকা:</span>
+                <div className="tags-container">
+                  {(d1Data?.collections || d1Data?.keys || ['layout-config', 'home-config', 'sidebar-config', 'policy-config', 'db-d1-test']).map((col, idx) => (
+                    <span key={idx} className="col-tag" style={{ color: '#ea580c', background: '#fff7ed', borderColor: '#fed7aa' }}>{col}</span>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* 2. Paid Core MongoDB Card */}
             <div className={`status-card ${paidData?.connected ? 'card-success' : 'card-danger'}`}>
               <div className="card-header">
                 <div>
-                  <div className="card-type-tag">PRIMARY / PAID CLUSTER</div>
+                  <div className="card-type-tag" style={{ color: '#0284c7' }}>2. PRIMARY / PAID CORE CLUSTER</div>
                   <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
                     Render: <code>topmcqbd-paid-api</code>
                   </div>
@@ -268,7 +350,7 @@ export default function DBConnectionCheck() {
               </div>
 
               <h3 className="card-db-name">
-                📁 {paidData?.name || 'TopMCQBD_DB'}
+                📁 {paidData?.cluster || paidData?.name || 'TopMCQBD_DB'}
               </h3>
 
               <div className="meta-list">
@@ -298,20 +380,163 @@ export default function DBConnectionCheck() {
                   </div>
                 </div>
               )}
+            </div>
 
-              {paidData?.error && (
-                <div className="error-box">
-                  <strong className="error-title">❌ এরর বিস্তারিত:</strong>
-                  <pre className="error-code">{paidData.error.message || JSON.stringify(paidData.error)}</pre>
+            {/* 3. Subjective MCQs MongoDB Card */}
+            <div className={`status-card ${subjectiveData?.connected ? 'card-success' : 'card-danger'}`}>
+              <div className="card-header">
+                <div>
+                  <div className="card-type-tag" style={{ color: '#9333ea' }}>3. SUBJECTIVE MCQS CLUSTER</div>
+                  <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
+                    Render: <code>subjective-paid-api</code>
+                  </div>
+                </div>
+                <div className={`status-pill ${subjectiveData?.connected ? 'pill-success' : 'pill-danger'}`}>
+                  <span className="status-dot" />
+                  <span style={{ transform: 'translateY(0.5px)', display: 'inline-flex', alignItems: 'center' }}>
+                    {loading ? 'Checking...' : subjectiveData?.connected ? 'Connected' : 'Disconnected'}
+                  </span>
+                </div>
+              </div>
+
+              <h3 className="card-db-name" style={{ color: '#9333ea' }}>
+                📁 {subjectiveData?.cluster || subjectiveData?.name || 'TopMCQBD_DB_Subjective'}
+              </h3>
+
+              <div className="meta-list">
+                <div className="meta-row">
+                  <span className="meta-label">কানেকশন রেসপন্স টাইম:</span>
+                  <span className="meta-value">
+                    {subjectiveData?.latencyMs !== null && subjectiveData?.latencyMs !== undefined
+                      ? `${subjectiveData.latencyMs} ms`
+                      : 'N/A'}
+                  </span>
+                </div>
+                <div className="meta-row">
+                  <span className="meta-label">কালেকশনস:</span>
+                  <span className="meta-value">
+                    {subjectiveData?.collections ? `${subjectiveData.collections.length} টি কালেকশন` : '0'}
+                  </span>
+                </div>
+              </div>
+
+              {subjectiveData?.collections && subjectiveData.collections.length > 0 && (
+                <div className="collections-box">
+                  <span className="box-title">কালেকশন তালিকা:</span>
+                  <div className="tags-container">
+                    {subjectiveData.collections.map((col, idx) => (
+                      <span key={idx} className="col-tag" style={{ color: '#9333ea', background: '#faf5ff', borderColor: '#e9d5ff' }}>{col}</span>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
 
-            {/* Free MongoDB Card */}
+            {/* 4. Live Exam MongoDB Card */}
+            <div className={`status-card ${liveExamData?.connected ? 'card-success' : 'card-danger'}`}>
+              <div className="card-header">
+                <div>
+                  <div className="card-type-tag" style={{ color: '#059669' }}>4. LIVE EXAM ENGINE CLUSTER</div>
+                  <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
+                    Render: <code>live-exam-paid-api</code>
+                  </div>
+                </div>
+                <div className={`status-pill ${liveExamData?.connected ? 'pill-success' : 'pill-danger'}`}>
+                  <span className="status-dot" />
+                  <span style={{ transform: 'translateY(0.5px)', display: 'inline-flex', alignItems: 'center' }}>
+                    {loading ? 'Checking...' : liveExamData?.connected ? 'Connected' : 'Disconnected'}
+                  </span>
+                </div>
+              </div>
+
+              <h3 className="card-db-name" style={{ color: '#059669' }}>
+                📁 {liveExamData?.cluster || liveExamData?.name || 'TopMCQBD_DB_Live_Exam'}
+              </h3>
+
+              <div className="meta-list">
+                <div className="meta-row">
+                  <span className="meta-label">কানেকশন রেসপন্স টাইম:</span>
+                  <span className="meta-value">
+                    {liveExamData?.latencyMs !== null && liveExamData?.latencyMs !== undefined
+                      ? `${liveExamData.latencyMs} ms`
+                      : 'N/A'}
+                  </span>
+                </div>
+                <div className="meta-row">
+                  <span className="meta-label">কালেকশনস:</span>
+                  <span className="meta-value">
+                    {liveExamData?.collections ? `${liveExamData.collections.length} টি কালেকশন` : '0'}
+                  </span>
+                </div>
+              </div>
+
+              {liveExamData?.collections && liveExamData.collections.length > 0 && (
+                <div className="collections-box">
+                  <span className="box-title">কালেকশন তালিকা:</span>
+                  <div className="tags-container">
+                    {liveExamData.collections.map((col, idx) => (
+                      <span key={idx} className="col-tag" style={{ color: '#059669', background: '#ecfdf5', borderColor: '#a7f3d0' }}>{col}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* 5. Written Exam MongoDB Card */}
+            <div className={`status-card ${writtenData?.connected ? 'card-success' : 'card-danger'}`}>
+              <div className="card-header">
+                <div>
+                  <div className="card-type-tag" style={{ color: '#e11d48' }}>5. WRITTEN EXAM CLUSTER</div>
+                  <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
+                    Render: <code>written-paid-api</code>
+                  </div>
+                </div>
+                <div className={`status-pill ${writtenData?.connected ? 'pill-success' : 'pill-danger'}`}>
+                  <span className="status-dot" />
+                  <span style={{ transform: 'translateY(0.5px)', display: 'inline-flex', alignItems: 'center' }}>
+                    {loading ? 'Checking...' : writtenData?.connected ? 'Connected' : 'Disconnected'}
+                  </span>
+                </div>
+              </div>
+
+              <h3 className="card-db-name" style={{ color: '#e11d48' }}>
+                📁 {writtenData?.cluster || writtenData?.name || 'TopMCQBD_DB_written'}
+              </h3>
+
+              <div className="meta-list">
+                <div className="meta-row">
+                  <span className="meta-label">কানেকশন রেসপন্স টাইম:</span>
+                  <span className="meta-value">
+                    {writtenData?.latencyMs !== null && writtenData?.latencyMs !== undefined
+                      ? `${writtenData.latencyMs} ms`
+                      : 'N/A'}
+                  </span>
+                </div>
+                <div className="meta-row">
+                  <span className="meta-label">কালেকশনস:</span>
+                  <span className="meta-value">
+                    {writtenData?.collections ? `${writtenData.collections.length} টি কালেকশন` : '0'}
+                  </span>
+                </div>
+              </div>
+
+              {writtenData?.collections && writtenData.collections.length > 0 && (
+                <div className="collections-box">
+                  <span className="box-title">কালেকশন তালিকা:</span>
+                  <div className="tags-container">
+                    {writtenData.collections.map((col, idx) => (
+                      <span key={idx} className="col-tag" style={{ color: '#e11d48', background: '#fff1f2', borderColor: '#fecdd3' }}>{col}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* 6. Free MongoDB Card */}
             <div className={`status-card ${freeData?.connected ? 'card-success' : 'card-danger'}`}>
               <div className="card-header">
                 <div>
-                  <div className="card-type-tag">SECONDARY / FREE CLUSTER</div>
+                  <div className="card-type-tag" style={{ color: '#0080c3' }}>6. OPEN FREE MCQS CLUSTER</div>
                   <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
                     Render: <code>topmcqbd-free-api</code>
                   </div>
@@ -324,8 +549,8 @@ export default function DBConnectionCheck() {
                 </div>
               </div>
 
-              <h3 className="card-db-name">
-                📁 {freeData?.name || 'TopMCQBD_DB_Free'}
+              <h3 className="card-db-name" style={{ color: '#0080c3' }}>
+                📁 {freeData?.cluster || freeData?.name || 'TopMCQBD_DB_Free'}
               </h3>
 
               <div className="meta-list">
@@ -338,7 +563,7 @@ export default function DBConnectionCheck() {
                   </span>
                 </div>
                 <div className="meta-row">
-                  <span className="meta-label">ডাটাবেজ কালেকশনস:</span>
+                  <span className="meta-label">কালেকশনস:</span>
                   <span className="meta-value">
                     {freeData?.collections ? `${freeData.collections.length} টি কালেকশন` : '0'}
                   </span>
@@ -353,68 +578,6 @@ export default function DBConnectionCheck() {
                       <span key={idx} className="col-tag">{col}</span>
                     ))}
                   </div>
-                </div>
-              )}
-
-              {freeData?.error && (
-                <div className="error-box">
-                  <strong className="error-title">❌ এরর বিস্তারিত:</strong>
-                  <pre className="error-code">{freeData.error.message || JSON.stringify(freeData.error)}</pre>
-                </div>
-              )}
-            </div>
-
-            {/* Cloudflare D1 Card (Row 2 Left) */}
-            <div className={`status-card ${d1Data?.connected ? 'card-success' : 'card-danger'}`}>
-              <div className="card-header">
-                <div>
-                  <div className="card-type-tag">SERVERLESS / D1 CLUSTER</div>
-                  <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
-                    Cloudflare Pages: <code>topmcqbd-db</code>
-                  </div>
-                </div>
-                <div className={`status-pill ${d1Data?.connected ? 'pill-success' : 'pill-danger'}`}>
-                  <span className="status-dot" />
-                  <span style={{ transform: 'translateY(0.5px)', display: 'inline-flex', alignItems: 'center' }}>
-                    {loading ? 'Checking...' : d1Data?.connected ? 'Connected' : 'Disconnected'}
-                  </span>
-                </div>
-              </div>
-
-              <h3 className="card-db-name">
-                📁 {d1Data?.databaseName || 'topmcqbd-db'}
-              </h3>
-
-              <div className="meta-list">
-                <div className="meta-row">
-                  <span className="meta-label">কানেকশন রেসপন্স টাইম:</span>
-                  <span className="meta-value">
-                    {d1Data?.pingTimeMs !== null && d1Data?.pingTimeMs !== undefined
-                      ? `${d1Data.pingTimeMs} ms`
-                      : '10 ms'}
-                  </span>
-                </div>
-                <div className="meta-row">
-                  <span className="meta-label">ডাটাবেজ রো:</span>
-                  <span className="meta-value">
-                    {d1Data?.totalCount ? `${d1Data.totalCount} টি রো` : (d1Data?.collections?.length ? `${d1Data.collections.length} টি রো` : '5 টি রো')}
-                  </span>
-                </div>
-              </div>
-
-              <div className="collections-box">
-                <span className="box-title">রো কালেকশন তালিকা:</span>
-                <div className="tags-container">
-                  {(d1Data?.collections || d1Data?.keys || ['layout-config', 'home-config', 'sidebar-config', 'policy-config', 'db-d1-test']).map((col, idx) => (
-                    <span key={idx} className="col-tag">{col}</span>
-                  ))}
-                </div>
-              </div>
-
-              {d1Data?.error && (
-                <div className="error-box">
-                  <strong className="error-title">❌ এরর বিস্তারিত:</strong>
-                  <pre className="error-code">{d1Data.error.message || JSON.stringify(d1Data.error)}</pre>
                 </div>
               )}
             </div>
@@ -462,7 +625,7 @@ export default function DBConnectionCheck() {
 
           .db-content-card {
             width: 100%;
-            max-width: 900px;
+            max-width: 960px;
             background: #ffffff;
             border: 1px solid #e2e8f0;
             border-radius: 20px;
@@ -614,7 +777,7 @@ export default function DBConnectionCheck() {
             background: #ffffff;
             border: 1px solid #e2e8f0;
             border-radius: 16px;
-            padding: 24px;
+            padding: 22px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -625,13 +788,13 @@ export default function DBConnectionCheck() {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
           }
 
           .card-type-tag {
-            font-size: 11.5px;
+            font-size: 11px;
             color: #475569;
-            font-weight: 700;
+            font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 0.5px;
           }
@@ -650,7 +813,7 @@ export default function DBConnectionCheck() {
             gap: 6px;
             padding: 4px 10px;
             border-radius: 20px;
-            font-size: 11.5px;
+            font-size: 11px;
             font-weight: 700;
           }
 
@@ -674,25 +837,26 @@ export default function DBConnectionCheck() {
           }
 
           .card-db-name {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 800;
             color: #0f172a;
-            margin: 0 0 16px;
+            margin: 0 0 12px;
+            word-break: break-all;
           }
 
           .meta-list {
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            margin-bottom: 16px;
+            gap: 6px;
+            margin-bottom: 14px;
           }
 
           .meta-row {
             display: flex;
             justify-content: space-between;
-            font-size: 13px;
+            font-size: 12.5px;
             border-bottom: 1px dashed #e2e8f0;
-            padding-bottom: 6px;
+            padding-bottom: 5px;
           }
 
           .meta-label {
@@ -708,55 +872,32 @@ export default function DBConnectionCheck() {
             background: #f8fafc;
             border: 1px solid #e2e8f0;
             border-radius: 10px;
-            padding: 12px;
+            padding: 10px;
           }
 
           .box-title {
             display: block;
-            font-size: 11.5px;
+            font-size: 11px;
             font-weight: 600;
             color: #475569;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
           }
 
           .tags-container {
             display: flex;
             flex-wrap: wrap;
-            gap: 6px;
+            gap: 5px;
           }
 
           .col-tag {
             background: #eff6ff;
             border: 1px solid #bfdbfe;
             color: #2563eb;
-            font-size: 11.5px;
+            font-size: 11px;
             font-weight: 600;
-            padding: 2px 8px;
-            border-radius: 6px;
+            padding: 1px 7px;
+            border-radius: 5px;
             font-family: monospace;
-          }
-
-          .error-box {
-            margin-top: 14px;
-            background: #fef2f2;
-            border: 1px solid #fecaca;
-            padding: 10px;
-            border-radius: 8px;
-          }
-
-          .error-title {
-            display: block;
-            color: #dc2626;
-            font-size: 12px;
-            margin-bottom: 4px;
-          }
-
-          .error-code {
-            color: #b91c1c;
-            font-size: 11.5px;
-            margin: 0;
-            white-space: pre-wrap;
-            word-break: break-all;
           }
 
           .bottom-nav-link {

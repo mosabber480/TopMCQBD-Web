@@ -4,54 +4,87 @@ import React from 'react';
 import Link from 'next/link';
 
 export default function DbNavBox({ activeRoute }) {
-  const buttons = [
+  // 12 DB Specific Buttons (3 rows x 4 columns)
+  const dbButtons = [
     {
-      text: 'ALL DB Test',
-      url: '/db-connection',
-      altUrl: '/db-connection-check',
-      icon: 'fa-solid fa-server',
-      bg: '#4f46e5',
-    },
-    {
-      text: 'DB Paid Admin',
+      text: 'Paid Core Admin',
       url: '/db-connection/dbpaid-admin',
       altUrl: '/dbpaid-admin',
       icon: 'fa-solid fa-sliders',
       bg: '#008fb0',
     },
     {
-      text: 'DB Paid Test',
+      text: 'Paid Core Test',
       url: '/db-connection/dbpaid-test',
       altUrl: '/dbpaid-test',
       icon: 'fa-solid fa-globe',
       bg: '#008fb0',
     },
     {
-      text: 'DB Free Admin',
+      text: 'Subj MCQs Admin',
+      url: '/db-connection/dbsubjective-admin',
+      altUrl: '/dbsubjective-admin',
+      icon: 'fa-solid fa-sliders',
+      bg: '#9333ea',
+    },
+    {
+      text: 'Subj MCQs Test',
+      url: '/db-connection/dbsubjective-test',
+      altUrl: '/dbsubjective-test',
+      icon: 'fa-solid fa-globe',
+      bg: '#9333ea',
+    },
+    {
+      text: 'Live Exam Admin',
+      url: '/db-connection/dbliveexam-admin',
+      altUrl: '/dbliveexam-admin',
+      icon: 'fa-solid fa-sliders',
+      bg: '#059669',
+    },
+    {
+      text: 'Live Exam Test',
+      url: '/db-connection/dbliveexam-test',
+      altUrl: '/dbliveexam-test',
+      icon: 'fa-solid fa-globe',
+      bg: '#059669',
+    },
+    {
+      text: 'Written Admin',
+      url: '/db-connection/dbwritten-admin',
+      altUrl: '/dbwritten-admin',
+      icon: 'fa-solid fa-sliders',
+      bg: '#e11d48',
+    },
+    {
+      text: 'Written Test',
+      url: '/db-connection/dbwritten-test',
+      altUrl: '/dbwritten-test',
+      icon: 'fa-solid fa-globe',
+      bg: '#e11d48',
+    },
+    {
+      text: 'Free MCQ Admin',
       url: '/db-connection/dbfree-admin',
       altUrl: '/dbfree-admin',
       icon: 'fa-solid fa-sliders',
       bg: '#0080c3',
     },
     {
-      text: 'DB Free Test',
+      text: 'Free MCQ Test',
       url: '/db-connection/dbfree-test',
       altUrl: '/dbfree-test',
       icon: 'fa-solid fa-globe',
       bg: '#0080c3',
     },
-  ];
-
-  const d1Buttons = [
     {
-      text: 'DB D1 Admin',
+      text: 'Cloudflare D1 Admin',
       url: '/db-connection/dbd1-admin',
       altUrl: '/dbd1-admin',
       icon: 'fa-solid fa-bolt',
       bg: '#ea580c',
     },
     {
-      text: 'DB D1 Test',
+      text: 'Cloudflare D1 Test',
       url: '/db-connection/dbd1-test',
       altUrl: '/dbd1-test',
       icon: 'fa-solid fa-database',
@@ -69,6 +102,9 @@ export default function DbNavBox({ activeRoute }) {
       console.error('Logout error:', e);
     }
   };
+
+  const isAllDbActive =
+    activeRoute === '/db-connection' || activeRoute === '/db-connection-check' || activeRoute === '/DB';
 
   const renderButton = (btn) => {
     const isActive = activeRoute === btn.url || activeRoute === btn.altUrl;
@@ -99,15 +135,17 @@ export default function DbNavBox({ activeRoute }) {
           border: 'none',
           outline: 'none',
           transition: 'all 0.2s ease',
+          width: '100%',
+          boxSizing: 'border-box',
         }}
       >
         <i
           className={btn.icon}
           style={{
-            fontSize: '13px',
-            width: '13px',
-            height: '13px',
-            lineHeight: '13px',
+            fontSize: '12px',
+            width: '12px',
+            height: '12px',
+            lineHeight: '12px',
             color: '#ffffff',
             display: 'inline-flex',
             alignItems: 'center',
@@ -126,6 +164,8 @@ export default function DbNavBox({ activeRoute }) {
             lineHeight: '1',
             display: 'inline-block',
             transform: 'translateY(1.5px)',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
           }}
         >
           {btn.text}
@@ -138,9 +178,9 @@ export default function DbNavBox({ activeRoute }) {
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
-              width: '8px',
-              height: '8px',
-              marginLeft: '4px',
+              width: '7px',
+              height: '7px',
+              marginLeft: '3px',
               flexShrink: 0,
               transform: 'translateY(0.5px)',
             }}
@@ -159,8 +199,8 @@ export default function DbNavBox({ activeRoute }) {
             <span
               style={{
                 position: 'relative',
-                width: '6px',
-                height: '6px',
+                width: '5px',
+                height: '5px',
                 borderRadius: '50%',
                 backgroundColor: '#ffffff',
                 boxShadow: '0 0 6px #ffffff',
@@ -174,48 +214,162 @@ export default function DbNavBox({ activeRoute }) {
 
   return (
     <div className="db-nav-box-wrapper">
+      {/* Top Header */}
       <div className="nav-box-title">
         <div className="title-left">
-          <span className="nav-badge">
-            <i className="fa-solid fa-compass" style={{ marginRight: '6px', fontSize: '12px' }}></i>
-            QUICK NAVIGATION
-          </span>
           <span className="nav-heading">Database Testing & Admin Suite</span>
         </div>
-        <div className="title-right" style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-          <small className="nav-sub">৭টি ডাটাবেজ পেজ দ্রুত সুইচ করুন</small>
-          <button
-            onClick={handleLogout}
-            style={{
-              background: '#fee2e2',
-              border: '1px solid #fca5a5',
-              color: '#dc2626',
-              padding: '5px 12px',
-              borderRadius: '6px',
-              fontSize: '11.5px',
-              fontWeight: '700',
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '5px',
-              transition: 'all 0.2s ease',
-            }}
-            title="ডাটাবেজ পেজ লকিং ভেরিফিকেশন রিসেট করুন"
-          >
-            <i className="fa-solid fa-lock" style={{ fontSize: '11px' }} />
-            <span>লগআউট</span>
-          </button>
+        <div className="title-right">
+          <small className="nav-sub">১২টি স্পেসিফিক ডাটাবেজ পেজ দ্রুত সুইচ করুন</small>
         </div>
       </div>
 
-      {/* Row 1: Primary 5 Buttons */}
-      <div className="admin-actions-row">
-        {buttons.map(renderButton)}
+      {/* 12 Buttons Grid (Exactly 3 Rows of 4 Buttons) */}
+      <div className="admin-actions-grid-4">
+        {dbButtons.map(renderButton)}
       </div>
 
-      {/* Row 2: 2 D1 Buttons underneath */}
-      <div className="admin-actions-row-d1" style={{ display: 'flex', gap: '8px', marginTop: '10px', flexWrap: 'wrap' }}>
-        {d1Buttons.map(renderButton)}
+      {/* Bottom Dedicated Bar: ALL DB Hub (Left) & Logout (Right) */}
+      <div className="bottom-hub-logout-bar">
+        {/* Left: ALL DB Hub Button */}
+        <Link
+          href="/db-connection"
+          className="all-db-hub-btn"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            backgroundColor: '#4f46e5',
+            color: '#ffffff',
+            textDecoration: 'none',
+            padding: '9px 18px',
+            borderRadius: '7px',
+            fontSize: '13px',
+            fontWeight: '700',
+            boxShadow: isAllDbActive ? '0 4px 14px rgba(79, 70, 229, 0.45)' : '0 2px 8px rgba(79, 70, 229, 0.25)',
+            border: 'none',
+            outline: 'none',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            lineHeight: 'normal',
+          }}
+        >
+          <i
+            className="fa-solid fa-server"
+            style={{
+              fontSize: '13px',
+              width: '13px',
+              height: '13px',
+              lineHeight: '13px',
+              color: '#ffffff',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transform: 'translateY(-0.5px)',
+            }}
+          />
+          <span
+            style={{
+              color: '#ffffff',
+              textDecoration: 'none',
+              fontSize: '13px',
+              fontWeight: '700',
+              lineHeight: '1',
+              display: 'inline-block',
+              transform: 'translateY(1px)',
+            }}
+          >
+            ALL DB Hub
+          </span>
+          {isAllDbActive && (
+            <span
+              className="active-live-bullet"
+              style={{
+                position: 'relative',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '7px',
+                height: '7px',
+                marginLeft: '4px',
+                transform: 'translateY(0.5px)',
+              }}
+            >
+              <span
+                style={{
+                  position: 'absolute',
+                  width: '100%',
+                  height: '100%',
+                  borderRadius: '50%',
+                  backgroundColor: '#ffffff',
+                  opacity: 0.75,
+                  animation: 'navPulse 1.4s cubic-bezier(0, 0, 0.2, 1) infinite',
+                }}
+              />
+              <span
+                style={{
+                  position: 'relative',
+                  width: '5px',
+                  height: '5px',
+                  borderRadius: '50%',
+                  backgroundColor: '#ffffff',
+                  boxShadow: '0 0 6px #ffffff',
+                }}
+              />
+            </span>
+          )}
+        </Link>
+
+        {/* Right: Logout Button */}
+        <button
+          onClick={handleLogout}
+          className="bottom-logout-btn"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
+            backgroundColor: '#fee2e2',
+            border: '1px solid #fca5a5',
+            color: '#dc2626',
+            padding: '8px 18px',
+            borderRadius: '7px',
+            fontSize: '12.5px',
+            fontWeight: '700',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            lineHeight: 'normal',
+          }}
+          title="ডাটাবেজ পেজ লকিং ভেরিফিকেশন রিসেট ও লগআউট করুন"
+        >
+          <i
+            className="fa-solid fa-lock"
+            style={{
+              fontSize: '12px',
+              width: '12px',
+              height: '12px',
+              lineHeight: '12px',
+              color: '#dc2626',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transform: 'translateY(-0.5px)',
+            }}
+          />
+          <span
+            style={{
+              color: '#dc2626',
+              fontSize: '12.5px',
+              fontWeight: '700',
+              lineHeight: '1',
+              display: 'inline-block',
+              transform: 'translateY(1px)',
+            }}
+          >
+            লগআউট
+          </span>
+        </button>
       </div>
 
       <style jsx>{`
@@ -233,7 +387,7 @@ export default function DbNavBox({ activeRoute }) {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          margin-bottom: 14px;
+          margin-bottom: 16px;
           flex-wrap: wrap;
           gap: 8px;
         }
@@ -269,11 +423,57 @@ export default function DbNavBox({ activeRoute }) {
           color: #64748b;
         }
 
-        .admin-actions-row {
+        .admin-actions-grid-4 {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-          gap: 8px;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 10px;
           width: 100%;
+        }
+
+        .bottom-hub-logout-bar {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
+          border-radius: 10px;
+          padding: 10px 14px;
+          margin-top: 14px;
+          flex-wrap: wrap;
+          gap: 10px;
+        }
+
+        :global(.all-db-hub-btn),
+        :global(.all-db-hub-btn:link),
+        :global(.all-db-hub-btn:visited),
+        :global(.all-db-hub-btn:hover),
+        :global(.all-db-hub-btn:active) {
+          text-decoration: none !important;
+          color: #ffffff !important;
+          background-color: #4f46e5 !important;
+          line-height: 1 !important;
+        }
+
+        :global(.all-db-hub-btn:hover) {
+          filter: brightness(1.12) !important;
+          transform: translateY(-1px);
+          box-shadow: 0 4px 14px rgba(79, 70, 229, 0.45) !important;
+        }
+
+        :global(.all-db-hub-btn i),
+        :global(.all-db-hub-btn svg) {
+          color: #ffffff !important;
+        }
+
+        :global(.all-db-hub-btn span) {
+          color: #ffffff !important;
+          text-decoration: none !important;
+        }
+
+        .bottom-logout-btn:hover {
+          background: #fecaca !important;
+          border-color: #f87171 !important;
+          transform: translateY(-1px);
         }
 
         :global(.db-nav-btn),
@@ -294,11 +494,11 @@ export default function DbNavBox({ activeRoute }) {
 
         :global(.db-nav-btn i),
         :global(.db-nav-btn svg) {
-          font-size: 13px !important;
-          width: 13px !important;
-          height: 13px !important;
-          max-width: 13px !important;
-          max-height: 13px !important;
+          font-size: 12px !important;
+          width: 12px !important;
+          height: 12px !important;
+          max-width: 12px !important;
+          max-height: 12px !important;
           color: #ffffff !important;
           display: inline-flex !important;
           align-items: center !important;
@@ -314,15 +514,23 @@ export default function DbNavBox({ activeRoute }) {
           align-items: center !important;
         }
 
-        @media (max-width: 900px) {
-          .admin-actions-row {
+        @media (max-width: 992px) {
+          .admin-actions-grid-4 {
             grid-template-columns: repeat(2, 1fr);
           }
         }
 
         @media (max-width: 480px) {
-          .admin-actions-row {
+          .admin-actions-grid-4 {
             grid-template-columns: 1fr;
+          }
+          .bottom-hub-logout-bar {
+            flex-direction: column;
+            align-items: stretch;
+          }
+          :global(.all-db-hub-btn),
+          .bottom-logout-btn {
+            justify-content: center;
           }
         }
 
