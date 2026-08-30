@@ -7,6 +7,20 @@ export default function DbNavBox({ activeRoute }) {
   // 12 DB Specific Buttons (3 rows x 4 columns)
   const dbButtons = [
     {
+      text: 'Cloudflare D1 Admin',
+      url: '/db-connection/dbd1-admin',
+      altUrl: '/dbd1-admin',
+      icon: 'fa-solid fa-bolt',
+      bg: '#ea580c',
+    },
+    {
+      text: 'Cloudflare D1 Test',
+      url: '/db-connection/dbd1-test',
+      altUrl: '/dbd1-test',
+      icon: 'fa-solid fa-database',
+      bg: '#ea580c',
+    },
+    {
       text: 'Paid Core Admin',
       url: '/db-connection/dbpaid-admin',
       altUrl: '/dbpaid-admin',
@@ -75,20 +89,6 @@ export default function DbNavBox({ activeRoute }) {
       altUrl: '/dbfree-test',
       icon: 'fa-solid fa-globe',
       bg: '#0080c3',
-    },
-    {
-      text: 'Cloudflare D1 Admin',
-      url: '/db-connection/dbd1-admin',
-      altUrl: '/dbd1-admin',
-      icon: 'fa-solid fa-bolt',
-      bg: '#ea580c',
-    },
-    {
-      text: 'Cloudflare D1 Test',
-      url: '/db-connection/dbd1-test',
-      altUrl: '/dbd1-test',
-      icon: 'fa-solid fa-database',
-      bg: '#ea580c',
     },
   ];
 
