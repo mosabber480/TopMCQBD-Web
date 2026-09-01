@@ -55,15 +55,15 @@
       "subMenus": []
     },
     {
-      "title": "রিফান্ড ও পলিসি",
-      "url": "/admin/policy-dashboard",
-      "icon": "fa-solid fa-file-invoice-dollar",
-      "subMenus": []
-    },
-    {
       "title": "ফ্রি এমসিকিউ কন্ট্রোল",
       "url": "/admin/free-mcqs-dashboard",
       "icon": "fa-solid fa-gift",
+      "subMenus": []
+    },
+    {
+      "title": "রিফান্ড ও পলিসি",
+      "url": "/admin/policy-dashboard",
+      "icon": "fa-solid fa-file-invoice-dollar",
       "subMenus": []
     }
   ],

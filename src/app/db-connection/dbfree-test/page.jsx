@@ -269,14 +269,14 @@ export default function DBFreeTestPage() {
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '8px',
-                  backgroundColor: '#4f46e5',
+                  backgroundColor: '#008fb0',
                   color: '#ffffff',
                   textDecoration: 'none',
                   padding: '11px 24px',
                   borderRadius: '8px',
                   fontSize: '14px',
                   fontWeight: '700',
-                  boxShadow: '0 4px 14px rgba(79, 70, 229, 0.35)',
+                  boxShadow: '0 4px 14px rgba(0, 143, 176, 0.35)',
                   transition: 'all 0.2s ease',
                 }}
               >

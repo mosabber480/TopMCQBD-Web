@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import DbNavBox from '@/components/common/DbNavBox';
 import DbAuthGuard from '@/components/common/DbAuthGuard';
+import { showTopAlert } from '@/components/layout/TopAlert';
 
 const CACHE_KEY = 'topmcqbd_dbpaid_admin_cache';
 
@@ -21,121 +22,101 @@ export default function DBPaidAdminPage() {
   // Form states
   const [isAddingData, setIsAddingData] = useState(false);
   const [newDataRows, setNewDataRows] = useState([{ text: '' }]);
-  const [inputText, setInputText] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState('');
-  const [actionMsg, setActionMsg] = useState(null);
-
-  const getApiUrl = useCallback(() => {
-    if (typeof window !== 'undefined') {
-      const hostname = window.location.hostname;
-      if (hostname === 'localhost' || hostname === '127.0.0.1') {
-        return '';
-      }
-    }
-    return process.env.NEXT_PUBLIC_PAID_API_URL || 'https://topmcqbd-paid-api.onrender.com';
-  }, []);
 
   const formatDateTime = (dateVal) => {
-    if (!dateVal) return '';
-    const d = new Date(dateVal);
-    if (isNaN(d.getTime())) return String(dateVal);
-
-    const now = new Date();
-    const isToday =
-      d.getDate() === now.getDate() &&
-      d.getMonth() === now.getMonth() &&
-      d.getFullYear() === now.getFullYear();
-
-    const dateStr = isToday
-      ? 'Today'
-      : d.toLocaleDateString('en-GB', {
-          day: '2-digit',
-          month: 'short',
-          year: 'numeric',
-        });
-
-    const timeStr = d.toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: true,
-    });
-
-    return `${dateStr}, ${timeStr}`;
-  };
-
-  useEffect(() => {
-    setActiveBackendUrl(getApiUrl() || 'Local Server (http://localhost:3000)');
-  }, [getApiUrl]);
-
-  // Save to cache
-  const saveToCache = (dataObj, itemsArr, timestamp) => {
+    if (!dateVal) return 'N/A';
     try {
-      const cacheObj = {
-        statusData: dataObj,
-        items: itemsArr,
-        lastChecked: timestamp,
-        savedAt: Date.now(),
-      };
-      localStorage.setItem(CACHE_KEY, JSON.stringify(cacheObj));
-    } catch (e) {
-      console.warn('LocalStorage error:', e);
+      const d = new Date(dateVal);
+      if (isNaN(d.getTime())) return String(dateVal);
+      return d.toLocaleString('en-US', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true,
+      });
+    } catch {
+      return String(dateVal);
     }
   };
 
-  // Live fetch from Paid API
+  const getApiUrl = () => {
+    if (typeof window !== 'undefined') {
+      return window.location.origin;
+    }
+    return '';
+  };
+
   const fetchPaidData = useCallback(async () => {
     setLoading(true);
     setFetchError(null);
+    const origin = getApiUrl();
+    setActiveBackendUrl(origin);
+
     try {
-      const baseUrl = getApiUrl();
-      const endpoint = `${baseUrl}/api/db-test/paid`;
-      const res = await fetch(endpoint, {
-        method: 'GET',
+      const res = await fetch(`${origin}/api/db-test/paid`, {
         cache: 'no-store',
-        headers: { Accept: 'application/json' },
+        headers: { 'Cache-Control': 'no-cache' },
       });
 
+      const data = await res.json();
       if (!res.ok) {
-        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        throw new Error(data.error || `HTTP error! status: ${res.status}`);
       }
 
-      const json = await res.json();
-      const currentTime = formatDateTime(new Date());
+      const now = new Date().toLocaleTimeString('bn-BD', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true,
+      });
 
-      setStatusData(json);
-      setItems(json.items || []);
-      setLastChecked(currentTime);
+      setStatusData(data);
+      const itemsList = Array.isArray(data.items) ? data.items : [];
+      setItems(itemsList);
+      setLastChecked(now);
       setIsFromCache(false);
-      saveToCache(json, json.items || [], currentTime);
+
+      const cachePayload = {
+        statusData: data,
+        items: itemsList,
+        lastChecked: now,
+        cachedAt: Date.now(),
+      };
+      try {
+        localStorage.setItem(CACHE_KEY, JSON.stringify(cachePayload));
+      } catch (e) {}
     } catch (err) {
-      setFetchError(
-        `${err.message || 'Failed to connect'}. (Render-এ কোড পুশ ও ডেপ্লয় না থাকলে 404 বা Failed to fetch দেখাতে পারে।)`
-      );
+      setFetchError(err.message || 'কানেকশন টেস্ট ব্যর্থ হয়েছে।');
+      setStatusData({
+        connected: false,
+        error: err.message,
+        cluster: 'TopMCQBD_DB (Paid/Primary)',
+      });
     } finally {
       setLoading(false);
     }
-  }, [getApiUrl]);
+  }, []);
 
   // Initial load: check localStorage first
   useEffect(() => {
     try {
-      const raw = localStorage.getItem(CACHE_KEY);
-      if (raw) {
-        const cached = JSON.parse(raw);
-        if (cached && cached.statusData) {
-          setStatusData(cached.statusData);
-          setItems(cached.items || []);
-          setLastChecked(cached.lastChecked || formatDateTime(cached.savedAt));
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed && parsed.statusData) {
+          setStatusData(parsed.statusData);
+          setItems(parsed.items || []);
+          setLastChecked(parsed.lastChecked);
           setIsFromCache(true);
-          setLoading(false);
-          return;
         }
       }
     } catch (e) {}
-
     fetchPaidData();
   }, [fetchPaidData]);
 
@@ -143,7 +124,6 @@ export default function DBPaidAdminPage() {
   const openAddDataForm = () => {
     setIsAddingData(true);
     setNewDataRows([{ text: '' }]);
-    setActionMsg(null);
   };
 
   const addNewDataRow = () => {
@@ -169,12 +149,11 @@ export default function DBPaidAdminPage() {
   const saveAllNewData = async () => {
     const validRows = newDataRows.filter((r) => r.text && r.text.trim());
     if (validRows.length === 0) {
-      setActionMsg({ type: 'error', text: 'কমপক্ষে একটি বক্সে ডাটা বা টেক্সট লিখুন!' });
+      showTopAlert('কমপক্ষে একটি বক্সে ডাটা বা টেক্সট লিখুন!', 'warning');
       return;
     }
 
     setSubmitting(true);
-    setActionMsg(null);
     try {
       const baseUrl = getApiUrl();
       for (const row of validRows) {
@@ -192,10 +171,10 @@ export default function DBPaidAdminPage() {
       setIsAddingData(false);
       setNewDataRows([{ text: '' }]);
       try { localStorage.removeItem('topmcqbd_dbpaid_test_cache'); } catch (e) {}
-      setActionMsg({ type: 'success', text: `✅ ${validRows.length} টি ডাটা সফলভাবে "db-paid-test" কালেকশনে যুক্ত হয়েছে!` });
+      showTopAlert(`✅ ${validRows.length} টি ডাটা সফলভাবে "db-paid-test" কালেকশনে সংরক্ষিত হয়েছে!`, 'success');
       fetchPaidData();
     } catch (err) {
-      setActionMsg({ type: 'error', text: `❌ ${err.message}` });
+      showTopAlert(`❌ ${err.message}`, 'danger');
     } finally {
       setSubmitting(false);
     }
@@ -206,7 +185,6 @@ export default function DBPaidAdminPage() {
     if (!editText.trim()) return;
 
     setSubmitting(true);
-    setActionMsg(null);
     try {
       const baseUrl = getApiUrl();
       const res = await fetch(`${baseUrl}/api/db-test/paid`, {
@@ -223,10 +201,10 @@ export default function DBPaidAdminPage() {
       setEditingId(null);
       setEditText('');
       try { localStorage.removeItem('topmcqbd_dbpaid_test_cache'); } catch (e) {}
-      setActionMsg({ type: 'success', text: '✅ টেক্সট সফলভাবে আপডেট করা হয়েছে!' });
+      showTopAlert('✅ টেক্সট সফলভাবে আপডেট করা হয়েছে!', 'success');
       fetchPaidData();
     } catch (err) {
-      setActionMsg({ type: 'error', text: `❌ ${err.message}` });
+      showTopAlert(`❌ ${err.message}`, 'danger');
     } finally {
       setSubmitting(false);
     }
@@ -234,10 +212,10 @@ export default function DBPaidAdminPage() {
 
   // Handle Delete Text
   const handleDeleteText = async (id) => {
-    if (!window.confirm('আপনি কি নিশ্চিত এই টেক্সটটি মুছে ফেলতে চান?')) return;
+    const confirmed = await showTopAlert('আপনি কি নিশ্চিত এই টেক্সটটি মুছে ফেলতে চান?', 'warning', true);
+    if (!confirmed) return;
 
     setSubmitting(true);
-    setActionMsg(null);
     try {
       const baseUrl = getApiUrl();
       const res = await fetch(`${baseUrl}/api/db-test/paid?id=${id}`, {
@@ -251,10 +229,10 @@ export default function DBPaidAdminPage() {
       }
 
       try { localStorage.removeItem('topmcqbd_dbpaid_test_cache'); } catch (e) {}
-      setActionMsg({ type: 'success', text: '🗑️ টেক্সট সফলভাবে মুছে ফেলা হয়েছে!' });
+      showTopAlert('🗑️ টেক্সট সফলভাবে মুছে ফেলা হয়েছে!', 'success');
       fetchPaidData();
     } catch (err) {
-      setActionMsg({ type: 'error', text: `❌ ${err.message}` });
+      showTopAlert(`❌ ${err.message}`, 'danger');
     } finally {
       setSubmitting(false);
     }
@@ -322,7 +300,7 @@ export default function DBPaidAdminPage() {
                 </>
               ) : (
                 <>
-                  <span>🔄</span>
+                  <i className="fa-solid fa-arrows-rotate" />
                   পুনরায় টেস্ট করুন
                 </>
               )}
@@ -341,14 +319,6 @@ export default function DBPaidAdminPage() {
             <small className="alert-hint">
               * নিশ্চিত করুন যে সার্ভার সচল আছে এবং <code>.env</code> ফাইলে সঠিক <code>MONGODB_URI_PAID</code> দেওয়া আছে।
             </small>
-          </div>
-        )}
-
-        {/* Action Message Alert */}
-        {actionMsg && (
-          <div className={`action-feedback ${actionMsg.type === 'success' ? 'msg-success' : 'msg-error'}`}>
-            <i className={`fa-solid ${actionMsg.type === 'success' ? 'fa-circle-check' : 'fa-circle-xmark'}`} style={{ marginRight: '8px' }} />
-            {actionMsg.text}
           </div>
         )}
 
@@ -371,8 +341,7 @@ export default function DBPaidAdminPage() {
             </div>
 
             <h3 className="card-db-name">
-              <i className="fa-solid fa-folder" style={{ marginRight: '8px', color: '#60a5fa' }} />
-              {statusData?.cluster || 'TopMCQBD_DB'}
+              📁 {statusData?.cluster || 'TopMCQBD_DB'}
             </h3>
 
             <div className="meta-list">
@@ -748,10 +717,10 @@ export default function DBPaidAdminPage() {
           transition: all 0.2s ease;
           display: inline-flex;
           align-items: center;
-          box-shadow: 0 2px 8px rgba(5, 150, 105, 0.25);
+          box-shadow: 0 2px 8px rgba(0, 143, 176, 0.3);
         }
         .btn-add-main:hover {
-          background: #047857;
+          background: #007a99;
           transform: translateY(-1px);
         }
         .add-rows-container {
@@ -857,7 +826,7 @@ export default function DBPaidAdminPage() {
           gap: 8px;
         }
         .btn-save-all-rows {
-          background: #007bff;
+          background: #059669;
           color: #ffffff;
           border: none;
           padding: 9px 20px;
@@ -868,9 +837,10 @@ export default function DBPaidAdminPage() {
           transition: all 0.2s;
           display: inline-flex;
           align-items: center;
+          box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3);
         }
         .btn-save-all-rows:hover:not(:disabled) {
-          background: #0056b3;
+          background: #047857;
           transform: translateY(-1px);
         }
         .btn-cancel-all-rows {
@@ -1002,7 +972,7 @@ export default function DBPaidAdminPage() {
           gap: 6px;
         }
         .btn-save {
-          background: #007bff;
+          background: #008fb0;
           color: #fff;
           border: none;
           padding: 8px 14px;
@@ -1010,6 +980,10 @@ export default function DBPaidAdminPage() {
           font-size: 12px;
           font-weight: 700;
           cursor: pointer;
+          transition: background-color 0.2s;
+        }
+        .btn-save:hover:not(:disabled) {
+          background: #007a99;
         }
         .btn-cancel {
           background: #64748b;
@@ -1019,6 +993,10 @@ export default function DBPaidAdminPage() {
           border-radius: 6px;
           font-size: 12px;
           cursor: pointer;
+          transition: background-color 0.2s;
+        }
+        .btn-cancel:hover {
+          background: #475569;
         }
         .bottom-nav-bar {
           display: flex;

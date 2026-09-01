@@ -4,91 +4,91 @@ import React from 'react';
 import Link from 'next/link';
 
 export default function DbNavBox({ activeRoute }) {
-  // 12 DB Specific Buttons (3 rows x 4 columns)
+  // 12 DB Specific Buttons (3 rows x 4 columns) - Pair colors (No red)
   const dbButtons = [
     {
       text: 'Cloudflare D1 Admin',
       url: '/db-connection/dbd1-admin',
       altUrl: '/dbd1-admin',
       icon: 'fa-solid fa-bolt',
-      bg: '#008fb0',
+      bg: '#0284c7', // Sky Blue
     },
     {
       text: 'Cloudflare D1 Test',
       url: '/db-connection/dbd1-test',
       altUrl: '/dbd1-test',
       icon: 'fa-solid fa-database',
-      bg: '#008fb0',
+      bg: '#0284c7', // Sky Blue
     },
     {
       text: 'Paid Core Admin',
       url: '/db-connection/dbpaid-admin',
       altUrl: '/dbpaid-admin',
       icon: 'fa-solid fa-sliders',
-      bg: '#008fb0',
+      bg: '#4f46e5', // Indigo
     },
     {
       text: 'Paid Core Test',
       url: '/db-connection/dbpaid-test',
       altUrl: '/dbpaid-test',
       icon: 'fa-solid fa-globe',
-      bg: '#008fb0',
+      bg: '#4f46e5', // Indigo
     },
     {
       text: 'Subj MCQs Admin',
       url: '/db-connection/dbsubjective-admin',
       altUrl: '/dbsubjective-admin',
       icon: 'fa-solid fa-sliders',
-      bg: '#008fb0',
+      bg: '#9333ea', // Purple
     },
     {
       text: 'Subj MCQs Test',
       url: '/db-connection/dbsubjective-test',
       altUrl: '/dbsubjective-test',
       icon: 'fa-solid fa-globe',
-      bg: '#008fb0',
+      bg: '#9333ea', // Purple
     },
     {
       text: 'Live Exam Admin',
       url: '/db-connection/dbliveexam-admin',
       altUrl: '/dbliveexam-admin',
       icon: 'fa-solid fa-sliders',
-      bg: '#008fb0',
+      bg: '#059669', // Emerald Green
     },
     {
       text: 'Live Exam Test',
       url: '/db-connection/dbliveexam-test',
       altUrl: '/dbliveexam-test',
       icon: 'fa-solid fa-globe',
-      bg: '#008fb0',
+      bg: '#059669', // Emerald Green
     },
     {
       text: 'Written Admin',
       url: '/db-connection/dbwritten-admin',
       altUrl: '/dbwritten-admin',
       icon: 'fa-solid fa-sliders',
-      bg: '#008fb0',
+      bg: '#d97706', // Amber Golden
     },
     {
       text: 'Written Test',
       url: '/db-connection/dbwritten-test',
       altUrl: '/dbwritten-test',
       icon: 'fa-solid fa-globe',
-      bg: '#008fb0',
+      bg: '#d97706', // Amber Golden
     },
     {
       text: 'Free MCQ Admin',
       url: '/db-connection/dbfree-admin',
       altUrl: '/dbfree-admin',
       icon: 'fa-solid fa-sliders',
-      bg: '#008fb0',
+      bg: '#0d9488', // Teal
     },
     {
       text: 'Free MCQ Test',
       url: '/db-connection/dbfree-test',
       altUrl: '/dbfree-test',
       icon: 'fa-solid fa-globe',
-      bg: '#008fb0',
+      bg: '#0d9488', // Teal
     },
   ];
 
@@ -212,6 +212,9 @@ export default function DbNavBox({ activeRoute }) {
     );
   };
 
+  const leftGroup = [dbButtons[0], dbButtons[1], dbButtons[4], dbButtons[5], dbButtons[8], dbButtons[9]];
+  const rightGroup = [dbButtons[2], dbButtons[3], dbButtons[6], dbButtons[7], dbButtons[10], dbButtons[11]];
+
   return (
     <div className="db-nav-box-wrapper">
       {/* Top Header */}
@@ -224,9 +227,15 @@ export default function DbNavBox({ activeRoute }) {
         </div>
       </div>
 
-      {/* 12 Buttons Grid (Exactly 3 Rows of 4 Buttons) */}
-      <div className="admin-actions-grid-4">
-        {dbButtons.map(renderButton)}
+      {/* 12 Buttons Grid with Center Subtle Line on Desktop */}
+      <div className="admin-actions-split-wrapper">
+        <div className="admin-sub-grid">
+          {leftGroup.map(renderButton)}
+        </div>
+        <div className="nav-vertical-divider" />
+        <div className="admin-sub-grid">
+          {rightGroup.map(renderButton)}
+        </div>
       </div>
 
       {/* Bottom Dedicated Bar: ALL DB Hub (Left) & Logout (Right) */}
@@ -240,14 +249,14 @@ export default function DbNavBox({ activeRoute }) {
             alignItems: 'center',
             justifyContent: 'center',
             gap: '8px',
-            backgroundColor: '#4f46e5',
+            backgroundColor: '#008fb0',
             color: '#ffffff',
             textDecoration: 'none',
             padding: '9px 18px',
             borderRadius: '7px',
             fontSize: '13px',
             fontWeight: '700',
-            boxShadow: isAllDbActive ? '0 4px 14px rgba(79, 70, 229, 0.45)' : '0 2px 8px rgba(79, 70, 229, 0.25)',
+            boxShadow: isAllDbActive ? '0 4px 14px rgba(0, 143, 176, 0.45)' : '0 2px 8px rgba(0, 143, 176, 0.25)',
             border: 'none',
             outline: 'none',
             cursor: 'pointer',
@@ -423,11 +432,25 @@ export default function DbNavBox({ activeRoute }) {
           color: #64748b;
         }
 
-        .admin-actions-grid-4 {
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 10px;
+        .admin-actions-split-wrapper {
+          display: flex;
+          align-items: stretch;
+          gap: 12px;
           width: 100%;
+        }
+
+        .admin-sub-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 10px;
+          flex: 1;
+        }
+
+        .nav-vertical-divider {
+          width: 1px;
+          background: linear-gradient(to bottom, #e2e8f0 0%, #cbd5e1 50%, #e2e8f0 100%);
+          margin: 0;
+          flex-shrink: 0;
         }
 
         .bottom-hub-logout-bar {
@@ -450,14 +473,14 @@ export default function DbNavBox({ activeRoute }) {
         :global(.all-db-hub-btn:active) {
           text-decoration: none !important;
           color: #ffffff !important;
-          background-color: #4f46e5 !important;
+          background-color: #008fb0 !important;
           line-height: 1 !important;
         }
 
         :global(.all-db-hub-btn:hover) {
           filter: brightness(1.12) !important;
           transform: translateY(-1px);
-          box-shadow: 0 4px 14px rgba(79, 70, 229, 0.45) !important;
+          box-shadow: 0 4px 14px rgba(0, 143, 176, 0.45) !important;
         }
 
         :global(.all-db-hub-btn i),
@@ -515,14 +538,23 @@ export default function DbNavBox({ activeRoute }) {
         }
 
         @media (max-width: 992px) {
-          .admin-actions-grid-4 {
-            grid-template-columns: repeat(2, 1fr);
+          .admin-actions-split-wrapper {
+            flex-direction: column;
+            gap: 10px;
+          }
+          .nav-vertical-divider {
+            width: 100%;
+            height: 1px;
+            margin: 2px 0;
           }
         }
 
         @media (max-width: 480px) {
-          .admin-actions-grid-4 {
+          .admin-sub-grid {
             grid-template-columns: 1fr;
+          }
+          .nav-vertical-divider {
+            display: none;
           }
           .bottom-hub-logout-bar {
             flex-direction: column;

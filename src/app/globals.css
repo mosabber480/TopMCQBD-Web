@@ -1,6 +1,7 @@
 /* AUTO-INJECT FONT AWESOME & GOOGLE FONTS */
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Bengali:wght@400;500;600;700;800&display=swap');
+@import './pages-style.css';
 
 :root {
     --primary: #007bff;
@@ -377,6 +378,8 @@ body.sidebar-collapsed .admin-main-content {
     text-align: center;
     position: relative;
     z-index: 1001;
+    min-height: 38px;
+    box-sizing: border-box;
 }
 .announce-content a {
     color: #fff;
@@ -391,6 +394,8 @@ body.sidebar-collapsed .admin-main-content {
     position: sticky;
     top: 0;
     z-index: 1000;
+    min-height: 64px;
+    box-sizing: border-box;
 }
 
 .header-wrapper {
@@ -403,6 +408,8 @@ body.sidebar-collapsed .admin-main-content {
     position: relative;
     flex-wrap: nowrap;
     gap: 20px;
+    min-height: 64px;
+    box-sizing: border-box;
 }
 
 .site-logo {
@@ -423,6 +430,7 @@ body.sidebar-collapsed .admin-main-content {
 .site-logo img {
     max-height: 38px;
     width: auto;
+    display: block;
 }
 
 .site-nav {
@@ -1185,7 +1193,7 @@ body.sidebar-collapsed .admin-main-content {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: #007bff;
+  background: #059669;
   color: #ffffff;
   border: none;
   padding: 10px 20px;
@@ -1193,10 +1201,10 @@ body.sidebar-collapsed .admin-main-content {
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.25);
+  box-shadow: 0 2px 8px rgba(5, 150, 105, 0.25);
   transition: background 0.2s ease, transform 0.1s ease;
 }
-.recheck-btn:hover { background: #0056b3; }
+.recheck-btn:hover { background: #047857; }
 .recheck-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .btn-spinner {

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import DbNavBox from '@/components/common/DbNavBox';
 import DbAuthGuard from '@/components/common/DbAuthGuard';
+import { showTopAlert } from '@/components/layout/TopAlert';
 
 const CACHE_KEY = 'topmcqbd_dbd1_admin_cache';
 
@@ -21,85 +22,75 @@ export default function DBD1AdminPage() {
   // Form states
   const [isAddingData, setIsAddingData] = useState(false);
   const [newDataRows, setNewDataRows] = useState([{ text: '' }]);
-  const [inputText, setInputText] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState('');
-  const [actionMsg, setActionMsg] = useState(null);
 
   const formatDateTime = (dateVal) => {
-    if (!dateVal) return '';
-    const d = new Date(dateVal);
-    if (isNaN(d.getTime())) return String(dateVal);
-
-    const now = new Date();
-    const isToday =
-      d.getDate() === now.getDate() &&
-      d.getMonth() === now.getMonth() &&
-      d.getFullYear() === now.getFullYear();
-
-    const dateStr = isToday
-      ? 'Today'
-      : d.toLocaleDateString('en-GB', {
-          day: '2-digit',
-          month: 'short',
-          year: 'numeric',
-        });
-
-    const timeStr = d.toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: true,
-    });
-
-    return `${dateStr}, ${timeStr}`;
-  };
-
-  useEffect(() => {
-    setActiveBackendUrl(process.env.NEXT_PUBLIC_APP_URL || 'https://topmcqbd.pages.dev');
-  }, []);
-
-  // Save to cache
-  const saveToCache = (dataObj, itemsArr, timestamp) => {
+    if (!dateVal) return 'N/A';
     try {
-      const cacheObj = {
-        statusData: dataObj,
-        items: itemsArr,
-        lastChecked: timestamp,
-        savedAt: Date.now(),
-      };
-      localStorage.setItem(CACHE_KEY, JSON.stringify(cacheObj));
-    } catch (e) {}
+      const d = new Date(dateVal);
+      if (isNaN(d.getTime())) return String(dateVal);
+      return d.toLocaleString('en-US', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true,
+      });
+    } catch {
+      return String(dateVal);
+    }
   };
 
-  // Live fetch from D1 API
   const fetchD1Data = useCallback(async () => {
     setLoading(true);
     setFetchError(null);
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    setActiveBackendUrl(origin);
+
     try {
       const res = await fetch('/api/db-test/d1', {
-        method: 'GET',
         cache: 'no-store',
-        headers: { Accept: 'application/json' },
+        headers: { 'Cache-Control': 'no-cache' },
       });
 
+      const data = await res.json();
       if (!res.ok) {
-        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        throw new Error(data.error || `HTTP error! status: ${res.status}`);
       }
 
-      const json = await res.json();
-      const currentTime = formatDateTime(new Date());
+      const now = new Date().toLocaleTimeString('bn-BD', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true,
+      });
 
-      const liveItems = json.items || [];
-
-      setStatusData(json);
-      setItems(liveItems);
-      setLastChecked(currentTime);
+      setStatusData(data);
+      const itemsList = Array.isArray(data.items) ? data.items : [];
+      setItems(itemsList);
+      setLastChecked(now);
       setIsFromCache(false);
-      saveToCache(json, liveItems, currentTime);
+
+      const cachePayload = {
+        statusData: data,
+        items: itemsList,
+        lastChecked: now,
+        cachedAt: Date.now(),
+      };
+      try {
+        localStorage.setItem(CACHE_KEY, JSON.stringify(cachePayload));
+      } catch (e) {}
     } catch (err) {
-      setFetchError(err.message || 'Failed to fetch items from Cloudflare D1');
+      setFetchError(err.message || 'কানেকশন টেস্ট ব্যর্থ হয়েছে।');
+      setStatusData({
+        connected: false,
+        error: err.message,
+        cluster: 'topmcqbd-db (Cloudflare D1)',
+      });
     } finally {
       setLoading(false);
     }
@@ -113,22 +104,17 @@ export default function DBD1AdminPage() {
         if (parsed && parsed.statusData) {
           setStatusData(parsed.statusData);
           setItems(parsed.items || []);
-          setLastChecked(parsed.lastChecked || formatDateTime(parsed.savedAt));
+          setLastChecked(parsed.lastChecked);
           setIsFromCache(true);
-          setLoading(false);
-          return;
         }
       }
     } catch (e) {}
-
     fetchD1Data();
   }, [fetchD1Data]);
 
-  // Multi-Row Add Data Handlers
   const openAddDataForm = () => {
     setIsAddingData(true);
     setNewDataRows([{ text: '' }]);
-    setActionMsg(null);
   };
 
   const addNewDataRow = () => {
@@ -154,12 +140,11 @@ export default function DBD1AdminPage() {
   const saveAllNewData = async () => {
     const validRows = newDataRows.filter((r) => r.text && r.text.trim());
     if (validRows.length === 0) {
-      setActionMsg({ type: 'error', text: 'কমপক্ষে একটি বক্সে ডাটা বা টেক্সট লিখুন!' });
+      showTopAlert('কমপক্ষে একটি বক্সে ডাটা বা টেক্সট লিখুন!', 'warning');
       return;
     }
 
     setSubmitting(true);
-    setActionMsg(null);
     try {
       const res = await fetch('/api/db-test/d1', {
         method: 'POST',
@@ -175,21 +160,19 @@ export default function DBD1AdminPage() {
       setIsAddingData(false);
       setNewDataRows([{ text: '' }]);
       try { localStorage.removeItem('topmcqbd_dbd1_test_cache'); } catch (e) {}
-      setActionMsg({ type: 'success', text: `✅ ${validRows.length} টি ডাটা সফলভাবে "db-d1-test" রো-তে যুক্ত হয়েছে!` });
+      showTopAlert(`✅ ${validRows.length} টি ডাটা সফলভাবে "db-d1-test" রো-তে সংরক্ষিত হয়েছে!`, 'success');
       fetchD1Data();
     } catch (err) {
-      setActionMsg({ type: 'error', text: `❌ ${err.message}` });
+      showTopAlert(`❌ ${err.message}`, 'danger');
     } finally {
       setSubmitting(false);
     }
   };
 
-  // Handle Edit Text
   const handleSaveEdit = async (id) => {
     if (!editText.trim()) return;
 
     setSubmitting(true);
-    setActionMsg(null);
     try {
       const res = await fetch('/api/db-test/d1', {
         method: 'PUT',
@@ -205,21 +188,20 @@ export default function DBD1AdminPage() {
       setEditingId(null);
       setEditText('');
       try { localStorage.removeItem('topmcqbd_dbd1_test_cache'); } catch (e) {}
-      setActionMsg({ type: 'success', text: '✅ টেক্সট সফলভাবে আপডেট করা হয়েছে!' });
+      showTopAlert('✅ টেক্সট সফলভাবে আপডেট করা হয়েছে!', 'success');
       fetchD1Data();
     } catch (err) {
-      setActionMsg({ type: 'error', text: `❌ ${err.message}` });
+      showTopAlert(`❌ ${err.message}`, 'danger');
     } finally {
       setSubmitting(false);
     }
   };
 
-  // Handle Delete Text
   const handleDeleteText = async (id) => {
-    if (!window.confirm('আপনি কি নিশ্চিত এই টেক্সটটি মুছে ফেলতে চান?')) return;
+    const confirmed = await showTopAlert('আপনি কি নিশ্চিত এই টেক্সটটি মুছে ফেলতে চান?', 'warning', true);
+    if (!confirmed) return;
 
     setSubmitting(true);
-    setActionMsg(null);
     try {
       const res = await fetch(`/api/db-test/d1?id=${encodeURIComponent(id)}`, {
         method: 'DELETE',
@@ -231,10 +213,10 @@ export default function DBD1AdminPage() {
       }
 
       try { localStorage.removeItem('topmcqbd_dbd1_test_cache'); } catch (e) {}
-      setActionMsg({ type: 'success', text: '🗑️ টেক্সট সফলভাবে মুছে ফেলা হয়েছে!' });
+      showTopAlert('🗑️ টেক্সট সফলভাবে মুছে ফেলা হয়েছে!', 'success');
       fetchD1Data();
     } catch (err) {
-      setActionMsg({ type: 'error', text: `❌ ${err.message}` });
+      showTopAlert(`❌ ${err.message}`, 'danger');
     } finally {
       setSubmitting(false);
     }
@@ -260,7 +242,6 @@ export default function DBD1AdminPage() {
     <DbAuthGuard activeRoute="/db-connection/dbd1-admin">
       <main className="db-page-container">
         <div className="db-content-card">
-          {/* Header */}
           <div className="db-header">
             <div className="db-badge">
               D1 Admin Diagnostic & Manager
@@ -300,7 +281,7 @@ export default function DBD1AdminPage() {
                   </>
                 ) : (
                   <>
-                    <span>🔄</span>
+                    <i className="fa-solid fa-arrows-rotate" />
                     পুনরায় টেস্ট করুন
                   </>
                 )}
@@ -319,14 +300,6 @@ export default function DBD1AdminPage() {
               <small className="alert-hint">
                 * নিশ্চিত করুন যে Cloudflare D1 ডাটাবেস বাইন্ডিং সঠিকভাবে কনফিগার করা আছে।
               </small>
-            </div>
-          )}
-
-          {/* Action Message Alert */}
-          {actionMsg && (
-            <div className={`action-feedback ${actionMsg.type === 'success' ? 'msg-success' : 'msg-error'}`}>
-              <i className={`fa-solid ${actionMsg.type === 'success' ? 'fa-circle-check' : 'fa-circle-xmark'}`} style={{ marginRight: '8px' }} />
-              {actionMsg.text}
             </div>
           )}
 
@@ -349,8 +322,7 @@ export default function DBD1AdminPage() {
               </div>
 
               <h3 className="card-db-name">
-                <i className="fa-solid fa-folder" style={{ marginRight: '8px', color: '#0284c7' }} />
-                {statusData?.databaseName || 'topmcqbd-db'}
+                📁 {statusData?.databaseName || 'topmcqbd-db'}
               </h3>
 
               <div className="meta-list">
@@ -641,6 +613,9 @@ export default function DBD1AdminPage() {
             font-weight: 700;
             letter-spacing: 1.5px;
             text-transform: uppercase;
+            color: #2563eb;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
             padding: 5px 14px;
             border-radius: 20px;
             margin-bottom: 12px;
@@ -729,7 +704,7 @@ export default function DBD1AdminPage() {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            background: #0080c3;
+            background: #059669;
             color: #ffffff;
             border: none;
             padding: 8px 16px;
@@ -737,12 +712,12 @@ export default function DBD1AdminPage() {
             font-size: 13px;
             font-weight: 700;
             cursor: pointer;
-            box-shadow: 0 2px 8px rgba(0, 128, 195, 0.25);
+            box-shadow: 0 2px 8px rgba(5, 150, 105, 0.25);
             transition: all 0.2s ease;
           }
 
           .recheck-btn:hover:not(:disabled) {
-            background: #006da6;
+            background: #047857;
             transform: translateY(-1px);
           }
 
@@ -1116,6 +1091,7 @@ export default function DBD1AdminPage() {
           }
 
           .btn-save {
+            background: #008fb0;
             color: #fff;
             border: none;
             padding: 8px 14px;
@@ -1123,6 +1099,10 @@ export default function DBD1AdminPage() {
             font-size: 12px;
             font-weight: 700;
             cursor: pointer;
+            transition: background-color 0.2s;
+          }
+          .btn-save:hover:not(:disabled) {
+            background: #007a99;
           }
 
           .btn-cancel {
@@ -1133,10 +1113,14 @@ export default function DBD1AdminPage() {
             border-radius: 6px;
             font-size: 12px;
             cursor: pointer;
+            transition: background-color 0.2s;
+          }
+          .btn-cancel:hover {
+            background: #475569;
           }
 
           .btn-add-main {
-            background: #0080c3;
+            background: #059669;
             color: #ffffff;
             border: none;
             padding: 12px 26px;
@@ -1147,11 +1131,11 @@ export default function DBD1AdminPage() {
             transition: all 0.2s ease;
             display: inline-flex;
             align-items: center;
-            box-shadow: 0 2px 8px rgba(0, 128, 195, 0.25);
+            box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3);
           }
 
           .btn-add-main:hover {
-            background: #006da6;
+            background: #047857;
             transform: translateY(-1px);
           }
 
@@ -1272,7 +1256,7 @@ export default function DBD1AdminPage() {
           }
 
           .btn-save-all-rows {
-            background: #0080c3;
+            background: #059669;
             color: #ffffff;
             border: none;
             padding: 9px 20px;
@@ -1283,10 +1267,11 @@ export default function DBD1AdminPage() {
             transition: all 0.2s;
             display: inline-flex;
             align-items: center;
+            box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3);
           }
 
           .btn-save-all-rows:hover:not(:disabled) {
-            background: #006da6;
+            background: #047857;
             transform: translateY(-1px);
           }
 

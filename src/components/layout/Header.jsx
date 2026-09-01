@@ -64,29 +64,23 @@ export default function Header({ headerData: initialHeader }) {
       setHeaderData(initialHeader);
     }
 
-    const loadLatestConfig = () => {
-      fetch('/api/layout-config')
-        .then(res => res.json())
-        .then(data => {
-          if (data?.header) {
-            setHeaderData(data.header);
-          }
-        })
-        .catch(() => {});
-    };
-
-    loadLatestConfig();
-
     const handleUpdate = (e) => {
       if (e && e.detail && e.detail.header) {
         setHeaderData(e.detail.header);
       } else {
-        loadLatestConfig();
+        fetch('/api/layout-config')
+          .then(res => res.json())
+          .then(data => {
+            if (data?.header) {
+              setHeaderData(data.header);
+            }
+          })
+          .catch(() => {});
       }
     };
     window.addEventListener('layout-updated', handleUpdate);
     return () => window.removeEventListener('layout-updated', handleUpdate);
-  }, [initialHeader, pathname]);
+  }, [initialHeader]);
 
   // Check login state
   useEffect(() => {

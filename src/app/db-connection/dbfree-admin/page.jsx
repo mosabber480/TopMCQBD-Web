@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import DbNavBox from '@/components/common/DbNavBox';
 import DbAuthGuard from '@/components/common/DbAuthGuard';
+import { showTopAlert } from '@/components/layout/TopAlert';
 
 const CACHE_KEY = 'topmcqbd_dbfree_admin_cache';
 
@@ -25,7 +26,6 @@ export default function DBFreeAdminPage() {
   const [submitting, setSubmitting] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState('');
-  const [actionMsg, setActionMsg] = useState(null);
 
   const getApiUrl = useCallback(() => {
     if (typeof window !== 'undefined') {
@@ -143,7 +143,6 @@ export default function DBFreeAdminPage() {
   const openAddDataForm = () => {
     setIsAddingData(true);
     setNewDataRows([{ text: '' }]);
-    setActionMsg(null);
   };
 
   const addNewDataRow = () => {
@@ -169,12 +168,11 @@ export default function DBFreeAdminPage() {
   const saveAllNewData = async () => {
     const validRows = newDataRows.filter((r) => r.text && r.text.trim());
     if (validRows.length === 0) {
-      setActionMsg({ type: 'error', text: 'কমপক্ষে একটি বক্সে ডাটা বা টেক্সট লিখুন!' });
+      showTopAlert('কমপক্ষে একটি বক্সে ডাটা বা টেক্সট লিখুন!', 'warning');
       return;
     }
 
     setSubmitting(true);
-    setActionMsg(null);
     try {
       const baseUrl = getApiUrl();
       for (const row of validRows) {
@@ -192,10 +190,10 @@ export default function DBFreeAdminPage() {
       setIsAddingData(false);
       setNewDataRows([{ text: '' }]);
       try { localStorage.removeItem('topmcqbd_dbfree_test_cache'); } catch (e) {}
-      setActionMsg({ type: 'success', text: `✅ ${validRows.length} টি ডাটা সফলভাবে "db-free-test" কালেকশনে যুক্ত হয়েছে!` });
+      showTopAlert(`✅ ${validRows.length} টি ডাটা সফলভাবে "db-free-test" কালেকশনে সংরক্ষিত হয়েছে!`, 'success');
       fetchFreeData();
     } catch (err) {
-      setActionMsg({ type: 'error', text: `❌ ${err.message}` });
+      showTopAlert(`❌ ${err.message}`, 'danger');
     } finally {
       setSubmitting(false);
     }
@@ -206,7 +204,6 @@ export default function DBFreeAdminPage() {
     if (!editText.trim()) return;
 
     setSubmitting(true);
-    setActionMsg(null);
     try {
       const baseUrl = getApiUrl();
       const res = await fetch(`${baseUrl}/api/db-test/free`, {
@@ -223,10 +220,10 @@ export default function DBFreeAdminPage() {
       setEditingId(null);
       setEditText('');
       try { localStorage.removeItem('topmcqbd_dbfree_test_cache'); } catch (e) {}
-      setActionMsg({ type: 'success', text: '✅ টেক্সট সফলভাবে আপডেট করা হয়েছে!' });
+      showTopAlert('✅ টেক্সট সফলভাবে আপডেট করা হয়েছে!', 'success');
       fetchFreeData();
     } catch (err) {
-      setActionMsg({ type: 'error', text: `❌ ${err.message}` });
+      showTopAlert(`❌ ${err.message}`, 'danger');
     } finally {
       setSubmitting(false);
     }
@@ -234,10 +231,10 @@ export default function DBFreeAdminPage() {
 
   // Handle Delete Text
   const handleDeleteText = async (id) => {
-    if (!window.confirm('আপনি কি নিশ্চিত এই টেক্সটটি মুছে ফেলতে চান?')) return;
+    const confirmed = await showTopAlert('আপনি কি নিশ্চিত এই টেক্সটটি মুছে ফেলতে চান?', 'warning', true);
+    if (!confirmed) return;
 
     setSubmitting(true);
-    setActionMsg(null);
     try {
       const baseUrl = getApiUrl();
       const res = await fetch(`${baseUrl}/api/db-test/free?id=${id}`, {
@@ -250,10 +247,11 @@ export default function DBFreeAdminPage() {
         throw new Error(data.error || 'মুছে ফেলা সম্ভব হয়নি।');
       }
 
-      setActionMsg({ type: 'success', text: '🗑️ টেক্সট সফলভাবে মুছে ফেলা হয়েছে!' });
+      try { localStorage.removeItem('topmcqbd_dbfree_test_cache'); } catch (e) {}
+      showTopAlert('🗑️ টেক্সট সফলভাবে মুছে ফেলা হয়েছে!', 'success');
       fetchFreeData();
     } catch (err) {
-      setActionMsg({ type: 'error', text: `❌ ${err.message}` });
+      showTopAlert(`❌ ${err.message}`, 'danger');
     } finally {
       setSubmitting(false);
     }
@@ -323,7 +321,7 @@ export default function DBFreeAdminPage() {
                 </>
               ) : (
                 <>
-                  <span>🔄</span>
+                  <i className="fa-solid fa-arrows-rotate" />
                   পুনরায় টেস্ট করুন
                 </>
               )}
@@ -342,14 +340,6 @@ export default function DBFreeAdminPage() {
             <small className="alert-hint">
               * নিশ্চিত করুন যে সার্ভার সচল আছে এবং <code>.env</code> ফাইলে সঠিক <code>MONGODB_URI_FREE</code> দেওয়া আছে।
             </small>
-          </div>
-        )}
-
-        {/* Action Message Alert */}
-        {actionMsg && (
-          <div className={`action-feedback ${actionMsg.type === 'success' ? 'msg-success' : 'msg-error'}`}>
-            <i className={`fa-solid ${actionMsg.type === 'success' ? 'fa-circle-check' : 'fa-circle-xmark'}`} style={{ marginRight: '8px' }} />
-            {actionMsg.text}
           </div>
         )}
 
@@ -372,8 +362,7 @@ export default function DBFreeAdminPage() {
             </div>
 
             <h3 className="card-db-name">
-              <i className="fa-solid fa-folder" style={{ marginRight: '8px', color: '#0284c7' }} />
-              {statusData?.cluster || 'TopMCQBD_DB_Free'}
+              📁 {statusData?.cluster || 'TopMCQBD_DB_Free'}
             </h3>
 
             <div className="meta-list">
@@ -741,7 +730,7 @@ export default function DBFreeAdminPage() {
           line-height: 1.5;
         }
         .btn-add-main {
-          background: #0080c3;
+          background: #059669;
           color: #ffffff;
           border: none;
           padding: 12px 26px;
@@ -752,10 +741,10 @@ export default function DBFreeAdminPage() {
           transition: all 0.2s ease;
           display: inline-flex;
           align-items: center;
-          box-shadow: 0 2px 8px rgba(0, 128, 195, 0.25);
+          box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3);
         }
         .btn-add-main:hover {
-          background: #006da6;
+          background: #047857;
           transform: translateY(-1px);
         }
         .add-rows-container {
@@ -861,7 +850,7 @@ export default function DBFreeAdminPage() {
           gap: 8px;
         }
         .btn-save-all-rows {
-          background: #0080c3;
+          background: #059669;
           color: #ffffff;
           border: none;
           padding: 9px 20px;
@@ -872,9 +861,10 @@ export default function DBFreeAdminPage() {
           transition: all 0.2s;
           display: inline-flex;
           align-items: center;
+          box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3);
         }
         .btn-save-all-rows:hover:not(:disabled) {
-          background: #006da6;
+          background: #047857;
           transform: translateY(-1px);
         }
         .btn-cancel-all-rows {
@@ -1052,7 +1042,7 @@ export default function DBFreeAdminPage() {
           flex: 1;
           min-width: 200px;
           background: #ffffff;
-          border: 1px solid #0080c3;
+          border: 1px solid #008fb0;
           border-radius: 6px;
           padding: 8px 12px;
           color: #1e293b;
@@ -1063,7 +1053,7 @@ export default function DBFreeAdminPage() {
           gap: 6px;
         }
         .btn-save {
-          background: #0080c3;
+          background: #008fb0;
           color: #fff;
           border: none;
           padding: 8px 14px;
@@ -1071,6 +1061,10 @@ export default function DBFreeAdminPage() {
           font-size: 12px;
           font-weight: 700;
           cursor: pointer;
+          transition: background-color 0.2s;
+        }
+        .btn-save:hover:not(:disabled) {
+          background: #007a99;
         }
         .btn-cancel {
           background: #64748b;
@@ -1080,6 +1074,10 @@ export default function DBFreeAdminPage() {
           border-radius: 6px;
           font-size: 12px;
           cursor: pointer;
+          transition: background-color 0.2s;
+        }
+        .btn-cancel:hover {
+          background: #475569;
         }
         .bottom-nav-bar {
           display: flex;

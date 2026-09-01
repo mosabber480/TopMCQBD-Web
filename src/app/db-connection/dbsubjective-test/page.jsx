@@ -534,9 +534,11 @@ export default function DBSubjectiveTestPage() {
             font-weight: 700;
             letter-spacing: 1.5px;
             text-transform: uppercase;
+            color: #2563eb;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
             padding: 5px 14px;
             border-radius: 20px;
-            border: 1px solid;
             margin-bottom: 12px;
           }
           .db-title {
@@ -575,6 +577,7 @@ export default function DBSubjectiveTestPage() {
             display: inline-flex;
             align-items: center;
             gap: 8px;
+            background: #059669;
             color: #ffffff;
             border: none;
             padding: 8px 16px;
@@ -582,11 +585,11 @@ export default function DBSubjectiveTestPage() {
             font-size: 13px;
             font-weight: 700;
             cursor: pointer;
-            box-shadow: 0 2px 8px rgba(0,0,0, 0.2);
+            box-shadow: 0 2px 8px rgba(5, 150, 105, 0.25);
             transition: all 0.2s ease;
           }
           .recheck-btn:hover:not(:disabled) {
-            filter: brightness(1.1);
+            background: #047857;
             transform: translateY(-1px);
           }
           .btn-spinner {
@@ -636,12 +639,14 @@ export default function DBSubjectiveTestPage() {
             gap: 6px;
           }
           .col-tag {
+            color: #0080c3;
+            background: #e0f2fe;
+            border: 1px solid #bae6fd;
             font-size: 11.5px;
             font-weight: 600;
             padding: 2px 8px;
             border-radius: 6px;
             font-family: monospace;
-            border: 1px solid;
           }
           @keyframes spin {
             0% { transform: rotate(0deg); }

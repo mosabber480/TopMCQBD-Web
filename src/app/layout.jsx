@@ -1,5 +1,6 @@
 import './globals.css';
 import AppLayoutWrapper from '@/components/layout/AppLayoutWrapper';
+import layoutConfigData from '@/data/layout-config.json';
 
 export const metadata = {
   title: 'TopMCQBD - সেরা অনলাইন কুইজ ও প্রস্তুতি প্ল্যাটফর্ম',
@@ -23,7 +24,7 @@ export default function RootLayout({ children }) {
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Bengali:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
       </head>
       <body>
-        <AppLayoutWrapper>
+        <AppLayoutWrapper initialLayoutData={layoutConfigData}>
           {children}
         </AppLayoutWrapper>
       </body>

@@ -271,7 +271,7 @@ export default function DBConnectionCheck() {
                 </>
               ) : (
                 <>
-                  <span>🔄</span>
+                  <i className="fa-solid fa-arrows-rotate" />
                   পুনরায় টেস্ট করুন
                 </>
               )}
@@ -723,7 +723,7 @@ export default function DBConnectionCheck() {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            background: #4f46e5;
+            background: #059669;
             color: #ffffff;
             border: none;
             padding: 8px 16px;
@@ -731,12 +731,12 @@ export default function DBConnectionCheck() {
             font-size: 13px;
             font-weight: 700;
             cursor: pointer;
-            box-shadow: 0 2px 8px rgba(79, 70, 229, 0.25);
+            box-shadow: 0 2px 8px rgba(5, 150, 105, 0.25);
             transition: all 0.2s ease;
           }
 
           .recheck-btn:hover:not(:disabled) {
-            background: #4338ca;
+            background: #047857;
             transform: translateY(-1px);
           }
 

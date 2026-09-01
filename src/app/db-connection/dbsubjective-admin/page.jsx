@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import DbNavBox from '@/components/common/DbNavBox';
 import DbAuthGuard from '@/components/common/DbAuthGuard';
+import { showTopAlert } from '@/components/layout/TopAlert';
 
 const CACHE_KEY = 'topmcqbd_dbsubjective_admin_cache';
 
@@ -23,7 +24,6 @@ export default function DBSubjectiveAdminPage() {
   const [submitting, setSubmitting] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState('');
-  const [actionMsg, setActionMsg] = useState(null);
 
   const getApiUrl = useCallback(() => {
     if (typeof window !== 'undefined') {
@@ -137,7 +137,6 @@ export default function DBSubjectiveAdminPage() {
   const openAddDataForm = () => {
     setIsAddingData(true);
     setNewDataRows([{ text: '' }]);
-    setActionMsg(null);
   };
 
   const addNewDataRow = () => {
@@ -163,12 +162,11 @@ export default function DBSubjectiveAdminPage() {
   const saveAllNewData = async () => {
     const validRows = newDataRows.filter((r) => r.text && r.text.trim());
     if (validRows.length === 0) {
-      setActionMsg({ type: 'error', text: 'কমপক্ষে একটি বক্সে ডাটা বা টেক্সট লিখুন!' });
+      showTopAlert('কমপক্ষে একটি বক্সে ডাটা বা টেক্সট লিখুন!', 'warning');
       return;
     }
 
     setSubmitting(true);
-    setActionMsg(null);
     try {
       const baseUrl = getApiUrl();
       for (const row of validRows) {
@@ -186,10 +184,10 @@ export default function DBSubjectiveAdminPage() {
       setIsAddingData(false);
       setNewDataRows([{ text: '' }]);
       try { localStorage.removeItem('topmcqbd_dbsubjective_test_cache'); } catch (e) {}
-      setActionMsg({ type: 'success', text: `✅ ${validRows.length} টি ডাটা সফলভাবে "db-subjective-test" কালেকশনে যুক্ত হয়েছে!` });
+      showTopAlert(`✅ ${validRows.length} টি ডাটা সফলভাবে "db-subjective-test" কালেকশনে সংরক্ষিত হয়েছে!`, 'success');
       fetchSubjectiveData();
     } catch (err) {
-      setActionMsg({ type: 'error', text: `❌ ${err.message}` });
+      showTopAlert(`❌ ${err.message}`, 'danger');
     } finally {
       setSubmitting(false);
     }
@@ -199,7 +197,6 @@ export default function DBSubjectiveAdminPage() {
     if (!editText.trim()) return;
 
     setSubmitting(true);
-    setActionMsg(null);
     try {
       const baseUrl = getApiUrl();
       const res = await fetch(`${baseUrl}/api/db-test/subjective`, {
@@ -216,20 +213,20 @@ export default function DBSubjectiveAdminPage() {
       setEditingId(null);
       setEditText('');
       try { localStorage.removeItem('topmcqbd_dbsubjective_test_cache'); } catch (e) {}
-      setActionMsg({ type: 'success', text: '✅ টেক্সট সফলভাবে আপডেট করা হয়েছে!' });
+      showTopAlert('✅ টেক্সট সফলভাবে আপডেট করা হয়েছে!', 'success');
       fetchSubjectiveData();
     } catch (err) {
-      setActionMsg({ type: 'error', text: `❌ ${err.message}` });
+      showTopAlert(`❌ ${err.message}`, 'danger');
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleDeleteText = async (id) => {
-    if (!window.confirm('আপনি কি নিশ্চিত এই টেক্সটটি মুছে ফেলতে চান?')) return;
+    const confirmed = await showTopAlert('আপনি কি নিশ্চিত এই টেক্সটটি মুছে ফেলতে চান?', 'warning', true);
+    if (!confirmed) return;
 
     setSubmitting(true);
-    setActionMsg(null);
     try {
       const baseUrl = getApiUrl();
       const res = await fetch(`${baseUrl}/api/db-test/subjective?id=${id}`, {
@@ -243,10 +240,10 @@ export default function DBSubjectiveAdminPage() {
       }
 
       try { localStorage.removeItem('topmcqbd_dbsubjective_test_cache'); } catch (e) {}
-      setActionMsg({ type: 'success', text: '🗑️ টেক্সট সফলভাবে মুছে ফেলা হয়েছে!' });
+      showTopAlert('🗑️ টেক্সট সফলভাবে মুছে ফেলা হয়েছে!', 'success');
       fetchSubjectiveData();
     } catch (err) {
-      setActionMsg({ type: 'error', text: `❌ ${err.message}` });
+      showTopAlert(`❌ ${err.message}`, 'danger');
     } finally {
       setSubmitting(false);
     }
@@ -296,7 +293,7 @@ export default function DBSubjectiveAdminPage() {
                   </>
                 ) : (
                   <>
-                    <span>🔄</span>
+                    <i className="fa-solid fa-arrows-rotate" />
                     পুনরায় টেস্ট করুন
                   </>
                 )}
@@ -315,14 +312,6 @@ export default function DBSubjectiveAdminPage() {
               <small className="alert-hint">
                 * নিশ্চিত করুন যে সার্ভার সচল আছে এবং <code>.env</code> ফাইলে সঠিক <code>MONGODB_URI_SUBJECTIVE</code> দেওয়া আছে।
               </small>
-            </div>
-          )}
-
-          {/* Action Message Alert */}
-          {actionMsg && (
-            <div className={`action-feedback ${actionMsg.type === 'success' ? 'msg-success' : 'msg-error'}`}>
-              <i className={`fa-solid ${actionMsg.type === 'success' ? 'fa-circle-check' : 'fa-circle-xmark'}`} style={{ marginRight: '8px' }} />
-              {actionMsg.text}
             </div>
           )}
 
@@ -345,8 +334,7 @@ export default function DBSubjectiveAdminPage() {
               </div>
 
               <h3 className="card-db-name">
-                <i className="fa-solid fa-folder" style={{ marginRight: '8px', color: '#0284c7' }} />
-                {statusData?.cluster || 'TopMCQBD_DB_Subjective'}
+                📁 {statusData?.cluster || 'TopMCQBD_DB_Subjective'}
               </h3>
 
               <div className="meta-list">
@@ -441,7 +429,6 @@ export default function DBSubjectiveAdminPage() {
                               onClick={() => handleSaveEdit(item.id)}
                               disabled={submitting}
                               className="btn-save"
-                              style={{ background: '#9333ea' }}
                             >
                               <i className="fa-solid fa-check" style={{ marginRight: '4px' }} /> সেভ করুন
                             </button>
@@ -602,7 +589,7 @@ export default function DBSubjectiveAdminPage() {
             border: 1px solid #e2e8f0;
             padding: 3px 10px;
             border-radius: 6px;
-            color: #9333ea;
+            color: #0284c7;
             font-size: 12px;
             font-weight: 600;
           }
@@ -682,6 +669,7 @@ export default function DBSubjectiveAdminPage() {
             line-height: 1.5;
           }
           .btn-add-main {
+            background: #059669;
             color: #ffffff;
             border: none;
             padding: 12px 26px;
@@ -692,15 +680,15 @@ export default function DBSubjectiveAdminPage() {
             transition: all 0.2s ease;
             display: inline-flex;
             align-items: center;
-            box-shadow: 0 2px 8px rgba(147, 51, 234, 0.25);
+            box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3);
           }
           .btn-add-main:hover {
-            filter: brightness(1.1);
+            background: #047857;
             transform: translateY(-1px);
           }
           .add-rows-container {
             background: #ffffff;
-            border: 1px solid #e9d5ff;
+            border: 1px solid #bfdbfe;
             border-radius: 12px;
             padding: 20px;
             margin-bottom: 24px;
@@ -712,6 +700,7 @@ export default function DBSubjectiveAdminPage() {
           .add-rows-title {
             font-size: 14px;
             font-weight: 700;
+            color: #2563eb;
             display: flex;
             align-items: center;
           }
@@ -731,6 +720,8 @@ export default function DBSubjectiveAdminPage() {
             padding: 8px 12px;
           }
           .row-num-badge {
+            background: #eff6ff;
+            color: #2563eb;
             font-size: 12px;
             font-weight: 700;
             padding: 4px 8px;
@@ -748,7 +739,7 @@ export default function DBSubjectiveAdminPage() {
           }
           .add-row-input:focus {
             outline: none;
-            border-color: #9333ea;
+            border-color: #0284c7;
           }
           .btn-row-delete {
             background: #fee2e2;
@@ -782,6 +773,7 @@ export default function DBSubjectiveAdminPage() {
             gap: 8px;
           }
           .btn-save-all-rows {
+            background: #059669;
             color: #ffffff;
             border: none;
             padding: 8px 18px;
@@ -789,6 +781,12 @@ export default function DBSubjectiveAdminPage() {
             font-size: 13px;
             font-weight: 700;
             cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3);
+          }
+          .btn-save-all-rows:hover:not(:disabled) {
+            background: #047857;
+            transform: translateY(-1px);
           }
           .btn-cancel-all-rows {
             background: #f1f5f9;
@@ -850,56 +848,81 @@ export default function DBSubjectiveAdminPage() {
           }
           .item-actions {
             display: flex;
-            gap: 6px;
+            gap: 8px;
           }
           .action-btn {
             border: none;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 11.5px;
-            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
             cursor: pointer;
+            font-weight: 700;
+            transition: all 0.2s;
           }
           .edit-btn {
             background: #eff6ff;
-            color: #2563eb;
+            color: #0284c7;
+            border: 1px solid #bae6fd;
+          }
+          .edit-btn:hover {
+            background: #0284c7;
+            color: #fff;
           }
           .del-btn {
-            background: #fef2f2;
+            background: #fee2e2;
             color: #dc2626;
+            border: 1px solid #fca5a5;
+          }
+          .del-btn:hover {
+            background: #dc2626;
+            color: #fff;
           }
           .edit-box-inline {
             display: flex;
-            flex: 1;
+            width: 100%;
             gap: 8px;
+            flex-wrap: wrap;
           }
           .edit-input {
             flex: 1;
+            min-width: 200px;
             background: #ffffff;
-            border: 1px solid #9333ea;
-            padding: 6px 10px;
-            border-radius: 5px;
+            border: 1px solid #008fb0;
+            border-radius: 6px;
+            padding: 8px 12px;
+            color: #1e293b;
+            font-size: 13px;
           }
           .edit-btn-group {
             display: flex;
-            gap: 4px;
+            gap: 6px;
           }
           .btn-save {
+            background: #008fb0;
             color: #ffffff;
             border: none;
-            padding: 6px 12px;
-            border-radius: 5px;
+            padding: 8px 14px;
+            border-radius: 6px;
             font-size: 12px;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
+            transition: background-color 0.2s;
+          }
+          .btn-save:hover:not(:disabled) {
+            background: #007a99;
           }
           .btn-cancel {
-            background: #e2e8f0;
+            background: #64748b;
+            color: #ffffff;
             border: none;
-            padding: 6px 10px;
-            border-radius: 5px;
+            padding: 8px 14px;
+            border-radius: 6px;
             font-size: 12px;
             cursor: pointer;
+            transition: background-color 0.2s;
+          }
+          .btn-cancel:hover {
+            background: #475569;
           }
           .db-page-container {
             min-height: 100vh;
@@ -930,9 +953,11 @@ export default function DBSubjectiveAdminPage() {
             font-weight: 700;
             letter-spacing: 1.5px;
             text-transform: uppercase;
+            color: #2563eb;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
             padding: 5px 14px;
             border-radius: 20px;
-            border: 1px solid;
             margin-bottom: 12px;
           }
           .db-title {
@@ -989,6 +1014,7 @@ export default function DBSubjectiveAdminPage() {
             display: inline-flex;
             align-items: center;
             gap: 8px;
+            background: #059669;
             color: #ffffff;
             border: none;
             padding: 8px 16px;
@@ -996,11 +1022,11 @@ export default function DBSubjectiveAdminPage() {
             font-size: 13px;
             font-weight: 700;
             cursor: pointer;
-            box-shadow: 0 2px 8px rgba(0,0,0, 0.2);
+            box-shadow: 0 2px 8px rgba(5, 150, 105, 0.25);
             transition: all 0.2s ease;
           }
           .recheck-btn:hover:not(:disabled) {
-            filter: brightness(1.1);
+            background: #047857;
             transform: translateY(-1px);
           }
           .btn-spinner {
@@ -1056,6 +1082,7 @@ export default function DBSubjectiveAdminPage() {
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            color: #2563eb;
           }
           .status-pill {
             display: inline-flex;
@@ -1127,12 +1154,14 @@ export default function DBSubjectiveAdminPage() {
             gap: 6px;
           }
           .col-tag {
+            color: #0080c3;
+            background: #e0f2fe;
+            border: 1px solid #bae6fd;
             font-size: 11.5px;
             font-weight: 600;
             padding: 2px 8px;
             border-radius: 6px;
             font-family: monospace;
-            border: 1px solid;
           }
           .bottom-nav-bar {
             display: flex;

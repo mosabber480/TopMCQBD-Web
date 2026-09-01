@@ -19,28 +19,22 @@ export default function AnnouncementBar({ announcement: initialAnnouncement }) {
   useEffect(() => {
     if (initialAnnouncement) setAnnouncement(initialAnnouncement);
 
-    const loadLatestConfig = () => {
-      fetch('/api/layout-config')
-        .then(res => res.json())
-        .then(data => {
-          if (data?.announcement) setAnnouncement(data.announcement);
-        })
-        .catch(() => {});
-    };
-
-    loadLatestConfig();
-
     const handleUpdate = (e) => {
       if (e && e.detail && e.detail.announcement) {
         setAnnouncement(e.detail.announcement);
       } else {
-        loadLatestConfig();
+        fetch('/api/layout-config')
+          .then(res => res.json())
+          .then(data => {
+            if (data?.announcement) setAnnouncement(data.announcement);
+          })
+          .catch(() => {});
       }
     };
 
     window.addEventListener('layout-updated', handleUpdate);
     return () => window.removeEventListener('layout-updated', handleUpdate);
-  }, [initialAnnouncement, pathname]);
+  }, [initialAnnouncement]);
 
   // Hide Announcement Bar on all Admin and Diagnostic routes
   if (pathname && (

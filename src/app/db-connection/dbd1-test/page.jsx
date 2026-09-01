@@ -345,6 +345,9 @@ export default function DBD1TestPage() {
             font-weight: 700;
             letter-spacing: 1.5px;
             text-transform: uppercase;
+            color: #2563eb;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
             padding: 5px 14px;
             border-radius: 20px;
             margin-bottom: 12px;
@@ -503,6 +506,7 @@ export default function DBD1TestPage() {
             display: inline-flex;
             align-items: center;
             gap: 8px;
+            background: #059669;
             color: #ffffff;
             border: none;
             padding: 8px 16px;
@@ -510,12 +514,12 @@ export default function DBD1TestPage() {
             font-size: 13px;
             font-weight: 700;
             cursor: pointer;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 2px 8px rgba(5, 150, 105, 0.25);
             transition: all 0.2s ease;
           }
 
           .recheck-btn:hover:not(:disabled) {
-            filter: brightness(1.1);
+            background: #047857;
             transform: translateY(-1px);
           }
 
