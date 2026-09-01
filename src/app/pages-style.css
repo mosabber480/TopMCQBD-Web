@@ -1531,15 +1531,86 @@ input:disabled + .quiz-slider { cursor: not-allowed; background-color: #cbd5e1; 
   grid-template-columns: repeat(4, 1fr);
 }
 
-@media (max-width: 900px) {
-  .quiz-options-container.layout-4 {
-    grid-template-columns: repeat(2, 1fr);
-  }
+/* 2 Questions in 1 Line Layout (Side-by-side Grid: 1, 2, 3, 4...) */
+.quiz-questions-wrapper.layout-2q {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  column-gap: 0;
+  row-gap: 0;
 }
-@media (max-width: 640px) {
-  .quiz-options-container.layout-2,
-  .quiz-options-container.layout-4 {
-    grid-template-columns: 1fr !important;
+.quiz-questions-wrapper.layout-2q .quiz-question-block {
+  background: transparent;
+  border: none;
+  border-bottom: 1px dashed #cbd5e1;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 0 0 20px 0;
+  margin-bottom: 20px;
+  box-sizing: border-box;
+}
+.quiz-questions-wrapper.layout-2q .quiz-question-block:nth-child(odd) {
+  padding-right: 25px;
+  border-right: 1px dashed #cbd5e1;
+}
+.quiz-questions-wrapper.layout-2q .quiz-question-block:nth-child(even) {
+  padding-left: 25px;
+}
+.quiz-questions-wrapper.layout-2q .quiz-options-container {
+  grid-template-columns: 1fr !important;
+}
+
+/* 2 Questions Column-wise Layout (Left: 1..20, Right: 21..40) */
+.quiz-questions-col-wrapper {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0;
+  align-items: start;
+}
+.quiz-questions-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.quiz-questions-column:first-child {
+  padding-right: 25px;
+  border-right: 1px dashed #cbd5e1;
+}
+.quiz-questions-column:last-child {
+  padding-left: 25px;
+}
+.quiz-questions-col-wrapper .quiz-question-block {
+  background: transparent;
+  border: none;
+  border-bottom: 1px dashed #cbd5e1;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 0 0 20px 0;
+  margin-bottom: 20px;
+  box-sizing: border-box;
+}
+.quiz-questions-col-wrapper .quiz-options-container {
+  grid-template-columns: 1fr !important;
+}
+
+@media (max-width: 900px) {
+  .quiz-questions-wrapper.layout-2q,
+  .quiz-questions-col-wrapper {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .quiz-questions-column:first-child {
+    border-right: none;
+    padding-right: 0;
+  }
+  .quiz-questions-column:last-child {
+    padding-left: 0;
+  }
+  .quiz-questions-wrapper.layout-2q .quiz-question-block:nth-child(odd) {
+    padding-right: 0;
+    border-right: none;
+  }
+  .quiz-questions-wrapper.layout-2q .quiz-question-block:nth-child(even) {
+    padding-left: 0;
   }
 }
 
@@ -1663,7 +1734,6 @@ input:disabled + .quiz-slider { cursor: not-allowed; background-color: #cbd5e1; 
 .quiz-option-btn:hover:not(.disabled) {
   border-color: #0284c7;
   background: #f0f9ff;
-  transform: translateX(4px);
 }
 .quiz-option-circle {
   display: inline-flex;
@@ -1880,7 +1950,48 @@ input:disabled + .quiz-slider { cursor: not-allowed; background-color: #cbd5e1; 
     border-radius: 6px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   }
-  .quiz-option-btn { width: 100%; flex: 1 1 100%; }
+
+  /* Reset all questions to original clean single-column layout on mobile */
+  .quiz-questions-wrapper,
+  .quiz-questions-col-wrapper {
+    display: block !important;
+    width: 100% !important;
+  }
+  .quiz-questions-column {
+    display: block !important;
+    width: 100% !important;
+    padding: 0 !important;
+    border: none !important;
+  }
+  .quiz-questions-column:first-child {
+    border-right: none !important;
+    padding-right: 0 !important;
+  }
+  .quiz-questions-column:last-child {
+    padding-left: 0 !important;
+  }
+  .quiz-question-block {
+    margin-bottom: 25px !important;
+    padding-bottom: 20px !important;
+    border-bottom: 1px dashed #ccc !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+  .quiz-options-container,
+  .quiz-options-container.layout-1,
+  .quiz-options-container.layout-2,
+  .quiz-options-container.layout-4 {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+  .quiz-option-btn {
+    width: 100% !important;
+    flex: 1 1 100% !important;
+  }
 }
 
 /* ==========================================================================

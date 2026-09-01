@@ -441,6 +441,28 @@ function QuestionsComponent() {
                     </div>
                     <span>১ লাইনে ৪টি অপশন</span>
                   </button>
+
+                  <button
+                    type="button"
+                    className={`quiz-layout-menu-item ${optionLayout === '2q-row' ? 'active' : ''}`}
+                    onClick={() => { setOptionLayout('2q-row'); setShowLayoutMenu(false); }}
+                  >
+                    <div className="quiz-layout-radio-circle">
+                      {optionLayout === '2q-row' && <div className="quiz-layout-radio-inner"></div>}
+                    </div>
+                    <span>১ লাইনে ২টি প্রশ্ন (পাশাপাশি ক্রম)</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className={`quiz-layout-menu-item ${optionLayout === '2q-col' ? 'active' : ''}`}
+                    onClick={() => { setOptionLayout('2q-col'); setShowLayoutMenu(false); }}
+                  >
+                    <div className="quiz-layout-radio-circle">
+                      {optionLayout === '2q-col' && <div className="quiz-layout-radio-inner"></div>}
+                    </div>
+                    <span>১ লাইনে ২টি প্রশ্ন (উপর-নিচ ক্রম)</span>
+                  </button>
                 </div>
               )}
             </div>
@@ -664,6 +686,313 @@ function QuestionsComponent() {
           <p style={{ textAlign: 'center', color: '#888', padding: '40px 0' }}>
             কোনো প্রশ্ন পাওয়া যায়নি।
           </p>
+        ) : optionLayout === '2q-col' ? (
+          <div className="quiz-questions-col-wrapper">
+            <div className="quiz-questions-column">
+              {displayQuestions
+                .slice(0, Math.ceil(displayQuestions.length / 2))
+                .map((q, idx) => {
+                  const chosen = answeredQuestions[idx];
+                  const isAnswered = chosen !== undefined;
+                  const shouldShow = isReadMode || isAnswered;
+                  const isAnswerVisible = shouldShow && showAnswer;
+                  const isExplanationVisible = shouldShow && showExplanation;
+
+                  return (
+                    <div key={q._id || idx} className="quiz-question-block">
+                      <div className="quiz-question-text">
+                        {idx + 1}. {q.q}
+                      </div>
+
+                      <div className="quiz-options-container layout-1">
+                        {(q.options || []).map((opt, optIndex) => {
+                          let btnClass = 'quiz-option-btn';
+
+                          if (isReadMode) {
+                            btnClass += ' disabled';
+                            if (optIndex === q.ans) {
+                              btnClass += showColor ? ' correct' : ' neutral-selected';
+                            }
+                          } else if (isAnswered) {
+                            btnClass += ' disabled';
+                            if (showColor) {
+                              if (optIndex === q.ans) {
+                                btnClass += ' correct';
+                              } else if (chosen === optIndex) {
+                                btnClass += ' incorrect';
+                              }
+                            } else {
+                              if (chosen === optIndex) {
+                                btnClass += ' neutral-selected';
+                              }
+                            }
+                          }
+
+                          return (
+                            <button
+                              key={optIndex}
+                              className={btnClass}
+                              disabled={isReadMode || isAnswered}
+                              onClick={() => handleAnswerClick(idx, optIndex)}
+                            >
+                              <div className="quiz-option-circle font-bn">
+                                {getBanglaLetter(optIndex)}
+                              </div>
+                              <div className="quiz-option-text">
+                                {opt}
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {isAnswerVisible && (
+                        <div className="quiz-answer-text" style={{ display: 'block' }}>
+                          <i className="fa-solid fa-circle-check" style={{ marginRight: '6px' }}></i>
+                          সঠিক উত্তর: {getBanglaLetter(q.ans)}. {q.options[q.ans]}
+                        </div>
+                      )}
+
+                      {isExplanationVisible && q.explanation && (
+                        <div className="quiz-explanation-text" style={{ display: 'block' }}>
+                          <strong>ব্যাখ্যা:</strong> {q.explanation}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+            </div>
+
+            <div className="quiz-questions-column">
+              {displayQuestions
+                .slice(Math.ceil(displayQuestions.length / 2))
+                .map((q, idx) => {
+                  const actualIdx = idx + Math.ceil(displayQuestions.length / 2);
+                  const chosen = answeredQuestions[actualIdx];
+                  const isAnswered = chosen !== undefined;
+                  const shouldShow = isReadMode || isAnswered;
+                  const isAnswerVisible = shouldShow && showAnswer;
+                  const isExplanationVisible = shouldShow && showExplanation;
+
+                  return (
+                    <div key={q._id || actualIdx} className="quiz-question-block">
+                      <div className="quiz-question-text">
+                        {actualIdx + 1}. {q.q}
+                      </div>
+
+                      <div className="quiz-options-container layout-1">
+                        {(q.options || []).map((opt, optIndex) => {
+                          let btnClass = 'quiz-option-btn';
+
+                          if (isReadMode) {
+                            btnClass += ' disabled';
+                            if (optIndex === q.ans) {
+                              btnClass += showColor ? ' correct' : ' neutral-selected';
+                            }
+                          } else if (isAnswered) {
+                            btnClass += ' disabled';
+                            if (showColor) {
+                              if (optIndex === q.ans) {
+                                btnClass += ' correct';
+                              } else if (chosen === optIndex) {
+                                btnClass += ' incorrect';
+                              }
+                            } else {
+                              if (chosen === optIndex) {
+                                btnClass += ' neutral-selected';
+                              }
+                            }
+                          }
+
+                          return (
+                            <button
+                              key={optIndex}
+                              className={btnClass}
+                              disabled={isReadMode || isAnswered}
+                              onClick={() => handleAnswerClick(actualIdx, optIndex)}
+                            >
+                              <div className="quiz-option-circle font-bn">
+                                {getBanglaLetter(optIndex)}
+                              </div>
+                              <div className="quiz-option-text">
+                                {opt}
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {isAnswerVisible && (
+                        <div className="quiz-answer-text" style={{ display: 'block' }}>
+                          <i className="fa-solid fa-circle-check" style={{ marginRight: '6px' }}></i>
+                          সঠিক উত্তর: {getBanglaLetter(q.ans)}. {q.options[q.ans]}
+                        </div>
+                      )}
+
+                      {isExplanationVisible && q.explanation && (
+                        <div className="quiz-explanation-text" style={{ display: 'block' }}>
+                          <strong>ব্যাখ্যা:</strong> {q.explanation}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+            </div>
+          </div>
+        ) : optionLayout === '2q-row' ? (
+          <div className="quiz-questions-col-wrapper">
+            <div className="quiz-questions-column">
+              {displayQuestions
+                .filter((_, idx) => idx % 2 === 0)
+                .map((q, i) => {
+                  const actualIdx = i * 2;
+                  const chosen = answeredQuestions[actualIdx];
+                  const isAnswered = chosen !== undefined;
+                  const shouldShow = isReadMode || isAnswered;
+                  const isAnswerVisible = shouldShow && showAnswer;
+                  const isExplanationVisible = shouldShow && showExplanation;
+
+                  return (
+                    <div key={q._id || actualIdx} className="quiz-question-block">
+                      <div className="quiz-question-text">
+                        {actualIdx + 1}. {q.q}
+                      </div>
+
+                      <div className="quiz-options-container layout-1">
+                        {(q.options || []).map((opt, optIndex) => {
+                          let btnClass = 'quiz-option-btn';
+
+                          if (isReadMode) {
+                            btnClass += ' disabled';
+                            if (optIndex === q.ans) {
+                              btnClass += showColor ? ' correct' : ' neutral-selected';
+                            }
+                          } else if (isAnswered) {
+                            btnClass += ' disabled';
+                            if (showColor) {
+                              if (optIndex === q.ans) {
+                                btnClass += ' correct';
+                              } else if (chosen === optIndex) {
+                                btnClass += ' incorrect';
+                              }
+                            } else {
+                              if (chosen === optIndex) {
+                                btnClass += ' neutral-selected';
+                              }
+                            }
+                          }
+
+                          return (
+                            <button
+                              key={optIndex}
+                              className={btnClass}
+                              disabled={isReadMode || isAnswered}
+                              onClick={() => handleAnswerClick(actualIdx, optIndex)}
+                            >
+                              <div className="quiz-option-circle font-bn">
+                                {getBanglaLetter(optIndex)}
+                              </div>
+                              <div className="quiz-option-text">
+                                {opt}
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {isAnswerVisible && (
+                        <div className="quiz-answer-text" style={{ display: 'block' }}>
+                          <i className="fa-solid fa-circle-check" style={{ marginRight: '6px' }}></i>
+                          সঠিক উত্তর: {getBanglaLetter(q.ans)}. {q.options[q.ans]}
+                        </div>
+                      )}
+
+                      {isExplanationVisible && q.explanation && (
+                        <div className="quiz-explanation-text" style={{ display: 'block' }}>
+                          <strong>ব্যাখ্যা:</strong> {q.explanation}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+            </div>
+
+            <div className="quiz-questions-column">
+              {displayQuestions
+                .filter((_, idx) => idx % 2 === 1)
+                .map((q, i) => {
+                  const actualIdx = i * 2 + 1;
+                  const chosen = answeredQuestions[actualIdx];
+                  const isAnswered = chosen !== undefined;
+                  const shouldShow = isReadMode || isAnswered;
+                  const isAnswerVisible = shouldShow && showAnswer;
+                  const isExplanationVisible = shouldShow && showExplanation;
+
+                  return (
+                    <div key={q._id || actualIdx} className="quiz-question-block">
+                      <div className="quiz-question-text">
+                        {actualIdx + 1}. {q.q}
+                      </div>
+
+                      <div className="quiz-options-container layout-1">
+                        {(q.options || []).map((opt, optIndex) => {
+                          let btnClass = 'quiz-option-btn';
+
+                          if (isReadMode) {
+                            btnClass += ' disabled';
+                            if (optIndex === q.ans) {
+                              btnClass += showColor ? ' correct' : ' neutral-selected';
+                            }
+                          } else if (isAnswered) {
+                            btnClass += ' disabled';
+                            if (showColor) {
+                              if (optIndex === q.ans) {
+                                btnClass += ' correct';
+                              } else if (chosen === optIndex) {
+                                btnClass += ' incorrect';
+                              }
+                            } else {
+                              if (chosen === optIndex) {
+                                btnClass += ' neutral-selected';
+                              }
+                            }
+                          }
+
+                          return (
+                            <button
+                              key={optIndex}
+                              className={btnClass}
+                              disabled={isReadMode || isAnswered}
+                              onClick={() => handleAnswerClick(actualIdx, optIndex)}
+                            >
+                              <div className="quiz-option-circle font-bn">
+                                {getBanglaLetter(optIndex)}
+                              </div>
+                              <div className="quiz-option-text">
+                                {opt}
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {isAnswerVisible && (
+                        <div className="quiz-answer-text" style={{ display: 'block' }}>
+                          <i className="fa-solid fa-circle-check" style={{ marginRight: '6px' }}></i>
+                          সঠিক উত্তর: {getBanglaLetter(q.ans)}. {q.options[q.ans]}
+                        </div>
+                      )}
+
+                      {isExplanationVisible && q.explanation && (
+                        <div className="quiz-explanation-text" style={{ display: 'block' }}>
+                          <strong>ব্যাখ্যা:</strong> {q.explanation}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+            </div>
+          </div>
         ) : (
           <div className="quiz-questions-wrapper">
             {displayQuestions.map((q, qIndex) => {
