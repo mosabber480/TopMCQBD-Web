@@ -260,7 +260,7 @@ export default function DBWrittenTestPage() {
                     borderRadius: '8px',
                     fontSize: '14px',
                     fontWeight: '700',
-                    boxShadow: '0 4px 14px rgba(225, 29, 72, 0.35)',
+                    boxShadow: '0 4px 14px rgba(99, 102, 241, 0.35)',
                     transition: 'all 0.2s ease',
                   }}
                 >
@@ -310,7 +310,7 @@ export default function DBWrittenTestPage() {
             border: 1px solid #e2e8f0;
             padding: 3px 10px;
             border-radius: 6px;
-            color: #e11d48;
+            color: #6366f1;
             font-size: 12px;
             font-weight: 600;
           }

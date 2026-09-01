@@ -604,7 +604,7 @@ export default function DBWrittenAdminPage() {
             border: 1px solid #e2e8f0;
             padding: 3px 10px;
             border-radius: 6px;
-            color: #e11d48;
+            color: #6366f1;
             font-size: 12px;
             font-weight: 600;
           }
@@ -694,7 +694,7 @@ export default function DBWrittenAdminPage() {
             transition: all 0.2s ease;
             display: inline-flex;
             align-items: center;
-            box-shadow: 0 2px 8px rgba(225, 29, 72, 0.25);
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.25);
           }
           .btn-add-main:hover {
             filter: brightness(1.1);
@@ -702,7 +702,7 @@ export default function DBWrittenAdminPage() {
           }
           .add-rows-container {
             background: #ffffff;
-            border: 1px solid #fecdd3;
+            border: 1px solid #c7d2fe;
             border-radius: 12px;
             padding: 20px;
             margin-bottom: 24px;
@@ -878,7 +878,7 @@ export default function DBWrittenAdminPage() {
           .edit-input {
             flex: 1;
             background: #ffffff;
-            border: 1px solid #e11d48;
+            border: 1px solid #6366f1;
             padding: 6px 10px;
             border-radius: 5px;
           }
