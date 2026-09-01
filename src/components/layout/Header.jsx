@@ -63,23 +63,6 @@ export default function Header({ headerData: initialHeader }) {
     if (initialHeader) {
       setHeaderData(initialHeader);
     }
-
-    const handleUpdate = (e) => {
-      if (e && e.detail && e.detail.header) {
-        setHeaderData(e.detail.header);
-      } else {
-        fetch('/api/layout-config')
-          .then(res => res.json())
-          .then(data => {
-            if (data?.header) {
-              setHeaderData(data.header);
-            }
-          })
-          .catch(() => {});
-      }
-    };
-    window.addEventListener('layout-updated', handleUpdate);
-    return () => window.removeEventListener('layout-updated', handleUpdate);
   }, [initialHeader]);
 
   // Check login state

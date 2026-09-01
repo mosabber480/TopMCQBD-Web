@@ -68,26 +68,11 @@ export default function Footer({ footerData: initialFooter, copyrightData: initi
 
   useEffect(() => {
     if (initialFooter) setFooterData(initialFooter);
+  }, [initialFooter]);
+
+  useEffect(() => {
     if (initialCopyright) setCopyrightData(initialCopyright);
-
-    const handleUpdate = (e) => {
-      if (e && e.detail) {
-        if (e.detail.footer) setFooterData(e.detail.footer);
-        if (e.detail.copyright) setCopyrightData(e.detail.copyright);
-      } else {
-        fetch('/api/layout-config')
-          .then(res => res.json())
-          .then(data => {
-            if (data?.footer) setFooterData(data.footer);
-            if (data?.copyright) setCopyrightData(data.copyright);
-          })
-          .catch(() => {});
-      }
-    };
-
-    window.addEventListener('layout-updated', handleUpdate);
-    return () => window.removeEventListener('layout-updated', handleUpdate);
-  }, [initialFooter, initialCopyright]);
+  }, [initialCopyright]);
 
   // Hide Main Website Footer on all Admin and Diagnostic routes
   if (pathname && (

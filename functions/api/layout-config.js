@@ -61,20 +61,14 @@ const DEFAULT_LAYOUT = {
   }
 };
 
-function jsonResponse(data, status = 200, cacheType = 'cdn') {
+function jsonResponse(data, status = 200, cacheType = 'none') {
   const headers = {
     'Content-Type': 'application/json; charset=utf-8',
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate'
   };
-
-  if (cacheType === 'cdn') {
-    headers['Cache-Control'] = 'public, max-age=60, s-maxage=300, stale-while-revalidate=86400';
-    headers['Cloudflare-CDN-Cache-Control'] = 'max-age=300';
-  } else {
-    headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, proxy-revalidate';
-  }
 
   return new Response(JSON.stringify(data), { status, headers });
 }
@@ -94,14 +88,14 @@ export async function onRequestGet(context) {
 
       if (row && row.data) {
         const parsed = typeof row.data === 'string' ? JSON.parse(row.data) : row.data;
-        return jsonResponse(parsed, 200, 'cdn');
+        return jsonResponse(parsed, 200, 'none');
       }
     }
   } catch (err) {
     console.error('D1 layout-config GET error:', err);
   }
 
-  return jsonResponse(DEFAULT_LAYOUT, 200, 'cdn');
+  return jsonResponse(DEFAULT_LAYOUT, 200, 'none');
 }
 
 export async function onRequestPost(context) {
