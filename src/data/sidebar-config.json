@@ -31,8 +31,8 @@
       "subMenus": []
     },
     {
-      "title": "প্রশ্ন ব্যাংক ও কুইজ",
-      "url": "/admin/quiz-dashboard",
+      "title": "প্রশ্ন ব্যাংক ও MCQ",
+      "url": "/admin/questions-dashboard",
       "icon": "fa-solid fa-file-circle-question",
       "subMenus": []
     },
@@ -85,8 +85,8 @@
       "action": "link"
     },
     {
-      "text": "কুইজ ম্যানেজমেন্ট",
-      "url": "/admin/quiz-dashboard",
+      "text": "প্রশ্ন ব্যাংক",
+      "url": "/admin/questions-dashboard",
       "icon": "fa-solid fa-file-circle-question",
       "color": "info",
       "targetBlank": false,

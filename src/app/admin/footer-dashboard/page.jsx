@@ -800,7 +800,7 @@ export default function AdminFooterDashboardPage() {
         input:focus, textarea:focus { border-color: var(--primary); }
 
         .row { display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: nowrap; align-items: center; }
-        .card-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+        .card-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; justify-content: flex-end; }
 
         .btn {
           padding: 8px 16px;

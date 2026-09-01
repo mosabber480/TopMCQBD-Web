@@ -19,7 +19,7 @@ const DEFAULT_LAYOUT = {
     btnIcon: "fa-solid fa-headset",
     menus: [
       { title: "হোম", url: "/", icon: "fa-solid fa-house" },
-      { title: "কুইজ অনুশীলন", url: "/quiz", icon: "fa-solid fa-bolt", badgeText: "FREE", badgeType: "free" },
+      { title: "কুইজ অনুশীলন", url: "/questions", icon: "fa-solid fa-bolt", badgeText: "FREE", badgeType: "free" },
       { title: "সকল MCQ", url: "/all-mcq", icon: "fa-solid fa-layer-group" },
       { title: "প্যাকেজসমূহ", url: "/packages", icon: "fa-solid fa-box" },
       { title: "আমাদের সম্পর্কে", url: "/about-us", icon: "fa-solid fa-bullseye" },
@@ -45,7 +45,7 @@ const DEFAULT_LAYOUT = {
         title: "প্রয়োজনীয় লিংক",
         links: [
           { title: "হোম পেজ", url: "/" },
-          { title: "কুইজ অনুশীলন", url: "/quiz" },
+          { title: "কুইজ অনুশীলন", url: "/questions" },
           { title: "সকল প্রশ্ন ক্যাটাগরি", url: "/all-mcq" }
         ]
       }

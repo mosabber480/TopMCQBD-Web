@@ -123,7 +123,7 @@ export default function FreeMcqsPage() {
             <i className="fa-solid fa-crown"></i> প্রিমিয়াম প্যাকেজ
           </Link>
           <Link
-            href="/quiz"
+            href="/questions"
             style={{
               background: 'rgba(255,255,255,0.2)',
               color: 'white',

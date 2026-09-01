@@ -19,7 +19,7 @@
       },
       {
         "title": "কুইজ অনুশীলন",
-        "url": "/quiz",
+        "url": "/questions",
         "icon": "fa-solid fa-bolt",
         "badgeText": "FREE",
         "badgeType": "free",
@@ -211,7 +211,7 @@
       },
       {
         "type": "links",
-        "title": "নতুন লিংক কলাম",
+        "title": "নতুন কলাম 660",
         "links": [
           {
             "title": "Test",
@@ -222,7 +222,7 @@
             "url": "#"
           },
           {
-            "title": "Test",
+            "title": "Test56",
             "url": "#"
           }
         ]

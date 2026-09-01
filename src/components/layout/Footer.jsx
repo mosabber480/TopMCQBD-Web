@@ -25,7 +25,7 @@ const DEFAULT_FOOTER = layoutConfigData?.footer || {
       title: "প্রয়োজনীয় লিংক",
       links: [
         { title: "হোম পেজ", url: "/" },
-        { title: "কুইজ অনুশীলন", url: "/quiz" },
+        { title: "কুইজ অনুশীলন", url: "/questions" },
         { title: "সকল প্রশ্ন ক্যাটাগরি", url: "/all-mcq" },
         { title: "প্যাকেজ ও মূল্য তালিকা", url: "/packages" }
       ]
@@ -34,9 +34,9 @@ const DEFAULT_FOOTER = layoutConfigData?.footer || {
       type: "links",
       title: "ক্যাটাগরি",
       links: [
-        { title: "বিসিএস প্রস্তুতি", url: "/quiz?category=bcs" },
-        { title: "ব্যাংক জব", url: "/quiz?category=bank" },
-        { title: "প্রাথমিক শিক্ষক", url: "/quiz?category=primary" }
+        { title: "বিসিএস প্রস্তুতি", url: "/questions?category=bcs" },
+        { title: "ব্যাংক জব", url: "/questions?category=bank" },
+        { title: "প্রাথমিক শিক্ষক", url: "/questions?category=primary" }
       ]
     },
     {

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef, Suspense } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { getPaidApiUrl } from '@/lib/config';
@@ -18,21 +18,12 @@ function QuestionsComponent() {
   const [answeredQuestions, setAnsweredQuestions] = useState({});
 
   // Toggles (Exact Defaults from quiz.html)
-  const [isReadMode, setIsReadMode] = useState(false); // Default OFF
+  const [isReadMode, setIsReadMode] = useState(false);
   const [showColor, setShowColor] = useState(true);
-  const [showAnswer, setShowAnswer] = useState(false); // Default OFF
+  const [showAnswer, setShowAnswer] = useState(false); // Default OFF in exam
   const [showExplanation, setShowExplanation] = useState(true); // Default ON
   const [showTime, setShowTime] = useState(false); // Default OFF
   const [showScore, setShowScore] = useState(true); // Default ON
-  const [optionLayout, setOptionLayout] = useState('2'); // Default: '2' (১ লাইনে ২টি অপশন)
-  const [showLayoutMenu, setShowLayoutMenu] = useState(false);
-  const layoutDropdownRef = useRef(null);
-
-  const [showLimitMenu, setShowLimitMenu] = useState(false);
-  const limitDropdownRef = useRef(null);
-
-  const [showRangeMenu, setShowRangeMenu] = useState(false);
-  const rangeDropdownRef = useRef(null);
 
   // Range and limit filters
   const [limit, setLimit] = useState('all');
@@ -59,23 +50,6 @@ function QuestionsComponent() {
 
   // Tooltip
   const [tooltip, setTooltip] = useState({ visible: false, text: '', x: 0, y: 0 });
-
-  // Close layout, limit & range menus on click outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (layoutDropdownRef.current && !layoutDropdownRef.current.contains(event.target)) {
-        setShowLayoutMenu(false);
-      }
-      if (limitDropdownRef.current && !limitDropdownRef.current.contains(event.target)) {
-        setShowLimitMenu(false);
-      }
-      if (rangeDropdownRef.current && !rangeDropdownRef.current.contains(event.target)) {
-        setShowRangeMenu(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   // Load questions from API
   useEffect(() => {
@@ -228,12 +202,12 @@ function QuestionsComponent() {
       setShowScore(false);
       setShowColor(true);
       setShowExplanation(true);
-      setShowAnswer(false); // Default OFF as requested
+      setShowAnswer(true); // In Read mode, show answer is active
       setTimerRunning(false);
     } else {
       // Exiting Read Mode: Time and Score switches are ENABLED again
       setShowScore(true);
-      setShowAnswer(false);
+      setShowAnswer(false); // Reset to default exam mode
       resetQuizState();
     }
   };
@@ -329,7 +303,6 @@ function QuestionsComponent() {
       <div className="quiz-floating-status-bar">
         {showTime && !isReadMode && (
           <div className="quiz-timer-board">
-            <i className="fa-regular fa-clock" style={{ marginRight: '6px' }}></i>
             <span>{formatTimer(totalSecondsLeft)}</span>
           </div>
         )}
@@ -393,179 +366,37 @@ function QuestionsComponent() {
               </label>
               আগে পড়ুন
             </label>
-
-            {/* Option Layout Custom Dropdown Menu */}
-            <div className="quiz-layout-dropdown-wrapper hide-on-mobile" ref={layoutDropdownRef}>
-              <button
-                type="button"
-                className="quiz-layout-trigger-btn"
-                onClick={() => setShowLayoutMenu(!showLayoutMenu)}
-                title="অপশন লেআউট পরিবর্তন করুন"
-              >
-                <i className="fa-solid fa-table-cells-large" style={{ color: '#007bff' }}></i>
-                <span>লেআউট</span>
-                <i className={`fa-solid fa-chevron-${showLayoutMenu ? 'up' : 'down'}`} style={{ fontSize: '11px', color: '#64748b' }}></i>
-              </button>
-
-              {showLayoutMenu && (
-                <div className="quiz-layout-popup-menu">
-                  <button
-                    type="button"
-                    className={`quiz-layout-menu-item ${optionLayout === '1' ? 'active' : ''}`}
-                    onClick={() => { setOptionLayout('1'); setShowLayoutMenu(false); }}
-                  >
-                    <div className="quiz-layout-radio-circle">
-                      {optionLayout === '1' && <div className="quiz-layout-radio-inner"></div>}
-                    </div>
-                    <span>১ লাইনে ১টি অপশন</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    className={`quiz-layout-menu-item ${optionLayout === '2' ? 'active' : ''}`}
-                    onClick={() => { setOptionLayout('2'); setShowLayoutMenu(false); }}
-                  >
-                    <div className="quiz-layout-radio-circle">
-                      {optionLayout === '2' && <div className="quiz-layout-radio-inner"></div>}
-                    </div>
-                    <span>১ লাইনে ২টি অপশন</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    className={`quiz-layout-menu-item ${optionLayout === '4' ? 'active' : ''}`}
-                    onClick={() => { setOptionLayout('4'); setShowLayoutMenu(false); }}
-                  >
-                    <div className="quiz-layout-radio-circle">
-                      {optionLayout === '4' && <div className="quiz-layout-radio-inner"></div>}
-                    </div>
-                    <span>১ লাইনে ৪টি অপশন</span>
-                  </button>
-                </div>
-              )}
-            </div>
           </div>
 
           <div className="quiz-right-controls-group">
             {/* Range and Limit filters */}
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              {/* Questions Count Custom Dropdown Menu */}
-              <div className="quiz-layout-dropdown-wrapper" ref={limitDropdownRef}>
-                <button
-                  type="button"
-                  className="quiz-layout-trigger-btn"
-                  onClick={() => setShowLimitMenu(!showLimitMenu)}
-                  title="প্রশ্নের সংখ্যা নির্ধারণ করুন"
-                >
-                  <i className="fa-solid fa-list-ol" style={{ color: '#007bff' }}></i>
-                  <span>
-                    {limit === 'all'
-                      ? 'সকল প্রশ্ন'
-                      : limit === '20'
-                      ? '২০ টি প্রশ্ন'
-                      : limit === '25'
-                      ? '২৫ টি প্রশ্ন'
-                      : limit === '50'
-                      ? '৫০ টি প্রশ্ন'
-                      : limit === '100'
-                      ? '১০০ টি প্রশ্ন'
-                      : 'সকল প্রশ্ন'}
-                  </span>
-                  <i className={`fa-solid fa-chevron-${showLimitMenu ? 'up' : 'down'}`} style={{ fontSize: '11px', color: '#64748b' }}></i>
-                </button>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <select
+                className="quiz-select-dropdown"
+                value={rangeIndex}
+                onChange={(e) => setRangeIndex(parseInt(e.target.value))}
+              >
+                {getRangeOptions().map((opt, i) => (
+                  <option key={i} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
 
-                {showLimitMenu && (
-                  <div className="quiz-layout-popup-menu">
-                    <button
-                      type="button"
-                      className={`quiz-layout-menu-item ${limit === 'all' ? 'active' : ''}`}
-                      onClick={() => { setLimit('all'); setRangeIndex(0); setShowLimitMenu(false); }}
-                    >
-                      <div className="quiz-layout-radio-circle">
-                        {limit === 'all' && <div className="quiz-layout-radio-inner"></div>}
-                      </div>
-                      <span>সকল প্রশ্ন</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      className={`quiz-layout-menu-item ${limit === '20' ? 'active' : ''}`}
-                      onClick={() => { setLimit('20'); setRangeIndex(0); setShowLimitMenu(false); }}
-                    >
-                      <div className="quiz-layout-radio-circle">
-                        {limit === '20' && <div className="quiz-layout-radio-inner"></div>}
-                      </div>
-                      <span>২০ টি প্রশ্ন</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      className={`quiz-layout-menu-item ${limit === '25' ? 'active' : ''}`}
-                      onClick={() => { setLimit('25'); setRangeIndex(0); setShowLimitMenu(false); }}
-                    >
-                      <div className="quiz-layout-radio-circle">
-                        {limit === '25' && <div className="quiz-layout-radio-inner"></div>}
-                      </div>
-                      <span>২৫ টি প্রশ্ন</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      className={`quiz-layout-menu-item ${limit === '50' ? 'active' : ''}`}
-                      onClick={() => { setLimit('50'); setRangeIndex(0); setShowLimitMenu(false); }}
-                    >
-                      <div className="quiz-layout-radio-circle">
-                        {limit === '50' && <div className="quiz-layout-radio-inner"></div>}
-                      </div>
-                      <span>৫০ টি প্রশ্ন</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      className={`quiz-layout-menu-item ${limit === '100' ? 'active' : ''}`}
-                      onClick={() => { setLimit('100'); setRangeIndex(0); setShowLimitMenu(false); }}
-                    >
-                      <div className="quiz-layout-radio-circle">
-                        {limit === '100' && <div className="quiz-layout-radio-inner"></div>}
-                      </div>
-                      <span>১০০ টি প্রশ্ন</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* Range Custom Dropdown Menu shown to the RIGHT when limit !== 'all' */}
-              {limit !== 'all' && (
-                <div className="quiz-layout-dropdown-wrapper" ref={rangeDropdownRef}>
-                  <button
-                    type="button"
-                    className="quiz-layout-trigger-btn"
-                    onClick={() => setShowRangeMenu(!showRangeMenu)}
-                    title="প্রশ্নের রেঞ্জ নির্ধারণ করুন"
-                  >
-                    <span>{getRangeOptions().find((o) => o.value === rangeIndex)?.label || '১ - ২০'}</span>
-                    <i className={`fa-solid fa-chevron-${showRangeMenu ? 'up' : 'down'}`} style={{ fontSize: '11px', color: '#64748b' }}></i>
-                  </button>
-
-                  {showRangeMenu && (
-                    <div className="quiz-layout-popup-menu" style={{ maxHeight: '220px', overflowY: 'auto' }}>
-                      {getRangeOptions().map((opt, i) => (
-                        <button
-                          key={i}
-                          type="button"
-                          className={`quiz-layout-menu-item ${rangeIndex === opt.value ? 'active' : ''}`}
-                          onClick={() => { setRangeIndex(opt.value); setShowRangeMenu(false); }}
-                        >
-                          <div className="quiz-layout-radio-circle">
-                            {rangeIndex === opt.value && <div className="quiz-layout-radio-inner"></div>}
-                          </div>
-                          <span>{opt.label}</span>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
+              <select
+                className="quiz-select-dropdown"
+                value={limit}
+                onChange={(e) => {
+                  setLimit(e.target.value);
+                  setRangeIndex(0);
+                }}
+              >
+                <option value="all">সকল প্রশ্ন</option>
+                <option value="20">20</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+              </select>
             </div>
 
             {/* Switches (Never Removed, Disabled when Read Mode is ON) */}
@@ -686,7 +517,7 @@ function QuestionsComponent() {
                     {qIndex + 1}. {q.q}
                   </div>
 
-                  <div className={`quiz-options-container layout-${optionLayout}`}>
+                  <div className="quiz-options-container">
                     {(q.options || []).map((opt, optIndex) => {
                       let btnClass = 'quiz-option-btn';
 
@@ -719,12 +550,7 @@ function QuestionsComponent() {
                           disabled={isReadMode || isAnswered}
                           onClick={() => handleAnswerClick(qIndex, optIndex)}
                         >
-                          <div className="quiz-option-circle font-bn">
-                            {getBanglaLetter(optIndex)}
-                          </div>
-                          <div className="quiz-option-text">
-                            {opt}
-                          </div>
+                          <strong>{getBanglaLetter(optIndex)}.</strong> {opt}
                         </button>
                       );
                     })}
@@ -762,32 +588,26 @@ function QuestionsComponent() {
               উত্তর দেওয়া হয়নি: <span>{unansweredCount}</span> টি
             </div>
 
-            {/* Progress Bar with Interactive Percentage & Hover Tooltip */}
+            {/* Progress Bar with Interactive Hover Tooltip */}
             <div className="quiz-progress-bar-container">
               <div
                 className="quiz-progress-correct"
                 style={{ width: `${correctPercent}%` }}
                 onMouseMove={(e) => handleProgressBarMouseMove(e, 'correct')}
                 onMouseLeave={() => setTooltip({ ...tooltip, visible: false })}
-              >
-                {correctPercent >= 8 ? `${Math.round(correctPercent)}%` : ''}
-              </div>
+              ></div>
               <div
                 className="quiz-progress-incorrect"
                 style={{ width: `${incorrectPercent}%` }}
                 onMouseMove={(e) => handleProgressBarMouseMove(e, 'incorrect')}
                 onMouseLeave={() => setTooltip({ ...tooltip, visible: false })}
-              >
-                {incorrectPercent >= 8 ? `${Math.round(incorrectPercent)}%` : ''}
-              </div>
+              ></div>
               <div
                 className="quiz-progress-unanswered"
                 style={{ width: `${unansweredPercent}%` }}
                 onMouseMove={(e) => handleProgressBarMouseMove(e, 'unanswered')}
                 onMouseLeave={() => setTooltip({ ...tooltip, visible: false })}
-              >
-                {unansweredPercent >= 8 ? `${Math.round(unansweredPercent)}%` : ''}
-              </div>
+              ></div>
             </div>
 
             <div id="final-score">

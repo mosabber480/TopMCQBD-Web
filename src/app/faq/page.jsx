@@ -32,50 +32,6 @@ export default function FAQPage() {
 
   return (
     <>
-      <style jsx>{`
-        .page-banner {
-          background: linear-gradient(135deg, var(--dark, #2c3e50), #1a252f);
-          color: white;
-          padding: 60px 20px;
-          text-align: center;
-        }
-        .page-banner h1 { font-size: 32px; font-weight: 800; margin-bottom: 10px; }
-        .page-banner p { font-size: 16px; color: #cbd5e1; }
-        .faq-container {
-          max-width: 900px;
-          margin: 50px auto 70px auto;
-          padding: 0 20px;
-        }
-        .faq-item {
-          background: white;
-          border-radius: 10px;
-          margin-bottom: 16px;
-          box-shadow: 0 4px 15px rgba(0,0,0,0.04);
-          border: 1px solid #e2e8f0;
-          overflow: hidden;
-        }
-        .faq-question {
-          padding: 20px 25px;
-          cursor: pointer;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          font-weight: 700;
-          font-size: 16px;
-          color: var(--dark);
-          user-select: none;
-        }
-        .faq-question:hover {
-          background: #f8fafc;
-        }
-        .faq-answer {
-          padding: 0 25px 20px 25px;
-          color: #4a5568;
-          font-size: 14.5px;
-          line-height: 1.7;
-        }
-      `}</style>
-
       <div className="page-banner">
         <h1>সচরাচর জিজ্ঞাসিত প্রশ্নাবলী (FAQ)</h1>
         <p>TopMCQBD সম্পর্কিত সাধারণ কিছু প্রশ্নের উত্তর জেনে নিন</p>
