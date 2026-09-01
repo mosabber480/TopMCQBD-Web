@@ -129,7 +129,7 @@ export default function DBSubjectiveTestPage() {
         <div className="db-content-card">
           {/* Header */}
           <div className="db-header">
-            <div className="db-badge" style={{ background: '#fdf4ff', color: '#a855f7', borderColor: '#f0abfc' }}>
+            <div className="db-badge">
               Subjective Paid DB Live Viewer
             </div>
             <h1 className="db-title">Subjective MCQs Database Live Data</h1>
@@ -179,7 +179,7 @@ export default function DBSubjectiveTestPage() {
             </div>
 
             <div className="control-btn-group">
-              <button onClick={() => fetchData(true)} disabled={loading} className="recheck-btn" style={{ background: '#9333ea' }}>
+              <button onClick={() => fetchData(true)} disabled={loading} className="recheck-btn">
                 {loading ? (
                   <>
                     <span className="btn-spinner" />
@@ -210,11 +210,11 @@ export default function DBSubjectiveTestPage() {
           <div className="summary-grid">
             <div className="summary-card">
               <span className="summary-label">ডাটাবেজ ক্লাস্টার</span>
-              <strong className="summary-val" style={{ color: '#a855f7' }}>TopMCQBD_DB_Subjective</strong>
+              <strong className="summary-val" style={{ color: '#60a5fa' }}>TopMCQBD_DB_Subjective</strong>
             </div>
             <div className="summary-card">
               <span className="summary-label">টার্গেট কালেকশন</span>
-              <strong className="summary-val" style={{ color: '#c084fc' }}>db-subjective-test</strong>
+              <strong className="summary-val" style={{ color: '#38bdf8' }}>db-subjective-test</strong>
             </div>
             <div className="summary-card">
               <span className="summary-label">মোট সংরক্ষিত ডাটা</span>
@@ -228,7 +228,7 @@ export default function DBSubjectiveTestPage() {
               <span className="box-title">ক্লাস্টারের অন্যান্য কালেকশনসমূহ:</span>
               <div className="tags-container">
                 {dbInfo.collections.map((col, idx) => (
-                  <span key={idx} className="col-tag" style={{ color: '#9333ea', background: '#faf5ff', borderColor: '#e9d5ff' }}>{col}</span>
+                  <span key={idx} className="col-tag">{col}</span>
                 ))}
               </div>
             </div>
@@ -253,14 +253,14 @@ export default function DBSubjectiveTestPage() {
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '8px',
-                    backgroundColor: '#9333ea',
+                    backgroundColor: '#4f46e5',
                     color: '#ffffff',
                     textDecoration: 'none',
                     padding: '11px 24px',
                     borderRadius: '8px',
                     fontSize: '14px',
                     fontWeight: '700',
-                    boxShadow: '0 4px 14px rgba(147, 51, 234, 0.35)',
+                    boxShadow: '0 4px 14px rgba(79, 70, 229, 0.35)',
                     transition: 'all 0.2s ease',
                   }}
                 >
@@ -310,7 +310,7 @@ export default function DBSubjectiveTestPage() {
             border: 1px solid #e2e8f0;
             padding: 3px 10px;
             border-radius: 6px;
-            color: #9333ea;
+            color: #2563eb;
             font-size: 12px;
             font-weight: 600;
           }

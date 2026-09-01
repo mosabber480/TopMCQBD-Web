@@ -143,7 +143,7 @@ export default function DBFreeTestPage() {
       <div className="db-content-card">
         {/* Header */}
         <div className="db-header">
-          <div className="db-badge" style={{ background: 'rgba(16, 185, 129, 0.15)', borderColor: 'rgba(16, 185, 129, 0.4)', color: '#34d399' }}>
+          <div className="db-badge">
             Free DB Live Viewer
           </div>
           <h1 className="db-title">Free Database Live Data</h1>
@@ -193,7 +193,7 @@ export default function DBFreeTestPage() {
           </div>
 
           <div className="control-btn-group">
-            <button onClick={() => fetchData(true)} disabled={loading} className="recheck-btn" style={{ background: '#059669' }}>
+            <button onClick={() => fetchData(true)} disabled={loading} className="recheck-btn">
               {loading ? (
                 <>
                   <span className="btn-spinner" />
@@ -269,14 +269,14 @@ export default function DBFreeTestPage() {
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '8px',
-                  backgroundColor: '#059669',
+                  backgroundColor: '#4f46e5',
                   color: '#ffffff',
                   textDecoration: 'none',
                   padding: '11px 24px',
                   borderRadius: '8px',
                   fontSize: '14px',
                   fontWeight: '700',
-                  boxShadow: '0 4px 14px rgba(5, 150, 105, 0.35)',
+                  boxShadow: '0 4px 14px rgba(79, 70, 229, 0.35)',
                   transition: 'all 0.2s ease',
                 }}
               >

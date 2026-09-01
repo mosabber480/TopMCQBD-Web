@@ -262,7 +262,7 @@ export default function DBD1AdminPage() {
         <div className="db-content-card">
           {/* Header */}
           <div className="db-header">
-            <div className="db-badge" style={{ background: 'rgba(234, 88, 12, 0.1)', borderColor: 'rgba(234, 88, 12, 0.4)', color: '#ea580c' }}>
+            <div className="db-badge">
               D1 Admin Diagnostic & Manager
             </div>
             <h1 className="db-title">D1 Database Manager</h1>
@@ -292,7 +292,7 @@ export default function DBD1AdminPage() {
             </div>
 
             <div className="control-btn-group">
-              <button onClick={fetchD1Data} disabled={loading} className="recheck-btn" style={{ background: '#ea580c' }}>
+              <button onClick={fetchD1Data} disabled={loading} className="recheck-btn">
                 {loading ? (
                   <>
                     <span className="btn-spinner" />
@@ -337,7 +337,7 @@ export default function DBD1AdminPage() {
                 <div>
                   <div className="card-type-tag">Serverless / D1 Cluster</div>
                   <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '3px' }}>
-                    টার্গেট রো: <strong style={{ color: '#ea580c' }}>db-d1-test</strong>
+                    টার্গেট রো: <strong>db-d1-test</strong>
                   </div>
                 </div>
                 <div className={`status-pill ${statusData?.connected ? 'pill-success' : 'pill-danger'}`}>
@@ -349,7 +349,7 @@ export default function DBD1AdminPage() {
               </div>
 
               <h3 className="card-db-name">
-                <i className="fa-solid fa-folder" style={{ marginRight: '8px', color: '#ea580c' }} />
+                <i className="fa-solid fa-folder" style={{ marginRight: '8px', color: '#0284c7' }} />
                 {statusData?.databaseName || 'topmcqbd-db'}
               </h3>
 
@@ -364,7 +364,7 @@ export default function DBD1AdminPage() {
                 </div>
                 <div className="meta-row">
                   <span className="meta-label">db-d1-test রো-তে মোট ডাটা:</span>
-                  <span className="meta-value" style={{ color: '#ea580c', fontSize: '15px' }}>
+                  <span className="meta-value" style={{ color: '#0284c7', fontSize: '15px' }}>
                     {items.length} টি আইটেম
                   </span>
                 </div>

@@ -129,7 +129,7 @@ export default function DBLiveExamTestPage() {
         <div className="db-content-card">
           {/* Header */}
           <div className="db-header">
-            <div className="db-badge" style={{ background: '#ecfdf5', color: '#059669', borderColor: '#a7f3d0' }}>
+            <div className="db-badge">
               Live Exam Paid DB Live Viewer
             </div>
             <h1 className="db-title">Live Exam Database Live Data</h1>
@@ -179,7 +179,7 @@ export default function DBLiveExamTestPage() {
             </div>
 
             <div className="control-btn-group">
-              <button onClick={() => fetchData(true)} disabled={loading} className="recheck-btn" style={{ background: '#059669' }}>
+              <button onClick={() => fetchData(true)} disabled={loading} className="recheck-btn">
                 {loading ? (
                   <>
                     <span className="btn-spinner" />
@@ -210,11 +210,11 @@ export default function DBLiveExamTestPage() {
           <div className="summary-grid">
             <div className="summary-card">
               <span className="summary-label">ডাটাবেজ ক্লাস্টার</span>
-              <strong className="summary-val" style={{ color: '#059669' }}>TopMCQBD_DB_Live_Exam</strong>
+              <strong className="summary-val" style={{ color: '#60a5fa' }}>TopMCQBD_DB_Live_Exam</strong>
             </div>
             <div className="summary-card">
               <span className="summary-label">টার্গেট কালেকশন</span>
-              <strong className="summary-val" style={{ color: '#10b981' }}>db-live-exam-test</strong>
+              <strong className="summary-val" style={{ color: '#38bdf8' }}>db-live-exam-test</strong>
             </div>
             <div className="summary-card">
               <span className="summary-label">মোট সংরক্ষিত ডাটা</span>
@@ -228,7 +228,7 @@ export default function DBLiveExamTestPage() {
               <span className="box-title">ক্লাস্টারের অন্যান্য কালেকশনসমূহ:</span>
               <div className="tags-container">
                 {dbInfo.collections.map((col, idx) => (
-                  <span key={idx} className="col-tag" style={{ color: '#059669', background: '#ecfdf5', borderColor: '#a7f3d0' }}>{col}</span>
+                  <span key={idx} className="col-tag">{col}</span>
                 ))}
               </div>
             </div>
@@ -253,14 +253,14 @@ export default function DBLiveExamTestPage() {
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '8px',
-                    backgroundColor: '#059669',
+                    backgroundColor: '#4f46e5',
                     color: '#ffffff',
                     textDecoration: 'none',
                     padding: '11px 24px',
                     borderRadius: '8px',
                     fontSize: '14px',
                     fontWeight: '700',
-                    boxShadow: '0 4px 14px rgba(5, 150, 105, 0.35)',
+                    boxShadow: '0 4px 14px rgba(79, 70, 229, 0.35)',
                     transition: 'all 0.2s ease',
                   }}
                 >
@@ -310,7 +310,7 @@ export default function DBLiveExamTestPage() {
             border: 1px solid #e2e8f0;
             padding: 3px 10px;
             border-radius: 6px;
-            color: #059669;
+            color: #2563eb;
             font-size: 12px;
             font-weight: 600;
           }

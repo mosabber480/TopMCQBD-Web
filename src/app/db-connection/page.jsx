@@ -298,7 +298,7 @@ export default function DBConnectionCheck() {
             <div className={`status-card ${d1Data?.connected ? 'card-success' : 'card-danger'}`}>
               <div className="card-header">
                 <div>
-                  <div className="card-type-tag" style={{ color: '#ea580c' }}>1. SERVERLESS / D1 CLUSTER</div>
+                  <div className="card-type-tag">1. SERVERLESS / D1 CLUSTER</div>
                   <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
                     Cloudflare Pages: <code>topmcqbd-db</code>
                   </div>
@@ -311,7 +311,7 @@ export default function DBConnectionCheck() {
                 </div>
               </div>
 
-              <h3 className="card-db-name" style={{ color: '#ea580c' }}>
+              <h3 className="card-db-name">
                 📁 {d1Data?.databaseName || 'topmcqbd-db'}
               </h3>
 
@@ -336,7 +336,7 @@ export default function DBConnectionCheck() {
                 <span className="box-title">রো কালেকশন তালিকা:</span>
                 <div className="tags-container">
                   {(d1Data?.collections || d1Data?.keys || ['layout-config', 'home-config', 'sidebar-config', 'policy-config', 'db-d1-test']).map((col, idx) => (
-                    <span key={idx} className="col-tag" style={{ color: '#ea580c', background: '#fff7ed', borderColor: '#fed7aa' }}>{col}</span>
+                    <span key={idx} className="col-tag">{col}</span>
                   ))}
                 </div>
               </div>
@@ -346,7 +346,7 @@ export default function DBConnectionCheck() {
             <div className={`status-card ${paidData?.connected ? 'card-success' : 'card-danger'}`}>
               <div className="card-header">
                 <div>
-                  <div className="card-type-tag" style={{ color: '#0284c7' }}>2. PRIMARY / PAID CORE CLUSTER</div>
+                  <div className="card-type-tag">2. PRIMARY / PAID CORE CLUSTER</div>
                   <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
                     Render: <code>topmcqbd-paid-api</code>
                   </div>
@@ -396,7 +396,7 @@ export default function DBConnectionCheck() {
             <div className={`status-card ${subjectiveData?.connected ? 'card-success' : 'card-danger'}`}>
               <div className="card-header">
                 <div>
-                  <div className="card-type-tag" style={{ color: '#9333ea' }}>3. SUBJECTIVE MCQS CLUSTER</div>
+                  <div className="card-type-tag">3. SUBJECTIVE MCQS CLUSTER</div>
                   <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
                     Render: <code>subjective-paid-api</code>
                   </div>
@@ -409,7 +409,7 @@ export default function DBConnectionCheck() {
                 </div>
               </div>
 
-              <h3 className="card-db-name" style={{ color: '#9333ea' }}>
+              <h3 className="card-db-name">
                 📁 {subjectiveData?.cluster || subjectiveData?.name || 'TopMCQBD_DB_Subjective'}
               </h3>
 
@@ -435,7 +435,7 @@ export default function DBConnectionCheck() {
                   <span className="box-title">কালেকশন তালিকা:</span>
                   <div className="tags-container">
                     {subjectiveData.collections.map((col, idx) => (
-                      <span key={idx} className="col-tag" style={{ color: '#9333ea', background: '#faf5ff', borderColor: '#e9d5ff' }}>{col}</span>
+                      <span key={idx} className="col-tag">{col}</span>
                     ))}
                   </div>
                 </div>
@@ -446,7 +446,7 @@ export default function DBConnectionCheck() {
             <div className={`status-card ${liveExamData?.connected ? 'card-success' : 'card-danger'}`}>
               <div className="card-header">
                 <div>
-                  <div className="card-type-tag" style={{ color: '#059669' }}>4. LIVE EXAM ENGINE CLUSTER</div>
+                  <div className="card-type-tag">4. LIVE EXAM ENGINE CLUSTER</div>
                   <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
                     Render: <code>live-exam-paid-api</code>
                   </div>
@@ -459,7 +459,7 @@ export default function DBConnectionCheck() {
                 </div>
               </div>
 
-              <h3 className="card-db-name" style={{ color: '#059669' }}>
+              <h3 className="card-db-name">
                 📁 {liveExamData?.cluster || liveExamData?.name || 'TopMCQBD_DB_Live_Exam'}
               </h3>
 
@@ -485,7 +485,7 @@ export default function DBConnectionCheck() {
                   <span className="box-title">কালেকশন তালিকা:</span>
                   <div className="tags-container">
                     {liveExamData.collections.map((col, idx) => (
-                      <span key={idx} className="col-tag" style={{ color: '#059669', background: '#ecfdf5', borderColor: '#a7f3d0' }}>{col}</span>
+                      <span key={idx} className="col-tag">{col}</span>
                     ))}
                   </div>
                 </div>
@@ -496,7 +496,7 @@ export default function DBConnectionCheck() {
             <div className={`status-card ${writtenData?.connected ? 'card-success' : 'card-danger'}`}>
               <div className="card-header">
                 <div>
-                  <div className="card-type-tag" style={{ color: '#6366f1' }}>5. WRITTEN EXAM CLUSTER</div>
+                  <div className="card-type-tag">5. WRITTEN EXAM CLUSTER</div>
                   <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
                     Render: <code>written-paid-api</code>
                   </div>
@@ -509,7 +509,7 @@ export default function DBConnectionCheck() {
                 </div>
               </div>
 
-              <h3 className="card-db-name" style={{ color: '#6366f1' }}>
+              <h3 className="card-db-name">
                 📁 {writtenData?.cluster || writtenData?.name || 'TopMCQBD_DB_written'}
               </h3>
 
@@ -535,7 +535,7 @@ export default function DBConnectionCheck() {
                   <span className="box-title">কালেকশন তালিকা:</span>
                   <div className="tags-container">
                     {writtenData.collections.map((col, idx) => (
-                      <span key={idx} className="col-tag" style={{ color: '#6366f1', background: '#eef2ff', borderColor: '#c7d2fe' }}>{col}</span>
+                      <span key={idx} className="col-tag">{col}</span>
                     ))}
                   </div>
                 </div>
@@ -546,7 +546,7 @@ export default function DBConnectionCheck() {
             <div className={`status-card ${freeData?.connected ? 'card-success' : 'card-danger'}`}>
               <div className="card-header">
                 <div>
-                  <div className="card-type-tag" style={{ color: '#0080c3' }}>6. OPEN FREE MCQS CLUSTER</div>
+                  <div className="card-type-tag">6. OPEN FREE MCQS CLUSTER</div>
                   <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
                     Render: <code>topmcqbd-free-api</code>
                   </div>
@@ -559,7 +559,7 @@ export default function DBConnectionCheck() {
                 </div>
               </div>
 
-              <h3 className="card-db-name" style={{ color: '#0080c3' }}>
+              <h3 className="card-db-name">
                 📁 {freeData?.cluster || freeData?.name || 'TopMCQBD_DB_Free'}
               </h3>
 

@@ -140,7 +140,7 @@ export default function DBD1TestPage() {
         <div className="db-content-card">
           {/* Header */}
           <div className="db-header">
-            <div className="db-badge" style={{ background: 'rgba(234, 88, 12, 0.1)', borderColor: 'rgba(234, 88, 12, 0.4)', color: '#ea580c' }}>
+            <div className="db-badge">
               D1 DB Live Viewer
             </div>
             <h1 className="db-title">Cloudflare D1 Database Live Data</h1>
@@ -163,10 +163,10 @@ export default function DBD1TestPage() {
                       <span>⚡</span> LocalStorage Cache
                     </span>
                   ) : (
-                    <span className="live-pill" style={{ borderColor: 'rgba(234, 88, 12, 0.3)', background: 'rgba(234, 88, 12, 0.15)', color: '#ea580c' }}>
+                    <span className="live-pill">
                       <span className="live-bullet-wrapper">
-                        <span className="live-bullet-ring" style={{ borderColor: '#ea580c' }} />
-                        <span className="live-bullet-core" style={{ background: '#ea580c' }} />
+                        <span className="live-bullet-ring" />
+                        <span className="live-bullet-core" />
                       </span>
                       <span>Live D1 Edge</span>
                     </span>
@@ -190,7 +190,7 @@ export default function DBD1TestPage() {
             </div>
 
             <div className="control-btn-group">
-              <button onClick={() => fetchData(true)} disabled={loading} className="recheck-btn" style={{ background: '#ea580c' }}>
+              <button onClick={() => fetchData(true)} disabled={loading} className="recheck-btn">
                 {loading ? (
                   <>
                     <span className="btn-spinner" />
@@ -221,15 +221,15 @@ export default function DBD1TestPage() {
           <div className="summary-grid">
             <div className="summary-card">
               <span className="summary-label">ডাটাবেজ ক্লাস্টার</span>
-              <strong className="summary-val" style={{ color: '#0080c3' }}>topmcqbd-db (D1)</strong>
+              <strong className="summary-val" style={{ color: '#60a5fa' }}>topmcqbd-db (D1)</strong>
             </div>
             <div className="summary-card">
               <span className="summary-label">টার্গেট রো</span>
-              <strong className="summary-val" style={{ color: '#0080c3' }}>db-d1-test</strong>
+              <strong className="summary-val" style={{ color: '#38bdf8' }}>db-d1-test</strong>
             </div>
             <div className="summary-card">
               <span className="summary-label">মোট সংরক্ষিত ডাটা</span>
-              <strong className="summary-val" style={{ color: '#16a34a' }}>{items.length} টি আইটেম</strong>
+              <strong className="summary-val" style={{ color: '#4ade80' }}>{items.length} টি আইটেম</strong>
             </div>
           </div>
 
@@ -266,14 +266,14 @@ export default function DBD1TestPage() {
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '8px',
-                    backgroundColor: '#ea580c',
+                    backgroundColor: '#4f46e5',
                     color: '#ffffff',
                     textDecoration: 'none',
                     padding: '11px 24px',
                     borderRadius: '8px',
                     fontSize: '14px',
                     fontWeight: '700',
-                    boxShadow: '0 4px 14px rgba(234, 88, 12, 0.35)',
+                    boxShadow: '0 4px 14px rgba(79, 70, 229, 0.35)',
                     transition: 'all 0.2s ease',
                   }}
                 >

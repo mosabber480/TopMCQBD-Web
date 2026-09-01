@@ -258,7 +258,7 @@ export default function DBLiveExamAdminPage() {
         <div className="db-content-card">
           {/* Header */}
           <div className="db-header">
-            <div className="db-badge" style={{ background: '#ecfdf5', color: '#059669', borderColor: '#a7f3d0' }}>
+            <div className="db-badge">
               Live Exam Admin Diagnostic & Manager
             </div>
             <h1 className="db-title">Live Exam Database Manager</h1>
@@ -288,7 +288,7 @@ export default function DBLiveExamAdminPage() {
             </div>
 
             <div className="control-btn-group">
-              <button onClick={fetchLiveExamData} disabled={loading} className="recheck-btn" style={{ background: '#059669' }}>
+              <button onClick={fetchLiveExamData} disabled={loading} className="recheck-btn">
                 {loading ? (
                   <>
                     <span className="btn-spinner" />
@@ -331,9 +331,9 @@ export default function DBLiveExamAdminPage() {
             <div className={`status-card ${statusData?.connected ? 'card-success' : 'card-danger'}`}>
               <div className="card-header">
                 <div>
-                  <div className="card-type-tag" style={{ color: '#059669' }}>Live Exam Paid Cluster</div>
+                  <div className="card-type-tag">Live Exam Paid Cluster</div>
                   <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '3px' }}>
-                    টার্গেট কালেকশন: <strong style={{ color: '#10b981' }}>db-live-exam-test</strong>
+                    টার্গেট কালেকশন: <strong>db-live-exam-test</strong>
                   </div>
                 </div>
                 <div className={`status-pill ${statusData?.connected ? 'pill-success' : 'pill-danger'}`}>
@@ -345,7 +345,7 @@ export default function DBLiveExamAdminPage() {
               </div>
 
               <h3 className="card-db-name">
-                <i className="fa-solid fa-folder" style={{ marginRight: '8px', color: '#10b981' }} />
+                <i className="fa-solid fa-folder" style={{ marginRight: '8px', color: '#0284c7' }} />
                 {statusData?.cluster || 'TopMCQBD_DB_Live_Exam'}
               </h3>
 
@@ -360,7 +360,7 @@ export default function DBLiveExamAdminPage() {
                 </div>
                 <div className="meta-row">
                   <span className="meta-label">db-live-exam-test কালেকশনে মোট ডাটা:</span>
-                  <span className="meta-value" style={{ color: '#059669', fontSize: '15px' }}>
+                  <span className="meta-value" style={{ color: '#0284c7', fontSize: '15px' }}>
                     {items.length} টি আইটেম
                   </span>
                 </div>
@@ -378,7 +378,7 @@ export default function DBLiveExamAdminPage() {
                   <span className="box-title">কালেকশন তালিকা:</span>
                   <div className="tags-container">
                     {statusData.collections.map((col, idx) => (
-                      <span key={idx} className="col-tag" style={{ color: '#059669', background: '#ecfdf5', borderColor: '#a7f3d0' }}>{col}</span>
+                      <span key={idx} className="col-tag">{col}</span>
                     ))}
                   </div>
                 </div>
@@ -390,7 +390,7 @@ export default function DBLiveExamAdminPage() {
           <div className="crud-container">
             <div className="crud-header">
               <h3>
-                <i className="fa-solid fa-pen-nib" style={{ marginRight: '8px', color: '#059669' }} />
+                <i className="fa-solid fa-pen-nib" style={{ marginRight: '8px', color: '#0284c7' }} />
                 ডাটা যোগ ও সম্পাদনা প্যানেল (db-live-exam-test)
               </h3>
               <p>নিচের বক্সে টেক্সট লিখে যোগ করুন। এটি সরাসরি Live Exam MongoDB ক্লাস্টারে সেভ হবে এবং <code>/db-connection/dbliveexam-test</code> পেজে লাইভ আপডেট হবে।</p>
@@ -400,13 +400,13 @@ export default function DBLiveExamAdminPage() {
             <div className="summary-grid">
               <div className="summary-card">
                 <span className="summary-label">ডাটাবেজ ক্লাস্টার</span>
-                <strong className="summary-val" style={{ color: '#059669' }}>
+                <strong className="summary-val" style={{ color: '#60a5fa' }}>
                   {statusData?.cluster || 'TopMCQBD_DB_Live_Exam'}
                 </strong>
               </div>
               <div className="summary-card">
                 <span className="summary-label">টার্গেট কালেকশন</span>
-                <strong className="summary-val" style={{ color: '#10b981' }}>db-live-exam-test</strong>
+                <strong className="summary-val" style={{ color: '#38bdf8' }}>db-live-exam-test</strong>
               </div>
               <div className="summary-card">
                 <span className="summary-label">মোট সংরক্ষিত ডাটা</span>
@@ -503,7 +503,6 @@ export default function DBLiveExamAdminPage() {
                     type="button"
                     onClick={openAddDataForm}
                     className="btn-add-main"
-                    style={{ background: '#059669' }}
                   >
                     <i className="fa-solid fa-plus" style={{ marginRight: '8px' }} /> Add Text (ডাটা যোগ করুন)
                   </button>
@@ -511,8 +510,8 @@ export default function DBLiveExamAdminPage() {
               ) : (
                 <div className="add-rows-container">
                   <div className="add-rows-header">
-                    <span className="add-rows-title" style={{ color: '#059669' }}>
-                      <i className="fa-solid fa-layer-group" style={{ marginRight: '8px', color: '#059669' }} />
+                    <span className="add-rows-title">
+                      <i className="fa-solid fa-layer-group" style={{ marginRight: '8px', color: '#0284c7' }} />
                       নতুন ডাটা যোগ করুন:
                     </span>
                   </div>
@@ -520,7 +519,7 @@ export default function DBLiveExamAdminPage() {
                   <div className="add-rows-list">
                     {newDataRows.map((row, rIdx) => (
                       <div key={rIdx} className="add-row-item">
-                        <span className="row-num-badge" style={{ background: '#ecfdf5', color: '#059669' }}>#{rIdx + 1}</span>
+                        <span className="row-num-badge">#{rIdx + 1}</span>
                         <input
                           type="text"
                           placeholder="এখানে যেকোনো টেক্সট বা টেস্ট ডাটা লিখুন..."
@@ -555,7 +554,6 @@ export default function DBLiveExamAdminPage() {
                         onClick={saveAllNewData}
                         disabled={submitting}
                         className="btn-save-all-rows"
-                        style={{ background: '#059669' }}
                       >
                         <i className="fa-solid fa-floppy-disk" style={{ marginRight: '6px' }} />
                         {submitting ? 'সেভ হচ্ছে...' : 'Save'}

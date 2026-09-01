@@ -285,7 +285,7 @@ export default function DBFreeAdminPage() {
       <div className="db-content-card">
         {/* Header */}
         <div className="db-header">
-          <div className="db-badge" style={{ background: 'rgba(16, 185, 129, 0.15)', borderColor: 'rgba(16, 185, 129, 0.4)', color: '#34d399' }}>
+          <div className="db-badge">
             Free Admin Diagnostic & Manager
           </div>
           <h1 className="db-title">Free Database Manager</h1>
@@ -315,7 +315,7 @@ export default function DBFreeAdminPage() {
           </div>
 
           <div className="control-btn-group">
-            <button onClick={fetchFreeData} disabled={loading} className="recheck-btn" style={{ background: '#059669' }}>
+            <button onClick={fetchFreeData} disabled={loading} className="recheck-btn">
               {loading ? (
                 <>
                   <span className="btn-spinner" />
@@ -360,7 +360,7 @@ export default function DBFreeAdminPage() {
               <div>
                 <div className="card-type-tag">Secondary / Free Cluster</div>
                 <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '3px' }}>
-                  টার্গেট কালেকশন: <strong style={{ color: '#34d399' }}>db-free-test</strong>
+                  টার্গেট কালেকশন: <strong>db-free-test</strong>
                 </div>
               </div>
               <div className={`status-pill ${statusData?.connected ? 'pill-success' : 'pill-danger'}`}>
@@ -372,7 +372,7 @@ export default function DBFreeAdminPage() {
             </div>
 
             <h3 className="card-db-name">
-              <i className="fa-solid fa-folder" style={{ marginRight: '8px', color: '#34d399' }} />
+              <i className="fa-solid fa-folder" style={{ marginRight: '8px', color: '#0284c7' }} />
               {statusData?.cluster || 'TopMCQBD_DB_Free'}
             </h3>
 
@@ -387,7 +387,7 @@ export default function DBFreeAdminPage() {
               </div>
               <div className="meta-row">
                 <span className="meta-label">db-free-test কালেকশনে মোট ডাটা:</span>
-                <span className="meta-value" style={{ color: '#34d399', fontSize: '15px' }}>
+                <span className="meta-value" style={{ color: '#0284c7', fontSize: '15px' }}>
                   {items.length} টি আইটেম
                 </span>
               </div>
