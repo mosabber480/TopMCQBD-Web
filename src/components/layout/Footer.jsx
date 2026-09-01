@@ -128,6 +128,28 @@ export default function Footer({ footerData: initialFooter, copyrightData: initi
               );
             }
 
+            if (col.type === 'icon_links' || col.type === 'icon-links') {
+              return (
+                <div key={idx} className="footer-col icon-links-col">
+                  <h4>{col.title || 'যোগাযোগ ও সাপোর্ট'}</h4>
+                  <ul>
+                    {(col.links || []).map((l, lIdx) => (
+                      <li key={lIdx}>
+                        <Link href={mapLegacyUrl(l.url || '#')}>
+                          {l.icon ? (
+                            <i className={l.icon} style={{ marginRight: '8px', fontSize: '13px', width: '16px', textAlign: 'center' }}></i>
+                          ) : (
+                            <i className="fa-solid fa-angle-right"></i>
+                          )}
+                          <span>{l.title || l.text}</span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            }
+
             return (
               <div key={idx} className="footer-col">
                 <h4>{col.title || 'প্রয়োজনীয় লিংক'}</h4>

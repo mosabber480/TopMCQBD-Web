@@ -793,23 +793,19 @@ body.sidebar-collapsed .admin-main-content {
     display: flex; 
     flex-wrap: wrap; 
     justify-content: space-between;
-    gap: 30px; 
+    gap: 24px; 
     margin-bottom: 30px; 
 }
 .footer-col { 
-    flex: 1 1 200px; 
+    flex: 1 1 170px;
+    min-width: 160px;
 }
 
-@media (min-width: 900px) {
-    .footer-col:first-child {
-        flex: 1.5 1 250px; 
-        max-width: 380px; 
-    }
+@media (min-width: 992px) {
     .footer-col.info-col {
-        margin-right: 100px; 
-    }
-    .footer-col:last-child {
-        flex: 0 1 auto; 
+        flex: 1.4 1 260px; 
+        max-width: 320px; 
+        margin-right: 15px; 
     }
 }
 

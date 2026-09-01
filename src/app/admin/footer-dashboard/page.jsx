@@ -99,7 +99,7 @@ export default function AdminFooterDashboardPage() {
 
   // Column Link Inline Editing
   const [editingFooterLink, setEditingFooterLink] = useState(null); // { colIdx, lkIdx }
-  const [editFooterLinkForm, setEditFooterLinkForm] = useState({ title: '', url: '' });
+  const [editFooterLinkForm, setEditFooterLinkForm] = useState({ title: '', url: '', icon: '' });
 
   // Multi-row Add Links inside Column
   const [addingFooterLinksColIdx, setAddingFooterLinksColIdx] = useState(null);
@@ -259,7 +259,7 @@ export default function AdminFooterDashboardPage() {
         ...footerColumns,
         {
           type: 'info',
-          title: 'নতুন তথ্য কলাম',
+          title: 'সাইট তথ্য ও সোশাল লিংক',
           text: 'সাইট সম্পর্কিত তথ্য...',
           fb: '',
           yt: '',
@@ -267,6 +267,20 @@ export default function AdminFooterDashboardPage() {
           tw: '',
           tg: '',
           ln: ''
+        }
+      ];
+    } else if (type === 'icon_links' || type === 'icon-links') {
+      updated = [
+        ...footerColumns,
+        {
+          type: 'icon_links',
+          title: 'যোগাযোগ ও সাপোর্ট',
+          links: [
+            { icon: 'fa-solid fa-phone', title: 'ফোন: ০১৭০০-০০০০০০', url: 'tel:01700000000' },
+            { icon: 'fa-solid fa-envelope', title: 'ইমেইল: support@topmcqbd.com', url: 'mailto:support@topmcqbd.com' },
+            { icon: 'fa-brands fa-whatsapp', title: 'হোয়াটসঅ্যাপ হেল্পলাইন', url: 'https://wa.me/8801700000000' },
+            { icon: 'fa-solid fa-location-dot', title: 'ঢাকা, বাংলাদেশ', url: '#' }
+          ]
         }
       ];
     } else {
@@ -384,15 +398,18 @@ export default function AdminFooterDashboardPage() {
     setEditingFooterLink({ colIdx, lkIdx });
     setEditFooterLinkForm({
       title: lk.title || '',
-      url: lk.url || ''
+      url: lk.url || '',
+      icon: lk.icon || ''
     });
   };
 
   const saveFooterLinkInline = async (colIdx, lkIdx) => {
     const updated = [...footerColumns];
+    const isIconCol = updated[colIdx].type === 'icon_links' || updated[colIdx].type === 'icon-links';
     updated[colIdx].links[lkIdx] = {
       title: editFooterLinkForm.title.trim(),
-      url: editFooterLinkForm.url.trim() || '#'
+      url: editFooterLinkForm.url.trim() || '#',
+      ...(isIconCol ? { icon: editFooterLinkForm.icon?.trim() || 'fa-solid fa-link' } : {})
     };
     setFooterColumns(updated);
     setEditingFooterLink(null);
@@ -413,12 +430,14 @@ export default function AdminFooterDashboardPage() {
 
   // Multi-row Add Links Form in Column
   const openAddFooterLinkForm = (colIdx) => {
+    const isIconCol = footerColumns[colIdx]?.type === 'icon_links' || footerColumns[colIdx]?.type === 'icon-links';
     setAddingFooterLinksColIdx(colIdx);
-    setNewFooterLinkRows([{ title: '', url: '' }]);
+    setNewFooterLinkRows([{ title: '', url: '', icon: isIconCol ? 'fa-solid fa-link' : '' }]);
   };
 
   const addNewFooterLinkRow = () => {
-    setNewFooterLinkRows([...newFooterLinkRows, { title: '', url: '' }]);
+    const isIconCol = footerColumns[addingFooterLinksColIdx]?.type === 'icon_links' || footerColumns[addingFooterLinksColIdx]?.type === 'icon-links';
+    setNewFooterLinkRows([...newFooterLinkRows, { title: '', url: '', icon: isIconCol ? 'fa-solid fa-link' : '' }]);
   };
 
   const updateNewFooterLinkRow = (index, field, value) => {
@@ -438,9 +457,14 @@ export default function AdminFooterDashboardPage() {
   };
 
   const saveAllNewFooterLinks = async (colIdx) => {
+    const isIconCol = footerColumns[colIdx]?.type === 'icon_links' || footerColumns[colIdx]?.type === 'icon-links';
     const validRows = newFooterLinkRows
       .filter(r => r.title.trim())
-      .map(r => ({ title: r.title.trim(), url: r.url.trim() || '#' }));
+      .map(r => ({
+        title: r.title.trim(),
+        url: r.url.trim() || '#',
+        ...(isIconCol ? { icon: r.icon?.trim() || 'fa-solid fa-link' } : {})
+      }));
 
     if (validRows.length === 0) {
       showTopAlert('কমপক্ষে একটি লিংক পূরণ করুন!', 'warning');
@@ -1164,7 +1188,8 @@ export default function AdminFooterDashboardPage() {
                 );
               }
 
-              // Links Column
+              // Links or Icon Links Column
+              const isIconCol = col.type === 'icon_links' || col.type === 'icon-links';
               const linksList = col.links || [];
 
               return (
@@ -1172,7 +1197,7 @@ export default function AdminFooterDashboardPage() {
                   key={colIdx}
                   id={`footer-col-${colIdx}`}
                   className={`read-box col-drag-item ${isDraggingCol ? 'dragging-col' : ''} ${dropPosCol === 'above' ? 'drag-over-top' : ''} ${dropPosCol === 'below' ? 'drag-over-bottom' : ''}`}
-                  style={{ borderLeft: '5px solid #17a2b8' }}
+                  style={{ borderLeft: isIconCol ? '5px solid #7c3aed' : '5px solid #17a2b8' }}
                   draggable={!isEditingTitleThis}
                   onDragStart={(e) => handleDragStart(e, 'col', colIdx, null)}
                   onDragEnd={handleDragEnd}
@@ -1181,7 +1206,7 @@ export default function AdminFooterDashboardPage() {
                 >
                   {isEditingTitleThis ? (
                     <div style={{ background: '#ffffff' }}>
-                      <div style={{ fontWeight: 'bold', marginBottom: '10px', color: '#17a2b8' }}>
+                      <div style={{ fontWeight: 'bold', marginBottom: '10px', color: isIconCol ? '#7c3aed' : '#17a2b8' }}>
                         কলাম টাইটেল এডিট করুন
                       </div>
                       <div className="form-group">
@@ -1237,7 +1262,15 @@ export default function AdminFooterDashboardPage() {
                                 ▼
                               </button>
                             </div>
-                            <i className="fa-solid fa-list" style={{ color: '#17a2b8' }}></i> {col.title}
+                            <i
+                              className={isIconCol ? 'fa-solid fa-icons' : 'fa-solid fa-list'}
+                              style={{ color: isIconCol ? '#7c3aed' : '#17a2b8' }}
+                            ></i> {col.title}
+                            {isIconCol && (
+                              <span style={{ fontSize: '11px', background: '#ede9fe', color: '#7c3aed', padding: '2px 8px', borderRadius: '12px', marginLeft: '6px', fontWeight: 'bold' }}>
+                                Icon Links
+                              </span>
+                            )}
                             <i className={'fa-solid fa-chevron-' + (expandedCols[colIdx] ? 'down' : 'right')} style={{ fontSize: '13px', color: '#64748b', marginLeft: '8px' }}></i>
                           </div>
                         </div>
@@ -1289,9 +1322,26 @@ export default function AdminFooterDashboardPage() {
                               >
                                 {isEditingThisLink ? (
                                   <div>
-                                    <div className="row" style={{ marginBottom: '5px' }}>
+                                    <div className="row" style={{ marginBottom: '5px', display: 'flex', gap: '10px', alignItems: 'center' }}>
+                                      {isIconCol && (
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1 }}>
+                                          <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '38px', height: '38px', background: '#ede9fe', borderRadius: '6px', color: '#7c3aed', fontSize: '15px' }}>
+                                            <i className={editFooterLinkForm.icon || 'fa-solid fa-link'}></i>
+                                          </span>
+                                          <input
+                                            type="text"
+                                            placeholder="আইকন ক্লাস (যেমন: fa-solid fa-phone)"
+                                            value={editFooterLinkForm.icon || ''}
+                                            onChange={(e) =>
+                                              setEditFooterLinkForm({ ...editFooterLinkForm, icon: e.target.value })
+                                            }
+                                            style={{ flex: 1 }}
+                                          />
+                                        </div>
+                                      )}
                                       <input
                                         type="text"
+                                        placeholder="লিংক টাইটেল"
                                         value={editFooterLinkForm.title}
                                         onChange={(e) =>
                                           setEditFooterLinkForm({ ...editFooterLinkForm, title: e.target.value })
@@ -1300,6 +1350,7 @@ export default function AdminFooterDashboardPage() {
                                       />
                                       <input
                                         type="text"
+                                        placeholder="URL (যেমন: tel:017... বা /contact)"
                                         value={editFooterLinkForm.url}
                                         onChange={(e) =>
                                           setEditFooterLinkForm({ ...editFooterLinkForm, url: e.target.value })
@@ -1329,7 +1380,9 @@ export default function AdminFooterDashboardPage() {
                                         fontSize: '13px',
                                         color: '#333',
                                         display: 'flex',
-                                        alignItems: 'center'
+                                        alignItems: 'center',
+                                        flexWrap: 'wrap',
+                                        gap: '4px'
                                       }}
                                     >
                                       <i
@@ -1354,7 +1407,17 @@ export default function AdminFooterDashboardPage() {
                                           ▼
                                         </button>
                                       </div>
+                                      {isIconCol && (
+                                        <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '24px', height: '24px', background: '#ede9fe', borderRadius: '4px', marginRight: '4px', color: '#7c3aed' }}>
+                                          <i className={lk.icon || 'fa-solid fa-link'}></i>
+                                        </span>
+                                      )}
                                       <b>{lk.title}</b>{' '}
+                                      {isIconCol && lk.icon && (
+                                        <code style={{ fontSize: '11px', color: '#6366f1', background: '#f1f5f9', padding: '1px 6px', borderRadius: '4px', marginLeft: '4px' }}>
+                                          {lk.icon}
+                                        </code>
+                                      )}
                                       <small style={{ color: '#777', marginLeft: '5px' }}>({lk.url || '#'})</small>
                                     </span>
                                     <div style={{ display: 'flex', gap: '6px' }}>
@@ -1394,11 +1457,11 @@ export default function AdminFooterDashboardPage() {
                             style={{
                               fontWeight: 'bold',
                               fontSize: '13px',
-                              color: '#17a2b8',
+                              color: isIconCol ? '#7c3aed' : '#17a2b8',
                               marginBottom: '10px'
                             }}
                           >
-                            <span>নতুন লিংক যোগ করুন:</span>
+                            <span>{isIconCol ? 'নতুন আইকন লিংক যোগ করুন:' : 'নতুন লিংক যোগ করুন:'}</span>
                           </div>
 
                           {newFooterLinkRows.map((row, rIdx) => (
@@ -1407,6 +1470,20 @@ export default function AdminFooterDashboardPage() {
                               className="row"
                               style={{ marginBottom: '8px', display: 'flex', gap: '10px', alignItems: 'center' }}
                             >
+                              {isIconCol && (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1 }}>
+                                  <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '38px', height: '38px', background: '#ede9fe', borderRadius: '6px', color: '#7c3aed', fontSize: '15px' }}>
+                                    <i className={row.icon || 'fa-solid fa-link'}></i>
+                                  </span>
+                                  <input
+                                    type="text"
+                                    placeholder="আইকন ক্লাস (যেমন: fa-solid fa-phone)"
+                                    value={row.icon || ''}
+                                    onChange={(e) => updateNewFooterLinkRow(rIdx, 'icon', e.target.value)}
+                                    style={{ flex: 1 }}
+                                  />
+                                </div>
+                              )}
                               <input
                                 type="text"
                                 placeholder="লিংক টাইটেল"
@@ -1416,7 +1493,7 @@ export default function AdminFooterDashboardPage() {
                               />
                               <input
                                 type="text"
-                                placeholder="URL"
+                                placeholder="URL (যেমন: tel:017... বা /contact)"
                                 value={row.url}
                                 onChange={(e) => updateNewFooterLinkRow(rIdx, 'url', e.target.value)}
                                 style={{ flex: 1 }}
@@ -1467,9 +1544,10 @@ export default function AdminFooterDashboardPage() {
                         <div className="card-actions" style={{ marginTop: '10px' }}>
                           <button
                             className="btn btn-info"
+                            style={isIconCol ? { background: '#7c3aed' } : {}}
                             onClick={() => openAddFooterLinkForm(colIdx)}
                           >
-                            <i className="fa-solid fa-plus"></i> লিংক যোগ করুন
+                            <i className="fa-solid fa-plus"></i> {isIconCol ? 'আইকন লিংক যোগ করুন' : 'লিংক যোগ করুন'}
                           </button>
                         </div>
                       )}
@@ -1484,12 +1562,19 @@ export default function AdminFooterDashboardPage() {
         </div>
 
         {/* Action Bar for Adding Columns */}
-        <div style={{ marginTop: '20px', display: 'flex', gap: '10px' }}>
+        <div style={{ marginTop: '20px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
           <button className="btn btn-info" onClick={() => addNewColumn('info')}>
             <i className="fa-solid fa-plus"></i> Info Column যোগ
           </button>
           <button className="btn btn-add" onClick={() => addNewColumn('links')}>
             <i className="fa-solid fa-plus"></i> Links Column যোগ
+          </button>
+          <button
+            className="btn"
+            style={{ background: '#7c3aed', color: '#ffffff' }}
+            onClick={() => addNewColumn('icon_links')}
+          >
+            <i className="fa-solid fa-plus"></i> Icon Link Column যোগ
           </button>
         </div>
           </div>

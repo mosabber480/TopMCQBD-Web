@@ -186,6 +186,72 @@
             "url": "/all-mcq"
           }
         ]
+      },
+      {
+        "type": "links",
+        "title": "নতুন লিংক কলাম",
+        "links": [
+          {
+            "title": "Test",
+            "url": "#"
+          },
+          {
+            "title": "Test",
+            "url": "#"
+          },
+          {
+            "title": "Test",
+            "url": "#"
+          },
+          {
+            "title": "Test",
+            "url": "#"
+          }
+        ]
+      },
+      {
+        "type": "links",
+        "title": "নতুন লিংক কলাম",
+        "links": [
+          {
+            "title": "Test",
+            "url": "#"
+          },
+          {
+            "title": "Test",
+            "url": "#"
+          },
+          {
+            "title": "Test",
+            "url": "#"
+          }
+        ]
+      },
+      {
+        "type": "icon_links",
+        "title": "যোগাযোগ ও সাপোর্ট",
+        "links": [
+          {
+            "icon": "fa-solid fa-phone",
+            "title": "ফোন: ০১৭০০-০০০০০০",
+            "url": "tel:01700000000"
+          },
+          {
+            "icon": "fa-solid fa-envelope",
+            "title": "ইমেইল: support@topmcqbd.com",
+            "url": "mailto:support@topmcqbd.com"
+          },
+          {
+            "icon": "fa-brands fa-whatsapp",
+            "title": "হোয়াটসঅ্যাপ হেল্পলাইন",
+            "url": "https://wa.me/8801700000000"
+          },
+          {
+            "icon": "fa-solid fa-location-dot",
+            "title": "ঢাকা, বাংলাদেশ",
+            "url": "#"
+          }
+        ]
       }
     ]
   },
