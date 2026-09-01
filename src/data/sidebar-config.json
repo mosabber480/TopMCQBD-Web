@@ -102,7 +102,7 @@
     },
     {
       "text": "Database Connection",
-      "url": "/db-connection-check",
+      "url": "/db-connection",
       "icon": "fa-solid fa-arrow-up-right-from-square",
       "color": "primary",
       "targetBlank": true,

@@ -1,1 +1,8 @@
-/api/*  /api/:splat  200
+# Cloudflare Pages Edge Redirects
+/db                 /db-connection            302
+/DB                 /db-connection            302
+/db-connection-check /db-connection          302
+
+# API Functions Rule
+/api/*              /api/:splat               200
+

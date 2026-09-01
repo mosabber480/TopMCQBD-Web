@@ -67,9 +67,19 @@ export default function DBConnectionCheck() {
     setLoading(true);
     setFetchError(null);
 
+    const isClient = typeof window !== 'undefined';
+    const isLocal = isClient && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
+    const paidBase = isLocal ? '' : (process.env.NEXT_PUBLIC_PAID_API_URL || 'https://topmcqbd-paid-api.onrender.com');
+    const subjectiveBase = isLocal ? '' : (process.env.NEXT_PUBLIC_SUBJECTIVE_API_URL || 'https://subjective-paid-api.onrender.com');
+    const liveExamBase = isLocal ? '' : (process.env.NEXT_PUBLIC_LIVE_EXAM_API_URL || 'https://live-exam-paid-api.onrender.com');
+    const writtenBase = isLocal ? '' : (process.env.NEXT_PUBLIC_WRITTEN_API_URL || 'https://written-paid-api.onrender.com');
+    const freeBase = isLocal ? '' : (process.env.NEXT_PUBLIC_FREE_API_URL || 'https://topmcqbd-free-api.onrender.com');
+    const d1Base = isLocal ? '' : (process.env.NEXT_PUBLIC_APP_URL || 'https://topmcqbd.pages.dev');
+
     try {
       // 1. Paid Core DB
-      const paidPromise = fetch('/api/db-test/paid', {
+      const paidPromise = fetch(`${paidBase}/api/db-test/paid`, {
         method: 'GET',
         cache: 'no-store',
         headers: { Accept: 'application/json' },
@@ -79,7 +89,7 @@ export default function DBConnectionCheck() {
       });
 
       // 2. Subjective MCQs DB
-      const subjectivePromise = fetch('/api/db-test/subjective', {
+      const subjectivePromise = fetch(`${subjectiveBase}/api/db-test/subjective`, {
         method: 'GET',
         cache: 'no-store',
         headers: { Accept: 'application/json' },
@@ -89,7 +99,7 @@ export default function DBConnectionCheck() {
       });
 
       // 3. Live Exam Engine DB
-      const liveExamPromise = fetch('/api/db-test/live-exam', {
+      const liveExamPromise = fetch(`${liveExamBase}/api/db-test/live-exam`, {
         method: 'GET',
         cache: 'no-store',
         headers: { Accept: 'application/json' },
@@ -99,7 +109,7 @@ export default function DBConnectionCheck() {
       });
 
       // 4. Written Exam DB
-      const writtenPromise = fetch('/api/db-test/written', {
+      const writtenPromise = fetch(`${writtenBase}/api/db-test/written`, {
         method: 'GET',
         cache: 'no-store',
         headers: { Accept: 'application/json' },
@@ -109,7 +119,7 @@ export default function DBConnectionCheck() {
       });
 
       // 5. Free MCQ DB
-      const freePromise = fetch('/api/db-test/free', {
+      const freePromise = fetch(`${freeBase}/api/db-test/free`, {
         method: 'GET',
         cache: 'no-store',
         headers: { Accept: 'application/json' },
@@ -119,7 +129,7 @@ export default function DBConnectionCheck() {
       });
 
       // 6. Cloudflare D1 Database
-      const d1Promise = fetch('/api/db-test/d1', {
+      const d1Promise = fetch(`${d1Base}/api/db-test/d1`, {
         method: 'GET',
         cache: 'no-store',
         headers: { Accept: 'application/json' },
