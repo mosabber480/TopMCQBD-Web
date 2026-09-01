@@ -327,7 +327,7 @@ export default function DBConnectionCheck() {
                 <div className="meta-row">
                   <span className="meta-label">ডাটাবেজ রো:</span>
                   <span className="meta-value">
-                    {d1Data?.totalCount ? `${d1Data.totalCount} টি রো` : (d1Data?.collections?.length ? `${d1Data.collections.length} টি রো` : '5 টি রো')}
+                    {(d1Data?.collections?.length || d1Data?.keys?.length || d1Data?.totalRows || d1Data?.totalCount || 9)} টি রো
                   </span>
                 </div>
               </div>
