@@ -129,7 +129,7 @@ export default function DBWrittenTestPage() {
         <div className="db-content-card">
           {/* Header */}
           <div className="db-header">
-            <div className="db-badge" style={{ background: '#fff1f2', color: '#e11d48', borderColor: '#fecdd3' }}>
+            <div className="db-badge" style={{ background: '#eef2ff', color: '#6366f1', borderColor: '#c7d2fe' }}>
               Written Exam Paid DB Live Viewer
             </div>
             <h1 className="db-title">Written Exam Database Live Data</h1>
@@ -179,7 +179,7 @@ export default function DBWrittenTestPage() {
             </div>
 
             <div className="control-btn-group">
-              <button onClick={() => fetchData(true)} disabled={loading} className="recheck-btn" style={{ background: '#e11d48' }}>
+              <button onClick={() => fetchData(true)} disabled={loading} className="recheck-btn" style={{ background: '#6366f1' }}>
                 {loading ? (
                   <>
                     <span className="btn-spinner" />
@@ -195,7 +195,7 @@ export default function DBWrittenTestPage() {
             </div>
           </div>
 
-          {/* Error Notification */}
+          {/* Error Message */}
           {error && (
             <div className="alert-card alert-error">
               <div className="alert-header">
@@ -210,11 +210,11 @@ export default function DBWrittenTestPage() {
           <div className="summary-grid">
             <div className="summary-card">
               <span className="summary-label">ডাটাবেজ ক্লাস্টার</span>
-              <strong className="summary-val" style={{ color: '#e11d48' }}>TopMCQBD_DB_written</strong>
+              <strong className="summary-val" style={{ color: '#6366f1' }}>TopMCQBD_DB_written</strong>
             </div>
             <div className="summary-card">
               <span className="summary-label">টার্গেট কালেকশন</span>
-              <strong className="summary-val" style={{ color: '#f43f5e' }}>db-written-test</strong>
+              <strong className="summary-val" style={{ color: '#4f46e5' }}>db-written-test</strong>
             </div>
             <div className="summary-card">
               <span className="summary-label">মোট সংরক্ষিত ডাটা</span>
@@ -228,7 +228,7 @@ export default function DBWrittenTestPage() {
               <span className="box-title">ক্লাস্টারের অন্যান্য কালেকশনসমূহ:</span>
               <div className="tags-container">
                 {dbInfo.collections.map((col, idx) => (
-                  <span key={idx} className="col-tag" style={{ color: '#e11d48', background: '#fff1f2', borderColor: '#fecdd3' }}>{col}</span>
+                  <span key={idx} className="col-tag" style={{ color: '#6366f1', background: '#eef2ff', borderColor: '#c7d2fe' }}>{col}</span>
                 ))}
               </div>
             </div>
@@ -253,7 +253,7 @@ export default function DBWrittenTestPage() {
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '8px',
-                    backgroundColor: '#e11d48',
+                    backgroundColor: '#6366f1',
                     color: '#ffffff',
                     textDecoration: 'none',
                     padding: '11px 24px',

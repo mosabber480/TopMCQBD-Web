@@ -258,7 +258,7 @@ export default function DBWrittenAdminPage() {
         <div className="db-content-card">
           {/* Header */}
           <div className="db-header">
-            <div className="db-badge" style={{ background: '#fff1f2', color: '#e11d48', borderColor: '#fecdd3' }}>
+            <div className="db-badge" style={{ background: '#eef2ff', color: '#6366f1', borderColor: '#c7d2fe' }}>
               Written Exam Admin Diagnostic & Manager
             </div>
             <h1 className="db-title">Written Exam Database Manager</h1>
@@ -288,7 +288,7 @@ export default function DBWrittenAdminPage() {
             </div>
 
             <div className="control-btn-group">
-              <button onClick={fetchWrittenData} disabled={loading} className="recheck-btn" style={{ background: '#e11d48' }}>
+              <button onClick={fetchWrittenData} disabled={loading} className="recheck-btn" style={{ background: '#6366f1' }}>
                 {loading ? (
                   <>
                     <span className="btn-spinner" />
@@ -331,9 +331,9 @@ export default function DBWrittenAdminPage() {
             <div className={`status-card ${statusData?.connected ? 'card-success' : 'card-danger'}`}>
               <div className="card-header">
                 <div>
-                  <div className="card-type-tag" style={{ color: '#e11d48' }}>Written Exam Paid Cluster</div>
+                  <div className="card-type-tag" style={{ color: '#6366f1' }}>Written Exam Paid Cluster</div>
                   <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '3px' }}>
-                    টার্গেট কালেকশন: <strong style={{ color: '#f43f5e' }}>db-written-test</strong>
+                    টার্গেট কালেকশন: <strong style={{ color: '#4f46e5' }}>db-written-test</strong>
                   </div>
                 </div>
                 <div className={`status-pill ${statusData?.connected ? 'pill-success' : 'pill-danger'}`}>
@@ -345,7 +345,7 @@ export default function DBWrittenAdminPage() {
               </div>
 
               <h3 className="card-db-name">
-                <i className="fa-solid fa-folder" style={{ marginRight: '8px', color: '#f43f5e' }} />
+                <i className="fa-solid fa-folder" style={{ marginRight: '8px', color: '#6366f1' }} />
                 {statusData?.cluster || 'TopMCQBD_DB_written'}
               </h3>
 
@@ -360,7 +360,7 @@ export default function DBWrittenAdminPage() {
                 </div>
                 <div className="meta-row">
                   <span className="meta-label">db-written-test কালেকশনে মোট ডাটা:</span>
-                  <span className="meta-value" style={{ color: '#e11d48', fontSize: '15px' }}>
+                  <span className="meta-value" style={{ color: '#6366f1', fontSize: '15px' }}>
                     {items.length} টি আইটেম
                   </span>
                 </div>
@@ -378,7 +378,7 @@ export default function DBWrittenAdminPage() {
                   <span className="box-title">কালেকশন তালিকা:</span>
                   <div className="tags-container">
                     {statusData.collections.map((col, idx) => (
-                      <span key={idx} className="col-tag" style={{ color: '#e11d48', background: '#fff1f2', borderColor: '#fecdd3' }}>{col}</span>
+                      <span key={idx} className="col-tag" style={{ color: '#6366f1', background: '#eef2ff', borderColor: '#c7d2fe' }}>{col}</span>
                     ))}
                   </div>
                 </div>
@@ -390,7 +390,7 @@ export default function DBWrittenAdminPage() {
           <div className="crud-container">
             <div className="crud-header">
               <h3>
-                <i className="fa-solid fa-pen-nib" style={{ marginRight: '8px', color: '#e11d48' }} />
+                <i className="fa-solid fa-pen-nib" style={{ marginRight: '8px', color: '#6366f1' }} />
                 ডাটা যোগ ও সম্পাদনা প্যানেল (db-written-test)
               </h3>
               <p>নিচের বক্সে টেক্সট লিখে যোগ করুন। এটি সরাসরি Written Exam MongoDB ক্লাস্টারে সেভ হবে এবং <code>/db-connection/dbwritten-test</code> পেজে লাইভ আপডেট হবে।</p>
@@ -400,13 +400,13 @@ export default function DBWrittenAdminPage() {
             <div className="summary-grid">
               <div className="summary-card">
                 <span className="summary-label">ডাটাবেজ ক্লাস্টার</span>
-                <strong className="summary-val" style={{ color: '#e11d48' }}>
+                <strong className="summary-val" style={{ color: '#6366f1' }}>
                   {statusData?.cluster || 'TopMCQBD_DB_written'}
                 </strong>
               </div>
               <div className="summary-card">
                 <span className="summary-label">টার্গেট কালেকশন</span>
-                <strong className="summary-val" style={{ color: '#f43f5e' }}>db-written-test</strong>
+                <strong className="summary-val" style={{ color: '#4f46e5' }}>db-written-test</strong>
               </div>
               <div className="summary-card">
                 <span className="summary-label">মোট সংরক্ষিত ডাটা</span>
@@ -503,7 +503,7 @@ export default function DBWrittenAdminPage() {
                     type="button"
                     onClick={openAddDataForm}
                     className="btn-add-main"
-                    style={{ background: '#e11d48' }}
+                    style={{ background: '#6366f1' }}
                   >
                     <i className="fa-solid fa-plus" style={{ marginRight: '8px' }} /> Add Text (ডাটা যোগ করুন)
                   </button>
@@ -511,8 +511,8 @@ export default function DBWrittenAdminPage() {
               ) : (
                 <div className="add-rows-container">
                   <div className="add-rows-header">
-                    <span className="add-rows-title" style={{ color: '#e11d48' }}>
-                      <i className="fa-solid fa-layer-group" style={{ marginRight: '8px', color: '#e11d48' }} />
+                    <span className="add-rows-title" style={{ color: '#6366f1' }}>
+                      <i className="fa-solid fa-layer-group" style={{ marginRight: '8px', color: '#6366f1' }} />
                       নতুন ডাটা যোগ করুন:
                     </span>
                   </div>
@@ -520,7 +520,7 @@ export default function DBWrittenAdminPage() {
                   <div className="add-rows-list">
                     {newDataRows.map((row, rIdx) => (
                       <div key={rIdx} className="add-row-item">
-                        <span className="row-num-badge" style={{ background: '#fff1f2', color: '#e11d48' }}>#{rIdx + 1}</span>
+                        <span className="row-num-badge" style={{ background: '#eef2ff', color: '#6366f1' }}>#{rIdx + 1}</span>
                         <input
                           type="text"
                           placeholder="এখানে যেকোনো টেক্সট বা টেস্ট ডাটা লিখুন..."
@@ -555,7 +555,7 @@ export default function DBWrittenAdminPage() {
                         onClick={saveAllNewData}
                         disabled={submitting}
                         className="btn-save-all-rows"
-                        style={{ background: '#e11d48' }}
+                        style={{ background: '#6366f1' }}
                       >
                         <i className="fa-solid fa-floppy-disk" style={{ marginRight: '6px' }} />
                         {submitting ? 'সেভ হচ্ছে...' : 'Save'}
@@ -750,7 +750,7 @@ export default function DBWrittenAdminPage() {
           }
           .add-row-input:focus {
             outline: none;
-            border-color: #e11d48;
+            border-color: #6366f1;
           }
           .btn-row-delete {
             background: #fee2e2;

@@ -67,14 +67,14 @@ export default function DbNavBox({ activeRoute }) {
       url: '/db-connection/dbwritten-admin',
       altUrl: '/dbwritten-admin',
       icon: 'fa-solid fa-sliders',
-      bg: '#e11d48',
+      bg: '#6366f1',
     },
     {
       text: 'Written Test',
       url: '/db-connection/dbwritten-test',
       altUrl: '/dbwritten-test',
       icon: 'fa-solid fa-globe',
-      bg: '#e11d48',
+      bg: '#6366f1',
     },
     {
       text: 'Free MCQ Admin',

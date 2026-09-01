@@ -496,7 +496,7 @@ export default function DBConnectionCheck() {
             <div className={`status-card ${writtenData?.connected ? 'card-success' : 'card-danger'}`}>
               <div className="card-header">
                 <div>
-                  <div className="card-type-tag" style={{ color: '#e11d48' }}>5. WRITTEN EXAM CLUSTER</div>
+                  <div className="card-type-tag" style={{ color: '#6366f1' }}>5. WRITTEN EXAM CLUSTER</div>
                   <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
                     Render: <code>written-paid-api</code>
                   </div>
@@ -509,7 +509,7 @@ export default function DBConnectionCheck() {
                 </div>
               </div>
 
-              <h3 className="card-db-name" style={{ color: '#e11d48' }}>
+              <h3 className="card-db-name" style={{ color: '#6366f1' }}>
                 📁 {writtenData?.cluster || writtenData?.name || 'TopMCQBD_DB_written'}
               </h3>
 
@@ -535,7 +535,7 @@ export default function DBConnectionCheck() {
                   <span className="box-title">কালেকশন তালিকা:</span>
                   <div className="tags-container">
                     {writtenData.collections.map((col, idx) => (
-                      <span key={idx} className="col-tag" style={{ color: '#e11d48', background: '#fff1f2', borderColor: '#fecdd3' }}>{col}</span>
+                      <span key={idx} className="col-tag" style={{ color: '#6366f1', background: '#eef2ff', borderColor: '#c7d2fe' }}>{col}</span>
                     ))}
                   </div>
                 </div>
