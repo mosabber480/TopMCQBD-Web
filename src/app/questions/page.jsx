@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { getPaidApiUrl } from '@/lib/config';
+import AiChatDrawer from '@/components/common/AiChatDrawer';
 
 function QuestionsComponent() {
   const searchParams = useSearchParams();
@@ -24,7 +25,7 @@ function QuestionsComponent() {
   const [showExplanation, setShowExplanation] = useState(true); // Default ON
   const [showTime, setShowTime] = useState(false); // Default OFF
   const [showScore, setShowScore] = useState(true); // Default ON
-  const [optionLayout, setOptionLayout] = useState('2'); // Default: '2' (১ লাইনে ২টি অপশন)
+  const [optionLayout, setOptionLayout] = useState('2q-col'); // Default: '2q-col' (১ লাইনে ২টি প্রশ্ন - উপর-নিচ ক্রম)
   const [showLayoutMenu, setShowLayoutMenu] = useState(false);
   const layoutDropdownRef = useRef(null);
 
@@ -57,8 +58,51 @@ function QuestionsComponent() {
     hasReset: false
   });
 
+  // AI Assistant States
+  const [isAiOpen, setIsAiOpen] = useState(false);
+  const [activeAiPrompt, setActiveAiPrompt] = useState('');
+  const [activeAiContext, setActiveAiContext] = useState(null);
+
+  const handleAskAI = (q, idx) => {
+    const bengaliLetters = ['ক', 'খ', 'গ', 'ঘ', 'ঙ'];
+    const promptText = `প্রশ্ন ${idx + 1}: ${q.q}\nঅপশনসমূহ:\n${(q.options || [])
+      .map((opt, i) => `(${bengaliLetters[i] || i + 1}) ${opt}`)
+      .join('\n')}\nদয়া করে এই MCQ টির সঠিক উত্তর নির্ণয় করে প্রতিটি অপশন বিশ্লেষণসহ বিস্তারিত সহজ বাংলায় বুঝিয়ে দিন।`;
+
+    setActiveAiPrompt(promptText);
+    setActiveAiContext({
+      question: `${idx + 1}. ${q.q}`,
+      options: q.options,
+      answer: q.ans,
+      explanation: q.explanation
+    });
+    setIsAiOpen(true);
+  };
+
   // Tooltip
   const [tooltip, setTooltip] = useState({ visible: false, text: '', x: 0, y: 0 });
+
+  // Dynamic header offset so floating score/timer is NEVER hidden behind Announcement bar or Header
+  const [headerOffset, setHeaderOffset] = useState(null);
+
+  useEffect(() => {
+    const updateHeaderOffset = () => {
+      const header = document.getElementById('global-header');
+      if (header) {
+        const rect = header.getBoundingClientRect();
+        // Position exactly 8px below the current bottom of the header in viewport
+        setHeaderOffset(Math.round(rect.bottom + 8));
+      }
+    };
+
+    updateHeaderOffset();
+    window.addEventListener('scroll', updateHeaderOffset, { passive: true });
+    window.addEventListener('resize', updateHeaderOffset, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', updateHeaderOffset);
+      window.removeEventListener('resize', updateHeaderOffset);
+    };
+  }, []);
 
   // Close layout, limit & range menus on click outside
   useEffect(() => {
@@ -326,7 +370,10 @@ function QuestionsComponent() {
       )}
 
       {/* Floating Status Bar */}
-      <div className="quiz-floating-status-bar">
+      <div
+        className="quiz-floating-status-bar"
+        style={headerOffset !== null ? { top: `${headerOffset}px` } : undefined}
+      >
         {showTime && !isReadMode && (
           <div className="quiz-timer-board">
             <i className="fa-regular fa-clock" style={{ marginRight: '6px' }}></i>
@@ -411,35 +458,13 @@ function QuestionsComponent() {
                 <div className="quiz-layout-popup-menu">
                   <button
                     type="button"
-                    className={`quiz-layout-menu-item ${optionLayout === '1' ? 'active' : ''}`}
-                    onClick={() => { setOptionLayout('1'); setShowLayoutMenu(false); }}
+                    className={`quiz-layout-menu-item ${optionLayout === '2q-col' ? 'active' : ''}`}
+                    onClick={() => { setOptionLayout('2q-col'); setShowLayoutMenu(false); }}
                   >
                     <div className="quiz-layout-radio-circle">
-                      {optionLayout === '1' && <div className="quiz-layout-radio-inner"></div>}
+                      {optionLayout === '2q-col' && <div className="quiz-layout-radio-inner"></div>}
                     </div>
-                    <span>১ লাইনে ১টি অপশন</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    className={`quiz-layout-menu-item ${optionLayout === '2' ? 'active' : ''}`}
-                    onClick={() => { setOptionLayout('2'); setShowLayoutMenu(false); }}
-                  >
-                    <div className="quiz-layout-radio-circle">
-                      {optionLayout === '2' && <div className="quiz-layout-radio-inner"></div>}
-                    </div>
-                    <span>১ লাইনে ২টি অপশন</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    className={`quiz-layout-menu-item ${optionLayout === '4' ? 'active' : ''}`}
-                    onClick={() => { setOptionLayout('4'); setShowLayoutMenu(false); }}
-                  >
-                    <div className="quiz-layout-radio-circle">
-                      {optionLayout === '4' && <div className="quiz-layout-radio-inner"></div>}
-                    </div>
-                    <span>১ লাইনে ৪টি অপশন</span>
+                    <span>১ লাইনে ২টি প্রশ্ন (উপর-নিচ ক্রম)</span>
                   </button>
 
                   <button
@@ -455,13 +480,35 @@ function QuestionsComponent() {
 
                   <button
                     type="button"
-                    className={`quiz-layout-menu-item ${optionLayout === '2q-col' ? 'active' : ''}`}
-                    onClick={() => { setOptionLayout('2q-col'); setShowLayoutMenu(false); }}
+                    className={`quiz-layout-menu-item ${optionLayout === '4' ? 'active' : ''}`}
+                    onClick={() => { setOptionLayout('4'); setShowLayoutMenu(false); }}
                   >
                     <div className="quiz-layout-radio-circle">
-                      {optionLayout === '2q-col' && <div className="quiz-layout-radio-inner"></div>}
+                      {optionLayout === '4' && <div className="quiz-layout-radio-inner"></div>}
                     </div>
-                    <span>১ লাইনে ২টি প্রশ্ন (উপর-নিচ ক্রম)</span>
+                    <span>১ লাইনে ৪টি অপশন</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className={`quiz-layout-menu-item ${optionLayout === '2' ? 'active' : ''}`}
+                    onClick={() => { setOptionLayout('2'); setShowLayoutMenu(false); }}
+                  >
+                    <div className="quiz-layout-radio-circle">
+                      {optionLayout === '2' && <div className="quiz-layout-radio-inner"></div>}
+                    </div>
+                    <span>১ লাইনে ২টি অপশন</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className={`quiz-layout-menu-item ${optionLayout === '1' ? 'active' : ''}`}
+                    onClick={() => { setOptionLayout('1'); setShowLayoutMenu(false); }}
+                  >
+                    <div className="quiz-layout-radio-circle">
+                      {optionLayout === '1' && <div className="quiz-layout-radio-inner"></div>}
+                    </div>
+                    <span>১ লাইনে ১টি অপশন</span>
                   </button>
                 </div>
               )}
@@ -701,7 +748,15 @@ function QuestionsComponent() {
                   return (
                     <div key={q._id || idx} className="quiz-question-block">
                       <div className="quiz-question-text">
-                        {idx + 1}. {q.q}
+                        {idx + 1}. {q.q}{' '}
+                        <button
+                          type="button"
+                          className="quiz-ask-ai-btn"
+                          onClick={() => handleAskAI(q, idx)}
+                          title="Ask AI"
+                        >
+                          Ask AI
+                        </button>
                       </div>
 
                       <div className="quiz-options-container layout-1">
@@ -777,7 +832,15 @@ function QuestionsComponent() {
                   return (
                     <div key={q._id || actualIdx} className="quiz-question-block">
                       <div className="quiz-question-text">
-                        {actualIdx + 1}. {q.q}
+                        {actualIdx + 1}. {q.q}{' '}
+                        <button
+                          type="button"
+                          className="quiz-ask-ai-btn"
+                          onClick={() => handleAskAI(q, actualIdx)}
+                          title="Ask AI"
+                        >
+                          Ask AI
+                        </button>
                       </div>
 
                       <div className="quiz-options-container layout-1">
@@ -855,7 +918,15 @@ function QuestionsComponent() {
                   return (
                     <div key={q._id || actualIdx} className="quiz-question-block">
                       <div className="quiz-question-text">
-                        {actualIdx + 1}. {q.q}
+                        {actualIdx + 1}. {q.q}{' '}
+                        <button
+                          type="button"
+                          className="quiz-ask-ai-btn"
+                          onClick={() => handleAskAI(q, actualIdx)}
+                          title="Ask AI"
+                        >
+                          Ask AI
+                        </button>
                       </div>
 
                       <div className="quiz-options-container layout-1">
@@ -931,7 +1002,15 @@ function QuestionsComponent() {
                   return (
                     <div key={q._id || actualIdx} className="quiz-question-block">
                       <div className="quiz-question-text">
-                        {actualIdx + 1}. {q.q}
+                        {actualIdx + 1}. {q.q}{' '}
+                        <button
+                          type="button"
+                          className="quiz-ask-ai-btn"
+                          onClick={() => handleAskAI(q, actualIdx)}
+                          title="Ask AI"
+                        >
+                          Ask AI
+                        </button>
                       </div>
 
                       <div className="quiz-options-container layout-1">
@@ -1012,7 +1091,15 @@ function QuestionsComponent() {
               return (
                 <div key={q._id || qIndex} className="quiz-question-block">
                   <div className="quiz-question-text">
-                    {qIndex + 1}. {q.q}
+                    {qIndex + 1}. {q.q}{' '}
+                    <button
+                      type="button"
+                      className="quiz-ask-ai-btn"
+                      onClick={() => handleAskAI(q, qIndex)}
+                      title="Ask AI"
+                    >
+                      Ask AI
+                    </button>
                   </div>
 
                   <div className={`quiz-options-container layout-${optionLayout}`}>
@@ -1125,6 +1212,26 @@ function QuestionsComponent() {
           </div>
         )}
       </div>
+
+      {/* Floating AI Launcher Trigger Button (Bottom Right) */}
+      <button
+        type="button"
+        className="ai-floating-trigger-btn"
+        onClick={() => setIsAiOpen(!isAiOpen)}
+        title="TopMCQBD AI শিক্ষক"
+      >
+        <img src="/images/logo-white-icon.png" alt="AI" style={{ width: '28px', height: '28px', objectFit: 'contain' }} />
+        <span className="ai-floating-pulse"></span>
+      </button>
+
+      {/* AI Chat Drawer Component */}
+      <AiChatDrawer
+        isOpen={isAiOpen}
+        onClose={() => setIsAiOpen(false)}
+        activePrompt={activeAiPrompt}
+        questionContext={activeAiContext}
+        onPromptProcessed={() => setActiveAiPrompt('')}
+      />
     </div>
   );
 }
