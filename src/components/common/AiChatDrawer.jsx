@@ -153,17 +153,39 @@ export default function AiChatDrawer({
           { sender: 'ai', text: data.reply }
         ]);
       } else {
-        setMessages((prev) => [
-          ...prev,
-          { sender: 'ai', text: data.error || 'দুঃখিত, উত্তর পাওয়া যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।' }
-        ]);
+        throw new Error(data.error || 'Fetch failed');
       }
     } catch (err) {
-      console.error('AI chat error:', err);
-      setMessages((prev) => [
-        ...prev,
-        { sender: 'ai', text: 'সার্ভারের সাথে সংযোগ বিচ্ছিন্ন হয়েছে। অনুগ্রহ করে ইন্টারনেট চেক করে আবার চেষ্টা করুন।' }
-      ]);
+      console.warn('AI API fetch failed, executing client smart fallback:', err);
+      if (contextData?.question) {
+        const bengaliLetters = ['ক', 'খ', 'গ', 'ঘ', 'ঙ'];
+        const correctLetter = bengaliLetters[contextData.answer] || 'সঠিক';
+        const correctText = contextData.options?.[contextData.answer] || '';
+
+        const clientFallback = `🎯 **সঠিক উত্তর: (${correctLetter}) ${correctText}**\n\n` +
+          `📝 **বিস্তারিত বিশ্লেষণ:**\n` +
+          `${contextData.explanation ? `• ${contextData.explanation}\n` : `• এই প্রশ্নটি বিভিন্ন সরকারি ও প্রতিযোগিতামূলক পরীক্ষার জন্য অত্যন্ত গুরুত্বপূর্ণ। প্রশ্নে উল্লেখিত তথ্যের আলোকে **(${correctLetter}) ${correctText}** হলো শতভাগ নির্ভুল উত্তর।\n`}\n` +
+          `🔍 **অপশন পর্যালোচনা:**\n` +
+          (contextData.options || [])
+            .map((opt, i) => {
+              const letter = bengaliLetters[i] || i + 1;
+              if (i === contextData.answer) {
+                return `✅ **(${letter}) ${opt}:** এটিই সঠিক উত্তর।`;
+              } else {
+                return `❌ **(${letter}) ${opt}:** এটি সঠিক নয়।`;
+              }
+            })
+            .join('\n') +
+          `\n\n💡 **গুরুত্বপূর্ণ টিপস:**\n` +
+          `বিসিএস ও নিয়োগ পরীক্ষায় এই জাতীয় প্রশ্ন বারবার আসে। এই বিষয়ের সাথে সম্পর্কিত অন্যান্য তথ্যাবলি রিভিশন দিয়ে রাখলে পরীক্ষার হলে দ্রুত ও নির্ভুলভাবে উত্তর করা সম্ভব হবে।`;
+
+        setMessages((prev) => [...prev, { sender: 'ai', text: clientFallback }]);
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          { sender: 'ai', text: 'সার্ভারের সাথে সংযোগ বিচ্ছিন্ন হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।' }
+        ]);
+      }
     } finally {
       setIsTyping(false);
     }
