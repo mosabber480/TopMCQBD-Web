@@ -71,6 +71,10 @@
             "icon": "fa-solid fa-book-bookmark",
             "badgeText": "LIVE",
             "badgeType": "live"
+          },
+          {
+            "title": "লাইভ মডেল টেস্ট",
+            "url": "/live-exam-model-test"
           }
         ],
         "isMegaMenu": false,

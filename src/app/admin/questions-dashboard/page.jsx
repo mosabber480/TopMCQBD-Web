@@ -991,7 +991,8 @@ export default function AdminQuestionsDashboardPage() {
         .btn-csv { background-color: #17a2b8; color: white; width: 100%; font-size: 15px; padding: 11px; margin-top: 10px; justify-content: center; }
         .btn-danger { background-color: #dc3545; color: white; }
         .btn-warning { background-color: #ffc107; color: #212529; }
-        .btn-secondary { background-color: #6c757d; color: white; }
+        .btn-secondary { background-color: #0f1629; color: white; border: 1px solid #0f1629; }
+        .btn-secondary:hover { background-color: #1e293b; border-color: #1e293b; color: white; }
         .btn-success { background-color: #28a745; color: white; }
 
         .cat-input-group {

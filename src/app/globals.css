@@ -227,12 +227,14 @@ body {
 }
 
 .submenu-arrow {
-    font-size: 12px !important;
-    transition: transform 0.3s ease;
+    font-size: 11px !important;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    opacity: 0.85;
 }
 
 .sidebar-item-group.open .submenu-arrow {
-    transform: rotate(180deg);
+    transform: none;
+    opacity: 1;
 }
 
 .sidebar-submenu {
@@ -949,8 +951,8 @@ body.sidebar-collapsed .admin-main-content {
     padding: 10px 20px; border: none; border-radius: 6px; font-weight: 700; cursor: pointer;
     font-size: 14px; transition: 0.2s; flex: 1;
 }
-.logout-btn-cancel { background: #e2e8f0; color: #475569; }
-.logout-btn-cancel:hover { background: #cbd5e1; color: #1e293b; }
+.logout-btn-cancel { background: #0f1629; color: #ffffff; border: 1px solid #0f1629; }
+.logout-btn-cancel:hover { background: #1e293b; border-color: #1e293b; color: #ffffff; }
 .logout-btn-confirm { background: #dc3545; color: white; }
 .logout-btn-confirm:hover { background: #c82333; }
 
@@ -975,8 +977,8 @@ body.sidebar-collapsed .admin-main-content {
 .btn-danger:hover { background-color: #c82333; }
 .btn-warning { background-color: #ffc107; color: #212529; }
 .btn-warning:hover { background-color: #e0a800; }
-.btn-secondary { background-color: #6c757d; color: white; }
-.btn-secondary:hover { background-color: #5a6268; }
+.btn-secondary { background-color: #0f1629 !important; color: #ffffff !important; border: 1px solid #0f1629 !important; }
+.btn-secondary:hover { background-color: #1e293b !important; border-color: #1e293b !important; color: #ffffff !important; }
 
 /* RESPONSIVE MOBILE */
 @media (max-width: 900px) {

@@ -834,8 +834,13 @@
   cursor: pointer;
 }
 .pkg-modal .btn-cancel-modal {
-  background: #e2e8f0;
-  color: #475569;
+  background: #0f1629;
+  color: #ffffff;
+  border: 1px solid #0f1629;
+}
+.pkg-modal .btn-cancel-modal:hover {
+  background: #1e293b;
+  color: #ffffff;
 }
 .pkg-modal .btn-submit-modal {
   background: #28a745;

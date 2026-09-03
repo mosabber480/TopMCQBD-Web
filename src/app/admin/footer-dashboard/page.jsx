@@ -822,8 +822,8 @@ export default function AdminFooterDashboardPage() {
         .btn-danger:hover { background-color: #c82333; }
         .btn-submit { background-color: #28a745; color: white; }
         .btn-submit:hover { background-color: #218838; }
-        .btn-secondary { background-color: #6c757d; color: white; }
-        .btn-secondary:hover { background-color: #5a6268; }
+        .btn-secondary { background-color: #0f1629; color: white; border: 1px solid #0f1629; }
+        .btn-secondary:hover { background-color: #1e293b; border-color: #1e293b; color: white; }
         .btn-info { background-color: #17a2b8; color: white; }
         .btn-info:hover { background-color: #138496; }
         .btn-add {

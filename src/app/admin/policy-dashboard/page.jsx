@@ -239,11 +239,14 @@ export default function AdminPolicyDashboardPage() {
         }
 
         .btn-secondary {
-          background-color: #6c757d;
+          background-color: #0f1629;
           color: white;
+          border: 1px solid #0f1629;
         }
         .btn-secondary:hover {
-          background-color: #5a6268;
+          background-color: #1e293b;
+          border-color: #1e293b;
+          color: white;
         }
 
         .btn-add {

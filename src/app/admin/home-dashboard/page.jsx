@@ -779,8 +779,8 @@ export default function AdminHomeDashboardPage() {
         .btn-danger:hover { background-color: #c82333; }
         .btn-submit { background-color: #28a745; color: white; }
         .btn-submit:hover { background-color: #218838; }
-        .btn-secondary { background-color: #6c757d; color: white; }
-        .btn-secondary:hover { background-color: #5a6268; }
+        .btn-secondary { background-color: #0f1629; color: white; border: 1px solid #0f1629; }
+        .btn-secondary:hover { background-color: #1e293b; border-color: #1e293b; color: white; }
 
         .section-action-bar { display: flex; gap: 10px; align-items: center; margin-top: 15px; flex-wrap: wrap; }
         .btn-add {

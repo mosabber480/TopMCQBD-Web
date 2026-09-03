@@ -39,6 +39,12 @@ export default function AdminMenuDashboardPage() {
   const [activeSubmenuMenuIndex, setActiveSubmenuMenuIndex] = useState(null);
   const [newSubmenuRows, setNewSubmenuRows] = useState([]);
 
+  // Inline Editing Submenu State
+  const [editingSubmenuKey, setEditingSubmenuKey] = useState(null); // `${mIdx}-${sIdx}`
+  const [editSubTitle, setEditSubTitle] = useState('');
+  const [editSubUrl, setEditSubUrl] = useState('');
+  const [editSubIcon, setEditSubIcon] = useState('');
+
   // Multi-row Header Button Form State
   const [isAddingHeaderBtn, setIsAddingHeaderBtn] = useState(false);
   const [newHeaderBtnRows, setNewHeaderBtnRows] = useState([]);
@@ -336,6 +342,7 @@ export default function AdminMenuDashboardPage() {
   // Multi-row Submenu Form Handlers
   // -------------------------------------------------------------
   const openAddSubmenuForm = (menuIndex) => {
+    setExpandedMenus((prev) => ({ ...prev, [menuIndex]: true }));
     setActiveSubmenuMenuIndex(menuIndex);
     setNewSubmenuRows([{ title: '', url: '', icon: 'fa-solid fa-circle-dot' }]);
   };
@@ -394,6 +401,39 @@ export default function AdminMenuDashboardPage() {
         await handleSaveToDB(updated);
       }
     });
+  };
+
+  // Inline Edit Submenu
+  const handleStartEditSubmenu = (mIdx, sIdx) => {
+    const sub = menus[mIdx]?.subMenus?.[sIdx];
+    if (!sub) return;
+    setEditingSubmenuKey(`${mIdx}-${sIdx}`);
+    setEditSubTitle(sub.title || sub.label || '');
+    setEditSubUrl(sub.url || sub.href || '');
+    setEditSubIcon(sub.icon || 'fa-solid fa-circle-dot');
+  };
+
+  const handleSaveEditSubmenu = async (mIdx, sIdx) => {
+    if (!editSubTitle.trim() || !editSubUrl.trim()) {
+      showTopAlert('সাবমেনুর শিরোনাম ও লিংক পূরণ করুন!', 'warning');
+      return;
+    }
+    const updated = [...menus];
+    const subList = [...(updated[mIdx].subMenus || [])];
+    subList[sIdx] = {
+      ...subList[sIdx],
+      title: editSubTitle.trim(),
+      url: editSubUrl.trim(),
+      icon: editSubIcon.trim() || 'fa-solid fa-circle-dot'
+    };
+    updated[mIdx].subMenus = subList;
+    setMenus(updated);
+    setEditingSubmenuKey(null);
+    await handleSaveToDB(updated);
+  };
+
+  const handleCancelEditSubmenu = () => {
+    setEditingSubmenuKey(null);
   };
 
   // -------------------------------------------------------------
@@ -601,8 +641,13 @@ export default function AdminMenuDashboardPage() {
           color: white;
         }
         .btn-secondary {
-          background: #64748b;
+          background: #0f1629;
           color: white;
+          border: 1px solid #0f1629;
+        }
+        .btn-secondary:hover {
+          background: #1e293b;
+          border-color: #1e293b;
         }
         .btn-info {
           background: #17a2b8;
@@ -897,17 +942,70 @@ export default function AdminMenuDashboardPage() {
                       </div>
                     </div>
 
-                    {expandedMenus[index] && (
+                    {(expandedMenus[index] || isAddingSub) && (
                       <>
 
                     {/* Submenus List */}
                     {subMenus.length > 0 && (
                       <div className="submenu-container">
                         {subMenus.map((sub, sIdx) => {
+                          const isEditingThisSub = editingSubmenuKey === `${index}-${sIdx}`;
                           const isDraggingSub =
                             dragItem?.type === 'submenu' && dragItem?.mIdx === index && dragItem?.sIdx === sIdx;
                           const dropPosSub =
                             dropIndicator?.id === `submenu-${index}-${sIdx}` ? dropIndicator.position : null;
+
+                          if (isEditingThisSub) {
+                            return (
+                              <div
+                                key={sIdx}
+                                className="submenu-item"
+                                style={{ background: '#f8fafc', borderColor: '#0284c7', display: 'block', padding: '10px 12px' }}
+                              >
+                                <div style={{ display: 'grid', gridTemplateColumns: '2fr 2fr 1.5fr auto', gap: '8px', alignItems: 'center' }}>
+                                  <input
+                                    type="text"
+                                    value={editSubTitle}
+                                    onChange={(e) => setEditSubTitle(e.target.value)}
+                                    placeholder="সাবমেনু শিরোনাম (Title)"
+                                    style={{ padding: '6px 10px', fontSize: '13px', borderRadius: '4px', border: '1px solid #cbd5e1' }}
+                                  />
+                                  <input
+                                    type="text"
+                                    value={editSubUrl}
+                                    onChange={(e) => setEditSubUrl(e.target.value)}
+                                    placeholder="লিংক (URL)"
+                                    style={{ padding: '6px 10px', fontSize: '13px', borderRadius: '4px', border: '1px solid #cbd5e1' }}
+                                  />
+                                  <input
+                                    type="text"
+                                    value={editSubIcon}
+                                    onChange={(e) => setEditSubIcon(e.target.value)}
+                                    placeholder="Icon Class"
+                                    style={{ padding: '6px 10px', fontSize: '13px', borderRadius: '4px', border: '1px solid #cbd5e1' }}
+                                  />
+                                  <div style={{ display: 'flex', gap: '6px' }}>
+                                    <button
+                                      type="button"
+                                      className="btn btn-success btn-sm"
+                                      style={{ padding: '5px 10px', fontSize: '12px' }}
+                                      onClick={() => handleSaveEditSubmenu(index, sIdx)}
+                                    >
+                                      <i className="fa-solid fa-floppy-disk"></i> Save
+                                    </button>
+                                    <button
+                                      type="button"
+                                      className="btn btn-secondary btn-sm"
+                                      style={{ padding: '5px 10px', fontSize: '12px' }}
+                                      onClick={handleCancelEditSubmenu}
+                                    >
+                                      <i className="fa-solid fa-xmark"></i> Cancel
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          }
 
                           return (
                             <div
@@ -930,14 +1028,24 @@ export default function AdminMenuDashboardPage() {
                                 </span>
                                 <code style={{ fontSize: '11px', color: '#64748b' }}>{sub.url || sub.href}</code>
                               </div>
-                              <button
-                                type="button"
-                                className="btn btn-danger btn-sm"
-                                style={{ padding: '3px 8px', fontSize: '11px' }}
-                                onClick={() => handleDeleteSubmenu(index, sIdx)}
-                              >
-                                <i className="fa-solid fa-trash"></i> Delete
-                              </button>
+                              <div style={{ display: 'flex', gap: '6px' }}>
+                                <button
+                                  type="button"
+                                  className="btn btn-warning btn-sm"
+                                  style={{ padding: '3px 8px', fontSize: '11px' }}
+                                  onClick={() => handleStartEditSubmenu(index, sIdx)}
+                                >
+                                  <i className="fa-solid fa-pen-to-square"></i> Edit
+                                </button>
+                                <button
+                                  type="button"
+                                  className="btn btn-danger btn-sm"
+                                  style={{ padding: '3px 8px', fontSize: '11px' }}
+                                  onClick={() => handleDeleteSubmenu(index, sIdx)}
+                                >
+                                  <i className="fa-solid fa-trash"></i> Delete
+                                </button>
+                              </div>
                             </div>
                           );
                         })}
@@ -995,6 +1103,14 @@ export default function AdminMenuDashboardPage() {
                         ))}
 
                         <div className="card-actions" style={{ marginTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <button
+                            type="button"
+                            className="btn btn-info btn-sm"
+                            onClick={addNewSubmenuRow}
+                            title="আরও একটি সাবমেনু যোগ করুন"
+                          >
+                            <i className="fa-solid fa-plus"></i> আরও সাবমেনু যোগ করুন
+                          </button>
                           <div style={{ display: 'flex', gap: '8px' }}>
                             <button
                               type="button"
@@ -1014,14 +1130,6 @@ export default function AdminMenuDashboardPage() {
                               <i className="fa-solid fa-xmark"></i> Cancel
                             </button>
                           </div>
-                          <button
-                            type="button"
-                            className="btn btn-info btn-sm"
-                            onClick={addNewSubmenuRow}
-                            title="আরও একটি সাবমেনু যোগ করুন"
-                          >
-                            <i className="fa-solid fa-plus"></i> আরও সাবমেনু যোগ করুন
-                          </button>
                         </div>
                       </div>
                     )}
@@ -1077,6 +1185,14 @@ export default function AdminMenuDashboardPage() {
             ))}
 
             <div className="card-actions" style={{ marginTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <button
+                type="button"
+                className="btn btn-info"
+                onClick={addNewMenuRow}
+                title="আরও একটি মেনু যোগ করুন"
+              >
+                <i className="fa-solid fa-plus"></i> আরও মেনু যোগ করুন
+              </button>
               <div style={{ display: 'flex', gap: '10px' }}>
                 <button type="button" className="btn btn-submit" onClick={saveAllNewMenus}>
                   <i className="fa-solid fa-floppy-disk"></i> Save Menu
@@ -1092,14 +1208,6 @@ export default function AdminMenuDashboardPage() {
                   <i className="fa-solid fa-xmark"></i> Cancel
                 </button>
               </div>
-              <button
-                type="button"
-                className="btn btn-info"
-                onClick={addNewMenuRow}
-                title="আরও একটি মেনু যোগ করুন"
-              >
-                <i className="fa-solid fa-plus"></i> আরও মেনু যোগ করুন
-              </button>
             </div>
           </div>
         ) : (
@@ -1344,6 +1452,14 @@ export default function AdminMenuDashboardPage() {
             ))}
 
             <div className="card-actions" style={{ marginTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <button
+                type="button"
+                className="btn btn-info"
+                onClick={addNewHeaderBtnRow}
+                title="আরও একটি বাটন যোগ করুন"
+              >
+                <i className="fa-solid fa-plus"></i> আরও বাটন যোগ করুন
+              </button>
               <div style={{ display: 'flex', gap: '10px' }}>
                 <button type="button" className="btn btn-submit" onClick={saveAllNewHeaderBtns}>
                   <i className="fa-solid fa-floppy-disk"></i> Save Buttons
@@ -1359,14 +1475,6 @@ export default function AdminMenuDashboardPage() {
                   <i className="fa-solid fa-xmark"></i> Cancel
                 </button>
               </div>
-              <button
-                type="button"
-                className="btn btn-info"
-                onClick={addNewHeaderBtnRow}
-                title="আরও একটি বাটন যোগ করুন"
-              >
-                <i className="fa-solid fa-plus"></i> আরও বাটন যোগ করুন
-              </button>
             </div>
           </div>
         ) : (
@@ -1421,7 +1529,7 @@ export default function AdminMenuDashboardPage() {
             <i className="fa-solid fa-floppy-disk"></i> পরিবর্তন সেভ করুন
           </button>
           <button
-            className="btn btn-danger"
+            className="btn btn-secondary"
             style={{ padding: '10px 15px', fontSize: '14px' }}
             onClick={() => fetchConfig()}
           >

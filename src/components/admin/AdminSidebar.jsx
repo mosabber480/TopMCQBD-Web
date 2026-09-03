@@ -34,7 +34,7 @@ export default function AdminSidebar() {
   const router = useRouter();
 
   const [menuItems, setMenuItems] = useState(defaultMenuItems);
-  const [openSubmenuIndex, setOpenSubmenuIndex] = useState(null);
+  const [openSubmenus, setOpenSubmenus] = useState({});
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userName, setUserName] = useState('অ্যাডমিন');
@@ -94,6 +94,15 @@ export default function AdminSidebar() {
     if (overlay) overlay.classList.remove('active');
   }, [pathname]);
 
+  // Set active submenu open on initial route match
+  useEffect(() => {
+    menuItems.forEach((item, index) => {
+      if (item.subMenus && item.subMenus.some(sub => sub.url === pathname)) {
+        setOpenSubmenus(prev => (prev[index] === undefined ? { ...prev, [index]: true } : prev));
+      }
+    });
+  }, [pathname, menuItems]);
+
   const toggleMobileSidebar = () => {
     setMobileOpen(!mobileOpen);
     const sidebar = document.getElementById('adminSidebar');
@@ -104,7 +113,15 @@ export default function AdminSidebar() {
 
   const toggleSubmenu = (index, e) => {
     e.preventDefault();
-    setOpenSubmenuIndex(openSubmenuIndex === index ? null : index);
+    e.stopPropagation();
+    setOpenSubmenus(prev => {
+      const isSubActive = menuItems[index]?.subMenus?.some(sub => pathname === sub.url);
+      const isCurrentlyOpen = prev[index] !== undefined ? prev[index] : !!isSubActive;
+      return {
+        ...prev,
+        [index]: !isCurrentlyOpen
+      };
+    });
   };
 
   return (
@@ -138,7 +155,7 @@ export default function AdminSidebar() {
               const hasSub = item.subMenus && item.subMenus.length > 0;
               const isSubActive = hasSub && item.subMenus.some(sub => pathname === sub.url);
               const isActive = pathname === item.href || isSubActive;
-              const isSubOpen = openSubmenuIndex === index || isSubActive;
+              const isSubOpen = openSubmenus[index] !== undefined ? openSubmenus[index] : !!isSubActive;
 
               let rawIcon = (item.icon || '').trim();
               const hasPrefix = rawIcon.startsWith('fa-solid') || rawIcon.startsWith('fa-brands') || rawIcon.startsWith('fa-regular');
@@ -157,7 +174,7 @@ export default function AdminSidebar() {
                         <i className={iconClass}></i>
                         <span>{item.label}</span>
                       </div>
-                      <i className="fa-solid fa-chevron-down submenu-arrow"></i>
+                      <i className={`fa-solid ${isSubOpen ? 'fa-minus' : 'fa-plus'} submenu-arrow`}></i>
                     </a>
                     <div className="sidebar-submenu" style={{ display: isSubOpen ? 'block' : 'none' }}>
                       {item.subMenus.map((sub, sIdx) => {

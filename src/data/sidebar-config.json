@@ -31,8 +31,8 @@
       "subMenus": []
     },
     {
-      "title": "প্রশ্ন ব্যাংক ও MCQ",
-      "url": "/admin/questions-dashboard",
+      "title": "প্রশ্ন ব্যাংক ও কুইজ",
+      "url": "/admin/quiz-dashboard",
       "icon": "fa-solid fa-file-circle-question",
       "subMenus": []
     },
@@ -49,12 +49,6 @@
       "subMenus": []
     },
     {
-      "title": "সাইডবার মেনু কন্ট্রোল",
-      "url": "/admin/admin-menu-dashboard",
-      "icon": "fa-solid fa-list-check",
-      "subMenus": []
-    },
-    {
       "title": "ফ্রি এমসিকিউ কন্ট্রোল",
       "url": "/admin/free-mcqs-dashboard",
       "icon": "fa-solid fa-gift",
@@ -64,6 +58,29 @@
       "title": "রিফান্ড ও পলিসি",
       "url": "/admin/policy-dashboard",
       "icon": "fa-solid fa-file-invoice-dollar",
+      "subMenus": []
+    },
+    {
+      "title": "লাইভ মডেল ড্যাশবোর্ড",
+      "url": "/admin/live-exam-model-dashboard",
+      "icon": "fa-solid fa-link",
+      "subMenus": [
+        {
+          "title": "লাইভ মডেল ড্যাশবোর্ড",
+          "url": "/admin/live-exam-model-dashboard",
+          "icon": "fa-solid fa-circle-dot"
+        },
+        {
+          "title": "অ্যাডমিন-মেনু-ড্যাশবোর্ড",
+          "url": "/admin/merit-position-dashboard",
+          "icon": "fa-solid fa-circle-dot"
+        }
+      ]
+    },
+    {
+      "title": "সাইডবার মেনু কন্ট্রোল",
+      "url": "/admin/admin-menu-dashboard",
+      "icon": "fa-solid fa-list-check",
       "subMenus": []
     }
   ],
@@ -85,8 +102,8 @@
       "action": "link"
     },
     {
-      "text": "প্রশ্ন ব্যাংক",
-      "url": "/admin/questions-dashboard",
+      "text": "কুইজ ম্যানেজমেন্ট",
+      "url": "/admin/quiz-dashboard",
       "icon": "fa-solid fa-file-circle-question",
       "color": "info",
       "targetBlank": false,

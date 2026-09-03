@@ -1067,9 +1067,9 @@ export default function DBFreeAdminPage() {
           background: #007a99;
         }
         .btn-cancel {
-          background: #64748b;
+          background: #0f1629;
           color: #fff;
-          border: none;
+          border: 1px solid #0f1629;
           padding: 8px 14px;
           border-radius: 6px;
           font-size: 12px;
@@ -1077,7 +1077,8 @@ export default function DBFreeAdminPage() {
           transition: background-color 0.2s;
         }
         .btn-cancel:hover {
-          background: #475569;
+          background: #1e293b;
+          border-color: #1e293b;
         }
         .bottom-nav-bar {
           display: flex;

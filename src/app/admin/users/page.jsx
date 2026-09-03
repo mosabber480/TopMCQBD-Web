@@ -539,7 +539,8 @@ export default function AdminUsersPage() {
         .btn-update { background-color: #28a745; }
         .btn-delete { background-color: #dc3545; }
         .btn-edit { background-color: #007bff; }
-        .btn-cancel-small { background-color: #6c757d; }
+        .btn-cancel-small { background-color: #0f1629; color: #ffffff; border: 1px solid #0f1629; }
+        .btn-cancel-small:hover { background-color: #1e293b; border-color: #1e293b; color: #ffffff; }
 
         .table-responsive { overflow-x: auto; }
 

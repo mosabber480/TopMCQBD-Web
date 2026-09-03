@@ -912,9 +912,9 @@ export default function DBSubjectiveAdminPage() {
             background: #007a99;
           }
           .btn-cancel {
-            background: #64748b;
+            background: #0f1629;
             color: #ffffff;
-            border: none;
+            border: 1px solid #0f1629;
             padding: 8px 14px;
             border-radius: 6px;
             font-size: 12px;
@@ -922,7 +922,8 @@ export default function DBSubjectiveAdminPage() {
             transition: background-color 0.2s;
           }
           .btn-cancel:hover {
-            background: #475569;
+            background: #1e293b;
+            border-color: #1e293b;
           }
           .db-page-container {
             min-height: 100vh;
