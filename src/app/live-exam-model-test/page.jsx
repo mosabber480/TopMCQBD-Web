@@ -221,6 +221,12 @@ export default function LiveExamModelTestPage() {
             {filteredExams.map((exam) => {
               const badgeStyle = getBadgeStyle(exam.badgeColor);
               const isUpcoming = exam.status === 'upcoming';
+              const qCount = exam.questions?.length || exam.questionsCount || 10;
+              // Standard ratio: 100 MCQs = 60 minutes (0.6 min per question)
+              const durationMin = exam.durationMinutes && Number(exam.durationMinutes) > 0
+                ? Number(exam.durationMinutes)
+                : Math.max(1, Math.round(qCount * 0.6));
+
               return (
                 <div 
                   key={exam.id} 
@@ -286,16 +292,16 @@ export default function LiveExamModelTestPage() {
                       textAlign: 'center'
                     }}>
                       <div>
-                        <span style={{ display: 'block', fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>সময়</span>
-                        <strong style={{ fontSize: '0.95rem', color: '#0f172a' }}>{exam.durationMinutes} মি.</strong>
+                        <span style={{ display: 'block', fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>সময়সীমা</span>
+                        <strong style={{ fontSize: '0.95rem', color: '#0f172a' }}>{durationMin} মিনিট</strong>
                       </div>
                       <div>
-                        <span style={{ display: 'block', fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>মোট নম্বর</span>
-                        <strong style={{ fontSize: '0.95rem', color: '#0f172a' }}>{exam.totalMarks}</strong>
+                        <span style={{ display: 'block', fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>প্রশ্ন সংখ্যা</span>
+                        <strong style={{ fontSize: '0.95rem', color: '#0284c7' }}>{qCount} টি</strong>
                       </div>
                       <div>
-                        <span style={{ display: 'block', fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>নেগেটিভ</span>
-                        <strong style={{ fontSize: '0.95rem', color: '#e11d48' }}>-{exam.negativeMarking}</strong>
+                        <span style={{ display: 'block', fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>নেগেটিভ মার্ক</span>
+                        <strong style={{ fontSize: '0.95rem', color: '#e11d48' }}>-{exam.negativeMarking || 0.5}</strong>
                       </div>
                     </div>
                   </div>

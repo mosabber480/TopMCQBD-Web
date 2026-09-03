@@ -22,7 +22,7 @@ const DEFAULT_EXAMS = [
     categoryName: "বিসিএস",
     badge: "লাইভ এক্সাম",
     badgeColor: "rose",
-    durationMinutes: 15,
+    durationMinutes: 9, // 15 MCQs = 9 minutes (100 MCQs = 60 min ratio)
     totalMarks: 20,
     negativeMarking: 0.5,
     participants: 14820,
@@ -162,7 +162,7 @@ const DEFAULT_EXAMS = [
     categoryName: "ব্যাংক জব",
     badge: "জনপ্রিয়",
     badgeColor: "emerald",
-    durationMinutes: 10,
+    durationMinutes: 6, // 10 MCQs = 6 minutes (100 MCQs = 60 min ratio)
     totalMarks: 10,
     negativeMarking: 0.25,
     participants: 9420,
@@ -222,11 +222,11 @@ const DEFAULT_EXAMS = [
     categoryName: "প্রাইমারি",
     badge: "নতুন",
     badgeColor: "violet",
-    durationMinutes: 15,
+    durationMinutes: 12, // 20 MCQs = 12 minutes (100 MCQs = 60 min ratio)
     totalMarks: 20,
     negativeMarking: 0.25,
     participants: 18350,
-    questionsCount: 15,
+    questionsCount: 20,
     isFree: true,
     scheduledStart: "2026-09-04T00:00:00.000Z",
     scheduledEnd: "2026-09-15T23:59:59.000Z",
@@ -240,7 +240,7 @@ const DEFAULT_EXAMS = [
     categoryName: "বিসিএস",
     badge: "শীঘ্রই আসছে",
     badgeColor: "amber",
-    durationMinutes: 20,
+    durationMinutes: 15, // 25 MCQs = 15 minutes (100 MCQs = 60 min ratio)
     totalMarks: 25,
     negativeMarking: 0.5,
     participants: 5200,
@@ -258,7 +258,7 @@ const DEFAULT_EXAMS = [
     categoryName: "গণিত ও আইসিটি",
     badge: "টপ রেটেড",
     badgeColor: "primary",
-    durationMinutes: 12,
+    durationMinutes: 6, // 10 MCQs = 6 minutes (100 MCQs = 60 min ratio)
     totalMarks: 10,
     negativeMarking: 0.5,
     participants: 11200,

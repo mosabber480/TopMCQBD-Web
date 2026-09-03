@@ -659,12 +659,13 @@ export default function AdminLiveExamModelDashboardPage() {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
                   <div>
                     <label style={{ display: 'block', fontSize: '0.88rem', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
-                      সময়সীমা (মিনিট)
+                      সময়সীমা (মিনিট) <span style={{ fontSize: '0.75rem', color: '#0284c7', fontWeight: 600 }}>(১০০ প্রশ্নে ৬০ মি.)</span>
                     </label>
                     <input 
                       type="number" 
                       value={examForm.durationMinutes}
                       onChange={(e) => setExamForm({ ...examForm, durationMinutes: Number(e.target.value) })}
+                      placeholder="যেমন: ১০ প্রশ্নে ৬, ১০০ প্রশ্নে ৬০"
                       style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1.5px solid #cbd5e1', outline: 'none' }}
                     />
                   </div>

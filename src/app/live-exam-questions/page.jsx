@@ -37,7 +37,16 @@ function LiveExamPlayerContent() {
           const data = await res.json();
           if (data.success && data.exam) {
             setExam(data.exam);
-            const durationSecs = (data.exam.durationMinutes || 15) * 60;
+            const qCount = (data.exam.questions && data.exam.questions.length > 0)
+              ? data.exam.questions.length 
+              : (data.exam.questionsCount || 10);
+            
+            // Standard ratio: 100 MCQs = 60 minutes => 0.6 min (36 sec) per question
+            const calculatedMinutes = data.exam.durationMinutes && Number(data.exam.durationMinutes) > 0
+              ? Number(data.exam.durationMinutes)
+              : Math.max(1, Math.round(qCount * 0.6));
+            
+            const durationSecs = calculatedMinutes * 60;
             setTimeLeft(durationSecs);
             startTimeRef.current = Date.now();
           } else {

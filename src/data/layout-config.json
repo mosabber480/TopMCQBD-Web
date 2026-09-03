@@ -84,10 +84,6 @@
         "title": "আমাদের সম্পর্কে",
         "url": "/about-us",
         "icon": "fa-solid fa-bullseye"
-      },
-      {
-        "title": "যোগাযোগ",
-        "url": "/contact"
       }
     ],
     "megaMenus": [
