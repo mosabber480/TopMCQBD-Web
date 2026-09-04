@@ -18,7 +18,9 @@ export const APP_CONFIG = {
 export const API_CONFIG = {
   PAID_API_URL: process.env.NEXT_PUBLIC_PAID_API_URL || 'https://topmcqbd-paid-api.onrender.com',
   FREE_API_URL: process.env.NEXT_PUBLIC_FREE_API_URL || 'https://topmcqbd-free-api.onrender.com',
+  SUBJECTIVE_API_URL: process.env.NEXT_PUBLIC_SUBJECTIVE_API_URL || 'https://subjective-paid-api.onrender.com',
   LIVE_EXAM_API_URL: process.env.NEXT_PUBLIC_LIVE_EXAM_API_URL || 'https://live-exam-paid-api.onrender.com',
+  WRITTEN_API_URL: process.env.NEXT_PUBLIC_WRITTEN_API_URL || 'https://written-paid-api.onrender.com',
 };
 
 /**
@@ -45,21 +47,76 @@ export function getPaidApiUrl(endpoint = '') {
  * Get full API endpoint URL for Live Exam Render Backend Service
  */
 export function getLiveExamApiUrl(endpoint = '') {
-  if (!endpoint) return '/api/live-exam/exams';
+  const baseUrl = process.env.NEXT_PUBLIC_LIVE_EXAM_API_URL || 'https://live-exam-paid-api.onrender.com';
+  if (!endpoint) return `${baseUrl.replace(/\/$/, '')}/api/live-exam/exams`;
   if (endpoint.startsWith('http://') || endpoint.startsWith('https://')) return endpoint;
 
   const cleanEndpoint = endpoint.startsWith('/') ? endpoint : '/' + endpoint;
 
-  // Next.js internal /api/live-exam routes are served locally by App Router
-  if (cleanEndpoint.startsWith('/api/live-exam') || cleanEndpoint.startsWith('/api/')) {
-    return cleanEndpoint;
-  }
-
-  const baseUrl = process.env.NEXT_PUBLIC_LIVE_EXAM_API_URL || 'https://live-exam-paid-api.onrender.com';
   if (typeof window !== 'undefined') {
     const hostname = window.location.hostname;
     const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
-    if (!isLocalhost && baseUrl) {
+    if (!isLocalhost || process.env.NEXT_PUBLIC_LIVE_EXAM_API_URL) {
+      return `${baseUrl.replace(/\/$/, '')}${cleanEndpoint}`;
+    }
+  }
+  return cleanEndpoint;
+}
+
+/**
+ * Get full API endpoint URL for Free MCQ Backend Service
+ */
+export function getFreeApiUrl(endpoint = '') {
+  const baseUrl = process.env.NEXT_PUBLIC_FREE_API_URL || 'https://topmcqbd-free-api.onrender.com';
+  if (!endpoint) return baseUrl;
+  if (endpoint.startsWith('http://') || endpoint.startsWith('https://')) return endpoint;
+
+  const cleanEndpoint = endpoint.startsWith('/') ? endpoint : '/' + endpoint;
+
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
+    if (!isLocalhost || process.env.NEXT_PUBLIC_FREE_API_URL) {
+      return `${baseUrl.replace(/\/$/, '')}${cleanEndpoint}`;
+    }
+  }
+  return cleanEndpoint;
+}
+
+/**
+ * Get full API endpoint URL for Subjective MCQs Backend Service
+ */
+export function getSubjectiveApiUrl(endpoint = '') {
+  const baseUrl = process.env.NEXT_PUBLIC_SUBJECTIVE_API_URL || 'https://subjective-paid-api.onrender.com';
+  if (!endpoint) return baseUrl;
+  if (endpoint.startsWith('http://') || endpoint.startsWith('https://')) return endpoint;
+
+  const cleanEndpoint = endpoint.startsWith('/') ? endpoint : '/' + endpoint;
+
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
+    if (!isLocalhost || process.env.NEXT_PUBLIC_SUBJECTIVE_API_URL) {
+      return `${baseUrl.replace(/\/$/, '')}${cleanEndpoint}`;
+    }
+  }
+  return cleanEndpoint;
+}
+
+/**
+ * Get full API endpoint URL for Written Exam Backend Service
+ */
+export function getWrittenApiUrl(endpoint = '') {
+  const baseUrl = process.env.NEXT_PUBLIC_WRITTEN_API_URL || 'https://written-paid-api.onrender.com';
+  if (!endpoint) return baseUrl;
+  if (endpoint.startsWith('http://') || endpoint.startsWith('https://')) return endpoint;
+
+  const cleanEndpoint = endpoint.startsWith('/') ? endpoint : '/' + endpoint;
+
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
+    if (!isLocalhost || process.env.NEXT_PUBLIC_WRITTEN_API_URL) {
       return `${baseUrl.replace(/\/$/, '')}${cleanEndpoint}`;
     }
   }
