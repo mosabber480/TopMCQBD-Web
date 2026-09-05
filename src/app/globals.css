@@ -1,7 +1,17 @@
-/* AUTO-INJECT FONT AWESOME & GOOGLE FONTS */
-@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Bengali:wght@400;500;600;700;800&display=swap');
 @import './pages-style.css';
+
+.site-main-content {
+    min-height: calc(100vh - 200px);
+    display: flex;
+    flex-direction: column;
+}
+
+@keyframes onlinePulse {
+    75%, 100% {
+        transform: scale(2.2);
+        opacity: 0;
+    }
+}
 
 :root {
     --primary: #007bff;

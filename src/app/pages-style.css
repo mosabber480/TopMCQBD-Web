@@ -2703,3 +2703,17 @@ input:disabled + .quiz-slider { cursor: not-allowed; background-color: #cbd5e1; 
     font-size: 10.5px;
   }
 }
+
+/* --- Model Test Demos Responsive Layouts --- */
+@media (max-width: 640px) {
+  .container {
+    padding: 0 14px !important;
+  }
+  div[style*="gridTemplateColumns: repeat(auto-fill, minmax(460px, 1fr))"],
+  div[style*="gridTemplateColumns: repeat(auto-fill, minmax(500px, 1fr))"],
+  div[style*="gridTemplateColumns: repeat(auto-fill, minmax(310px, 1fr))"],
+  div[style*="gridTemplateColumns: repeat(auto-fill, minmax(320px, 1fr))"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
