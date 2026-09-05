@@ -42,6 +42,7 @@ export default function DBConnectionCheck() {
   const [subjectiveData, setSubjectiveData] = useState(null);
   const [liveExamData, setLiveExamData] = useState(null);
   const [writtenData, setWrittenData] = useState(null);
+  const [questionBankData, setQuestionBankData] = useState(null);
   const [freeData, setFreeData] = useState(null);
   const [d1Data, setD1Data] = useState(null);
   const [fetchError, setFetchError] = useState(null);
@@ -62,7 +63,7 @@ export default function DBConnectionCheck() {
     }
   };
 
-  // Perform live database connection check on all 5 MongoDBs + Cloudflare D1
+  // Perform live database connection check on all 6 MongoDBs + Cloudflare D1
   const checkConnection = useCallback(async () => {
     setLoading(true);
     setFetchError(null);
@@ -74,6 +75,7 @@ export default function DBConnectionCheck() {
     const subjectiveBase = isLocal ? '' : (process.env.NEXT_PUBLIC_SUBJECTIVE_API_URL || 'https://subjective-paid-api.onrender.com');
     const liveExamBase = isLocal ? '' : (process.env.NEXT_PUBLIC_LIVE_EXAM_API_URL || 'https://live-exam-paid-api.onrender.com');
     const writtenBase = isLocal ? '' : (process.env.NEXT_PUBLIC_WRITTEN_API_URL || 'https://written-paid-api.onrender.com');
+    const questionBankBase = isLocal ? '' : (process.env.NEXT_PUBLIC_QUESTION_BANK_API_URL || 'https://question-bank-paid-api.onrender.com');
     const freeBase = isLocal ? '' : (process.env.NEXT_PUBLIC_FREE_API_URL || 'https://topmcqbd-free-api.onrender.com');
     const d1Base = isLocal ? '' : (process.env.NEXT_PUBLIC_APP_URL || 'https://topmcqbd.pages.dev');
 
@@ -118,7 +120,17 @@ export default function DBConnectionCheck() {
         return res.json();
       });
 
-      // 5. Free MCQ DB
+      // 5. Question Bank DB
+      const questionBankPromise = fetch(`${questionBankBase}/api/db-test/question-bank`, {
+        method: 'GET',
+        cache: 'no-store',
+        headers: { Accept: 'application/json' },
+      }).then(async (res) => {
+        if (!res.ok) throw new Error(`Question Bank API HTTP ${res.status}`);
+        return res.json();
+      });
+
+      // 6. Free MCQ DB
       const freePromise = fetch(`${freeBase}/api/db-test/free`, {
         method: 'GET',
         cache: 'no-store',
@@ -128,7 +140,7 @@ export default function DBConnectionCheck() {
         return res.json();
       });
 
-      // 6. Cloudflare D1 Database
+      // 7. Cloudflare D1 Database
       const d1Promise = fetch(`${d1Base}/api/db-test/d1`, {
         method: 'GET',
         cache: 'no-store',
@@ -138,11 +150,12 @@ export default function DBConnectionCheck() {
         return res.json();
       });
 
-      const [paidRes, subjRes, liveRes, writRes, freeRes, d1Res] = await Promise.allSettled([
+      const [paidRes, subjRes, liveRes, writRes, qbRes, freeRes, d1Res] = await Promise.allSettled([
         paidPromise,
         subjectivePromise,
         liveExamPromise,
         writtenPromise,
+        questionBankPromise,
         freePromise,
         d1Promise,
       ]);
@@ -168,6 +181,7 @@ export default function DBConnectionCheck() {
       const newSubjective = extractData(subjRes, 'TopMCQBD_DB_Subjective', 'Subjective MCQs DB');
       const newLiveExam = extractData(liveRes, 'TopMCQBD_DB_Live_Exam', 'Live Exam DB');
       const newWritten = extractData(writRes, 'TopMCQBD_DB_written', 'Written Exam DB');
+      const newQuestionBank = extractData(qbRes, 'TopMCQBD_DB_Question_Bank', 'Question Bank DB');
       const newFree = extractData(freeRes, 'TopMCQBD_DB_Free', 'Free MCQ DB');
       const newD1 = extractData(d1Res, 'topmcqbd-db', 'Cloudflare D1');
 
@@ -176,6 +190,7 @@ export default function DBConnectionCheck() {
       setSubjectiveData(newSubjective);
       setLiveExamData(newLiveExam);
       setWrittenData(newWritten);
+      setQuestionBankData(newQuestionBank);
       setFreeData(newFree);
       setD1Data(newD1);
       setLastChecked(currentTime);
@@ -191,6 +206,7 @@ export default function DBConnectionCheck() {
           subjectiveData: newSubjective,
           liveExamData: newLiveExam,
           writtenData: newWritten,
+          questionBankData: newQuestionBank,
           freeData: newFree,
           d1Data: newD1,
         },
@@ -209,11 +225,12 @@ export default function DBConnectionCheck() {
       const cachedRaw = localStorage.getItem(CACHE_KEY);
       if (cachedRaw) {
         const cached = JSON.parse(cachedRaw);
-        if (cached && (cached.paidData || cached.subjectiveData || cached.d1Data)) {
+        if (cached && (cached.paidData || cached.subjectiveData || cached.d1Data || cached.questionBankData)) {
           setPaidData(cached.paidData || null);
           setSubjectiveData(cached.subjectiveData || null);
           setLiveExamData(cached.liveExamData || null);
           setWrittenData(cached.writtenData || null);
+          setQuestionBankData(cached.questionBankData || null);
           setFreeData(cached.freeData || null);
           setD1Data(cached.d1Data || null);
           setLastChecked(cached.lastChecked || formatDateTime(cached.savedAt));
@@ -238,7 +255,7 @@ export default function DBConnectionCheck() {
             <div className="db-badge">Master Diagnostic Hub</div>
             <h1 className="db-title">All Database Connections</h1>
             <p className="db-subtitle">
-              Cloudflare D1, 4x Dedicated Paid MongoDB Clusters ও 1x Free MongoDB ক্লাস্টারের রিয়েল-টাইম কানেকশন স্ট্যাটাস
+              Cloudflare D1, 5x Dedicated Paid MongoDB Clusters ও 1x Free MongoDB ক্লাস্টারের রিয়েল-টাইম কানেকশন স্ট্যাটাস
             </p>
           </div>
 
@@ -292,7 +309,7 @@ export default function DBConnectionCheck() {
             </div>
           )}
 
-          {/* 6 Database Status Cards Grid */}
+          {/* 7 Database Status Cards Grid */}
           <div className="db-grid">
             {/* 1. Cloudflare D1 SQL Card */}
             <div className={`status-card ${d1Data?.connected ? 'card-success' : 'card-danger'}`}>
@@ -542,11 +559,61 @@ export default function DBConnectionCheck() {
               )}
             </div>
 
-            {/* 6. Free MongoDB Card */}
+            {/* 6. Question Bank MongoDB Card */}
+            <div className={`status-card ${questionBankData?.connected ? 'card-success' : 'card-danger'}`}>
+              <div className="card-header">
+                <div>
+                  <div className="card-type-tag">6. QUESTION BANK CLUSTER</div>
+                  <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
+                    Render: <code>question-bank-paid-api</code>
+                  </div>
+                </div>
+                <div className={`status-pill ${questionBankData?.connected ? 'pill-success' : 'pill-danger'}`}>
+                  <span className="status-dot" />
+                  <span style={{ transform: 'translateY(0.5px)', display: 'inline-flex', alignItems: 'center' }}>
+                    {loading ? 'Checking...' : questionBankData?.connected ? 'Connected' : 'Disconnected'}
+                  </span>
+                </div>
+              </div>
+
+              <h3 className="card-db-name">
+                📁 {questionBankData?.cluster || questionBankData?.name || 'TopMCQBD_DB_Question_Bank'}
+              </h3>
+
+              <div className="meta-list">
+                <div className="meta-row">
+                  <span className="meta-label">কানেকশন রেসপন্স টাইম:</span>
+                  <span className="meta-value">
+                    {questionBankData?.latencyMs !== null && questionBankData?.latencyMs !== undefined
+                      ? `${questionBankData.latencyMs} ms`
+                      : 'N/A'}
+                  </span>
+                </div>
+                <div className="meta-row">
+                  <span className="meta-label">কালেকশনস:</span>
+                  <span className="meta-value">
+                    {questionBankData?.collections ? `${questionBankData.collections.length} টি কালেকশন` : '0'}
+                  </span>
+                </div>
+              </div>
+
+              {questionBankData?.collections && questionBankData.collections.length > 0 && (
+                <div className="collections-box">
+                  <span className="box-title">কালেকশন তালিকা:</span>
+                  <div className="tags-container">
+                    {questionBankData.collections.map((col, idx) => (
+                      <span key={idx} className="col-tag">{col}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* 7. Free MongoDB Card */}
             <div className={`status-card ${freeData?.connected ? 'card-success' : 'card-danger'}`}>
               <div className="card-header">
                 <div>
-                  <div className="card-type-tag">6. OPEN FREE MCQS CLUSTER</div>
+                  <div className="card-type-tag">7. OPEN FREE MCQS CLUSTER</div>
                   <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
                     Render: <code>topmcqbd-free-api</code>
                   </div>

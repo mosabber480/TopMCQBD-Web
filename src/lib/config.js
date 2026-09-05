@@ -21,6 +21,7 @@ export const API_CONFIG = {
   SUBJECTIVE_API_URL: process.env.NEXT_PUBLIC_SUBJECTIVE_API_URL || 'https://subjective-paid-api.onrender.com',
   LIVE_EXAM_API_URL: process.env.NEXT_PUBLIC_LIVE_EXAM_API_URL || 'https://live-exam-paid-api.onrender.com',
   WRITTEN_API_URL: process.env.NEXT_PUBLIC_WRITTEN_API_URL || 'https://written-paid-api.onrender.com',
+  QUESTION_BANK_API_URL: process.env.NEXT_PUBLIC_QUESTION_BANK_API_URL || 'https://question-bank-paid-api.onrender.com',
 };
 
 /**
@@ -123,6 +124,25 @@ export function getWrittenApiUrl(endpoint = '') {
   return cleanEndpoint;
 }
 
+/**
+ * Get full API endpoint URL for Question Bank Backend Service
+ */
+export function getQuestionBankApiUrl(endpoint = '') {
+  const baseUrl = process.env.NEXT_PUBLIC_QUESTION_BANK_API_URL || 'https://question-bank-paid-api.onrender.com';
+  if (!endpoint) return baseUrl;
+  if (endpoint.startsWith('http://') || endpoint.startsWith('https://')) return endpoint;
+
+  const cleanEndpoint = endpoint.startsWith('/') ? endpoint : '/' + endpoint;
+
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
+    if (!isLocalhost || process.env.NEXT_PUBLIC_QUESTION_BANK_API_URL) {
+      return `${baseUrl.replace(/\/$/, '')}${cleanEndpoint}`;
+    }
+  }
+  return cleanEndpoint;
+}
 
 /**
  * Format URL safely for external, internal, and asset links

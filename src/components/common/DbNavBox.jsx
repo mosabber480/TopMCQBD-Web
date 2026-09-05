@@ -77,6 +77,20 @@ export default function DbNavBox({ activeRoute }) {
       bg: '#d97706', // Amber Golden
     },
     {
+      text: 'Q-Bank Admin',
+      url: '/db-connection/dbquestionbank-admin',
+      altUrl: '/dbquestionbank-admin',
+      icon: 'fa-solid fa-sliders',
+      bg: '#ea580c', // Coral Orange
+    },
+    {
+      text: 'Q-Bank Test',
+      url: '/db-connection/dbquestionbank-test',
+      altUrl: '/dbquestionbank-test',
+      icon: 'fa-solid fa-globe',
+      bg: '#ea580c', // Coral Orange
+    },
+    {
       text: 'Free MCQ Admin',
       url: '/db-connection/dbfree-admin',
       altUrl: '/dbfree-admin',
@@ -121,7 +135,10 @@ export default function DbNavBox({ activeRoute }) {
           backgroundColor: btn.bg,
           color: '#ffffff',
           textDecoration: 'none',
-          padding: '9px 12px',
+          padding: '0 12px',
+          height: '38px',
+          minHeight: '38px',
+          maxHeight: '38px',
           borderRadius: '7px',
           fontSize: '12.5px',
           fontWeight: '700',
@@ -212,8 +229,24 @@ export default function DbNavBox({ activeRoute }) {
     );
   };
 
-  const leftGroup = [dbButtons[0], dbButtons[1], dbButtons[4], dbButtons[5], dbButtons[8], dbButtons[9]];
-  const rightGroup = [dbButtons[2], dbButtons[3], dbButtons[6], dbButtons[7], dbButtons[10], dbButtons[11]];
+  const leftGroup = [
+    dbButtons[0],
+    dbButtons[1],
+    dbButtons[4],
+    dbButtons[5],
+    dbButtons[8],
+    dbButtons[9],
+    dbButtons[12],
+    dbButtons[13],
+  ];
+  const rightGroup = [
+    dbButtons[2],
+    dbButtons[3],
+    dbButtons[6],
+    dbButtons[7],
+    dbButtons[10],
+    dbButtons[11],
+  ];
 
   return (
     <div className="db-nav-box-wrapper">
@@ -223,11 +256,11 @@ export default function DbNavBox({ activeRoute }) {
           <span className="nav-heading">Database Testing & Admin Suite</span>
         </div>
         <div className="title-right">
-          <small className="nav-sub">১২টি স্পেসিফিক ডাটাবেজ পেজ দ্রুত সুইচ করুন</small>
+          <small className="nav-sub">১৪টি স্পেসিফিক ডাটাবেজ পেজ দ্রুত সুইচ করুন</small>
         </div>
       </div>
 
-      {/* 12 Buttons Grid with Center Subtle Line on Desktop */}
+      {/* 14 Buttons Grid with Center Subtle Line on Desktop */}
       <div className="admin-actions-split-wrapper">
         <div className="admin-sub-grid">
           {leftGroup.map(renderButton)}
@@ -434,7 +467,7 @@ export default function DbNavBox({ activeRoute }) {
 
         .admin-actions-split-wrapper {
           display: flex;
-          align-items: stretch;
+          align-items: flex-start;
           gap: 12px;
           width: 100%;
         }
