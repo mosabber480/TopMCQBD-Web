@@ -276,7 +276,7 @@ export default function FullModelTestClient({ initialSearchParams }) {
 
     return (
       <main style={{ backgroundColor: '#f8fafc', minHeight: 'calc(100vh - 200px)', paddingBottom: '80px', paddingTop: '30px' }}>
-        <div className="container" style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 20px' }}>
+        <div className="container" style={{ maxWidth: '1300px', margin: '0 auto', padding: '0 20px' }}>
           
           {/* Breadcrumb & Navigation */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '10px' }}>
@@ -418,7 +418,7 @@ export default function FullModelTestClient({ initialSearchParams }) {
   if (examId) {
     return (
       <main style={{ padding: '40px 0 80px', backgroundColor: '#f8fafc', minHeight: 'calc(100vh - 200px)' }}>
-        <div className="container" style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 20px' }}>
+        <div className="container" style={{ maxWidth: '1300px', margin: '0 auto', padding: '0 20px' }}>
           
           {/* Breadcrumb & Navigation */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '10px' }}>
@@ -644,7 +644,7 @@ export default function FullModelTestClient({ initialSearchParams }) {
   // -------------------------------------------------------------
   return (
     <main style={{ padding: '40px 0 80px', backgroundColor: '#f8fafc', minHeight: 'calc(100vh - 200px)' }}>
-      <div className="container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px' }}>
+      <div className="container" style={{ maxWidth: '1300px', margin: '0 auto', padding: '0 20px' }}>
         
         {/* Page Header */}
         <div style={{ textAlign: 'center', marginBottom: '40px' }}>

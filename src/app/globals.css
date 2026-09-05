@@ -2,9 +2,42 @@
 
 .site-main-content {
     min-height: calc(100vh - 200px);
-    display: flex;
-    flex-direction: column;
+    width: 100%;
+    display: block;
 }
+
+/* ==========================================================================
+   PUBLIC WEBSITE PAGES & SECTIONS (MAX WIDTH 1300PX)
+   Does NOT apply to /admin or /db-connection pages
+   ========================================================================== */
+.site-main-content .container,
+.site-main-content > section,
+.site-main-content .section-container,
+.site-main-content .slider-section,
+.site-main-content .packages-container,
+.site-main-content .content-container,
+.site-main-content .faq-container,
+.site-main-content .not-found-wrapper,
+.header-wrapper,
+.footer-container,
+.announce-content {
+    max-width: 1300px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.page-banner {
+    width: 100%;
+}
+.page-banner .banner-content {
+    max-width: 1300px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    width: 100%;
+}
+
 
 @keyframes onlinePulse {
     75%, 100% {

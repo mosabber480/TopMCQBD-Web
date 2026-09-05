@@ -204,7 +204,7 @@ function LiveExamPlayerContent() {
 
   return (
     <main style={{ backgroundColor: '#f8fafc', minHeight: '85vh', padding: '30px 0 60px' }}>
-      <div className="container" style={{ maxWidth: '1150px', margin: '0 auto', padding: '0 20px' }}>
+      <div className="container" style={{ maxWidth: '1300px', margin: '0 auto', padding: '0 20px' }}>
         
         {/* Top Exam Header Bar */}
         <div style={{

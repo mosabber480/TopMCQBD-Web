@@ -378,7 +378,7 @@ function ModelTestContent() {
 
     return (
       <main style={{ backgroundColor: '#f8fafc', minHeight: 'calc(100vh - 200px)', paddingBottom: '80px', paddingTop: '30px' }}>
-        <div className="container" style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 20px' }}>
+        <div className="container" style={{ maxWidth: '1300px', margin: '0 auto', padding: '0 20px' }}>
           
           {/* Breadcrumb & Navigation */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '10px' }}>
@@ -487,7 +487,7 @@ function ModelTestContent() {
       <main style={{ backgroundColor: '#f8fafc', minHeight: 'calc(100vh - 200px)', paddingBottom: '80px' }}>
         {/* Dark Teal/Green Banner Header */}
         <div style={{ backgroundColor: '#006a4e', color: '#ffffff', padding: '40px 20px', textAlign: 'left' }}>
-          <div className="container" style={{ maxWidth: '1100px', margin: '0 auto' }}>
+          <div className="container" style={{ maxWidth: '1300px', margin: '0 auto' }}>
             <span style={{ fontSize: '0.85rem', letterSpacing: '1.5px', fontWeight: 700, opacity: 0.9, textTransform: 'uppercase' }}>
               {selectedSubject.code}
             </span>
@@ -502,7 +502,7 @@ function ModelTestContent() {
 
         {/* Sub-header / Breadcrumb Bar */}
         <div style={{ backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', padding: '12px 20px' }}>
-          <div className="container" style={{ maxWidth: '1100px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+          <div className="container" style={{ maxWidth: '1300px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
             <div style={{ fontSize: '0.9rem', color: '#64748b' }}>
               <Link href="/subjective-Practice-demo" style={{ color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>MCQ</Link>
               <span style={{ margin: '0 8px', color: '#cbd5e1' }}>/</span>
@@ -534,7 +534,7 @@ function ModelTestContent() {
         </div>
 
         {/* Chapters Grid Container (Refined Box Design) */}
-        <div className="container" style={{ maxWidth: '1100px', margin: '35px auto 0', padding: '0 20px' }}>
+        <div className="container" style={{ maxWidth: '1300px', margin: '35px auto 0', padding: '0 20px' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(480px, 1fr))', gap: '22px' }}>
             {chaptersList.map(ch => {
               const theme = selectedSubject.theme || {
@@ -676,7 +676,7 @@ function ModelTestContent() {
   if (examId) {
     return (
       <main style={{ padding: '40px 0 80px', backgroundColor: '#f8fafc', minHeight: 'calc(100vh - 200px)' }}>
-        <div className="container" style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 20px' }}>
+        <div className="container" style={{ maxWidth: '1300px', margin: '0 auto', padding: '0 20px' }}>
           
           {/* Breadcrumb & Navigation */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '10px' }}>
@@ -878,7 +878,7 @@ function ModelTestContent() {
   // -------------------------------------------------------------
   return (
     <main style={{ padding: '40px 0 80px', backgroundColor: '#f8fafc', minHeight: 'calc(100vh - 200px)' }}>
-      <div className="container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px' }}>
+      <div className="container" style={{ maxWidth: '1300px', margin: '0 auto', padding: '0 20px' }}>
         
         {/* Page Header */}
         <div style={{ textAlign: 'center', marginBottom: '40px' }}>

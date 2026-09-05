@@ -7,6 +7,8 @@
 .slider-section {
   position: relative;
   max-width: 1300px;
+  width: 100%;
+  box-sizing: border-box;
   margin: 20px auto;
   padding: 0 20px;
 }
@@ -122,6 +124,8 @@
 }
 .section-container {
   max-width: 1300px;
+  width: 100%;
+  box-sizing: border-box;
   margin: 40px auto 50px auto;
   padding: 0 20px;
 }
@@ -859,7 +863,7 @@
 /* ==========================================================================
    About Us Page (/about-us) Styles
    ========================================================================== */
-.content-container { max-width: 1000px; margin: 40px auto 50px auto; padding: 0 20px; }
+.content-container { max-width: 1300px; width: 100%; box-sizing: border-box; margin: 40px auto 50px auto; padding: 0 20px; }
 .card-box { background: white; border-radius: 12px; padding: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; margin-bottom: 30px; }
 .card-box h2 { font-size: 22px; color: var(--dark, #2c3e50); margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
 .card-box p { font-size: 15px; color: #4a5568; line-height: 1.8; margin-bottom: 15px; }
@@ -871,7 +875,9 @@
    FAQ Page (/faq) Styles
    ========================================================================== */
 .faq-container {
-  max-width: 1000px;
+  max-width: 1300px;
+  width: 100%;
+  box-sizing: border-box;
   margin: 40px auto 50px auto;
   padding: 0 20px;
 }

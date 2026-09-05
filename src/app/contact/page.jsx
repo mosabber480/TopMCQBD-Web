@@ -89,7 +89,7 @@ export default function ContactPage() {
           pointerEvents: 'none'
         }}></div>
 
-        <div style={{ maxWidth: '900px', margin: '0 auto', position: 'relative', zIndex: 2 }}>
+        <div style={{ maxWidth: '1300px', margin: '0 auto', position: 'relative', zIndex: 2 }}>
           {/* Breadcrumb */}
           <div style={{
             display: 'inline-flex',
@@ -557,7 +557,7 @@ export default function ContactPage() {
       </div>
 
       {/* 4. Mini FAQ Accordion Section */}
-      <section style={{ maxWidth: '1000px', margin: '0 auto', padding: '0 20px' }}>
+      <section style={{ maxWidth: '1300px', margin: '0 auto', padding: '0 20px' }}>
         <div style={{ textAlign: 'center', marginBottom: '25px' }}>
           <h3 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0f172a', marginBottom: '6px' }}>
             সাধারণ কিছু প্রশ্নোত্তর (FAQ)

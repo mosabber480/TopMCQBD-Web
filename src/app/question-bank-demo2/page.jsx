@@ -150,7 +150,7 @@ function Demo2Content() {
         }
 
         .hero-inner {
-          max-width: 1100px;
+          max-width: 1300px;
           margin: 0 auto;
           display: flex;
           align-items: center;
@@ -205,7 +205,7 @@ function Demo2Content() {
         }
 
         .demo2-content-container {
-          max-width: 1150px;
+          max-width: 1300px;
           margin: 30px auto 0 auto;
           padding: 0 20px;
         }
