@@ -20,16 +20,17 @@ const DEFAULT_EXAMS = [
     title: "৪৬তম বিসিএস প্রিলিমিনারি লাইভ গ্র্যান্ড মডেল টেস্ট - ০১",
     category: "bcs",
     categoryName: "বিসিএস",
-    badge: "লাইভ এক্সাম",
+    badge: "BCS",
     badgeColor: "rose",
+    tags: ["BCS", "বিসিএস", "46th BCS"],
     durationMinutes: 9, // 15 MCQs = 9 minutes (100 MCQs = 60 min ratio)
     totalMarks: 20,
     negativeMarking: 0.5,
     participants: 14820,
     questionsCount: 15,
     isFree: true,
-    scheduledStart: "2026-09-04T10:00:00.000Z",
-    scheduledEnd: "2026-09-10T23:59:59.000Z",
+    scheduledStart: "2026-09-04T00:00:00.000Z",
+    scheduledEnd: "2026-09-07T00:00:00.000Z",
     status: "live", // "upcoming", "live", "ended"
     description: "৪৬তম বিসিএস প্রিলিমিনারি পরীক্ষার সর্বশেষ সিলেবাস অনুসারে প্রণীত সম্পূর্ণ মডেল টেস্ট। ব্যাখ্যামূলক সমাধান ও তাৎক্ষণিক মেরিট পজিশন।",
     questions: [
@@ -160,16 +161,17 @@ const DEFAULT_EXAMS = [
     title: "কম্বাইন্ড ৮ ব্যাংক অফিসার ডেইলি প্র্যাকটিস টেস্ট",
     category: "bank",
     categoryName: "ব্যাংক জব",
-    badge: "জনপ্রিয়",
+    badge: "Bank",
     badgeColor: "emerald",
+    tags: ["Bank", "ব্যাংক", "Bank Officer"],
     durationMinutes: 6, // 10 MCQs = 6 minutes (100 MCQs = 60 min ratio)
     totalMarks: 10,
     negativeMarking: 0.25,
     participants: 9420,
     questionsCount: 10,
     isFree: true,
-    scheduledStart: "2026-09-04T08:00:00.000Z",
-    scheduledEnd: "2026-09-12T23:59:59.000Z",
+    scheduledStart: "2026-09-04T00:00:00.000Z",
+    scheduledEnd: "2026-09-07T00:00:00.000Z",
     status: "live",
     description: "বাংলাদেশ ব্যাংক এবং সমন্বিত ব্যাংক অফিসার পদের জন্য বিশেষ ইংরেজি, গণিত ও জেনারেল নলেজ প্রশ্ন সেট।",
     questions: [
@@ -219,9 +221,10 @@ const DEFAULT_EXAMS = [
     id: "primary-teacher-2026",
     title: "প্রাথমিক সহকারী শিক্ষক নিয়োগ স্পেশাল মডেল টেস্ট - ০৩",
     category: "primary",
-    categoryName: "প্রাইমারি",
-    badge: "নতুন",
+    categoryName: "প্রাথমিক",
+    badge: "Primary",
     badgeColor: "violet",
+    tags: ["Primary", "প্রাথমিক", "Primary Teacher"],
     durationMinutes: 12, // 20 MCQs = 12 minutes (100 MCQs = 60 min ratio)
     totalMarks: 20,
     negativeMarking: 0.25,
@@ -229,25 +232,45 @@ const DEFAULT_EXAMS = [
     questionsCount: 20,
     isFree: true,
     scheduledStart: "2026-09-04T00:00:00.000Z",
-    scheduledEnd: "2026-09-15T23:59:59.000Z",
+    scheduledEnd: "2026-09-07T00:00:00.000Z",
     status: "live",
     description: "প্রাইমারি নিয়োগ পরীক্ষার অনুরূপ ৮০ নম্বরের প্রস্তুতিমূলক প্রশ্ন থেকে বাছাইকৃত গুরুত্বপূর্ণ সেট।"
+  },
+  {
+    id: "ntrca-19-special",
+    title: "১৯তম শিক্ষক নিবন্ধন (NTRCA) স্পেশাল মডেল টেস্ট",
+    category: "ntrca",
+    categoryName: "শিক্ষক নিবন্ধন",
+    badge: "NTRCA",
+    badgeColor: "amber",
+    tags: ["NTRCA", "নিবন্ধন", "শিক্ষক নিবন্ধন"],
+    durationMinutes: 15,
+    totalMarks: 25,
+    negativeMarking: 0.25,
+    participants: 8720,
+    questionsCount: 25,
+    isFree: true,
+    scheduledStart: "2026-09-04T00:00:00.000Z",
+    scheduledEnd: "2026-09-07T00:00:00.000Z",
+    status: "live",
+    description: "১৯তম শিক্ষক নিবন্ধন প্রিলিমিনারি পরীক্ষার সিলেবাস অনুসারে স্কুল ও কলেজ পর্যায়ের পূর্ণাঙ্গ প্রস্তুতি টেস্ট।"
   },
   {
     id: "bcs-47-upcoming-grand",
     title: "৪৭তম বিসিএস প্রিলিমিনারি স্পেশাল লাইভ গ্র্যান্ড মডেল টেস্ট",
     category: "bcs",
     categoryName: "বিসিএস",
-    badge: "শীঘ্রই আসছে",
-    badgeColor: "amber",
+    badge: "BCS",
+    badgeColor: "rose",
+    tags: ["BCS", "বিসিএস", "47th BCS"],
     durationMinutes: 15, // 25 MCQs = 15 minutes (100 MCQs = 60 min ratio)
     totalMarks: 25,
     negativeMarking: 0.5,
     participants: 5200,
     questionsCount: 25,
     isFree: true,
-    scheduledStart: "2026-09-06T14:00:00.000Z",
-    scheduledEnd: "2026-09-06T20:00:00.000Z",
+    scheduledStart: "2026-09-06T00:00:00.000Z",
+    scheduledEnd: "2026-09-09T00:00:00.000Z",
     status: "upcoming",
     description: "৪৭তম বিসিএস প্রিলিমিনারি পরীক্ষার্থীদের জন্য জাতীয় পর্যায়ের মেধা যাচাই মডেল টেস্ট।"
   },
@@ -256,8 +279,9 @@ const DEFAULT_EXAMS = [
     title: "বিসিএস ও ব্যাংক ম্যাথ শর্টকাট স্পেশাল টেস্ট",
     category: "subject",
     categoryName: "গণিত ও আইসিটি",
-    badge: "টপ রেটেড",
-    badgeColor: "primary",
+    badge: "Subject",
+    badgeColor: "cyan",
+    tags: ["Subject", "Math", "বিষয়ভিত্তিক", "গণিত"],
     durationMinutes: 6, // 10 MCQs = 6 minutes (100 MCQs = 60 min ratio)
     totalMarks: 10,
     negativeMarking: 0.5,
@@ -265,8 +289,8 @@ const DEFAULT_EXAMS = [
     questionsCount: 10,
     isFree: true,
     scheduledStart: "2026-09-01T00:00:00.000Z",
-    scheduledEnd: "2026-09-30T23:59:59.000Z",
-    status: "live",
+    scheduledEnd: "2026-09-04T00:00:00.000Z",
+    status: "ended",
     description: "ঐকিক নিয়ম, শতকরা, লাভ-ক্ষতি, ধারা ও বীজগণিতের গুরুত্বপূর্ণ বাছাই করা প্রশ্ন।"
   }
 ];
@@ -298,6 +322,47 @@ export async function OPTIONS() {
   });
 }
 
+// Helper to calculate dynamic status from scheduled dates
+function getDynamicExamStatus(exam, now = new Date()) {
+  if (!exam) return 'live';
+  const currentTime = now instanceof Date ? now.getTime() : new Date(now).getTime();
+
+  const startTime = exam.scheduledStart ? new Date(exam.scheduledStart).getTime() : null;
+  let endTime = exam.scheduledEnd ? new Date(exam.scheduledEnd).getTime() : null;
+
+  // 3 days validity default if end time is missing or not after start
+  if (startTime && (!endTime || isNaN(endTime) || endTime <= startTime)) {
+    endTime = startTime + (3 * 24 * 60 * 60 * 1000);
+  }
+
+  // 1. Before start date -> Upcoming
+  if (startTime && !isNaN(startTime) && currentTime < startTime) {
+    return 'upcoming';
+  }
+
+  // 2. After end date -> Past (ended)
+  if (endTime && !isNaN(endTime) && currentTime > endTime) {
+    return 'past';
+  }
+
+  // 3. During scheduled window -> Live
+  return 'live';
+}
+
+function formatExamWithDynamicStatus(e) {
+  if (!e) return null;
+  const dynamicStatus = getDynamicExamStatus(e);
+  const qCount = Array.isArray(e.questions) && e.questions.length > 0 ? e.questions.length : (Number(e.questionsCount) || 10);
+  const calculatedDuration = Math.max(1, Math.round(qCount * 0.6));
+  return {
+    ...e,
+    id: e.id || e._id?.toString(),
+    durationMinutes: calculatedDuration,
+    status: dynamicStatus,
+    originalStatus: e.status
+  };
+}
+
 // GET: Fetch all live exams (or single exam by ?id=...)
 export async function GET(req) {
   let client;
@@ -316,7 +381,7 @@ export async function GET(req) {
         if (single) {
           return NextResponse.json({
             success: true,
-            exam: { ...single, id: single.id || single._id.toString() }
+            exam: formatExamWithDynamicStatus(single)
           }, { headers: CORS_HEADERS });
         }
       }
@@ -349,7 +414,7 @@ export async function GET(req) {
     if (examId) {
       const found = exams.find(e => e.id === examId);
       if (found) {
-        return NextResponse.json({ success: true, exam: { ...found, id: found.id || found._id?.toString() } }, { headers: CORS_HEADERS });
+        return NextResponse.json({ success: true, exam: formatExamWithDynamicStatus(found) }, { headers: CORS_HEADERS });
       }
       return NextResponse.json({ success: false, error: 'Exam not found' }, { status: 404, headers: CORS_HEADERS });
     }
@@ -358,17 +423,14 @@ export async function GET(req) {
       success: true,
       total: exams.length,
       isLiveMongo: true,
-      exams: exams.map(e => ({
-        ...e,
-        id: e.id || e._id?.toString()
-      }))
+      exams: exams.map(formatExamWithDynamicStatus)
     }, { headers: CORS_HEADERS });
 
   } catch (err) {
     return NextResponse.json({
       success: true,
       total: DEFAULT_EXAMS.length,
-      exams: DEFAULT_EXAMS,
+      exams: DEFAULT_EXAMS.map(formatExamWithDynamicStatus),
       isFallback: true
     }, { headers: CORS_HEADERS });
   } finally {

@@ -41,10 +41,8 @@ function LiveExamPlayerContent() {
               ? data.exam.questions.length 
               : (data.exam.questionsCount || 10);
             
-            // Standard ratio: 100 MCQs = 60 minutes => 0.6 min (36 sec) per question
-            const calculatedMinutes = data.exam.durationMinutes && Number(data.exam.durationMinutes) > 0
-              ? Number(data.exam.durationMinutes)
-              : Math.max(1, Math.round(qCount * 0.6));
+            // 100 MCQs = 60 minutes => 0.6 min per question (e.g. 10 MCQs = 6 min, 5 MCQs = 3 min)
+            const calculatedMinutes = Math.max(1, Math.round(qCount * 0.6));
             
             const durationSecs = calculatedMinutes * 60;
             setTimeLeft(durationSecs);
@@ -198,6 +196,56 @@ function LiveExamPlayerContent() {
         }}>
           সকল মডেল টেস্ট দেখুন ➔
         </Link>
+      </main>
+    );
+  }
+
+  const isUpcoming = exam && (
+    exam.status === 'upcoming' || 
+    (exam.scheduledStart && new Date(exam.scheduledStart).getTime() > Date.now())
+  );
+
+  if (isUpcoming) {
+    const sDate = exam.scheduledStart ? new Date(exam.scheduledStart) : null;
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const dateFormatted = sDate ? `${sDate.getUTCDate()} ${months[sDate.getUTCMonth()]} ${sDate.getUTCFullYear()}` : 'নির্ধারিত তারিখে';
+    return (
+      <main style={{ padding: '70px 20px', backgroundColor: '#f8fafc', minHeight: '85vh', textAlign: 'center' }}>
+        <div style={{
+          maxWidth: '520px',
+          margin: '0 auto',
+          backgroundColor: '#ffffff',
+          borderRadius: '16px',
+          padding: '36px 28px',
+          border: '1.5px solid #fde68a',
+          boxShadow: '0 8px 30px rgba(245, 158, 11, 0.12)'
+        }}>
+          <div style={{ width: '64px', height: '64px', borderRadius: '50%', backgroundColor: '#fef3c7', color: '#d97706', fontSize: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 18px' }}>
+            ⏳
+          </div>
+          <span style={{ display: 'inline-block', padding: '4px 14px', borderRadius: '50px', backgroundColor: '#fffbeb', color: '#b45309', border: '1px solid #fde68a', fontSize: '0.85rem', fontWeight: 700, marginBottom: '12px' }}>
+            পরীক্ষাটি এখনো শুরু হয়নি
+          </span>
+          <h2 style={{ color: '#0f172a', fontSize: '1.35rem', fontWeight: 800, marginBottom: '12px', lineHeight: 1.4 }}>
+            {exam.title}
+          </h2>
+          <p style={{ color: '#475569', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '24px' }}>
+            এই লাইভ মডেল টেস্টটি <strong>{dateFormatted}</strong> তারিখে স্বয়ংক্রিয়ভাবে লাইভ হবে। নির্ধারিত সময়ে অংশগ্রহণ করুন।
+          </p>
+          <Link href="/live-exam-model-test" style={{
+            display: 'inline-block',
+            padding: '12px 28px',
+            borderRadius: '10px',
+            backgroundColor: '#0284c7',
+            color: '#ffffff',
+            fontWeight: 700,
+            textDecoration: 'none',
+            fontSize: '0.95rem',
+            boxShadow: '0 4px 12px rgba(2, 132, 199, 0.25)'
+          }}>
+            ⬅ লাইভ পরীক্ষা তালিকায় ফিরে যান
+          </Link>
+        </div>
       </main>
     );
   }

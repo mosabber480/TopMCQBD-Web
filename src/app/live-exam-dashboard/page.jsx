@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { getLiveExamApiUrl } from '@/lib/config';
+import LiveExamNavBox from '@/components/common/LiveExamNavBox';
 
 export default function LiveExamDashboardPage() {
   const [stats, setStats] = useState({
@@ -61,9 +62,12 @@ export default function LiveExamDashboardPage() {
   ];
 
   return (
-    <div style={{ padding: '40px 0 50px', backgroundColor: '#f8fafc', minHeight: 'auto' }}>
+    <div style={{ padding: '16px 0 45px', backgroundColor: '#f8fafc', minHeight: 'auto' }}>
       <div className="container" style={{ maxWidth: '1300px', margin: '0 auto', padding: '0 20px' }}>
         
+        {/* Navigation Action Box */}
+        <LiveExamNavBox activeRoute="/live-exam-dashboard" />
+
         {/* User Profile Header Card */}
         <div style={{
           backgroundColor: '#ffffff',
@@ -91,7 +95,7 @@ export default function LiveExamDashboardPage() {
               fontSize: '1.8rem',
               fontWeight: 700
             }}>
-              👤
+              <i className="fa-solid fa-user"></i>
             </div>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
@@ -104,9 +108,12 @@ export default function LiveExamDashboardPage() {
                   backgroundColor: '#fef3c7',
                   color: '#d97706',
                   fontSize: '0.8rem',
-                  fontWeight: 700
+                  fontWeight: 700,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px'
                 }}>
-                  🛡️ প্রো মেম্বার
+                  <i className="fa-solid fa-shield-halved"></i> প্রো মেম্বার
                 </span>
               </div>
               <p style={{ color: '#64748b', fontSize: '0.92rem' }}>
@@ -119,6 +126,9 @@ export default function LiveExamDashboardPage() {
             <Link 
               href="/live-exam-model-test"
               style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
                 padding: '10px 20px',
                 borderRadius: '10px',
                 backgroundColor: '#0284c7',
@@ -129,11 +139,14 @@ export default function LiveExamDashboardPage() {
                 boxShadow: '0 4px 12px rgba(2,132,199,0.25)'
               }}
             >
-              🔥 নতুন এক্সাম দিন ➔
+              <i className="fa-solid fa-fire"></i> নতুন এক্সাম দিন <i className="fa-solid fa-arrow-right" style={{ fontSize: '0.8rem', marginLeft: '2px' }}></i>
             </Link>
             <Link 
               href="/national-merit-position"
               style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
                 padding: '10px 20px',
                 borderRadius: '10px',
                 backgroundColor: '#ffffff',
@@ -144,7 +157,7 @@ export default function LiveExamDashboardPage() {
                 textDecoration: 'none'
               }}
             >
-              🏆 জাতীয় মেরিট পজিশন
+              <i className="fa-solid fa-trophy" style={{ color: '#d97706' }}></i> জাতীয় মেরিট পজিশন
             </Link>
           </div>
         </div>
