@@ -383,15 +383,15 @@ function ModelTestContent() {
           {/* Breadcrumb & Navigation */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '10px' }}>
             <div style={{ fontSize: '0.9rem', color: '#64748b' }}>
-              <Link href="/subjective-model-test-demo" style={{ color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>MCQ</Link>
+              <Link href="/subjective-Practice-demo" style={{ color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>MCQ</Link>
               <span style={{ margin: '0 8px', color: '#cbd5e1' }}>/</span>
-              <Link href={`/subjective-model-test-demo?examId=${selectedExam.id}&subject=${selectedSubject.id}`} style={{ color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>{selectedSubject.name}</Link>
+              <Link href={`/subjective-Practice-demo?examId=${selectedExam.id}&subject=${selectedSubject.id}`} style={{ color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>{selectedSubject.name}</Link>
               <span style={{ margin: '0 8px', color: '#cbd5e1' }}>/</span>
               <span style={{ color: '#0f172a', fontWeight: 700 }}>অধ্যায় {chapterId}</span>
             </div>
 
             <button
-              onClick={() => router.push(`/subjective-model-test-demo?examId=${selectedExam.id}&subject=${selectedSubject.id}`)}
+              onClick={() => router.push(`/subjective-Practice-demo?examId=${selectedExam.id}&subject=${selectedSubject.id}`)}
               style={{
                 backgroundColor: '#ffffff',
                 color: '#334155',
@@ -504,15 +504,15 @@ function ModelTestContent() {
         <div style={{ backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', padding: '12px 20px' }}>
           <div className="container" style={{ maxWidth: '1100px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
             <div style={{ fontSize: '0.9rem', color: '#64748b' }}>
-              <Link href="/subjective-model-test-demo" style={{ color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>MCQ</Link>
+              <Link href="/subjective-Practice-demo" style={{ color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>MCQ</Link>
               <span style={{ margin: '0 8px', color: '#cbd5e1' }}>/</span>
-              <Link href={`/subjective-model-test-demo?examId=${selectedExam.id}`} style={{ color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>{selectedExam.categoryName}</Link>
+              <Link href={`/subjective-Practice-demo?examId=${selectedExam.id}`} style={{ color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>{selectedExam.categoryName}</Link>
               <span style={{ margin: '0 8px', color: '#cbd5e1' }}>/</span>
               <span style={{ color: '#0f172a', fontWeight: 700 }}>{selectedSubject.name}</span>
             </div>
 
             <button
-              onClick={() => router.push(`/subjective-model-test-demo?examId=${selectedExam.id}`)}
+              onClick={() => router.push(`/subjective-Practice-demo?examId=${selectedExam.id}`)}
               style={{
                 backgroundColor: '#f1f5f9',
                 color: '#334155',
@@ -533,78 +533,137 @@ function ModelTestContent() {
           </div>
         </div>
 
-        {/* Chapters Grid Container */}
+        {/* Chapters Grid Container (Refined Box Design) */}
         <div className="container" style={{ maxWidth: '1100px', margin: '35px auto 0', padding: '0 20px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(500px, 1fr))', gap: '20px' }}>
-            {chaptersList.map(ch => (
-              <div
-                key={ch.id}
-                onClick={() => router.push(`/subjective-model-test-demo?examId=${selectedExam.id}&subject=${selectedSubject.id}&chapterId=${ch.id}`)}
-                style={{
-                  backgroundColor: '#ffffff',
-                  borderRadius: '14px',
-                  padding: '24px',
-                  border: '1px solid #e2e8f0',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
-                  display: 'flex',
-                  gap: '16px',
-                  alignItems: 'flex-start',
-                  cursor: 'pointer',
-                  transition: 'transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-3px)';
-                  e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.08)';
-                  e.currentTarget.style.borderColor = '#006a4e';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'none';
-                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.03)';
-                  e.currentTarget.style.borderColor = '#e2e8f0';
-                }}
-              >
-                {/* Green Number Badge Box */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(480px, 1fr))', gap: '22px' }}>
+            {chaptersList.map(ch => {
+              const theme = selectedSubject.theme || {
+                color: '#006a4e',
+                gradient: 'linear-gradient(135deg, #006a4e 0%, #059669 100%)',
+                lightBg: '#f0fdf4',
+                borderColor: '#bbf7d0',
+                glowColor: 'rgba(0, 106, 78, 0.12)'
+              };
+
+              return (
                 <div
+                  key={ch.id}
+                  onClick={() => router.push(`/subjective-Practice-demo?examId=${selectedExam.id}&subject=${selectedSubject.id}&chapterId=${ch.id}`)}
                   style={{
-                    width: '38px',
-                    height: '38px',
-                    borderRadius: '10px',
-                    backgroundColor: '#e6f4ea',
-                    color: '#006a4e',
+                    backgroundColor: '#ffffff',
+                    borderRadius: '20px',
+                    padding: '24px 22px',
+                    border: '1.5px solid #e2e8f0',
+                    boxShadow: '0 4px 16px rgba(15, 23, 42, 0.04)',
+                    cursor: 'pointer',
                     display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontWeight: 800,
-                    fontSize: '1rem',
-                    flexShrink: 0
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-6px)';
+                    e.currentTarget.style.boxShadow = `0 18px 30px -6px ${theme.glowColor}, 0 8px 16px rgba(0,0,0,0.04)`;
+                    e.currentTarget.style.borderColor = theme.color;
+                    const cta = e.currentTarget.querySelector('.chapter-cta-btn');
+                    if (cta) {
+                      cta.style.filter = 'brightness(0.92)';
+                      const arrow = cta.querySelector('.chapter-cta-arrow');
+                      if (arrow) arrow.style.transform = 'translateX(4px)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'none';
+                    e.currentTarget.style.boxShadow = '0 4px 16px rgba(15, 23, 42, 0.04)';
+                    e.currentTarget.style.borderColor = '#e2e8f0';
+                    const cta = e.currentTarget.querySelector('.chapter-cta-btn');
+                    if (cta) {
+                      cta.style.filter = 'none';
+                      const arrow = cta.querySelector('.chapter-cta-arrow');
+                      if (arrow) arrow.style.transform = 'none';
+                    }
                   }}
                 >
-                  {ch.id}
-                </div>
-
-                {/* Chapter Details */}
-                <div style={{ flex: 1 }}>
-                  <h3 style={{ fontSize: '1.2rem', color: '#0f172a', fontWeight: 700, marginBottom: '8px', lineHeight: '1.4' }}>
-                    {ch.title}
-                  </h3>
-                  <p style={{ fontSize: '0.88rem', color: '#475569', lineHeight: '1.6', marginBottom: '16px' }}>
-                    {ch.desc}
-                  </p>
+                  {/* Decorative left accent line */}
                   <div
                     style={{
-                      color: selectedSubject?.theme?.color || '#006a4e',
-                      fontSize: '0.9rem',
+                      position: 'absolute',
+                      top: 0,
+                      bottom: 0,
+                      left: 0,
+                      width: '5px',
+                      background: theme.gradient
+                    }}
+                  />
+
+                  <div>
+                    {/* Header Row with Badge */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+                      <span
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          padding: '4px 12px',
+                          borderRadius: '20px',
+                          backgroundColor: theme.lightBg,
+                          color: theme.color,
+                          fontSize: '0.82rem',
+                          fontWeight: 700,
+                          border: `1px solid ${theme.borderColor}`
+                        }}
+                      >
+                        অধ্যায় {toBanglaNumber(ch.id)}
+                      </span>
+                    </div>
+
+                    <h3 style={{ fontSize: '1.25rem', color: '#0f172a', fontWeight: 700, marginBottom: '8px', lineHeight: '1.4' }}>
+                      {ch.title}
+                    </h3>
+                    <p style={{ fontSize: '0.9rem', color: '#475569', lineHeight: '1.6', margin: '0 0 16px 0' }}>
+                      {ch.desc}
+                    </p>
+                  </div>
+
+                  {/* Call to Action Button */}
+                  <div
+                    className="chapter-cta-btn"
+                    style={{
+                      width: '100%',
+                      padding: '11px 16px',
+                      borderRadius: '12px',
+                      background: theme.gradient,
+                      color: '#ffffff',
                       fontWeight: 700,
-                      display: 'inline-flex',
+                      fontSize: '0.92rem',
+                      display: 'flex',
                       alignItems: 'center',
-                      gap: '6px'
+                      justifyContent: 'center',
+                      gap: '8px',
+                      boxShadow: '0 4px 14px rgba(0, 0, 0, 0.08)',
+                      transition: 'all 0.25s ease, filter 0.2s ease',
+                      border: 'none',
+                      cursor: 'pointer'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.stopPropagation();
+                      e.currentTarget.style.filter = 'brightness(0.88)';
+                      e.currentTarget.style.boxShadow = '0 6px 18px rgba(0, 0, 0, 0.14)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.stopPropagation();
+                      e.currentTarget.style.filter = 'none';
+                      e.currentTarget.style.boxShadow = '0 4px 14px rgba(0, 0, 0, 0.08)';
                     }}
                   >
-                    <span>টপিক দেখুন</span> <i className="fa-solid fa-arrow-right" style={{ fontSize: '0.85rem' }}></i>
+                    <span>টপিক দেখুন</span>
+                    <i className="fa-solid fa-arrow-right chapter-cta-arrow" style={{ fontSize: '0.85rem', transition: 'transform 0.2s ease' }}></i>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </main>
@@ -622,13 +681,13 @@ function ModelTestContent() {
           {/* Breadcrumb & Navigation */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '10px' }}>
             <div style={{ fontSize: '0.9rem', color: '#64748b' }}>
-              <Link href="/subjective-model-test-demo" style={{ color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>সকল মডেল টেস্ট</Link>
+              <Link href="/subjective-Practice-demo" style={{ color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>সকল মডেল টেস্ট</Link>
               <span style={{ margin: '0 8px', color: '#cbd5e1' }}>/</span>
               <span style={{ color: '#0f172a', fontWeight: 700 }}>{selectedExam.title}</span>
             </div>
 
             <button
-              onClick={() => router.push('/subjective-model-test-demo')}
+              onClick={() => router.push('/subjective-Practice-demo')}
               style={{
                 backgroundColor: '#ffffff',
                 color: '#334155',
@@ -672,7 +731,7 @@ function ModelTestContent() {
               return (
                 <div
                   key={sub.id}
-                  onClick={() => router.push(`/subjective-model-test-demo?examId=${selectedExam.id}&subject=${sub.id}`)}
+                  onClick={() => router.push(`/subjective-Practice-demo?examId=${selectedExam.id}&subject=${sub.id}`)}
                   style={{
                     backgroundColor: '#ffffff',
                     borderRadius: '20px',
@@ -1135,7 +1194,7 @@ function ModelTestContent() {
                       </span>
                     </div>
                     <button
-                      onClick={() => router.push(`/subjective-model-test-demo?examId=${exam.id}`)}
+                      onClick={() => router.push(`/subjective-Practice-demo?examId=${exam.id}`)}
                       style={{
                         backgroundColor: '#0284c7',
                         color: '#ffffff',

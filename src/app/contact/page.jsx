@@ -54,13 +54,13 @@ export default function ContactPage() {
   ];
 
   return (
-    <div style={{ backgroundColor: '#f8fafc', minHeight: '100vh', paddingBottom: '60px' }}>
+    <div style={{ backgroundColor: '#f8fafc', minHeight: '100vh', paddingBottom: '50px' }}>
       
       {/* 1. Hero Header Section */}
       <section style={{
         background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0369a1 100%)',
         color: '#ffffff',
-        padding: '50px 20px 60px 20px',
+        padding: '50px 20px',
         position: 'relative',
         overflow: 'hidden',
         textAlign: 'center'
@@ -135,7 +135,7 @@ export default function ContactPage() {
       </section>
 
       {/* 2. Top Fast Contact Highlights */}
-      <div style={{ maxWidth: '1200px', margin: '-30px auto 40px auto', padding: '0 20px', position: 'relative', zIndex: 3 }}>
+      <div style={{ maxWidth: '1300px', margin: '-30px auto 40px auto', padding: '0 20px', position: 'relative', zIndex: 3 }}>
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
@@ -249,7 +249,7 @@ export default function ContactPage() {
       </div>
 
       {/* 3. Main Form & Details Two-Column Grid */}
-      <div style={{ maxWidth: '1200px', margin: '0 auto 50px auto', padding: '0 20px' }}>
+      <div style={{ maxWidth: '1300px', margin: '0 auto 50px auto', padding: '0 20px' }}>
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))',

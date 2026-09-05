@@ -65,7 +65,7 @@ export default function AllMcqPage() {
   const mainCategories = Object.keys(categoryTree);
 
   return (
-    <div className="container" style={{ maxWidth: '1300px', margin: '30px auto', padding: '0 20px' }}>
+    <div className="container" style={{ maxWidth: '1300px', margin: '40px auto 50px auto', padding: '0 20px' }}>
       <div className="all-mcq-card">
         <Link href="/" className="btn-home">
           <i className="fa-solid fa-arrow-left"></i> হোম পেজ

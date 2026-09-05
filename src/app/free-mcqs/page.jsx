@@ -78,7 +78,7 @@ export default function FreeMcqsPage() {
   };
 
   return (
-    <div style={{ maxWidth: '1200px', margin: '30px auto', padding: '0 20px' }}>
+    <div style={{ maxWidth: '1300px', margin: '40px auto 50px auto', padding: '0 20px' }}>
       {/* Banner */}
       <div
         style={{

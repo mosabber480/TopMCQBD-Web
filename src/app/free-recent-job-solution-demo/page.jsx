@@ -316,11 +316,11 @@ function QuestionBankContent() {
   );
 }
 
-export default function QuestionBankDemoPage() {
+export default function FreeRecentJobSolutionDemoPage() {
   return (
     <Suspense fallback={
       <div style={{ textAlign: 'center', padding: '80px 20px', color: '#64748b' }}>
-        প্রশ্নব্যাংক পেজ লোড হচ্ছে...
+        রিসেন্ট জব সল্যুশন পেজ লোড হচ্ছে...
       </div>
     }>
       <QuestionBankContent />

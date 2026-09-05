@@ -18,16 +18,6 @@
         "icon": "fa-solid fa-house"
       },
       {
-        "title": "কুইজ অনুশীলন",
-        "url": "/questions",
-        "icon": "fa-solid fa-bolt",
-        "badgeText": "FREE",
-        "badgeType": "free",
-        "isMegaMenu": true,
-        "megaMenuId": "mega_1787215391182",
-        "subMenus": []
-      },
-      {
         "title": "সকল MCQ",
         "url": "/all-mcq",
         "icon": "fa-solid fa-layer-group",
@@ -74,7 +64,42 @@
           },
           {
             "title": "লাইভ মডেল টেস্ট",
-            "url": "/live-exam-model-test"
+            "url": "/live-exam-model-test",
+            "icon": "fa-solid fa-ranking-star",
+            "badgeText": "Live Exam",
+            "badgeType": "live"
+          },
+          {
+            "title": "বিষয়ভিত্তিক অনুশীলন",
+            "url": "/subjective-Practice-demo",
+            "icon": "fa-solid fa-layer-group",
+            "badgeText": "Best",
+            "badgeType": "live"
+          }
+        ],
+        "isMegaMenu": false,
+        "megaMenuId": null
+      },
+      {
+        "title": "Free Plan",
+        "url": "#",
+        "icon": "fa-solid fa-hockey-puck",
+        "badgeText": "Free",
+        "badgeType": "free",
+        "subMenus": [
+          {
+            "title": "Recent Job Solution",
+            "url": "/free-recent-job-solution-demo",
+            "icon": "fa-solid fa-bolt",
+            "badgeText": "Free",
+            "badgeType": "free"
+          },
+          {
+            "title": "Free Model Test",
+            "url": "/free-model-test-demo",
+            "icon": "fa-solid fa-bolt",
+            "badgeText": "Free",
+            "badgeType": "free"
           }
         ],
         "isMegaMenu": false,
@@ -265,10 +290,6 @@
       {
         "title": "Privacy & Refund Policy",
         "url": "/privacy-and-refund-policy"
-      },
-      {
-        "title": "System Status",
-        "url": "/status.html"
       }
     ]
   }

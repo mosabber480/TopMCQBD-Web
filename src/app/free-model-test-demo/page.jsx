@@ -10,18 +10,18 @@ const toBanglaNumber = (num) => {
   return String(num).split('').map(d => banglaDigits[d] !== undefined ? banglaDigits[d] : d).join('');
 };
 
-// Full Grand Model Tests Data
+// Free Model Tests Data
 const INITIAL_EXAMS = [
   {
-    id: "bcs-46-grand-01",
-    title: "৪৬তম বিসিএস প্রিলিমিনারি লাইভ পূর্ণাঙ্গ গ্র্যান্ড মডেল টেস্ট - ০১",
+    id: "bcs-46-live",
+    title: "৪৬তম বিসিএস প্রিলিমিনারি লাইভ গ্র্যান্ড মডেল টেস্ট - ০১",
     category: "bcs",
-    categoryName: "বিসিএস পূর্ণাঙ্গ",
-    tags: ["Live Grand Test", "200 Marks", "BCS Full"],
+    categoryName: "বিসিএস",
+    tags: ["Live Exam", "BCS", "Grand Test"],
     badgeColor: "rose",
-    onlineUsers: 54,
+    onlineUsers: 42,
     borderColor: "#0284c7",
-    description: "৪৬তম বিসিএস প্রিলিমিনারি পরীক্ষার সর্বশেষ ২০০ নম্বরের সিলেবাস অনুসারে প্রণীত সম্পূর্ণ মডেল টেস্ট। ব্যাখ্যামূলক সমাধান ও তাৎক্ষণিক মেরিট পজিশন।",
+    description: "৪৬তম বিসিএস প্রিলিমিনারি পরীক্ষার সর্বশেষ সিলেবাস অনুসারে প্রণীত সম্পূর্ণ মডেল টেস্ট। ব্যাখ্যামূলক সমাধান ও তাৎক্ষণিক মেরিট পজিশন।",
     subjectsText: "বাংলা (৩৫), English (৩৫), গণিত ও মানসিক দক্ষতা (৩০), সাধারণ জ্ঞান (৫০), বিজ্ঞান ও আইসিটি (৩০), ভূগোল ও সুশাসন (২০)",
     totalQuestions: 200,
     totalMarks: 200,
@@ -29,31 +29,31 @@ const INITIAL_EXAMS = [
     negativeMarks: "০.৫০"
   },
   {
-    id: "bcs-46-grand-02",
-    title: "৪৬তম বিসিএস প্রিলিমিনারি পূর্ণাঙ্গ প্রস্তুতি স্পেশাল টেস্ট - ০২",
+    id: "bcs-45-past",
+    title: "৪৫তম বিসিএস প্রিলিমিনারি মূল প্রশ্ন সমাধান ও পরীক্ষা",
     category: "bcs",
-    categoryName: "বিসিএস পূর্ণাঙ্গ",
-    tags: ["Grand Test", "200 Marks", "Top Rated"],
+    categoryName: "বিসিএস প্রশ্নব্যাংক",
+    tags: ["Previous Year", "BCS", "Question Bank"],
     badgeColor: "amber",
-    onlineUsers: 48,
+    onlineUsers: 38,
     borderColor: "#0284c7",
-    description: "২০০টি প্রশ্নের স্ট্যান্ডার্ড বিসিএস স্ট্যান্ডার্ড সেট। প্রতিটি প্রশ্নের রেফারেন্স ও ব্যাখ্যামূলক বিশ্লেষণ।",
-    subjectsText: "বাংলা সাহিত্য ও ব্যাকরণ, English Language & Literature, সাধারণ গণিত, বাংলাদেশ ও আন্তর্জাতিক বিষয়াবলি",
+    description: "৪৫তম বিসিএস পরীক্ষার ২০০টি প্রশ্নের নির্ভুল সমাধান ও ব্যাখ্যা।",
+    subjectsText: "বাংলা ভাষা ও ব্যাকরণ, বাংলা সাহিত্যের ইতিহাস, গল্প, নাটক, প্রবন্ধ, গুরুত্বপূর্ণ তথ্য",
     totalQuestions: 200,
     totalMarks: 200,
     durationMinutes: 120,
     negativeMarks: "০.৫০"
   },
   {
-    id: "bank-officer-full-01",
-    title: "কম্বাইন্ড ৮ ব্যাংক অফিসার ১০০ নম্বরের পূর্ণাঙ্গ মডেল টেস্ট - ০১",
+    id: "bank-officer-daily",
+    title: "কম্বাইন্ড ৮ ব্যাংক অফিসার ডেইলি প্র্যাকটিস টেস্ট",
     category: "bank",
-    categoryName: "ব্যাংক জব পূর্ণাঙ্গ",
-    tags: ["Popular", "100 Marks", "Bank Full"],
+    categoryName: "ব্যাংক জব",
+    tags: ["Popular", "Bank Job", "Daily Test"],
     badgeColor: "emerald",
-    onlineUsers: 39,
+    onlineUsers: 29,
     borderColor: "#10b981",
-    description: "বাংলাদেশ ব্যাংক ও ৮টি সমন্বিত সরকারি ব্যাংকের অফিসার পদের জন্য নির্ধারিত স্ট্যান্ডার্ড ১০০ নম্বরের প্রশ্ন সেট।",
+    description: "বাংলাদেশ ব্যাংক এবং সমন্বিত ব্যাংক অফিসার পদের জন্য বিশেষ ইংরেজি, গণিত ও জেনারেল নলেজ প্রশ্ন সেট।",
     subjectsText: "English (30), Mathematics (30), General Knowledge & Banking (20), Bangla (10), ICT (10)",
     totalQuestions: 100,
     totalMarks: 100,
@@ -61,15 +61,15 @@ const INITIAL_EXAMS = [
     negativeMarks: "০.২৫"
   },
   {
-    id: "primary-teacher-full-01",
-    title: "প্রাথমিক সহকারী শিক্ষক নিয়োগ ৮০ নম্বরের পূর্ণাঙ্গ মডেল টেস্ট - ০১",
+    id: "primary-teacher-2026",
+    title: "প্রাথমিক সহকারী শিক্ষক নিয়োগ স্পেশাল মডেল টেস্ট - ০৩",
     category: "primary",
-    categoryName: "প্রাইমারি পূর্ণাঙ্গ",
-    tags: ["New", "80 Marks", "Primary Full"],
+    categoryName: "প্রাইমারি",
+    tags: ["New", "Primary", "Teacher Exam"],
     badgeColor: "violet",
-    onlineUsers: 62,
+    onlineUsers: 45,
     borderColor: "#8b5cf6",
-    description: "প্রাইমারি সহকারী শিক্ষক নিয়োগ পরীক্ষার সর্বশেষ প্যাটার্ন অনুযায়ী ৮০টি গুরুত্বপূর্ণ এমসিকিউ প্রশ্ন সংবলিত পূর্ণাঙ্গ সেট।",
+    description: "প্রাইমারি নিয়োগ পরীক্ষার অনুরূপ ৮০ নম্বরের প্রস্তুতিমূলক প্রশ্ন থেকে বাছাইকৃত গুরুত্বপূর্ণ সেট।",
     subjectsText: "বাংলা (২০), ইংরেজি (২০), গণিত (২০), সাধারণ জ্ঞান (২০)",
     totalQuestions: 80,
     totalMarks: 80,
@@ -77,31 +77,31 @@ const INITIAL_EXAMS = [
     negativeMarks: "০.২৫"
   },
   {
-    id: "primary-teacher-full-02",
-    title: "প্রাথমিক শিক্ষক নিয়োগ চূড়ান্ত প্রস্তুতি স্পেশাল মডেল টেস্ট - ০২",
-    category: "primary",
-    categoryName: "প্রাইমারি পূর্ণাঙ্গ",
-    tags: ["80 Marks", "Top Selection"],
-    badgeColor: "violet",
-    onlineUsers: 41,
-    borderColor: "#8b5cf6",
-    description: "প্রাইমারি নিয়োগ পরীক্ষার অনুরূপ ৮০ নম্বরের প্রস্তুতিমূলক প্রশ্ন থেকে বাছাইকৃত শতভাগ কমন উপযোগী সেট।",
-    subjectsText: "বাংলা সাহিত্য ও ব্যাকরণ, ইংরেজি গ্রামার, পাটিগণিত ও জ্যামিতি, সাম্প্রতিক তথ্য",
-    totalQuestions: 80,
-    totalMarks: 80,
-    durationMinutes: 60,
+    id: "math-shortcut-mastery",
+    title: "বিসিএস ও ব্যাংক ম্যাথ শর্টকাট স্পেশাল টেস্ট",
+    category: "subject",
+    categoryName: "গণিত ও আইসিটি",
+    tags: ["Top Rated", "Math", "Shortcut"],
+    badgeColor: "cyan",
+    onlineUsers: 19,
+    borderColor: "#06b6d4",
+    description: "ঐকিক নিয়ম, শতকরা, লাভ-ক্ষতি, ধারা ও বীজগণিতের গুরুত্বপূর্ণ বাছাই করা প্রশ্ন।",
+    subjectsText: "ঐকিক নিয়ম, শতকরা, লাভ-ক্ষতি, মান নির্ণয়, সূচক ও লগারিদম, জ্যামিতি",
+    totalQuestions: 50,
+    totalMarks: 50,
+    durationMinutes: 45,
     negativeMarks: "০.২৫"
   },
   {
-    id: "ntrca-18th-full",
-    title: "১৮তম শিক্ষক নিবন্ধন (NTRCA) ১০০ নম্বরের পূর্ণাঙ্গ গ্র্যান্ড টেস্ট",
+    id: "ntrca-18th-college",
+    title: "১৮তম শিক্ষক নিবন্ধন (NTRCA) স্পেশাল গ্র্যান্ড টেস্ট",
     category: "primary",
-    categoryName: "শিক্ষক নিবন্ধন পূর্ণাঙ্গ",
-    tags: ["Popular", "100 Marks", "NTRCA Full"],
+    categoryName: "শিক্ষক নিবন্ধন",
+    tags: ["Popular", "NTRCA", "Teacher Registration"],
     badgeColor: "amber",
-    onlineUsers: 45,
+    onlineUsers: 33,
     borderColor: "#f59e0b",
-    description: "স্কুল ও কলেজ উভয় পর্যায়ের শিক্ষক নিবন্ধন পরীক্ষার ১০০ নম্বরের পূর্ণাঙ্গ প্রিলিমিনারি মডেল টেস্ট।",
+    description: "স্কুল ও কলেজ পর্যায়ের শিক্ষক নিবন্ধন পরীক্ষার শতভাগ কমন উপযোগী মডেল টেস্ট।",
     subjectsText: "বাংলা (২৫), ইংরেজি (২৫), সাধারণ গণিত (২৫), সাধারণ জ্ঞান (২৫)",
     totalQuestions: 100,
     totalMarks: 100,
@@ -110,19 +110,25 @@ const INITIAL_EXAMS = [
   }
 ];
 
-// Subjects Data per Exam
-const SUBJECTS_DATA = [
+// Master Subjects Data per Exam
+const ALL_SUBJECTS_DATA = [
   {
     id: "bangla",
     code: "BANGLA",
     name: "বাংলা",
-    desc: "ব্যাকরণ, সাহিত্য ও শুদ্ধ প্রয়োগ",
+    desc: "ব্যাকরণ, সাহিত্য, ভাষা রীতি ও শুদ্ধ প্রয়োগ",
     modelTestsCount: 20,
+    questionsCount: 35,
+    duration: 35,
+    marks: 35,
     theme: {
       color: "#006a4e",
       gradient: "linear-gradient(135deg, #006a4e 0%, #059669 100%)",
       lightBg: "#f0fdf4",
       borderColor: "#bbf7d0",
+      badgeBg: "#dcfce7",
+      badgeText: "#15803d",
+      icon: "fa-solid fa-book-open-reader",
       glowColor: "rgba(0, 106, 78, 0.12)"
     }
   },
@@ -130,13 +136,19 @@ const SUBJECTS_DATA = [
     id: "english",
     code: "ENGLISH",
     name: "English",
-    desc: "Grammar, Vocabulary & Composition",
+    desc: "Grammar, Vocabulary, Idioms & Comprehension",
     modelTestsCount: 20,
+    questionsCount: 35,
+    duration: 35,
+    marks: 35,
     theme: {
       color: "#0284c7",
       gradient: "linear-gradient(135deg, #0284c7 0%, #2563eb 100%)",
       lightBg: "#f0f9ff",
       borderColor: "#bae6fd",
+      badgeBg: "#e0f2fe",
+      badgeText: "#0369a1",
+      icon: "fa-solid fa-spell-check",
       glowColor: "rgba(2, 132, 199, 0.12)"
     }
   },
@@ -144,13 +156,19 @@ const SUBJECTS_DATA = [
     id: "math",
     code: "MATHEMATICS",
     name: "গণিত",
-    desc: "পাটিগণিত, বীজগণিত, জ্যামিতি ও পরিমিতি",
+    desc: "পাটিগণিত, বীজগণিত, জ্যামিতি ও মানসিক দক্ষতা",
     modelTestsCount: 20,
+    questionsCount: 30,
+    duration: 35,
+    marks: 30,
     theme: {
       color: "#d97706",
       gradient: "linear-gradient(135deg, #d97706 0%, #f59e0b 100%)",
       lightBg: "#fffbeb",
       borderColor: "#fde68a",
+      badgeBg: "#fef3c7",
+      badgeText: "#b45309",
+      icon: "fa-solid fa-calculator",
       glowColor: "rgba(217, 119, 6, 0.12)"
     }
   },
@@ -158,36 +176,39 @@ const SUBJECTS_DATA = [
     id: "gk",
     code: "GENERAL KNOWLEDGE",
     name: "সাধারণ জ্ঞান",
-    desc: "বাংলাদেশ, আন্তর্জাতিক ও সাম্প্রতিক বিষয়াবলি",
+    desc: "বাংলাদেশ, আন্তর্জাতিক, বিজ্ঞান ও সাম্প্রতিক বিষয়াবলি",
     modelTestsCount: 20,
+    questionsCount: 50,
+    duration: 45,
+    marks: 50,
     theme: {
       color: "#7c3aed",
       gradient: "linear-gradient(135deg, #7c3aed 0%, #9333ea 100%)",
       lightBg: "#faf5ff",
       borderColor: "#ddd6fe",
+      badgeBg: "#ede9fe",
+      badgeText: "#6d28d9",
+      icon: "fa-solid fa-earth-americas",
       glowColor: "rgba(124, 58, 237, 0.12)"
     }
   }
 ];
 
-function FullModelTestContent() {
+// Displayed Subjects (3 items)
+const SUBJECTS_DATA = ALL_SUBJECTS_DATA.slice(0, 3);
+
+function FreeModelTestContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
   const examId = searchParams.get('examId');
   const subjectId = searchParams.get('subject');
-  const chapterId = searchParams.get('chapterId');
 
   const [currentCat, setCurrentCat] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [modelTestSearch, setModelTestSearch] = useState('');
 
-  // Clean chapterId from URL if present and redirect to clean subject URL
-  useEffect(() => {
-    if (chapterId && examId && subjectId) {
-      router.replace(`/full-model-test-demo?examId=${examId}&subject=${subjectId}`);
-    }
-  }, [chapterId, examId, subjectId, router]);
-
+  // Live dynamic Online User counts
   const getWeightedOnlineCount = (current) => {
     if (current && Math.random() < 0.85) {
       const delta = Math.floor(Math.random() * 5) - 2;
@@ -234,11 +255,12 @@ function FullModelTestContent() {
     return () => clearInterval(interval);
   }, []);
 
+  // Selected Exam & Selected Subject
   const selectedExam = INITIAL_EXAMS.find(e => e.id === examId) || INITIAL_EXAMS[0];
-  const selectedSubject = SUBJECTS_DATA.find(s => s.id === subjectId);
+  const selectedSubject = ALL_SUBJECTS_DATA.find(s => s.id === subjectId);
 
   const categories = [
-    { id: 'all', label: 'সকল পূর্ণাঙ্গ টেস্ট' },
+    { id: 'all', label: 'সকল ফ্রি টেস্ট' },
     { id: 'bcs', label: 'বিসিএস' },
     { id: 'bank', label: 'ব্যাংক জব' },
     { id: 'primary', label: 'প্রাইমারি শিক্ষক' },
@@ -260,44 +282,86 @@ function FullModelTestContent() {
   });
 
   // -------------------------------------------------------------
-  // VIEW 3: 20 MODEL TESTS UNDER SELECTED SUBJECT
-  // (Matches exactly the box design of /subjective-model-test-demo?examId=bcs-46-live&subject=bangla&chapterId=1)
-  // Displays only Model 1, Model 2 ... Model 20
+  // VIEW 3: MODEL TESTS 1 - 20 UNDER SELECTED SUBJECT
+  // (When examId and subjectId are both present)
+  // Cards styled matching /live-exam-model-test page with:
+  // - সময়সীমা (durationMin মিনিট)
+  // - প্রশ্ন সংখ্যা (qCount টি)
+  // - নেগেটিভ মার্ক (-negativeMarking)
   // -------------------------------------------------------------
   if (examId && subjectId && selectedSubject) {
-    const MODEL_COUNT = 20;
-    const modelsList = Array.from({ length: MODEL_COUNT }, (_, idx) => {
-      const num = idx + 1;
-      const formattedNum = String(num).padStart(2, '0');
+    const totalQuestions = selectedSubject.questionsCount || 20;
+    const durationMinutes = selectedSubject.duration || 20;
+    const rawNegative = selectedExam.negativeMarks || "০.৫০";
+    // Convert to standard decimal string like 0.5 or 0.25
+    const negativeMarking = rawNegative.includes('২৫') ? '0.25' : '0.5';
+
+    const BADGE_THEMES = [
+      { bg: '#ffe4e6', color: '#e11d48', border: '#fecdd3', label: 'লাইভ এক্সাম', icon: '🔴' },
+      { bg: '#fef3c7', color: '#d97706', border: '#fde68a', label: 'টপ রেটেড', icon: '⭐' },
+      { bg: '#d1fae5', color: '#059669', border: '#a7f3d0', label: 'স্পেশাল টেস্ট', icon: '⚡' },
+      { bg: '#ede9fe', color: '#7c3aed', border: '#ddd6fe', label: 'পূর্ণাঙ্গ প্র্যাকটিস', icon: '🎯' }
+    ];
+
+    // Generate 20 Model Tests for this subject
+    const MODEL_TESTS_COUNT = 20;
+    const allModelTests = Array.from({ length: MODEL_TESTS_COUNT }, (_, idx) => {
+      const testNo = idx + 1;
+      const formattedNum = String(testNo).padStart(2, '0');
       const bnNum = toBanglaNumber(formattedNum);
-      const title = selectedSubject.id === 'english'
-        ? `Model Test - ${formattedNum}`
-        : `মডেল টেস্ট - ${bnNum}`;
+      const badgeTheme = BADGE_THEMES[idx % BADGE_THEMES.length];
+
+      let testType = "লাইভ গ্র্যান্ড";
+      if (testNo % 4 === 2) testType = "মূল প্রশ্ন ও স্পেশাল";
+      else if (testNo % 4 === 3) testType = "ডেইলি প্র্যাকটিস";
+      else if (testNo % 4 === 0) testType = "চূড়ান্ত প্রস্তুতি";
+
+      const examPrefix = selectedExam.title.split(' ')[0] || "বিসিএস";
 
       return {
-        num,
+        id: `${selectedSubject.id}-model-test-${testNo}`,
+        testNo,
         formattedNum,
         bnNum,
-        title
+        title: `${examPrefix} প্রিলিমিনারি ${selectedSubject.name} ${testType} মডেল টেস্ট - ${bnNum}`,
+        description: `${examPrefix} প্রিলিমিনারি পরীক্ষার্থীদের জন্য ${selectedSubject.name} বিষয়ের জাতীয় পর্যায়ের মেধা যাচাই মডেল টেস্ট।`,
+        duration: durationMinutes,
+        questionsCount: totalQuestions,
+        negativeMarking: negativeMarking,
+        badgeTheme: badgeTheme,
+        participantsCount: 85 + (testNo * 19),
+        onlineCount: onlineCounts[`${selectedSubject.id}-${testNo}`] || (16 + ((testNo * 7) % 28))
       };
+    });
+
+    const filteredModelTests = allModelTests.filter(test => {
+      const q = modelTestSearch.trim().toLowerCase();
+      if (!q) return true;
+      const matchNum = String(test.testNo).includes(q) || test.bnNum.includes(q) || test.formattedNum.includes(q);
+      const matchTitle = test.title.toLowerCase().includes(q);
+      const matchDesc = test.description.toLowerCase().includes(q);
+      const matchTag = test.badgeTheme.label.toLowerCase().includes(q);
+      return matchNum || matchTitle || matchDesc || matchTag;
     });
 
     return (
       <main style={{ backgroundColor: '#f8fafc', minHeight: 'calc(100vh - 200px)', paddingBottom: '80px', paddingTop: '30px' }}>
-        <div className="container" style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 20px' }}>
+        <div className="container" style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 20px' }}>
           
           {/* Breadcrumb & Navigation */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '10px' }}>
             <div style={{ fontSize: '0.9rem', color: '#64748b' }}>
-              <Link href="/full-model-test-demo" style={{ color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>MCQ</Link>
+              <Link href="/free-model-test-demo" style={{ color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>ফ্রি মডেল টেস্ট</Link>
               <span style={{ margin: '0 8px', color: '#cbd5e1' }}>/</span>
-              <Link href={`/full-model-test-demo?examId=${selectedExam.id}`} style={{ color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>{selectedExam.categoryName}</Link>
+              <Link href={`/free-model-test-demo?examId=${selectedExam.id}`} style={{ color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>
+                {selectedExam.title.length > 30 ? selectedExam.title.substring(0, 30) + '...' : selectedExam.title}
+              </Link>
               <span style={{ margin: '0 8px', color: '#cbd5e1' }}>/</span>
               <span style={{ color: '#0f172a', fontWeight: 700 }}>{selectedSubject.name}</span>
             </div>
 
             <button
-              onClick={() => router.push(`/full-model-test-demo?examId=${selectedExam.id}`)}
+              onClick={() => router.push(`/free-model-test-demo?examId=${selectedExam.id}`)}
               style={{
                 backgroundColor: '#ffffff',
                 color: '#334155',
@@ -317,102 +381,228 @@ function FullModelTestContent() {
             </button>
           </div>
 
-          {/* Heading */}
-          <h2 style={{ fontSize: '1.6rem', color: '#0f172a', fontWeight: 800, marginBottom: '20px' }}>
-            মডেল টেস্টসমূহ ({toBanglaNumber(modelsList.length)})
-          </h2>
+          {/* Heading & Search Bar */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px', flexWrap: 'wrap', gap: '15px' }}>
+            <div>
+              <h1 style={{ fontSize: '1.8rem', color: '#0f172a', fontWeight: 800, margin: '0 0 6px 0' }}>
+                {selectedSubject.name} — মডেল টেস্টসমূহ ({allModelTests.length})
+              </h1>
+              <p style={{ color: '#64748b', fontSize: '0.95rem', margin: 0 }}>
+                {selectedExam.title} • নির্ধারিত সময়ে পরীক্ষা দিয়ে রিয়েল-টাইম মেধা যাচাই ও ফলাফল দেখুন
+              </p>
+            </div>
 
-          {/* 2-Column Models Grid: 2 boxes per line */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(460px, 1fr))', gap: '14px' }}>
-            {modelsList.map((model) => (
-              <div
-                key={model.num}
-                onClick={() => router.push(`/questions?category=${encodeURIComponent(`${selectedExam.categoryName} > ${selectedExam.title} > ${selectedSubject.name} > ${model.title}`)}`)}
+            {/* Search Input */}
+            <div style={{ position: 'relative', minWidth: '240px' }}>
+              <input
+                type="text"
+                value={modelTestSearch}
+                onChange={(e) => setModelTestSearch(e.target.value)}
+                placeholder="মডেল টেস্ট খুঁজুন (যেমন: ০১, টেস্ট)..."
                 style={{
+                  width: '100%',
+                  padding: '9px 14px 9px 36px',
+                  borderRadius: '10px',
+                  border: '1.5px solid #cbd5e1',
+                  fontSize: '0.9rem',
+                  outline: 'none',
                   backgroundColor: '#ffffff',
-                  borderRadius: '12px',
-                  padding: '16px 20px',
-                  border: '1px solid #e2e8f0',
-                  boxShadow: '0 2px 6px rgba(0,0,0,0.02)',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  flexWrap: 'wrap',
-                  gap: '14px',
-                  transition: 'transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease'
+                  color: '#0f172a',
+                  transition: 'border-color 0.2s ease'
                 }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.06)';
-                  e.currentTarget.style.borderColor = selectedSubject?.theme?.color || '#006a4e';
+                onFocus={(e) => (e.target.style.borderColor = '#0284c7')}
+                onBlur={(e) => (e.target.style.borderColor = '#cbd5e1')}
+              />
+              <i
+                className="fa-solid fa-magnifying-glass"
+                style={{
+                  position: 'absolute',
+                  left: '12px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: '#94a3b8',
+                  fontSize: '0.85rem'
                 }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'none';
-                  e.currentTarget.style.boxShadow = '0 2px 6px rgba(0,0,0,0.02)';
-                  e.currentTarget.style.borderColor = '#e2e8f0';
-                }}
-              >
-                {/* Left Side: Number Badge + Model Title */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                  <div
-                    style={{
-                      width: '34px',
-                      height: '34px',
-                      borderRadius: '8px',
-                      backgroundColor: selectedSubject?.theme?.lightBg || '#e6f4ea',
-                      color: selectedSubject?.theme?.color || '#006a4e',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontWeight: 800,
-                      fontSize: '0.95rem',
-                      flexShrink: 0
-                    }}
-                  >
-                    {model.num}
-                  </div>
-
-                  <span style={{ fontSize: '1.02rem', color: '#0f172a', fontWeight: 700, lineHeight: '1.4' }}>
-                    {model.title}
-                  </span>
-                </div>
-
-                {/* Right Side: প্রশ্ন: ১০০ এবং সময়: ৬০ মিনিট */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-                  <span
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      backgroundColor: '#f1f5f9',
-                      color: '#334155',
-                      padding: '6px 14px',
-                      borderRadius: '8px',
-                      fontSize: '0.88rem',
-                      fontWeight: 600
-                    }}
-                  >
-                    {selectedSubject.id === 'english' ? 'Questions : 100' : 'প্রশ্ন : ১০০'}
-                  </span>
-
-                  <span
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      backgroundColor: '#f1f5f9',
-                      color: '#334155',
-                      padding: '6px 14px',
-                      borderRadius: '8px',
-                      fontSize: '0.88rem',
-                      fontWeight: 600
-                    }}
-                  >
-                    {selectedSubject.id === 'english' ? 'Time : 60 Minutes' : 'সময় : ৬০ মিনিট'}
-                  </span>
-                </div>
-              </div>
-            ))}
+              />
+            </div>
           </div>
+
+          {/* Cards Grid matching /live-exam-model-test */}
+          {filteredModelTests.length === 0 ? (
+            <div
+              style={{
+                textAlign: 'center',
+                padding: '60px 20px',
+                background: '#ffffff',
+                borderRadius: '16px',
+                border: '1px dashed #cbd5e1'
+              }}
+            >
+              <p style={{ fontSize: '1.1rem', color: '#64748b', margin: 0 }}>
+                কোনো মডেল টেস্ট পাওয়া যায়নি।
+              </p>
+            </div>
+          ) : (
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
+                gap: '24px'
+              }}
+            >
+              {filteredModelTests.map(test => {
+                const questionsCategoryParam = `${selectedExam.categoryName} > ${selectedExam.title} > ${selectedSubject.name} > ${test.title}`;
+
+                return (
+                  <div
+                    key={test.testNo}
+                    style={{
+                      backgroundColor: '#ffffff',
+                      borderRadius: '16px',
+                      padding: '24px',
+                      border: '1px solid #e2e8f0',
+                      boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                      transition: 'transform 0.2s ease, box-shadow 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-3px)';
+                      e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0,0,0,0.08)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'none';
+                      e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0,0,0,0.05)';
+                    }}
+                  >
+                    <div>
+                      {/* Top Meta */}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                        <span
+                          style={{
+                            padding: '4px 12px',
+                            borderRadius: '50px',
+                            fontSize: '0.78rem',
+                            fontWeight: 700,
+                            backgroundColor: test.badgeTheme.bg,
+                            color: test.badgeTheme.color,
+                            border: `1px solid ${test.badgeTheme.border}`
+                          }}
+                        >
+                          {test.badgeTheme.icon} {test.badgeTheme.label}
+                        </span>
+
+                        <span
+                          style={{
+                            padding: '4px 10px',
+                            borderRadius: '6px',
+                            backgroundColor: '#f1f5f9',
+                            color: '#475569',
+                            fontSize: '0.78rem',
+                            fontWeight: 600
+                          }}
+                        >
+                          {selectedExam.categoryName} • {selectedSubject.name}
+                        </span>
+                      </div>
+
+                      {/* Title (Clickable) */}
+                      <h3
+                        onClick={() => router.push(`/questions?category=${encodeURIComponent(questionsCategoryParam)}`)}
+                        style={{
+                          fontSize: '1.2rem',
+                          fontWeight: 700,
+                          lineHeight: 1.5,
+                          marginBottom: '12px',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <Link
+                          href={`/questions?category=${encodeURIComponent(questionsCategoryParam)}`}
+                          style={{
+                            color: '#0f172a',
+                            textDecoration: 'none',
+                            transition: 'color 0.2s ease'
+                          }}
+                          onMouseEnter={(e) => (e.currentTarget.style.color = '#0284c7')}
+                          onMouseLeave={(e) => (e.currentTarget.style.color = '#0f172a')}
+                        >
+                          {test.title}
+                        </Link>
+                      </h3>
+
+                      {/* Description - matching attached reference image text */}
+                      <p style={{ color: '#64748b', fontSize: '0.9rem', lineHeight: 1.6, marginBottom: '20px' }}>
+                        {test.description}
+                      </p>
+
+                      {/* Meta Specs Grid - Exactly matching attached screenshot from /live-exam-model-test */}
+                      <div
+                        style={{
+                          display: 'grid',
+                          gridTemplateColumns: 'repeat(3, 1fr)',
+                          gap: '8px',
+                          backgroundColor: '#f8fafc',
+                          padding: '12px',
+                          borderRadius: '10px',
+                          border: '1px solid #f1f5f9',
+                          marginBottom: '20px',
+                          textAlign: 'center'
+                        }}
+                      >
+                        <div>
+                          <span style={{ display: 'block', fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>সময়সীমা</span>
+                          <strong style={{ fontSize: '0.95rem', color: '#0f172a' }}>{test.duration} মিনিট</strong>
+                        </div>
+                        <div>
+                          <span style={{ display: 'block', fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>প্রশ্ন সংখ্যা</span>
+                          <strong style={{ fontSize: '0.95rem', color: '#0284c7' }}>{test.questionsCount} টি</strong>
+                        </div>
+                        <div>
+                          <span style={{ display: 'block', fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>নেগেটিভ মার্ক</span>
+                          <strong style={{ fontSize: '0.95rem', color: '#e11d48' }}>-{test.negativeMarking}</strong>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div>
+
+                      <button
+                        onClick={() => router.push(`/questions?category=${encodeURIComponent(questionsCategoryParam)}`)}
+                        style={{
+                          display: 'block',
+                          width: '100%',
+                          textAlign: 'center',
+                          padding: '12px 20px',
+                          borderRadius: '10px',
+                          backgroundColor: '#0284c7',
+                          color: '#ffffff',
+                          fontWeight: 700,
+                          fontSize: '0.95rem',
+                          border: 'none',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.2s, transform 0.15s',
+                          boxShadow: '0 4px 12px rgba(2,132,199,0.25)'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = '#0369a1';
+                          e.currentTarget.style.transform = 'translateY(-1px)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = '#0284c7';
+                          e.currentTarget.style.transform = 'none';
+                        }}
+                      >
+                        🔥 পরীক্ষায় অংশ নিন ➔
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
 
         </div>
       </main>
@@ -421,35 +611,62 @@ function FullModelTestContent() {
 
   // -------------------------------------------------------------
   // VIEW 2: SUBJECTS SELECTION VIEW (When examId is present)
-  // Shows Subject Cards with "২০ টি মডেল টেস্ট অন্তর্ভুক্ত" (Chapter removed!)
+  // Shows Subject Cards with "২০ টি মডেল টেস্ট ➔" (Chapter removed!)
   // -------------------------------------------------------------
   if (examId) {
     return (
-      <main style={{ padding: '40px 0 80px', backgroundColor: '#f8fafc', minHeight: 'calc(100vh - 200px)' }}>
-        <div className="container" style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 20px' }}>
+      <main style={{ padding: '36px 0 80px', backgroundColor: '#f8fafc', minHeight: 'calc(100vh - 200px)' }}>
+        <div className="container" style={{ maxWidth: '1240px', margin: '0 auto', padding: '0 20px' }}>
           
           {/* Breadcrumb & Navigation */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '10px' }}>
-            <div style={{ fontSize: '0.9rem', color: '#64748b' }}>
-              <Link href="/full-model-test-demo" style={{ color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>পূর্ণাঙ্গ মডেল টেস্ট</Link>
-              <span style={{ margin: '0 8px', color: '#cbd5e1' }}>/</span>
-              <span style={{ color: '#0f172a', fontWeight: 700 }}>{selectedExam.title}</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '14px' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px', fontSize: '0.9rem', color: '#64748b' }}>
+              <Link 
+                href="/free-model-test-demo" 
+                style={{ 
+                  color: '#0284c7', 
+                  textDecoration: 'none', 
+                  fontWeight: 600,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                <i className="fa-solid fa-house" style={{ fontSize: '0.82rem' }}></i>
+                <span>ফ্রি মডেল টেস্ট</span>
+              </Link>
+              <i className="fa-solid fa-chevron-right" style={{ fontSize: '0.72rem', color: '#94a3b8' }}></i>
+              <span style={{ color: '#0f172a', fontWeight: 700, maxWidth: '500px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {selectedExam.title}
+              </span>
             </div>
 
             <button
-              onClick={() => router.push('/full-model-test-demo')}
+              onClick={() => router.push('/free-model-test-demo')}
               style={{
                 backgroundColor: '#ffffff',
                 color: '#334155',
                 border: '1px solid #cbd5e1',
-                padding: '6px 14px',
-                borderRadius: '6px',
+                padding: '8px 16px',
+                borderRadius: '10px',
                 fontSize: '0.85rem',
                 fontWeight: 600,
                 cursor: 'pointer',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '6px'
+                gap: '8px',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#f1f5f9';
+                e.currentTarget.style.borderColor = '#94a3b8';
+                e.currentTarget.style.transform = 'translateX(-2px)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#ffffff';
+                e.currentTarget.style.borderColor = '#cbd5e1';
+                e.currentTarget.style.transform = 'none';
               }}
             >
               <i className="fa-solid fa-arrow-left"></i>
@@ -457,41 +674,72 @@ function FullModelTestContent() {
             </button>
           </div>
 
-          {/* Exam Info Card */}
-          <div
-            style={{
-              backgroundColor: '#ffffff',
-              borderRadius: '16px',
-              padding: '28px',
-              border: '1px solid #e2e8f0',
-              borderLeft: `5px solid ${selectedExam.borderColor || '#0284c7'}`,
-              marginBottom: '35px',
-              boxShadow: '0 2px 10px rgba(0,0,0,0.03)'
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '10px' }}>
-              <span style={{ backgroundColor: '#e0f2fe', color: '#0284c7', padding: '4px 12px', borderRadius: '12px', fontSize: '0.82rem', fontWeight: 700 }}>
+          {/* Exam Info Header (Comfortable spacing & typography) */}
+          <div style={{ marginBottom: '32px' }}>
+            {/* Tags row */}
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '18px', flexWrap: 'wrap', gap: '10px' }}>
+              <span
+                style={{
+                  backgroundColor: '#e0f2fe',
+                  color: '#0284c7',
+                  padding: '6px 14px',
+                  borderRadius: '50px',
+                  fontSize: '0.84rem',
+                  fontWeight: 700,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                <i className="fa-solid fa-award"></i>
                 {selectedExam.categoryName}
               </span>
-              <span style={{ fontSize: '0.88rem', color: '#64748b' }}>
-                <i className="fa-solid fa-layer-group" style={{ marginRight: '6px' }} />
-                বিষয়ভিত্তিক মডেল টেস্ট অন্তর্ভুক্ত
+
+              <span
+                style={{
+                  backgroundColor: '#ecfdf5',
+                  color: '#059669',
+                  padding: '6px 14px',
+                  borderRadius: '50px',
+                  fontSize: '0.84rem',
+                  fontWeight: 700,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#10b981' }}></span>
+                ১০০% ফ্রি এক্সেস
               </span>
             </div>
-            <h1 style={{ fontSize: '1.75rem', color: '#0f172a', fontWeight: 800, marginBottom: '10px' }}>
+
+            {/* Title & Description with spacious line height and margin */}
+            <h1 style={{ fontSize: '2.1rem', color: '#0f172a', fontWeight: 800, marginBottom: '16px', lineHeight: 1.45, letterSpacing: '-0.01em' }}>
               {selectedExam.title}
             </h1>
-            <p style={{ color: '#475569', fontSize: '0.98rem', lineHeight: '1.6', margin: 0 }}>
+            <p style={{ color: '#475569', fontSize: '1.05rem', lineHeight: '1.8', margin: 0, maxWidth: '960px' }}>
               {selectedExam.description}
             </p>
+
+            {/* Subject count indicator (Moved below description) */}
+            <div style={{ marginTop: '18px' }}>
+              <span
+                style={{
+                  fontSize: '0.92rem',
+                  color: '#475569',
+                  fontWeight: 600,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '7px'
+                }}
+              >
+                <i className="fa-solid fa-layer-group" style={{ color: '#0284c7', fontSize: '0.95rem' }} />
+                <span>{toBanglaNumber(SUBJECTS_DATA.length)} টি বিষয় অন্তর্ভুক্ত</span>
+              </span>
+            </div>
           </div>
 
-          {/* Section Title */}
-          <h2 style={{ fontSize: '1.4rem', color: '#0f172a', fontWeight: 800, marginBottom: '20px' }}>
-            বিষয়সমূহ নির্বাচন করুন ({SUBJECTS_DATA.length})
-          </h2>
-
-          {/* Subjects Grid - Refined Box Design */}
+          {/* Subjects Grid - 3 Boxes Grid */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '26px' }}>
             {SUBJECTS_DATA.map(sub => {
               const theme = sub.theme || {
@@ -499,13 +747,16 @@ function FullModelTestContent() {
                 gradient: 'linear-gradient(135deg, #006a4e 0%, #059669 100%)',
                 lightBg: '#f0fdf4',
                 borderColor: '#bbf7d0',
+                badgeBg: '#dcfce7',
+                badgeText: '#15803d',
+                icon: 'fa-solid fa-book-open-reader',
                 glowColor: 'rgba(0, 106, 78, 0.12)'
               };
 
               return (
                 <div
                   key={sub.id}
-                  onClick={() => router.push(`/full-model-test-demo?examId=${selectedExam.id}&subject=${sub.id}`)}
+                  onClick={() => router.push(`/free-model-test-demo?examId=${selectedExam.id}&subject=${sub.id}`)}
                   style={{
                     backgroundColor: '#ffffff',
                     borderRadius: '20px',
@@ -578,7 +829,7 @@ function FullModelTestContent() {
                       {sub.desc}
                     </p>
 
-                    {/* Meta Specs Box inside Card showing 20 Model Tests */}
+                    {/* Meta Specs Box inside Card (২০ টি মডেল টেস্ট - একলাইনে) */}
                     <div
                       style={{
                         backgroundColor: '#f8fafc',
@@ -599,11 +850,11 @@ function FullModelTestContent() {
                       <strong style={{ color: theme.color, fontWeight: 800, fontSize: '1.05rem' }}>
                         {toBanglaNumber(sub.modelTestsCount || 20)} টি
                       </strong>
-                      <span>মডেল টেস্ট অন্তর্ভুক্ত</span>
+                      <span>মডেল টেস্ট</span>
                     </div>
                   </div>
 
-                  {/* Call to Action Button */}
+                  {/* Call to Action Button (Normally active with subtle hover effect) */}
                   <div
                     className="subject-cta-btn"
                     style={{
@@ -648,7 +899,7 @@ function FullModelTestContent() {
   }
 
   // -------------------------------------------------------------
-  // VIEW 1: ALL FULL MODEL TESTS LIST (Default / Home of full-model-test-demo)
+  // VIEW 1: ALL FREE MODEL TESTS LIST (Default / Home of free-model-test-demo)
   // -------------------------------------------------------------
   return (
     <main style={{ padding: '40px 0 80px', backgroundColor: '#f8fafc', minHeight: 'calc(100vh - 200px)' }}>
@@ -671,13 +922,13 @@ function FullModelTestContent() {
             }}
           >
             <i className="fa-solid fa-graduation-cap"></i>
-            <span>পূর্ণাঙ্গ মডেল টেস্ট সম্ভার</span>
+            <span>ফ্রি মডেল টেস্ট সম্ভার</span>
           </span>
           <h1 style={{ fontSize: '2.4rem', color: '#0f172a', fontWeight: 800, marginBottom: '12px', letterSpacing: '-0.5px' }}>
-            পূর্ণাঙ্গ অনলাইন মডেল টেস্ট
+            ফ্রি অনলাইন মডেল টেস্ট
           </h1>
           <p style={{ color: '#64748b', fontSize: '1.05rem', maxWidth: '650px', margin: '0 auto', lineHeight: '1.6' }}>
-            আপনার পছন্দের ক্যাটাগরি বাছাই করুন এবং নির্ধারিত পরীক্ষার বিষয়ভিত্তিক মডেল টেস্টে অংশ নিন।
+            আপনার পছন্দের ক্যাটাগরি বাছাই করুন এবং নির্ধারিত পরীক্ষার বিষয়ভিত্তিক মডেল টেস্টে অংশ নিন সম্পূর্ণ ফ্রিতে।
           </p>
         </div>
 
@@ -730,7 +981,7 @@ function FullModelTestContent() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="পূর্ণাঙ্গ টেস্ট খুঁজুন..."
+              placeholder="ফ্রি টেস্ট খুঁজুন..."
               style={{
                 width: '100%',
                 padding: '9px 14px 9px 36px',
@@ -771,7 +1022,7 @@ function FullModelTestContent() {
             }}
           >
             <p style={{ fontSize: '1.1rem', color: '#64748b', margin: 0 }}>
-              কোনো পূর্ণাঙ্গ মডেল টেস্ট পাওয়া যায়নি।
+              কোনো ফ্রি মডেল টেস্ট পাওয়া যায়নি।
             </p>
           </div>
         ) : (
@@ -797,6 +1048,9 @@ function FullModelTestContent() {
               } else if (exam.badgeColor === 'violet') {
                 badgeBg = '#ede9fe';
                 badgeColor = '#7c3aed';
+              } else if (exam.badgeColor === 'cyan' || exam.badgeColor === 'primary') {
+                badgeBg = '#e0f2fe';
+                badgeColor = '#0284c7';
               }
 
               return (
@@ -869,9 +1123,29 @@ function FullModelTestContent() {
                       </span>
                     </div>
 
-                    {/* Title */}
-                    <h2 style={{ fontSize: '1.25rem', color: '#0f172a', fontWeight: 700, marginBottom: '10px', lineHeight: '1.4' }}>
-                      {exam.title}
+                    {/* Title (Clickable) */}
+                    <h2
+                      onClick={() => router.push(`/free-model-test-demo?examId=${exam.id}`)}
+                      style={{
+                        fontSize: '1.25rem',
+                        fontWeight: 700,
+                        marginBottom: '10px',
+                        lineHeight: '1.4',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      <Link
+                        href={`/free-model-test-demo?examId=${exam.id}`}
+                        style={{
+                          color: '#0f172a',
+                          textDecoration: 'none',
+                          transition: 'color 0.2s ease'
+                        }}
+                        onMouseEnter={(e) => (e.currentTarget.style.color = '#0284c7')}
+                        onMouseLeave={(e) => (e.currentTarget.style.color = '#0f172a')}
+                      >
+                        {exam.title}
+                      </Link>
                     </h2>
 
                     {/* Description */}
@@ -968,7 +1242,7 @@ function FullModelTestContent() {
                     </div>
 
                     <button
-                      onClick={() => router.push(`/full-model-test-demo?examId=${exam.id}`)}
+                      onClick={() => router.push(`/free-model-test-demo?examId=${exam.id}`)}
                       style={{
                         backgroundColor: '#006a4e',
                         color: '#ffffff',
@@ -985,7 +1259,7 @@ function FullModelTestContent() {
                         boxShadow: '0 2px 6px rgba(0, 106, 78, 0.3)'
                       }}
                     >
-                      <span>বিষয় ও মডেল টেস্ট দেখুন</span> <i className="fa-solid fa-arrow-right" style={{ fontSize: '0.85rem' }}></i>
+                      <span>বিষয় ও টপিক দেখুন</span> <i className="fa-solid fa-arrow-right" style={{ fontSize: '0.85rem' }}></i>
                     </button>
                   </div>
                 </div>
@@ -1006,7 +1280,6 @@ function FullModelTestContent() {
           .container {
             padding: 0 14px !important;
           }
-          div[style*="gridTemplateColumns: repeat(auto-fill, minmax(310px, 1fr))"],
           div[style*="gridTemplateColumns: repeat(auto-fill, minmax(500px, 1fr))"] {
             grid-template-columns: 1fr !important;
           }
@@ -1016,14 +1289,14 @@ function FullModelTestContent() {
   );
 }
 
-export default function FullModelTestDemoPage() {
+export default function FreeModelTestDemoPage() {
   return (
     <Suspense fallback={
       <div style={{ textAlign: 'center', padding: '80px 20px', color: '#64748b' }}>
-        পূর্ণাঙ্গ মডেল টেস্ট পেজ লোড হচ্ছে...
+        ফ্রি মডেল টেস্ট পেজ লোড হচ্ছে...
       </div>
     }>
-      <FullModelTestContent />
+      <FreeModelTestContent />
     </Suspense>
   );
 }

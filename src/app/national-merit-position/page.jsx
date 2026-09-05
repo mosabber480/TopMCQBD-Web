@@ -62,8 +62,8 @@ function NationalMeritContent() {
   const restMerit = meritList.slice(3);
 
   return (
-    <main style={{ padding: '40px 0 80px', backgroundColor: '#f8fafc', minHeight: '85vh' }}>
-      <div className="container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px' }}>
+    <div style={{ padding: '40px 0 50px', backgroundColor: '#f8fafc', minHeight: 'auto' }}>
+      <div className="container" style={{ maxWidth: '1300px', margin: '0 auto', padding: '0 20px' }}>
         
         {/* Page Header */}
         <div style={{ textAlign: 'center', marginBottom: '35px' }}>
@@ -377,7 +377,7 @@ function NationalMeritContent() {
         </div>
 
       </div>
-    </main>
+    </div>
   );
 }
 

@@ -265,7 +265,7 @@ export default function PackagesPage() {
         </div>
       </div>
 
-      <main className="packages-container" id="packagesWrapper">
+      <div className="packages-container" id="packagesWrapper">
         {DEFAULT_PACKAGES.map((pkg) => (
           <div
             key={pkg.id}
@@ -304,7 +304,7 @@ export default function PackagesPage() {
             </button>
           </div>
         ))}
-      </main>
+      </div>
 
       {/* Choice Modal (Change vs Add, শুধু pending থাকলে দেখাবে) */}
       {choiceModal.open && (

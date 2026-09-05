@@ -122,7 +122,7 @@
 }
 .section-container {
   max-width: 1300px;
-  margin: 40px auto;
+  margin: 40px auto 50px auto;
   padding: 0 20px;
 }
 .section-title {
@@ -565,7 +565,7 @@
 .page-banner {
   background: linear-gradient(135deg, var(--dark, #2c3e50), #1a252f);
   color: white;
-  padding: 60px 20px;
+  padding: 50px 20px;
   text-align: center;
 }
 .banner-content {
@@ -584,11 +584,11 @@
 
 .packages-container {
   max-width: 1300px;
-  margin: 60px auto 90px auto;
+  margin: 40px auto 50px auto;
   padding: 0 20px;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 46px 42px;
+  gap: 30px;
 }
 
 @media (max-width: 992px) {
@@ -859,7 +859,7 @@
 /* ==========================================================================
    About Us Page (/about-us) Styles
    ========================================================================== */
-.content-container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+.content-container { max-width: 1000px; margin: 40px auto 50px auto; padding: 0 20px; }
 .card-box { background: white; border-radius: 12px; padding: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; margin-bottom: 30px; }
 .card-box h2 { font-size: 22px; color: var(--dark, #2c3e50); margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
 .card-box p { font-size: 15px; color: #4a5568; line-height: 1.8; margin-bottom: 15px; }
@@ -871,8 +871,8 @@
    FAQ Page (/faq) Styles
    ========================================================================== */
 .faq-container {
-  max-width: 900px;
-  margin: 50px auto 70px auto;
+  max-width: 1000px;
+  margin: 40px auto 50px auto;
   padding: 0 20px;
 }
 .faq-item {
@@ -1141,7 +1141,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 60px 20px;
+  padding: 40px 20px 50px 20px;
   width: 100%;
   max-width: 1300px;
   margin: 0 auto;
@@ -1336,7 +1336,7 @@
   position: relative;
   width: 100%;
   max-width: 1300px;
-  margin: 30px auto;
+  margin: 40px auto 50px auto;
   padding: 0 20px;
 }
 .quiz-container {
@@ -2005,7 +2005,7 @@ input:disabled + .quiz-slider { cursor: not-allowed; background-color: #cbd5e1; 
    ========================================================================== */
 .not-found-wrapper {
   max-width: 1300px;
-  margin: 60px auto 0 auto;
+  margin: 40px auto 50px auto;
   padding: 0 20px;
   width: 100%;
   display: flex;

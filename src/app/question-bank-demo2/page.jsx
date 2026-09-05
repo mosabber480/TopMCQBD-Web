@@ -108,7 +108,7 @@ function Demo2Content() {
   const [searchQuery, setSearchQuery] = useState('');
 
   const filterTabs = [
-    { id: 'All', label: 'সকল ক্যাটাগরি', count: QUESTION_BANK_DATA.length },
+    { id: 'All', label: 'সকল', count: QUESTION_BANK_DATA.length },
     { id: 'BCS', label: 'বিসিএস প্রিলি', count: QUESTION_BANK_DATA.filter(i => i.category === 'BCS').length },
     { id: 'Bank', label: 'ব্যাংক জবস', count: QUESTION_BANK_DATA.filter(i => i.category === 'Bank').length },
     { id: 'Primary', label: 'প্রাথমিক শিক্ষক', count: QUESTION_BANK_DATA.filter(i => i.category === 'Primary').length },

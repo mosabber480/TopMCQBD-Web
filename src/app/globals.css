@@ -356,7 +356,7 @@ body.sidebar-collapsed .admin-main-content {
 .container {
     max-width: 1300px;
     margin: 0 auto;
-    padding: 0 20px 25px 20px;
+    padding: 0 20px;
 }
 
 .box, .section-card {
@@ -784,7 +784,7 @@ body.sidebar-collapsed .admin-main-content {
     background-color: #1e293b; 
     color: #cbd5e1; 
     padding: 50px 20px 20px 20px; 
-    margin-top: 60px; 
+    margin-top: 0; 
 }
 .footer-container { 
     max-width: 1300px; 
