@@ -6,6 +6,88 @@ import Link from 'next/link';
 import { getPaidApiUrl } from '@/lib/config';
 import AiChatDrawer from '@/components/common/AiChatDrawer';
 
+const FONT_FAMILIES = [
+  {
+    id: 'noto-sans',
+    name: 'Noto Sans Bengali',
+    sub: 'ক্লিন ও আধুনিক (ডিফল্ট)',
+    family: "'Noto Sans Bengali', sans-serif"
+  },
+  {
+    id: 'hind-siliguri',
+    name: 'Hind Siliguri',
+    sub: 'হিন্দ শিলিগুড়ি (জনপ্রিয় ও সুস্পষ্ট)',
+    family: "'Hind Siliguri', sans-serif"
+  },
+  {
+    id: 'kalpurush',
+    name: 'Kalpurush / Noto Serif',
+    sub: 'কালপুরুষ (বই ও পত্রিকার ক্লাসিক ফন্ট)',
+    family: "'Kalpurush', 'Noto Serif Bengali', serif"
+  },
+  {
+    id: 'tiro-bangla',
+    name: 'Tiro Bangla',
+    sub: 'তিরো বাংলা (মার্জিত ও ফরমাল সেরিফ)',
+    family: "'Tiro Bangla', serif"
+  },
+  {
+    id: 'anek-bangla',
+    name: 'Anek Bangla',
+    sub: 'অনেক বাংলা (বোল্ড ও আধুনিক)',
+    family: "'Anek Bangla', sans-serif"
+  },
+  {
+    id: 'poppins',
+    name: 'Poppins',
+    sub: 'পপিন্স (জ্যামিতিক ও আকর্ষণীয় স্যান-সেরিফ)',
+    family: "'Poppins', 'Noto Sans Bengali', sans-serif"
+  },
+  {
+    id: 'montserrat',
+    name: 'Montserrat',
+    sub: 'মন্টসেরাট (স্টাইলিশ ও প্রিমিয়াম)',
+    family: "'Montserrat', 'Noto Sans Bengali', sans-serif"
+  },
+  {
+    id: 'arial',
+    name: 'Arial',
+    sub: 'অ্যারিয়াল (ইউনিভার্সাল ও স্ট্যান্ডার্ড)',
+    family: "Arial, 'Noto Sans Bengali', sans-serif"
+  }
+];
+
+const FONT_WEIGHTS = [
+  {
+    id: 'thin',
+    value: 'thin',
+    name: 'Thin',
+    sub: 'পাতলা ও হালকা ফন্ট (৩০০)',
+    weight: 300
+  },
+  {
+    id: 'regular',
+    value: 'regular',
+    name: 'Regular',
+    sub: 'স্বাভাবিক ও স্পষ্ট (ডিফল্ট - ৪০০)',
+    weight: 400
+  },
+  {
+    id: 'medium',
+    value: 'medium',
+    name: 'Medium',
+    sub: 'মাঝারি গাঢ় ও পরিচ্ছন্ন (৬০০)',
+    weight: 600
+  },
+  {
+    id: 'bold',
+    value: 'bold',
+    name: 'Bold',
+    sub: 'সম্পূর্ণ গাঢ় ও আকর্ষণীয় (৮০০)',
+    weight: 800
+  }
+];
+
 function QuestionsComponent() {
   const searchParams = useSearchParams();
   const categoryParam = searchParams.get('category');
@@ -28,6 +110,26 @@ function QuestionsComponent() {
   const [optionLayout, setOptionLayout] = useState('2q-col'); // Default: '2q-col' (১ লাইনে ২টি প্রশ্ন - উপর-নিচ ক্রম)
   const [showLayoutMenu, setShowLayoutMenu] = useState(false);
   const layoutDropdownRef = useRef(null);
+
+  // Cut mark / negative marking states
+  const [cutMark, setCutMark] = useState(0.5); // Default 0.5 cut mark
+  const [cutMarkMode, setCutMarkMode] = useState('0.5'); // '0.5' | '0.25' | '0' | 'custom'
+  const [customCutMarkInput, setCustomCutMarkInput] = useState('');
+  const [showCutMarkMenu, setShowCutMarkMenu] = useState(false);
+  const cutMarkDropdownRef = useRef(null);
+
+  // Font settings states
+  const [fontSize, setFontSize] = useState(16); // Default 16px
+  const [fontFamily, setFontFamily] = useState("'Noto Sans Bengali', sans-serif");
+  const [fontWeight, setFontWeight] = useState('regular'); // 'thin' | 'regular' | 'medium' | 'bold'
+  const [customFontSizeInput, setCustomFontSizeInput] = useState('');
+  const [showFontMenu, setShowFontMenu] = useState(false);
+  const [fontAccordion, setFontAccordion] = useState({ size: true, family: false, weight: false });
+  const fontDropdownRef = useRef(null);
+
+  const toggleFontAccordion = (sec) => {
+    setFontAccordion((prev) => ({ ...prev, [sec]: !prev[sec] }));
+  };
 
   const [showLimitMenu, setShowLimitMenu] = useState(false);
   const limitDropdownRef = useRef(null);
@@ -104,11 +206,58 @@ function QuestionsComponent() {
     };
   }, []);
 
-  // Close layout, limit & range menus on click outside
+  // Load saved preferences from localStorage on initial mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('topmcqbd_cut_mark_pref');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (typeof parsed.cutMark === 'number') {
+          setCutMark(parsed.cutMark);
+        }
+        if (parsed.cutMarkMode) {
+          setCutMarkMode(parsed.cutMarkMode);
+        }
+        if (parsed.customValue !== undefined) {
+          setCustomCutMarkInput(parsed.customValue);
+        }
+      }
+
+      // Load font settings
+      const savedFontSize = localStorage.getItem('topmcqbd_font_size');
+      if (savedFontSize) {
+        const num = parseInt(savedFontSize, 10);
+        if (!isNaN(num) && num >= 10 && num <= 36) {
+          setFontSize(num);
+          if (![14, 15, 16, 17, 18, 19, 20].includes(num)) {
+            setCustomFontSizeInput(String(num));
+          }
+        }
+      }
+      const savedFontFamily = localStorage.getItem('topmcqbd_font_family');
+      if (savedFontFamily) {
+        setFontFamily(savedFontFamily);
+      }
+      const savedFontWeight = localStorage.getItem('topmcqbd_font_weight');
+      if (savedFontWeight && ['thin', 'regular', 'medium', 'bold'].includes(savedFontWeight)) {
+        setFontWeight(savedFontWeight);
+      }
+    } catch (e) {
+      console.warn('Error reading preferences from localStorage:', e);
+    }
+  }, []);
+
+  // Close layout, limit, range, font & cut mark menus on click outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (layoutDropdownRef.current && !layoutDropdownRef.current.contains(event.target)) {
         setShowLayoutMenu(false);
+      }
+      if (cutMarkDropdownRef.current && !cutMarkDropdownRef.current.contains(event.target)) {
+        setShowCutMarkMenu(false);
+      }
+      if (fontDropdownRef.current && !fontDropdownRef.current.contains(event.target)) {
+        setShowFontMenu(false);
       }
       if (limitDropdownRef.current && !limitDropdownRef.current.contains(event.target)) {
         setShowLimitMenu(false);
@@ -213,6 +362,94 @@ function QuestionsComponent() {
     });
   };
 
+  const toBengaliNumber = (num) => {
+    if (num === undefined || num === null) return '০';
+    const bengaliDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+    return String(num).replace(/[0-9]/g, (d) => bengaliDigits[d]);
+  };
+
+  const formatScore = (val) => {
+    if (val === undefined || val === null || isNaN(val)) return '0';
+    const rounded = Math.round(val * 100) / 100;
+    if (Number.isInteger(rounded)) return rounded.toString();
+    return rounded.toFixed(rounded % 0.1 === 0 ? 1 : 2);
+  };
+
+  const handleSelectPresetCutMark = (val, mode) => {
+    setCutMark(val);
+    setCutMarkMode(mode);
+    setCustomCutMarkInput('');
+    setShowCutMarkMenu(false);
+    try {
+      localStorage.setItem('topmcqbd_cut_mark_pref', JSON.stringify({
+        cutMark: val,
+        cutMarkMode: mode,
+        customValue: ''
+      }));
+    } catch (e) {
+      console.warn('Error saving cut mark preference to localStorage:', e);
+    }
+    const newScore = Math.round((correctCount * 1 - incorrectCount * val) * 100) / 100;
+    setScore(newScore);
+  };
+
+  const handleApplyCustomCutMark = () => {
+    const parsed = parseFloat(customCutMarkInput);
+    if (isNaN(parsed) || parsed < 0) {
+      alert('অনুগ্রহ করে একটি সঠিক ধনাত্মক নম্বর লিখুন (যেমন: 0.20, 0.75, 1)');
+      return;
+    }
+    const val = Math.round(parsed * 100) / 100;
+    setCutMark(val);
+    setCutMarkMode('custom');
+    setShowCutMarkMenu(false);
+    try {
+      localStorage.setItem('topmcqbd_cut_mark_pref', JSON.stringify({
+        cutMark: val,
+        cutMarkMode: 'custom',
+        customValue: customCutMarkInput
+      }));
+    } catch (e) {
+      console.warn('Error saving custom cut mark preference to localStorage:', e);
+    }
+    const newScore = Math.round((correctCount * 1 - incorrectCount * val) * 100) / 100;
+    setScore(newScore);
+  };
+
+  const handleSelectFontSize = (size) => {
+    setFontSize(size);
+    setCustomFontSizeInput('');
+    try {
+      localStorage.setItem('topmcqbd_font_size', String(size));
+    } catch (e) {}
+  };
+
+  const handleApplyCustomFontSize = () => {
+    const num = parseInt(customFontSizeInput, 10);
+    if (isNaN(num) || num < 10 || num > 36) {
+      alert('অনুগ্রহ করে ১০ থেকে ৩৬ এর মধ্যে একটি সঠিক সাইজ লিখুন (যেমন: ১৮)');
+      return;
+    }
+    setFontSize(num);
+    try {
+      localStorage.setItem('topmcqbd_font_size', String(num));
+    } catch (e) {}
+  };
+
+  const handleSelectFontFamily = (family) => {
+    setFontFamily(family);
+    try {
+      localStorage.setItem('topmcqbd_font_family', family);
+    } catch (e) {}
+  };
+
+  const handleSelectFontWeight = (weight) => {
+    setFontWeight(weight);
+    try {
+      localStorage.setItem('topmcqbd_font_weight', weight);
+    } catch (e) {}
+  };
+
   const handleTimeOut = () => {
     const totalCount = displayQuestions.length || 1;
     const unanswered = totalCount - (correctCount + incorrectCount);
@@ -222,7 +459,7 @@ function QuestionsComponent() {
       visible: true,
       type: 'danger',
       title: '⏰ সময় শেষ!',
-      msg: `সঠিক: ${correctCount} টি | ভুল: ${incorrectCount} টি | বাকি: ${unanswered} টি\nসঠিক উত্তরের হার: ${pct}%\nমোট স্কোর: ${score.toFixed(1)}`,
+      msg: `সঠিক: ${correctCount} টি | ভুল: ${incorrectCount} টি | বাকি: ${unanswered} টি\nসঠিক উত্তরের হার: ${pct}%\nমোট স্কোর: ${formatScore(score)}`,
       hasReset: true
     });
   };
@@ -236,7 +473,7 @@ function QuestionsComponent() {
       visible: true,
       type: 'success',
       title: '🏆 অভিনন্দন! পরীক্ষা সম্পন্ন হয়েছে',
-      msg: `সঠিক উত্তর: ${finalCorrect} টি | ভুল উত্তর: ${finalIncorrect} টি\nসঠিক উত্তরের হার: ${pct}%\nমোট প্রাপ্ত স্কোর: ${finalScore.toFixed(1)}`,
+      msg: `সঠিক উত্তর: ${finalCorrect} টি | ভুল উত্তর: ${finalIncorrect} টি\nসঠিক উত্তরের হার: ${pct}%\nমোট প্রাপ্ত স্কোর: ${formatScore(finalScore)}`,
       hasReset: true
     });
   };
@@ -294,17 +531,16 @@ function QuestionsComponent() {
     const newAnswered = { ...answeredQuestions, [qIndex]: optIndex };
     setAnsweredQuestions(newAnswered);
 
-    let newScore = score;
     let newCorrect = correctCount;
     let newIncorrect = incorrectCount;
 
     if (optIndex === correctAns) {
-      newScore += 1;
       newCorrect += 1;
     } else {
-      newScore -= 0.5;
       newIncorrect += 1;
     }
+
+    const newScore = Math.round((newCorrect * 1 - newIncorrect * cutMark) * 100) / 100;
 
     setScore(newScore);
     setCorrectCount(newCorrect);
@@ -382,7 +618,7 @@ function QuestionsComponent() {
         )}
         {showScore && !isReadMode && (
           <div className="quiz-score-board">
-            স্কোর: <span>{score.toFixed(1)}</span>
+            স্কোর: <span>{formatScore(score)}</span>
           </div>
         )}
       </div>
@@ -405,7 +641,16 @@ function QuestionsComponent() {
         </div>
       )}
 
-      <div className="quiz-container">
+      <div
+        className="quiz-container"
+        style={{
+          '--quiz-font-size': `${fontSize}px`,
+          '--quiz-font-family': fontFamily,
+          '--quiz-font-weight': fontWeight === 'thin' ? '300' : fontWeight === 'medium' ? '500' : fontWeight === 'bold' ? '700' : '400',
+          '--quiz-question-weight': fontWeight === 'thin' ? '400' : fontWeight === 'medium' ? '700' : fontWeight === 'bold' ? '800' : '600',
+          '--quiz-circle-weight': fontWeight === 'thin' ? '500' : fontWeight === 'medium' ? '700' : fontWeight === 'bold' ? '800' : '700'
+        }}
+      >
         <h1>Online Questions & Exam Practice</h1>
         <h2>{categoryParam ? categoryParam : 'সাধারণ জ্ঞান ও বিষয়ভিত্তিক প্রশ্নব্যাংক'}</h2>
 
@@ -414,32 +659,101 @@ function QuestionsComponent() {
             <i className="fa-solid fa-folder-tree" style={{ marginRight: '6px', color: 'var(--primary, #007bff)' }}></i>
             {categoryParam || 'সকল প্রশ্নব্যাংক'}
           </div>
-          <div className="quiz-negative-mark-note">
-            [ প্রতিটি ভুল উত্তরের জন্য ০.৫ নম্বর কাটা যাবে ]
-          </div>
-        </div>
+          <div className="quiz-header-right-actions">
+            {/* Cut Mark (Negative Marking) Custom Dropdown */}
+            <div className="quiz-layout-dropdown-wrapper" ref={cutMarkDropdownRef}>
+              <button
+                type="button"
+                className="quiz-cut-mark-trigger-btn"
+                onClick={() => setShowCutMarkMenu(!showCutMarkMenu)}
+                title="ভুল উত্তরের জন্য কাট মার্ক পরিবর্তন করুন"
+              >
+                <span>
+                  {cutMark === 0
+                    ? '[ কোনো কাট মার্ক নেই ]'
+                    : `[ প্রতিটি ভুল উত্তরের জন্য ${toBengaliNumber(cutMark)} নম্বর কাটা যাবে ]`}
+                </span>
+                <i className={`fa-solid fa-chevron-${showCutMarkMenu ? 'up' : 'down'}`} style={{ fontSize: '11px', color: '#e74c3c' }}></i>
+              </button>
 
-        <hr style={{ margin: '12px 0', border: 'none', borderTop: '1px solid #e2e8f0' }} />
+              {showCutMarkMenu && (
+                <div className="quiz-layout-popup-menu quiz-cut-mark-popup">
+                  <div className="quiz-cut-mark-popup-title">
+                    <i className="fa-solid fa-pen-ruler" style={{ color: '#e74c3c', marginRight: '6px' }}></i>
+                    নেগেটিভ মার্কিং (কাট মার্ক)
+                  </div>
 
-        {/* Controls Bar */}
-        <div className="quiz-controls-bar">
-          <div className="quiz-nav-actions">
-            <button className="quiz-btn-reset" onClick={resetQuiz}>
-              <i className="fa-solid fa-rotate-right"></i> পুনরায় শুরু করুন
-            </button>
+                  <button
+                    type="button"
+                    className={`quiz-layout-menu-item ${cutMarkMode === '0.5' ? 'active' : ''}`}
+                    onClick={() => handleSelectPresetCutMark(0.5, '0.5')}
+                  >
+                    <div className="quiz-layout-radio-circle">
+                      {cutMarkMode === '0.5' && <div className="quiz-layout-radio-inner"></div>}
+                    </div>
+                    <span>০.৫ নম্বর কাটা যাবে (ডিফল্ট)</span>
+                  </button>
 
-            {/* Read Mode Switch */}
-            <label className="quiz-switch-label" style={{ background: '#e2e8f0', padding: '4px 12px', borderRadius: '20px', fontWeight: 'bold' }}>
-              <label className="quiz-switch">
-                <input
-                  type="checkbox"
-                  checked={isReadMode}
-                  onChange={(e) => handleReadModeToggle(e.target.checked)}
-                />
-                <span className="quiz-slider"></span>
-              </label>
-              আগে পড়ুন
-            </label>
+                  <button
+                    type="button"
+                    className={`quiz-layout-menu-item ${cutMarkMode === '0.25' ? 'active' : ''}`}
+                    onClick={() => handleSelectPresetCutMark(0.25, '0.25')}
+                  >
+                    <div className="quiz-layout-radio-circle">
+                      {cutMarkMode === '0.25' && <div className="quiz-layout-radio-inner"></div>}
+                    </div>
+                    <span>০.২৫ নম্বর কাটা যাবে</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className={`quiz-layout-menu-item ${cutMarkMode === '0' ? 'active' : ''}`}
+                    onClick={() => handleSelectPresetCutMark(0, '0')}
+                  >
+                    <div className="quiz-layout-radio-circle">
+                      {cutMarkMode === '0' && <div className="quiz-layout-radio-inner"></div>}
+                    </div>
+                    <span>No Cut Mark (০ নম্বর)</span>
+                  </button>
+
+                  <div className="quiz-cut-mark-divider"></div>
+
+                  <div className="quiz-cut-mark-custom-section">
+                    <div className="quiz-cut-mark-custom-header">
+                      <span>কাস্টম কাট মার্ক:</span>
+                      {cutMarkMode === 'custom' && (
+                        <span className="quiz-cut-mark-badge">সক্রিয়: {toBengaliNumber(cutMark)}</span>
+                      )}
+                    </div>
+                    <div className="quiz-cut-mark-input-row">
+                      <input
+                        type="number"
+                        step="0.05"
+                        min="0"
+                        max="10"
+                        placeholder="যেমন: 0.20 বা 1"
+                        value={customCutMarkInput}
+                        onChange={(e) => setCustomCutMarkInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleApplyCustomCutMark();
+                          }
+                        }}
+                        className="quiz-cut-mark-input"
+                      />
+                      <button
+                        type="button"
+                        className="quiz-cut-mark-apply-btn"
+                        onClick={handleApplyCustomCutMark}
+                      >
+                        সেট করুন
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* Option Layout Custom Dropdown Menu */}
             <div className="quiz-layout-dropdown-wrapper hide-on-mobile" ref={layoutDropdownRef}>
@@ -513,6 +827,254 @@ function QuestionsComponent() {
                 </div>
               )}
             </div>
+
+            {/* Font Settings Custom Dropdown Menu */}
+            <div className="quiz-layout-dropdown-wrapper" ref={fontDropdownRef}>
+              <button
+                type="button"
+                className="quiz-layout-trigger-btn"
+                onClick={() => setShowFontMenu(!showFontMenu)}
+                title="ফন্ট সাইজ ও ফন্ট ফ্যামিলি পরিবর্তন করুন"
+              >
+                <i className="fa-solid fa-font" style={{ color: '#007bff' }}></i>
+                <span>ফন্ট</span>
+                <i className={`fa-solid fa-chevron-${showFontMenu ? 'up' : 'down'}`} style={{ fontSize: '11px', color: '#64748b' }}></i>
+              </button>
+
+              {showFontMenu && (
+                <div className="quiz-layout-popup-menu quiz-font-popup">
+                  <div className="quiz-font-popup-title">
+                    <i className="fa-solid fa-sliders" style={{ color: '#007bff', marginRight: '6px' }}></i>
+                    ফন্ট সেটিংস (Font Settings)
+                  </div>
+
+                  {/* Section 1: Font Size Accordion */}
+                  <div
+                    className={`quiz-font-accordion-header ${fontAccordion.size ? 'active' : ''}`}
+                    onClick={() => toggleFontAccordion('size')}
+                    title="ফন্ট সাইজ অপশন খুলতে বা বন্ধ করতে ক্লিক করুন"
+                  >
+                    <div className="quiz-font-accordion-header-left">
+                      <i className="fa-solid fa-text-height" style={{ color: '#007bff' }}></i>
+                      <span>ফন্ট সাইজ:</span>
+                    </div>
+                    <div className="quiz-font-accordion-header-right">
+                      <span className="quiz-font-accordion-badge">
+                        <span className="quiz-font-accordion-badge-text">{fontSize} px</span>
+                      </span>
+                      <i className={`fa-solid fa-chevron-${fontAccordion.size ? 'up' : 'down'} quiz-font-accordion-chevron`}></i>
+                    </div>
+                  </div>
+
+                  {fontAccordion.size && (
+                    <div className="quiz-font-accordion-body">
+                      <div className="quiz-font-size-pills">
+                        <button
+                          type="button"
+                          className={`quiz-font-size-pill ${fontSize === 14 ? 'active' : ''}`}
+                          onClick={() => handleSelectFontSize(14)}
+                        >
+                          14 px
+                        </button>
+                        <button
+                          type="button"
+                          className={`quiz-font-size-pill ${fontSize === 15 ? 'active' : ''}`}
+                          onClick={() => handleSelectFontSize(15)}
+                        >
+                          15 px
+                        </button>
+                        <button
+                          type="button"
+                          className={`quiz-font-size-pill ${fontSize === 16 ? 'active' : ''}`}
+                          onClick={() => handleSelectFontSize(16)}
+                        >
+                          16 px (ডিফল্ট)
+                        </button>
+                      </div>
+
+                      <div className="quiz-font-size-pills">
+                        <button
+                          type="button"
+                          className={`quiz-font-size-pill ${fontSize === 17 ? 'active' : ''}`}
+                          onClick={() => handleSelectFontSize(17)}
+                        >
+                          17 px
+                        </button>
+                        <button
+                          type="button"
+                          className={`quiz-font-size-pill ${fontSize === 18 ? 'active' : ''}`}
+                          onClick={() => handleSelectFontSize(18)}
+                        >
+                          18 px
+                        </button>
+                        <button
+                          type="button"
+                          className={`quiz-font-size-pill ${fontSize === 19 ? 'active' : ''}`}
+                          onClick={() => handleSelectFontSize(19)}
+                        >
+                          19 px
+                        </button>
+                        <button
+                          type="button"
+                          className={`quiz-font-size-pill ${fontSize === 20 ? 'active' : ''}`}
+                          onClick={() => handleSelectFontSize(20)}
+                        >
+                          20 px
+                        </button>
+                      </div>
+
+                      <div className="quiz-font-custom-section">
+                        <div className="quiz-font-custom-header">
+                          <span>কাস্টম সাইজ (১০ - ৩৬ px):</span>
+                          {![14, 15, 16, 17, 18, 19, 20].includes(fontSize) && (
+                            <span className="quiz-font-badge">সক্রিয়: {toBengaliNumber(fontSize)} px</span>
+                          )}
+                        </div>
+                        <div className="quiz-font-custom-size-row">
+                          <input
+                            type="number"
+                            min="10"
+                            max="36"
+                            placeholder="যেমন: 22"
+                            value={customFontSizeInput}
+                            onChange={(e) => setCustomFontSizeInput(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                handleApplyCustomFontSize();
+                              }
+                            }}
+                            className="quiz-font-input"
+                          />
+                          <button
+                            type="button"
+                            className="quiz-font-apply-btn"
+                            onClick={handleApplyCustomFontSize}
+                          >
+                            সেট করুন
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="quiz-cut-mark-divider"></div>
+
+                  {/* Section 2: Font Family Accordion */}
+                  <div
+                    className={`quiz-font-accordion-header ${fontAccordion.family ? 'active' : ''}`}
+                    onClick={() => toggleFontAccordion('family')}
+                    title="ফন্ট ফ্যামিলি অপশন খুলতে বা বন্ধ করতে ক্লিক করুন"
+                  >
+                    <div className="quiz-font-accordion-header-left">
+                      <i className="fa-solid fa-paragraph" style={{ color: '#007bff' }}></i>
+                      <span>ফন্ট ফ্যামিলি:</span>
+                    </div>
+                    <div className="quiz-font-accordion-header-right">
+                      <span className="quiz-font-accordion-badge" style={{ fontFamily }}>
+                        <span className="quiz-font-accordion-badge-text">
+                          {FONT_FAMILIES.find((f) => f.family === fontFamily)?.name || 'Noto Sans Bengali'}
+                        </span>
+                      </span>
+                      <i className={`fa-solid fa-chevron-${fontAccordion.family ? 'up' : 'down'} quiz-font-accordion-chevron`}></i>
+                    </div>
+                  </div>
+
+                  {fontAccordion.family && (
+                    <div className="quiz-font-accordion-body">
+                      <div className="quiz-font-family-list">
+                        {FONT_FAMILIES.map((font) => (
+                          <button
+                            key={font.id}
+                            type="button"
+                            className={`quiz-layout-menu-item ${fontFamily === font.family ? 'active' : ''}`}
+                            onClick={() => handleSelectFontFamily(font.family)}
+                            style={{ fontFamily: font.family }}
+                          >
+                            <div className="quiz-layout-radio-circle">
+                              {fontFamily === font.family && <div className="quiz-layout-radio-inner"></div>}
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                              <span style={{ fontSize: '13.5px', fontWeight: 600 }}>{font.name}</span>
+                              <span style={{ fontSize: '11px', color: '#64748b' }}>{font.sub}</span>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="quiz-cut-mark-divider"></div>
+
+                  {/* Section 3: Font Weight Accordion */}
+                  <div
+                    className={`quiz-font-accordion-header ${fontAccordion.weight ? 'active' : ''}`}
+                    onClick={() => toggleFontAccordion('weight')}
+                    title="ফন্ট ওয়েট অপশন খুলতে বা বন্ধ করতে ক্লিক করুন"
+                  >
+                    <div className="quiz-font-accordion-header-left">
+                      <i className="fa-solid fa-bold" style={{ color: '#007bff' }}></i>
+                      <span>ফন্ট ওয়েট:</span>
+                    </div>
+                    <div className="quiz-font-accordion-header-right">
+                      <span className="quiz-font-accordion-badge">
+                        <span className="quiz-font-accordion-badge-text">
+                          {fontWeight === 'thin' ? 'Thin' : fontWeight === 'medium' ? 'Medium' : fontWeight === 'bold' ? 'Bold' : 'Regular'}
+                        </span>
+                      </span>
+                      <i className={`fa-solid fa-chevron-${fontAccordion.weight ? 'up' : 'down'} quiz-font-accordion-chevron`}></i>
+                    </div>
+                  </div>
+
+                  {fontAccordion.weight && (
+                    <div className="quiz-font-accordion-body">
+                      <div className="quiz-font-family-list">
+                        {FONT_WEIGHTS.map((item) => (
+                          <button
+                            key={item.id}
+                            type="button"
+                            className={`quiz-layout-menu-item ${fontWeight === item.value ? 'active' : ''}`}
+                            onClick={() => handleSelectFontWeight(item.value)}
+                          >
+                            <div className="quiz-layout-radio-circle">
+                              {fontWeight === item.value && <div className="quiz-layout-radio-inner"></div>}
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                              <span style={{ fontSize: '13.5px', fontWeight: item.weight }}>{item.name}</span>
+                              <span style={{ fontSize: '11px', color: '#64748b' }}>{item.sub}</span>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <hr style={{ margin: '12px 0', border: 'none', borderTop: '1px solid #e2e8f0' }} />
+
+        {/* Controls Bar */}
+        <div className="quiz-controls-bar">
+          <div className="quiz-nav-actions">
+            <button className="quiz-btn-reset" onClick={resetQuiz}>
+              <i className="fa-solid fa-rotate-right"></i> পুনরায় শুরু করুন
+            </button>
+
+            {/* Read Mode Switch */}
+            <label className="quiz-switch-label" style={{ background: '#e2e8f0', padding: '4px 12px', borderRadius: '20px', fontWeight: 'bold' }}>
+              <label className="quiz-switch">
+                <input
+                  type="checkbox"
+                  checked={isReadMode}
+                  onChange={(e) => handleReadModeToggle(e.target.checked)}
+                />
+                <span className="quiz-slider"></span>
+              </label>
+              আগে পড়ুন
+            </label>
           </div>
 
           <div className="quiz-right-controls-group">
