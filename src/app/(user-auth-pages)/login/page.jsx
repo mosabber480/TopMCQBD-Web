@@ -15,6 +15,7 @@ function LoginComponent() {
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
 
+  const [regUsername, setRegUsername] = useState('');
   const [regName, setRegName] = useState('');
   const [regEmail, setRegEmail] = useState('');
   const [regPassword, setRegPassword] = useState('');
@@ -65,6 +66,11 @@ function LoginComponent() {
       const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
       const userStr = localStorage.getItem('user') || localStorage.getItem('quiz_user');
       if (token && userStr && currentMode !== 'reset') {
+        const redirectParam = searchParams.get('redirect');
+        if (redirectParam) {
+          router.replace(decodeURIComponent(redirectParam));
+          return;
+        }
         const u = JSON.parse(userStr);
         if (u.role === 'owner' || u.role === 'admin') {
           router.replace('/admin/dashboard');
@@ -73,7 +79,7 @@ function LoginComponent() {
         }
       }
     } catch (e) {}
-  }, [currentMode, router]);
+  }, [currentMode, router, searchParams]);
 
   // 1. LOGIN SUBMIT
   const handleLoginSubmit = async (e) => {
@@ -90,14 +96,24 @@ function LoginComponent() {
       const data = await res.json();
 
       if (res.ok && (data.success || data.token)) {
+        const userObj = {
+          ...data.user,
+          username: data.user.username || (data.user.name ? data.user.name.split(' ')[0] : '')
+        };
         localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
+        localStorage.setItem('user', JSON.stringify(userObj));
         localStorage.setItem('quiz_token', data.token);
-        localStorage.setItem('quiz_user', JSON.stringify(data.user));
+        localStorage.setItem('quiz_user', JSON.stringify(userObj));
+        window.dispatchEvent(new Event('auth-change'));
 
         showAlert('Login Successful! Redirecting...', true);
 
         setTimeout(() => {
+          const redirectParam = searchParams.get('redirect');
+          if (redirectParam) {
+            router.replace(decodeURIComponent(redirectParam));
+            return;
+          }
           if (data.user && (data.user.role === 'owner' || data.user.role === 'admin')) {
             router.replace('/admin/dashboard');
           } else {
@@ -127,22 +143,33 @@ function LoginComponent() {
     setBtnLoading(true);
 
     try {
+      const finalUsername = regUsername.trim() || regName.trim().split(' ')[0];
       const res = await fetch(getPaidApiUrl('/api/auth/register'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: regName.trim(), email: regEmail.trim(), password: regPassword })
+        body: JSON.stringify({
+          name: regName.trim(),
+          username: finalUsername,
+          email: regEmail.trim(),
+          password: regPassword
+        })
       });
 
       const data = await res.json();
 
       if (res.ok && data.success) {
         if (data.token && data.user) {
+          const userObj = {
+            ...data.user,
+            username: data.user.username || finalUsername
+          };
           localStorage.setItem('token', data.token);
           localStorage.setItem('quiz_token', data.token);
-          localStorage.setItem('user', JSON.stringify(data.user));
-          localStorage.setItem('quiz_user', JSON.stringify(data.user));
+          localStorage.setItem('user', JSON.stringify(userObj));
+          localStorage.setItem('quiz_user', JSON.stringify(userObj));
           window.dispatchEvent(new Event('auth-change'));
           showAlert('Registration successful! Logging you in...', true);
+          setRegUsername('');
           setRegName('');
           setRegEmail('');
           setRegPassword('');
@@ -152,6 +179,7 @@ function LoginComponent() {
           }, 1000);
         } else {
           showAlert('Registration successful! Please login below.', true);
+          setRegUsername('');
           setRegName('');
           setRegEmail('');
           setRegPassword('');
@@ -308,6 +336,24 @@ function LoginComponent() {
         {/* 2. REGISTER FORM */}
         {currentMode === 'register' && (
           <form onSubmit={handleRegisterSubmit}>
+            <div className="form-group">
+              <label>Username / Nickname (সংক্ষিপ্ত নাম):</label>
+              <input
+                type="text"
+                placeholder="Enter username or nickname (e.g. shuvo)..."
+                value={regUsername}
+                onChange={(e) => setRegUsername(e.target.value.replace(/\s+/g, ''))}
+                onKeyDown={(e) => {
+                  if (e.key === ' ' || e.code === 'Space') {
+                    e.preventDefault();
+                  }
+                }}
+                required
+              />
+              <small style={{ fontSize: '12px', color: '#64748b', display: 'block', marginTop: '4px' }}>
+                * এই নামটি এক শব্দে হবে (স্পেস ছাড়া)। এটি হেডারে প্রদর্শিত হবে।
+              </small>
+            </div>
             <div className="form-group">
               <label>Full Name:</label>
               <input

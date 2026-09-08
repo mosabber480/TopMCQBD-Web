@@ -10,7 +10,7 @@ export const revalidate = 0;
 export async function POST(request) {
   try {
     await connectDB();
-    const { name, email, password, role } = await request.json();
+    const { name, username, email, password, role } = await request.json();
 
     if (!name || !email || !password) {
       return NextResponse.json(
@@ -28,11 +28,14 @@ export async function POST(request) {
       );
     }
 
+    const finalUsername = (username ? username.replace(/\s+/g, '') : (name.trim().split(' ')[0] || '')).replace(/\s+/g, '');
+
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const user = new User({
       name: name.trim(),
+      username: finalUsername,
       email: cleanEmail,
       password: hashedPassword,
       role: role && ['customer', 'admin'].includes(role) ? role : 'customer'
@@ -45,6 +48,7 @@ export async function POST(request) {
     const userResponse = {
       _id: user._id,
       name: user.name,
+      username: user.username,
       email: user.email,
       role: user.role,
       subscription: user.subscription,

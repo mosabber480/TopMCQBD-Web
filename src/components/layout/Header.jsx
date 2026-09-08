@@ -67,17 +67,29 @@ export default function Header({ headerData: initialHeader }) {
 
   // Check login state
   useEffect(() => {
-    try {
-      const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
-      const userStr = localStorage.getItem('user') || localStorage.getItem('quiz_user');
-      if (token && userStr) {
-        setUser(JSON.parse(userStr));
-      } else {
+    const syncUser = () => {
+      try {
+        const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
+        const userStr = localStorage.getItem('user') || localStorage.getItem('quiz_user');
+        if (token && userStr) {
+          setUser(JSON.parse(userStr));
+        } else {
+          setUser(null);
+        }
+      } catch (e) {
         setUser(null);
       }
-    } catch (e) {
-      setUser(null);
-    }
+    };
+
+    syncUser();
+
+    window.addEventListener('auth-change', syncUser);
+    window.addEventListener('storage', syncUser);
+
+    return () => {
+      window.removeEventListener('auth-change', syncUser);
+      window.removeEventListener('storage', syncUser);
+    };
   }, [pathname]);
 
   // Prevent website body scroll when mobile menu is open
@@ -123,12 +135,16 @@ export default function Header({ headerData: initialHeader }) {
   let authText = 'লগইন';
 
   if (user) {
+    const displayName = (user.username && user.username.trim()) ||
+      (user.nickname && user.nickname.trim()) ||
+      (user.name ? user.name.split(' ')[0] : 'ইউজার');
+
     if (user.role === 'owner' || user.role === 'admin') {
       authLink = '/admin/dashboard';
-      authText = user.name ? user.name.split(' ')[0] : 'ড্যাশবোর্ড';
+      authText = displayName || 'ড্যাশবোর্ড';
     } else {
       authLink = '/profile';
-      authText = user.name ? user.name.split(' ')[0] : 'প্রোফাইল';
+      authText = displayName || 'প্রোফাইল';
     }
   }
 

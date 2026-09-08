@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, Suspense } from 'react';
+import dynamic from 'next/dynamic';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { getPaidApiUrl } from '@/lib/config';
@@ -88,7 +89,7 @@ const FONT_WEIGHTS = [
   }
 ];
 
-function QuestionsComponent() {
+function QuestionsComponentInternal() {
   const searchParams = useSearchParams();
   const categoryParam = searchParams.get('category');
 
@@ -102,6 +103,7 @@ function QuestionsComponent() {
 
   // Toggles (Exact Defaults from quiz.html)
   const [isReadMode, setIsReadMode] = useState(false); // Default OFF
+  const [showAskAi, setShowAskAi] = useState(false); // Default OFF (toggled via switcher next to Read Mode)
   const [showColor, setShowColor] = useState(true);
   const [showAnswer, setShowAnswer] = useState(false); // Default OFF
   const [showExplanation, setShowExplanation] = useState(true); // Default ON
@@ -165,7 +167,136 @@ function QuestionsComponent() {
   const [activeAiPrompt, setActiveAiPrompt] = useState('');
   const [activeAiContext, setActiveAiContext] = useState(null);
 
+  // Helper to check user authentication and subscription / paid status
+  const checkUserPlanStatus = () => {
+    if (typeof window === 'undefined') return { isLoggedIn: false, isPaid: false, user: null };
+    try {
+      const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
+      const userStr = localStorage.getItem('user') || localStorage.getItem('quiz_user');
+      
+      let u = null;
+      if (userStr) {
+        try {
+          u = JSON.parse(userStr);
+        } catch (e) {}
+      }
+
+      // User is considered logged in if token exists or valid user object is found
+      const isLoggedIn = !!(token || (u && (u._id || u.phone || u.email || u.name)));
+      if (!isLoggedIn) {
+        return { isLoggedIn: false, isPaid: false, user: null };
+      }
+
+      if (!u) {
+        // Token exists but user details not cached yet
+        return { isLoggedIn: true, isPaid: false, user: null };
+      }
+
+      // 1. Admin and owner roles have complete paid access
+      if (u.role === 'admin' || u.role === 'owner') {
+        return { isLoggedIn: true, isPaid: true, user: u };
+      }
+
+      // 2. Check subscription active status and valid end date
+      const sub = u.subscription;
+      if (sub && sub.active && sub.plan && sub.plan !== 'none') {
+        if (!sub.endDate || new Date(sub.endDate) > new Date()) {
+          return { isLoggedIn: true, isPaid: true, user: u };
+        }
+      }
+
+      // 3. Check alternative flags
+      if (u.isPaid || u.hasActivePlan || u.plan === 'paid') {
+        return { isLoggedIn: true, isPaid: true, user: u };
+      }
+
+      // Logged in, but free / no active subscription plan
+      return { isLoggedIn: true, isPaid: false, user: u };
+    } catch (e) {
+      return { isLoggedIn: false, isPaid: false, user: null };
+    }
+  };
+
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Plan status state
+  const [planStatus, setPlanStatus] = useState({
+    checked: false,
+    isLoggedIn: false,
+    isPaid: false,
+    user: null
+  });
+
+  // Sync user profile from backend on mount to detect active plans in real-time
+  useEffect(() => {
+    setIsMounted(true);
+    const s = checkUserPlanStatus();
+    setPlanStatus({ checked: true, isLoggedIn: s.isLoggedIn, isPaid: s.isPaid, user: s.user });
+
+    const syncUser = async () => {
+      const token = typeof window !== 'undefined' ? (localStorage.getItem('token') || localStorage.getItem('quiz_token')) : null;
+      if (token) {
+        try {
+          const res = await fetch(getPaidApiUrl('/api/users/me'), {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.user) {
+              localStorage.setItem('user', JSON.stringify(data.user));
+              localStorage.setItem('quiz_user', JSON.stringify(data.user));
+              const updated = checkUserPlanStatus();
+              setPlanStatus({ checked: true, isLoggedIn: updated.isLoggedIn, isPaid: updated.isPaid, user: updated.user });
+            }
+          }
+        } catch (e) {}
+      }
+    };
+
+    syncUser();
+
+    // Listen to storage events across tabs or auth changes
+    const handleStorageChange = () => {
+      const updated = checkUserPlanStatus();
+      setPlanStatus({ checked: true, isLoggedIn: updated.isLoggedIn, isPaid: updated.isPaid, user: updated.user });
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
+
   const handleAskAI = (q, idx) => {
+    const status = checkUserPlanStatus();
+
+    // 1. Not logged in -> Prompt login
+    if (!status.isLoggedIn) {
+      setPopup({
+        visible: true,
+        type: 'warning',
+        title: 'লগইন ও সক্রিয় প্ল্যান প্রয়োজন',
+        msg: 'আপনার কোনো সক্রিয় প্ল্যান নেই। Ask AI দেখার জন্য সক্রিয় প্ল্যান লাগবে, অনুগ্রহ করে লগইন করে একটি প্ল্যান পারচেজ করুন।',
+        hasReset: false,
+        isLoginRequired: true,
+        isPlanRequired: false
+      });
+      return;
+    }
+
+    // 2. Logged in, but not paid / no active plan -> Prompt package purchase
+    if (!status.isPaid) {
+      setPopup({
+        visible: true,
+        type: 'warning',
+        title: 'সক্রিয় প্ল্যান প্রয়োজন',
+        msg: 'আপনার কোনো সক্রিয় প্ল্যান নেই। Ask AI দেখার জন্য সক্রিয় প্ল্যান লাগবে, অনুগ্রহ করে একটি প্ল্যান পারচেজ করুন।',
+        hasReset: false,
+        isLoginRequired: false,
+        isPlanRequired: true
+      });
+      return;
+    }
+
     const bengaliLetters = ['ক', 'খ', 'গ', 'ঘ', 'ঙ'];
     const promptText = `প্রশ্ন ${idx + 1}: ${q.q}\nঅপশনসমূহ:\n${(q.options || [])
       .map((opt, i) => `(${bengaliLetters[i] || i + 1}) ${opt}`)
@@ -242,6 +373,12 @@ function QuestionsComponent() {
       if (savedFontWeight && ['thin', 'regular', 'medium', 'bold'].includes(savedFontWeight)) {
         setFontWeight(savedFontWeight);
       }
+
+      // Load saved Ask AI toggle preference
+      const savedAskAi = localStorage.getItem('topmcqbd_show_ask_ai');
+      if (savedAskAi === 'true') {
+        setShowAskAi(true);
+      }
     } catch (e) {
       console.warn('Error reading preferences from localStorage:', e);
     }
@@ -270,8 +407,16 @@ function QuestionsComponent() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Load questions from API
+  // Load questions from API (Active plan strictly required for Paid API MCQs)
   useEffect(() => {
+    const status = checkUserPlanStatus();
+    if (!status.isPaid) {
+      setAllQuestions([]);
+      setDisplayQuestions([]);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     setError('');
 
@@ -291,7 +436,7 @@ function QuestionsComponent() {
         setError('ডাটাবেজ থেকে কুইজের প্রশ্ন লোড করতে সমস্যা হয়েছে!');
         setLoading(false);
       });
-  }, [categoryParam]);
+  }, [categoryParam, planStatus.isPaid]);
 
   // Update display questions slice
   useEffect(() => {
@@ -519,6 +664,14 @@ function QuestionsComponent() {
     }
   };
 
+  // Ask AI Switch Toggle Handler (Toggles display of Ask AI buttons next to questions)
+  const handleAskAiToggle = (checked) => {
+    setShowAskAi(checked);
+    try {
+      localStorage.setItem('topmcqbd_show_ask_ai', checked ? 'true' : 'false');
+    } catch (e) {}
+  };
+
   // Option Click Handler (Single Attempt Lock)
   const handleAnswerClick = (qIndex, optIndex) => {
     if (isReadMode) return;
@@ -596,6 +749,21 @@ function QuestionsComponent() {
     });
   };
 
+  if (!isMounted) {
+    return (
+      <div className="quiz-section-wrapper font-bn" style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ textAlign: 'center', padding: '50px 20px' }}>
+          <div className="spinner-border text-primary" role="status" style={{ width: '2.5rem', height: '2.5rem' }}>
+            <span className="visually-hidden">লোড হচ্ছে...</span>
+          </div>
+          <p style={{ marginTop: '16px', color: '#64748b', fontSize: '15px' }}>
+            প্রশ্নব্যাংক লোড হচ্ছে...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="quiz-section-wrapper">
       {/* Hover Tooltip */}
@@ -605,37 +773,75 @@ function QuestionsComponent() {
         </div>
       )}
 
-      {/* Floating Status Bar */}
-      <div
-        className="quiz-floating-status-bar"
-        style={headerOffset !== null ? { top: `${headerOffset}px` } : undefined}
-      >
-        {showTime && !isReadMode && (
-          <div className="quiz-timer-board">
-            <i className="fa-regular fa-clock" style={{ marginRight: '6px' }}></i>
-            <span>{formatTimer(totalSecondsLeft)}</span>
-          </div>
-        )}
-        {showScore && !isReadMode && (
-          <div className="quiz-score-board">
-            স্কোর: <span>{formatScore(score)}</span>
-          </div>
-        )}
-      </div>
+      {/* Floating Status Bar (Visible only when paid plan is active) */}
+      {planStatus.isPaid && (
+        <div
+          className="quiz-floating-status-bar"
+          style={headerOffset !== null ? { top: `${headerOffset}px` } : undefined}
+        >
+          {showTime && !isReadMode && (
+            <div className="quiz-timer-board">
+              <i className="fa-regular fa-clock" style={{ marginRight: '6px' }}></i>
+              <span>{formatTimer(totalSecondsLeft)}</span>
+            </div>
+          )}
+          {showScore && !isReadMode && (
+            <div className="quiz-score-board">
+              স্কোর: <span>{formatScore(score)}</span>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Corner Toast Popup */}
       {popup.visible && (
         <div className={`quiz-corner-popup ${popup.type}`}>
           <h4>{popup.title}</h4>
           <p>{popup.msg}</p>
-          <div className="quiz-popup-actions">
+          <div className="quiz-popup-actions" style={{ flexWrap: 'wrap', gap: '8px' }}>
+            {popup.isLoginRequired && (
+              <Link
+                href={`/login?redirect=${encodeURIComponent(typeof window !== 'undefined' ? window.location.pathname + window.location.search : '/questions')}`}
+                className="quiz-popup-btn btn-popup-reset"
+                style={{
+                  textDecoration: 'none',
+                  background: '#007bff',
+                  color: '#ffffff',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  fontWeight: 600
+                }}
+                onClick={() => setPopup({ ...popup, visible: false })}
+              >
+                <i className="fa-solid fa-right-to-bracket"></i> লগইন করুন
+              </Link>
+            )}
+            {popup.isPlanRequired && (
+              <Link
+                href="/packages"
+                className="quiz-popup-btn btn-popup-reset"
+                style={{
+                  textDecoration: 'none',
+                  background: '#16a34a',
+                  color: '#ffffff',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  fontWeight: 600
+                }}
+                onClick={() => setPopup({ ...popup, visible: false })}
+              >
+                <i className="fa-solid fa-cart-shopping"></i> প্যাকেজ কিনুন
+              </Link>
+            )}
             {popup.hasReset && (
               <button className="quiz-popup-btn btn-popup-reset" onClick={resetQuiz}>
                 <i className="fa-solid fa-rotate-right"></i> পুনরায় শুরু করুন
               </button>
             )}
             <button className="quiz-popup-btn btn-popup-close" onClick={() => setPopup({ ...popup, visible: false })}>
-              ঠিক আছে
+              {popup.isLoginRequired || popup.isPlanRequired ? 'বাতিল' : 'ঠিক আছে'}
             </button>
           </div>
         </div>
@@ -1075,6 +1281,35 @@ function QuestionsComponent() {
               </label>
               আগে পড়ুন
             </label>
+
+            {/* Ask AI Switcher */}
+            <label
+              className="quiz-switch-label quiz-ask-ai-switcher"
+              style={{
+                background: showAskAi ? '#e0f2fe' : '#e2e8f0',
+                color: showAskAi ? '#0284c7' : '#2c3e50',
+                border: showAskAi ? '1px solid #7dd3fc' : '1px solid transparent',
+                padding: '4px 12px',
+                borderRadius: '20px',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                transition: 'all 0.2s ease'
+              }}
+              title={showAskAi ? 'Ask AI বাটন বন্ধ করুন' : 'Ask AI বাটন চালু করুন'}
+            >
+              <label className="quiz-switch">
+                <input
+                  type="checkbox"
+                  checked={showAskAi}
+                  onChange={(e) => handleAskAiToggle(e.target.checked)}
+                />
+                <span className="quiz-slider" style={showAskAi ? { backgroundColor: '#0284c7' } : {}}></span>
+              </label>
+              Ask AI
+            </label>
           </div>
 
           <div className="quiz-right-controls-group">
@@ -1282,7 +1517,51 @@ function QuestionsComponent() {
         </div>
 
         {/* Questions Display */}
-        {loading ? (
+        {!planStatus.isPaid ? (
+          <div className="quiz-paywall-card">
+            <div className={`quiz-paywall-icon-box ${planStatus.isLoggedIn ? 'crown-icon' : 'lock-icon'}`}>
+              <i className={planStatus.isLoggedIn ? 'fa-solid fa-crown' : 'fa-solid fa-lock'}></i>
+            </div>
+            <h3 className="quiz-paywall-title">
+              {planStatus.isLoggedIn ? 'অ্যাক্টিভ প্ল্যান লাগবে' : 'লগইন করে প্ল্যান পারচেজ করতে হবে'}
+            </h3>
+            {planStatus.isLoggedIn ? (
+              <>
+                <div className="quiz-paywall-plan-badge">
+                  ইউজার: <strong>{planStatus.user?.name || planStatus.user?.phone || 'ব্যবহারকারী'}</strong> &nbsp;|&nbsp; স্ট্যাটাস: <span className="badge-inactive">কোনো সক্রিয় প্ল্যান নেই</span>
+                </div>
+                <p className="quiz-paywall-desc">
+                  আপনার অ্যাকাউন্টে কোনো সক্রিয় প্ল্যান নেই। এই বিষয়ের সকল প্রশ্ন ও মডেল টেস্ট অনুশীলন করার জন্য একটি অ্যাক্টিভ প্ল্যান লাগবে, অনুগ্রহ করে একটি প্ল্যান পারচেজ করুন।
+                </p>
+                <div className="quiz-paywall-actions">
+                  <Link href="/packages" className="btn btn-primary quiz-paywall-btn">
+                    <i className="fa-solid fa-bolt"></i> প্ল্যান পারচেজ করুন
+                  </Link>
+                  <Link href="/profile" className="quiz-paywall-btn-outline">
+                    <i className="fa-solid fa-user-gear"></i> প্রোফাইল ও সাবস্ক্রিপশন
+                  </Link>
+                </div>
+              </>
+            ) : (
+              <>
+                <p className="quiz-paywall-desc">
+                  এই বিষয়ের সকল পেইড প্রশ্ন ও পূর্ণাঙ্গ মডেল টেস্ট অনুশীলন করার জন্য আপনাকে প্রথমে লগইন করে একটি প্ল্যান পারচেজ করতে হবে।
+                </p>
+                <div className="quiz-paywall-actions">
+                  <Link
+                    href={`/login?redirect=${encodeURIComponent(`/questions${categoryParam ? `?category=${encodeURIComponent(categoryParam)}` : ''}`)}`}
+                    className="btn btn-primary quiz-paywall-btn"
+                  >
+                    <i className="fa-solid fa-right-to-bracket"></i> লগইন করুন
+                  </Link>
+                  <Link href="/packages" className="quiz-paywall-btn-outline">
+                    <i className="fa-solid fa-gem"></i> প্যাকেজসমূহ দেখুন
+                  </Link>
+                </div>
+              </>
+            )}
+          </div>
+        ) : loading ? (
           <p style={{ textAlign: 'center', color: '#888', padding: '40px 0' }}>
             <i className="fa-solid fa-spinner fa-spin" style={{ marginRight: '8px' }}></i>
             ডাটাবেজ থেকে প্রশ্ন লোড হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন...
@@ -1311,14 +1590,16 @@ function QuestionsComponent() {
                     <div key={q._id || idx} className="quiz-question-block">
                       <div className="quiz-question-text">
                         {idx + 1}. {q.q}{' '}
-                        <button
-                          type="button"
-                          className="quiz-ask-ai-btn"
-                          onClick={() => handleAskAI(q, idx)}
-                          title="Ask AI"
-                        >
-                          Ask AI
-                        </button>
+                        {showAskAi && (
+                          <button
+                            type="button"
+                            className="quiz-ask-ai-btn"
+                            onClick={() => handleAskAI(q, idx)}
+                            title="Ask AI"
+                          >
+                            Ask AI
+                          </button>
+                        )}
                       </div>
 
                       <div className="quiz-options-container layout-1">
@@ -1395,14 +1676,16 @@ function QuestionsComponent() {
                     <div key={q._id || actualIdx} className="quiz-question-block">
                       <div className="quiz-question-text">
                         {actualIdx + 1}. {q.q}{' '}
-                        <button
-                          type="button"
-                          className="quiz-ask-ai-btn"
-                          onClick={() => handleAskAI(q, actualIdx)}
-                          title="Ask AI"
-                        >
-                          Ask AI
-                        </button>
+                        {showAskAi && (
+                          <button
+                            type="button"
+                            className="quiz-ask-ai-btn"
+                            onClick={() => handleAskAI(q, actualIdx)}
+                            title="Ask AI"
+                          >
+                            Ask AI
+                          </button>
+                        )}
                       </div>
 
                       <div className="quiz-options-container layout-1">
@@ -1481,14 +1764,16 @@ function QuestionsComponent() {
                     <div key={q._id || actualIdx} className="quiz-question-block">
                       <div className="quiz-question-text">
                         {actualIdx + 1}. {q.q}{' '}
-                        <button
-                          type="button"
-                          className="quiz-ask-ai-btn"
-                          onClick={() => handleAskAI(q, actualIdx)}
-                          title="Ask AI"
-                        >
-                          Ask AI
-                        </button>
+                        {showAskAi && (
+                          <button
+                            type="button"
+                            className="quiz-ask-ai-btn"
+                            onClick={() => handleAskAI(q, actualIdx)}
+                            title="Ask AI"
+                          >
+                            Ask AI
+                          </button>
+                        )}
                       </div>
 
                       <div className="quiz-options-container layout-1">
@@ -1565,14 +1850,16 @@ function QuestionsComponent() {
                     <div key={q._id || actualIdx} className="quiz-question-block">
                       <div className="quiz-question-text">
                         {actualIdx + 1}. {q.q}{' '}
-                        <button
-                          type="button"
-                          className="quiz-ask-ai-btn"
-                          onClick={() => handleAskAI(q, actualIdx)}
-                          title="Ask AI"
-                        >
-                          Ask AI
-                        </button>
+                        {showAskAi && (
+                          <button
+                            type="button"
+                            className="quiz-ask-ai-btn"
+                            onClick={() => handleAskAI(q, actualIdx)}
+                            title="Ask AI"
+                          >
+                            Ask AI
+                          </button>
+                        )}
                       </div>
 
                       <div className="quiz-options-container layout-1">
@@ -1654,14 +1941,16 @@ function QuestionsComponent() {
                 <div key={q._id || qIndex} className="quiz-question-block">
                   <div className="quiz-question-text">
                     {qIndex + 1}. {q.q}{' '}
-                    <button
-                      type="button"
-                      className="quiz-ask-ai-btn"
-                      onClick={() => handleAskAI(q, qIndex)}
-                      title="Ask AI"
-                    >
-                      Ask AI
-                    </button>
+                    {showAskAi && (
+                      <button
+                        type="button"
+                        className="quiz-ask-ai-btn"
+                        onClick={() => handleAskAI(q, qIndex)}
+                        title="Ask AI"
+                      >
+                        Ask AI
+                      </button>
+                    )}
                   </div>
 
                   <div className={`quiz-options-container layout-${optionLayout}`}>
@@ -1779,7 +2068,34 @@ function QuestionsComponent() {
       <button
         type="button"
         className="ai-floating-trigger-btn"
-        onClick={() => setIsAiOpen(!isAiOpen)}
+        onClick={() => {
+          const status = checkUserPlanStatus();
+          if (!status.isLoggedIn) {
+            setPopup({
+              visible: true,
+              type: 'warning',
+              title: 'লগইন ও সক্রিয় প্ল্যান প্রয়োজন',
+              msg: 'আপনার কোনো সক্রিয় প্ল্যান নেই। Ask AI দেখার জন্য সক্রিয় প্ল্যান লাগবে, অনুগ্রহ করে লগইন করে একটি প্ল্যান পারচেজ করুন।',
+              hasReset: false,
+              isLoginRequired: true,
+              isPlanRequired: false
+            });
+            return;
+          }
+          if (!status.isPaid) {
+            setPopup({
+              visible: true,
+              type: 'warning',
+              title: 'সক্রিয় প্ল্যান প্রয়োজন',
+              msg: 'আপনার কোনো সক্রিয় প্ল্যান নেই। Ask AI দেখার জন্য সক্রিয় প্ল্যান লাগবে, অনুগ্রহ করে একটি প্ল্যান পারচেজ করুন।',
+              hasReset: false,
+              isLoginRequired: false,
+              isPlanRequired: true
+            });
+            return;
+          }
+          setIsAiOpen(!isAiOpen);
+        }}
         title="TopMCQBD AI শিক্ষক"
       >
         <img src="/images/logo-white-icon.png" alt="AI" style={{ width: '28px', height: '28px', objectFit: 'contain' }} />
@@ -1797,6 +2113,22 @@ function QuestionsComponent() {
     </div>
   );
 }
+
+const QuestionsComponent = dynamic(() => Promise.resolve(QuestionsComponentInternal), {
+  ssr: false,
+  loading: () => (
+    <div className="quiz-section-wrapper font-bn" style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ textAlign: 'center', padding: '50px 20px' }}>
+        <div className="spinner-border text-primary" role="status" style={{ width: '2.5rem', height: '2.5rem' }}>
+          <span className="visually-hidden">লোড হচ্ছে...</span>
+        </div>
+        <p style={{ marginTop: '16px', color: '#64748b', fontSize: '15px' }}>
+          প্রশ্নব্যাংক লোড হচ্ছে...
+        </p>
+      </div>
+    </div>
+  )
+});
 
 export default function QuestionsPage() {
   return (

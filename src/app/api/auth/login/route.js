@@ -56,6 +56,7 @@ export async function POST(request) {
       user: {
         id: user._id,
         name: user.name,
+        username: user.username || (user.name ? user.name.split(' ')[0] : ''),
         email: user.email,
         role: user.role,
         subscription: user.subscription,

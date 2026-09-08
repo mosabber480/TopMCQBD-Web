@@ -46,6 +46,16 @@ const UserSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
+    username: {
+        type: String,
+        trim: true,
+        default: ''
+    },
+    phone: {
+        type: String,
+        trim: true,
+        default: ''
+    },
     email: {
         type: String,
         required: true,
@@ -95,5 +105,9 @@ const UserSchema = new mongoose.Schema({
         type: Date
     }
 }, { timestamps: true });
+
+if (process.env.NODE_ENV === 'development') {
+    delete mongoose.models.User;
+}
 
 export default mongoose.models.User || mongoose.model('User', UserSchema);

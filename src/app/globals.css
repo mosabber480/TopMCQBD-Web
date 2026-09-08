@@ -18,6 +18,8 @@
 .site-main-content .content-container,
 .site-main-content .faq-container,
 .site-main-content .not-found-wrapper,
+.site-main-content .profile-wrapper,
+.profile-wrapper,
 .header-wrapper,
 .footer-container,
 .announce-content {
@@ -47,8 +49,8 @@
 }
 
 :root {
-    --primary: #007bff;
-    --primary-dark: #0056b3;
+    --primary: #135fd6;
+    --primary-dark: #0f4cb0;
     --secondary: #17a2b8;
     --secondary-dark: #27ae60;
     --warning: #ff9f43;
@@ -61,6 +63,7 @@
     --purple-btn: #6f42c1;
     --accent: #ff9f43;
     --font-main: 'Noto Sans Bengali', 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans Bengali', sans-serif;
     --sidebar-width: 260px;
     --sidebar-collapsed-width: 70px;
 }
@@ -77,6 +80,52 @@ body {
     color: #333;
     line-height: 1.6;
     min-height: 100vh;
+}
+
+/* ==========================================================================
+   GLOBAL FORM CONTROLS & INPUTS VERTICAL ALIGNMENT
+   ========================================================================== */
+input:not([type="checkbox"]):not([type="radio"]), 
+select, 
+textarea {
+    font-family: var(--font-ui);
+    line-height: normal;
+    vertical-align: middle;
+    box-sizing: border-box;
+}
+input::placeholder,
+textarea::placeholder {
+    font-family: var(--font-ui);
+    line-height: normal;
+}
+
+/* ==========================================================================
+   GLOBAL FONTAWESOME ICONS OPTICAL VERTICAL CENTERING
+   ========================================================================== */
+i[class*="fa-"], 
+.fa, 
+.fa-solid, 
+.fa-regular, 
+.fa-brands {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: -0.125em;
+    line-height: 1;
+}
+
+/* Icons inside buttons, badges, links, and flex containers */
+.btn i[class*="fa-"],
+.badge i[class*="fa-"],
+button i[class*="fa-"],
+a i[class*="fa-"],
+.site-nav a i[class*="fa-"],
+.profile-info-row strong i[class*="fa-"],
+.mega-icon-card i[class*="fa-"],
+.mega-link-icon-box i[class*="fa-"] {
+    vertical-align: middle;
+    line-height: 1;
+    transform: translateY(-0.5px);
 }
 
 /* ==========================================================================
@@ -595,7 +644,7 @@ body.sidebar-collapsed .admin-main-content {
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
     border-radius: 8px;
     list-style: none;
-    padding: 6px 0;
+    padding: 0;
     min-width: 190px;
     z-index: 9999;
     border: 1px solid #e2e8f0;
@@ -603,6 +652,7 @@ body.sidebar-collapsed .admin-main-content {
     gap: 0 !important;
     align-items: stretch !important;
     margin-top: 0;
+    overflow: hidden;
 }
 
 @media (min-width: 769px) {
@@ -617,10 +667,12 @@ body.sidebar-collapsed .admin-main-content {
     display: block !important;
     border-bottom: 1px solid #f1f5f9;
 }
-.dropdown-menu li:last-child { border-bottom: none; }
+.dropdown-menu li:last-child {
+    border-bottom: none !important;
+}
 
 .dropdown-menu li a {
-    padding: 10px 16px !important;
+    padding: 10px 18px !important;
     display: block !important;
     width: 100% !important;
     color: #2c3e50 !important;
@@ -628,22 +680,66 @@ body.sidebar-collapsed .admin-main-content {
     font-weight: 500;
     white-space: nowrap;
     position: relative;
-    transition: color 0.2s ease, background 0.15s ease;
+    transition: color 0.3s ease, background 0.3s ease !important;
     text-decoration: none !important;
-    background: #f8fafc !important;
+    background: #ffffff !important;
+    overflow: hidden;
 }
 
+.dropdown-menu li:first-child a {
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+.dropdown-menu li:last-child a {
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+/* Invisible default left border to keep layout completely stable (no dancing) */
+.dropdown-menu li a::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 2.5px;
+    height: 100%;
+    background-color: transparent;
+    display: block !important;
+}
+
+/* Animated accent line: slim width (2.5px), top-to-bottom draw effect */
 .dropdown-menu li a::after {
-    display: none !important;
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 2.5px;
+    height: 100%;
+    background-color: var(--primary);
+    transform: scaleY(0);
+    transform-origin: top;
+    transition: transform 0.38s cubic-bezier(0.25, 1, 0.3, 1);
+    display: block !important;
+    z-index: 1;
+}
+
+.dropdown-menu li:first-child a::before,
+.dropdown-menu li:first-child a::after {
+    border-top-left-radius: 7px;
+}
+.dropdown-menu li:last-child a::before,
+.dropdown-menu li:last-child a::after {
+    border-bottom-left-radius: 7px;
+}
+
+.dropdown-menu li a:hover::after,
+.dropdown-menu li a:focus::after {
+    transform: scaleY(1) !important;
 }
 
 .dropdown-menu li a:hover {
-    background: #eff6ff !important;
+    background: #f0f7ff !important;
     color: var(--primary) !important;
-}
-
-.dropdown-menu li a:hover::after {
-    display: none !important;
 }
 
 .mega-menu {
@@ -694,13 +790,42 @@ body.sidebar-collapsed .admin-main-content {
         font-weight: 500;
         padding: 8px 12px !important;
         border-radius: 6px;
-        transition: background 0.15s ease, color 0.15s ease !important;
+        transition: background 0.3s ease, color 0.3s ease !important;
         display: flex !important;
         align-items: center;
         background: #f8fafc !important;
         border: 1px solid #f1f5f9 !important;
         position: relative;
         box-sizing: border-box !important;
+        overflow: hidden;
+    }
+    .mega-links-col a::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 2.5px;
+        height: 100%;
+        background-color: transparent;
+        display: block !important;
+    }
+    .mega-links-col a::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 2.5px;
+        height: 100%;
+        background-color: var(--primary);
+        transform: scaleY(0);
+        transform-origin: top;
+        transition: transform 0.38s cubic-bezier(0.25, 1, 0.3, 1);
+        display: block !important;
+        z-index: 1;
+    }
+    .mega-links-col a:hover::after,
+    .mega-links-col a:focus::after {
+        transform: scaleY(1) !important;
     }
     .mega-links-col a i {
         font-size: 10px;
@@ -712,16 +837,10 @@ body.sidebar-collapsed .admin-main-content {
         position: relative;
         display: inline-block;
     }
-    .mega-links-col a span::after {
-        display: none !important;
-    }
     .mega-links-col a:hover {
         background: #eff6ff !important;
         border-color: #dbeafe !important;
         color: var(--primary) !important;
-    }
-    .mega-links-col a:hover span::after {
-        display: none !important;
     }
     
     .mega-social { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
@@ -1000,7 +1119,19 @@ body.sidebar-collapsed .admin-main-content {
 .logout-btn-confirm:hover { background: #c82333; }
 
 /* BADGES & BUTTONS */
-.badge { display: inline-block; padding: 4px 12px; border-radius: 15px; font-weight: bold; font-size: 12px; }
+.badge { 
+    display: inline-flex; 
+    align-items: center; 
+    justify-content: center; 
+    gap: 5px; 
+    padding: 4px 12px; 
+    border-radius: 15px; 
+    font-weight: bold; 
+    font-size: 12px; 
+    line-height: 1.25;
+    font-family: var(--font-ui);
+    vertical-align: middle;
+}
 .badge-active { background-color: #d4edda; color: #155724; }
 .badge-expired { background-color: #f8d7da; color: #721c24; }
 .badge-pending { background-color: #ffc107; color: #212529; }
@@ -1009,8 +1140,11 @@ body.sidebar-collapsed .admin-main-content {
 
 .btn {
     padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px;
-    display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s ease;
+    display: inline-flex; align-items: center; justify-content: center; gap: 7px; transition: all 0.2s ease;
     text-decoration: none;
+    line-height: 1.25;
+    font-family: var(--font-ui);
+    vertical-align: middle;
 }
 .btn-primary { background-color: var(--primary); color: white; }
 .btn-primary:hover { background-color: var(--primary-dark); }
