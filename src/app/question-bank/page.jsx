@@ -1,3 +1,3 @@
-import QuestionBankDemoPage from '../question-bank-demo/page';
+import QuestionBankDemoPage from '../(demo-pages)/question-bank-demo/page';
 
 export default QuestionBankDemoPage;
