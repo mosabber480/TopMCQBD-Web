@@ -18,17 +18,29 @@
         "icon": "fa-solid fa-house"
       },
       {
-        "title": "সকল MCQ",
+        "title": "পেইড MCQ",
         "url": "/all-mcq",
         "icon": "fa-solid fa-layer-group",
         "subMenus": [
           {
-            "title": "test",
-            "url": "test"
+            "title": "Subjective Model Test",
+            "url": "/subjective-model-test"
           },
           {
-            "title": "check",
-            "url": "test"
+            "title": "Full Model Test",
+            "url": "/full-model-test"
+          },
+          {
+            "title": "Question Bank",
+            "url": "/question-bank"
+          },
+          {
+            "title": "Live Exam",
+            "url": "/live-exam-model-test"
+          },
+          {
+            "title": "সম্পূর্ণ সাবজেক্টিভ অনুশীলন",
+            "url": "/subjective-all-mcqs-Practice-success"
           }
         ]
       },

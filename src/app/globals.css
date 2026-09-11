@@ -184,6 +184,48 @@ a i[class*="fa-"],
 .btn-alert-cancel { background-color: #e2e8f0; color: #4a5568; }
 
 /* ==========================================================================
+   ADMIN BOTTOM ACTION & CONFIRMATION FLOATING BARS
+   Matches #topAlertBanner theme: white background, side border, dark text
+   ========================================================================== */
+#reorder-action-bar,
+.reorder-action-bar,
+#delete-confirm-bar {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #f4f7f6 !important;
+    color: #2c3e50 !important;
+    padding: 15px 25px;
+    border-top: 1px solid #cbd5e1 !important;
+    border-bottom: none !important;
+    z-index: 9999;
+    box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.04), 0 -8px 20px rgba(0, 0, 0, 0.08), 0 -16px 36px rgba(15, 23, 42, 0.08) !important;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    animation: slideUp 0.3s ease;
+}
+
+#reorder-action-bar,
+.reorder-action-bar {
+    border-left: 6px solid #ffc107 !important;
+}
+
+#delete-confirm-bar {
+    border-left: 6px solid #dc3545 !important;
+}
+
+#reorder-action-bar span,
+.reorder-action-bar span,
+#delete-confirm-bar span {
+    color: #2c3e50 !important;
+    font-weight: 700 !important;
+    font-size: 15px !important;
+}
+
+/* ==========================================================================
    ADMIN DASHBOARD LEFT SIDEBAR NAVIGATION & COLLAPSE STYLES
    ========================================================================== */
 .sidebar-wrapper {
@@ -203,6 +245,7 @@ a i[class*="fa-"],
     z-index: 1100;
     box-shadow: 2px 0 10px rgba(0,0,0,0.1);
     overflow-y: auto;
+    overflow-x: hidden;
     transition: width 0.3s ease, left 0.3s ease;
 }
 
@@ -269,29 +312,45 @@ a i[class*="fa-"],
 
 .sidebar-link {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
-    padding: 12px 20px;
+    padding: 11px 18px;
     color: #cbd5e1;
     text-decoration: none;
     font-size: 14px;
     font-weight: 600;
     border-left: 3px solid transparent;
     transition: all 0.2s ease;
-    white-space: nowrap;
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
     cursor: pointer;
+    line-height: 1.45;
 }
 
 .sidebar-link .link-content {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 12px;
+    flex: 1;
+    min-width: 0;
+}
+
+.sidebar-link .link-content span {
+    flex: 1;
+    min-width: 0;
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    line-height: 1.45;
 }
 
 .sidebar-link i {
     width: 18px;
     text-align: center;
     font-size: 15px;
+    margin-top: 3px;
+    flex-shrink: 0;
 }
 
 .sidebar-link:hover {
@@ -300,9 +359,19 @@ a i[class*="fa-"],
 }
 
 .sidebar-link.active {
-    background-color: rgba(0,123,255,0.15);
-    color: var(--primary);
-    border-left-color: var(--primary);
+    background-color: rgba(56, 189, 248, 0.12);
+    color: #38bdf8;
+    border-left-color: #38bdf8;
+    font-weight: 700;
+}
+
+.sidebar-link.active:hover {
+    background-color: rgba(56, 189, 248, 0.18);
+    color: #38bdf8;
+}
+
+.sidebar-link.active i {
+    color: #38bdf8;
 }
 
 .sidebar-link.logout-link {
@@ -322,6 +391,8 @@ a i[class*="fa-"],
     font-size: 11px !important;
     transition: opacity 0.2s ease, transform 0.2s ease;
     opacity: 0.85;
+    margin-top: 4px;
+    flex-shrink: 0;
 }
 
 .sidebar-item-group.open .submenu-arrow {
@@ -336,21 +407,35 @@ a i[class*="fa-"],
 
 .sidebar-sublink {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 10px;
-    padding: 10px 20px 10px 42px;
+    padding: 9px 18px 9px 38px;
     color: #94a3b8;
     text-decoration: none;
     font-size: 13px;
     font-weight: 500;
+    line-height: 1.45;
     transition: all 0.2s ease;
-    white-space: nowrap;
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+}
+
+.sidebar-sublink span {
+    flex: 1;
+    min-width: 0;
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    line-height: 1.45;
 }
 
 .sidebar-sublink i {
     width: 14px;
     font-size: 10px;
     text-align: center;
+    margin-top: 4px;
+    flex-shrink: 0;
 }
 
 .sidebar-sublink:hover {
@@ -361,6 +446,11 @@ a i[class*="fa-"],
 .sidebar-sublink.active {
     color: #38bdf8;
     font-weight: 700;
+    background-color: rgba(56, 189, 248, 0.08);
+}
+
+.sidebar-sublink.active i {
+    color: #38bdf8;
 }
 
 /* SIDEBAR COLLAPSED */

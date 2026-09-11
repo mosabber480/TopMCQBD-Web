@@ -1,0 +1,131 @@
+import { NextResponse } from 'next/server';
+import { authorize } from '@/lib/auth';
+import { connectDB } from '@/lib/db';
+import Question from '@/models/Question';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+export async function GET(request) {
+  try {
+    await connectDB();
+    const { searchParams } = new URL(request.url);
+    const category = searchParams.get('category');
+    const search = searchParams.get('search');
+    const limit = parseInt(searchParams.get('limit') || '0', 10);
+
+    let filter = {};
+    if (category && category !== 'all' && category !== 'All') {
+      const trimmed = category.trim();
+      const escaped = trimmed.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      filter.category = { $regex: escaped, $options: 'i' };
+    }
+
+    if (search && search.trim()) {
+      const sEscaped = search.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      filter.q = { $regex: sEscaped, $options: 'i' };
+    }
+
+    let query = Question.find(filter).sort({ createdAt: -1 });
+    if (limit > 0) {
+      query = query.limit(limit);
+    }
+
+    const questions = await query.exec();
+
+    return NextResponse.json({
+      success: true,
+      questions,
+      mcqs: questions,
+      total: questions.length
+    });
+  } catch (err) {
+    console.error('GET FULL MODEL QUESTIONS ERROR:', err);
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+  }
+}
+
+export async function POST(request) {
+  try {
+    if (process.env.NODE_ENV !== 'development') {
+      const { user: currentAdmin, errorResponse } = await authorize(request, ['owner', 'admin']);
+      if (errorResponse) return errorResponse;
+    }
+
+    await connectDB();
+    const body = await request.json();
+
+    if (Array.isArray(body)) {
+      const validQuestions = body
+        .filter((item) => item && item.q && Array.isArray(item.options) && item.category)
+        .map((item) => ({
+          q: String(item.q).trim(),
+          options: item.options.map((o) => (o !== undefined ? String(o).trim() : '')),
+          ans: parseInt(item.ans || 0, 10),
+          explanation: item.explanation ? String(item.explanation).trim() : '',
+          category: String(item.category).trim()
+        }));
+
+      if (validQuestions.length === 0) {
+        return NextResponse.json({ success: false, error: 'No valid questions found in payload.' }, { status: 400 });
+      }
+
+      const inserted = await Question.insertMany(validQuestions);
+      return NextResponse.json({ success: true, count: inserted.length });
+    }
+
+    const { q, options, ans, explanation, category } = body;
+    if (!q || !options || !Array.isArray(options) || !category) {
+      return NextResponse.json({ success: false, error: 'Question text, options and category are required.' }, { status: 400 });
+    }
+
+    const newQuestion = await Question.create({
+      q: String(q).trim(),
+      options: options.map((o) => String(o).trim()),
+      ans: parseInt(ans || 0, 10),
+      explanation: explanation ? String(explanation).trim() : '',
+      category: String(category).trim()
+    });
+
+    return NextResponse.json({ success: true, question: newQuestion });
+  } catch (err) {
+    console.error('POST FULL MODEL QUESTIONS ERROR:', err);
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+  }
+}
+
+export async function DELETE(request) {
+  try {
+    if (process.env.NODE_ENV !== 'development') {
+      const { user: currentAdmin, errorResponse } = await authorize(request, ['owner', 'admin']);
+      if (errorResponse) return errorResponse;
+    }
+
+    await connectDB();
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    const category = searchParams.get('category');
+
+    if (id) {
+      const deleted = await Question.findByIdAndDelete(id);
+      if (!deleted) {
+        return NextResponse.json({ success: false, error: 'Question not found' }, { status: 404 });
+      }
+      return NextResponse.json({ success: true, message: 'Question deleted successfully' });
+    }
+
+    if (category) {
+      const trimmed = category.trim();
+      const escaped = trimmed.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const result = await Question.deleteMany({
+        category: { $regex: escaped, $options: 'i' }
+      });
+      return NextResponse.json({ success: true, count: result.deletedCount });
+    }
+
+    return NextResponse.json({ success: false, error: 'ID or category is required' }, { status: 400 });
+  } catch (err) {
+    console.error('DELETE FULL MODEL QUESTION ERROR:', err);
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+  }
+}

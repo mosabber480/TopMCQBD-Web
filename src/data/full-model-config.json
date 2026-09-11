@@ -1,0 +1,164 @@
+{
+  "exams": [
+    {
+      "id": "bcs-46-grand-01",
+      "title": "৪৬তম বিসিএস প্রিলিমিনারি লাইভ পূর্ণাঙ্গ গ্র্যান্ড মডেল টেস্ট - ০১",
+      "category": "bcs",
+      "categoryName": "বিসিএস পূর্ণাঙ্গ",
+      "tags": ["Live Grand Test", "200 Marks", "BCS Full"],
+      "badgeColor": "rose",
+      "onlineUsers": 54,
+      "borderColor": "#0284c7",
+      "description": "৪৬তম বিসিএস প্রিলিমিনারি পরীক্ষার সর্বশেষ ২০০ নম্বরের সিলেবাস অনুসারে প্রণীত সম্পূর্ণ মডেল টেস্ট। ব্যাখ্যামূলক সমাধান ও তাৎক্ষণিক মেরিট পজিশন।",
+      "subjectsText": "বাংলা (৩৫), English (৩৫), গণিত ও মানসিক দক্ষতা (৩০), সাধারণ জ্ঞান (৫০), বিজ্ঞান ও আইসিটি (৩০), ভূগোল ও সুশাসন (২০)",
+      "totalQuestions": 200,
+      "totalMarks": 200,
+      "durationMinutes": 120,
+      "negativeMarks": "০.৫০",
+      "status": "active"
+    },
+    {
+      "id": "bcs-46-grand-02",
+      "title": "৪৬তম বিসিএস প্রিলিমিনারি পূর্ণাঙ্গ প্রস্তুতি স্পেশাল টেস্ট - ০২",
+      "category": "bcs",
+      "categoryName": "বিসিএস পূর্ণাঙ্গ",
+      "tags": ["Grand Test", "200 Marks", "Top Rated"],
+      "badgeColor": "amber",
+      "onlineUsers": 48,
+      "borderColor": "#0284c7",
+      "description": "২০০টি প্রশ্নের স্ট্যান্ডার্ড বিসিএস স্ট্যান্ডার্ড সেট। প্রতিটি প্রশ্নের রেফারেন্স ও ব্যাখ্যামূলক বিশ্লেষণ।",
+      "subjectsText": "বাংলা সাহিত্য ও ব্যাকরণ, English Language & Literature, সাধারণ গণিত, বাংলাদেশ ও আন্তর্জাতিক বিষয়াবলি",
+      "totalQuestions": 200,
+      "totalMarks": 200,
+      "durationMinutes": 120,
+      "negativeMarks": "০.৫০",
+      "status": "active"
+    },
+    {
+      "id": "bank-officer-full-01",
+      "title": "কম্বাইন্ড ৮ ব্যাংক অফিসার ১০০ নম্বরের পূর্ণাঙ্গ মডেল টেস্ট - ০১",
+      "category": "bank",
+      "categoryName": "ব্যাংক জব পূর্ণাঙ্গ",
+      "tags": ["Popular", "100 Marks", "Bank Full"],
+      "badgeColor": "emerald",
+      "onlineUsers": 39,
+      "borderColor": "#10b981",
+      "description": "বাংলাদেশ ব্যাংক ও ৮টি সমন্বিত সরকারি ব্যাংকের অফিসার পদের জন্য নির্ধারিত স্ট্যান্ডার্ড ১০০ নম্বরের প্রশ্ন সেট।",
+      "subjectsText": "English (30), Mathematics (30), General Knowledge & Banking (20), Bangla (10), ICT (10)",
+      "totalQuestions": 100,
+      "totalMarks": 100,
+      "durationMinutes": 60,
+      "negativeMarks": "০.২৫",
+      "status": "active"
+    },
+    {
+      "id": "primary-teacher-full-01",
+      "title": "প্রাথমিক সহকারী শিক্ষক নিয়োগ ৮০ নম্বরের পূর্ণাঙ্গ মডেল টেস্ট - ০১",
+      "category": "primary",
+      "categoryName": "প্রাইমারি পূর্ণাঙ্গ",
+      "tags": ["New", "80 Marks", "Primary Full"],
+      "badgeColor": "violet",
+      "onlineUsers": 62,
+      "borderColor": "#8b5cf6",
+      "description": "প্রাইমারি সহকারী শিক্ষক নিয়োগ পরীক্ষার সর্বশেষ প্যাটার্ন অনুযায়ী ৮০টি গুরুত্বপূর্ণ এমসিকিউ প্রশ্ন সংবলিত পূর্ণাঙ্গ সেট।",
+      "subjectsText": "বাংলা (২০), ইংরেজি (২০), গণিত (২০), সাধারণ জ্ঞান (২০)",
+      "totalQuestions": 80,
+      "totalMarks": 80,
+      "durationMinutes": 60,
+      "negativeMarks": "০.২৫",
+      "status": "active"
+    },
+    {
+      "id": "primary-teacher-full-02",
+      "title": "প্রাথমিক শিক্ষক নিয়োগ চূড়ান্ত প্রস্তুতি স্পেশাল মডেল টেস্ট - ০২",
+      "category": "primary",
+      "categoryName": "প্রাইমারি পূর্ণাঙ্গ",
+      "tags": ["80 Marks", "Top Selection"],
+      "badgeColor": "violet",
+      "onlineUsers": 41,
+      "borderColor": "#8b5cf6",
+      "description": "প্রাইমারি নিয়োগ পরীক্ষার অনুরূপ ৮০ নম্বরের প্রস্তুতিমূলক প্রশ্ন থেকে বাছাইকৃত শতভাগ কমন উপযোগী সেট।",
+      "subjectsText": "বাংলা সাহিত্য ও ব্যাকরণ, ইংরেজি গ্রামার, পাটিগণিত ও জ্যামিতি, সাম্প্রতিক তথ্য",
+      "totalQuestions": 80,
+      "totalMarks": 80,
+      "durationMinutes": 60,
+      "negativeMarks": "০.২৫",
+      "status": "active"
+    },
+    {
+      "id": "ntrca-18th-full",
+      "title": "১৮তম শিক্ষক নিবন্ধন (NTRCA) ১০০ নম্বরের পূর্ণাঙ্গ গ্র্যান্ড টেস্ট",
+      "category": "primary",
+      "categoryName": "শিক্ষক নিবন্ধন পূর্ণাঙ্গ",
+      "tags": ["Popular", "100 Marks", "NTRCA Full"],
+      "badgeColor": "amber",
+      "onlineUsers": 45,
+      "borderColor": "#f59e0b",
+      "description": "স্কুল ও কলেজ উভয় পর্যায়ের শিক্ষক নিবন্ধন পরীক্ষার ১০০ নম্বরের পূর্ণাঙ্গ প্রিলিমিনারি মডেল টেস্ট।",
+      "subjectsText": "বাংলা (২৫), ইংরেজি (২৫), সাধারণ গণিত (২৫), সাধারণ জ্ঞান (২৫)",
+      "totalQuestions": 100,
+      "totalMarks": 100,
+      "durationMinutes": 60,
+      "negativeMarks": "০.২৫",
+      "status": "active"
+    }
+  ],
+  "subjects": [
+    {
+      "id": "bangla",
+      "code": "BANGLA",
+      "name": "বাংলা",
+      "desc": "ব্যাকরণ, সাহিত্য ও শুদ্ধ প্রয়োগ",
+      "modelTestsCount": 20,
+      "theme": {
+        "color": "#006a4e",
+        "gradient": "linear-gradient(135deg, #006a4e 0%, #059669 100%)",
+        "lightBg": "#f0fdf4",
+        "borderColor": "#bbf7d0",
+        "glowColor": "rgba(0, 106, 78, 0.12)"
+      }
+    },
+    {
+      "id": "english",
+      "code": "ENGLISH",
+      "name": "English",
+      "desc": "Grammar, Vocabulary & Composition",
+      "modelTestsCount": 20,
+      "theme": {
+        "color": "#0284c7",
+        "gradient": "linear-gradient(135deg, #0284c7 0%, #2563eb 100%)",
+        "lightBg": "#f0f9ff",
+        "borderColor": "#bae6fd",
+        "glowColor": "rgba(2, 132, 199, 0.12)"
+      }
+    },
+    {
+      "id": "math",
+      "code": "MATHEMATICS",
+      "name": "গণিত",
+      "desc": "পাটিগণিত, বীজগণিত, জ্যামিতি ও পরিমিতি",
+      "modelTestsCount": 20,
+      "theme": {
+        "color": "#d97706",
+        "gradient": "linear-gradient(135deg, #d97706 0%, #f59e0b 100%)",
+        "lightBg": "#fffbeb",
+        "borderColor": "#fde68a",
+        "glowColor": "rgba(217, 119, 6, 0.12)"
+      }
+    },
+    {
+      "id": "gk",
+      "code": "GENERAL KNOWLEDGE",
+      "name": "সাধারণ জ্ঞান",
+      "desc": "বাংলাদেশ, আন্তর্জাতিক ও সাম্প্রতিক বিষয়াবলি",
+      "modelTestsCount": 20,
+      "theme": {
+        "color": "#7c3aed",
+        "gradient": "linear-gradient(135deg, #7c3aed 0%, #9333ea 100%)",
+        "lightBg": "#faf5ff",
+        "borderColor": "#ddd6fe",
+        "glowColor": "rgba(124, 58, 237, 0.12)"
+      }
+    }
+  ]
+}

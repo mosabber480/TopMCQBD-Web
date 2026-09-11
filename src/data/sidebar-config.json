@@ -7,58 +7,70 @@
       "subMenus": []
     },
     {
-      "title": "হেডার কন্ট্রোল",
-      "url": "/admin/header-dashboard",
-      "icon": "fa-solid fa-window-restore",
-      "subMenus": []
+      "title": "Global Setting",
+      "url": "/admin/dashboard",
+      "icon": "fa-solid fa-link",
+      "subMenus": [
+        {
+          "title": "হেডার কন্ট্রোল",
+          "url": "/admin/header-dashboard",
+          "icon": "fa-solid fa-window-restore"
+        },
+        {
+          "title": "ফুটার কন্ট্রোল",
+          "url": "/admin/footer-dashboard",
+          "icon": "fa-solid fa-table-columns"
+        }
+      ]
     },
     {
-      "title": "ফুটার কন্ট্রোল",
-      "url": "/admin/footer-dashboard",
-      "icon": "fa-solid fa-table-columns",
-      "subMenus": []
+      "title": "Common Pages",
+      "url": "/admin",
+      "icon": "fa-solid fa-link",
+      "subMenus": [
+        {
+          "title": "হোম পেজ কন্ট্রোল",
+          "url": "/admin/home-dashboard",
+          "icon": "fa-solid fa-sliders"
+        },
+        {
+          "title": "আমাদের সম্পর্কে",
+          "url": "/admin/about-dashboard",
+          "icon": "fa-solid fa-address-card"
+        },
+        {
+          "title": "রিফান্ড ও পলিসি",
+          "url": "/admin/policy-dashboard",
+          "icon": "fa-solid fa-file-invoice-dollar"
+        }
+      ]
     },
     {
-      "title": "হোম পেজ কন্ট্রোল",
-      "url": "/admin/home-dashboard",
-      "icon": "fa-solid fa-sliders",
-      "subMenus": []
-    },
-    {
-      "title": "আমাদের সম্পর্কে",
-      "url": "/admin/about-dashboard",
-      "icon": "fa-solid fa-address-card",
-      "subMenus": []
-    },
-    {
-      "title": "প্রশ্ন ব্যাংক ও কুইজ",
-      "url": "/admin/quiz-dashboard",
+      "title": "Paid Dashboard",
+      "url": "/admin/question-bank-dashboard",
       "icon": "fa-solid fa-file-circle-question",
-      "subMenus": []
-    },
-    {
-      "title": "প্যাকেজসমূহ পেজ",
-      "url": "/admin/packages-dashboard",
-      "icon": "fa-solid fa-box-open",
-      "subMenus": []
-    },
-    {
-      "title": "ইউজার ও সাবস্ক্রিপশন",
-      "url": "/admin/users",
-      "icon": "fa-solid fa-users-gear",
-      "subMenus": []
-    },
-    {
-      "title": "ফ্রি এমসিকিউ কন্ট্রোল",
-      "url": "/admin/free-mcqs-dashboard",
-      "icon": "fa-solid fa-gift",
-      "subMenus": []
-    },
-    {
-      "title": "রিফান্ড ও পলিসি",
-      "url": "/admin/policy-dashboard",
-      "icon": "fa-solid fa-file-invoice-dollar",
-      "subMenus": []
+      "subMenus": [
+        {
+          "title": "Questions Bank",
+          "url": "/admin/question-bank-dashboard",
+          "icon": "fa-solid fa-circle-dot"
+        },
+        {
+          "title": "Full Model Test",
+          "url": "/admin/full-model-dashabord",
+          "icon": "fa-solid fa-circle-dot"
+        },
+        {
+          "title": "Subjective Model Test",
+          "url": "/admin/subjective-model-test-dashbaord",
+          "icon": "fa-solid fa-circle-dot"
+        },
+        {
+          "title": "Subjective-ALL-MCQ (No Model)",
+          "url": "/admin/subjective-all-mcqs-dashabord",
+          "icon": "fa-solid fa-circle-dot"
+        }
+      ]
     },
     {
       "title": "লাইভ মডেল ড্যাশবোর্ড",
@@ -78,9 +90,21 @@
       ]
     },
     {
-      "title": "সাইডবার মেনু কন্ট্রোল",
-      "url": "/admin/admin-menu-dashboard",
-      "icon": "fa-solid fa-list-check",
+      "title": "প্যাকেজসমূহ পেজ",
+      "url": "/admin/packages-dashboard",
+      "icon": "fa-solid fa-box-open",
+      "subMenus": []
+    },
+    {
+      "title": "ইউজার ও সাবস্ক্রিপশন",
+      "url": "/admin/users",
+      "icon": "fa-solid fa-users-gear",
+      "subMenus": []
+    },
+    {
+      "title": "ফ্রি এমসিকিউ কন্ট্রোল",
+      "url": "/admin/free-mcqs-dashboard",
+      "icon": "fa-solid fa-gift",
       "subMenus": []
     }
   ],

@@ -130,7 +130,10 @@ export default function AdminOverviewDashboard() {
           </h2>
           <p>TopMCQBD-এর সেন্ট্রাল অ্যাডমিন কন্ট্রোল প্যানেলে আপনাকে স্বাগতম। কন্টেন্ট ও ডেটা এক জায়গা থেকেই নিয়ন্ত্রণ করুন।</p>
         </div>
-        <div>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <Link href="/admin/sidebar-dashboard" className="btn" style={{ background: '#475569', color: 'white' }}>
+            <i className="fa-solid fa-list-check"></i> সাইডবার মেনু কন্ট্রোল
+          </Link>
           <Link href="/admin/admin-profile" className="btn" style={{ background: 'var(--dark, #2c3e50)', color: 'white' }}>
             <i className="fa-solid fa-user-shield"></i> অ্যাডমিন প্রোফাইল
           </Link>

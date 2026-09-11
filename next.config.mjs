@@ -84,6 +84,48 @@ const nextConfig = {
         destination: '/db-connection/dbd1-test',
         permanent: false,
       },
+      // Subjective All MCQs Shortcuts
+      {
+        source: '/paid-subjective-all-mcqs-Practice-success',
+        destination: '/subjective-all-mcqs-Practice-success',
+        permanent: false,
+      },
+      {
+        source: '/paid-subjective-all-mcqs-practice-success',
+        destination: '/subjective-all-mcqs-Practice-success',
+        permanent: false,
+      },
+      {
+        source: '/paid-subjective-all-mcqs-Practice-questions',
+        destination: '/subjective-all-mcqs-Practice-questions',
+        permanent: false,
+      },
+      {
+        source: '/paid-subjective-all-mcqs-practice-questions',
+        destination: '/subjective-all-mcqs-Practice-questions',
+        permanent: false,
+      },
+      // Paid Subjective Model Test Shortcuts
+      {
+        source: '/paidsubjective-model-test',
+        destination: '/subjective-model-test',
+        permanent: false,
+      },
+      {
+        source: '/paidsubjective-model-test-questions',
+        destination: '/subjective-model-test-questions',
+        permanent: false,
+      },
+      {
+        source: '/paid-subjective-model-test',
+        destination: '/subjective-model-test',
+        permanent: false,
+      },
+      {
+        source: '/paid-subjective-model-test-questions',
+        destination: '/subjective-model-test-questions',
+        permanent: false,
+      },
     ];
   },
   async headers() {

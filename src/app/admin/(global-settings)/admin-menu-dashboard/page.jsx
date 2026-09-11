@@ -742,18 +742,21 @@ export default function AdminMenuDashboardPage() {
           bottom: 0;
           left: 0;
           width: 100%;
-          background: #2c3e50;
+          background: #f4f7f6;
+          color: #2c3e50;
           padding: 15px;
-          border-top: 4px solid #ffc107;
+          border-top: 1px solid #cbd5e1;
+          border-bottom: none;
+          border-left: 6px solid #ffc107;
           z-index: 9999;
-          box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.2);
+          box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.04), 0 -8px 20px rgba(0, 0, 0, 0.08), 0 -16px 36px rgba(15, 23, 42, 0.08);
           justify-content: center;
           align-items: center;
           gap: 20px;
           animation: slideUp 0.3s ease;
         }
         #delete-confirm-bar {
-          border-top: 4px solid #dc3545;
+          border-left: 6px solid #dc3545;
         }
         @keyframes slideUp {
           from {
@@ -1491,7 +1494,7 @@ export default function AdminMenuDashboardPage() {
       {/* Floating Delete Confirmation Bar */}
       {pendingDelete && (
         <div id="delete-confirm-bar">
-          <span style={{ color: '#ffffff', fontWeight: 'bold', fontSize: '15px' }}>
+          <span style={{ color: '#2c3e50', fontWeight: 'bold', fontSize: '15px' }}>
             {pendingDelete.message}
           </span>
           <button
@@ -1518,7 +1521,7 @@ export default function AdminMenuDashboardPage() {
       {/* Floating Reorder Save Bar */}
       {isReordered && !pendingDelete && (
         <div id="reorder-action-bar">
-          <span style={{ color: '#ffffff', fontWeight: 'bold', fontSize: '15px' }}>
+          <span style={{ color: '#2c3e50', fontWeight: 'bold', fontSize: '15px' }}>
             আপনি সাইডবার/হেডার মেনুর ক্রম পরিবর্তন করেছেন। সেভ করতে বোতাম চাপুন।
           </span>
           <button

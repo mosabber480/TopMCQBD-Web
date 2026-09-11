@@ -10,13 +10,16 @@ try {
 
 const MONGODB_URI_PAID = process.env.MONGODB_URI_PAID || process.env.MONGO_URI;
 const MONGODB_URI_FREE = process.env.MONGODB_URI_FREE;
+const MONGODB_URI_QUESTION_BANK = process.env.MONGODB_URI_QUESTION_BANK;
 
 if (!global.mongooseCache) {
   global.mongooseCache = {
     paidConn: null,
     paidPromise: null,
     freeConn: null,
-    freePromise: null
+    freePromise: null,
+    questionBankConn: null,
+    questionBankPromise: null
   };
 }
 
@@ -98,6 +101,44 @@ export async function connectFreeDB() {
   }
 
   return cached.freeConn;
+}
+
+/**
+ * Connect to Question Bank Database connection
+ */
+export async function connectQuestionBankDB() {
+  const uri = process.env.MONGODB_URI_QUESTION_BANK || MONGODB_URI_PAID;
+  if (!uri) {
+    throw new Error('Please define the MONGODB_URI_QUESTION_BANK environment variable inside .env');
+  }
+
+  if (cached.questionBankConn && cached.questionBankConn.readyState === 1) {
+    return cached.questionBankConn;
+  }
+
+  if (!cached.questionBankPromise) {
+    cached.questionBankPromise = mongoose.createConnection(uri, {
+      bufferCommands: false,
+      serverSelectionTimeoutMS: 6000,
+      connectTimeoutMS: 10000,
+    }).asPromise().then((conn) => {
+      console.log('✅ Connected to MongoDB (Question Bank DB)');
+      return conn;
+    }).catch(err => {
+      cached.questionBankPromise = null;
+      console.error('❌ MongoDB Connection Error (Question Bank):', err);
+      throw err;
+    });
+  }
+
+  try {
+    cached.questionBankConn = await cached.questionBankPromise;
+  } catch (e) {
+    cached.questionBankPromise = null;
+    throw e;
+  }
+
+  return cached.questionBankConn;
 }
 
 export default connectDB;
