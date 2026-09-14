@@ -347,11 +347,11 @@ function ModelTestContent() {
   const selectedSubject = SUBJECTS_DATA.find(s => s.id === subjectId);
 
   const categories = [
-    { id: 'all', label: 'সকল টেস্ট' },
-    { id: 'bcs', label: 'বিসিএস' },
-    { id: 'bank', label: 'ব্যাংক জব' },
-    { id: 'primary', label: 'প্রাথমিক শিক্ষক' },
-    { id: 'subject', label: 'পূর্ণাঙ্গ মডেল টেস্ট' }
+    { id: 'all', label: 'সকল', count: INITIAL_EXAMS.length },
+    { id: 'bcs', label: 'বিসিএস', count: INITIAL_EXAMS.filter(e => e.category === 'bcs').length },
+    { id: 'bank', label: 'ব্যাংক জব', count: INITIAL_EXAMS.filter(e => e.category === 'bank').length },
+    { id: 'primary', label: 'প্রাথমিক শিক্ষক', count: INITIAL_EXAMS.filter(e => e.category === 'primary').length },
+    { id: 'subject', label: 'পূর্ণাঙ্গ মডেল টেস্ট', count: INITIAL_EXAMS.filter(e => e.category === 'subject').length }
   ];
 
   const filteredExams = INITIAL_EXAMS.filter(exam => {
@@ -924,7 +924,7 @@ function ModelTestContent() {
           }}
         >
           {/* Category Pills */}
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
             {categories.map(cat => {
               const isActive = currentCat === cat.id;
               return (
@@ -932,19 +932,48 @@ function ModelTestContent() {
                   key={cat.id}
                   onClick={() => setCurrentCat(cat.id)}
                   style={{
-                    padding: '8px 18px',
+                    padding: '8px 16px',
                     borderRadius: '8px',
                     fontSize: '0.92rem',
                     fontWeight: 600,
                     cursor: 'pointer',
                     transition: 'all 0.2s ease',
-                    border: isActive ? '1px solid #0284c7' : '1px solid #cbd5e1',
-                    backgroundColor: isActive ? '#0284c7' : '#ffffff',
-                    color: isActive ? '#ffffff' : '#334155',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    whiteSpace: 'nowrap',
+                    border: isActive ? '1px solid #0284c7' : '1px solid #e2e8f0',
+                    backgroundColor: isActive ? '#0284c7' : '#f1f5f9',
+                    color: isActive ? '#ffffff' : '#475569',
                     boxShadow: isActive ? '0 2px 8px rgba(2, 132, 199, 0.25)' : 'none'
                   }}
+                  onMouseEnter={(e) => {
+                    if (!isActive) {
+                      e.currentTarget.style.backgroundColor = '#e2e8f0';
+                      e.currentTarget.style.color = '#0f172a';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isActive) {
+                      e.currentTarget.style.backgroundColor = '#f1f5f9';
+                      e.currentTarget.style.color = '#475569';
+                    }
+                  }}
                 >
-                  {cat.label}
+                  <span>{cat.label}</span>
+                  <span
+                    style={{
+                      padding: '1px 7px',
+                      borderRadius: '10px',
+                      fontSize: '0.75rem',
+                      fontWeight: 700,
+                      backgroundColor: isActive ? 'rgba(255, 255, 255, 0.25)' : '#cbd5e1',
+                      color: isActive ? '#ffffff' : '#334155',
+                      display: 'inline-block'
+                    }}
+                  >
+                    {toBanglaNumber(cat.count)}
+                  </span>
                 </button>
               );
             })}

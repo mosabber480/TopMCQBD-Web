@@ -499,11 +499,11 @@ export default function SubjectiveModelTestClient({ initialSearchParams }) {
   const selectedSubject = SUBJECTS_DATA.find(s => s.id === subjectId);
 
   const categories = [
-    { id: 'all', label: 'সকল টেস্ট' },
-    { id: 'bcs', label: 'বিসিএস' },
-    { id: 'bank', label: 'ব্যাংক জব' },
-    { id: 'primary', label: 'প্রাথমিক শিক্ষক' },
-    { id: 'subject', label: 'পূর্ণাঙ্গ মডেল টেস্ট' }
+    { id: 'all', label: 'সকল', count: INITIAL_EXAMS.length },
+    { id: 'bcs', label: 'বিসিএস', count: INITIAL_EXAMS.filter(e => e.category === 'bcs').length },
+    { id: 'bank', label: 'ব্যাংক জব', count: INITIAL_EXAMS.filter(e => e.category === 'bank').length },
+    { id: 'primary', label: 'প্রাথমিক শিক্ষক', count: INITIAL_EXAMS.filter(e => e.category === 'primary').length },
+    { id: 'subject', label: 'পূর্ণাঙ্গ মডেল টেস্ট', count: INITIAL_EXAMS.filter(e => e.category === 'subject').length }
   ];
 
   const filteredExams = INITIAL_EXAMS.filter(exam => {
@@ -601,7 +601,7 @@ export default function SubjectiveModelTestClient({ initialSearchParams }) {
                 fontWeight: 600,
                 lineHeight: '1.6'
               }}>
-                {toBanglaNumber(topicsList.length)} টি টপিক — টপিক বেছে নিন এবং প্রশ্ন সমাধান ও অনুশীলন শুরু করুন।
+                {currentChapter.desc || `${toBanglaNumber(topicsList.length)} টি টপিক — টপিক বেছে নিন এবং প্রশ্ন সমাধান ও অনুশীলন শুরু করুন।`}
               </p>
             </div>
 
@@ -800,7 +800,7 @@ export default function SubjectiveModelTestClient({ initialSearchParams }) {
                 fontWeight: 600,
                 lineHeight: '1.6'
               }}>
-                {chaptersList.length} টি অধ্যায় — অধ্যায় বেছে নিন এবং টপিকভিত্তিক প্রশ্ন সমাধান করুন।
+                {selectedSubject.desc || `${toBanglaNumber(chaptersList.length)} টি অধ্যায় — অধ্যায় বেছে নিন এবং টপিকভিত্তিক প্রশ্ন সমাধান করুন।`}
               </p>
             </div>
 
@@ -861,6 +861,11 @@ export default function SubjectiveModelTestClient({ initialSearchParams }) {
 
         {/* Chapters Grid Container */}
         <div className="container" style={{ maxWidth: '1300px', margin: '35px auto 0', padding: '0 20px' }}>
+          {/* Section Title */}
+          <h2 style={{ fontSize: '1.4rem', color: '#0f172a', fontWeight: 800, marginBottom: '20px' }}>
+            অধ্যায়সমূহ ({chaptersList.length})
+          </h2>
+
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(500px, 1fr))', gap: '20px' }}>
             {chaptersList.map(ch => (
               <div
@@ -999,7 +1004,7 @@ export default function SubjectiveModelTestClient({ initialSearchParams }) {
                 fontWeight: 600,
                 lineHeight: '1.6'
               }}>
-                {toBanglaNumber(SUBJECTS_DATA.length)} টি বিষয় — বিষয় বেছে নিন এবং অধ্যায়ভিত্তিক প্রস্তুতি ও পরীক্ষা শুরু করুন।
+                {selectedExam.description || `${toBanglaNumber(SUBJECTS_DATA.length)} টি বিষয় — বিষয় বেছে নিন এবং অধ্যায়ভিত্তিক প্রস্তুতি ও পরীক্ষা শুরু করুন।`}
               </p>
             </div>
 
@@ -1059,6 +1064,11 @@ export default function SubjectiveModelTestClient({ initialSearchParams }) {
 
         {/* Subjects Grid Container */}
         <div className="container" style={{ maxWidth: '1300px', margin: '35px auto 0', padding: '0 20px' }}>
+          {/* Section Title */}
+          <h2 style={{ fontSize: '1.4rem', color: '#0f172a', fontWeight: 800, marginBottom: '20px' }}>
+            বিষয়সমূহ ({SUBJECTS_DATA.length})
+          </h2>
+
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '26px' }}>
             {SUBJECTS_DATA.map(sub => {
               const theme = sub.theme || {
@@ -1098,14 +1108,17 @@ export default function SubjectiveModelTestClient({ initialSearchParams }) {
                     e.currentTarget.style.borderColor = '#e2e8f0';
                   }}
                 >
-                  <div style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    height: '4px',
-                    background: theme.gradient
-                  }} />
+                  {/* Decorative left accent line */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      bottom: 0,
+                      left: 0,
+                      width: '5px',
+                      background: theme.gradient
+                    }}
+                  />
 
                   <div>
                     {/* Top Row: Subject Code Badge on the LEFT, No Icon */}
@@ -1145,10 +1158,9 @@ export default function SubjectiveModelTestClient({ initialSearchParams }) {
 
                     <p style={{
                       color: '#64748b',
-                      fontSize: '0.9rem',
-                      lineHeight: '1.6',
-                      marginBottom: '18px',
-                      minHeight: '44px'
+                      fontSize: '0.88rem',
+                      lineHeight: '1.5',
+                      margin: '0 0 14px 0'
                     }}>
                       {sub.desc}
                     </p>
@@ -1268,7 +1280,7 @@ export default function SubjectiveModelTestClient({ initialSearchParams }) {
           }}
         >
           {/* Category Pills */}
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
             {categories.map(cat => {
               const isActive = currentCat === cat.id;
               return (
@@ -1276,19 +1288,48 @@ export default function SubjectiveModelTestClient({ initialSearchParams }) {
                   key={cat.id}
                   onClick={() => setCurrentCat(cat.id)}
                   style={{
-                    padding: '8px 18px',
+                    padding: '8px 16px',
                     borderRadius: '8px',
                     fontSize: '0.92rem',
                     fontWeight: 600,
                     cursor: 'pointer',
                     transition: 'all 0.2s ease',
-                    border: isActive ? '1px solid #0284c7' : '1px solid #cbd5e1',
-                    backgroundColor: isActive ? '#0284c7' : '#ffffff',
-                    color: isActive ? '#ffffff' : '#334155',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    whiteSpace: 'nowrap',
+                    border: isActive ? '1px solid #0284c7' : '1px solid #e2e8f0',
+                    backgroundColor: isActive ? '#0284c7' : '#f1f5f9',
+                    color: isActive ? '#ffffff' : '#475569',
                     boxShadow: isActive ? '0 2px 8px rgba(2, 132, 199, 0.25)' : 'none'
                   }}
+                  onMouseEnter={(e) => {
+                    if (!isActive) {
+                      e.currentTarget.style.backgroundColor = '#e2e8f0';
+                      e.currentTarget.style.color = '#0f172a';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isActive) {
+                      e.currentTarget.style.backgroundColor = '#f1f5f9';
+                      e.currentTarget.style.color = '#475569';
+                    }
+                  }}
                 >
-                  {cat.label}
+                  <span>{cat.label}</span>
+                  <span
+                    style={{
+                      padding: '1px 7px',
+                      borderRadius: '10px',
+                      fontSize: '0.75rem',
+                      fontWeight: 700,
+                      backgroundColor: isActive ? 'rgba(255, 255, 255, 0.25)' : '#cbd5e1',
+                      color: isActive ? '#ffffff' : '#334155',
+                      display: 'inline-block'
+                    }}
+                  >
+                    {toBanglaNumber(cat.count)}
+                  </span>
                 </button>
               );
             })}

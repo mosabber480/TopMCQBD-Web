@@ -231,11 +231,11 @@ export default function FullModelTestClient({ initialSearchParams }) {
   const selectedSubject = SUBJECTS_DATA.find(s => s.id === subjectId);
 
   const categories = [
-    { id: 'all', label: 'সকল পূর্ণাঙ্গ টেস্ট' },
-    { id: 'bcs', label: 'বিসিএস' },
-    { id: 'bank', label: 'ব্যাংক জব' },
-    { id: 'primary', label: 'প্রাইমারি শিক্ষক' },
-    { id: 'subject', label: 'বিষয়ভিত্তিক' }
+    { id: 'all', label: 'সকল', count: INITIAL_EXAMS.length },
+    { id: 'bcs', label: 'বিসিএস', count: INITIAL_EXAMS.filter(e => e.category === 'bcs').length },
+    { id: 'bank', label: 'ব্যাংক জব', count: INITIAL_EXAMS.filter(e => e.category === 'bank').length },
+    { id: 'primary', label: 'প্রাইমারি শিক্ষক', count: INITIAL_EXAMS.filter(e => e.category === 'primary').length },
+    { id: 'subject', label: 'বিষয়ভিত্তিক', count: INITIAL_EXAMS.filter(e => e.category === 'subject').length }
   ];
 
   const filteredExams = INITIAL_EXAMS.filter(exam => {
@@ -578,16 +578,17 @@ export default function FullModelTestClient({ initialSearchParams }) {
                         borderRadius: '12px',
                         border: '1px solid #f1f5f9',
                         marginBottom: '14px',
-                        textAlign: 'center',
+                        textAlign: 'left',
                         fontSize: '0.98rem',
                         color: '#334155',
                         fontWeight: 700,
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '6px'
+                        justifyContent: 'flex-start',
+                        gap: '8px'
                       }}
                     >
+                      <i className="fa-solid fa-layer-group" style={{ color: theme.color, fontSize: '0.95rem' }}></i>
                       <strong style={{ color: theme.color, fontWeight: 800, fontSize: '1.05rem' }}>
                         {toBanglaNumber(sub.modelTestsCount || 20)} টি
                       </strong>
@@ -690,7 +691,7 @@ export default function FullModelTestClient({ initialSearchParams }) {
           }}
         >
           {/* Category Pills */}
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
             {categories.map(cat => {
               const isActive = currentCat === cat.id;
               return (
@@ -698,19 +699,48 @@ export default function FullModelTestClient({ initialSearchParams }) {
                   key={cat.id}
                   onClick={() => setCurrentCat(cat.id)}
                   style={{
-                    padding: '8px 18px',
+                    padding: '8px 16px',
                     borderRadius: '8px',
                     fontSize: '0.92rem',
                     fontWeight: 600,
                     cursor: 'pointer',
                     transition: 'all 0.2s ease',
-                    border: isActive ? '1px solid #0284c7' : '1px solid #cbd5e1',
-                    backgroundColor: isActive ? '#0284c7' : '#ffffff',
-                    color: isActive ? '#ffffff' : '#334155',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    whiteSpace: 'nowrap',
+                    border: isActive ? '1px solid #0284c7' : '1px solid #e2e8f0',
+                    backgroundColor: isActive ? '#0284c7' : '#f1f5f9',
+                    color: isActive ? '#ffffff' : '#475569',
                     boxShadow: isActive ? '0 2px 8px rgba(2, 132, 199, 0.25)' : 'none'
                   }}
+                  onMouseEnter={(e) => {
+                    if (!isActive) {
+                      e.currentTarget.style.backgroundColor = '#e2e8f0';
+                      e.currentTarget.style.color = '#0f172a';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isActive) {
+                      e.currentTarget.style.backgroundColor = '#f1f5f9';
+                      e.currentTarget.style.color = '#475569';
+                    }
+                  }}
                 >
-                  {cat.label}
+                  <span>{cat.label}</span>
+                  <span
+                    style={{
+                      padding: '1px 7px',
+                      borderRadius: '10px',
+                      fontSize: '0.75rem',
+                      fontWeight: 700,
+                      backgroundColor: isActive ? 'rgba(255, 255, 255, 0.25)' : '#cbd5e1',
+                      color: isActive ? '#ffffff' : '#334155',
+                      display: 'inline-block'
+                    }}
+                  >
+                    {toBanglaNumber(cat.count)}
+                  </span>
                 </button>
               );
             })}

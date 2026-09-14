@@ -499,11 +499,11 @@ function ModelTestContent() {
   const selectedSubject = SUBJECTS_DATA.find(s => s.id === subjectId);
 
   const categories = [
-    { id: 'all', label: 'সকল টেস্ট' },
-    { id: 'bcs', label: 'বিসিএস' },
-    { id: 'bank', label: 'ব্যাংক জব' },
-    { id: 'primary', label: 'প্রাথমিক শিক্ষক' },
-    { id: 'subject', label: 'পূর্ণাঙ্গ মডেল টেস্ট' }
+    { id: 'all', label: 'সকল', count: INITIAL_EXAMS.length },
+    { id: 'bcs', label: 'বিসিএস', count: INITIAL_EXAMS.filter(e => e.category === 'bcs').length },
+    { id: 'bank', label: 'ব্যাংক জব', count: INITIAL_EXAMS.filter(e => e.category === 'bank').length },
+    { id: 'primary', label: 'প্রাথমিক শিক্ষক', count: INITIAL_EXAMS.filter(e => e.category === 'primary').length },
+    { id: 'subject', label: 'পূর্ণাঙ্গ মডেল টেস্ট', count: INITIAL_EXAMS.filter(e => e.category === 'subject').length }
   ];
 
   const filteredExams = INITIAL_EXAMS.filter(exam => {
@@ -859,137 +859,83 @@ function ModelTestContent() {
           </div>
         </div>
 
-        {/* Chapters Grid Container (Refined Box Design) */}
+        {/* Chapters Grid Container */}
         <div className="container" style={{ maxWidth: '1300px', margin: '35px auto 0', padding: '0 20px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(480px, 1fr))', gap: '22px' }}>
-            {chaptersList.map(ch => {
-              const theme = selectedSubject.theme || {
-                color: '#006a4e',
-                gradient: 'linear-gradient(135deg, #006a4e 0%, #059669 100%)',
-                lightBg: '#f0fdf4',
-                borderColor: '#bbf7d0',
-                glowColor: 'rgba(0, 106, 78, 0.12)'
-              };
+          {/* Section Title */}
+          <h2 style={{ fontSize: '1.4rem', color: '#0f172a', fontWeight: 800, marginBottom: '20px' }}>
+            অধ্যায়সমূহ ({chaptersList.length})
+          </h2>
 
-              return (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(500px, 1fr))', gap: '20px' }}>
+            {chaptersList.map(ch => (
+              <div
+                key={ch.id}
+                onClick={() => router.push(`/subjective-all-mcqs-Practice-success?examId=${selectedExam.id}&subject=${selectedSubject.id}&chapterId=${encodeURIComponent(toSlug(ch.title))}`)}
+                style={{
+                  backgroundColor: '#ffffff',
+                  borderRadius: '14px',
+                  padding: '24px',
+                  border: '1px solid #e2e8f0',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
+                  display: 'flex',
+                  gap: '16px',
+                  alignItems: 'flex-start',
+                  cursor: 'pointer',
+                  transition: 'transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-3px)';
+                  e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.08)';
+                  e.currentTarget.style.borderColor = '#006a4e';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'none';
+                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.03)';
+                  e.currentTarget.style.borderColor = '#e2e8f0';
+                }}
+              >
+                {/* Green Number Badge Box */}
                 <div
-                  key={ch.id}
-                  onClick={() => router.push(`/subjective-all-mcqs-Practice-success?examId=${selectedExam.id}&subject=${selectedSubject.id}&chapterId=${encodeURIComponent(toSlug(ch.title))}`)}
                   style={{
-                    backgroundColor: '#ffffff',
-                    borderRadius: '20px',
-                    padding: '24px 22px',
-                    border: '1.5px solid #e2e8f0',
-                    boxShadow: '0 4px 16px rgba(15, 23, 42, 0.04)',
-                    cursor: 'pointer',
+                    width: '38px',
+                    height: '38px',
+                    borderRadius: '10px',
+                    backgroundColor: '#e6f4ea',
+                    color: '#006a4e',
                     display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'space-between',
-                    position: 'relative',
-                    overflow: 'hidden',
-                    transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-6px)';
-                    e.currentTarget.style.boxShadow = `0 18px 30px -6px ${theme.glowColor}, 0 8px 16px rgba(0,0,0,0.04)`;
-                    e.currentTarget.style.borderColor = theme.color;
-                    const cta = e.currentTarget.querySelector('.chapter-cta-btn');
-                    if (cta) {
-                      cta.style.filter = 'brightness(0.92)';
-                      const arrow = cta.querySelector('.chapter-cta-arrow');
-                      if (arrow) arrow.style.transform = 'translateX(4px)';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'none';
-                    e.currentTarget.style.boxShadow = '0 4px 16px rgba(15, 23, 42, 0.04)';
-                    e.currentTarget.style.borderColor = '#e2e8f0';
-                    const cta = e.currentTarget.querySelector('.chapter-cta-btn');
-                    if (cta) {
-                      cta.style.filter = 'none';
-                      const arrow = cta.querySelector('.chapter-cta-arrow');
-                      if (arrow) arrow.style.transform = 'none';
-                    }
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontWeight: 800,
+                    fontSize: '1rem',
+                    flexShrink: 0
                   }}
                 >
-                  {/* Decorative left accent line */}
+                  {ch.id}
+                </div>
+
+                {/* Chapter Details */}
+                <div style={{ flex: 1 }}>
+                  <h3 style={{ fontSize: '1.2rem', color: '#0f172a', fontWeight: 700, marginBottom: '8px', lineHeight: '1.4' }}>
+                    {ch.title}
+                  </h3>
+                  <p style={{ fontSize: '0.88rem', color: '#475569', lineHeight: '1.6', marginBottom: '16px' }}>
+                    {ch.desc}
+                  </p>
                   <div
                     style={{
-                      position: 'absolute',
-                      top: 0,
-                      bottom: 0,
-                      left: 0,
-                      width: '5px',
-                      background: theme.gradient
-                    }}
-                  />
-
-                  <div>
-                    {/* Header Row with Badge */}
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-                      <span
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          padding: '4px 12px',
-                          borderRadius: '20px',
-                          backgroundColor: theme.lightBg,
-                          color: theme.color,
-                          fontSize: '0.82rem',
-                          fontWeight: 700,
-                          border: `1px solid ${theme.borderColor}`
-                        }}
-                      >
-                        অধ্যায় {toBanglaNumber(ch.id)}
-                      </span>
-                    </div>
-
-                    <h3 style={{ fontSize: '1.25rem', color: '#0f172a', fontWeight: 700, marginBottom: '8px', lineHeight: '1.4' }}>
-                      {ch.title}
-                    </h3>
-                    <p style={{ fontSize: '0.9rem', color: '#475569', lineHeight: '1.6', margin: '0 0 16px 0' }}>
-                      {ch.desc}
-                    </p>
-                  </div>
-
-                  {/* Call to Action Button */}
-                  <div
-                    className="chapter-cta-btn"
-                    style={{
-                      width: '100%',
-                      padding: '11px 16px',
-                      borderRadius: '12px',
-                      background: theme.gradient,
-                      color: '#ffffff',
+                      color: selectedSubject?.theme?.color || '#006a4e',
+                      fontSize: '0.9rem',
                       fontWeight: 700,
-                      fontSize: '0.92rem',
-                      display: 'flex',
+                      display: 'inline-flex',
                       alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '8px',
-                      boxShadow: '0 4px 14px rgba(0, 0, 0, 0.08)',
-                      transition: 'all 0.25s ease, filter 0.2s ease',
-                      border: 'none',
-                      cursor: 'pointer'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.stopPropagation();
-                      e.currentTarget.style.filter = 'brightness(0.88)';
-                      e.currentTarget.style.boxShadow = '0 6px 18px rgba(0, 0, 0, 0.14)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.stopPropagation();
-                      e.currentTarget.style.filter = 'none';
-                      e.currentTarget.style.boxShadow = '0 4px 14px rgba(0, 0, 0, 0.08)';
+                      gap: '6px'
                     }}
                   >
-                    <span>টপিক দেখুন</span>
-                    <i className="fa-solid fa-arrow-right chapter-cta-arrow" style={{ fontSize: '0.85rem', transition: 'transform 0.2s ease' }}></i>
+                    <span>টপিক দেখুন</span> <i className="fa-solid fa-arrow-right" style={{ fontSize: '0.85rem' }}></i>
                   </div>
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
         </div>
       </main>
@@ -1157,14 +1103,17 @@ function ModelTestContent() {
                     e.currentTarget.style.borderColor = '#e2e8f0';
                   }}
                 >
-                  <div style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    height: '4px',
-                    background: theme.gradient
-                  }} />
+                  {/* Decorative left accent line */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      bottom: 0,
+                      left: 0,
+                      width: '5px',
+                      background: theme.gradient
+                    }}
+                  />
 
                   <div>
                     {/* Top Row: Subject Code Badge on the LEFT, No Icon */}
@@ -1204,10 +1153,9 @@ function ModelTestContent() {
 
                     <p style={{
                       color: '#64748b',
-                      fontSize: '0.9rem',
-                      lineHeight: '1.6',
-                      marginBottom: '18px',
-                      minHeight: '44px'
+                      fontSize: '0.88rem',
+                      lineHeight: '1.5',
+                      margin: '0 0 14px 0'
                     }}>
                       {sub.desc}
                     </p>
@@ -1327,7 +1275,7 @@ function ModelTestContent() {
           }}
         >
           {/* Category Pills */}
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
             {categories.map(cat => {
               const isActive = currentCat === cat.id;
               return (
@@ -1335,19 +1283,48 @@ function ModelTestContent() {
                   key={cat.id}
                   onClick={() => setCurrentCat(cat.id)}
                   style={{
-                    padding: '8px 18px',
+                    padding: '8px 16px',
                     borderRadius: '8px',
                     fontSize: '0.92rem',
                     fontWeight: 600,
                     cursor: 'pointer',
                     transition: 'all 0.2s ease',
-                    border: isActive ? '1px solid #0284c7' : '1px solid #cbd5e1',
-                    backgroundColor: isActive ? '#0284c7' : '#ffffff',
-                    color: isActive ? '#ffffff' : '#334155',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    whiteSpace: 'nowrap',
+                    border: isActive ? '1px solid #0284c7' : '1px solid #e2e8f0',
+                    backgroundColor: isActive ? '#0284c7' : '#f1f5f9',
+                    color: isActive ? '#ffffff' : '#475569',
                     boxShadow: isActive ? '0 2px 8px rgba(2, 132, 199, 0.25)' : 'none'
                   }}
+                  onMouseEnter={(e) => {
+                    if (!isActive) {
+                      e.currentTarget.style.backgroundColor = '#e2e8f0';
+                      e.currentTarget.style.color = '#0f172a';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isActive) {
+                      e.currentTarget.style.backgroundColor = '#f1f5f9';
+                      e.currentTarget.style.color = '#475569';
+                    }
+                  }}
                 >
-                  {cat.label}
+                  <span>{cat.label}</span>
+                  <span
+                    style={{
+                      padding: '1px 7px',
+                      borderRadius: '10px',
+                      fontSize: '0.75rem',
+                      fontWeight: 700,
+                      backgroundColor: isActive ? 'rgba(255, 255, 255, 0.25)' : '#cbd5e1',
+                      color: isActive ? '#ffffff' : '#334155',
+                      display: 'inline-block'
+                    }}
+                  >
+                    {toBanglaNumber(cat.count)}
+                  </span>
                 </button>
               );
             })}

@@ -249,11 +249,11 @@ export default function FullModelTestClient({ initialSearchParams }) {
   const selectedSubject = subjects.find(s => s.id === subjectId);
 
   const categories = [
-    { id: 'all', label: 'সকল পূর্ণাঙ্গ টেস্ট' },
-    { id: 'bcs', label: 'বিসিএস' },
-    { id: 'bank', label: 'ব্যাংক জব' },
-    { id: 'primary', label: 'প্রাইমারি শিক্ষক' },
-    { id: 'subject', label: 'বিষয়ভিত্তিক' }
+    { id: 'all', label: 'সকল', count: exams.length },
+    { id: 'bcs', label: 'বিসিএস', count: exams.filter(e => e.category === 'bcs').length },
+    { id: 'bank', label: 'ব্যাংক জব', count: exams.filter(e => e.category === 'bank').length },
+    { id: 'primary', label: 'প্রাইমারি শিক্ষক', count: exams.filter(e => e.category === 'primary').length },
+    { id: 'subject', label: 'বিষয়ভিত্তিক', count: exams.filter(e => e.category === 'subject').length }
   ];
 
   const filteredExams = exams.filter(exam => {
@@ -293,15 +293,96 @@ export default function FullModelTestClient({ initialSearchParams }) {
     });
 
     return (
-      <main style={{ backgroundColor: '#f8fafc', minHeight: 'calc(100vh - 200px)', paddingBottom: '80px', paddingTop: '30px' }}>
-        <div className="container" style={{ maxWidth: '1300px', margin: '0 auto', padding: '0 20px' }}>
-          
-          {/* Breadcrumb & Navigation */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '10px' }}>
+      <main style={{ backgroundColor: '#f8fafc', minHeight: 'calc(100vh - 200px)', paddingBottom: '80px' }}>
+        {/* Full-width Illustrated Subject Banner Header (Chapter-Style Graphic Theme) */}
+        <div style={{
+          width: '100%',
+          backgroundImage: "url('/images/chapter-banner-bg.png')",
+          backgroundRepeat: 'no-repeat',
+          backgroundPosition: 'center',
+          backgroundSize: 'cover',
+          backgroundColor: '#daf9e2',
+          borderBottom: '1px solid #bbf7d0',
+          padding: '24px 20px',
+          position: 'relative',
+          overflow: 'hidden'
+        }}>
+          <div className="container" style={{
+            maxWidth: '1300px',
+            margin: '0 auto',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '20px'
+          }}>
+            {/* Left Content */}
+            <div style={{ flex: '1 1 500px', zIndex: 1 }}>
+              <span style={{
+                display: 'inline-block',
+                fontSize: '0.78rem',
+                letterSpacing: '1.2px',
+                fontWeight: 800,
+                textTransform: 'uppercase',
+                color: '#ffffff',
+                backgroundColor: selectedSubject?.theme?.color || '#006a4e',
+                padding: '5px 18px',
+                borderRadius: '20px',
+                marginBottom: '10px',
+                boxShadow: '0 2px 8px rgba(0, 106, 78, 0.25)'
+              }}>
+                {selectedSubject.code} • মডেল টেস্ট
+              </span>
+              <h1 style={{
+                fontSize: '2.5rem',
+                fontWeight: 800,
+                margin: '4px 0 10px',
+                color: '#064e3b',
+                letterSpacing: '-0.5px',
+                lineHeight: '1.2'
+              }}>
+                {selectedSubject.name}
+              </h1>
+              <p style={{
+                fontSize: '1.02rem',
+                color: '#064e3b',
+                margin: 0,
+                fontWeight: 600,
+                lineHeight: '1.6'
+              }}>
+                {selectedSubject.desc || `${toBanglaNumber(modelsList.length)} টি মডেল টেস্ট — মডেল টেস্ট বেছে নিন এবং পূর্ণাঙ্গ প্রস্তুতি ও পরীক্ষা শুরু করুন।`}
+              </p>
+            </div>
+
+            {/* Right Graphic Illustration (Sun & Open Book) */}
+            <div style={{
+              flexShrink: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 1
+            }}>
+              <img
+                src="/images/chapter-banner-graphic.png"
+                alt="Subject Graphic"
+                style={{
+                  height: '145px',
+                  width: 'auto',
+                  objectFit: 'contain',
+                  display: 'block'
+                }}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Sub-header / Breadcrumb Bar */}
+        <div style={{ backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', padding: '12px 20px' }}>
+          <div className="container" style={{ maxWidth: '1300px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
             <div style={{ fontSize: '0.9rem', color: '#64748b' }}>
-              <Link href="/full-model-test" style={{ color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>পূর্ণাঙ্গ টেস্ট</Link>
+              <Link href="/full-model-test" style={{ color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>পূর্ণাঙ্গ মডেল টেস্ট</Link>
               <span style={{ margin: '0 8px', color: '#cbd5e1' }}>/</span>
-              <Link href={`/full-model-test?examId=${selectedExam.id}`} style={{ color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>{selectedExam.categoryName}</Link>
+              <Link href={`/full-model-test?examId=${selectedExam.id}`} style={{ color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>{selectedExam.title}</Link>
               <span style={{ margin: '0 8px', color: '#cbd5e1' }}>/</span>
               <span style={{ color: '#0f172a', fontWeight: 700 }}>{selectedSubject.name}</span>
             </div>
@@ -309,7 +390,7 @@ export default function FullModelTestClient({ initialSearchParams }) {
             <button
               onClick={() => router.push(`/full-model-test?examId=${selectedExam.id}`)}
               style={{
-                backgroundColor: '#ffffff',
+                backgroundColor: '#f1f5f9',
                 color: '#334155',
                 border: '1px solid #cbd5e1',
                 padding: '6px 14px',
@@ -322,11 +403,14 @@ export default function FullModelTestClient({ initialSearchParams }) {
                 gap: '6px'
               }}
             >
-              <i className="fa-solid fa-arrow-left"></i>
               <span>বিষয় তালিকায় ফিরে যান</span>
+              <i className="fa-solid fa-arrow-right"></i>
             </button>
           </div>
+        </div>
 
+        {/* Models Grid Container */}
+        <div className="container" style={{ maxWidth: '1300px', margin: '35px auto 0', padding: '0 20px' }}>
           {/* Heading */}
           <h2 style={{ fontSize: '1.6rem', color: '#0f172a', fontWeight: 800, marginBottom: '20px' }}>
             মডেল টেস্টসমূহ ({toBanglaNumber(modelsList.length)})
@@ -438,11 +522,92 @@ export default function FullModelTestClient({ initialSearchParams }) {
   // -------------------------------------------------------------
   if (examId) {
     return (
-      <main style={{ padding: '40px 0 80px', backgroundColor: '#f8fafc', minHeight: 'calc(100vh - 200px)' }}>
-        <div className="container" style={{ maxWidth: '1300px', margin: '0 auto', padding: '0 20px' }}>
-          
-          {/* Breadcrumb & Navigation */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '10px' }}>
+      <main style={{ backgroundColor: '#f8fafc', minHeight: 'calc(100vh - 200px)', paddingBottom: '80px' }}>
+        {/* Full-width Illustrated Exam Banner Header (Green Pen & Wave Theme) */}
+        <div style={{
+          width: '100%',
+          backgroundImage: "url('/images/exam-banner-bg.png')",
+          backgroundRepeat: 'no-repeat',
+          backgroundPosition: 'center',
+          backgroundSize: 'cover',
+          backgroundColor: '#e6f7ec',
+          borderBottom: '1px solid #bbf7d0',
+          padding: '24px 20px',
+          position: 'relative',
+          overflow: 'hidden'
+        }}>
+          <div className="container" style={{
+            maxWidth: '1300px',
+            margin: '0 auto',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '20px'
+          }}>
+            {/* Left Content */}
+            <div style={{ flex: '1 1 500px', zIndex: 1 }}>
+              <span style={{
+                display: 'inline-block',
+                fontSize: '0.78rem',
+                letterSpacing: '1.2px',
+                fontWeight: 800,
+                textTransform: 'uppercase',
+                color: '#ffffff',
+                backgroundColor: '#047857',
+                padding: '5px 18px',
+                borderRadius: '20px',
+                marginBottom: '10px',
+                boxShadow: '0 2px 8px rgba(4, 120, 87, 0.25)'
+              }}>
+                {selectedExam.categoryName || selectedExam.badge || 'মডেল টেস্ট'}
+              </span>
+              <h1 style={{
+                fontSize: '2.5rem',
+                fontWeight: 800,
+                margin: '4px 0 10px',
+                color: '#06281e',
+                letterSpacing: '-0.5px',
+                lineHeight: '1.2'
+              }}>
+                {selectedExam.title}
+              </h1>
+              <p style={{
+                fontSize: '1.02rem',
+                color: '#06281e',
+                margin: 0,
+                fontWeight: 600,
+                lineHeight: '1.6'
+              }}>
+                {selectedExam.description || `${toBanglaNumber(subjects.length)} টি বিষয় — বিষয় বেছে নিন এবং অধ্যায়ভিত্তিক প্রস্তুতি ও পরীক্ষা শুরু করুন।`}
+              </p>
+            </div>
+
+            {/* Right Graphic Illustration (Green Fountain Pen & Leaves) */}
+            <div style={{
+              flexShrink: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 1
+            }}>
+              <img
+                src="/images/exam-banner-graphic.png"
+                alt="Exam Graphic"
+                style={{
+                  height: '145px',
+                  width: 'auto',
+                  objectFit: 'contain',
+                  display: 'block'
+                }}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Sub-header / Breadcrumb Bar */}
+        <div style={{ backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', padding: '12px 20px' }}>
+          <div className="container" style={{ maxWidth: '1300px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
             <div style={{ fontSize: '0.9rem', color: '#64748b' }}>
               <Link href="/full-model-test" style={{ color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>পূর্ণাঙ্গ মডেল টেস্ট</Link>
               <span style={{ margin: '0 8px', color: '#cbd5e1' }}>/</span>
@@ -452,7 +617,7 @@ export default function FullModelTestClient({ initialSearchParams }) {
             <button
               onClick={() => router.push('/full-model-test')}
               style={{
-                backgroundColor: '#ffffff',
+                backgroundColor: '#f1f5f9',
                 color: '#334155',
                 border: '1px solid #cbd5e1',
                 padding: '6px 14px',
@@ -465,43 +630,17 @@ export default function FullModelTestClient({ initialSearchParams }) {
                 gap: '6px'
               }}
             >
-              <i className="fa-solid fa-arrow-left"></i>
-              <span>সকল মডেল টেস্টে ফিরে যান</span>
+              <span>অন্য মডেল টেস্ট বাছাই করুন</span>
+              <i className="fa-solid fa-arrow-right"></i>
             </button>
           </div>
+        </div>
 
-          {/* Exam Info Card */}
-          <div
-            style={{
-              backgroundColor: '#ffffff',
-              borderRadius: '16px',
-              padding: '28px',
-              border: '1px solid #e2e8f0',
-              borderLeft: `5px solid ${selectedExam.borderColor || '#0284c7'}`,
-              marginBottom: '35px',
-              boxShadow: '0 2px 10px rgba(0,0,0,0.03)'
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '10px' }}>
-              <span style={{ backgroundColor: '#e0f2fe', color: '#0284c7', padding: '4px 12px', borderRadius: '12px', fontSize: '0.82rem', fontWeight: 700 }}>
-                {selectedExam.categoryName}
-              </span>
-              <span style={{ fontSize: '0.88rem', color: '#64748b' }}>
-                <i className="fa-solid fa-layer-group" style={{ marginRight: '6px' }} />
-                বিষয়ভিত্তিক মডেল টেস্ট অন্তর্ভুক্ত
-              </span>
-            </div>
-            <h1 style={{ fontSize: '1.75rem', color: '#0f172a', fontWeight: 800, marginBottom: '10px' }}>
-              {selectedExam.title}
-            </h1>
-            <p style={{ color: '#475569', fontSize: '0.98rem', lineHeight: '1.6', margin: 0 }}>
-              {selectedExam.description}
-            </p>
-          </div>
-
+        {/* Subjects Grid Container */}
+        <div className="container" style={{ maxWidth: '1300px', margin: '35px auto 0', padding: '0 20px' }}>
           {/* Section Title */}
           <h2 style={{ fontSize: '1.4rem', color: '#0f172a', fontWeight: 800, marginBottom: '20px' }}>
-            বিষয়সমূহ নির্বাচন করুন ({subjects.length})
+            বিষয়সমূহ ({subjects.length})
           </h2>
 
           {/* Subjects Grid - Refined Box Design */}
@@ -599,16 +738,17 @@ export default function FullModelTestClient({ initialSearchParams }) {
                         borderRadius: '12px',
                         border: '1px solid #f1f5f9',
                         marginBottom: '14px',
-                        textAlign: 'center',
+                        textAlign: 'left',
                         fontSize: '0.98rem',
                         color: '#334155',
                         fontWeight: 700,
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '6px'
+                        justifyContent: 'flex-start',
+                        gap: '8px'
                       }}
                     >
+                      <i className="fa-solid fa-layer-group" style={{ color: theme.color, fontSize: '0.95rem' }}></i>
                       <strong style={{ color: theme.color, fontWeight: 800, fontSize: '1.05rem' }}>
                         {toBanglaNumber(sub.modelTestsCount || 20)} টি
                       </strong>
@@ -711,7 +851,7 @@ export default function FullModelTestClient({ initialSearchParams }) {
           }}
         >
           {/* Category Pills */}
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
             {categories.map(cat => {
               const isActive = currentCat === cat.id;
               return (
@@ -719,19 +859,48 @@ export default function FullModelTestClient({ initialSearchParams }) {
                   key={cat.id}
                   onClick={() => setCurrentCat(cat.id)}
                   style={{
-                    padding: '8px 18px',
+                    padding: '8px 16px',
                     borderRadius: '8px',
                     fontSize: '0.92rem',
                     fontWeight: 600,
                     cursor: 'pointer',
                     transition: 'all 0.2s ease',
-                    border: isActive ? '1px solid #0284c7' : '1px solid #cbd5e1',
-                    backgroundColor: isActive ? '#0284c7' : '#ffffff',
-                    color: isActive ? '#ffffff' : '#334155',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    whiteSpace: 'nowrap',
+                    border: isActive ? '1px solid #0284c7' : '1px solid #e2e8f0',
+                    backgroundColor: isActive ? '#0284c7' : '#f1f5f9',
+                    color: isActive ? '#ffffff' : '#475569',
                     boxShadow: isActive ? '0 2px 8px rgba(2, 132, 199, 0.25)' : 'none'
                   }}
+                  onMouseEnter={(e) => {
+                    if (!isActive) {
+                      e.currentTarget.style.backgroundColor = '#e2e8f0';
+                      e.currentTarget.style.color = '#0f172a';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isActive) {
+                      e.currentTarget.style.backgroundColor = '#f1f5f9';
+                      e.currentTarget.style.color = '#475569';
+                    }
+                  }}
                 >
-                  {cat.label}
+                  <span>{cat.label}</span>
+                  <span
+                    style={{
+                      padding: '1px 7px',
+                      borderRadius: '10px',
+                      fontSize: '0.75rem',
+                      fontWeight: 700,
+                      backgroundColor: isActive ? 'rgba(255, 255, 255, 0.25)' : '#cbd5e1',
+                      color: isActive ? '#ffffff' : '#334155',
+                      display: 'inline-block'
+                    }}
+                  >
+                    {toBanglaNumber(cat.count)}
+                  </span>
                 </button>
               );
             })}
