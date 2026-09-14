@@ -8,7 +8,7 @@
     },
     {
       "title": "Global Setting",
-      "url": "/admin/dashboard",
+      "url": "",
       "icon": "fa-solid fa-link",
       "subMenus": [
         {
@@ -25,7 +25,7 @@
     },
     {
       "title": "Common Pages",
-      "url": "/admin",
+      "url": "",
       "icon": "fa-solid fa-link",
       "subMenus": [
         {
@@ -46,35 +46,8 @@
       ]
     },
     {
-      "title": "Paid Dashboard",
-      "url": "/admin/question-bank-dashboard",
-      "icon": "fa-solid fa-file-circle-question",
-      "subMenus": [
-        {
-          "title": "Questions Bank",
-          "url": "/admin/question-bank-dashboard",
-          "icon": "fa-solid fa-circle-dot"
-        },
-        {
-          "title": "Full Model Test",
-          "url": "/admin/full-model-dashabord",
-          "icon": "fa-solid fa-circle-dot"
-        },
-        {
-          "title": "Subjective Model Test",
-          "url": "/admin/subjective-model-test-dashbaord",
-          "icon": "fa-solid fa-circle-dot"
-        },
-        {
-          "title": "Subjective-ALL-MCQ (No Model)",
-          "url": "/admin/subjective-all-mcqs-dashabord",
-          "icon": "fa-solid fa-circle-dot"
-        }
-      ]
-    },
-    {
       "title": "লাইভ মডেল ড্যাশবোর্ড",
-      "url": "/admin/live-exam-model-dashboard",
+      "url": "",
       "icon": "fa-solid fa-link",
       "subMenus": [
         {
@@ -106,6 +79,59 @@
       "url": "/admin/free-mcqs-dashboard",
       "icon": "fa-solid fa-gift",
       "subMenus": []
+    },
+    {
+      "title": "Paid Question Bank",
+      "url": "",
+      "icon": "fa-solid fa-link",
+      "subMenus": [
+        {
+          "title": "Question Bank",
+          "url": "/admin/question-bank-dashboard",
+          "icon": "fa-solid fa-circle-dot"
+        }
+      ]
+    },
+    {
+      "title": "Paid Full Model Dashboard",
+      "url": "",
+      "icon": "fa-solid fa-link",
+      "subMenus": [
+        {
+          "title": "Full Model Test (1-20)",
+          "url": "/admin/full-model-dashabord",
+          "icon": "fa-solid fa-circle-dot"
+        }
+      ]
+    },
+    {
+      "title": "Paid Subjective Model Test",
+      "url": "",
+      "icon": "fa-solid fa-link",
+      "subMenus": [
+        {
+          "title": "subjective model Test",
+          "url": "/admin/subjective-model-test-dashbaord",
+          "icon": "fa-solid fa-circle-dot"
+        },
+        {
+          "title": "Subject Model categories",
+          "url": "/admin/subject-model-categories-dashbaord",
+          "icon": "fa-solid fa-circle-dot"
+        }
+      ]
+    },
+    {
+      "title": "Paid Subjectiove All MCQ (No Model)",
+      "url": "",
+      "icon": "fa-solid fa-link",
+      "subMenus": [
+        {
+          "title": "Subjective All MCQ (No Model)",
+          "url": "/admin/subjective-all-mcqs-dashabord",
+          "icon": "fa-solid fa-circle-dot"
+        }
+      ]
     }
   ],
   "headerButtons": [

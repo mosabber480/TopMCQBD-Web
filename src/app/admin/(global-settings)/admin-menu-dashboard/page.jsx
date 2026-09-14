@@ -91,7 +91,7 @@ export default function AdminMenuDashboardPage() {
         setMenus(
           data.menus.map((m) => ({
             label: m.title || m.label,
-            href: m.url || m.href,
+            href: m.url !== undefined && m.url !== null ? m.url : (m.href || ''),
             icon: m.icon || 'fa-solid fa-link',
             subMenus: m.subMenus || []
           }))
@@ -122,11 +122,11 @@ export default function AdminMenuDashboardPage() {
 
     const formattedMenus = menusToSave.map((m) => ({
       title: m.label,
-      url: m.href,
+      url: m.href || '',
       icon: m.icon,
       subMenus: (m.subMenus || []).map((s) => ({
         title: s.title || s.label,
-        url: s.url || s.href,
+        url: s.url || s.href || '',
         icon: s.icon || 'fa-solid fa-circle-dot'
       }))
     }));
@@ -273,7 +273,7 @@ export default function AdminMenuDashboardPage() {
 
   const saveAllNewMenus = async () => {
     const validRows = newMenuRows
-      .filter((r) => r.label.trim() && r.href.trim())
+      .filter((r) => r.label.trim())
       .map((r) => ({
         label: r.label.trim(),
         href: r.href.trim(),
@@ -282,7 +282,7 @@ export default function AdminMenuDashboardPage() {
       }));
 
     if (validRows.length === 0) {
-      showTopAlert('কমপক্ষে একটি সাইডবার মেনুর শিরোনাম ও লিংক দিন!', 'warning');
+      showTopAlert('কমপক্ষে একটি সাইডবার মেনুর শিরোনাম দিন!', 'warning');
       return;
     }
 
@@ -320,12 +320,16 @@ export default function AdminMenuDashboardPage() {
   // Inline Edit Main Menu
   const handleStartEdit = (index) => {
     setEditingMenuIndex(index);
-    setEditTitle(menus[index].label);
-    setEditUrl(menus[index].href);
-    setEditIcon(menus[index].icon);
+    setEditTitle(menus[index].label || '');
+    setEditUrl(menus[index].href || '');
+    setEditIcon(menus[index].icon || '');
   };
 
   const handleSaveEdit = async (index) => {
+    if (!editTitle.trim()) {
+      showTopAlert('সাইডবার মেনুর শিরোনাম দিন!', 'warning');
+      return;
+    }
     const updated = [...menus];
     updated[index] = {
       ...updated[index],
@@ -839,19 +843,19 @@ export default function AdminMenuDashboardPage() {
                         type="text"
                         value={editTitle}
                         onChange={(e) => setEditTitle(e.target.value)}
-                        placeholder="Title"
+                        placeholder="মেনুর শিরোনাম (Title)"
                       />
                       <input
                         type="text"
                         value={editUrl}
                         onChange={(e) => setEditUrl(e.target.value)}
-                        placeholder="URL"
+                        placeholder="URL (ড্রপডাউন হলে ফাঁকা রাখুন)"
                       />
                       <input
                         type="text"
                         value={editIcon}
                         onChange={(e) => setEditIcon(e.target.value)}
-                        placeholder="Icon"
+                        placeholder="Icon Class"
                       />
                       <div style={{ display: 'flex', gap: '6px' }}>
                         <button
@@ -915,7 +919,14 @@ export default function AdminMenuDashboardPage() {
                             <i className={'fa-solid fa-chevron-' + (expandedMenus[index] ? 'down' : 'right')} style={{ fontSize: '13px', color: '#64748b', marginLeft: '8px' }}></i>
                           </strong>
                           <div style={{ fontSize: '12px', color: '#64748b' }}>
-                            <code>{menu.href}</code> {subMenus.length > 0 && `• (${subMenus.length} সাবমেনু)`}
+                            {menu.href ? (
+                              <code>{menu.href}</code>
+                            ) : (
+                              <span style={{ fontSize: '11px', color: '#0284c7', background: '#e0f2fe', padding: '1px 6px', borderRadius: '4px', fontWeight: '500' }}>
+                                ড্রপডাউন (কোনো লিংক নেই)
+                              </span>
+                            )}
+                            {subMenus.length > 0 && ` • (${subMenus.length} সাবমেনু)`}
                           </div>
                         </div>
                       </div>
@@ -1163,7 +1174,7 @@ export default function AdminMenuDashboardPage() {
                 />
                 <input
                   type="text"
-                  placeholder="লিংক / URL (যেমন: /admin/notices)"
+                  placeholder="লিংক / URL (ড্রপডাউন হলে ফাঁকা রাখুন)"
                   value={row.href}
                   onChange={(e) => updateNewMenuRow(rIdx, 'href', e.target.value)}
                   style={{ flex: 2, minWidth: '180px' }}

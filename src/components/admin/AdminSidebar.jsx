@@ -81,7 +81,7 @@ export default function AdminSidebar() {
         if (data && data.menus && data.menus.length > 0) {
           setMenuItems(
             data.menus.map(item => ({
-              href: item.url,
+              href: item.url || '',
               icon: item.icon || 'fa-solid fa-circle',
               label: item.title,
               subMenus: item.subMenus || []
@@ -157,9 +157,10 @@ export default function AdminSidebar() {
           <nav className="sidebar-menu">
             {menuItems.map((item, index) => {
               const hasSub = item.subMenus && item.subMenus.length > 0;
-              const isSubActive = hasSub && item.subMenus.some(sub => pathname === sub.url);
-              const isActive = pathname === item.href || isSubActive;
+              const isSubActive = hasSub && item.subMenus.some(sub => sub.url === pathname);
+              const isActive = (item.href && item.href !== '#' && pathname === item.href) || isSubActive;
               const isSubOpen = openSubmenus[index] !== undefined ? openSubmenus[index] : !!isSubActive;
+              const altClass = index % 2 === 0 ? 'menu-alt-primary' : 'menu-alt-secondary';
 
               let rawIcon = (item.icon || '').trim();
               const hasPrefix = rawIcon.startsWith('fa-solid') || rawIcon.startsWith('fa-brands') || rawIcon.startsWith('fa-regular');
@@ -167,10 +168,10 @@ export default function AdminSidebar() {
 
               if (hasSub) {
                 return (
-                  <div key={index} className={`sidebar-item-group ${isSubOpen ? 'open' : ''}`}>
+                  <div key={index} className={`sidebar-item-group ${altClass} ${isSubOpen ? 'open' : ''}`}>
                     <a
                       href="#"
-                      className={`sidebar-link ${isActive ? 'active' : ''}`}
+                      className={`sidebar-link ${altClass} ${isActive ? 'active' : ''}`}
                       onClick={(e) => toggleSubmenu(index, e)}
                       title={item.label}
                     >
@@ -204,11 +205,28 @@ export default function AdminSidebar() {
                 );
               }
 
+              if (!item.href || item.href === '#') {
+                return (
+                  <a
+                    key={index}
+                    href="#"
+                    onClick={(e) => e.preventDefault()}
+                    className={`sidebar-link ${altClass} ${isActive ? 'active' : ''}`}
+                    title={item.label}
+                  >
+                    <div className="link-content">
+                      <i className={iconClass}></i>
+                      <span>{item.label}</span>
+                    </div>
+                  </a>
+                );
+              }
+
               return (
                 <Link
                   key={index}
                   href={formatURL(item.href || '#')}
-                  className={`sidebar-link ${isActive ? 'active' : ''}`}
+                  className={`sidebar-link ${altClass} ${isActive ? 'active' : ''}`}
                   title={item.label}
                 >
                   <div className="link-content">
