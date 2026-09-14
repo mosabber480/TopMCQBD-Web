@@ -93,6 +93,29 @@ function QuestionsComponentInternal() {
   const searchParams = useSearchParams();
   const categoryParam = searchParams.get('category');
 
+  // Helper to format category for clean UI display (replace hyphens back to readable text and > separators)
+  const formatCategoryDisplay = (cat) => {
+    if (!cat) return '';
+    try {
+      const decoded = decodeURIComponent(cat);
+      const segments = decoded.replace(/->-|---|–>–/g, ' > ').split(/\s*>\s*/);
+      return segments.map((seg) => seg.replace(/-/g, ' ').trim()).join(' > ');
+    } catch (e) {
+      return cat.replace(/-/g, ' ');
+    }
+  };
+
+  // Automatically ensure URL in address bar has hyphens instead of %20 / spaces
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const search = window.location.search;
+      if (search && (search.includes('%20') || search.includes(' '))) {
+        const cleanSearch = search.replace(/(%20|\s)+/g, '-');
+        window.history.replaceState(null, '', window.location.pathname + cleanSearch + window.location.hash);
+      }
+    }
+  }, [categoryParam]);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [allQuestions, setAllQuestions] = useState([]);
@@ -862,17 +885,17 @@ function QuestionsComponentInternal() {
           '--quiz-circle-weight': fontWeight === 'thin' ? '500' : fontWeight === 'medium' ? '700' : fontWeight === 'bold' ? '800' : '700'
         }}
       >
-        <h1>Full Model Test Practice & Solutions</h1>
-        <h2>{categoryParam ? categoryParam : 'পূর্ণাঙ্গ মডেল টেস্ট ও সমাধান'}</h2>
+        <h1>বিষয়ভিত্তিক সকল MCQ অনুশীলন ও সমাধান</h1>
+        <h2>{categoryParam ? formatCategoryDisplay(categoryParam) : 'বিষয়ভিত্তিক সকল MCQ অনুশীলন ও সমাধান'}</h2>
 
         <div className="quiz-header-info-bar">
           <div className="quiz-exam-path">
-            <Link href="/full-model-test" style={{ textDecoration: 'none', color: 'inherit', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+            <Link href="/subjective-all-mcqs-Practice-success" style={{ textDecoration: 'none', color: 'inherit', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
               <i className="fa-solid fa-graduation-cap" style={{ color: 'var(--primary, #007bff)' }}></i>
-              <span style={{ textDecoration: 'underline' }}>পূর্ণাঙ্গ মডেল টেস্ট</span>
+              <span style={{ textDecoration: 'underline' }}>বিষয়ভিত্তিক সকল MCQ অনুশীলন</span>
             </Link>
             <span style={{ margin: '0 6px', color: '#94a3b8' }}>/</span>
-            <span>{categoryParam || 'পূর্ণাঙ্গ মডেল টেস্ট'}</span>
+            <span>{categoryParam ? formatCategoryDisplay(categoryParam) : 'বিষয়ভিত্তিক সকল MCQ অনুশীলন'}</span>
           </div>
           <div className="quiz-header-right-actions">
             {/* Cut Mark (Negative Marking) Custom Dropdown */}

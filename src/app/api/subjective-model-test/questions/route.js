@@ -18,7 +18,8 @@ export async function GET(request) {
     if (category && category !== 'all' && category !== 'All') {
       const trimmed = category.trim();
       const escaped = trimmed.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      filter.category = { $regex: escaped, $options: 'i' };
+      const flexible = escaped.replace(/[-–—\s>/]+/g, '[\\s\\->/]+');
+      filter.category = { $regex: flexible, $options: 'i' };
     }
 
     if (search && search.trim()) {

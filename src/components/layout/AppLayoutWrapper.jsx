@@ -50,6 +50,17 @@ export default function AppLayoutWrapper({ children, initialLayoutData }) {
     return () => window.removeEventListener('layout-updated', handleUpdate);
   }, []);
 
+  // Global URL space cleaner: across the entire website, automatically replace %20 and whitespace in URLs with hyphens '-'
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const search = window.location.search;
+    if (search && (search.includes('%20') || search.includes(' '))) {
+      const cleanSearch = search.replace(/(%20|\s)+/g, '-');
+      const cleanUrl = window.location.pathname + cleanSearch + window.location.hash;
+      window.history.replaceState(null, '', cleanUrl);
+    }
+  }, [pathname]);
+
   // Admin routes & DB diagnostic/manager routes have their own dedicated layouts
   const isAdminOrDiagnostic = pathname && (
     pathname.startsWith('/admin') ||

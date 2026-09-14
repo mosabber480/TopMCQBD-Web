@@ -17,8 +17,8 @@ export async function GET(request) {
     if (category && category !== 'all' && category !== 'All') {
       const trimmed = category.trim();
       const escaped = trimmed.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      // Match exact category OR subcategory starting with category + ' >' or '/'
-      filter.category = { $regex: `^${escaped}((\\s*>\\s*)|(/|$))`, $options: 'i' };
+      const flexible = escaped.replace(/[-–—\s>/]+/g, '[\\s\\->/]+');
+      filter.category = { $regex: flexible, $options: 'i' };
     }
 
     let query = Question.find(filter).sort({ createdAt: -1 });

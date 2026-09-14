@@ -334,10 +334,12 @@ export default function FullModelTestClient({ initialSearchParams }) {
 
           {/* 2-Column Models Grid: 2 boxes per line */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(460px, 1fr))', gap: '14px' }}>
-            {modelsList.map((model) => (
-              <div
-                key={model.num}
-                onClick={() => router.push(`/full-model-questions?category=${encodeURIComponent(`${selectedExam.categoryName} > ${selectedExam.title} > ${selectedSubject.name} > ${model.title}`)}`)}
+            {modelsList.map((model) => {
+              const catSlug = `${selectedExam.categoryName} > ${selectedExam.title} > ${selectedSubject.name} > ${model.title}`.trim().replace(/\s+/g, '-');
+              return (
+                <div
+                  key={model.num}
+                  onClick={() => router.push(`/full-model-questions?category=${encodeURIComponent(catSlug)}`)}
                 style={{
                   backgroundColor: '#ffffff',
                   borderRadius: '12px',
@@ -421,7 +423,8 @@ export default function FullModelTestClient({ initialSearchParams }) {
                   </span>
                 </div>
               </div>
-            ))}
+            );
+          })}
           </div>
 
         </div>

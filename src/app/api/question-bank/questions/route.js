@@ -19,10 +19,11 @@ export async function GET(request) {
     if (category && category !== 'all' && category !== 'All') {
       const trimmed = category.trim();
       const escaped = trimmed.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const flexible = escaped.replace(/[-–—\s>/]+/g, '[\\s\\->/]+');
       filter.$or = [
-        { category: { $regex: escaped, $options: 'i' } },
-        { examTitle: { $regex: escaped, $options: 'i' } },
-        { year: { $regex: escaped, $options: 'i' } }
+        { category: { $regex: flexible, $options: 'i' } },
+        { examTitle: { $regex: flexible, $options: 'i' } },
+        { year: { $regex: flexible, $options: 'i' } }
       ];
     }
 

@@ -86,6 +86,9 @@ const toBanglaNumber = (num) => {
   return String(num).split('').map(d => banglaDigits[d] !== undefined ? banglaDigits[d] : d).join('');
 };
 
+// URL slug helper (replaces spaces, commas and special chars with hyphens)
+const toSlug = (str) => (str || '').trim().replace(/[,\s]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+
 // Subjects Data per Model Test
 const SUBJECTS_DATA = [
   {
@@ -143,7 +146,127 @@ const SUBJECTS_DATA = [
       borderColor: "#ddd6fe",
       glowColor: "rgba(124, 58, 237, 0.12)"
     }
+  },
+  {
+    id: "bangladesh",
+    code: "BANGLADESH AFFAIRS",
+    name: "বাংলাদেশ বিষয়াবলি",
+    desc: "ইতিহাস, মুক্তিযুদ্ধ, সংবিধান ও অর্থনীতি",
+    chaptersCount: 16,
+    theme: {
+      color: "#059669",
+      gradient: "linear-gradient(135deg, #059669 0%, #10b981 100%)",
+      lightBg: "#ecfdf5",
+      borderColor: "#a7f3d0",
+      glowColor: "rgba(5, 150, 105, 0.12)"
+    }
+  },
+  {
+    id: "international",
+    code: "INTERNATIONAL AFFAIRS",
+    name: "আন্তর্জাতিক বিষয়াবলি",
+    desc: "আন্তর্জাতিক সংস্থা, বিশ্ব রাজনীতি ও বৈশ্বিক ইতিহাস",
+    chaptersCount: 14,
+    theme: {
+      color: "#2563eb",
+      gradient: "linear-gradient(135deg, #2563eb 0%, #3b82f6 100%)",
+      lightBg: "#eff6ff",
+      borderColor: "#bfdbfe",
+      glowColor: "rgba(37, 99, 235, 0.12)"
+    }
+  },
+  {
+    id: "science",
+    code: "GENERAL SCIENCE",
+    name: "সাধারণ বিজ্ঞান",
+    desc: "দৈনন্দিন বিজ্ঞান, পদার্থ, রসায়ন ও জীববিদ্যা",
+    chaptersCount: 15,
+    theme: {
+      color: "#0d9488",
+      gradient: "linear-gradient(135deg, #0d9488 0%, #14b8a6 100%)",
+      lightBg: "#f0fdfa",
+      borderColor: "#99f6e4",
+      glowColor: "rgba(13, 148, 136, 0.12)"
+    }
+  },
+  {
+    id: "computer",
+    code: "COMPUTER & IT",
+    name: "কম্পিউটার ও তথ্যপ্রযুক্তি",
+    desc: "হার্ডওয়্যার, নেটওয়ার্ক, ইন্টারনেট ও সাইবার নিরাপত্তা",
+    chaptersCount: 12,
+    theme: {
+      color: "#4f46e5",
+      gradient: "linear-gradient(135deg, #4f46e5 0%, #6366f1 100%)",
+      lightBg: "#eef2ff",
+      borderColor: "#c7d2fe",
+      glowColor: "rgba(79, 70, 229, 0.12)"
+    }
+  },
+  {
+    id: "mental",
+    code: "MENTAL ABILITY",
+    name: "মানসিক দক্ষতা",
+    desc: "যৌক্তিক যুক্তি, স্থানিক বিশ্লেষণ ও সমস্যা সমাধান",
+    chaptersCount: 10,
+    theme: {
+      color: "#db2777",
+      gradient: "linear-gradient(135deg, #db2777 0%, #ec4899 100%)",
+      lightBg: "#fdf2f8",
+      borderColor: "#fbcfe8",
+      glowColor: "rgba(219, 39, 119, 0.12)"
+    }
+  },
+  {
+    id: "geography",
+    code: "GEOGRAPHY & ENVIRONMENT",
+    name: "ভূগোল ও পরিবেশ",
+    desc: "বাংলাদেশ ও বৈশ্বিক ভূগোল, পরিবেশ ও দুর্যোগ ব্যবস্থাপনা",
+    chaptersCount: 10,
+    theme: {
+      color: "#ea580c",
+      gradient: "linear-gradient(135deg, #ea580c 0%, #f97316 100%)",
+      lightBg: "#fff7ed",
+      borderColor: "#fed7aa",
+      glowColor: "rgba(234, 88, 12, 0.12)"
+    }
+  },
+  {
+    id: "ethics",
+    code: "ETHICS & GOVERNANCE",
+    name: "নৈতিকতা ও সুশাসন",
+    desc: "নৈতিক মূল্যবোধ, জাতীয় সদাচার ও সুশাসনের ভিত্তি",
+    chaptersCount: 8,
+    theme: {
+      color: "#6366f1",
+      gradient: "linear-gradient(135deg, #6366f1 0%, #818cf8 100%)",
+      lightBg: "#e0e7ff",
+      borderColor: "#c7d2fe",
+      glowColor: "rgba(99, 102, 241, 0.12)"
+    }
+  },
+  {
+    id: "literature",
+    code: "BANGLA LITERATURE",
+    name: "বাংলা সাহিত্য স্পেশাল",
+    desc: "প্রাচীন, মধ্য ও আধুনিক যুগের কবি-সাহিত্যিকদের বিশদ প্রস্তুতি",
+    chaptersCount: 12,
+    theme: {
+      color: "#b45309",
+      gradient: "linear-gradient(135deg, #b45309 0%, #d97706 100%)",
+      lightBg: "#fef3c7",
+      borderColor: "#fde68a",
+      glowColor: "rgba(180, 83, 9, 0.12)"
+    }
   }
+];
+
+// Default chapters fallback for dynamically added subjects
+const DEFAULT_CHAPTERS = [
+  { id: 1, title: "মৌলিক ধারণা ও প্রারম্ভিক প্রস্তুতি", desc: "বিষয়টির প্রাথমিক ধারণা, গুরুত্বপূর্ণ সিলেবাস ও মৌলিক আলোচনা।" },
+  { id: 2, title: "গুরুত্বপূর্ণ অধ্যায় ও বিগত বছরের প্রশ্ন", desc: "বিগত বিসিএস ও পিএসসি পরীক্ষার আলোকে সর্বাধিক কমনোপযোগী টপিক।" },
+  { id: 3, title: "এডভান্সড কনসেপ্ট ও অনুশীলন", desc: "পরীক্ষায় আসা কঠিন ও প্যাঁচানো প্রশ্নাবলি এবং শর্টকাট সমাধান।" },
+  { id: 4, title: "রিভিশন ও চূড়ান্ত প্রস্তুতি", desc: "পূর্ণাঙ্গ রিভিশন ও সময় নিয়ন্ত্রণ করে বিষয়ভিত্তিক চূড়ান্ত প্রস্তুতি।" }
 ];
 
 // Chapters per Subject
@@ -288,12 +411,41 @@ export default function SubjectiveModelTestClient({ initialSearchParams }) {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const examId = searchParams.get('examId');
-  const subjectId = searchParams.get('subject');
-  const chapterId = searchParams.get('chapterId');
+  const examId = searchParams.get('examId') || initialSearchParams?.examId;
+  const subjectId = searchParams.get('subject') || initialSearchParams?.subject;
+  const chapterId = searchParams.get('chapterId') || searchParams.get('chapter') || initialSearchParams?.chapterId || initialSearchParams?.chapter;
 
   const [currentCat, setCurrentCat] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [topicPage, setTopicPage] = useState(1);
+
+  useEffect(() => {
+    setTopicPage(1);
+  }, [examId, subjectId, chapterId]);
+
+  // If URL has numeric chapterId (e.g. 1, 2, 3) or unslugified title, replace with clean hyphen slug
+  useEffect(() => {
+    if (examId && subjectId && chapterId) {
+      const chaptersList = CHAPTERS_BY_SUBJECT[subjectId] || DEFAULT_CHAPTERS;
+      let decoded = '';
+      try {
+        decoded = decodeURIComponent(chapterId);
+      } catch (e) {
+        decoded = chapterId;
+      }
+      const ch = chaptersList.find(c => 
+        String(c.id) === String(chapterId) || 
+        toSlug(c.title) === toSlug(decoded) || 
+        c.title === decoded
+      );
+      if (ch) {
+        const expectedSlug = toSlug(ch.title);
+        if (chapterId !== expectedSlug && decoded !== expectedSlug) {
+          router.replace(`/subjective-model-test?examId=${examId}&subject=${subjectId}&chapterId=${encodeURIComponent(expectedSlug)}`);
+        }
+      }
+    }
+  }, [examId, subjectId, chapterId, router]);
 
   // Live dynamic Online User counts weighted distribution (8 to 48 range)
   const getWeightedOnlineCount = (current) => {
@@ -372,28 +524,126 @@ export default function SubjectiveModelTestClient({ initialSearchParams }) {
   // VIEW 4: TOPICS OF SELECTED CHAPTER VIEW (When examId, subjectId & chapterId exist)
   // -------------------------------------------------------------
   if (examId && subjectId && chapterId && selectedSubject) {
-    const chaptersList = CHAPTERS_BY_SUBJECT[subjectId] || [];
-    const currentChapter = chaptersList.find(c => String(c.id) === String(chapterId)) || chaptersList[0];
-    const topicsList = (CHAPTER_TOPICS[subjectId] && CHAPTER_TOPICS[subjectId][chapterId]) || [currentChapter.title];
+    const chaptersList = CHAPTERS_BY_SUBJECT[subjectId] || DEFAULT_CHAPTERS;
+    let decodedChapter = '';
+    try {
+      decodedChapter = chapterId ? decodeURIComponent(chapterId) : '';
+    } catch (e) {
+      decodedChapter = chapterId || '';
+    }
+    const currentChapter = chaptersList.find(c => 
+      String(c.id) === String(chapterId) || 
+      toSlug(c.title) === toSlug(decodedChapter) ||
+      toSlug(c.title) === toSlug(chapterId) ||
+      c.title === chapterId || 
+      c.title === decodedChapter || 
+      encodeURIComponent(c.title) === chapterId
+    ) || chaptersList[0];
+    const topicsList = (CHAPTER_TOPICS[subjectId] && (CHAPTER_TOPICS[subjectId][currentChapter.id] || CHAPTER_TOPICS[subjectId][chapterId])) || [currentChapter.title];
+
+    
 
     return (
-      <main style={{ backgroundColor: '#f8fafc', minHeight: 'calc(100vh - 200px)', paddingBottom: '80px', paddingTop: '30px' }}>
-        <div className="container" style={{ maxWidth: '1300px', margin: '0 auto', padding: '0 20px' }}>
-          
-          {/* Breadcrumb & Navigation */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '10px' }}>
+      <main style={{ backgroundColor: '#f8fafc', minHeight: 'calc(100vh - 200px)', paddingBottom: '80px' }}>
+        {/* Full-width Illustrated Chapter Banner Header */}
+        <div style={{
+          width: '100%',
+          backgroundImage: "url('/images/chapter-banner-bg.png')",
+          backgroundRepeat: 'no-repeat',
+          backgroundPosition: 'center',
+          backgroundSize: 'cover',
+          backgroundColor: '#daf9e2',
+          borderBottom: '1px solid #bbf7d0',
+          padding: '24px 20px',
+          position: 'relative',
+          overflow: 'hidden'
+        }}>
+          <div className="container" style={{
+            maxWidth: '1300px',
+            margin: '0 auto',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '20px'
+          }}>
+            {/* Left Content */}
+            <div style={{ flex: '1 1 500px', zIndex: 1 }}>
+              <span style={{
+                display: 'inline-block',
+                fontSize: '0.78rem',
+                letterSpacing: '1.2px',
+                fontWeight: 800,
+                textTransform: 'uppercase',
+                color: '#ffffff',
+                backgroundColor: selectedSubject?.theme?.color || '#006a4e',
+                padding: '5px 18px',
+                borderRadius: '20px',
+                marginBottom: '10px',
+                boxShadow: '0 2px 8px rgba(0, 106, 78, 0.25)'
+              }}>
+                {selectedSubject.code} • অধ্যায় {toBanglaNumber(currentChapter.id)}
+              </span>
+              <h1 style={{
+                fontSize: '2.5rem',
+                fontWeight: 800,
+                margin: '4px 0 10px',
+                color: '#064e3b',
+                letterSpacing: '-0.5px',
+                lineHeight: '1.2'
+              }}>
+                {currentChapter.title}
+              </h1>
+              <p style={{
+                fontSize: '1.02rem',
+                color: '#064e3b',
+                margin: 0,
+                fontWeight: 600,
+                lineHeight: '1.6'
+              }}>
+                {toBanglaNumber(topicsList.length)} টি টপিক — টপিক বেছে নিন এবং প্রশ্ন সমাধান ও অনুশীলন শুরু করুন।
+              </p>
+            </div>
+
+            {/* Right Graphic Illustration (Transparent, cropped, never cut off) */}
+            <div style={{
+              flexShrink: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 1
+            }}>
+              <img
+                src="/images/chapter-banner-graphic.png"
+                alt="Chapter Graphic"
+                style={{
+                  height: '145px',
+                  width: 'auto',
+                  objectFit: 'contain',
+                  display: 'block'
+                }}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Sub-header / Breadcrumb Bar */}
+        <div style={{ backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', padding: '12px 20px' }}>
+          <div className="container" style={{ maxWidth: '1300px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
             <div style={{ fontSize: '0.9rem', color: '#64748b' }}>
-              <Link href="/subjective-model-test" style={{ color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>MCQ</Link>
+              <Link href="/subjective-model-test" style={{ color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>বিষয়ভিত্তিক মডেল টেস্ট</Link>
+              <span style={{ margin: '0 8px', color: '#cbd5e1' }}>/</span>
+              <Link href={`/subjective-model-test?examId=${selectedExam.id}`} style={{ color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>{selectedExam.title}</Link>
               <span style={{ margin: '0 8px', color: '#cbd5e1' }}>/</span>
               <Link href={`/subjective-model-test?examId=${selectedExam.id}&subject=${selectedSubject.id}`} style={{ color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>{selectedSubject.name}</Link>
               <span style={{ margin: '0 8px', color: '#cbd5e1' }}>/</span>
-              <span style={{ color: '#0f172a', fontWeight: 700 }}>অধ্যায় {chapterId}</span>
+              <span style={{ color: '#0f172a', fontWeight: 700 }}>{currentChapter.title}</span>
             </div>
 
             <button
               onClick={() => router.push(`/subjective-model-test?examId=${selectedExam.id}&subject=${selectedSubject.id}`)}
               style={{
-                backgroundColor: '#ffffff',
+                backgroundColor: '#f1f5f9',
                 color: '#334155',
                 border: '1px solid #cbd5e1',
                 padding: '6px 14px',
@@ -406,107 +656,183 @@ export default function SubjectiveModelTestClient({ initialSearchParams }) {
                 gap: '6px'
               }}
             >
-              <i className="fa-solid fa-arrow-left"></i>
               <span>অধ্যায় তালিকায় ফিরে যান</span>
+              <i className="fa-solid fa-arrow-right"></i>
             </button>
           </div>
+        </div>
 
-          {/* Heading */}
-          <h2 style={{ fontSize: '1.6rem', color: '#0f172a', fontWeight: 800, marginBottom: '20px' }}>
-            টপিকসমূহ ({topicsList.length})
-          </h2>
-
-          {/* 3-Column Topics Grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(310px, 1fr))', gap: '16px' }}>
-            {topicsList.map((top, idx) => (
-              <div
-                key={idx}
-                onClick={() => router.push(`/subjective-model-test-questions?category=${encodeURIComponent(`${selectedExam.categoryName} > ${selectedSubject.name} > ${currentChapter.title} > ${top}`)}`)}
-                style={{
-                  backgroundColor: '#ffffff',
-                  borderRadius: '12px',
-                  padding: '16px 18px',
-                  border: '1px solid #e2e8f0',
-                  boxShadow: '0 2px 6px rgba(0,0,0,0.02)',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '14px',
-                  transition: 'transform 0.2s ease, box-shadow 0.2s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.06)';
-                  e.currentTarget.style.borderColor = '#006a4e';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'none';
-                  e.currentTarget.style.boxShadow = '0 2px 6px rgba(0,0,0,0.02)';
-                  e.currentTarget.style.borderColor = '#e2e8f0';
-                }}
-              >
-                {/* Green Number Box */}
-                <div
-                  style={{
-                    width: '32px',
-                    height: '32px',
-                    borderRadius: '8px',
-                    backgroundColor: '#e6f4ea',
-                    color: '#006a4e',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontWeight: 800,
-                    fontSize: '0.9rem',
-                    flexShrink: 0
-                  }}
-                >
-                  {idx + 1}
-                </div>
-
-                {/* Topic Title */}
-                <span style={{ fontSize: '0.95rem', color: '#0f172a', fontWeight: 700, lineHeight: '1.4' }}>
-                  {top}
-                </span>
-              </div>
-            ))}
+        {/* Topics Grid Container */}
+        <div className="container" style={{ maxWidth: '1300px', margin: '35px auto 0', padding: '0 20px' }}>
+          <div style={{ marginBottom: '22px' }}>
+            <h2 style={{ fontSize: '1.45rem', color: '#0f172a', fontWeight: 800, margin: 0 }}>
+              টপিকসমূহ ({toBanglaNumber(topicsList.length)})
+            </h2>
           </div>
 
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(310px, 1fr))', gap: '16px' }}>
+            {topicsList.map((top, idx) => {
+              const globalIdx = idx + 1;
+              const catSlug = `${selectedExam.categoryName} > ${selectedSubject.name} > ${currentChapter.title} > ${top}`.trim().replace(/\s+/g, '-');
+              const qUrl = `/subjective-model-test-questions?category=${encodeURIComponent(catSlug)}`;
+
+              return (
+                <div
+                  key={globalIdx}
+                  onClick={() => router.push(qUrl)}
+                  style={{
+                    backgroundColor: '#ffffff',
+                    borderRadius: '12px',
+                    padding: '16px 18px',
+                    border: '1px solid #e2e8f0',
+                    boxShadow: '0 2px 6px rgba(0,0,0,0.02)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '14px',
+                    transition: 'transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.06)';
+                    e.currentTarget.style.borderColor = selectedSubject?.theme?.color || '#0284c7';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'none';
+                    e.currentTarget.style.boxShadow = '0 2px 6px rgba(0,0,0,0.02)';
+                    e.currentTarget.style.borderColor = '#e2e8f0';
+                  }}
+                >
+                  {/* Number Box */}
+                  <div
+                    style={{
+                      width: '34px',
+                      height: '34px',
+                      borderRadius: '8px',
+                      backgroundColor: selectedSubject?.theme?.lightBg || '#f0f9ff',
+                      color: selectedSubject?.theme?.color || '#0284c7',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontWeight: 800,
+                      fontSize: '0.9rem',
+                      flexShrink: 0
+                    }}
+                  >
+                    {globalIdx}
+                  </div>
+
+                  {/* Topic Title */}
+                  <span style={{ fontSize: '0.95rem', color: '#0f172a', fontWeight: 700, lineHeight: '1.4' }}>
+                    {top}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+
+          
         </div>
       </main>
     );
   }
 
-  // -------------------------------------------------------------
   // VIEW 3: CHAPTERS VIEW (When examId & subject are present)
   // -------------------------------------------------------------
   if (examId && subjectId && selectedSubject) {
-    const chaptersList = CHAPTERS_BY_SUBJECT[subjectId] || [];
+    const chaptersList = CHAPTERS_BY_SUBJECT[subjectId] || DEFAULT_CHAPTERS;
 
     return (
       <main style={{ backgroundColor: '#f8fafc', minHeight: 'calc(100vh - 200px)', paddingBottom: '80px' }}>
-        {/* Dark Teal/Green Banner Header */}
-        <div style={{ backgroundColor: '#006a4e', color: '#ffffff', padding: '40px 20px', textAlign: 'left' }}>
-          <div className="container" style={{ maxWidth: '1300px', margin: '0 auto' }}>
-            <span style={{ fontSize: '0.85rem', letterSpacing: '1.5px', fontWeight: 700, opacity: 0.9, textTransform: 'uppercase' }}>
-              {selectedSubject.code}
-            </span>
-            <h1 style={{ fontSize: '2.6rem', fontWeight: 800, margin: '6px 0 10px', color: '#ffffff' }}>
-              {selectedSubject.name}
-            </h1>
-            <p style={{ fontSize: '1.05rem', color: '#e2e8f0', margin: 0, opacity: 0.95 }}>
-              {chaptersList.length} টি অধ্যায় — অধ্যায় বেছে নিন এবং টপিকভিত্তিক প্রশ্ন সমাধান করুন।
-            </p>
+                {/* Full-width Illustrated Subject Banner Header */}
+        <div style={{
+          width: '100%',
+          backgroundImage: "url('/images/subject-banner-bg.png')",
+          backgroundRepeat: 'no-repeat',
+          backgroundPosition: 'center',
+          backgroundSize: 'cover',
+          backgroundColor: '#dff1fe',
+          borderBottom: '1px solid #bfdbfe',
+          padding: '24px 20px',
+          position: 'relative',
+          overflow: 'hidden'
+        }}>
+          <div className="container" style={{
+            maxWidth: '1300px',
+            margin: '0 auto',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '20px'
+          }}>
+            {/* Left Content */}
+            <div style={{ flex: '1 1 500px', zIndex: 1 }}>
+              <span style={{
+                display: 'inline-block',
+                fontSize: '0.78rem',
+                letterSpacing: '1.2px',
+                fontWeight: 800,
+                textTransform: 'uppercase',
+                color: '#ffffff',
+                backgroundColor: '#2563eb',
+                padding: '5px 18px',
+                borderRadius: '20px',
+                marginBottom: '10px',
+                boxShadow: '0 2px 8px rgba(37, 99, 235, 0.25)'
+              }}>
+                {selectedSubject.code}
+              </span>
+              <h1 style={{
+                fontSize: '2.5rem',
+                fontWeight: 800,
+                margin: '4px 0 10px',
+                color: '#0a1c3d',
+                letterSpacing: '-0.5px',
+                lineHeight: '1.2'
+              }}>
+                {selectedSubject.name}
+              </h1>
+              <p style={{
+                fontSize: '1.02rem',
+                color: '#0a1c3d',
+                margin: 0,
+                fontWeight: 600,
+                lineHeight: '1.6'
+              }}>
+                {chaptersList.length} টি অধ্যায় — অধ্যায় বেছে নিন এবং টপিকভিত্তিক প্রশ্ন সমাধান করুন।
+              </p>
+            </div>
+
+            {/* Right Graphic Illustration (Transparent, cropped, never cut off) */}
+            <div style={{
+              flexShrink: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 1
+            }}>
+              <img
+                src="/images/subject-banner-graphic.png"
+                alt="Study Graphic"
+                style={{
+                  height: '145px',
+                  width: 'auto',
+                  objectFit: 'contain',
+                  display: 'block'
+                }}
+              />
+            </div>
           </div>
         </div>
 
-        {/* Sub-header / Breadcrumb Bar */}
+{/* Sub-header / Breadcrumb Bar */}
         <div style={{ backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', padding: '12px 20px' }}>
           <div className="container" style={{ maxWidth: '1300px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
             <div style={{ fontSize: '0.9rem', color: '#64748b' }}>
-              <Link href="/subjective-model-test" style={{ color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>MCQ</Link>
+              <Link href="/subjective-model-test" style={{ color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>বিষয়ভিত্তিক মডেল টেস্ট</Link>
               <span style={{ margin: '0 8px', color: '#cbd5e1' }}>/</span>
-              <Link href={`/subjective-model-test?examId=${selectedExam.id}`} style={{ color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>{selectedExam.categoryName}</Link>
+              <Link href={`/subjective-model-test?examId=${selectedExam.id}`} style={{ color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>{selectedExam.title}</Link>
               <span style={{ margin: '0 8px', color: '#cbd5e1' }}>/</span>
               <span style={{ color: '#0f172a', fontWeight: 700 }}>{selectedSubject.name}</span>
             </div>
@@ -527,8 +853,8 @@ export default function SubjectiveModelTestClient({ initialSearchParams }) {
                 gap: '6px'
               }}
             >
-              <i className="fa-solid fa-arrow-left"></i>
               <span>বিষয় তালিকায় ফিরে যান</span>
+              <i className="fa-solid fa-arrow-right"></i>
             </button>
           </div>
         </div>
@@ -539,7 +865,7 @@ export default function SubjectiveModelTestClient({ initialSearchParams }) {
             {chaptersList.map(ch => (
               <div
                 key={ch.id}
-                onClick={() => router.push(`/subjective-model-test?examId=${selectedExam.id}&subject=${selectedSubject.id}&chapterId=${ch.id}`)}
+                onClick={() => router.push(`/subjective-model-test?examId=${selectedExam.id}&subject=${selectedSubject.id}&chapterId=${encodeURIComponent(toSlug(ch.title))}`)}
                 style={{
                   backgroundColor: '#ffffff',
                   borderRadius: '14px',
@@ -616,13 +942,95 @@ export default function SubjectiveModelTestClient({ initialSearchParams }) {
   // -------------------------------------------------------------
   if (examId) {
     return (
-      <main style={{ padding: '40px 0 80px', backgroundColor: '#f8fafc', minHeight: 'calc(100vh - 200px)' }}>
-        <div className="container" style={{ maxWidth: '1300px', margin: '0 auto', padding: '0 20px' }}>
-          
-          {/* Breadcrumb & Navigation */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '10px' }}>
+      <main style={{ backgroundColor: '#f8fafc', minHeight: 'calc(100vh - 200px)', paddingBottom: '80px' }}>
+        {/* Full-width Illustrated Exam Banner Header (Green Pen & Wave Theme) */}
+        <div style={{
+          width: '100%',
+          backgroundImage: "url('/images/exam-banner-bg.png')",
+          backgroundRepeat: 'no-repeat',
+          backgroundPosition: 'center',
+          backgroundSize: 'cover',
+          backgroundColor: '#e6f7ec',
+          borderBottom: '1px solid #bbf7d0',
+          padding: '24px 20px',
+          position: 'relative',
+          overflow: 'hidden'
+        }}>
+          <div className="container" style={{
+            maxWidth: '1300px',
+            margin: '0 auto',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '20px'
+          }}>
+            {/* Left Content */}
+            <div style={{ flex: '1 1 500px', zIndex: 1 }}>
+              <span style={{
+                display: 'inline-block',
+                fontSize: '0.78rem',
+                letterSpacing: '1.2px',
+                fontWeight: 800,
+                textTransform: 'uppercase',
+                color: '#ffffff',
+                backgroundColor: '#047857',
+                padding: '5px 18px',
+                borderRadius: '20px',
+                marginBottom: '10px',
+                boxShadow: '0 2px 8px rgba(4, 120, 87, 0.25)'
+              }}>
+                {selectedExam.categoryName || selectedExam.badge || 'মডেল টেস্ট'}
+              </span>
+              <h1 style={{
+                fontSize: '2.5rem',
+                fontWeight: 800,
+                margin: '4px 0 10px',
+                color: '#06281e',
+                letterSpacing: '-0.5px',
+                lineHeight: '1.2'
+              }}>
+                {selectedExam.title}
+              </h1>
+              <p style={{
+                fontSize: '1.02rem',
+                color: '#06281e',
+                margin: 0,
+                fontWeight: 600,
+                lineHeight: '1.6'
+              }}>
+                {toBanglaNumber(SUBJECTS_DATA.length)} টি বিষয় — বিষয় বেছে নিন এবং অধ্যায়ভিত্তিক প্রস্তুতি ও পরীক্ষা শুরু করুন।
+              </p>
+            </div>
+
+            {/* Right Graphic Illustration (Green Fountain Pen & Leaves) */}
+            <div style={{
+              flexShrink: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 1
+            }}>
+              <img
+                src="/images/exam-banner-graphic.png"
+                alt="Exam Graphic"
+                style={{
+                  height: '145px',
+                  width: 'auto',
+                  objectFit: 'contain',
+                  display: 'block'
+                }}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Sub-header / Breadcrumb Bar */}
+        {/* Sub-header / Breadcrumb Bar */}
+        <div style={{ backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', padding: '12px 20px' }}>
+          <div className="container" style={{ maxWidth: '1300px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
             <div style={{ fontSize: '0.9rem', color: '#64748b' }}>
-              <Link href="/subjective-model-test" style={{ color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>সকল মডেল টেস্ট</Link>
+              <Link href="/subjective-model-test" style={{ color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>বিষয়ভিত্তিক মডেল টেস্ট</Link>
               <span style={{ margin: '0 8px', color: '#cbd5e1' }}>/</span>
               <span style={{ color: '#0f172a', fontWeight: 700 }}>{selectedExam.title}</span>
             </div>
@@ -630,7 +1038,7 @@ export default function SubjectiveModelTestClient({ initialSearchParams }) {
             <button
               onClick={() => router.push('/subjective-model-test')}
               style={{
-                backgroundColor: '#ffffff',
+                backgroundColor: '#f1f5f9',
                 color: '#334155',
                 border: '1px solid #cbd5e1',
                 padding: '6px 14px',
@@ -643,22 +1051,14 @@ export default function SubjectiveModelTestClient({ initialSearchParams }) {
                 gap: '6px'
               }}
             >
-              <i className="fa-solid fa-arrow-left"></i>
               <span>অন্য মডেল টেস্ট বাছাই করুন</span>
+              <i className="fa-solid fa-arrow-right"></i>
             </button>
           </div>
+        </div>
 
-          {/* Title Header */}
-          <div style={{ marginBottom: '30px' }}>
-            <h1 style={{ fontSize: '1.8rem', color: '#0f172a', fontWeight: 800, marginBottom: '8px' }}>
-              {selectedExam.title}
-            </h1>
-            <p style={{ color: '#64748b', fontSize: '1rem', margin: 0 }}>
-              বিষয় বেছে নিন এবং অধ্যায়ভিত্তিক প্রস্তুতি ও পরীক্ষা শুরু করুন।
-            </p>
-          </div>
-
-          {/* 4 Subject Cards Grid (Refined Box Design) */}
+        {/* Subjects Grid Container */}
+        <div className="container" style={{ maxWidth: '1300px', margin: '35px auto 0', padding: '0 20px' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '26px' }}>
             {SUBJECTS_DATA.map(sub => {
               const theme = sub.theme || {
@@ -683,94 +1083,98 @@ export default function SubjectiveModelTestClient({ initialSearchParams }) {
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'space-between',
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                     position: 'relative',
-                    overflow: 'hidden',
-                    transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
+                    overflow: 'hidden'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-6px)';
-                    e.currentTarget.style.boxShadow = `0 18px 30px -6px ${theme.glowColor}, 0 8px 16px rgba(0,0,0,0.04)`;
+                    e.currentTarget.style.transform = 'translateY(-5px)';
+                    e.currentTarget.style.boxShadow = `0 16px 32px ${theme.glowColor}`;
                     e.currentTarget.style.borderColor = theme.color;
-                    const cta = e.currentTarget.querySelector('.subject-cta-btn');
-                    if (cta) {
-                      cta.style.filter = 'brightness(0.92)';
-                      const arrow = cta.querySelector('.subject-cta-arrow');
-                      if (arrow) arrow.style.transform = 'translateX(4px)';
-                    }
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.transform = 'none';
                     e.currentTarget.style.boxShadow = '0 4px 16px rgba(15, 23, 42, 0.04)';
                     e.currentTarget.style.borderColor = '#e2e8f0';
-                    const cta = e.currentTarget.querySelector('.subject-cta-btn');
-                    if (cta) {
-                      cta.style.filter = 'none';
-                      const arrow = cta.querySelector('.subject-cta-arrow');
-                      if (arrow) arrow.style.transform = 'none';
-                    }
                   }}
                 >
-                  {/* Decorative left accent line */}
-                  <div
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      bottom: 0,
-                      left: 0,
-                      width: '5px',
-                      background: theme.gradient
-                    }}
-                  />
+                  <div style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: '4px',
+                    background: theme.gradient
+                  }} />
 
                   <div>
-                    {/* Subject Code & Name */}
-                    <span
-                      style={{
-                        fontSize: '0.78rem',
-                        color: theme.color,
-                        fontWeight: 800,
-                        letterSpacing: '1px',
-                        textTransform: 'uppercase',
-                        display: 'block',
-                        marginTop: '2px',
-                        marginBottom: '4px'
-                      }}
-                    >
-                      {sub.code}
-                    </span>
-                    <h3 style={{ fontSize: '1.45rem', color: '#0f172a', fontWeight: 800, marginBottom: '6px', lineHeight: 1.25 }}>
+                    {/* Top Row: Subject Code Badge on the LEFT, No Icon */}
+                    <div style={{
+                      marginBottom: '16px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'flex-start'
+                    }}>
+                      <span
+                        style={{
+                          fontSize: '0.74rem',
+                          fontWeight: 800,
+                          letterSpacing: '1px',
+                          textTransform: 'uppercase',
+                          padding: '5px 12px',
+                          borderRadius: '6px',
+                          backgroundColor: theme.lightBg,
+                          color: theme.color,
+                          border: `1px solid ${theme.borderColor}`,
+                          display: 'inline-block'
+                        }}
+                      >
+                        {sub.code}
+                      </span>
+                    </div>
+
+                    <h2 style={{
+                      fontSize: '1.45rem',
+                      fontWeight: 800,
+                      color: '#0f172a',
+                      marginBottom: '8px',
+                      lineHeight: '1.3'
+                    }}>
                       {sub.name}
-                    </h3>
-                    <p style={{ fontSize: '0.88rem', color: '#64748b', lineHeight: '1.5', margin: '0 0 14px 0' }}>
+                    </h2>
+
+                    <p style={{
+                      color: '#64748b',
+                      fontSize: '0.9rem',
+                      lineHeight: '1.6',
+                      marginBottom: '18px',
+                      minHeight: '44px'
+                    }}>
                       {sub.desc}
                     </p>
 
-                    {/* Meta Specs Box inside Card */}
                     <div
                       style={{
-                        backgroundColor: '#f8fafc',
                         padding: '10px 14px',
-                        borderRadius: '12px',
+                        borderRadius: '10px',
+                        backgroundColor: '#f8fafc',
                         border: '1px solid #f1f5f9',
-                        marginBottom: '14px',
-                        textAlign: 'center',
-                        fontSize: '0.98rem',
-                        color: '#334155',
-                        fontWeight: 700,
+                        marginBottom: '20px',
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '6px'
+                        gap: '8px',
+                        fontSize: '0.88rem',
+                        color: '#475569'
                       }}
                     >
-                      <strong style={{ color: theme.color, fontWeight: 800, fontSize: '1.05rem' }}>
+                      <i className="fa-solid fa-layer-group" style={{ color: theme.color, fontSize: '0.9rem' }}></i>
+                      <strong style={{ color: '#0f172a', fontWeight: 700 }}>
                         {toBanglaNumber(sub.chaptersCount)} টি
                       </strong>
                       <span>অধ্যায় অন্তর্ভুক্ত</span>
                     </div>
                   </div>
 
-                  {/* Call to Action Button */}
                   <div
                     className="subject-cta-btn"
                     style={{
@@ -808,7 +1212,6 @@ export default function SubjectiveModelTestClient({ initialSearchParams }) {
               );
             })}
           </div>
-
         </div>
       </main>
     );

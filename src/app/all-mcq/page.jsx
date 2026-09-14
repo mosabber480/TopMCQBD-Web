@@ -114,7 +114,7 @@ export default function AllMcqPage() {
 
                         <div className="topic-btn-group">
                           {topics.map(topic => {
-                            const fullCategoryPath = `${mainCat} > ${subCat} > ${topic}`;
+                            const fullCategoryPath = `${mainCat} > ${subCat} > ${topic}`.trim().replace(/\s+/g, '-');
 
                             return (
                               <Link

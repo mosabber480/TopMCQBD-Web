@@ -297,14 +297,20 @@ function QuestionBankContent() {
                     {/* Dual Action Buttons */}
                     <div className="card-buttons-flex">
                       <button 
-                        onClick={() => router.push(`/question-bank-questions?category=${encodeURIComponent(item.year || item.id)}`)} 
+                        onClick={() => {
+                          const catSlug = String(item.year || item.id).trim().replace(/\s+/g, '-');
+                          router.push(`/question-bank-questions?category=${encodeURIComponent(catSlug)}`);
+                        }} 
                         className="btn-read-solution"
                         title="প্রশ্নব্যাংক সমাধান পড়ুন"
                       >
                         <i className="fa-regular fa-folder-open"></i> <span>ব্যাখ্যা পড়ুন</span>
                       </button>
                       <button 
-                        onClick={() => router.push(`/question-bank-questions?category=${encodeURIComponent(item.year || item.id)}&mode=exam`)} 
+                        onClick={() => {
+                          const catSlug = String(item.year || item.id).trim().replace(/\s+/g, '-');
+                          router.push(`/question-bank-questions?category=${encodeURIComponent(catSlug)}&mode=exam`);
+                        }} 
                         className="btn-start-exam"
                         title="পরীক্ষা দিন"
                       >

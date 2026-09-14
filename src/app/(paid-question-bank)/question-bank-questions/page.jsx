@@ -93,6 +93,29 @@ function QuestionsComponentInternal() {
   const searchParams = useSearchParams();
   const categoryParam = searchParams.get('category');
 
+  // Helper to format category for clean UI display (replace hyphens back to readable text and > separators)
+  const formatCategoryDisplay = (cat) => {
+    if (!cat) return '';
+    try {
+      const decoded = decodeURIComponent(cat);
+      const segments = decoded.replace(/->-|---|–>–/g, ' > ').split(/\s*>\s*/);
+      return segments.map((seg) => seg.replace(/-/g, ' ').trim()).join(' > ');
+    } catch (e) {
+      return cat.replace(/-/g, ' ');
+    }
+  };
+
+  // Automatically ensure URL in address bar has hyphens instead of %20 / spaces
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const search = window.location.search;
+      if (search && (search.includes('%20') || search.includes(' '))) {
+        const cleanSearch = search.replace(/(%20|\s)+/g, '-');
+        window.history.replaceState(null, '', window.location.pathname + cleanSearch + window.location.hash);
+      }
+    }
+  }, [categoryParam]);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [allQuestions, setAllQuestions] = useState([]);
@@ -863,7 +886,7 @@ function QuestionsComponentInternal() {
         }}
       >
         <h1>Question Bank Solutions & Practice</h1>
-        <h2>{categoryParam ? categoryParam : 'প্রশ্নব্যাংক ও বিগত সালের প্রশ্ন সমাধান'}</h2>
+        <h2>{categoryParam ? formatCategoryDisplay(categoryParam) : 'প্রশ্নব্যাংক ও বিগত সালের প্রশ্ন সমাধান'}</h2>
 
         <div className="quiz-header-info-bar">
           <div className="quiz-exam-path">
@@ -872,7 +895,7 @@ function QuestionsComponentInternal() {
               <span style={{ textDecoration: 'underline' }}>প্রশ্নব্যাংক আর্কাইভ</span>
             </Link>
             <span style={{ margin: '0 6px', color: '#94a3b8' }}>/</span>
-            <span>{categoryParam || 'সকল প্রশ্নব্যাংক'}</span>
+            <span>{categoryParam ? formatCategoryDisplay(categoryParam) : 'সকল প্রশ্নব্যাংক'}</span>
           </div>
           <div className="quiz-header-right-actions">
             {/* Cut Mark (Negative Marking) Custom Dropdown */}
