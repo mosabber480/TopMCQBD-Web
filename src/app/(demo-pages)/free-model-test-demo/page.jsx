@@ -6,10 +6,10 @@ export const metadata = {
   description: 'বিসিএস, ব্যাংক, প্রাথমিক শিক্ষক নিয়োগ সহ সকল সরকারি চাকরির ফ্রি মডেল টেস্ট।'
 };
 
-export default function FreeModelTestDemoPage({ searchParams }) {
+export default function FreeModelTestDemoPage() {
   return (
     <Suspense fallback={<div style={{ minHeight: 'calc(100vh - 200px)', backgroundColor: '#f8fafc' }} />}>
-      <FreeModelTestClient initialSearchParams={searchParams} />
+      <FreeModelTestClient />
     </Suspense>
   );
 }
