@@ -101,14 +101,14 @@
         "subMenus": [
           {
             "title": "Recent Job Solution",
-            "url": "/free-recent-job-solution-demo",
+            "url": "/free-recent-job-solution",
             "icon": "fa-solid fa-bolt",
             "badgeText": "Free",
             "badgeType": "free"
           },
           {
             "title": "Free Model Test",
-            "url": "/free-model-test-demo",
+            "url": "/free-model-test",
             "icon": "fa-solid fa-bolt",
             "badgeText": "Free",
             "badgeType": "free"

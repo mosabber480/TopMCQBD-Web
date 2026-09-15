@@ -1,3 +1,4 @@
-import AdminFullModelDashboardPage from '../full-model-dashabord/page';
+import AdminFullModelQuestionsDashboardPage from '../full-model-questions-dashabord/page';
 
-export default AdminFullModelDashboardPage;
+export default AdminFullModelQuestionsDashboardPage;
+

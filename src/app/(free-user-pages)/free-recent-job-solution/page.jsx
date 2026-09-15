@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect, Suspense } from 'react';
-
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -145,7 +144,7 @@ function QuestionBankContent() {
 
   // Fetch dynamic config from API
   useEffect(() => {
-    fetch('/api/question-bank/config', { cache: 'no-store' })
+    fetch('/api/free-recent-job-solution/config', { cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
         if (data.success) {
@@ -157,7 +156,7 @@ function QuestionBankContent() {
           }
         }
       })
-      .catch(err => console.error('Question bank config fetch error:', err));
+      .catch(err => console.error('Free recent job config fetch error:', err));
   }, []);
 
   const filterTags = categoriesList.map(tag => {
@@ -178,6 +177,7 @@ function QuestionBankContent() {
     const itemYearEn = toEnglishNumberStr(item.year).toLowerCase();
     const itemDateEn = toEnglishNumberStr(item.date).toLowerCase();
 
+    // Remove 'th', 'st', 'nd', 'rd' or special characters from query if searching numbers e.g. 50th -> 50
     const cleanNumQuery = q.replace(/(st|nd|rd|th)/g, '');
     const cleanNumQueryNoSymbol = cleanNumQuery.replace(/[-_\s]/g, '');
 
@@ -321,24 +321,10 @@ function QuestionBankContent() {
 
                     {/* Dual Action Buttons */}
                     <div className="card-buttons-flex">
-                      <button 
-                        onClick={() => {
-                          const catSlug = String(item.year || item.id).trim().replace(/\s+/g, '-');
-                          router.push(`/question-bank-questions?category=${encodeURIComponent(catSlug)}`);
-                        }} 
-                        className="btn-read-solution"
-                        title="প্রশ্নব্যাংক সমাধান পড়ুন"
-                      >
+                      <button onClick={() => router.push('/questions')} className="btn-read-solution">
                         <i className="fa-regular fa-folder-open"></i> <span>ব্যাখ্যা পড়ুন</span>
                       </button>
-                      <button 
-                        onClick={() => {
-                          const catSlug = String(item.year || item.id).trim().replace(/\s+/g, '-');
-                          router.push(`/question-bank-questions?category=${encodeURIComponent(catSlug)}&mode=exam`);
-                        }} 
-                        className="btn-start-exam"
-                        title="পরীক্ষা দিন"
-                      >
+                      <button onClick={() => router.push('/quiz')} className="btn-start-exam">
                         <span>পরীক্ষা দিন</span> <i className="fa-solid fa-arrow-right"></i>
                       </button>
                     </div>
@@ -354,11 +340,11 @@ function QuestionBankContent() {
   );
 }
 
-export default function QuestionBankPage() {
+export default function FreeRecentJobSolutionPage() {
   return (
     <Suspense fallback={
       <div style={{ textAlign: 'center', padding: '80px 20px', color: '#64748b' }}>
-        প্রশ্নব্যাংক পেজ লোড হচ্ছে...
+        রিসেন্ট জব সল্যুশন পেজ লোড হচ্ছে...
       </div>
     }>
       <QuestionBankContent />

@@ -415,9 +415,29 @@ function ModelTestContent() {
   const subjectId = searchParams.get('subject');
   const chapterId = searchParams.get('chapterId') || searchParams.get('chapter');
 
+  const [examsData, setExamsData] = useState(INITIAL_EXAMS);
+  const [subjectsData, setSubjectsData] = useState(SUBJECTS_DATA);
+  const [chaptersMap, setChaptersMap] = useState(CHAPTERS_BY_SUBJECT);
+  const [topicsMap, setTopicsMap] = useState(CHAPTER_TOPICS);
+
   const [currentCat, setCurrentCat] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [topicPage, setTopicPage] = useState(1);
+
+  // Sync data from config API
+  useEffect(() => {
+    fetch('/api/subjective/config', { cache: 'no-store' })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          if (Array.isArray(data.exams) && data.exams.length > 0) setExamsData(data.exams);
+          if (Array.isArray(data.subjects) && data.subjects.length > 0) setSubjectsData(data.subjects);
+          if (data.chapters && Object.keys(data.chapters).length > 0) setChaptersMap(data.chapters);
+          if (data.topics && Object.keys(data.topics).length > 0) setTopicsMap(data.topics);
+        }
+      })
+      .catch(err => console.error('Failed to load subjective practice config:', err));
+  }, []);
 
   useEffect(() => {
     setTopicPage(1);
@@ -426,7 +446,7 @@ function ModelTestContent() {
   // If URL has numeric chapterId (e.g. 1, 2, 3) or unslugified title, replace with clean hyphen slug
   useEffect(() => {
     if (examId && subjectId && chapterId) {
-      const chaptersList = CHAPTERS_BY_SUBJECT[subjectId] || DEFAULT_CHAPTERS;
+      const chaptersList = (chaptersMap && chaptersMap[subjectId]) || CHAPTERS_BY_SUBJECT[subjectId] || DEFAULT_CHAPTERS;
       let decoded = '';
       try {
         decoded = decodeURIComponent(chapterId);
@@ -445,7 +465,7 @@ function ModelTestContent() {
         }
       }
     }
-  }, [examId, subjectId, chapterId, router]);
+  }, [examId, subjectId, chapterId, chaptersMap, router]);
 
   // Live dynamic Online User counts weighted distribution (8 to 48 range)
   const getWeightedOnlineCount = (current) => {
@@ -475,8 +495,8 @@ function ModelTestContent() {
   useEffect(() => {
     setOnlineCounts(prev => {
       const next = { ...prev };
-      INITIAL_EXAMS.forEach(e => {
-        next[e.id] = getWeightedOnlineCount(prev[e.id]);
+      examsData.forEach(e => {
+        next[e.id] = getWeightedOnlineCount(prev[e.id] || e.onlineUsers || 30);
       });
       return next;
     });
@@ -484,38 +504,38 @@ function ModelTestContent() {
     const interval = setInterval(() => {
       setOnlineCounts(prev => {
         const next = { ...prev };
-        INITIAL_EXAMS.forEach(e => {
-          next[e.id] = getWeightedOnlineCount(prev[e.id]);
+        examsData.forEach(e => {
+          next[e.id] = getWeightedOnlineCount(prev[e.id] || e.onlineUsers || 30);
         });
         return next;
       });
     }, 3500);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [examsData]);
 
   // Selected Exam & Subject
-  const selectedExam = INITIAL_EXAMS.find(e => e.id === examId) || INITIAL_EXAMS[0];
-  const selectedSubject = SUBJECTS_DATA.find(s => s.id === subjectId);
+  const selectedExam = examsData.find(e => e.id === examId) || examsData[0] || INITIAL_EXAMS[0];
+  const selectedSubject = subjectsData.find(s => s.id === subjectId);
 
   const categories = [
-    { id: 'all', label: 'সকল', count: INITIAL_EXAMS.length },
-    { id: 'bcs', label: 'বিসিএস', count: INITIAL_EXAMS.filter(e => e.category === 'bcs').length },
-    { id: 'bank', label: 'ব্যাংক জব', count: INITIAL_EXAMS.filter(e => e.category === 'bank').length },
-    { id: 'primary', label: 'প্রাথমিক শিক্ষক', count: INITIAL_EXAMS.filter(e => e.category === 'primary').length },
-    { id: 'subject', label: 'পূর্ণাঙ্গ মডেল টেস্ট', count: INITIAL_EXAMS.filter(e => e.category === 'subject').length }
+    { id: 'all', label: 'সকল', count: examsData.length },
+    { id: 'bcs', label: 'বিসিএস', count: examsData.filter(e => e.category === 'bcs').length },
+    { id: 'bank', label: 'ব্যাংক জব', count: examsData.filter(e => e.category === 'bank').length },
+    { id: 'primary', label: 'প্রাথমিক শিক্ষক', count: examsData.filter(e => e.category === 'primary').length },
+    { id: 'subject', label: 'পূর্ণাঙ্গ মডেল টেস্ট', count: examsData.filter(e => e.category === 'subject').length }
   ];
 
-  const filteredExams = INITIAL_EXAMS.filter(exam => {
+  const filteredExams = examsData.filter(exam => {
     const matchCat = currentCat === 'all' || exam.category === currentCat;
     const q = searchQuery.toLowerCase().trim();
     if (!q) return matchCat;
 
-    const matchTitle = exam.title.toLowerCase().includes(q);
-    const matchDesc = exam.description.toLowerCase().includes(q);
-    const matchCatName = exam.categoryName.toLowerCase().includes(q);
+    const matchTitle = (exam.title || '').toLowerCase().includes(q);
+    const matchDesc = (exam.description || '').toLowerCase().includes(q);
+    const matchCatName = (exam.categoryName || '').toLowerCase().includes(q);
     const matchSubjects = (exam.subjectsText || '').toLowerCase().includes(q);
-    const matchTags = (exam.tags || [exam.badge]).some(tag => tag.toLowerCase().includes(q));
+    const matchTags = ((exam.tags && Array.isArray(exam.tags)) ? exam.tags : [exam.badge || '']).some(tag => (tag || '').toLowerCase().includes(q));
 
     return matchCat && (matchTitle || matchDesc || matchCatName || matchSubjects || matchTags);
   });
@@ -524,7 +544,7 @@ function ModelTestContent() {
   // VIEW 4: TOPICS OF SELECTED CHAPTER VIEW (When examId, subjectId & chapterId exist)
   // -------------------------------------------------------------
   if (examId && subjectId && chapterId && selectedSubject) {
-    const chaptersList = CHAPTERS_BY_SUBJECT[subjectId] || DEFAULT_CHAPTERS;
+    const chaptersList = (chaptersMap && chaptersMap[subjectId]) || CHAPTERS_BY_SUBJECT[subjectId] || DEFAULT_CHAPTERS;
     let decodedChapter = '';
     try {
       decodedChapter = chapterId ? decodeURIComponent(chapterId) : '';
@@ -539,7 +559,7 @@ function ModelTestContent() {
       c.title === decodedChapter || 
       encodeURIComponent(c.title) === chapterId
     ) || chaptersList[0];
-    const topicsList = (CHAPTER_TOPICS[subjectId] && (CHAPTER_TOPICS[subjectId][currentChapter.id] || CHAPTER_TOPICS[subjectId][chapterId])) || [currentChapter.title];
+    const topicsList = (topicsMap && topicsMap[subjectId] && (topicsMap[subjectId][currentChapter.id] || topicsMap[subjectId][chapterId])) || [currentChapter.title];
 
     
 
@@ -740,7 +760,7 @@ function ModelTestContent() {
   // VIEW 3: CHAPTERS VIEW (When examId & subject are present)
   // -------------------------------------------------------------
   if (examId && subjectId && selectedSubject) {
-    const chaptersList = CHAPTERS_BY_SUBJECT[subjectId] || DEFAULT_CHAPTERS;
+    const chaptersList = (chaptersMap && chaptersMap[subjectId]) || CHAPTERS_BY_SUBJECT[subjectId] || DEFAULT_CHAPTERS;
 
     return (
       <main style={{ backgroundColor: '#f8fafc', minHeight: 'calc(100vh - 200px)', paddingBottom: '80px' }}>
@@ -1004,7 +1024,7 @@ function ModelTestContent() {
                 fontWeight: 600,
                 lineHeight: '1.6'
               }}>
-                {toBanglaNumber(SUBJECTS_DATA.length)} টি বিষয় — বিষয় বেছে নিন এবং অধ্যায়ভিত্তিক প্রস্তুতি ও পরীক্ষা শুরু করুন।
+                {toBanglaNumber(subjectsData.length)} টি বিষয় — বিষয় বেছে নিন এবং অধ্যায়ভিত্তিক প্রস্তুতি ও পরীক্ষা শুরু করুন।
               </p>
             </div>
 
@@ -1065,7 +1085,7 @@ function ModelTestContent() {
         {/* Subjects Grid Container */}
         <div className="container" style={{ maxWidth: '1300px', margin: '35px auto 0', padding: '0 20px' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '26px' }}>
-            {SUBJECTS_DATA.map(sub => {
+            {subjectsData.map(sub => {
               const theme = sub.theme || {
                 color: '#006a4e',
                 gradient: 'linear-gradient(135deg, #006a4e 0%, #059669 100%)',

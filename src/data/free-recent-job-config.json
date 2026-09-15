@@ -1,0 +1,119 @@
+{
+  "categories": [
+    { "id": "All", "label": "সকল" },
+    { "id": "BCS", "label": "বিসিএস প্রিলি" },
+    { "id": "Bank", "label": "ব্যাংক জবস" },
+    { "id": "Primary", "label": "প্রাথমিক শিক্ষক" },
+    { "id": "NTRCA", "label": "শিক্ষক নিবন্ধন" }
+  ],
+  "items": [
+    {
+      "id": "recent-bcs-46",
+      "year": "৪৬তম বিসিএস প্রিলিমিনারি পরীক্ষা",
+      "category": "BCS",
+      "date": "২০২৪",
+      "totalQ": 200,
+      "time": "২ ঘণ্টা",
+      "subjectStats": "বাংলা ৩৫, ইংরেজি ৩৫, গণিত ১৫, বিজ্ঞান ১৫, কম্পিউটার ১৫, সাধারণ জ্ঞান ৫০",
+      "status": "সম্পূর্ণ সমাধানসহ উপলব্ধ",
+      "tags": ["BCS", "46th BCS", "46th", "BCS Preliminary", "Prelims", "46", "2024", "bcs exam"],
+      "displayTag": "46th"
+    },
+    {
+      "id": "recent-bcs-45",
+      "year": "৪৫তম বিসিএস প্রিলিমিনারি পরীক্ষা",
+      "category": "BCS",
+      "date": "২০২৩",
+      "totalQ": 200,
+      "time": "২ ঘণ্টা",
+      "subjectStats": "বাংলা ৩৫, ইংরেজি ৩৫, গণিত ১৫, বিজ্ঞান ১৫, কম্পিউটার ১৫, সাধারণ জ্ঞান ৫০",
+      "status": "সম্পূর্ণ সমাধানসহ উপলব্ধ",
+      "tags": ["BCS", "45th BCS", "45th", "BCS Preliminary", "Prelims", "45", "2023", "bcs exam"],
+      "displayTag": "45th"
+    },
+    {
+      "id": "recent-bcs-44",
+      "year": "৪৪তম বিসিএস প্রিলিমিনারি পরীক্ষা",
+      "category": "BCS",
+      "date": "২০২২",
+      "totalQ": 200,
+      "time": "২ ঘণ্টা",
+      "subjectStats": "বাংলা ৩৫, ইংরেজি ৩৫, গণিত ১৫, বিজ্ঞান ১৫, কম্পিউটার ১৫, সাধারণ জ্ঞান ৫০",
+      "status": "সম্পূর্ণ সমাধানসহ উপলব্ধ",
+      "tags": ["BCS", "44th BCS", "44th", "BCS Preliminary", "Prelims", "44", "2022", "bcs exam"],
+      "displayTag": "44th"
+    },
+    {
+      "id": "recent-bb-ad-2024",
+      "year": "বাংলাদেশ ব্যাংক সহকারী পরিচালক (AD)",
+      "category": "Bank",
+      "date": "২০২৪",
+      "totalQ": 100,
+      "time": "১ ঘণ্টা",
+      "subjectStats": "English 25, Math 25, Bangla 20, GK 20, ICT 10",
+      "status": "ব্যাখ্যামূলক সমাধান",
+      "tags": ["Bank", "Bank Job", "Bangladesh Bank", "AD", "Assistant Director", "2024"],
+      "displayTag": "AD"
+    },
+    {
+      "id": "recent-bb-off-2024",
+      "year": "বাংলাদেশ ব্যাংক অফিসার (General)",
+      "category": "Bank",
+      "date": "২০২৪",
+      "totalQ": 100,
+      "time": "১ ঘণ্টা",
+      "subjectStats": "English 25, Math 25, Bangla 20, GK 20, ICT 10",
+      "status": "ব্যাখ্যামূলক সমাধান",
+      "tags": ["Bank", "Bank Job", "Bangladesh Bank", "Officer", "General Officer", "2024"],
+      "displayTag": "Officer"
+    },
+    {
+      "id": "recent-primary-2024-step3",
+      "year": "প্রাথমিক সহকারী শিক্ষক নিয়োগ (২০২৪ - ৩য় ধাপ)",
+      "category": "Primary",
+      "date": "২০২৪",
+      "totalQ": 80,
+      "time": "১ ঘণ্টা",
+      "subjectStats": "বাংলা ২০, ইংরেজি ২০, গণিত ২০, সাধারণ জ্ঞান ২০",
+      "status": "ব্যাখ্যামূলক সমাধান",
+      "tags": ["Primary", "Primary Teacher", "Assistant Teacher", "Primary 2024", "Step 3", "Step-3", "2024"],
+      "displayTag": "Step-3"
+    },
+    {
+      "id": "recent-primary-2024-step2",
+      "year": "প্রাথমিক সহকারী শিক্ষক নিয়োগ (২০২৪ - ২য় ধাপ)",
+      "category": "Primary",
+      "date": "২০২৪",
+      "totalQ": 80,
+      "time": "১ ঘণ্টা",
+      "subjectStats": "বাংলা ২০, ইংরেজি ২০, গণিত ২০, সাধারণ জ্ঞান ২০",
+      "status": "ব্যাখ্যামূলক সমাধান",
+      "tags": ["Primary", "Primary Teacher", "Assistant Teacher", "Primary 2024", "Step 2", "Step-2", "2024"],
+      "displayTag": "Step-2"
+    },
+    {
+      "id": "recent-ntrca-18-college",
+      "year": "১৮তম শিক্ষক নিবন্ধন (কলেজ পর্যায়)",
+      "category": "NTRCA",
+      "date": "২০২৪",
+      "totalQ": 100,
+      "time": "১ ঘণ্টা",
+      "subjectStats": "বাংলা ২৫, ইংরেজি ২৫, গণিত ২৫, সাধারণ জ্ঞান ২৫",
+      "status": "ব্যাখ্যামূলক সমাধান",
+      "tags": ["NTRCA", "Teacher Registration", "18th NTRCA", "18th", "কলেজ পর্যায়", "college", "2024"],
+      "displayTag": "18th"
+    },
+    {
+      "id": "recent-ntrca-18-school",
+      "year": "১৮তম শিক্ষক নিবন্ধন (স্কুল পর্যায়)",
+      "category": "NTRCA",
+      "date": "২০২৪",
+      "totalQ": 100,
+      "time": "১ ঘণ্টা",
+      "subjectStats": "বাংলা ২৫, ইংরেজি ২৫, গণিত ২৫, সাধারণ জ্ঞান ২৫",
+      "status": "ব্যাখ্যামূলক সমাধান",
+      "tags": ["NTRCA", "Teacher Registration", "18th NTRCA", "18th", "স্কুল পর্যায়", "school", "2024"],
+      "displayTag": "18th"
+    }
+  ]
+}

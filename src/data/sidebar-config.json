@@ -87,7 +87,12 @@
       "subMenus": [
         {
           "title": "Question Bank",
-          "url": "/admin/question-bank-dashboard",
+          "url": "/admin/question-bank-questions-dashboard",
+          "icon": "fa-solid fa-circle-dot"
+        },
+        {
+          "title": "Questions Bank Categories",
+          "url": "/admin/question-bank-categories-dashbaord",
           "icon": "fa-solid fa-circle-dot"
         }
       ]
@@ -99,7 +104,12 @@
       "subMenus": [
         {
           "title": "Full Model Test (1-20)",
-          "url": "/admin/full-model-dashabord",
+          "url": "/admin/full-model-questions-dashabord",
+          "icon": "fa-solid fa-circle-dot"
+        },
+        {
+          "title": "Full Model Test Categories",
+          "url": "/admin/full-model-categories-dashbaord",
           "icon": "fa-solid fa-circle-dot"
         }
       ]
@@ -111,7 +121,7 @@
       "subMenus": [
         {
           "title": "subjective model Test",
-          "url": "/admin/subjective-model-test-dashbaord",
+          "url": "/admin/subjective-model-questions-dashbaord",
           "icon": "fa-solid fa-circle-dot"
         },
         {
@@ -129,6 +139,28 @@
         {
           "title": "Subjective All MCQ (No Model)",
           "url": "/admin/subjective-all-mcqs-dashabord",
+          "icon": "fa-solid fa-circle-dot"
+        },
+        {
+          "title": "Subjective All MCQ Categories",
+          "url": "/admin/subjective-all-mcqs-Practice-categories-dashbaord",
+          "icon": "fa-solid fa-circle-dot"
+        }
+      ]
+    },
+    {
+      "title": "Free User Pages",
+      "url": "",
+      "icon": "fa-solid fa-layer-group",
+      "subMenus": [
+        {
+          "title": "Free Recent Job Categories",
+          "url": "/admin/free-recent-job-solution-categories-dashbaord",
+          "icon": "fa-solid fa-circle-dot"
+        },
+        {
+          "title": "Free Model Test Categories",
+          "url": "/admin/free-model-test-categories-dashbaord",
           "icon": "fa-solid fa-circle-dot"
         }
       ]

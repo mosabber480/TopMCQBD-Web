@@ -1,3 +1,4 @@
-import AdminSubjectiveModelTestDashboardPage from '../subjective-model-test-dashbaord/page';
+import AdminSubjectiveModelQuestionsDashboardPage from '../subjective-model-questions-dashbaord/page';
 
-export default AdminSubjectiveModelTestDashboardPage;
+export default AdminSubjectiveModelQuestionsDashboardPage;
+

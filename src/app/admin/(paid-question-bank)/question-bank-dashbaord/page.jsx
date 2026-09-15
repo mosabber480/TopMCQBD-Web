@@ -1,3 +1,4 @@
-import AdminQuestionBankDashboardPage from '../question-bank-dashboard/page';
+import AdminQuestionBankQuestionsDashboardPage from '../question-bank-questions-dashboard/page';
 
-export default AdminQuestionBankDashboardPage;
+export default AdminQuestionBankQuestionsDashboardPage;
+
