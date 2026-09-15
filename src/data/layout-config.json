@@ -50,49 +50,6 @@
         "icon": "fa-solid fa-box"
       },
       {
-        "title": "ডেমো পেজেস",
-        "url": "#",
-        "subMenus": [
-          {
-            "title": "বিষয়ভিত্তিক মডেল টেস্ট",
-            "url": "/subjective-model-test-demo",
-            "icon": "fa-solid fa-book-open",
-            "badgeText": "LIVE",
-            "badgeType": "live"
-          },
-          {
-            "title": "পূর্ণাঙ্গ মডেল টেস্ট",
-            "url": "/full-model-test-demo",
-            "icon": "fa-solid fa-pen",
-            "badgeText": "Demo",
-            "badgeType": "live"
-          },
-          {
-            "title": "প্রশ্নব্যাংক",
-            "url": "/question-bank-demo",
-            "icon": "fa-solid fa-book-bookmark",
-            "badgeText": "LIVE",
-            "badgeType": "live"
-          },
-          {
-            "title": "লাইভ মডেল টেস্ট",
-            "url": "/live-exam-model-test",
-            "icon": "fa-solid fa-ranking-star",
-            "badgeText": "Live Exam",
-            "badgeType": "live"
-          },
-          {
-            "title": "বিষয়ভিত্তিক অনুশীলন",
-            "url": "/subjective-Practice-demo",
-            "icon": "fa-solid fa-layer-group",
-            "badgeText": "Best",
-            "badgeType": "live"
-          }
-        ],
-        "isMegaMenu": false,
-        "megaMenuId": null
-      },
-      {
         "title": "Free Plan",
         "url": "#",
         "icon": "fa-solid fa-hockey-puck",

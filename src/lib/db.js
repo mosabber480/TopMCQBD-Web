@@ -11,6 +11,7 @@ try {
 const MONGODB_URI_PAID = process.env.MONGODB_URI_PAID || process.env.MONGO_URI;
 const MONGODB_URI_FREE = process.env.MONGODB_URI_FREE;
 const MONGODB_URI_QUESTION_BANK = process.env.MONGODB_URI_QUESTION_BANK;
+const MONGODB_URI_SUBJECTIVE = process.env.MONGODB_URI_SUBJECTIVE;
 
 if (!global.mongooseCache) {
   global.mongooseCache = {
@@ -19,7 +20,9 @@ if (!global.mongooseCache) {
     freeConn: null,
     freePromise: null,
     questionBankConn: null,
-    questionBankPromise: null
+    questionBankPromise: null,
+    subjectiveConn: null,
+    subjectivePromise: null
   };
 }
 
@@ -139,6 +142,44 @@ export async function connectQuestionBankDB() {
   }
 
   return cached.questionBankConn;
+}
+
+/**
+ * Connect to Subjective Database connection
+ */
+export async function connectSubjectiveDB() {
+  const uri = process.env.MONGODB_URI_SUBJECTIVE || MONGODB_URI_PAID;
+  if (!uri) {
+    throw new Error('Please define the MONGODB_URI_SUBJECTIVE environment variable inside .env');
+  }
+
+  if (cached.subjectiveConn && cached.subjectiveConn.readyState === 1) {
+    return cached.subjectiveConn;
+  }
+
+  if (!cached.subjectivePromise) {
+    cached.subjectivePromise = mongoose.createConnection(uri, {
+      bufferCommands: false,
+      serverSelectionTimeoutMS: 6000,
+      connectTimeoutMS: 10000,
+    }).asPromise().then((conn) => {
+      console.log('✅ Connected to MongoDB (Subjective DB)');
+      return conn;
+    }).catch(err => {
+      cached.subjectivePromise = null;
+      console.error('❌ MongoDB Connection Error (Subjective):', err);
+      throw err;
+    });
+  }
+
+  try {
+    cached.subjectiveConn = await cached.subjectivePromise;
+  } catch (e) {
+    cached.subjectivePromise = null;
+    throw e;
+  }
+
+  return cached.subjectiveConn;
 }
 
 export default connectDB;

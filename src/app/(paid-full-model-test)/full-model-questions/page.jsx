@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef, Suspense } from 'react';
 import dynamic from 'next/dynamic';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { getPaidApiUrl } from '@/lib/config';
+import { getPaidApiUrl, getSubjectiveApiUrl } from '@/lib/config';
 import AiChatDrawer from '@/components/common/AiChatDrawer';
 
 const FONT_FAMILIES = [
@@ -449,7 +449,7 @@ function QuestionsComponentInternal() {
             const fallbackUrl = categoryParam
               ? `/api/questions?category=${encodeURIComponent(categoryParam)}`
               : '/api/questions';
-            const fallbackRes = await fetch(getPaidApiUrl(fallbackUrl));
+            const fallbackRes = await fetch(getSubjectiveApiUrl(fallbackUrl));
             const fallbackData = await fallbackRes.json();
             if (fallbackData.questions && fallbackData.questions.length > 0) {
               list = fallbackData.questions;
