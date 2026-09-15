@@ -33,6 +33,8 @@ _worker.bundle
 next.js project guide.txt
 project-guide.local.txt
 *.local.txt
+*.local.html
+*.local.*
 *guide*.txt
 *.guide
 Old-Project/
