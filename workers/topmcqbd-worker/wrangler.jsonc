@@ -11,13 +11,6 @@
     "html_handling": "auto-trailing-slash",
     "not_found_handling": "single-page-application"
   },
-  "d1_databases": [
-    {
-      "binding": "DB",
-      "database_name": "topmcqbd-db",
-      "database_id": "6717c9b8-4836-438d-a042-f2a8a65124c6"
-    }
-  ],
   "vars": {
     "APP_NAME": "TopMCQBD Backup Worker API",
     "MONGODB_DB_PAID": "TopMCQBD_DB",
