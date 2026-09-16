@@ -57,12 +57,12 @@ export default {
     const path = url.pathname;
 
     try {
-      // 1. Root / Health endpoint
-      if (path === '/' || path === '/api/health') {
+      // 1. Health endpoint
+      if (path === '/api/health') {
         return jsonResponse({
           status: 'ok',
-          service: 'TopMCQBD Cloudflare Backup Worker API',
-          runtime: 'Cloudflare Workers (Edge V8 Isolate)',
+          service: 'TopMCQBD Cloudflare Fullstack Worker & Backup API',
+          runtime: 'Cloudflare Workers (Edge V8 Isolate with Native Assets)',
           version: '2.0.0',
           timestamp: new Date().toISOString(),
         });
@@ -150,8 +150,17 @@ export default {
         });
       }
 
-      // Default 404
-      return jsonResponse({ error: 'Endpoint not found on Backup Worker' }, 404);
+      // 5. If it is an unmatched API route
+      if (path.startsWith('/api/')) {
+        return jsonResponse({ error: 'Endpoint not found on Backup Worker API' }, 404);
+      }
+
+      // 6. Serve Complete Website UI (HTML, CSS, JS, Images) from Native Static Assets
+      if (env.ASSETS) {
+        return env.ASSETS.fetch(request);
+      }
+
+      return jsonResponse({ error: 'Static Assets not configured' }, 404);
     } catch (err) {
       console.error('[Worker Error]:', err);
       return jsonResponse({

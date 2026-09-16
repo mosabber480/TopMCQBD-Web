@@ -5,6 +5,10 @@
   "compatibility_flags": [
     "nodejs_compat"
   ],
+  "assets": {
+    "directory": "../../out",
+    "binding": "ASSETS"
+  },
   "vars": {
     "APP_NAME": "TopMCQBD Backup Worker API",
     "MONGODB_DB_PAID": "TopMCQBD_DB",
