@@ -4,8 +4,6 @@
  * Perfect for UptimeRobot (1-URL keep-alive ping) & Direct Automated Wakeup
  */
 
-import { pingEdgeCluster, CLUSTERS } from '../_shared/mongodb.js';
-
 const ENDPOINTS = [
   {
     id: 'paid',
