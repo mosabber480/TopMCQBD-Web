@@ -1,21 +1,15 @@
-import mongoose from 'mongoose';
+/**
+ * Question Model (Native MongoDB Driver)
+ * Fast, lightweight, Edge-compatible question model for TopMCQBD
+ */
 
-const questionSchema = new mongoose.Schema({
-    q: { type: String, required: true },
-    options: { type: [String], required: true },
-    ans: { type: Number, required: true },
-    explanation: { type: String, default: '' },
-    category: { type: String, required: true, index: true }
-}, { timestamps: true });
+import { createNativeModel } from './_baseModel.js';
 
-export function getQuestionModel(connection) {
-  if (!connection) {
-    return mongoose.models.Question || mongoose.model('Question', questionSchema);
-  }
-  if (connection.models && connection.models.Question) {
-    return connection.models.Question;
-  }
-  return connection.model('Question', questionSchema, 'questions');
+const QuestionModel = createNativeModel('questions', 'paid');
+
+export function getQuestionModel(clusterKeyOrConn = 'paid') {
+  const cluster = typeof clusterKeyOrConn === 'string' ? clusterKeyOrConn : 'paid';
+  return createNativeModel('questions', cluster);
 }
 
-export default mongoose.models.Question || mongoose.model('Question', questionSchema);
+export default QuestionModel;

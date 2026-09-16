@@ -22,6 +22,7 @@ export const API_CONFIG = {
   LIVE_EXAM_API_URL: process.env.NEXT_PUBLIC_LIVE_EXAM_API_URL || 'https://live-exam-paid-api.onrender.com',
   WRITTEN_API_URL: process.env.NEXT_PUBLIC_WRITTEN_API_URL || 'https://written-paid-api.onrender.com',
   QUESTION_BANK_API_URL: process.env.NEXT_PUBLIC_QUESTION_BANK_API_URL || 'https://question-bank-paid-api.onrender.com',
+  BACKUP_WORKER_URL: process.env.NEXT_PUBLIC_BACKUP_WORKER_URL || '',
 };
 
 /**
@@ -210,3 +211,47 @@ export function mapLegacyUrl(url) {
   if (url.includes('admin/free-mcqs-dashboard.html')) return '/admin/free-mcqs-dashboard';
   return formatURL(url);
 }
+
+/**
+ * Get Cloudflare Backup Worker API URL
+ */
+export function getBackupWorkerUrl(endpoint = '') {
+  const baseUrl = process.env.NEXT_PUBLIC_BACKUP_WORKER_URL || '';
+  if (!baseUrl) return '';
+  if (!endpoint) return baseUrl;
+  if (endpoint.startsWith('http://') || endpoint.startsWith('https://')) return endpoint;
+  const cleanEndpoint = endpoint.startsWith('/') ? endpoint : '/' + endpoint;
+  return `${baseUrl.replace(/\/$/, '')}${cleanEndpoint}`;
+}
+
+/**
+ * Smart Fetch with Automatic Failover:
+ * 1. Tries the primary Render endpoint first.
+ * 2. If Render takes > timeoutMs (default 3.5s) or returns 500/502/503/504,
+ *    seamlessly falls back to the Cloudflare Worker API.
+ */
+export async function fetchWithFailover(renderUrl, workerEndpoint = '', options = {}) {
+  const timeoutMs = options.timeout || 3500;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const res = await fetch(renderUrl, { ...options, signal: controller.signal });
+    clearTimeout(timeoutId);
+    if (res.ok) return res;
+
+    if ([500, 502, 503, 504].includes(res.status)) {
+      throw new Error(`Render status ${res.status}`);
+    }
+    return res;
+  } catch (err) {
+    clearTimeout(timeoutId);
+    const workerUrl = getBackupWorkerUrl(workerEndpoint);
+    if (workerUrl) {
+      console.warn(`[Failover] Primary request failed (${err.message}). Falling back to Worker:`, workerUrl);
+      return fetch(workerUrl, options);
+    }
+    throw err;
+  }
+}
+

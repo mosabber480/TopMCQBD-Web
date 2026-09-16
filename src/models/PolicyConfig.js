@@ -1,14 +1,9 @@
-import mongoose from 'mongoose';
+/**
+ * PolicyConfig Model (Native MongoDB Driver)
+ */
 
-const policySchema = new mongoose.Schema({
-    content: { 
-        type: String, 
-        required: true 
-    },
-    updatedAt: { 
-        type: Date, 
-        default: Date.now 
-    }
-});
+import { createNativeModel } from './_baseModel.js';
 
-export default mongoose.models.PolicyConfig || mongoose.model('PolicyConfig', policySchema);
+const PolicyConfig = createNativeModel('policyconfigs', 'paid');
+
+export default PolicyConfig;

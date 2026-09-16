@@ -1,0 +1,17 @@
+{
+  "name": "topmcqbd-backup-api",
+  "main": "src/index.js",
+  "compatibility_date": "2026-09-08",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "vars": {
+    "APP_NAME": "TopMCQBD Backup Worker API",
+    "MONGODB_DB_PAID": "TopMCQBD_DB",
+    "MONGODB_DB_FREE": "TopMCQBD_DB_Free",
+    "MONGODB_DB_LIVE_EXAM": "TopMCQBD_DB_Live_Exam",
+    "MONGODB_DB_SUBJECTIVE": "TopMCQBD_DB_Subjective",
+    "MONGODB_DB_WRITTEN": "TopMCQBD_DB_written",
+    "MONGODB_DB_QUESTION_BANK": "TopMCQBD_DB_Question_Bank"
+  }
+}

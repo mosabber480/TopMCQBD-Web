@@ -36,6 +36,7 @@ project-guide.local.txt
 *.local.html
 *.local.*
 *guide*.txt
+cloudflare-pages-mongodb-work.txt
 *.guide
 Old-Project/
 Old-Mosabber-Quiz-App/

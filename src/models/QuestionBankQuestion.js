@@ -1,24 +1,15 @@
-import mongoose from 'mongoose';
+/**
+ * Question Bank Model (Native MongoDB Driver)
+ * Fast, lightweight, Edge-compatible question bank model for TopMCQBD_DB_Question_Bank
+ */
 
-export const questionBankQuestionSchema = new mongoose.Schema(
-  {
-    q: { type: String, required: true },
-    options: { type: [String], required: true },
-    ans: { type: Number, required: true },
-    explanation: { type: String, default: '' },
-    category: { type: String, required: true, index: true },
-    year: { type: String, default: '' },
-    examTitle: { type: String, default: '' },
-    subject: { type: String, default: '' }
-  },
-  { timestamps: true }
-);
+import { createNativeModel } from './_baseModel.js';
 
-export function getQuestionBankModel(connection) {
-  if (connection.models && connection.models.QuestionBankQuestion) {
-    return connection.models.QuestionBankQuestion;
-  }
-  return connection.model('QuestionBankQuestion', questionBankQuestionSchema, 'questions');
+const QuestionBankModel = createNativeModel('questions', 'question-bank');
+
+export function getQuestionBankModel(clusterKeyOrConn = 'question-bank') {
+  const cluster = typeof clusterKeyOrConn === 'string' ? clusterKeyOrConn : 'question-bank';
+  return createNativeModel('questions', cluster);
 }
 
 export default getQuestionBankModel;

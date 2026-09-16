@@ -1,0 +1,16 @@
+{
+  "name": "topmcqbd-backup-api",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev --port 8787",
+    "deploy": "wrangler deploy"
+  },
+  "dependencies": {
+    "mongodb": "^7.5.0"
+  },
+  "devDependencies": {
+    "wrangler": "^4.123.0"
+  }
+}
