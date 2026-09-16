@@ -182,8 +182,14 @@ function QuestionsComponentInternal() {
     type: '', // 'warning' | 'danger' | 'success'
     title: '',
     msg: '',
-    hasReset: false
+    hasReset: false,
+    isCompletion: false
   });
+
+  // Review Wrong Answers & Retake Wrong Answers modes
+  const [isReviewWrongMode, setIsReviewWrongMode] = useState(false);
+  const [isRetakeWrongMode, setIsRetakeWrongMode] = useState(false);
+  const [originalQuestionsList, setOriginalQuestionsList] = useState([]);
 
   // AI Assistant States
   const [isAiOpen, setIsAiOpen] = useState(false);
@@ -468,6 +474,10 @@ function QuestionsComponentInternal() {
       return;
     }
 
+    setIsRetakeWrongMode(false);
+    setOriginalQuestionsList([]);
+    setIsReviewWrongMode(false);
+
     if (limit === 'all') {
       setDisplayQuestions(allQuestions);
     } else {
@@ -628,7 +638,8 @@ function QuestionsComponentInternal() {
       type: 'danger',
       title: '⏰ সময় শেষ!',
       msg: `সঠিক: ${correctCount} টি | ভুল: ${incorrectCount} টি | বাকি: ${unanswered} টি\nসঠিক উত্তরের হার: ${pct}%\nমোট স্কোর: ${formatScore(score)}`,
-      hasReset: true
+      hasReset: true,
+      isCompletion: true
     });
   };
 
@@ -642,7 +653,8 @@ function QuestionsComponentInternal() {
       type: 'success',
       title: '🏆 অভিনন্দন! পরীক্ষা সম্পন্ন হয়েছে',
       msg: `সঠিক উত্তর: ${finalCorrect} টি | ভুল উত্তর: ${finalIncorrect} টি\nসঠিক উত্তরের হার: ${pct}%\nমোট প্রাপ্ত স্কোর: ${formatScore(finalScore)}`,
-      hasReset: true
+      hasReset: true,
+      isCompletion: true
     });
   };
 
@@ -651,7 +663,7 @@ function QuestionsComponentInternal() {
     setScore(0);
     setCorrectCount(0);
     setIncorrectCount(0);
-    setPopup({ visible: false, type: '', title: '', msg: '', hasReset: false });
+    setPopup({ visible: false, type: '', title: '', msg: '', hasReset: false, isCompletion: false });
 
     if (showTime && !isReadMode && displayQuestions.length > 0) {
       setTotalSecondsLeft(displayQuestions.length * 36);
@@ -665,6 +677,124 @@ function QuestionsComponentInternal() {
       setIsReadMode(false);
       setShowScore(true);
     }
+    if ((isRetakeWrongMode || isReviewWrongMode) && originalQuestionsList.length > 0) {
+      setDisplayQuestions(originalQuestionsList);
+      setIsRetakeWrongMode(false);
+      setIsReviewWrongMode(false);
+    }
+    resetQuizState();
+  };
+
+  // View Wrong Answers & Explanations Handler ("ভুল উত্তর দেখুন")
+  const handleViewWrongAnswers = () => {
+    const sourceQuestions = (originalQuestionsList && originalQuestionsList.length > 0) ? originalQuestionsList : displayQuestions;
+    const wrongQuestions = sourceQuestions
+      .map((q, idx) => ({
+        ...q,
+        _originalIdx: idx,
+        _chosenAnswer: answeredQuestions[idx]
+      }))
+      .filter((q) => q._chosenAnswer !== undefined && q._chosenAnswer !== q.ans);
+
+    if (wrongQuestions.length === 0) {
+      setPopup({
+        visible: true,
+        type: 'success',
+        title: '🎉 কোনো ভুল উত্তর নেই!',
+        msg: 'আপনার কোনো ভুল উত্তর নেই। আপনি দারুণ পরীক্ষা দিয়েছেন!',
+        hasReset: false,
+        isCompletion: false
+      });
+      return;
+    }
+
+    if (!isRetakeWrongMode && !isReviewWrongMode) {
+      setOriginalQuestionsList([...sourceQuestions]);
+    }
+
+    setDisplayQuestions(wrongQuestions);
+    setIsReviewWrongMode(true);
+    setIsRetakeWrongMode(false);
+    setShowAnswer(true);
+    setShowExplanation(true);
+    setShowColor(true);
+
+    setTimeout(() => {
+      const target = document.querySelector('.quiz-questions-col-wrapper') || document.querySelector('.quiz-questions-wrapper') || document.querySelector('.quiz-container');
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }, 100);
+  };
+
+  // Exit Review Wrong Answers Mode and restore original list
+  const handleExitReviewMode = () => {
+    if (originalQuestionsList.length > 0) {
+      setDisplayQuestions(originalQuestionsList);
+    }
+    setIsReviewWrongMode(false);
+    resetQuizState();
+  };
+
+  // Retake exam ONLY on wrong answers Handler ("ভুল উত্তরের ওপর পরীক্ষা দিন")
+  const handleRetakeWrongAnswers = () => {
+    const sourceQuestions = (originalQuestionsList && originalQuestionsList.length > 0) ? originalQuestionsList : displayQuestions;
+    const wrongQuestions = sourceQuestions.filter((q, qIndex) => {
+      const chosen = q._chosenAnswer !== undefined ? q._chosenAnswer : answeredQuestions[qIndex];
+      return chosen !== undefined && chosen !== q.ans;
+    });
+
+    if (wrongQuestions.length === 0) {
+      setPopup({
+        visible: true,
+        type: 'success',
+        title: '🎉 কোনো ভুল উত্তর নেই!',
+        msg: 'আপনার কোনো ভুল উত্তর নেই। আপনি দারুণ পরীক্ষা দিয়েছেন!',
+        hasReset: false,
+        isCompletion: false
+      });
+      return;
+    }
+
+    if (!isRetakeWrongMode && !isReviewWrongMode) {
+      setOriginalQuestionsList([...sourceQuestions]);
+    }
+
+    setDisplayQuestions(wrongQuestions);
+    setIsRetakeWrongMode(true);
+    setIsReviewWrongMode(false);
+
+    setAnsweredQuestions({});
+    setScore(0);
+    setCorrectCount(0);
+    setIncorrectCount(0);
+    setPopup({ visible: false, type: '', title: '', msg: '', hasReset: false, isCompletion: false });
+
+    if (showTime && !isReadMode) {
+      setTotalSecondsLeft(wrongQuestions.length * 36);
+      setTimerRunning(true);
+      setWarningTriggered(false);
+    }
+
+    setTimeout(() => {
+      const target = document.querySelector('.quiz-questions-col-wrapper') || document.querySelector('.quiz-questions-wrapper') || document.querySelector('.quiz-container');
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }, 100);
+  };
+
+  // Exit wrong questions retake mode and restore original list
+  const handleExitRetakeMode = () => {
+    if (originalQuestionsList.length > 0) {
+      setDisplayQuestions(originalQuestionsList);
+    }
+    setIsRetakeWrongMode(false);
+    setIsReviewWrongMode(false);
     resetQuizState();
   };
 
@@ -772,6 +902,96 @@ function QuestionsComponentInternal() {
     });
   };
 
+  const renderQuestionBlock = (q, qIndex, containerLayoutClass) => {
+    const chosen = q._chosenAnswer !== undefined ? q._chosenAnswer : answeredQuestions[qIndex];
+    const isAnswered = chosen !== undefined;
+    const shouldShow = isReadMode || isAnswered || isReviewWrongMode;
+    const isAnswerVisible = shouldShow && showAnswer;
+    const isExplanationVisible = shouldShow && showExplanation;
+
+    return (
+      <div key={q._id || qIndex} className="quiz-question-block">
+        <div className="quiz-question-text">
+          {qIndex + 1}. {q.q}{' '}
+          {showAskAi && (
+            <button
+              type="button"
+              className="quiz-ask-ai-btn"
+              onClick={() => handleAskAI(q, qIndex)}
+              title="Ask AI"
+            >
+              Ask AI
+            </button>
+          )}
+        </div>
+
+        <div className={`quiz-options-container ${containerLayoutClass || `layout-${optionLayout}`}`}>
+          {(q.options || []).map((opt, optIndex) => {
+            let btnClass = 'quiz-option-btn';
+
+            if (isReadMode) {
+              btnClass += ' disabled';
+              if (optIndex === q.ans) {
+                btnClass += showColor ? ' correct' : ' neutral-selected';
+              }
+            } else if (isReviewWrongMode) {
+              btnClass += ' disabled';
+              if (optIndex === q.ans) {
+                btnClass += showColor ? ' correct' : ' neutral-selected';
+              } else if (chosen === optIndex) {
+                btnClass += showColor ? ' incorrect' : ' neutral-selected';
+              }
+            } else if (isAnswered) {
+              btnClass += ' disabled';
+              if (showColor) {
+                if (optIndex === q.ans) {
+                  btnClass += ' correct';
+                } else if (chosen === optIndex) {
+                  btnClass += ' incorrect';
+                }
+              } else {
+                if (chosen === optIndex) {
+                  btnClass += ' neutral-selected';
+                }
+              }
+            }
+
+            return (
+              <button
+                key={optIndex}
+                className={btnClass}
+                disabled={isReadMode || isAnswered || isReviewWrongMode}
+                onClick={() => handleAnswerClick(qIndex, optIndex)}
+              >
+                <div className="quiz-option-circle font-bn">
+                  {getBanglaLetter(optIndex)}
+                </div>
+                <div className="quiz-option-text">
+                  {opt}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Correct Answer reveal: Shows after clicking/readMode/fullAnswerView AND when showAnswer switch is ON */}
+        {isAnswerVisible && (
+          <div className="quiz-answer-text" style={{ display: 'block' }}>
+            <i className="fa-solid fa-circle-check" style={{ marginRight: '6px' }}></i>
+            সঠিক উত্তর: {getBanglaLetter(q.ans)}. {q.options[q.ans]}
+          </div>
+        )}
+
+        {/* Explanation reveal */}
+        {isExplanationVisible && q.explanation && (
+          <div className="quiz-explanation-text" style={{ display: 'block' }}>
+            <strong>ব্যাখ্যা:</strong> {q.explanation}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   if (!isMounted) {
     return (
       <div className="quiz-section-wrapper font-bn" style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -819,9 +1039,40 @@ function QuestionsComponentInternal() {
       {/* Corner Toast Popup */}
       {popup.visible && (
         <div className={`quiz-corner-popup ${popup.type}`}>
+          {/* Top-right close '✖' icon */}
+          <button
+            type="button"
+            className="quiz-popup-close-icon"
+            onClick={() => setPopup({ ...popup, visible: false })}
+            aria-label="Close"
+          >
+            <i className="fa-solid fa-xmark"></i>
+          </button>
+
           <h4>{popup.title}</h4>
           <p>{popup.msg}</p>
-          <div className="quiz-popup-actions" style={{ flexWrap: 'wrap', gap: '8px' }}>
+
+          {/* Action buttons on top of "পুনরায় শুরু করুন" */}
+          {(popup.isCompletion || (popup.hasReset && !popup.isLoginRequired && !popup.isPlanRequired)) && (
+            <div className="quiz-popup-extra-actions">
+              <button
+                type="button"
+                className="quiz-popup-btn btn-popup-view-wrong"
+                onClick={handleViewWrongAnswers}
+              >
+                <i className="fa-solid fa-eye"></i> ভুল উত্তর দেখুন
+              </button>
+              <button
+                type="button"
+                className="quiz-popup-btn btn-popup-retake-wrong"
+                onClick={handleRetakeWrongAnswers}
+              >
+                <i className="fa-solid fa-pen-to-square"></i> ভুল উত্তরের ওপর পরীক্ষা দিন
+              </button>
+            </div>
+          )}
+
+          <div className="quiz-popup-actions" style={{ flexWrap: 'wrap', gap: '8px', justifyContent: 'flex-start' }}>
             {popup.isLoginRequired && (
               <Link
                 href={`/login?redirect=${encodeURIComponent(typeof window !== 'undefined' ? window.location.pathname + window.location.search : '/questions')}`}
@@ -860,12 +1111,14 @@ function QuestionsComponentInternal() {
             )}
             {popup.hasReset && (
               <button className="quiz-popup-btn btn-popup-reset" onClick={resetQuiz}>
-                <i className="fa-solid fa-rotate-right"></i> পুনরায় শুরু করুন
+                <i className="fa-solid fa-rotate-right"></i> পুনরায় সম্পূর্ণ পরীক্ষা দিন
               </button>
             )}
-            <button className="quiz-popup-btn btn-popup-close" onClick={() => setPopup({ ...popup, visible: false })}>
-              {popup.isLoginRequired || popup.isPlanRequired ? 'বাতিল' : 'ঠিক আছে'}
-            </button>
+            {!popup.isCompletion && (
+              <button className="quiz-popup-btn btn-popup-close" onClick={() => setPopup({ ...popup, visible: false })}>
+                {popup.isLoginRequired || popup.isPlanRequired ? 'বাতিল' : 'ঠিক আছে'}
+              </button>
+            )}
           </div>
         </div>
       )}
@@ -1288,10 +1541,6 @@ function QuestionsComponentInternal() {
         {/* Controls Bar */}
         <div className="quiz-controls-bar">
           <div className="quiz-nav-actions">
-            <button className="quiz-btn-reset" onClick={resetQuiz}>
-              <i className="fa-solid fa-rotate-right"></i> পুনরায় শুরু করুন
-            </button>
-
             {/* Read Mode Switch */}
             <label className="quiz-switch-label" style={{ background: '#e2e8f0', padding: '4px 12px', borderRadius: '20px', fontWeight: 'bold' }}>
               <label className="quiz-switch">
@@ -1539,6 +1788,57 @@ function QuestionsComponentInternal() {
           </div>
         </div>
 
+        {/* Completion Summary Banner right below controls bar when all answers are submitted */}
+        {displayQuestions.length > 0 && Object.keys(answeredQuestions).length === displayQuestions.length && !isReviewWrongMode && !isRetakeWrongMode && (
+          <div className="quiz-completion-banner">
+            <div className="quiz-completion-banner-info">
+              <div className="quiz-completion-banner-icon">
+                <i className="fa-solid fa-circle-check"></i>
+              </div>
+              <div className="quiz-completion-banner-text">
+                <span className="quiz-banner-score-text">
+                  আপনার মোট প্রাপ্ত স্কোর: <strong>{formatScore(score)}</strong>
+                </span>
+                <span className="quiz-banner-divider">|</span>
+                <span className="quiz-banner-wrong-text">
+                  ভুল উত্তর: <strong className={incorrectCount > 0 ? 'text-danger' : 'text-success'}>{toBengaliNumber(incorrectCount)} টি</strong>
+                </span>
+                {incorrectCount === 0 && (
+                  <span className="quiz-banner-perfect-text">🎉 কোনো ভুল নেই, সব উত্তর সঠিক!</span>
+                )}
+              </div>
+            </div>
+
+            <div className="quiz-completion-banner-actions">
+              {incorrectCount > 0 && (
+                <>
+                  <button
+                    type="button"
+                    className="quiz-banner-btn btn-banner-view-wrong"
+                    onClick={handleViewWrongAnswers}
+                  >
+                    <i className="fa-solid fa-eye"></i> ভুল উত্তর দেখুন
+                  </button>
+                  <button
+                    type="button"
+                    className="quiz-banner-btn btn-banner-retake-wrong"
+                    onClick={handleRetakeWrongAnswers}
+                  >
+                    <i className="fa-solid fa-pen-to-square"></i> ভুল উত্তরের ওপর পরীক্ষা দিন
+                  </button>
+                </>
+              )}
+              <button
+                type="button"
+                className="quiz-banner-btn btn-banner-reset-full"
+                onClick={resetQuiz}
+              >
+                <i className="fa-solid fa-rotate-right"></i> পুনরায় সম্পূর্ণ পরীক্ষা দিন
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Questions Display */}
         {!planStatus.isPaid ? (
           <div className="quiz-paywall-card">
@@ -1597,447 +1897,91 @@ function QuestionsComponentInternal() {
           <p style={{ textAlign: 'center', color: '#888', padding: '40px 0' }}>
             কোনো প্রশ্ন পাওয়া যায়নি।
           </p>
-        ) : optionLayout === '2q-col' ? (
-          <div className="quiz-questions-col-wrapper">
-            <div className="quiz-questions-column">
-              {displayQuestions
-                .slice(0, Math.ceil(displayQuestions.length / 2))
-                .map((q, idx) => {
-                  const chosen = answeredQuestions[idx];
-                  const isAnswered = chosen !== undefined;
-                  const shouldShow = isReadMode || isAnswered;
-                  const isAnswerVisible = shouldShow && showAnswer;
-                  const isExplanationVisible = shouldShow && showExplanation;
-
-                  return (
-                    <div key={q._id || idx} className="quiz-question-block">
-                      <div className="quiz-question-text">
-                        {idx + 1}. {q.q}{' '}
-                        {showAskAi && (
-                          <button
-                            type="button"
-                            className="quiz-ask-ai-btn"
-                            onClick={() => handleAskAI(q, idx)}
-                            title="Ask AI"
-                          >
-                            Ask AI
-                          </button>
-                        )}
-                      </div>
-
-                      <div className="quiz-options-container layout-1">
-                        {(q.options || []).map((opt, optIndex) => {
-                          let btnClass = 'quiz-option-btn';
-
-                          if (isReadMode) {
-                            btnClass += ' disabled';
-                            if (optIndex === q.ans) {
-                              btnClass += showColor ? ' correct' : ' neutral-selected';
-                            }
-                          } else if (isAnswered) {
-                            btnClass += ' disabled';
-                            if (showColor) {
-                              if (optIndex === q.ans) {
-                                btnClass += ' correct';
-                              } else if (chosen === optIndex) {
-                                btnClass += ' incorrect';
-                              }
-                            } else {
-                              if (chosen === optIndex) {
-                                btnClass += ' neutral-selected';
-                              }
-                            }
-                          }
-
-                          return (
-                            <button
-                              key={optIndex}
-                              className={btnClass}
-                              disabled={isReadMode || isAnswered}
-                              onClick={() => handleAnswerClick(idx, optIndex)}
-                            >
-                              <div className="quiz-option-circle font-bn">
-                                {getBanglaLetter(optIndex)}
-                              </div>
-                              <div className="quiz-option-text">
-                                {opt}
-                              </div>
-                            </button>
-                          );
-                        })}
-                      </div>
-
-                      {isAnswerVisible && (
-                        <div className="quiz-answer-text" style={{ display: 'block' }}>
-                          <i className="fa-solid fa-circle-check" style={{ marginRight: '6px' }}></i>
-                          সঠিক উত্তর: {getBanglaLetter(q.ans)}. {q.options[q.ans]}
-                        </div>
-                      )}
-
-                      {isExplanationVisible && q.explanation && (
-                        <div className="quiz-explanation-text" style={{ display: 'block' }}>
-                          <strong>ব্যাখ্যা:</strong> {q.explanation}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-            </div>
-
-            <div className="quiz-questions-column">
-              {displayQuestions
-                .slice(Math.ceil(displayQuestions.length / 2))
-                .map((q, idx) => {
-                  const actualIdx = idx + Math.ceil(displayQuestions.length / 2);
-                  const chosen = answeredQuestions[actualIdx];
-                  const isAnswered = chosen !== undefined;
-                  const shouldShow = isReadMode || isAnswered;
-                  const isAnswerVisible = shouldShow && showAnswer;
-                  const isExplanationVisible = shouldShow && showExplanation;
-
-                  return (
-                    <div key={q._id || actualIdx} className="quiz-question-block">
-                      <div className="quiz-question-text">
-                        {actualIdx + 1}. {q.q}{' '}
-                        {showAskAi && (
-                          <button
-                            type="button"
-                            className="quiz-ask-ai-btn"
-                            onClick={() => handleAskAI(q, actualIdx)}
-                            title="Ask AI"
-                          >
-                            Ask AI
-                          </button>
-                        )}
-                      </div>
-
-                      <div className="quiz-options-container layout-1">
-                        {(q.options || []).map((opt, optIndex) => {
-                          let btnClass = 'quiz-option-btn';
-
-                          if (isReadMode) {
-                            btnClass += ' disabled';
-                            if (optIndex === q.ans) {
-                              btnClass += showColor ? ' correct' : ' neutral-selected';
-                            }
-                          } else if (isAnswered) {
-                            btnClass += ' disabled';
-                            if (showColor) {
-                              if (optIndex === q.ans) {
-                                btnClass += ' correct';
-                              } else if (chosen === optIndex) {
-                                btnClass += ' incorrect';
-                              }
-                            } else {
-                              if (chosen === optIndex) {
-                                btnClass += ' neutral-selected';
-                              }
-                            }
-                          }
-
-                          return (
-                            <button
-                              key={optIndex}
-                              className={btnClass}
-                              disabled={isReadMode || isAnswered}
-                              onClick={() => handleAnswerClick(actualIdx, optIndex)}
-                            >
-                              <div className="quiz-option-circle font-bn">
-                                {getBanglaLetter(optIndex)}
-                              </div>
-                              <div className="quiz-option-text">
-                                {opt}
-                              </div>
-                            </button>
-                          );
-                        })}
-                      </div>
-
-                      {isAnswerVisible && (
-                        <div className="quiz-answer-text" style={{ display: 'block' }}>
-                          <i className="fa-solid fa-circle-check" style={{ marginRight: '6px' }}></i>
-                          সঠিক উত্তর: {getBanglaLetter(q.ans)}. {q.options[q.ans]}
-                        </div>
-                      )}
-
-                      {isExplanationVisible && q.explanation && (
-                        <div className="quiz-explanation-text" style={{ display: 'block' }}>
-                          <strong>ব্যাখ্যা:</strong> {q.explanation}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-            </div>
-          </div>
-        ) : optionLayout === '2q-row' ? (
-          <div className="quiz-questions-col-wrapper">
-            <div className="quiz-questions-column">
-              {displayQuestions
-                .filter((_, idx) => idx % 2 === 0)
-                .map((q, i) => {
-                  const actualIdx = i * 2;
-                  const chosen = answeredQuestions[actualIdx];
-                  const isAnswered = chosen !== undefined;
-                  const shouldShow = isReadMode || isAnswered;
-                  const isAnswerVisible = shouldShow && showAnswer;
-                  const isExplanationVisible = shouldShow && showExplanation;
-
-                  return (
-                    <div key={q._id || actualIdx} className="quiz-question-block">
-                      <div className="quiz-question-text">
-                        {actualIdx + 1}. {q.q}{' '}
-                        {showAskAi && (
-                          <button
-                            type="button"
-                            className="quiz-ask-ai-btn"
-                            onClick={() => handleAskAI(q, actualIdx)}
-                            title="Ask AI"
-                          >
-                            Ask AI
-                          </button>
-                        )}
-                      </div>
-
-                      <div className="quiz-options-container layout-1">
-                        {(q.options || []).map((opt, optIndex) => {
-                          let btnClass = 'quiz-option-btn';
-
-                          if (isReadMode) {
-                            btnClass += ' disabled';
-                            if (optIndex === q.ans) {
-                              btnClass += showColor ? ' correct' : ' neutral-selected';
-                            }
-                          } else if (isAnswered) {
-                            btnClass += ' disabled';
-                            if (showColor) {
-                              if (optIndex === q.ans) {
-                                btnClass += ' correct';
-                              } else if (chosen === optIndex) {
-                                btnClass += ' incorrect';
-                              }
-                            } else {
-                              if (chosen === optIndex) {
-                                btnClass += ' neutral-selected';
-                              }
-                            }
-                          }
-
-                          return (
-                            <button
-                              key={optIndex}
-                              className={btnClass}
-                              disabled={isReadMode || isAnswered}
-                              onClick={() => handleAnswerClick(actualIdx, optIndex)}
-                            >
-                              <div className="quiz-option-circle font-bn">
-                                {getBanglaLetter(optIndex)}
-                              </div>
-                              <div className="quiz-option-text">
-                                {opt}
-                              </div>
-                            </button>
-                          );
-                        })}
-                      </div>
-
-                      {isAnswerVisible && (
-                        <div className="quiz-answer-text" style={{ display: 'block' }}>
-                          <i className="fa-solid fa-circle-check" style={{ marginRight: '6px' }}></i>
-                          সঠিক উত্তর: {getBanglaLetter(q.ans)}. {q.options[q.ans]}
-                        </div>
-                      )}
-
-                      {isExplanationVisible && q.explanation && (
-                        <div className="quiz-explanation-text" style={{ display: 'block' }}>
-                          <strong>ব্যাখ্যা:</strong> {q.explanation}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-            </div>
-
-            <div className="quiz-questions-column">
-              {displayQuestions
-                .filter((_, idx) => idx % 2 === 1)
-                .map((q, i) => {
-                  const actualIdx = i * 2 + 1;
-                  const chosen = answeredQuestions[actualIdx];
-                  const isAnswered = chosen !== undefined;
-                  const shouldShow = isReadMode || isAnswered;
-                  const isAnswerVisible = shouldShow && showAnswer;
-                  const isExplanationVisible = shouldShow && showExplanation;
-
-                  return (
-                    <div key={q._id || actualIdx} className="quiz-question-block">
-                      <div className="quiz-question-text">
-                        {actualIdx + 1}. {q.q}{' '}
-                        {showAskAi && (
-                          <button
-                            type="button"
-                            className="quiz-ask-ai-btn"
-                            onClick={() => handleAskAI(q, actualIdx)}
-                            title="Ask AI"
-                          >
-                            Ask AI
-                          </button>
-                        )}
-                      </div>
-
-                      <div className="quiz-options-container layout-1">
-                        {(q.options || []).map((opt, optIndex) => {
-                          let btnClass = 'quiz-option-btn';
-
-                          if (isReadMode) {
-                            btnClass += ' disabled';
-                            if (optIndex === q.ans) {
-                              btnClass += showColor ? ' correct' : ' neutral-selected';
-                            }
-                          } else if (isAnswered) {
-                            btnClass += ' disabled';
-                            if (showColor) {
-                              if (optIndex === q.ans) {
-                                btnClass += ' correct';
-                              } else if (chosen === optIndex) {
-                                btnClass += ' incorrect';
-                              }
-                            } else {
-                              if (chosen === optIndex) {
-                                btnClass += ' neutral-selected';
-                              }
-                            }
-                          }
-
-                          return (
-                            <button
-                              key={optIndex}
-                              className={btnClass}
-                              disabled={isReadMode || isAnswered}
-                              onClick={() => handleAnswerClick(actualIdx, optIndex)}
-                            >
-                              <div className="quiz-option-circle font-bn">
-                                {getBanglaLetter(optIndex)}
-                              </div>
-                              <div className="quiz-option-text">
-                                {opt}
-                              </div>
-                            </button>
-                          );
-                        })}
-                      </div>
-
-                      {isAnswerVisible && (
-                        <div className="quiz-answer-text" style={{ display: 'block' }}>
-                          <i className="fa-solid fa-circle-check" style={{ marginRight: '6px' }}></i>
-                          সঠিক উত্তর: {getBanglaLetter(q.ans)}. {q.options[q.ans]}
-                        </div>
-                      )}
-
-                      {isExplanationVisible && q.explanation && (
-                        <div className="quiz-explanation-text" style={{ display: 'block' }}>
-                          <strong>ব্যাখ্যা:</strong> {q.explanation}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-            </div>
-          </div>
         ) : (
-          <div className="quiz-questions-wrapper">
-            {displayQuestions.map((q, qIndex) => {
-              const chosen = answeredQuestions[qIndex];
-              const isAnswered = chosen !== undefined;
-
-              // Exact quiz.html updateVisibility logic:
-              // const shouldShow = isReadMode || answeredQuestions[qIndex] !== undefined;
-              const shouldShow = isReadMode || isAnswered;
-
-              // Only show 'সঠিক উত্তর' if shouldShow is TRUE and 'showAnswer' switch is ON!
-              const isAnswerVisible = shouldShow && showAnswer;
-
-              // Only show 'ব্যাখ্যা' if shouldShow is TRUE and 'showExplanation' switch is ON!
-              const isExplanationVisible = shouldShow && showExplanation;
-
-              return (
-                <div key={q._id || qIndex} className="quiz-question-block">
-                  <div className="quiz-question-text">
-                    {qIndex + 1}. {q.q}{' '}
-                    {showAskAi && (
-                      <button
-                        type="button"
-                        className="quiz-ask-ai-btn"
-                        onClick={() => handleAskAI(q, qIndex)}
-                        title="Ask AI"
-                      >
-                        Ask AI
-                      </button>
-                    )}
-                  </div>
-
-                  <div className={`quiz-options-container layout-${optionLayout}`}>
-                    {(q.options || []).map((opt, optIndex) => {
-                      let btnClass = 'quiz-option-btn';
-
-                      if (isReadMode) {
-                        // Read Mode: Options are non-clickable, correct answer is green (if showColor)
-                        btnClass += ' disabled';
-                        if (optIndex === q.ans) {
-                          btnClass += showColor ? ' correct' : ' neutral-selected';
-                        }
-                      } else if (isAnswered) {
-                        // Locked after 1 click!
-                        btnClass += ' disabled';
-                        if (showColor) {
-                          if (optIndex === q.ans) {
-                            btnClass += ' correct';
-                          } else if (chosen === optIndex) {
-                            btnClass += ' incorrect';
-                          }
-                        } else {
-                          if (chosen === optIndex) {
-                            btnClass += ' neutral-selected';
-                          }
-                        }
-                      }
-
-                      return (
-                        <button
-                          key={optIndex}
-                          className={btnClass}
-                          disabled={isReadMode || isAnswered}
-                          onClick={() => handleAnswerClick(qIndex, optIndex)}
-                        >
-                          <div className="quiz-option-circle font-bn">
-                            {getBanglaLetter(optIndex)}
-                          </div>
-                          <div className="quiz-option-text">
-                            {opt}
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  {/* Correct Answer reveal: Only shows after clicking/readMode AND when showAnswer switch is ON */}
-                  {isAnswerVisible && (
-                    <div className="quiz-answer-text" style={{ display: 'block' }}>
-                      <i className="fa-solid fa-circle-check" style={{ marginRight: '6px' }}></i>
-                      সঠিক উত্তর: {getBanglaLetter(q.ans)}. {q.options[q.ans]}
-                    </div>
-                  )}
-
-                  {/* Explanation reveal: Only shows after clicking/readMode AND when showExplanation switch is ON */}
-                  {isExplanationVisible && q.explanation && (
-                    <div className="quiz-explanation-text" style={{ display: 'block' }}>
-                      <strong>ব্যাখ্যা:</strong> {q.explanation}
-                    </div>
-                  )}
+          <>
+            {/* Retake Wrong Questions Banner */}
+            {isRetakeWrongMode && (
+              <div className="quiz-retake-mode-banner">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <i className="fa-solid fa-triangle-exclamation" style={{ color: '#e11d48', fontSize: '18px' }}></i>
+                  <span>
+                    ভুল উত্তর দেওয়া <strong>{toBengaliNumber(displayQuestions.length)}</strong>টি প্রশ্নের ওপর পুনরায় পরীক্ষা দিচ্ছেন।
+                  </span>
                 </div>
-              );
-            })}
-          </div>
+                <button
+                  type="button"
+                  onClick={handleExitRetakeMode}
+                  className="btn-exit-retake"
+                >
+                  <i className="fa-solid fa-arrow-left"></i> মূল পরীক্ষায় ফিরে যান
+                </button>
+              </div>
+            )}
+
+            {/* View Wrong Answers Banner */}
+            {isReviewWrongMode && (
+              <div className="quiz-review-mode-banner">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <i className="fa-solid fa-circle-exclamation" style={{ color: '#d97706', fontSize: '18px' }}></i>
+                  <span>
+                    ভুল উত্তর দেওয়া <strong>{toBengaliNumber(displayQuestions.length)}</strong>টি প্রশ্নের সঠিক উত্তর ও ব্যাখ্যা নিচে প্রদর্শিত হচ্ছে।
+                  </span>
+                </div>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  <button
+                    type="button"
+                    onClick={handleExitReviewMode}
+                    className="btn-banner-reset"
+                    style={{ background: '#d97706' }}
+                  >
+                    <i className="fa-solid fa-arrow-left"></i> মূল পরীক্ষায় ফিরুন
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleRetakeWrongAnswers}
+                    className="btn-banner-retake"
+                  >
+                    <i className="fa-solid fa-pen-to-square"></i> ভুল উত্তরের ওপর পরীক্ষা দিন
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {optionLayout === '2q-col' ? (
+              <div className="quiz-questions-col-wrapper">
+                <div className="quiz-questions-column">
+                  {displayQuestions
+                    .slice(0, Math.ceil(displayQuestions.length / 2))
+                    .map((q, idx) => renderQuestionBlock(q, idx, 'layout-1'))}
+                </div>
+                <div className="quiz-questions-column">
+                  {displayQuestions
+                    .slice(Math.ceil(displayQuestions.length / 2))
+                    .map((q, idx) => {
+                      const actualIdx = idx + Math.ceil(displayQuestions.length / 2);
+                      return renderQuestionBlock(q, actualIdx, 'layout-1');
+                    })}
+                </div>
+              </div>
+            ) : optionLayout === '2q-row' ? (
+              <div className="quiz-questions-col-wrapper">
+                <div className="quiz-questions-column">
+                  {displayQuestions
+                    .filter((_, idx) => idx % 2 === 0)
+                    .map((q, i) => renderQuestionBlock(q, i * 2, 'layout-1'))}
+                </div>
+                <div className="quiz-questions-column">
+                  {displayQuestions
+                    .filter((_, idx) => idx % 2 === 1)
+                    .map((q, i) => renderQuestionBlock(q, i * 2 + 1, 'layout-1'))}
+                </div>
+              </div>
+            ) : (
+              <div className="quiz-questions-wrapper">
+                {displayQuestions.map((q, qIndex) => renderQuestionBlock(q, qIndex))}
+              </div>
+            )}
+          </>
         )}
 
         {/* Result Section */}
@@ -2082,6 +2026,31 @@ function QuestionsComponentInternal() {
 
             <div id="final-score">
               আপনার মোট প্রাপ্ত স্কোর: {score.toFixed(1)}
+            </div>
+
+            {/* User-requested Result Action Buttons */}
+            <div className="quiz-result-actions">
+              <button
+                type="button"
+                className="quiz-result-btn btn-view-wrong"
+                onClick={handleViewWrongAnswers}
+              >
+                <i className="fa-solid fa-eye"></i> ভুল উত্তর দেখুন
+              </button>
+              <button
+                type="button"
+                className="quiz-result-btn btn-retake-wrong"
+                onClick={handleRetakeWrongAnswers}
+              >
+                <i className="fa-solid fa-pen-to-square"></i> ভুল উত্তরের ওপর পরীক্ষা দিন
+              </button>
+              <button
+                type="button"
+                className="quiz-result-btn btn-retake-all"
+                onClick={resetQuiz}
+              >
+                <i className="fa-solid fa-rotate-right"></i> পুনরায় সম্পূর্ণ পরীক্ষা দিন
+              </button>
             </div>
           </div>
         )}
