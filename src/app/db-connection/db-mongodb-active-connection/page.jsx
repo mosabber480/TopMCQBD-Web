@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
+import DbAuthGuard from '@/components/common/DbAuthGuard';
+import DbNavBox from '@/components/common/DbNavBox';
 
 const DB_SERVICES = [
   {
@@ -84,6 +86,14 @@ const DB_SERVICES = [
 ];
 
 export default function DbMongodbActiveConnectionPage() {
+  return (
+    <DbAuthGuard activeRoute="/db-connection/db-mongodb-active-connection">
+      <DbMongodbActiveConnectionContent />
+    </DbAuthGuard>
+  );
+}
+
+function DbMongodbActiveConnectionContent() {
   const [loading, setLoading] = useState(false);
   const [dbStatuses, setDbStatuses] = useState({});
   const [lastWakeTime, setLastWakeTime] = useState(null);
@@ -182,13 +192,14 @@ export default function DbMongodbActiveConnectionPage() {
                 borderRadius: '8px',
                 backgroundColor: '#ffffff',
                 border: '1px solid #e2e8f0',
-                color: '#334155',
+                color: '#0284c7',
                 fontSize: '13px',
-                fontWeight: '600',
-                textDecoration: 'none'
+                fontWeight: '700',
+                textDecoration: 'none',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.06)'
               }}
             >
-              <i className="fa-solid fa-lock" style={{ fontSize: '11px' }}></i> পাসওয়ার্ড প্রটেক্টেড DB Suite
+              <i className="fa-solid fa-server" style={{ fontSize: '12px' }}></i> ALL DB Hub
             </Link>
           </div>
         </div>
@@ -222,7 +233,7 @@ export default function DbMongodbActiveConnectionPage() {
                 marginBottom: '14px'
               }}
             >
-              <i className="fa-solid fa-bolt" style={{ color: '#34d399' }}></i> নো-পাসওয়ার্ড ইনস্ট্যান্ট ওয়েকআপ হাব
+              <i className="fa-solid fa-bolt" style={{ color: '#34d399' }}></i> MongoDB ইনস্ট্যান্ট ওয়েক-আপ ও লাইভ কানেকশন হাব
             </div>
 
             <h1 style={{ fontSize: '32px', fontWeight: '800', marginBottom: '8px', letterSpacing: '-0.5px', fontFamily: "'Outfit', sans-serif" }}>
@@ -573,6 +584,56 @@ export default function DbMongodbActiveConnectionPage() {
               </div>
             );
           })}
+        </div>
+
+        {/* Database Navigation Box */}
+        <DbNavBox activeRoute="/db-connection/db-mongodb-active-connection" />
+
+        {/* Bottom Navigation Links Bar */}
+        <div
+          className="bottom-nav-bar"
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            width: '100%',
+            marginTop: '24px',
+            padding: '8px 4px 0 4px',
+            flexWrap: 'wrap',
+            gap: '12px',
+            boxSizing: 'border-box',
+          }}
+        >
+          <Link
+            href="/"
+            style={{
+              color: '#0284c7',
+              textDecoration: 'none',
+              fontWeight: '700',
+              fontSize: '14px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+            }}
+          >
+            <i className="fa-solid fa-arrow-left" />
+            ওয়েবসাইট ভিজিট
+          </Link>
+          <Link
+            href="/admin/dashboard"
+            style={{
+              color: '#0284c7',
+              textDecoration: 'none',
+              fontWeight: '700',
+              fontSize: '14px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+            }}
+          >
+            অ্যাডমিন প্যানেল
+            <i className="fa-solid fa-arrow-right" />
+          </Link>
         </div>
 
       </div>

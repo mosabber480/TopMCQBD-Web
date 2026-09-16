@@ -119,6 +119,12 @@ export default function DbNavBox({ activeRoute }) {
 
   const isAllDbActive =
     activeRoute === '/db-connection' || activeRoute === '/db-connection-check' || activeRoute === '/DB';
+  const isMongoActive =
+    activeRoute === '/db-connection/db-mongodb-active-connection';
+  const isPagesApiActive =
+    activeRoute === '/db-connection/db-pages-api';
+  const isWorkersApiActive =
+    activeRoute === '/db-connection/db-workers-api';
 
   const renderButton = (btn) => {
     const isActive = activeRoute === btn.url || activeRoute === btn.altUrl;
@@ -256,7 +262,7 @@ export default function DbNavBox({ activeRoute }) {
           <span className="nav-heading">Database Testing & Admin Suite</span>
         </div>
         <div className="title-right">
-          <small className="nav-sub">১৪টি স্পেসিফিক ডাটাবেজ পেজ দ্রুত সুইচ করুন</small>
+          <small className="nav-sub">১৬টি স্পেসিফিক ডাটাবেজ ও ক্লাউড পেজ দ্রুত সুইচ করুন</small>
         </div>
       </div>
 
@@ -271,97 +277,373 @@ export default function DbNavBox({ activeRoute }) {
         </div>
       </div>
 
-      {/* Bottom Dedicated Bar: ALL DB Hub (Left) & Logout (Right) */}
+      {/* Bottom Dedicated Bar: ALL DB Hub & MongoDB Active Hub (Left) & Logout (Right) */}
       <div className="bottom-hub-logout-bar">
-        {/* Left: ALL DB Hub Button */}
-        <Link
-          href="/db-connection"
-          className="all-db-hub-btn"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-            backgroundColor: '#008fb0',
-            color: '#ffffff',
-            textDecoration: 'none',
-            padding: '9px 18px',
-            borderRadius: '7px',
-            fontSize: '13px',
-            fontWeight: '700',
-            boxShadow: isAllDbActive ? '0 4px 14px rgba(0, 143, 176, 0.45)' : '0 2px 8px rgba(0, 143, 176, 0.25)',
-            border: 'none',
-            outline: 'none',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-            lineHeight: 'normal',
-          }}
-        >
-          <i
-            className="fa-solid fa-server"
+        {/* Left: Hub Buttons Group */}
+        <div className="bottom-hub-left-group">
+          {/* ALL DB Hub Button */}
+          <Link
+            href="/db-connection"
+            className="all-db-hub-btn"
             style={{
-              fontSize: '13px',
-              width: '13px',
-              height: '13px',
-              lineHeight: '13px',
-              color: '#ffffff',
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
-              transform: 'translateY(-0.5px)',
-            }}
-          />
-          <span
-            style={{
+              gap: '8px',
+              backgroundColor: '#008fb0',
               color: '#ffffff',
               textDecoration: 'none',
+              padding: '9px 18px',
+              borderRadius: '7px',
               fontSize: '13px',
               fontWeight: '700',
-              lineHeight: '1',
-              display: 'inline-block',
-              transform: 'translateY(1px)',
+              boxShadow: isAllDbActive ? '0 4px 14px rgba(0, 143, 176, 0.45)' : '0 2px 8px rgba(0, 143, 176, 0.25)',
+              border: 'none',
+              outline: 'none',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              lineHeight: 'normal',
             }}
           >
-            ALL DB Hub
-          </span>
-          {isAllDbActive && (
-            <span
-              className="active-live-bullet"
+            <i
+              className="fa-solid fa-server"
               style={{
-                position: 'relative',
+                fontSize: '13px',
+                width: '13px',
+                height: '13px',
+                lineHeight: '13px',
+                color: '#ffffff',
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                width: '7px',
-                height: '7px',
-                marginLeft: '4px',
-                transform: 'translateY(0.5px)',
+                transform: 'translateY(-0.5px)',
+              }}
+            />
+            <span
+              style={{
+                color: '#ffffff',
+                textDecoration: 'none',
+                fontSize: '13px',
+                fontWeight: '700',
+                lineHeight: '1',
+                display: 'inline-block',
+                transform: 'translateY(1px)',
               }}
             >
+              ALL DB Hub
+            </span>
+            {isAllDbActive && (
               <span
-                style={{
-                  position: 'absolute',
-                  width: '100%',
-                  height: '100%',
-                  borderRadius: '50%',
-                  backgroundColor: '#ffffff',
-                  opacity: 0.75,
-                  animation: 'navPulse 1.4s cubic-bezier(0, 0, 0.2, 1) infinite',
-                }}
-              />
-              <span
+                className="active-live-bullet"
                 style={{
                   position: 'relative',
-                  width: '5px',
-                  height: '5px',
-                  borderRadius: '50%',
-                  backgroundColor: '#ffffff',
-                  boxShadow: '0 0 6px #ffffff',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '7px',
+                  height: '7px',
+                  marginLeft: '4px',
+                  transform: 'translateY(0.5px)',
                 }}
-              />
+              >
+                <span
+                  style={{
+                    position: 'absolute',
+                    width: '100%',
+                    height: '100%',
+                    borderRadius: '50%',
+                    backgroundColor: '#ffffff',
+                    opacity: 0.75,
+                    animation: 'navPulse 1.4s cubic-bezier(0, 0, 0.2, 1) infinite',
+                  }}
+                />
+                <span
+                  style={{
+                    position: 'relative',
+                    width: '5px',
+                    height: '5px',
+                    borderRadius: '50%',
+                    backgroundColor: '#ffffff',
+                    boxShadow: '0 0 6px #ffffff',
+                  }}
+                />
+              </span>
+            )}
+          </Link>
+
+          {/* MongoDB Active Connection Button */}
+          <Link
+            href="/db-connection/db-mongodb-active-connection"
+            className="mongo-active-btn"
+            title="MongoDB 24/7 Active Connection & Keep-Alive Hub"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              backgroundColor: '#047857',
+              color: '#ffffff',
+              textDecoration: 'none',
+              padding: '9px 18px',
+              borderRadius: '7px',
+              fontSize: '13px',
+              fontWeight: '700',
+              boxShadow: isMongoActive ? '0 4px 14px rgba(4, 120, 87, 0.45)' : '0 2px 8px rgba(4, 120, 87, 0.25)',
+              border: 'none',
+              outline: 'none',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              lineHeight: 'normal',
+            }}
+          >
+            <i
+              className="fa-solid fa-bolt"
+              style={{
+                fontSize: '13px',
+                width: '13px',
+                height: '13px',
+                lineHeight: '13px',
+                color: '#ffffff',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transform: 'translateY(-0.5px)',
+              }}
+            />
+            <span
+              style={{
+                color: '#ffffff',
+                textDecoration: 'none',
+                fontSize: '13px',
+                fontWeight: '700',
+                lineHeight: '1',
+                display: 'inline-block',
+                transform: 'translateY(1px)',
+              }}
+            >
+              MongoDB Active Hub
             </span>
-          )}
-        </Link>
+            {isMongoActive && (
+              <span
+                className="active-live-bullet"
+                style={{
+                  position: 'relative',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '7px',
+                  height: '7px',
+                  marginLeft: '4px',
+                  transform: 'translateY(0.5px)',
+                }}
+              >
+                <span
+                  style={{
+                    position: 'absolute',
+                    width: '100%',
+                    height: '100%',
+                    borderRadius: '50%',
+                    backgroundColor: '#ffffff',
+                    opacity: 0.75,
+                    animation: 'navPulse 1.4s cubic-bezier(0, 0, 0.2, 1) infinite',
+                  }}
+                />
+                <span
+                  style={{
+                    position: 'relative',
+                    width: '5px',
+                    height: '5px',
+                    borderRadius: '50%',
+                    backgroundColor: '#ffffff',
+                    boxShadow: '0 0 6px #ffffff',
+                  }}
+                />
+              </span>
+            )}
+          </Link>
+
+          {/* Cloudflare Pages API Button */}
+          <Link
+            href="/db-connection/db-pages-api"
+            className="pages-api-nav-btn"
+            title="Cloudflare Pages API Database Testing & Admin Suite"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              backgroundColor: '#ea580c',
+              color: '#ffffff',
+              textDecoration: 'none',
+              padding: '9px 18px',
+              borderRadius: '7px',
+              fontSize: '13px',
+              fontWeight: '700',
+              boxShadow: isPagesApiActive ? '0 4px 14px rgba(234, 88, 12, 0.45)' : '0 2px 8px rgba(234, 88, 12, 0.25)',
+              border: 'none',
+              outline: 'none',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              lineHeight: 'normal',
+            }}
+          >
+            <i
+              className="fa-solid fa-cloud"
+              style={{
+                fontSize: '13px',
+                width: '13px',
+                height: '13px',
+                lineHeight: '13px',
+                color: '#ffffff',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transform: 'translateY(-0.5px)',
+              }}
+            />
+            <span
+              style={{
+                color: '#ffffff',
+                textDecoration: 'none',
+                fontSize: '13px',
+                fontWeight: '700',
+                lineHeight: '1',
+                display: 'inline-block',
+                transform: 'translateY(1px)',
+              }}
+            >
+              CF Pages API
+            </span>
+            {isPagesApiActive && (
+              <span
+                className="active-live-bullet"
+                style={{
+                  position: 'relative',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '7px',
+                  height: '7px',
+                  marginLeft: '4px',
+                  transform: 'translateY(0.5px)',
+                }}
+              >
+                <span
+                  style={{
+                    position: 'absolute',
+                    width: '100%',
+                    height: '100%',
+                    borderRadius: '50%',
+                    backgroundColor: '#ffffff',
+                    opacity: 0.75,
+                    animation: 'navPulse 1.4s cubic-bezier(0, 0, 0.2, 1) infinite',
+                  }}
+                />
+                <span
+                  style={{
+                    position: 'relative',
+                    width: '5px',
+                    height: '5px',
+                    borderRadius: '50%',
+                    backgroundColor: '#ffffff',
+                    boxShadow: '0 0 6px #ffffff',
+                  }}
+                />
+              </span>
+            )}
+          </Link>
+
+          {/* Cloudflare Worker Backup API Button */}
+          <Link
+            href="/db-connection/db-workers-api"
+            className="workers-api-nav-btn"
+            title="Cloudflare Worker Backup API Database Testing & Admin Suite"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              backgroundColor: '#4f46e5',
+              color: '#ffffff',
+              textDecoration: 'none',
+              padding: '9px 18px',
+              borderRadius: '7px',
+              fontSize: '13px',
+              fontWeight: '700',
+              boxShadow: isWorkersApiActive ? '0 4px 14px rgba(79, 70, 229, 0.45)' : '0 2px 8px rgba(79, 70, 229, 0.25)',
+              border: 'none',
+              outline: 'none',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              lineHeight: 'normal',
+            }}
+          >
+            <i
+              className="fa-solid fa-bolt"
+              style={{
+                fontSize: '13px',
+                width: '13px',
+                height: '13px',
+                lineHeight: '13px',
+                color: '#ffffff',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transform: 'translateY(-0.5px)',
+              }}
+            />
+            <span
+              style={{
+                color: '#ffffff',
+                textDecoration: 'none',
+                fontSize: '13px',
+                fontWeight: '700',
+                lineHeight: '1',
+                display: 'inline-block',
+                transform: 'translateY(1px)',
+              }}
+            >
+              Worker Backup API
+            </span>
+            {isWorkersApiActive && (
+              <span
+                className="active-live-bullet"
+                style={{
+                  position: 'relative',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '7px',
+                  height: '7px',
+                  marginLeft: '4px',
+                  transform: 'translateY(0.5px)',
+                }}
+              >
+                <span
+                  style={{
+                    position: 'absolute',
+                    width: '100%',
+                    height: '100%',
+                    borderRadius: '50%',
+                    backgroundColor: '#ffffff',
+                    opacity: 0.75,
+                    animation: 'navPulse 1.4s cubic-bezier(0, 0, 0.2, 1) infinite',
+                  }}
+                />
+                <span
+                  style={{
+                    position: 'relative',
+                    width: '5px',
+                    height: '5px',
+                    borderRadius: '50%',
+                    backgroundColor: '#ffffff',
+                    boxShadow: '0 0 6px #ffffff',
+                  }}
+                />
+              </span>
+            )}
+          </Link>
+        </div>
 
         {/* Right: Logout Button */}
         <button
@@ -499,6 +781,13 @@ export default function DbNavBox({ activeRoute }) {
           gap: 10px;
         }
 
+        .bottom-hub-left-group {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          flex-wrap: wrap;
+        }
+
         :global(.all-db-hub-btn),
         :global(.all-db-hub-btn:link),
         :global(.all-db-hub-btn:visited),
@@ -522,6 +811,87 @@ export default function DbNavBox({ activeRoute }) {
         }
 
         :global(.all-db-hub-btn span) {
+          color: #ffffff !important;
+          text-decoration: none !important;
+        }
+
+        :global(.mongo-active-btn),
+        :global(.mongo-active-btn:link),
+        :global(.mongo-active-btn:visited),
+        :global(.mongo-active-btn:hover),
+        :global(.mongo-active-btn:active) {
+          text-decoration: none !important;
+          color: #ffffff !important;
+          background-color: #047857 !important;
+          line-height: 1 !important;
+        }
+
+        :global(.mongo-active-btn:hover) {
+          filter: brightness(1.12) !important;
+          transform: translateY(-1px);
+          box-shadow: 0 4px 14px rgba(4, 120, 87, 0.45) !important;
+        }
+
+        :global(.mongo-active-btn i),
+        :global(.mongo-active-btn svg) {
+          color: #ffffff !important;
+        }
+
+        :global(.mongo-active-btn span) {
+          color: #ffffff !important;
+          text-decoration: none !important;
+        }
+
+        :global(.pages-api-nav-btn),
+        :global(.pages-api-nav-btn:link),
+        :global(.pages-api-nav-btn:visited),
+        :global(.pages-api-nav-btn:hover),
+        :global(.pages-api-nav-btn:active) {
+          text-decoration: none !important;
+          color: #ffffff !important;
+          background-color: #ea580c !important;
+          line-height: 1 !important;
+        }
+
+        :global(.pages-api-nav-btn:hover) {
+          filter: brightness(1.12) !important;
+          transform: translateY(-1px);
+          box-shadow: 0 4px 14px rgba(234, 88, 12, 0.45) !important;
+        }
+
+        :global(.pages-api-nav-btn i),
+        :global(.pages-api-nav-btn svg) {
+          color: #ffffff !important;
+        }
+
+        :global(.pages-api-nav-btn span) {
+          color: #ffffff !important;
+          text-decoration: none !important;
+        }
+
+        :global(.workers-api-nav-btn),
+        :global(.workers-api-nav-btn:link),
+        :global(.workers-api-nav-btn:visited),
+        :global(.workers-api-nav-btn:hover),
+        :global(.workers-api-nav-btn:active) {
+          text-decoration: none !important;
+          color: #ffffff !important;
+          background-color: #4f46e5 !important;
+          line-height: 1 !important;
+        }
+
+        :global(.workers-api-nav-btn:hover) {
+          filter: brightness(1.12) !important;
+          transform: translateY(-1px);
+          box-shadow: 0 4px 14px rgba(79, 70, 229, 0.45) !important;
+        }
+
+        :global(.workers-api-nav-btn i),
+        :global(.workers-api-nav-btn svg) {
+          color: #ffffff !important;
+        }
+
+        :global(.workers-api-nav-btn span) {
           color: #ffffff !important;
           text-decoration: none !important;
         }
@@ -593,7 +963,15 @@ export default function DbNavBox({ activeRoute }) {
             flex-direction: column;
             align-items: stretch;
           }
+          .bottom-hub-left-group {
+            flex-direction: column;
+            align-items: stretch;
+            width: 100%;
+          }
           :global(.all-db-hub-btn),
+          :global(.mongo-active-btn),
+          :global(.pages-api-nav-btn),
+          :global(.workers-api-nav-btn),
           .bottom-logout-btn {
             justify-content: center;
           }

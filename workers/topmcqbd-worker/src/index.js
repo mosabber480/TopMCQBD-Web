@@ -10,7 +10,7 @@
  * 6. Full CORS Support for seamless Frontend Integration
  */
 
-import { MongoClient } from 'mongodb';
+import { MongoClient, ObjectId } from 'mongodb';
 
 // Worker global client cache across isolate lifetime
 const mongoClients = {};
@@ -467,39 +467,169 @@ export default {
         });
       }
 
-      // (K) MongoDB Multi-Cluster Ping & Latency Check
+      // (K) MongoDB Multi-Cluster Ping & CRUD Handler
       if (path === '/api/db-check' || path.startsWith('/api/db-test/')) {
-        let targetUri = env.MONGODB_URI_FREE || env.MONGODB_URI_PAID;
-        let targetDb = env.MONGODB_DB_FREE || env.MONGODB_DB_PAID || 'TopMCQBD_DB_Free';
+        const clusterMatch = path.replace(/^\/api\/db-test\/?/, '').trim();
+        const clusterKey = clusterMatch || url.searchParams.get('cluster') || 'paid';
 
-        if (path === '/api/db-test/paid') {
-          targetUri = env.MONGODB_URI_PAID || targetUri;
-          targetDb = env.MONGODB_DB_PAID || 'TopMCQBD_DB';
-        } else if (path === '/api/db-test/free') {
+        let targetUri = env.MONGODB_URI_PAID;
+        let targetDb = env.MONGODB_DB_PAID || 'TopMCQBD_DB';
+        let targetColl = 'db-paid-test';
+
+        if (clusterKey === 'free') {
           targetUri = env.MONGODB_URI_FREE || targetUri;
           targetDb = env.MONGODB_DB_FREE || 'TopMCQBD_DB_Free';
+          targetColl = 'db-free-test';
+        } else if (clusterKey === 'subjective') {
+          targetUri = env.MONGODB_URI_SUBJECTIVE || targetUri;
+          targetDb = env.MONGODB_DB_SUBJECTIVE || 'TopMCQBD_DB_Subjective';
+          targetColl = 'db-subjective-test';
+        } else if (clusterKey === 'live-exam') {
+          targetUri = env.MONGODB_URI_LIVE_EXAM || targetUri;
+          targetDb = env.MONGODB_DB_LIVE_EXAM || 'TopMCQBD_DB_Live_Exam';
+          targetColl = 'db-live-exam-test';
+        } else if (clusterKey === 'written') {
+          targetUri = env.MONGODB_URI_WRITTEN || targetUri;
+          targetDb = env.MONGODB_DB_WRITTEN || 'TopMCQBD_DB_written';
+          targetColl = 'db-written-test';
+        } else if (clusterKey === 'question-bank') {
+          targetUri = env.MONGODB_URI_QUESTION_BANK || targetUri;
+          targetDb = env.MONGODB_DB_QUESTION_BANK || 'TopMCQBD_DB_Question_Bank';
+          targetColl = 'db-question-bank-test';
+        } else if (clusterKey === 'paid') {
+          targetUri = env.MONGODB_URI_PAID || targetUri;
+          targetDb = env.MONGODB_DB_PAID || 'TopMCQBD_DB';
+          targetColl = 'db-paid-test';
         }
 
         if (!targetUri) {
           return jsonResponse({
             success: false,
-            message: 'MONGODB_URI is not set in Worker environment variables (Settings > Variables)',
+            message: `MONGODB_URI for ${clusterKey} is not configured in Worker variables`,
           }, 500);
         }
 
-        const t0 = Date.now();
         const client = await getClient(targetUri);
         const db = client.db(targetDb);
-        const pingResult = await db.command({ ping: 1 });
-        const latencyMs = Date.now() - t0;
+        const collection = db.collection(targetColl);
 
-        return jsonResponse({
-          success: pingResult.ok === 1,
-          database: targetDb,
-          latencyMs,
-          runtime: 'Cloudflare Worker',
-          timestamp: new Date().toISOString(),
-        });
+        // GET: Ping + List collections + Fetch documents
+        if (request.method === 'GET') {
+          const t0 = Date.now();
+          const pingResult = await db.command({ ping: 1 });
+          const latencyMs = Date.now() - t0;
+          const collections = await db.listCollections().toArray();
+          const collectionNames = collections.map((c) => c.name);
+
+          const items = await collection
+            .find({})
+            .sort({ createdAt: -1 })
+            .limit(100)
+            .toArray();
+
+          const formattedItems = items.map((doc) => ({
+            id: doc._id.toString(),
+            title: doc.title || '',
+            category: doc.category || 'Worker Edge',
+            text: doc.text || '',
+            createdAt: doc.createdAt || null,
+            updatedAt: doc.updatedAt || null,
+          }));
+
+          return jsonResponse({
+            success: pingResult.ok === 1,
+            cluster: targetDb,
+            collection: targetColl,
+            connected: true,
+            latencyMs,
+            collections: collectionNames,
+            totalItems: formattedItems.length,
+            items: formattedItems,
+            runtime: 'Cloudflare Worker (V8 Isolate)',
+            timestamp: new Date().toISOString(),
+          });
+        }
+
+        // POST: Insert new test document
+        if (request.method === 'POST') {
+          const body = await request.json().catch(() => ({}));
+          const text = (body.text || '').trim();
+          const title = (body.title || '').trim();
+          const category = (body.category || 'Worker Edge').trim();
+
+          if (!text) {
+            return jsonResponse({ success: false, error: 'টেক্সট ফিল্ড খালি রাখা যাবে না।' }, 400);
+          }
+
+          const newDoc = {
+            title: title || (text.length > 25 ? text.slice(0, 25) + '...' : text),
+            category,
+            text,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          };
+
+          const insertRes = await collection.insertOne(newDoc);
+          return jsonResponse({
+            success: true,
+            message: `ডাটা সফলভাবে ${targetColl} কালেকশনে যুক্ত হয়েছে।`,
+            item: { id: insertRes.insertedId.toString(), ...newDoc },
+          }, 201);
+        }
+
+        // PUT: Edit existing test document
+        if (request.method === 'PUT') {
+          const body = await request.json().catch(() => ({}));
+          const id = body.id || body._id;
+          const text = (body.text || '').trim();
+          const title = (body.title || '').trim();
+          const category = (body.category || '').trim();
+
+          if (!id || !text) {
+            return jsonResponse({ success: false, error: 'ID এবং টেক্সট উভয়েই আবশ্যক।' }, 400);
+          }
+
+          const filter = ObjectId.isValid(id) ? { _id: new ObjectId(id) } : { _id: id };
+          const updateDoc = { text, updatedAt: new Date().toISOString() };
+          if (title) updateDoc.title = title;
+          if (category) updateDoc.category = category;
+
+          const updateRes = await collection.updateOne(filter, { $set: updateDoc });
+          if (updateRes.matchedCount === 0) {
+            return jsonResponse({ success: false, error: 'কোনো তথ্য পাওয়া যায়নি।' }, 404);
+          }
+
+          return jsonResponse({
+            success: true,
+            message: 'ডাটা সফলভাবে আপডেট করা হয়েছে।',
+            updatedId: id,
+          });
+        }
+
+        // DELETE: Delete test document
+        if (request.method === 'DELETE') {
+          let id = url.searchParams.get('id');
+          if (!id) {
+            const body = await request.json().catch(() => ({}));
+            id = body?.id || body?._id;
+          }
+
+          if (!id) {
+            return jsonResponse({ success: false, error: 'মুছে ফেলার জন্য ID প্রদান করুন।' }, 400);
+          }
+
+          const filter = ObjectId.isValid(id) ? { _id: new ObjectId(id) } : { _id: id };
+          const delRes = await collection.deleteOne(filter);
+          if (delRes.deletedCount === 0) {
+            return jsonResponse({ success: false, error: 'মুছে ফেলার জন্য ডাটা পাওয়া যায়নি।' }, 404);
+          }
+
+          return jsonResponse({
+            success: true,
+            message: 'ডাটা সফলভাবে মুছে ফেলা হয়েছে।',
+            deletedId: id,
+          });
+        }
       }
 
       // (L) Questions API (Direct MongoDB Querying)
