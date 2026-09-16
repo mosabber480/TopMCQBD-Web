@@ -1,12 +1,12 @@
 {
   "name": "topmcqbd-backup-api",
-  "main": "src/index.js",
+  "main": "workers/topmcqbd-worker/src/index.js",
   "compatibility_date": "2026-09-08",
   "compatibility_flags": [
     "nodejs_compat"
   ],
   "assets": {
-    "directory": "../../out",
+    "directory": "out",
     "binding": "ASSETS",
     "html_handling": "auto-trailing-slash",
     "not_found_handling": "single-page-application"

@@ -1,13 +1,19 @@
 /**
- * TopMCQBD Backup Worker API
- * High-Availability Failover & Direct Edge MongoDB API
- * Runs on Cloudflare Workers with nodejs_compat
+ * TopMCQBD Cloudflare Fullstack Worker & Backup API
+ * 
+ * Features:
+ * 1. Serves the Complete TopMCQBD Website UI (HTML, CSS, JS, Images, Fonts) via Cloudflare Native Assets
+ * 2. High-Performance Direct MongoDB Atlas Connectivity (TCP Socket, Edge-Optimized, Connection Pooling)
+ * 3. Cloudflare D1 SQL Database Integration for Layout, Menus, Header, Footer, and Configs
+ * 4. Smart Route Fallback (auto-resolves Clean URLs like /questions to /questions.html)
+ * 5. Rich Diagnostic Portal for Edge Health Checks
+ * 6. Full CORS Support for seamless Frontend Integration
  */
 
 import { MongoClient } from 'mongodb';
 
-// Worker global client cache
-const clients = {};
+// Worker global client cache across isolate lifetime
+const mongoClients = {};
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -27,28 +33,317 @@ function jsonResponse(data, status = 200, extraHeaders = {}) {
   });
 }
 
+function htmlResponse(html, status = 200) {
+  return new Response(html, {
+    status,
+    headers: {
+      'Content-Type': 'text/html; charset=utf-8',
+      ...CORS_HEADERS,
+    },
+  });
+}
+
+/**
+ * Get connected MongoClient instance with Serverless Edge optimizations
+ */
 async function getClient(uri) {
   if (!uri) throw new Error('MongoDB URI is not configured');
-  if (clients[uri]) return clients[uri];
+  if (mongoClients[uri]) return mongoClients[uri];
 
   const client = new MongoClient(uri, {
     tls: true,
-    family: 4,
-    directConnection: true,
-    maxPoolSize: 1,
-    minPoolSize: 0,
-    connectTimeoutMS: 5000,
-    serverSelectionTimeoutMS: 5000,
+    family: 4,               // Enforce IPv4 to avoid Edge IPv6 DNS latency
+    directConnection: true,  // Connects directly to replica shard
+    maxPoolSize: 1,         // Single lightweight socket per Edge isolate
+    minPoolSize: 0,         // Clean up idle sockets automatically
+    connectTimeoutMS: 6000,
+    serverSelectionTimeoutMS: 6000,
+    socketTimeoutMS: 10000,
   });
 
   await client.connect();
-  clients[uri] = client;
+  mongoClients[uri] = client;
   return client;
+}
+
+/**
+ * D1 Config Helper: Read data from app_configs table
+ */
+async function getD1Config(env, key) {
+  if (!env || !env.DB) return null;
+  try {
+    const row = await env.DB.prepare(
+      'SELECT data FROM app_configs WHERE key = ? LIMIT 1'
+    ).bind(key).first();
+    if (row && row.data) {
+      return typeof row.data === 'string' ? JSON.parse(row.data) : row.data;
+    }
+  } catch (e) {
+    console.error(`[Worker D1 Error] fetching ${key}:`, e);
+  }
+  return null;
+}
+
+const DEFAULT_LAYOUT = {
+  announcement: {
+    text: "বিসিএস ও সরকারি চাকরির প্রস্তুতি",
+    link: ""
+  },
+  header: {
+    siteTitle: "TopMCQBD",
+    logoUrl: "/images/TopMCQ.png",
+    seoTitle: "TopMCQBD - সেরা অনলাইন কুইজ ও প্রস্তুতি প্ল্যাটফর্ম",
+    faviconUrl: "/images/favicon.ico",
+    btnText: "যোগাযোগ",
+    btnLink: "/contact",
+    btnIcon: "fa-solid fa-headset",
+    menus: [
+      { title: "হোম", url: "/", icon: "fa-solid fa-house" },
+      { title: "কুইজ অনুশীলন", url: "/questions", icon: "fa-solid fa-bolt", badgeText: "FREE", badgeType: "free" },
+      { title: "সকল MCQ", url: "/all-mcq", icon: "fa-solid fa-layer-group" },
+      { title: "প্যাকেজসমূহ", url: "/packages", icon: "fa-solid fa-box" },
+      { title: "আমাদের সম্পর্কে", url: "/about-us", icon: "fa-solid fa-bullseye" },
+      { title: "যোগাযোগ", url: "/contact" }
+    ],
+    megaMenus: []
+  },
+  footer: {
+    columns: [
+      {
+        type: "info",
+        title: "সাইট তথ্য ও সোশাল লিংক",
+        text: "বিসিএস, ব্যাংক, প্রাথমিক শিক্ষক নিয়োগ এবং বিশ্ববিদ্যালয়ের ভর্তি পরীক্ষার জন্য একটি আধুনিক ও স্বয়ংসম্পূর্ণ অনলাইন প্রস্তুতি প্ল্যাটফর্ম।",
+        fb: "", yt: "", wa: "", tw: "", tg: "", ln: ""
+      },
+      {
+        type: "links",
+        title: "প্রয়োজনীয় লিংক",
+        links: [
+          { title: "হোম পেজ", url: "/" },
+          { title: "কুইজ অনুশীলন", url: "/questions" },
+          { title: "সকল প্রশ্ন ক্যাটাগরি", url: "/all-mcq" }
+        ]
+      }
+    ]
+  },
+  copyright: {
+    text: "© 2026 TopMCQBD. সর্বস্বত্ব সংরক্ষিত।",
+    links: [
+      { title: "FAQ", url: "/faq" },
+      { title: "Privacy & Refund Policy", url: "/privacy-and-refund-policy" },
+      { title: "System Status", url: "/status.html" }
+    ]
+  }
+};
+
+/**
+ * Fallback Portal UI when static assets are initializing
+ */
+function renderPortalHtml(env, url) {
+  return `<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TopMCQBD — Cloudflare Edge Worker Engine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #059669;
+      --primary-dark: #047857;
+      --bg: #0f172a;
+      --card-bg: rgba(30, 41, 59, 0.7);
+      --border: rgba(255, 255, 255, 0.1);
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #38bdf8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Hind Siliguri', 'Outfit', sans-serif;
+      background: radial-gradient(circle at 50% 0%, #1e293b, var(--bg));
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .container {
+      max-width: 860px;
+      width: 100%;
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 40px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(5, 150, 105, 0.2);
+      color: #34d399;
+      padding: 6px 16px;
+      border-radius: 9999px;
+      font-size: 14px;
+      font-weight: 600;
+      border: 1px solid rgba(52, 211, 153, 0.3);
+      margin-bottom: 16px;
+    }
+    .badge .dot {
+      width: 8px;
+      height: 8px;
+      background: #34d399;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #34d399;
+    }
+    h1 {
+      font-size: 32px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+    p.subtitle {
+      color: var(--text-muted);
+      font-size: 16px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .card {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(56, 189, 248, 0.4);
+    }
+    .card-title {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .card-value {
+      font-size: 18px;
+      font-weight: 600;
+      color: #ffffff;
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 24px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(5, 150, 105, 0.4);
+    }
+    .btn-primary:hover {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+    }
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+    .footer {
+      text-align: center;
+      margin-top: 32px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="badge">
+        <span class="dot"></span> Cloudflare Edge Worker Live
+      </div>
+      <h1>TopMCQBD — Fullstack Worker Engine</h1>
+      <p class="subtitle">Cloudflare V8 Edge Isolate + Native Assets + Direct MongoDB Atlas TCP</p>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="card-title">Runtime Platform</div>
+        <div class="card-value">Cloudflare Workers</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Edge Node.js Compat</div>
+        <div class="card-value" style="color: #34d399;">Active (v2026-09-08)</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Database Engine</div>
+        <div class="card-value" style="color: var(--accent);">Direct Shard TCP</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Native Assets</div>
+        <div class="card-value">${env.ASSETS ? '✅ Connected (1,344 files)' : '⚡ Initializing'}</div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <a href="https://topmcqbd.pages.dev" class="btn btn-primary" target="_blank">
+        🌐 Open Main Website (Pages)
+      </a>
+      <a href="/api/db-check" class="btn btn-secondary">
+        ⚡ Test MongoDB Latency
+      </a>
+      <a href="/api/questions" class="btn btn-secondary">
+        📚 Fetch Questions API
+      </a>
+      <a href="/api/health" class="btn btn-secondary">
+        🩺 API Health Check
+      </a>
+    </div>
+
+    <div class="footer">
+      © 2026 TopMCQBD. Dual-Cloud Architecture (Cloudflare Pages + Cloudflare Workers + Render).
+    </div>
+  </div>
+</body>
+</html>`;
 }
 
 export default {
   async fetch(request, env, ctx) {
-    // Handle CORS preflight
+    // 1. Handle CORS preflight
     if (request.method === 'OPTIONS') {
       return new Response(null, { status: 204, headers: CORS_HEADERS });
     }
@@ -57,26 +352,138 @@ export default {
     const path = url.pathname;
 
     try {
-      // 1. Health endpoint
+      // -------------------------------------------------------------
+      // API ROUTES (Backend Handlers)
+      // -------------------------------------------------------------
+
+      // (A) Health Check API
       if (path === '/api/health') {
         return jsonResponse({
           status: 'ok',
           service: 'TopMCQBD Cloudflare Fullstack Worker & Backup API',
           runtime: 'Cloudflare Workers (Edge V8 Isolate with Native Assets)',
           version: '2.0.0',
+          assetsConfigured: Boolean(env.ASSETS),
+          d1Configured: Boolean(env.DB),
           timestamp: new Date().toISOString(),
         });
       }
 
-      // 2. Multi-Cluster Ping & Latency Check
-      if (path === '/api/db-check') {
-        const targetUri = env.MONGODB_URI_FREE || env.MONGODB_URI_PAID;
-        const targetDb = env.MONGODB_DB_FREE || env.MONGODB_DB_PAID || 'TopMCQBD_DB_Free';
+      // (B) Layout Config API (Header, Menus, Announcement, Footer)
+      if (path === '/api/layout-config') {
+        const d1Data = await getD1Config(env, 'layout_config');
+        return jsonResponse(d1Data || DEFAULT_LAYOUT, 200, {
+          'Cache-Control': 'public, max-age=60, s-maxage=300',
+        });
+      }
+
+      // (C) Common Config API (Key-Value Edge Cache from D1)
+      if (path === '/api/common-config') {
+        const key = url.searchParams.get('key') || 'all';
+        if (env.DB) {
+          if (key === 'all') {
+            const { results } = await env.DB.prepare('SELECT key, data FROM app_configs').all();
+            const allData = {};
+            if (results && results.length) {
+              for (const row of results) {
+                try {
+                  allData[row.key] = typeof row.data === 'string' ? JSON.parse(row.data) : row.data;
+                } catch (e) {
+                  allData[row.key] = row.data;
+                }
+              }
+            }
+            return jsonResponse(allData, 200, { 'Cache-Control': 'public, max-age=60, s-maxage=300' });
+          } else {
+            const d1Data = await getD1Config(env, key);
+            return jsonResponse(d1Data || {}, 200, { 'Cache-Control': 'public, max-age=60, s-maxage=300' });
+          }
+        }
+        return jsonResponse({}, 200);
+      }
+
+      // (D) Home Config API
+      if (path === '/api/home-config') {
+        const d1Data = await getD1Config(env, 'home_config');
+        return jsonResponse(d1Data || {}, 200, {
+          'Cache-Control': 'public, max-age=60, s-maxage=300',
+        });
+      }
+
+      // (E) Sidebar Config API
+      if (path === '/api/sidebar-config') {
+        const d1Data = await getD1Config(env, 'sidebar_config');
+        return jsonResponse(d1Data || {}, 200, {
+          'Cache-Control': 'public, max-age=60, s-maxage=300',
+        });
+      }
+
+      // (F) Packages Data API
+      if (path === '/api/packages-data') {
+        const d1Data = await getD1Config(env, 'packages_data');
+        return jsonResponse(d1Data || [], 200, {
+          'Cache-Control': 'public, max-age=60, s-maxage=300',
+        });
+      }
+
+      // (G) FAQ Data API
+      if (path === '/api/faq-data') {
+        const d1Data = await getD1Config(env, 'faq_data');
+        return jsonResponse(d1Data || [], 200, {
+          'Cache-Control': 'public, max-age=60, s-maxage=300',
+        });
+      }
+
+      // (H) About Data API
+      if (path === '/api/about-data') {
+        const d1Data = await getD1Config(env, 'about_data');
+        return jsonResponse(d1Data || {}, 200, {
+          'Cache-Control': 'public, max-age=60, s-maxage=300',
+        });
+      }
+
+      // (I) Policy API
+      if (path === '/api/policy' || path === '/api/policy/get') {
+        const d1Data = await getD1Config(env, 'policy_config');
+        return jsonResponse(d1Data || {}, 200, {
+          'Cache-Control': 'public, max-age=60, s-maxage=300',
+        });
+      }
+
+      // (J) Cloudflare D1 Health / Latency Check
+      if (path === '/api/db-test/d1') {
+        if (!env.DB) {
+          return jsonResponse({ success: false, message: 'D1 Database binding (DB) is not attached' }, 500);
+        }
+        const t0 = Date.now();
+        await env.DB.prepare('SELECT 1').first();
+        const latencyMs = Date.now() - t0;
+        return jsonResponse({
+          success: true,
+          database: 'topmcqbd-db (Cloudflare D1 SQL)',
+          latencyMs,
+          runtime: 'Cloudflare Worker',
+          timestamp: new Date().toISOString(),
+        });
+      }
+
+      // (K) MongoDB Multi-Cluster Ping & Latency Check
+      if (path === '/api/db-check' || path.startsWith('/api/db-test/')) {
+        let targetUri = env.MONGODB_URI_FREE || env.MONGODB_URI_PAID;
+        let targetDb = env.MONGODB_DB_FREE || env.MONGODB_DB_PAID || 'TopMCQBD_DB_Free';
+
+        if (path === '/api/db-test/paid') {
+          targetUri = env.MONGODB_URI_PAID || targetUri;
+          targetDb = env.MONGODB_DB_PAID || 'TopMCQBD_DB';
+        } else if (path === '/api/db-test/free') {
+          targetUri = env.MONGODB_URI_FREE || targetUri;
+          targetDb = env.MONGODB_DB_FREE || 'TopMCQBD_DB_Free';
+        }
 
         if (!targetUri) {
           return jsonResponse({
             success: false,
-            message: 'MONGODB_URI is not set in Worker environment variables',
+            message: 'MONGODB_URI is not set in Worker environment variables (Settings > Variables)',
           }, 500);
         }
 
@@ -95,7 +502,7 @@ export default {
         });
       }
 
-      // 3. Questions Endpoint (Fallback for Practice & Free MCQs)
+      // (L) Questions API (Direct MongoDB Querying)
       if (path === '/api/questions' || path === '/api/free-mcqs') {
         const uri = env.MONGODB_URI_FREE || env.MONGODB_URI_PAID;
         const dbName = env.MONGODB_DB_FREE || 'TopMCQBD_DB_Free';
@@ -132,7 +539,7 @@ export default {
         });
       }
 
-      // 4. Categories Endpoint
+      // (M) Categories API
       if (path === '/api/categories') {
         const uri = env.MONGODB_URI_FREE || env.MONGODB_URI_PAID;
         const dbName = env.MONGODB_DB_FREE || 'TopMCQBD_DB_Free';
@@ -150,22 +557,68 @@ export default {
         });
       }
 
-      // 5. If it is an unmatched API route
+      // If an API route is unmatched
       if (path.startsWith('/api/')) {
         return jsonResponse({ error: 'Endpoint not found on Backup Worker API' }, 404);
       }
 
-      // 6. Serve Complete Website UI (HTML, CSS, JS, Images) from Native Static Assets
+      // -------------------------------------------------------------
+      // WEBSITE FRONTEND & STATIC ASSETS HANDLER
+      // -------------------------------------------------------------
+
+      // Serve Full Website UI from Native Static Assets
       if (env.ASSETS) {
-        return env.ASSETS.fetch(request);
+        // Handle root / explicitly
+        if (path === '/' || path === '') {
+          const indexUrl = new URL('/index.html', request.url);
+          const indexRes = await env.ASSETS.fetch(new Request(indexUrl.toString(), request));
+          if (indexRes.status !== 404) return indexRes;
+        }
+
+        // 1. Try serving the exact asset requested
+        const assetResponse = await env.ASSETS.fetch(request);
+        if (assetResponse.status !== 404) {
+          return assetResponse;
+        }
+
+        // 2. Smart Clean URL Resolution (e.g. /about-us -> /about-us.html)
+        if (!path.includes('.')) {
+          const cleanPath = path.replace(/\/$/, '');
+          
+          // (A) Try /route.html
+          const htmlUrl = new URL(request.url);
+          htmlUrl.pathname = `${cleanPath}.html`;
+          const htmlRes = await env.ASSETS.fetch(new Request(htmlUrl.toString(), request));
+          if (htmlRes.status !== 404) {
+            return htmlRes;
+          }
+
+          // (B) Try /route/index.html
+          htmlUrl.pathname = `${cleanPath}/index.html`;
+          const subDirRes = await env.ASSETS.fetch(new Request(htmlUrl.toString(), request));
+          if (subDirRes.status !== 404) {
+            return subDirRes;
+          }
+
+          // (C) Fallback to /index.html (Single-Page Application Fallback)
+          htmlUrl.pathname = '/index.html';
+          const rootRes = await env.ASSETS.fetch(new Request(htmlUrl.toString(), request));
+          if (rootRes.status !== 404) {
+            return rootRes;
+          }
+        }
+
+        return assetResponse;
       }
 
-      return jsonResponse({ error: 'Static Assets not configured' }, 404);
+      // If Native Assets are not yet connected, render the beautiful Edge Portal UI
+      return htmlResponse(renderPortalHtml(env, url));
+
     } catch (err) {
-      console.error('[Worker Error]:', err);
+      console.error('[Worker Runtime Error]:', err);
       return jsonResponse({
         success: false,
-        error: err.message || 'Internal Worker Error',
+        error: err.message || 'Internal Worker Runtime Error',
       }, 500);
     }
   },
