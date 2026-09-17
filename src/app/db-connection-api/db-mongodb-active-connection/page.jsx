@@ -207,66 +207,66 @@ function DbMongodbActiveConnectionContent() {
         {/* HERO CARD */}
         <div
           style={{
-            background: 'linear-gradient(135deg, #064e3b 0%, #065f46 50%, #047857 100%)',
+            backgroundColor: '#ffffff',
+            border: '1px solid #e2e8f0',
             borderRadius: '20px',
-            padding: '36px 32px',
-            color: '#ffffff',
-            boxShadow: '0 10px 25px -5px rgba(6, 78, 59, 0.3)',
+            padding: '32px 32px',
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.04)',
             marginBottom: '32px',
-            position: 'relative',
-            overflow: 'hidden'
+            position: 'relative'
           }}
         >
-          <div style={{ position: 'relative', zIndex: 2 }}>
+          <div>
             <div
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '8px',
-                backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                backdropFilter: 'blur(8px)',
-                padding: '5px 14px',
+                backgroundColor: '#ecfdf5',
+                border: '1px solid #a7f3d0',
+                color: '#059669',
+                padding: '6px 14px',
                 borderRadius: '999px',
                 fontSize: '13px',
                 fontWeight: '700',
-                letterSpacing: '0.5px',
+                letterSpacing: '0.3px',
                 marginBottom: '14px'
               }}
             >
-              <i className="fa-solid fa-bolt" style={{ color: '#34d399' }}></i> MongoDB ইনস্ট্যান্ট ওয়েক-আপ ও লাইভ কানেকশন হাব
+              <i className="fa-solid fa-bolt" style={{ color: '#059669' }}></i> MongoDB ইনস্ট্যান্ট ওয়েক-আপ ও লাইভ কানেকশন হাব
             </div>
 
-            <h1 style={{ fontSize: '32px', fontWeight: '800', marginBottom: '8px', letterSpacing: '-0.5px', fontFamily: "'Outfit', sans-serif" }}>
+            <h1 style={{ fontSize: '28px', fontWeight: '800', color: '#0f172a', marginBottom: '8px', letterSpacing: '-0.5px', fontFamily: "'Outfit', sans-serif" }}>
               MongoDB Atlas 24/7 Active Connection & Keep-Alive
             </h1>
-            <p style={{ fontSize: '16px', color: '#a7f3d0', maxWidth: '850px', lineHeight: '1.6' }}>
+            <p style={{ fontSize: '15px', color: '#64748b', maxWidth: '850px', lineHeight: '1.6' }}>
               এই পেজে প্রবেশ করলেই স্বয়ংক্রিয়ভাবে ৬টি ডেডিকেটেড MongoDB Atlas ক্লাস্টার এবং Cloudflare D1-এ একসাথে লাইভ রিড কোয়েরি চলে যায়। 
               ফলে কোনো ডেটাবেজ কখনোই স্লিপ (Paused) মোডে যায় না এবং সবসময় ১০০% জাগ্রত থাকে।
             </p>
 
             {/* LIVE SUMMARY PILLS */}
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', marginTop: '24px' }}>
-              <div style={{ backgroundColor: 'rgba(0, 0, 0, 0.25)', padding: '12px 20px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: totalAwake === DB_SERVICES.length ? '#10b981' : '#f59e0b', boxShadow: '0 0 10px #10b981' }}></div>
+              <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', padding: '12px 20px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: totalAwake === DB_SERVICES.length ? '#10b981' : '#f59e0b', boxShadow: '0 0 10px rgba(16, 185, 129, 0.3)' }}></div>
                 <div>
-                  <div style={{ fontSize: '11px', color: '#a7f3d0', textTransform: 'uppercase', fontWeight: '700' }}>জাগ্রত ডেটাবেজ</div>
-                  <div style={{ fontSize: '20px', fontWeight: '800', fontFamily: "'Outfit', sans-serif" }}>{totalAwake} / {DB_SERVICES.length} টি সচল</div>
+                  <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', fontWeight: '700' }}>জাগ্রত ডেটাবেজ</div>
+                  <div style={{ fontSize: '20px', fontWeight: '800', color: '#0f172a', fontFamily: "'Outfit', sans-serif" }}>{totalAwake} / {DB_SERVICES.length} টি সচল</div>
                 </div>
               </div>
 
-              <div style={{ backgroundColor: 'rgba(0, 0, 0, 0.25)', padding: '12px 20px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <i className="fa-solid fa-gauge-high" style={{ color: '#38bdf8', fontSize: '20px' }}></i>
+              <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', padding: '12px 20px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <i className="fa-solid fa-gauge-high" style={{ color: '#0284c7', fontSize: '20px' }}></i>
                 <div>
-                  <div style={{ fontSize: '11px', color: '#a7f3d0', textTransform: 'uppercase', fontWeight: '700' }}>গড় রেসপন্স স্পিড</div>
-                  <div style={{ fontSize: '20px', fontWeight: '800', fontFamily: "'Outfit', sans-serif" }}>{avgLatency} ms</div>
+                  <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', fontWeight: '700' }}>গড় রেসপন্স স্পিড</div>
+                  <div style={{ fontSize: '20px', fontWeight: '800', color: '#0f172a', fontFamily: "'Outfit', sans-serif" }}>{avgLatency} ms</div>
                 </div>
               </div>
 
-              <div style={{ backgroundColor: 'rgba(0, 0, 0, 0.25)', padding: '12px 20px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <i className="fa-regular fa-clock" style={{ color: '#fbbf24', fontSize: '20px' }}></i>
+              <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', padding: '12px 20px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <i className="fa-regular fa-clock" style={{ color: '#d97706', fontSize: '20px' }}></i>
                 <div>
-                  <div style={{ fontSize: '11px', color: '#a7f3d0', textTransform: 'uppercase', fontWeight: '700' }}>সর্বশেষ ওয়েক-আপ</div>
-                  <div style={{ fontSize: '18px', fontWeight: '700' }}>{lastWakeTime || 'চেকিং...'}</div>
+                  <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', fontWeight: '700' }}>সর্বশেষ ওয়েক-আপ</div>
+                  <div style={{ fontSize: '18px', fontWeight: '700', color: '#0f172a' }}>{lastWakeTime || 'চেকিং...'}</div>
                 </div>
               </div>
             </div>

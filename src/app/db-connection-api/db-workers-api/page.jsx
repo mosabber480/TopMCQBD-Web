@@ -82,6 +82,9 @@ function DbWorkersApiContent() {
   const [loadingAll, setLoadingAll] = useState(false);
   const [clusterLoading, setClusterLoading] = useState({});
   const [copiedUrl, setCopiedUrl] = useState(false);
+  const [selectedClusterUrl, setSelectedClusterUrl] = useState('paid');
+  const [copiedCluster, setCopiedCluster] = useState(null);
+  const [showAllUrls, setShowAllUrls] = useState(false);
   const [lastCheckTime, setLastCheckTime] = useState(null);
 
   // Multi-Row Add Data States per cluster: { [clusterId]: boolean }
@@ -432,10 +435,15 @@ function DbWorkersApiContent() {
     setPendingReorder(null);
   };
 
-  const copyApiUrl = () => {
-    navigator.clipboard.writeText(`${apiBaseDomain}/api/db-test/paid`);
+  const copyApiUrl = (clusterId = selectedClusterUrl) => {
+    const url = `${apiBaseDomain}/api/db-test/${clusterId}`;
+    navigator.clipboard.writeText(url);
+    setCopiedCluster(clusterId);
     setCopiedUrl(true);
-    setTimeout(() => setCopiedUrl(false), 2000);
+    setTimeout(() => {
+      setCopiedUrl(false);
+      setCopiedCluster(null);
+    }, 2000);
   };
 
   return (
@@ -484,14 +492,101 @@ function DbWorkersApiContent() {
 
           <div className="top-box-bottom">
             <div className="copy-action-box">
-              <span className="copy-label">ব্যাকআপ এপিআই চেক URL:</span>
-              <div className="copy-field">
-                <span className="copy-url-text">{apiBaseDomain}/api/db-test/paid</span>
-                <button onClick={copyApiUrl} className="btn-copy" title="URL কপি করুন">
-                  <i className={`fa-solid ${copiedUrl ? 'fa-check' : 'fa-copy'}`} />
-                  {copiedUrl ? 'কপি হয়েছে' : 'কপি'}
+              <div className="copy-box-header">
+                <span className="copy-label">
+                  <i className="fa-solid fa-link" style={{ marginRight: '6px', color: '#059669' }} />
+                  ৬টি MongoDB ক্লাস্টারের ব্যাকআপ এপিআই চেক URL:
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setShowAllUrls(!showAllUrls)}
+                  className="btn-toggle-all-urls"
+                >
+                  <i className={`fa-solid ${showAllUrls ? 'fa-chevron-up' : 'fa-list-check'}`} style={{ marginRight: '6px' }} />
+                  {showAllUrls ? 'তালিকা গুটিয়ে ফেলুন' : '৬টি URL একসাথে দেখুন'}
                 </button>
               </div>
+
+              {/* Cluster Selector Tabs */}
+              <div className="cluster-url-selector-tabs">
+                {CLUSTERS.map((c) => {
+                  const isSelected = selectedClusterUrl === c.id;
+                  return (
+                    <button
+                      key={c.id}
+                      type="button"
+                      onClick={() => setSelectedClusterUrl(c.id)}
+                      className={`cluster-url-tab ${isSelected ? 'active' : ''}`}
+                      style={{
+                        borderColor: isSelected ? c.badgeColor : '#cbd5e1',
+                        color: isSelected ? c.badgeColor : '#475569',
+                        backgroundColor: isSelected ? c.badgeBg : '#ffffff',
+                      }}
+                    >
+                      <i className="fa-solid fa-database" style={{ fontSize: '11px', marginRight: '5px' }} />
+                      <span>{c.name.split('.')[1]?.trim() || c.name}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Active Selected Cluster URL */}
+              <div className="copy-field">
+                <div className="copy-url-wrapper">
+                  <span className="copy-badge" style={{
+                    backgroundColor: CLUSTERS.find((c) => c.id === selectedClusterUrl)?.badgeBg || '#ecfdf5',
+                    color: CLUSTERS.find((c) => c.id === selectedClusterUrl)?.badgeColor || '#059669',
+                    border: `1px solid ${CLUSTERS.find((c) => c.id === selectedClusterUrl)?.badgeBorder || '#a7f3d0'}`
+                  }}>
+                    {CLUSTERS.find((c) => c.id === selectedClusterUrl)?.cluster}
+                  </span>
+                  <span className="copy-url-text">
+                    {apiBaseDomain}/api/db-test/{selectedClusterUrl}
+                  </span>
+                </div>
+                <button
+                  onClick={() => copyApiUrl(selectedClusterUrl)}
+                  className="btn-copy"
+                  title="এই URL কপি করুন"
+                >
+                  <i className={`fa-solid ${copiedUrl && (!copiedCluster || copiedCluster === selectedClusterUrl) ? 'fa-check' : 'fa-copy'}`} />
+                  {copiedUrl && (!copiedCluster || copiedCluster === selectedClusterUrl) ? 'কপি হয়েছে' : 'কপি'}
+                </button>
+              </div>
+
+              {/* Expandable All 6 URLs List */}
+              {showAllUrls && (
+                <div className="all-urls-grid">
+                  {CLUSTERS.map((c, idx) => {
+                    const cUrl = `${apiBaseDomain}/api/db-test/${c.id}`;
+                    const isCopied = copiedUrl && copiedCluster === c.id;
+                    return (
+                      <div key={c.id} className="all-url-card">
+                        <div className="auc-info">
+                          <div className="auc-title-row">
+                            <span className="auc-num" style={{ backgroundColor: c.badgeBg, color: c.badgeColor, border: `1px solid ${c.badgeBorder}` }}>
+                              {idx + 1}
+                            </span>
+                            <strong className="auc-name">{c.name}</strong>
+                            <span className="auc-db-name mono" style={{ color: c.badgeColor }}>
+                              ({c.cluster})
+                            </span>
+                          </div>
+                          <code className="auc-url mono">{cUrl}</code>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => copyApiUrl(c.id)}
+                          className={`btn-copy-sm ${isCopied ? 'copied' : ''}`}
+                        >
+                          <i className={`fa-solid ${isCopied ? 'fa-check' : 'fa-copy'}`} style={{ marginRight: '4px' }} />
+                          {isCopied ? 'কপি হয়েছে' : 'কপি'}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -1089,10 +1184,174 @@ function DbWorkersApiContent() {
         .copy-action-box {
           background: #f8fafc;
           border: 1px solid #cbd5e1;
-          border-radius: 10px;
-          padding: 10px 16px;
+          border-radius: 12px;
+          padding: 12px 18px;
           width: 100%;
           box-sizing: border-box;
+        }
+
+        .copy-box-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 10px;
+          flex-wrap: wrap;
+          gap: 8px;
+        }
+
+        .btn-toggle-all-urls {
+          display: inline-flex;
+          align-items: center;
+          font-size: 12px;
+          font-weight: 600;
+          color: #059669;
+          background: #ecfdf5;
+          border: 1px solid #a7f3d0;
+          padding: 4px 10px;
+          border-radius: 6px;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .btn-toggle-all-urls:hover {
+          background: #a7f3d0;
+          color: #047857;
+        }
+
+        .cluster-url-selector-tabs {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
+          margin-bottom: 10px;
+        }
+
+        .cluster-url-tab {
+          display: inline-flex;
+          align-items: center;
+          padding: 4px 10px;
+          border-radius: 6px;
+          border: 1px solid;
+          font-size: 12px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .cluster-url-tab:hover {
+          filter: brightness(0.96);
+          transform: translateY(-1px);
+        }
+
+        .cluster-url-tab.active {
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+          font-weight: 700;
+        }
+
+        .copy-url-wrapper {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex: 1;
+          min-width: 0;
+        }
+
+        .copy-badge {
+          padding: 2px 7px;
+          border-radius: 5px;
+          font-size: 11px;
+          font-family: 'JetBrains Mono', monospace;
+          font-weight: 700;
+          white-space: nowrap;
+        }
+
+        .all-urls-grid {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          margin-top: 14px;
+          padding-top: 14px;
+          border-top: 1px dashed #cbd5e1;
+        }
+
+        .all-url-card {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          padding: 8px 12px;
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
+          border-radius: 8px;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+        }
+
+        .auc-info {
+          display: flex;
+          flex-direction: column;
+          gap: 3px;
+          flex: 1;
+          min-width: 0;
+        }
+
+        .auc-title-row {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 13px;
+        }
+
+        .auc-num {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 18px;
+          height: 18px;
+          border-radius: 50%;
+          font-size: 10px;
+          font-weight: 700;
+        }
+
+        .auc-name {
+          color: #1e293b;
+        }
+
+        .auc-db-name {
+          font-size: 11px;
+          font-weight: 600;
+        }
+
+        .auc-url {
+          font-size: 12px;
+          color: #059669;
+          background: #f8fafc;
+          padding: 2px 6px;
+          border-radius: 4px;
+          word-break: break-all;
+        }
+
+        .btn-copy-sm {
+          display: inline-flex;
+          align-items: center;
+          background: #ffffff;
+          border: 1px solid #cbd5e1;
+          color: #334155;
+          padding: 4px 10px;
+          border-radius: 6px;
+          font-size: 12px;
+          font-weight: 600;
+          cursor: pointer;
+          white-space: nowrap;
+          transition: all 0.2s;
+        }
+
+        .btn-copy-sm:hover {
+          background: #f1f5f9;
+        }
+
+        .btn-copy-sm.copied {
+          background: #ecfdf5;
+          color: #059669;
+          border-color: #a7f3d0;
         }
 
         .copy-label {

@@ -4,7 +4,7 @@
  * Features:
  * 1. Serves the Complete TopMCQBD Website UI (HTML, CSS, JS, Images, Fonts) via Cloudflare Native Assets
  * 2. High-Performance Direct MongoDB Atlas Connectivity (TCP Socket, Edge-Optimized, Connection Pooling)
- * 3. Cloudflare D1 SQL Database Integration for Layout, Menus, Header, Footer, and Configs
+ * 3. Dynamic Layout and Configs Proxied Directly from Cloudflare Pages D1
  * 4. Smart Route Fallback (auto-resolves Clean URLs like /questions to /questions.html)
  * 5. Rich Diagnostic Portal for Edge Health Checks
  * 6. Full CORS Support for seamless Frontend Integration
@@ -48,40 +48,25 @@ function htmlResponse(html, status = 200) {
  */
 async function getClient(uri) {
   if (!uri) throw new Error('MongoDB URI is not configured');
-  if (mongoClients[uri]) return mongoClients[uri];
 
-  const client = new MongoClient(uri, {
+  const isSrv = uri.startsWith('mongodb+srv://');
+  const clientOptions = {
     tls: true,
     family: 4,               // Enforce IPv4 to avoid Edge IPv6 DNS latency
-    directConnection: true,  // Connects directly to replica shard
     maxPoolSize: 1,         // Single lightweight socket per Edge isolate
     minPoolSize: 0,         // Clean up idle sockets automatically
-    connectTimeoutMS: 6000,
-    serverSelectionTimeoutMS: 6000,
-    socketTimeoutMS: 10000,
-  });
+    connectTimeoutMS: 8000,
+    serverSelectionTimeoutMS: 8000,
+    socketTimeoutMS: 12000,
+  };
 
-  await client.connect();
-  mongoClients[uri] = client;
-  return client;
-}
-
-/**
- * D1 Config Helper: Read data from app_configs table
- */
-async function getD1Config(env, key) {
-  if (!env || !env.DB) return null;
-  try {
-    const row = await env.DB.prepare(
-      'SELECT data FROM app_configs WHERE key = ? LIMIT 1'
-    ).bind(key).first();
-    if (row && row.data) {
-      return typeof row.data === 'string' ? JSON.parse(row.data) : row.data;
-    }
-  } catch (e) {
-    console.error(`[Worker D1 Error] fetching ${key}:`, e);
+  if (!isSrv) {
+    clientOptions.directConnection = true;
   }
-  return null;
+
+  const client = new MongoClient(uri, clientOptions);
+  await client.connect();
+  return client;
 }
 
 const DEFAULT_LAYOUT = {
@@ -364,113 +349,141 @@ export default {
           runtime: 'Cloudflare Workers (Edge V8 Isolate with Native Assets)',
           version: '2.0.0',
           assetsConfigured: Boolean(env.ASSETS),
-          d1Configured: Boolean(env.DB),
+          database: 'MongoDB Atlas Shards (TCP Gateway)',
           timestamp: new Date().toISOString(),
         });
       }
 
-      // (B) Layout Config API (Header, Menus, Announcement, Footer)
+      // (B) Layout Config API (Proxied from Cloudflare Pages D1)
       if (path === '/api/layout-config') {
-        const d1Data = await getD1Config(env, 'layout_config');
-        return jsonResponse(d1Data || DEFAULT_LAYOUT, 200, {
-          'Cache-Control': 'public, max-age=60, s-maxage=300',
-        });
+        try {
+          const res = await fetch('https://topmcqbd.pages.dev/api/layout-config', {
+            headers: { 'User-Agent': 'TopMCQBD-Worker-Proxy' },
+          });
+          if (res.ok) {
+            const data = await res.json();
+            return jsonResponse(data, 200, { 'Cache-Control': 'public, max-age=60, s-maxage=300' });
+          }
+        } catch (e) {}
+        return jsonResponse(DEFAULT_LAYOUT, 200);
       }
 
-      // (C) Common Config API (Key-Value Edge Cache from D1)
+      // (C) Common Config API (Proxied from Cloudflare Pages D1)
       if (path === '/api/common-config') {
-        const key = url.searchParams.get('key') || 'all';
-        if (env.DB) {
-          if (key === 'all') {
-            const { results } = await env.DB.prepare('SELECT key, data FROM app_configs').all();
-            const allData = {};
-            if (results && results.length) {
-              for (const row of results) {
-                try {
-                  allData[row.key] = typeof row.data === 'string' ? JSON.parse(row.data) : row.data;
-                } catch (e) {
-                  allData[row.key] = row.data;
-                }
-              }
-            }
-            return jsonResponse(allData, 200, { 'Cache-Control': 'public, max-age=60, s-maxage=300' });
-          } else {
-            const d1Data = await getD1Config(env, key);
-            return jsonResponse(d1Data || {}, 200, { 'Cache-Control': 'public, max-age=60, s-maxage=300' });
+        try {
+          const res = await fetch(`https://topmcqbd.pages.dev/api/common-config${url.search}`, {
+            headers: { 'User-Agent': 'TopMCQBD-Worker-Proxy' },
+          });
+          if (res.ok) {
+            const data = await res.json();
+            return jsonResponse(data, 200, { 'Cache-Control': 'public, max-age=60, s-maxage=300' });
           }
-        }
+        } catch (e) {}
         return jsonResponse({}, 200);
       }
 
-      // (D) Home Config API
+      // (D) Home Config API (Proxied from Cloudflare Pages D1)
       if (path === '/api/home-config') {
-        const d1Data = await getD1Config(env, 'home_config');
-        return jsonResponse(d1Data || {}, 200, {
-          'Cache-Control': 'public, max-age=60, s-maxage=300',
-        });
+        try {
+          const res = await fetch('https://topmcqbd.pages.dev/api/home-config', {
+            headers: { 'User-Agent': 'TopMCQBD-Worker-Proxy' },
+          });
+          if (res.ok) {
+            const data = await res.json();
+            return jsonResponse(data, 200, { 'Cache-Control': 'public, max-age=60, s-maxage=300' });
+          }
+        } catch (e) {}
+        return jsonResponse({}, 200);
       }
 
-      // (E) Sidebar Config API
+      // (E) Sidebar Config API (Proxied from Cloudflare Pages D1)
       if (path === '/api/sidebar-config') {
-        const d1Data = await getD1Config(env, 'sidebar_config');
-        return jsonResponse(d1Data || {}, 200, {
-          'Cache-Control': 'public, max-age=60, s-maxage=300',
-        });
+        try {
+          const res = await fetch('https://topmcqbd.pages.dev/api/sidebar-config', {
+            headers: { 'User-Agent': 'TopMCQBD-Worker-Proxy' },
+          });
+          if (res.ok) {
+            const data = await res.json();
+            return jsonResponse(data, 200, { 'Cache-Control': 'public, max-age=60, s-maxage=300' });
+          }
+        } catch (e) {}
+        return jsonResponse({}, 200);
       }
 
-      // (F) Packages Data API
+      // (F) Packages Data API (Proxied from Cloudflare Pages D1)
       if (path === '/api/packages-data') {
-        const d1Data = await getD1Config(env, 'packages_data');
-        return jsonResponse(d1Data || [], 200, {
-          'Cache-Control': 'public, max-age=60, s-maxage=300',
-        });
+        try {
+          const res = await fetch('https://topmcqbd.pages.dev/api/packages-data', {
+            headers: { 'User-Agent': 'TopMCQBD-Worker-Proxy' },
+          });
+          if (res.ok) {
+            const data = await res.json();
+            return jsonResponse(data, 200, { 'Cache-Control': 'public, max-age=60, s-maxage=300' });
+          }
+        } catch (e) {}
+        return jsonResponse([], 200);
       }
 
-      // (G) FAQ Data API
+      // (G) FAQ Data API (Proxied from Cloudflare Pages D1)
       if (path === '/api/faq-data') {
-        const d1Data = await getD1Config(env, 'faq_data');
-        return jsonResponse(d1Data || [], 200, {
-          'Cache-Control': 'public, max-age=60, s-maxage=300',
-        });
+        try {
+          const res = await fetch('https://topmcqbd.pages.dev/api/faq-data', {
+            headers: { 'User-Agent': 'TopMCQBD-Worker-Proxy' },
+          });
+          if (res.ok) {
+            const data = await res.json();
+            return jsonResponse(data, 200, { 'Cache-Control': 'public, max-age=60, s-maxage=300' });
+          }
+        } catch (e) {}
+        return jsonResponse([], 200);
       }
 
-      // (H) About Data API
+      // (H) About Data API (Proxied from Cloudflare Pages D1)
       if (path === '/api/about-data') {
-        const d1Data = await getD1Config(env, 'about_data');
-        return jsonResponse(d1Data || {}, 200, {
-          'Cache-Control': 'public, max-age=60, s-maxage=300',
-        });
+        try {
+          const res = await fetch('https://topmcqbd.pages.dev/api/about-data', {
+            headers: { 'User-Agent': 'TopMCQBD-Worker-Proxy' },
+          });
+          if (res.ok) {
+            const data = await res.json();
+            return jsonResponse(data, 200, { 'Cache-Control': 'public, max-age=60, s-maxage=300' });
+          }
+        } catch (e) {}
+        return jsonResponse({}, 200);
       }
 
-      // (I) Policy API
+      // (I) Policy API (Proxied from Cloudflare Pages D1)
       if (path === '/api/policy' || path === '/api/policy/get') {
-        const d1Data = await getD1Config(env, 'policy_config');
-        return jsonResponse(d1Data || {}, 200, {
-          'Cache-Control': 'public, max-age=60, s-maxage=300',
-        });
+        try {
+          const res = await fetch('https://topmcqbd.pages.dev/api/policy', {
+            headers: { 'User-Agent': 'TopMCQBD-Worker-Proxy' },
+          });
+          if (res.ok) {
+            const data = await res.json();
+            return jsonResponse(data, 200, { 'Cache-Control': 'public, max-age=60, s-maxage=300' });
+          }
+        } catch (e) {}
+        return jsonResponse({}, 200);
       }
 
-      // (J) Cloudflare D1 Health / Latency Check
+      // (J) Cloudflare D1 Status Check (Worker D1 is disabled; Pages D1 is primary)
       if (path === '/api/db-test/d1') {
-        if (!env.DB) {
-          return jsonResponse({ success: false, message: 'D1 Database binding (DB) is not attached' }, 500);
-        }
-        const t0 = Date.now();
-        await env.DB.prepare('SELECT 1').first();
-        const latencyMs = Date.now() - t0;
         return jsonResponse({
           success: true,
-          database: 'topmcqbd-db (Cloudflare D1 SQL)',
-          latencyMs,
+          message: 'D1 is managed exclusively in Cloudflare Pages (https://topmcqbd.pages.dev). Cloudflare Worker D1 is disabled.',
+          pagesUrl: 'https://topmcqbd.pages.dev/api/db-test/d1',
           runtime: 'Cloudflare Worker',
           timestamp: new Date().toISOString(),
         });
       }
 
       // (K) MongoDB Multi-Cluster Ping & CRUD Handler
-      if (path === '/api/db-check' || path.startsWith('/api/db-test/')) {
-        const clusterMatch = path.replace(/^\/api\/db-test\/?/, '').trim();
-        const clusterKey = clusterMatch || url.searchParams.get('cluster') || 'paid';
+      if (path === '/api/db-check' || path.startsWith('/api/db-test/') || path === '/api/db-pages-api') {
+        let clusterMatch = path.replace(/^\/api\/db-test\/?/, '').trim();
+        if (path === '/api/db-pages-api' || path === '/api/db-check') {
+          clusterMatch = url.searchParams.get('cluster') || 'paid';
+        }
+        const clusterKey = (clusterMatch || url.searchParams.get('cluster') || 'paid').toLowerCase();
 
         let targetUri = env.MONGODB_URI_PAID;
         let targetDb = env.MONGODB_DB_PAID || 'TopMCQBD_DB';
@@ -484,7 +497,7 @@ export default {
           targetUri = env.MONGODB_URI_SUBJECTIVE || targetUri;
           targetDb = env.MONGODB_DB_SUBJECTIVE || 'TopMCQBD_DB_Subjective';
           targetColl = 'db-subjective-test';
-        } else if (clusterKey === 'live-exam') {
+        } else if (clusterKey === 'live-exam' || clusterKey === 'live_exam') {
           targetUri = env.MONGODB_URI_LIVE_EXAM || targetUri;
           targetDb = env.MONGODB_DB_LIVE_EXAM || 'TopMCQBD_DB_Live_Exam';
           targetColl = 'db-live-exam-test';
@@ -492,7 +505,7 @@ export default {
           targetUri = env.MONGODB_URI_WRITTEN || targetUri;
           targetDb = env.MONGODB_DB_WRITTEN || 'TopMCQBD_DB_written';
           targetColl = 'db-written-test';
-        } else if (clusterKey === 'question-bank') {
+        } else if (clusterKey === 'question-bank' || clusterKey === 'question_bank') {
           targetUri = env.MONGODB_URI_QUESTION_BANK || targetUri;
           targetDb = env.MONGODB_DB_QUESTION_BANK || 'TopMCQBD_DB_Question_Bank';
           targetColl = 'db-question-bank-test';
@@ -510,125 +523,129 @@ export default {
         }
 
         const client = await getClient(targetUri);
-        const db = client.db(targetDb);
-        const collection = db.collection(targetColl);
+        try {
+          const db = client.db(targetDb);
+          const collection = db.collection(targetColl);
 
-        // GET: Ping + List collections + Fetch documents
-        if (request.method === 'GET') {
-          const t0 = Date.now();
-          const pingResult = await db.command({ ping: 1 });
-          const latencyMs = Date.now() - t0;
-          const collections = await db.listCollections().toArray();
-          const collectionNames = collections.map((c) => c.name);
+          // GET: Ping + List collections + Fetch documents
+          if (request.method === 'GET') {
+            const t0 = Date.now();
+            const pingResult = await db.command({ ping: 1 });
+            const latencyMs = Date.now() - t0;
+            const collections = await db.listCollections().toArray();
+            const collectionNames = collections.map((c) => c.name);
 
-          const items = await collection
-            .find({})
-            .sort({ createdAt: -1 })
-            .limit(100)
-            .toArray();
+            const items = await collection
+              .find({})
+              .sort({ createdAt: -1 })
+              .limit(100)
+              .toArray();
 
-          const formattedItems = items.map((doc) => ({
-            id: doc._id.toString(),
-            title: doc.title || '',
-            category: doc.category || 'Worker Edge',
-            text: doc.text || '',
-            createdAt: doc.createdAt || null,
-            updatedAt: doc.updatedAt || null,
-          }));
+            const formattedItems = items.map((doc) => ({
+              id: doc._id.toString(),
+              title: doc.title || '',
+              category: doc.category || 'Worker Edge',
+              text: doc.text || '',
+              createdAt: doc.createdAt || null,
+              updatedAt: doc.updatedAt || null,
+            }));
 
-          return jsonResponse({
-            success: pingResult.ok === 1,
-            cluster: targetDb,
-            collection: targetColl,
-            connected: true,
-            latencyMs,
-            collections: collectionNames,
-            totalItems: formattedItems.length,
-            items: formattedItems,
-            runtime: 'Cloudflare Worker (V8 Isolate)',
-            timestamp: new Date().toISOString(),
-          });
-        }
-
-        // POST: Insert new test document
-        if (request.method === 'POST') {
-          const body = await request.json().catch(() => ({}));
-          const text = (body.text || '').trim();
-          const title = (body.title || '').trim();
-          const category = (body.category || 'Worker Edge').trim();
-
-          if (!text) {
-            return jsonResponse({ success: false, error: 'টেক্সট ফিল্ড খালি রাখা যাবে না।' }, 400);
+            return jsonResponse({
+              success: pingResult.ok === 1,
+              cluster: targetDb,
+              collection: targetColl,
+              connected: true,
+              latencyMs,
+              collections: collectionNames,
+              totalItems: formattedItems.length,
+              items: formattedItems,
+              runtime: 'Cloudflare Worker (V8 Isolate)',
+              timestamp: new Date().toISOString(),
+            });
           }
 
-          const newDoc = {
-            title: title || (text.length > 25 ? text.slice(0, 25) + '...' : text),
-            category,
-            text,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          };
-
-          const insertRes = await collection.insertOne(newDoc);
-          return jsonResponse({
-            success: true,
-            message: `ডাটা সফলভাবে ${targetColl} কালেকশনে যুক্ত হয়েছে।`,
-            item: { id: insertRes.insertedId.toString(), ...newDoc },
-          }, 201);
-        }
-
-        // PUT: Edit existing test document
-        if (request.method === 'PUT') {
-          const body = await request.json().catch(() => ({}));
-          const id = body.id || body._id;
-          const text = (body.text || '').trim();
-          const title = (body.title || '').trim();
-          const category = (body.category || '').trim();
-
-          if (!id || !text) {
-            return jsonResponse({ success: false, error: 'ID এবং টেক্সট উভয়েই আবশ্যক।' }, 400);
-          }
-
-          const filter = ObjectId.isValid(id) ? { _id: new ObjectId(id) } : { _id: id };
-          const updateDoc = { text, updatedAt: new Date().toISOString() };
-          if (title) updateDoc.title = title;
-          if (category) updateDoc.category = category;
-
-          const updateRes = await collection.updateOne(filter, { $set: updateDoc });
-          if (updateRes.matchedCount === 0) {
-            return jsonResponse({ success: false, error: 'কোনো তথ্য পাওয়া যায়নি।' }, 404);
-          }
-
-          return jsonResponse({
-            success: true,
-            message: 'ডাটা সফলভাবে আপডেট করা হয়েছে।',
-            updatedId: id,
-          });
-        }
-
-        // DELETE: Delete test document
-        if (request.method === 'DELETE') {
-          let id = url.searchParams.get('id');
-          if (!id) {
+          // POST: Insert new test document
+          if (request.method === 'POST') {
             const body = await request.json().catch(() => ({}));
-            id = body?.id || body?._id;
+            const text = (body.text || '').trim();
+            const title = (body.title || '').trim();
+            const category = (body.category || 'Worker Edge').trim();
+
+            if (!text) {
+              return jsonResponse({ success: false, error: 'টেক্সট ফিল্ড খালি রাখা যাবে না।' }, 400);
+            }
+
+            const newDoc = {
+              title: title || (text.length > 25 ? text.slice(0, 25) + '...' : text),
+              category,
+              text,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            };
+
+            const insertRes = await collection.insertOne(newDoc);
+            return jsonResponse({
+              success: true,
+              message: `ডাটা সফলভাবে ${targetColl} কালেকশনে যুক্ত হয়েছে।`,
+              item: { id: insertRes.insertedId.toString(), ...newDoc },
+            }, 201);
           }
 
-          if (!id) {
-            return jsonResponse({ success: false, error: 'মুছে ফেলার জন্য ID প্রদান করুন।' }, 400);
+          // PUT: Edit existing test document
+          if (request.method === 'PUT') {
+            const body = await request.json().catch(() => ({}));
+            const id = body.id || body._id;
+            const text = (body.text || '').trim();
+            const title = (body.title || '').trim();
+            const category = (body.category || '').trim();
+
+            if (!id || !text) {
+              return jsonResponse({ success: false, error: 'ID এবং টেক্সট উভয়েই আবশ্যক।' }, 400);
+            }
+
+            const filter = ObjectId.isValid(id) ? { _id: new ObjectId(id) } : { _id: id };
+            const updateDoc = { text, updatedAt: new Date().toISOString() };
+            if (title) updateDoc.title = title;
+            if (category) updateDoc.category = category;
+
+            const updateRes = await collection.updateOne(filter, { $set: updateDoc });
+            if (updateRes.matchedCount === 0) {
+              return jsonResponse({ success: false, error: 'কোনো তথ্য পাওয়া যায়নি।' }, 404);
+            }
+
+            return jsonResponse({
+              success: true,
+              message: 'ডাটা সফলভাবে আপডেট করা হয়েছে।',
+              updatedId: id,
+            });
           }
 
-          const filter = ObjectId.isValid(id) ? { _id: new ObjectId(id) } : { _id: id };
-          const delRes = await collection.deleteOne(filter);
-          if (delRes.deletedCount === 0) {
-            return jsonResponse({ success: false, error: 'মুছে ফেলার জন্য ডাটা পাওয়া যায়নি।' }, 404);
-          }
+          // DELETE: Delete test document
+          if (request.method === 'DELETE') {
+            let id = url.searchParams.get('id');
+            if (!id) {
+              const body = await request.json().catch(() => ({}));
+              id = body?.id || body?._id;
+            }
 
-          return jsonResponse({
-            success: true,
-            message: 'ডাটা সফলভাবে মুছে ফেলা হয়েছে।',
-            deletedId: id,
-          });
+            if (!id) {
+              return jsonResponse({ success: false, error: 'মুছে ফেলার জন্য ID প্রদান করুন।' }, 400);
+            }
+
+            const filter = ObjectId.isValid(id) ? { _id: new ObjectId(id) } : { _id: id };
+            const delRes = await collection.deleteOne(filter);
+            if (delRes.deletedCount === 0) {
+              return jsonResponse({ success: false, error: 'মুছে ফেলার জন্য ডাটা পাওয়া যায়নি।' }, 404);
+            }
+
+            return jsonResponse({
+              success: true,
+              message: 'ডাটা সফলভাবে মুছে ফেলা হয়েছে।',
+              deletedId: id,
+            });
+          }
+        } finally {
+          await client.close().catch(() => {});
         }
       }
 
@@ -646,27 +663,31 @@ export default {
         const page = parseInt(url.searchParams.get('page') || '1', 10);
 
         const client = await getClient(uri);
-        const db = client.db(dbName);
-        const collection = db.collection('questions');
+        try {
+          const db = client.db(dbName);
+          const collection = db.collection('questions');
 
-        const filter = category ? { category } : {};
-        const total = await collection.countDocuments(filter);
-        const questions = await collection
-          .find(filter)
-          .skip((page - 1) * limit)
-          .limit(limit)
-          .toArray();
+          const filter = category ? { category } : {};
+          const total = await collection.countDocuments(filter);
+          const questions = await collection
+            .find(filter)
+            .skip((page - 1) * limit)
+            .limit(limit)
+            .toArray();
 
-        return jsonResponse({
-          success: true,
-          total,
-          page,
-          count: questions.length,
-          data: questions,
-          source: 'Cloudflare Worker Backup API',
-        }, 200, {
-          'Cache-Control': 'public, max-age=60, s-maxage=300',
-        });
+          return jsonResponse({
+            success: true,
+            total,
+            page,
+            count: questions.length,
+            data: questions,
+            source: 'Cloudflare Worker Backup API',
+          }, 200, {
+            'Cache-Control': 'public, max-age=60, s-maxage=300',
+          });
+        } finally {
+          await client.close().catch(() => {});
+        }
       }
 
       // (M) Categories API
@@ -675,16 +696,20 @@ export default {
         const dbName = env.MONGODB_DB_FREE || 'TopMCQBD_DB_Free';
 
         const client = await getClient(uri);
-        const db = client.db(dbName);
-        const categories = await db.collection('questions').distinct('category');
+        try {
+          const db = client.db(dbName);
+          const categories = await db.collection('questions').distinct('category');
 
-        return jsonResponse({
-          success: true,
-          categories,
-          source: 'Cloudflare Worker Backup API',
-        }, 200, {
-          'Cache-Control': 'public, max-age=300, s-maxage=600',
-        });
+          return jsonResponse({
+            success: true,
+            categories,
+            source: 'Cloudflare Worker Backup API',
+          }, 200, {
+            'Cache-Control': 'public, max-age=300, s-maxage=600',
+          });
+        } finally {
+          await client.close().catch(() => {});
+        }
       }
 
       // If an API route is unmatched

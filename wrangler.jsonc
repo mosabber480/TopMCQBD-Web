@@ -9,15 +9,25 @@
     "directory": "out",
     "binding": "ASSETS",
     "html_handling": "auto-trailing-slash",
-    "not_found_handling": "single-page-application"
+    "not_found_handling": "single-page-application",
+    "run_worker_first": [
+      "/api/*"
+    ]
   },
   "vars": {
     "APP_NAME": "TopMCQBD Backup Worker API",
+    "JWT_SECRET": "topmcqbd_super_secret_jwt_key_2026",
     "MONGODB_DB_PAID": "TopMCQBD_DB",
     "MONGODB_DB_FREE": "TopMCQBD_DB_Free",
     "MONGODB_DB_LIVE_EXAM": "TopMCQBD_DB_Live_Exam",
     "MONGODB_DB_SUBJECTIVE": "TopMCQBD_DB_Subjective",
     "MONGODB_DB_WRITTEN": "TopMCQBD_DB_written",
-    "MONGODB_DB_QUESTION_BANK": "TopMCQBD_DB_Question_Bank"
+    "MONGODB_DB_QUESTION_BANK": "TopMCQBD_DB_Question_Bank",
+    "MONGODB_URI_PAID": "mongodb+srv://mosabber480_db_user:EScirLEzwgQVVNaB@mosabber.3ajdj0u.mongodb.net/TopMCQBD_DB?retryWrites=true&w=majority",
+    "MONGODB_URI_FREE": "mongodb+srv://mosabber480_db_user:VVcrE9PeIIyVlcKU@topmcqbd.pixb7fx.mongodb.net/TopMCQBD_DB_Free?retryWrites=true&w=majority",
+    "MONGODB_URI_SUBJECTIVE": "mongodb+srv://mosabber480_db_user:DyW4KsXEhpcK1Rm2@topmcqbd.3ifvd7c.mongodb.net/TopMCQBD_DB_Subjective?retryWrites=true&w=majority&appName=TopMCQBD",
+    "MONGODB_URI_LIVE_EXAM": "mongodb+srv://mosabber480_db_user:UANQIRPoI9Zm3m4f@topmcqbd.ns1gpls.mongodb.net/TopMCQBD_DB_Live_Exam?retryWrites=true&w=majority&appName=TopMCQBD",
+    "MONGODB_URI_WRITTEN": "mongodb+srv://mosabber480_db_user:FABv84QMDHSQyeP5@topmcqbd.hfivdlt.mongodb.net/TopMCQBD_DB_written?retryWrites=true&w=majority&appName=TopMCQBD",
+    "MONGODB_URI_QUESTION_BANK": "mongodb+srv://mosabber480_db_user:0lxx4VTglJgoel8E@topmcqbd.bexo18c.mongodb.net/TopMCQBD_DB_Question_Bank?retryWrites=true&w=majority&appName=TopMCQBD"
   }
 }

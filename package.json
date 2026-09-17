@@ -12,7 +12,7 @@
     "seed": "node seedUsers.js",
     "sync:d1": "node syncConfigs.js",
     "worker:dev": "wrangler dev workers/topmcqbd-worker/src/index.js --config workers/topmcqbd-worker/wrangler.jsonc --port 8787",
-    "worker:deploy": "wrangler deploy workers/topmcqbd-worker/src/index.js --config workers/topmcqbd-worker/wrangler.jsonc",
+    "worker:deploy": "npm run build && wrangler deploy workers/topmcqbd-worker/src/index.js --config workers/topmcqbd-worker/wrangler.jsonc",
     "pages:deploy": "wrangler pages deploy out --project-name topmcqbd"
   },
   "dependencies": {
