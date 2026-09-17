@@ -13,7 +13,8 @@ const CLUSTERS = {
     name: 'TopMCQBD_DB (Paid Core)',
     envUriKey: 'MONGODB_URI_PAID',
     envDbKey: 'MONGODB_DB_PAID',
-    fallbackUri: 'mongodb+srv://mosabber480_db_user:EScirLEzwgQVVNaB@mosabber.3ajdj0u.mongodb.net/TopMCQBD_DB?retryWrites=true&w=majority',
+    directUri: 'mongodb://mosabber480_db_user:EScirLEzwgQVVNaB@ac-472re4l-shard-00-00.3ajdj0u.mongodb.net:27017,ac-472re4l-shard-00-01.3ajdj0u.mongodb.net:27017,ac-472re4l-shard-00-02.3ajdj0u.mongodb.net:27017/TopMCQBD_DB?ssl=true&replicaSet=atlas-wzdf1e-shard-0&authSource=admin&retryWrites=true&w=majority',
+    srvUri: 'mongodb+srv://mosabber480_db_user:EScirLEzwgQVVNaB@mosabber.3ajdj0u.mongodb.net/TopMCQBD_DB?retryWrites=true&w=majority',
   },
   free: {
     db: 'TopMCQBD_DB_Free',
@@ -21,7 +22,8 @@ const CLUSTERS = {
     name: 'TopMCQBD_DB_Free (Open Free)',
     envUriKey: 'MONGODB_URI_FREE',
     envDbKey: 'MONGODB_DB_FREE',
-    fallbackUri: 'mongodb+srv://mosabber480_db_user:VVcrE9PeIIyVlcKU@topmcqbd.pixb7fx.mongodb.net/TopMCQBD_DB_Free?retryWrites=true&w=majority',
+    directUri: 'mongodb://mosabber480_db_user:VVcrE9PeIIyVlcKU@ac-rw27hdk-shard-00-00.pixb7fx.mongodb.net:27017,ac-rw27hdk-shard-00-01.pixb7fx.mongodb.net:27017,ac-rw27hdk-shard-00-02.pixb7fx.mongodb.net:27017/TopMCQBD_DB_Free?ssl=true&replicaSet=atlas-bntyny-shard-0&authSource=admin&retryWrites=true&w=majority',
+    srvUri: 'mongodb+srv://mosabber480_db_user:VVcrE9PeIIyVlcKU@topmcqbd.pixb7fx.mongodb.net/TopMCQBD_DB_Free?retryWrites=true&w=majority',
   },
   subjective: {
     db: 'TopMCQBD_DB_Subjective',
@@ -29,7 +31,8 @@ const CLUSTERS = {
     name: 'TopMCQBD_DB_Subjective',
     envUriKey: 'MONGODB_URI_SUBJECTIVE',
     envDbKey: 'MONGODB_DB_SUBJECTIVE',
-    fallbackUri: 'mongodb+srv://mosabber480_db_user:DyW4KsXEhpcK1Rm2@topmcqbd.3ifvd7c.mongodb.net/TopMCQBD_DB_Subjective?retryWrites=true&w=majority&appName=TopMCQBD',
+    directUri: 'mongodb://mosabber480_db_user:DyW4KsXEhpcK1Rm2@ac-co47w40-shard-00-00.3ifvd7c.mongodb.net:27017,ac-co47w40-shard-00-01.3ifvd7c.mongodb.net:27017,ac-co47w40-shard-00-02.3ifvd7c.mongodb.net:27017/TopMCQBD_DB_Subjective?ssl=true&replicaSet=atlas-c8bq3l-shard-0&authSource=admin&retryWrites=true&w=majority',
+    srvUri: 'mongodb+srv://mosabber480_db_user:DyW4KsXEhpcK1Rm2@topmcqbd.3ifvd7c.mongodb.net/TopMCQBD_DB_Subjective?retryWrites=true&w=majority&appName=TopMCQBD',
   },
   live_exam: {
     db: 'TopMCQBD_DB_Live_Exam',
@@ -37,7 +40,8 @@ const CLUSTERS = {
     name: 'TopMCQBD_DB_Live_Exam',
     envUriKey: 'MONGODB_URI_LIVE_EXAM',
     envDbKey: 'MONGODB_DB_LIVE_EXAM',
-    fallbackUri: 'mongodb+srv://mosabber480_db_user:UANQIRPoI9Zm3m4f@topmcqbd.ns1gpls.mongodb.net/TopMCQBD_DB_Live_Exam?retryWrites=true&w=majority&appName=TopMCQBD',
+    directUri: 'mongodb://mosabber480_db_user:UANQIRPoI9Zm3m4f@ac-il8uyoo-shard-00-00.ns1gpls.mongodb.net:27017,ac-il8uyoo-shard-00-01.ns1gpls.mongodb.net:27017,ac-il8uyoo-shard-00-02.ns1gpls.mongodb.net:27017/TopMCQBD_DB_Live_Exam?ssl=true&replicaSet=atlas-e1xhyt-shard-0&authSource=admin&retryWrites=true&w=majority',
+    srvUri: 'mongodb+srv://mosabber480_db_user:UANQIRPoI9Zm3m4f@topmcqbd.ns1gpls.mongodb.net/TopMCQBD_DB_Live_Exam?retryWrites=true&w=majority&appName=TopMCQBD',
   },
   written: {
     db: 'TopMCQBD_DB_written',
@@ -45,7 +49,8 @@ const CLUSTERS = {
     name: 'TopMCQBD_DB_written',
     envUriKey: 'MONGODB_URI_WRITTEN',
     envDbKey: 'MONGODB_DB_WRITTEN',
-    fallbackUri: 'mongodb+srv://mosabber480_db_user:FABv84QMDHSQyeP5@topmcqbd.hfivdlt.mongodb.net/TopMCQBD_DB_written?retryWrites=true&w=majority&appName=TopMCQBD',
+    directUri: 'mongodb://mosabber480_db_user:FABv84QMDHSQyeP5@ac-zzyyeyo-shard-00-00.hfivdlt.mongodb.net:27017,ac-zzyyeyo-shard-00-01.hfivdlt.mongodb.net:27017,ac-zzyyeyo-shard-00-02.hfivdlt.mongodb.net:27017/TopMCQBD_DB_written?ssl=true&replicaSet=atlas-afklo6-shard-0&authSource=admin&retryWrites=true&w=majority',
+    srvUri: 'mongodb+srv://mosabber480_db_user:FABv84QMDHSQyeP5@topmcqbd.hfivdlt.mongodb.net/TopMCQBD_DB_written?retryWrites=true&w=majority&appName=TopMCQBD',
   },
   question_bank: {
     db: 'TopMCQBD_DB_Question_Bank',
@@ -53,7 +58,8 @@ const CLUSTERS = {
     name: 'TopMCQBD_DB_Question_Bank',
     envUriKey: 'MONGODB_URI_QUESTION_BANK',
     envDbKey: 'MONGODB_DB_QUESTION_BANK',
-    fallbackUri: 'mongodb+srv://mosabber480_db_user:0lxx4VTglJgoel8E@topmcqbd.bexo18c.mongodb.net/TopMCQBD_DB_Question_Bank?retryWrites=true&w=majority&appName=TopMCQBD',
+    directUri: 'mongodb://mosabber480_db_user:0lxx4VTglJgoel8E@ac-bkuekcv-shard-00-00.bexo18c.mongodb.net:27017,ac-bkuekcv-shard-00-01.bexo18c.mongodb.net:27017,ac-bkuekcv-shard-00-02.bexo18c.mongodb.net:27017/TopMCQBD_DB_Question_Bank?ssl=true&replicaSet=atlas-2tax1l-shard-0&authSource=admin&retryWrites=true&w=majority',
+    srvUri: 'mongodb+srv://mosabber480_db_user:0lxx4VTglJgoel8E@topmcqbd.bexo18c.mongodb.net/TopMCQBD_DB_Question_Bank?retryWrites=true&w=majority&appName=TopMCQBD',
   },
 };
 
@@ -80,13 +86,6 @@ function resolveCluster(clusterParam) {
   return CLUSTERS[normalized] || CLUSTERS.paid;
 }
 
-function getTargetUri(clusterConfig, env) {
-  if (env && env[clusterConfig.envUriKey]) {
-    return env[clusterConfig.envUriKey];
-  }
-  return clusterConfig.fallbackUri;
-}
-
 function getTargetDb(clusterConfig, env) {
   if (env && env[clusterConfig.envDbKey]) {
     return env[clusterConfig.envDbKey];
@@ -94,30 +93,53 @@ function getTargetDb(clusterConfig, env) {
   return clusterConfig.db;
 }
 
-/**
- * Get connected MongoClient instance with Serverless Edge optimizations
- */
-async function getClient(uri) {
-  if (!uri) throw new Error('MongoDB URI is not configured');
-
+function createClientOptions(uri) {
   const isSrv = uri.startsWith('mongodb+srv://');
+  const isMultiHost = uri.includes(',');
   const clientOptions = {
     tls: true,
-    family: 4,
-    maxPoolSize: 1,
-    minPoolSize: 0,
-    connectTimeoutMS: 8000,
-    serverSelectionTimeoutMS: 8000,
-    socketTimeoutMS: 12000,
+    family: 4,               // Enforce IPv4 to avoid Edge IPv6 DNS latency
+    maxPoolSize: 1,         // Single lightweight socket per Edge isolate
+    minPoolSize: 0,         // Clean up idle sockets automatically
+    connectTimeoutMS: 6000,
+    serverSelectionTimeoutMS: 6000,
+    socketTimeoutMS: 10000,
   };
 
-  if (!isSrv) {
+  if (!isSrv && !isMultiHost) {
     clientOptions.directConnection = true;
   }
+  return clientOptions;
+}
 
-  const client = new MongoClient(uri, clientOptions);
-  await client.connect();
-  return client;
+/**
+ * Get connected MongoClient instance with Serverless Edge optimizations
+ * Connects directly to replicaSet shards (fastest, zero SRV DNS timeout)
+ */
+async function getClient(config, env) {
+  const customUri = env && env[config.envUriKey];
+  const urisToTry = [];
+
+  // 1. Direct replicaSet URI first (bypasses DNS SRV lookup, connecting in ~600ms)
+  if (config.directUri) urisToTry.push(config.directUri);
+  // 2. Custom environment URI if set
+  if (customUri && !urisToTry.includes(customUri)) urisToTry.push(customUri);
+  // 3. Fallback SRV URI
+  if (config.srvUri && !urisToTry.includes(config.srvUri)) urisToTry.push(config.srvUri);
+
+  let lastError = null;
+  for (const uri of urisToTry) {
+    try {
+      const client = new MongoClient(uri, createClientOptions(uri));
+      await client.connect();
+      return client;
+    } catch (err) {
+      lastError = err;
+      console.warn(`[Cloudflare Edge db-pages-api] Connection to ${config.name} failed with URI (${uri.substring(0, 30)}...): ${err.message}. Trying next fallback...`);
+    }
+  }
+
+  throw lastError || new Error(`All connection attempts to ${config.name} failed`);
 }
 
 export async function onRequestGet(context) {
@@ -167,13 +189,12 @@ export async function onRequestGet(context) {
   }
 
   const config = resolveCluster(clusterParam);
-  const uri = getTargetUri(config, context.env);
   const dbName = getTargetDb(config, context.env);
 
   const t0 = Date.now();
   let client;
   try {
-    client = await getClient(uri);
+    client = await getClient(config, context.env);
     const db = client.db(dbName);
     const collection = db.collection(config.coll);
 
@@ -240,7 +261,6 @@ export async function onRequestPost(context) {
   const url = new URL(context.request.url);
   const clusterParam = url.searchParams.get('cluster') || 'paid';
   const config = resolveCluster(clusterParam);
-  const uri = getTargetUri(config, context.env);
   const dbName = getTargetDb(config, context.env);
 
   let client;
@@ -252,7 +272,7 @@ export async function onRequestPost(context) {
       return jsonResponse({ success: false, error: 'টেক্সট ফিল্ড খালি রাখা যাবে না।' }, 400);
     }
 
-    client = await getClient(uri);
+    client = await getClient(config, context.env);
     const db = client.db(dbName);
     const collection = db.collection(config.coll);
 
@@ -284,7 +304,6 @@ export async function onRequestPut(context) {
   const url = new URL(context.request.url);
   const clusterParam = url.searchParams.get('cluster') || 'paid';
   const config = resolveCluster(clusterParam);
-  const uri = getTargetUri(config, context.env);
   const dbName = getTargetDb(config, context.env);
 
   let client;
@@ -297,7 +316,7 @@ export async function onRequestPut(context) {
       return jsonResponse({ success: false, error: 'ID এবং টেক্সট উভয়েই আবশ্যক।' }, 400);
     }
 
-    client = await getClient(uri);
+    client = await getClient(config, context.env);
     const db = client.db(dbName);
     const collection = db.collection(config.coll);
 
@@ -332,7 +351,6 @@ export async function onRequestDelete(context) {
   const url = new URL(context.request.url);
   const clusterParam = url.searchParams.get('cluster') || 'paid';
   const config = resolveCluster(clusterParam);
-  const uri = getTargetUri(config, context.env);
   const dbName = getTargetDb(config, context.env);
 
   let client;
@@ -347,7 +365,7 @@ export async function onRequestDelete(context) {
       return jsonResponse({ success: false, error: 'মুছে ফেলার জন্য ID প্রদান করুন।' }, 400);
     }
 
-    client = await getClient(uri);
+    client = await getClient(config, context.env);
     const db = client.db(dbName);
     const collection = db.collection(config.coll);
 

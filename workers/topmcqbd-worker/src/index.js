@@ -53,6 +53,7 @@ const CLUSTERS = {
     name: 'TopMCQBD_DB (Paid Core)',
     envUriKey: 'MONGODB_URI_PAID',
     envDbKey: 'MONGODB_DB_PAID',
+    directUri: 'mongodb://mosabber480_db_user:EScirLEzwgQVVNaB@ac-472re4l-shard-00-00.3ajdj0u.mongodb.net:27017,ac-472re4l-shard-00-01.3ajdj0u.mongodb.net:27017,ac-472re4l-shard-00-02.3ajdj0u.mongodb.net:27017/TopMCQBD_DB?ssl=true&replicaSet=atlas-wzdf1e-shard-0&authSource=admin&retryWrites=true&w=majority',
     fallbackUri: 'mongodb+srv://mosabber480_db_user:EScirLEzwgQVVNaB@mosabber.3ajdj0u.mongodb.net/TopMCQBD_DB?retryWrites=true&w=majority',
   },
   free: {
@@ -61,6 +62,7 @@ const CLUSTERS = {
     name: 'TopMCQBD_DB_Free (Open Free)',
     envUriKey: 'MONGODB_URI_FREE',
     envDbKey: 'MONGODB_DB_FREE',
+    directUri: 'mongodb://mosabber480_db_user:VVcrE9PeIIyVlcKU@ac-rw27hdk-shard-00-00.pixb7fx.mongodb.net:27017,ac-rw27hdk-shard-00-01.pixb7fx.mongodb.net:27017,ac-rw27hdk-shard-00-02.pixb7fx.mongodb.net:27017/TopMCQBD_DB_Free?ssl=true&replicaSet=atlas-bntyny-shard-0&authSource=admin&retryWrites=true&w=majority',
     fallbackUri: 'mongodb+srv://mosabber480_db_user:VVcrE9PeIIyVlcKU@topmcqbd.pixb7fx.mongodb.net/TopMCQBD_DB_Free?retryWrites=true&w=majority',
   },
   subjective: {
@@ -69,6 +71,7 @@ const CLUSTERS = {
     name: 'TopMCQBD_DB_Subjective',
     envUriKey: 'MONGODB_URI_SUBJECTIVE',
     envDbKey: 'MONGODB_DB_SUBJECTIVE',
+    directUri: 'mongodb://mosabber480_db_user:DyW4KsXEhpcK1Rm2@ac-co47w40-shard-00-00.3ifvd7c.mongodb.net:27017,ac-co47w40-shard-00-01.3ifvd7c.mongodb.net:27017,ac-co47w40-shard-00-02.3ifvd7c.mongodb.net:27017/TopMCQBD_DB_Subjective?ssl=true&replicaSet=atlas-c8bq3l-shard-0&authSource=admin&retryWrites=true&w=majority',
     fallbackUri: 'mongodb+srv://mosabber480_db_user:DyW4KsXEhpcK1Rm2@topmcqbd.3ifvd7c.mongodb.net/TopMCQBD_DB_Subjective?retryWrites=true&w=majority&appName=TopMCQBD',
   },
   live_exam: {
@@ -77,6 +80,7 @@ const CLUSTERS = {
     name: 'TopMCQBD_DB_Live_Exam',
     envUriKey: 'MONGODB_URI_LIVE_EXAM',
     envDbKey: 'MONGODB_DB_LIVE_EXAM',
+    directUri: 'mongodb://mosabber480_db_user:UANQIRPoI9Zm3m4f@ac-il8uyoo-shard-00-00.ns1gpls.mongodb.net:27017,ac-il8uyoo-shard-00-01.ns1gpls.mongodb.net:27017,ac-il8uyoo-shard-00-02.ns1gpls.mongodb.net:27017/TopMCQBD_DB_Live_Exam?ssl=true&replicaSet=atlas-e1xhyt-shard-0&authSource=admin&retryWrites=true&w=majority',
     fallbackUri: 'mongodb+srv://mosabber480_db_user:UANQIRPoI9Zm3m4f@topmcqbd.ns1gpls.mongodb.net/TopMCQBD_DB_Live_Exam?retryWrites=true&w=majority&appName=TopMCQBD',
   },
   written: {
@@ -85,6 +89,7 @@ const CLUSTERS = {
     name: 'TopMCQBD_DB_written',
     envUriKey: 'MONGODB_URI_WRITTEN',
     envDbKey: 'MONGODB_DB_WRITTEN',
+    directUri: 'mongodb://mosabber480_db_user:FABv84QMDHSQyeP5@ac-zzyyeyo-shard-00-00.hfivdlt.mongodb.net:27017,ac-zzyyeyo-shard-00-01.hfivdlt.mongodb.net:27017,ac-zzyyeyo-shard-00-02.hfivdlt.mongodb.net:27017/TopMCQBD_DB_written?ssl=true&replicaSet=atlas-afklo6-shard-0&authSource=admin&retryWrites=true&w=majority',
     fallbackUri: 'mongodb+srv://mosabber480_db_user:FABv84QMDHSQyeP5@topmcqbd.hfivdlt.mongodb.net/TopMCQBD_DB_written?retryWrites=true&w=majority&appName=TopMCQBD',
   },
   question_bank: {
@@ -93,6 +98,7 @@ const CLUSTERS = {
     name: 'TopMCQBD_DB_Question_Bank',
     envUriKey: 'MONGODB_URI_QUESTION_BANK',
     envDbKey: 'MONGODB_DB_QUESTION_BANK',
+    directUri: 'mongodb://mosabber480_db_user:0lxx4VTglJgoel8E@ac-bkuekcv-shard-00-00.bexo18c.mongodb.net:27017,ac-bkuekcv-shard-00-01.bexo18c.mongodb.net:27017,ac-bkuekcv-shard-00-02.bexo18c.mongodb.net:27017/TopMCQBD_DB_Question_Bank?ssl=true&replicaSet=atlas-2tax1l-shard-0&authSource=admin&retryWrites=true&w=majority',
     fallbackUri: 'mongodb+srv://mosabber480_db_user:0lxx4VTglJgoel8E@topmcqbd.bexo18c.mongodb.net/TopMCQBD_DB_Question_Bank?retryWrites=true&w=majority&appName=TopMCQBD',
   },
 };
@@ -100,35 +106,72 @@ const CLUSTERS = {
 function resolveCluster(clusterParam, env) {
   const norm = String(clusterParam || 'paid').toLowerCase().replace(/-/g, '_');
   const cfg = CLUSTERS[norm] || CLUSTERS.paid;
-  const uri = (env && env[cfg.envUriKey]) || cfg.fallbackUri;
+  const customUri = env && env[cfg.envUriKey];
   const dbName = (env && env[cfg.envDbKey]) || cfg.db;
-  return { uri, dbName, coll: cfg.coll, name: cfg.name };
+  return {
+    cfg,
+    customUri,
+    uri: customUri || cfg.directUri || cfg.fallbackUri,
+    dbName,
+    coll: cfg.coll,
+    name: cfg.name,
+  };
 }
 
-/**
- * Get connected MongoClient instance with Serverless Edge optimizations
- */
-async function getClient(uri) {
-  if (!uri) throw new Error('MongoDB URI is not configured');
-
+function createClientOptions(uri) {
   const isSrv = uri.startsWith('mongodb+srv://');
+  const isMultiHost = uri.includes(',');
   const clientOptions = {
     tls: true,
     family: 4,               // Enforce IPv4 to avoid Edge IPv6 DNS latency
     maxPoolSize: 1,         // Single lightweight socket per Edge isolate
     minPoolSize: 0,         // Clean up idle sockets automatically
-    connectTimeoutMS: 8000,
-    serverSelectionTimeoutMS: 8000,
-    socketTimeoutMS: 12000,
+    connectTimeoutMS: 6000,
+    serverSelectionTimeoutMS: 6000,
+    socketTimeoutMS: 10000,
   };
 
-  if (!isSrv) {
+  if (!isSrv && !isMultiHost) {
     clientOptions.directConnection = true;
   }
+  return clientOptions;
+}
 
-  const client = new MongoClient(uri, clientOptions);
-  await client.connect();
-  return client;
+/**
+ * Get connected MongoClient instance with Serverless Edge optimizations
+ * Connects directly to replicaSet shards (fastest, zero SRV DNS timeout)
+ */
+async function getClient(target) {
+  let urisToTry = [];
+
+  if (typeof target === 'string') {
+    urisToTry = [target];
+  } else if (target && target.cfg) {
+    // 1. Direct replicaSet URI first (instant TLS, ~600ms, bypasses SRV lookup)
+    if (target.cfg.directUri) urisToTry.push(target.cfg.directUri);
+    // 2. Custom env URI if set
+    if (target.customUri && !urisToTry.includes(target.customUri)) urisToTry.push(target.customUri);
+    // 3. Fallback SRV URI
+    if (target.cfg.fallbackUri && !urisToTry.includes(target.cfg.fallbackUri)) urisToTry.push(target.cfg.fallbackUri);
+  } else if (target) {
+    if (target.directUri) urisToTry.push(target.directUri);
+    if (target.uri) urisToTry.push(target.uri);
+    if (target.fallbackUri) urisToTry.push(target.fallbackUri);
+  }
+
+  let lastError = null;
+  for (const uri of urisToTry) {
+    try {
+      const client = new MongoClient(uri, createClientOptions(uri));
+      await client.connect();
+      return client;
+    } catch (err) {
+      lastError = err;
+      console.warn(`[Worker Edge MongoDB] Connection attempt failed with ${uri.substring(0, 35)}... : ${err.message}`);
+    }
+  }
+
+  throw lastError || new Error('All connection attempts to MongoDB failed');
 }
 
 // -------------------------------------------------------------
@@ -548,7 +591,7 @@ export default {
           const cfg = resolveCluster(key, env);
           const t0 = Date.now();
           try {
-            const client = await getClient(cfg.uri);
+            const client = await getClient(cfg);
             try {
               const db = client.db(cfg.dbName);
               const pingRes = await db.command({ ping: 1 });
@@ -854,7 +897,7 @@ export default {
         }
 
         const clusterInfo = resolveCluster(clusterParam, env);
-        const client = await getClient(clusterInfo.uri);
+        const client = await getClient(clusterInfo);
 
         try {
           const db = client.db(clusterInfo.dbName);

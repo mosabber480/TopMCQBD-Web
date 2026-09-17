@@ -36,3 +36,8 @@ Thumbs.db
 # Local demo folder (never push to GitHub)
 /TopMCQBD-Demo
 /TopMCQBD-Demo-2
+
+# Reference project folders (Local reference only - Never push to GitHub or Cloudflare)
+kaj-koresilo-next-cloud-pages-mongodb-project/
+kaj-koresilo-next-cloud-pages-and-workers-mongodb-project/
+kaj-koresilo*

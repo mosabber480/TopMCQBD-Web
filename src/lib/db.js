@@ -91,10 +91,12 @@ export async function getNativeClient(clusterKey = 'paid') {
     return client;
   } catch (err) {
     console.warn(`[Native MongoDB] Standard connect failed for ${clusterKey}, retrying with directConnection:`, err.message);
-    const directClient = new MongoClient(config.uri, {
+    const isMultiHost = config.uri.includes(',');
+    const directOptions = {
       ...clientOptions,
-      directConnection: true
-    });
+      ...(isMultiHost ? {} : { directConnection: true })
+    };
+    const directClient = new MongoClient(config.uri, directOptions);
     await directClient.connect();
     dbCache.nativeClients[clusterKey] = directClient;
     dbCache.nativeDbs[clusterKey] = directClient.db(config.dbName);

@@ -74,7 +74,7 @@ export default function DBConnectionCheck() {
     const writtenBase = process.env.NEXT_PUBLIC_WRITTEN_API_URL || 'https://written-paid-api.onrender.com';
     const questionBankBase = process.env.NEXT_PUBLIC_QUESTION_BANK_API_URL || 'https://question-bank-paid-api.onrender.com';
     const freeBase = process.env.NEXT_PUBLIC_FREE_API_URL || 'https://topmcqbd-free-api.onrender.com';
-    const d1Base = process.env.NEXT_PUBLIC_APP_URL || 'https://topmcqbd.pages.dev';
+    const d1Base = process.env.NEXT_PUBLIC_TEST_PAGES_URL || 'https://topmcqbd-web-deploy-test.pages.dev';
 
     try {
       // 1. Paid Core DB

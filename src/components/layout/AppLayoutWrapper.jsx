@@ -12,6 +12,11 @@ export default function AppLayoutWrapper({ children, initialLayoutData }) {
   const [layoutData, setLayoutData] = useState(initialLayoutData || {});
 
   useEffect(() => {
+    // Skip layout fetch completely for DB diagnostic pages
+    if (pathname && (pathname.startsWith('/db-connection') || pathname.startsWith('/DB'))) {
+      return;
+    }
+
     // 1. Check if localStorage has cached data
     try {
       const cached = localStorage.getItem('layout_config_data');

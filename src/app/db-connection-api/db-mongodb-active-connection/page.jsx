@@ -77,8 +77,8 @@ const DB_SERVICES = [
     name: 'Cloudflare D1 SQL Edge DB',
     cluster: 'topmcqbd-db',
     host: 'Cloudflare APAC Edge Network',
-    renderUrl: 'https://topmcqbd.pages.dev',
-    pingUrl: 'https://topmcqbd.pages.dev/api/db-test/d1',
+    renderUrl: 'https://topmcqbd-web-deploy-test.pages.dev',
+    pingUrl: 'https://topmcqbd-web-deploy-test.pages.dev/api/db-test/d1',
     collectionTarget: 'app_configs (SQL)',
     type: 'Serverless SQL Edge Database',
     badgeColor: '#f59e0b'
@@ -161,7 +161,7 @@ function DbMongodbActiveConnectionContent() {
   }, [wakeUpAllDatabases]);
 
   const copyUptimeUrl = () => {
-    const url = 'https://topmcqbd.pages.dev/api/db-mongodb-active-connection';
+    const url = 'https://topmcqbd-web-deploy-test.pages.dev/api/db-mongodb-active-connection';
     navigator.clipboard.writeText(url);
     setCopiedUrl(true);
     setTimeout(() => setCopiedUrl(false), 2500);
@@ -335,7 +335,7 @@ function DbMongodbActiveConnectionContent() {
               <i className="fa-solid fa-link" style={{ color: '#2563eb' }}></i> মাস্টার কিপ-অ্যালাইভ URL
             </div>
             <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '13px', backgroundColor: '#ffffff', padding: '8px 14px', borderRadius: '8px', border: '1px solid #bfdbfe', color: '#1e3a8a', width: 'fit-content', fontWeight: '600' }}>
-              https://topmcqbd.pages.dev/api/db-mongodb-active-connection
+              https://topmcqbd-web-deploy-test.pages.dev/api/db-mongodb-active-connection
             </div>
           </div>
 

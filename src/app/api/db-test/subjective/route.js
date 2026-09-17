@@ -10,19 +10,19 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
+const DIRECT_SUBJECTIVE_URI = 'mongodb://mosabber480_db_user:DyW4KsXEhpcK1Rm2@ac-co47w40-shard-00-00.3ifvd7c.mongodb.net:27017,ac-co47w40-shard-00-01.3ifvd7c.mongodb.net:27017,ac-co47w40-shard-00-02.3ifvd7c.mongodb.net:27017/TopMCQBD_DB_Subjective?ssl=true&replicaSet=atlas-c8bq3l-shard-0&authSource=admin&retryWrites=true&w=majority';
+
 const getSubjectiveDb = async () => {
   try {
     dns.setServers(['8.8.8.8', '1.1.1.1', '8.8.4.4']);
   } catch (e) {}
 
-  const uri = process.env.MONGODB_URI_SUBJECTIVE;
+  const uri = process.env.MONGODB_URI_SUBJECTIVE || DIRECT_SUBJECTIVE_URI;
   const dbName = process.env.MONGODB_DB_NAME_SUBJECTIVE || 'TopMCQBD_DB_Subjective';
 
-  if (!uri) {
-    throw new Error('MONGODB_URI_SUBJECTIVE environment variable is not defined.');
-  }
-
   const client = new MongoClient(uri, {
+    tls: true,
+    family: 4,
     connectTimeoutMS: 6000,
     serverSelectionTimeoutMS: 6000,
   });

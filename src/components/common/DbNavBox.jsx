@@ -74,6 +74,8 @@ export default function DbNavBox({ activeRoute }) {
     activeRoute === '/db-connection-api/db-mongodb-active-connection';
   const isPagesApiActive =
     activeRoute === '/db-connection-api/db-pages-api';
+  const isTestPagesApiActive =
+    activeRoute === '/db-connection-api/db-test-pages-api';
   const isWorkersApiActive =
     activeRoute === '/db-connection-api/db-workers-api';
 
@@ -486,6 +488,97 @@ export default function DbNavBox({ activeRoute }) {
             )}
           </Link>
 
+          {/* Cloudflare Test Pages API Button */}
+          <Link
+            href="/db-connection-api/db-test-pages-api"
+            className="test-pages-api-nav-btn"
+            title="Cloudflare Test Pages API Database Testing & Admin Suite (topmcqbd-web-deploy-test.pages.dev)"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              backgroundColor: '#d97706',
+              color: '#ffffff',
+              textDecoration: 'none',
+              padding: '9px 18px',
+              borderRadius: '7px',
+              fontSize: '13px',
+              fontWeight: '700',
+              boxShadow: isTestPagesApiActive ? '0 4px 14px rgba(217, 119, 6, 0.45)' : '0 2px 8px rgba(217, 119, 6, 0.25)',
+              border: 'none',
+              outline: 'none',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              lineHeight: 'normal',
+            }}
+          >
+            <i
+              className="fa-solid fa-flask-vial"
+              style={{
+                fontSize: '13px',
+                width: '13px',
+                height: '13px',
+                lineHeight: '13px',
+                color: '#ffffff',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transform: 'translateY(-0.5px)',
+              }}
+            />
+            <span
+              style={{
+                color: '#ffffff',
+                textDecoration: 'none',
+                fontSize: '13px',
+                fontWeight: '700',
+                lineHeight: '1',
+                display: 'inline-block',
+                transform: 'translateY(1px)',
+              }}
+            >
+              CF Test Pages API
+            </span>
+            {isTestPagesApiActive && (
+              <span
+                className="active-live-bullet"
+                style={{
+                  position: 'relative',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '7px',
+                  height: '7px',
+                  marginLeft: '4px',
+                  transform: 'translateY(0.5px)',
+                }}
+              >
+                <span
+                  style={{
+                    position: 'absolute',
+                    width: '100%',
+                    height: '100%',
+                    borderRadius: '50%',
+                    backgroundColor: '#ffffff',
+                    opacity: 0.75,
+                    animation: 'navPulse 1.4s cubic-bezier(0, 0, 0.2, 1) infinite',
+                  }}
+                />
+                <span
+                  style={{
+                    position: 'relative',
+                    width: '5px',
+                    height: '5px',
+                    borderRadius: '50%',
+                    backgroundColor: '#ffffff',
+                    boxShadow: '0 0 6px #ffffff',
+                  }}
+                />
+              </span>
+            )}
+          </Link>
+
           {/* Cloudflare Worker Backup API Button */}
           <Link
             href="/db-connection-api/db-workers-api"
@@ -784,6 +877,33 @@ export default function DbNavBox({ activeRoute }) {
         }
 
         :global(.pages-api-nav-btn span) {
+          color: #ffffff !important;
+          text-decoration: none !important;
+        }
+
+        :global(.test-pages-api-nav-btn),
+        :global(.test-pages-api-nav-btn:link),
+        :global(.test-pages-api-nav-btn:visited),
+        :global(.test-pages-api-nav-btn:hover),
+        :global(.test-pages-api-nav-btn:active) {
+          text-decoration: none !important;
+          color: #ffffff !important;
+          background-color: #d97706 !important;
+          line-height: 1 !important;
+        }
+
+        :global(.test-pages-api-nav-btn:hover) {
+          filter: brightness(1.12) !important;
+          transform: translateY(-1px);
+          box-shadow: 0 4px 14px rgba(217, 119, 6, 0.45) !important;
+        }
+
+        :global(.test-pages-api-nav-btn i),
+        :global(.test-pages-api-nav-btn svg) {
+          color: #ffffff !important;
+        }
+
+        :global(.test-pages-api-nav-btn span) {
           color: #ffffff !important;
           text-decoration: none !important;
         }

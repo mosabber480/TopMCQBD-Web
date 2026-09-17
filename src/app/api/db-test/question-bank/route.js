@@ -10,19 +10,19 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
+const DIRECT_QUESTION_BANK_URI = 'mongodb://mosabber480_db_user:0lxx4VTglJgoel8E@ac-bkuekcv-shard-00-00.bexo18c.mongodb.net:27017,ac-bkuekcv-shard-00-01.bexo18c.mongodb.net:27017,ac-bkuekcv-shard-00-02.bexo18c.mongodb.net:27017/TopMCQBD_DB_Question_Bank?ssl=true&replicaSet=atlas-2tax1l-shard-0&authSource=admin&retryWrites=true&w=majority';
+
 const getQuestionBankDb = async () => {
   try {
     dns.setServers(['8.8.8.8', '1.1.1.1', '8.8.4.4']);
   } catch (e) {}
 
-  const uri = process.env.MONGODB_URI_QUESTION_BANK;
+  const uri = process.env.MONGODB_URI_QUESTION_BANK || DIRECT_QUESTION_BANK_URI;
   const dbName = process.env.MONGODB_DB_NAME_QUESTION_BANK || 'TopMCQBD_DB_Question_Bank';
 
-  if (!uri) {
-    throw new Error('MONGODB_URI_QUESTION_BANK environment variable is not defined.');
-  }
-
   const client = new MongoClient(uri, {
+    tls: true,
+    family: 4,
     connectTimeoutMS: 6000,
     serverSelectionTimeoutMS: 6000,
   });

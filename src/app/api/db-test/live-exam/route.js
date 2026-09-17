@@ -10,19 +10,19 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
+const DIRECT_LIVE_EXAM_URI = 'mongodb://mosabber480_db_user:UANQIRPoI9Zm3m4f@ac-il8uyoo-shard-00-00.ns1gpls.mongodb.net:27017,ac-il8uyoo-shard-00-01.ns1gpls.mongodb.net:27017,ac-il8uyoo-shard-00-02.ns1gpls.mongodb.net:27017/TopMCQBD_DB_Live_Exam?ssl=true&replicaSet=atlas-e1xhyt-shard-0&authSource=admin&retryWrites=true&w=majority';
+
 const getLiveExamDb = async () => {
   try {
     dns.setServers(['8.8.8.8', '1.1.1.1', '8.8.4.4']);
   } catch (e) {}
 
-  const uri = process.env.MONGODB_URI_LIVE_EXAM;
+  const uri = process.env.MONGODB_URI_LIVE_EXAM || DIRECT_LIVE_EXAM_URI;
   const dbName = process.env.MONGODB_DB_NAME_LIVE_EXAM || 'TopMCQBD_DB_Live_Exam';
 
-  if (!uri) {
-    throw new Error('MONGODB_URI_LIVE_EXAM environment variable is not defined.');
-  }
-
   const client = new MongoClient(uri, {
+    tls: true,
+    family: 4,
     connectTimeoutMS: 6000,
     serverSelectionTimeoutMS: 6000,
   });

@@ -1,0 +1,17 @@
+# Cloudflare Pages Ignore List (.cfignore)
+# Never upload or deploy reference/archive projects to Cloudflare
+
+kaj-koresilo-next-cloud-pages-mongodb-project/
+kaj-koresilo-next-cloud-pages-and-workers-mongodb-project/
+kaj-koresilo*
+Old-Project/
+Old-Mosabber-Quiz-App/
+TopMCQBD-Demo/
+scratch/
+.wrangler/
+.agents/
+node_modules/
+.env*
+.dev.vars
+*.local.*
+*guide*.txt
