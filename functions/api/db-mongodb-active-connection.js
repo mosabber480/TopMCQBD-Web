@@ -72,6 +72,14 @@ export async function onRequestOptions() {
   return jsonResponse({}, 200);
 }
 
+export async function onRequestHead(context) {
+  return onRequestGet(context);
+}
+
+export async function onRequestPost(context) {
+  return onRequestGet(context);
+}
+
 export async function onRequestGet(context) {
   const startTime = Date.now();
 

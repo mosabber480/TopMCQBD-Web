@@ -108,3 +108,11 @@ export async function GET() {
     databases: results
   });
 }
+
+export async function HEAD() {
+  return GET();
+}
+
+export async function POST() {
+  return GET();
+}

@@ -1,6 +1,6 @@
 # Next.js Project Architecture & Developer Guide Rule
 
-Antigravity AI must automatically recognize, read, and adhere to the project guides defined in [`project-guide.local.txt`](file:///c:/Users/bdCalling/Downloads/Mosabber/TopMCQBD-Web/project-guide.local.txt) and [`cloudflare-d1-bookmarks-guide.local.txt`](file:///c:/Users/bdCalling/Downloads/Mosabber/TopMCQBD-Web/cloudflare-d1-bookmarks-guide.local.txt).
+Antigravity AI must automatically recognize, read, and adhere to the project guides defined in [`project-guide.local.txt`](file:///c:/Users/bdCalling/Downloads/Mosabber/TopMCQBD-Web/project-guide.local.txt), [`cloudflare-pages-workers-master-guide.local.txt`](file:///c:/Users/bdCalling/Downloads/Mosabber/TopMCQBD-Web/cloudflare-pages-workers-master-guide.local.txt), [`cloudflare-pages-mongodb-work.txt`](file:///c:/Users/bdCalling/Downloads/Mosabber/TopMCQBD-Web/cloudflare-pages-mongodb-work.txt), and [`cloudflare-d1-bookmarks-guide.local.txt`](file:///c:/Users/bdCalling/Downloads/Mosabber/TopMCQBD-Web/cloudflare-d1-bookmarks-guide.local.txt).
 
 ### Project Context & Core Rules:
 1. **Architecture & Scope**:
