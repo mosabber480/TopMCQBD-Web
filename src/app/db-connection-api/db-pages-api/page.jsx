@@ -127,10 +127,7 @@ function DbPagesApiContent() {
   };
 
   const getApiEndpoint = useCallback((clusterId) => {
-    const isClient = typeof window !== 'undefined';
-    const isLocal = isClient && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-    const base = isLocal ? '' : apiBaseDomain;
-    return `${base}/api/db-test/${clusterId}`;
+    return `${apiBaseDomain}/api/db-test/${clusterId}`;
   }, []);
 
   // Fetch single cluster data

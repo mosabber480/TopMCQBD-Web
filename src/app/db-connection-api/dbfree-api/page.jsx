@@ -76,12 +76,6 @@ function DbFreeContent() {
   const [pendingDelete, setPendingDelete] = useState(null);
 
   const getApiBaseUrl = useCallback(() => {
-    if (typeof window !== 'undefined') {
-      const hostname = window.location.hostname;
-      if (hostname === 'localhost' || hostname === '127.0.0.1') {
-        return '';
-      }
-    }
     return process.env.NEXT_PUBLIC_FREE_API_URL || 'https://topmcqbd-free-api.onrender.com';
   }, []);
 

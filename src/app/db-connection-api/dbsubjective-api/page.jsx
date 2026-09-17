@@ -76,12 +76,6 @@ function DbSubjectiveContent() {
   const [pendingDelete, setPendingDelete] = useState(null);
 
   const getApiBaseUrl = useCallback(() => {
-    if (typeof window !== 'undefined') {
-      const hostname = window.location.hostname;
-      if (hostname === 'localhost' || hostname === '127.0.0.1') {
-        return '';
-      }
-    }
     return process.env.NEXT_PUBLIC_SUBJECTIVE_API_URL || 'https://subjective-paid-api.onrender.com';
   }, []);
 

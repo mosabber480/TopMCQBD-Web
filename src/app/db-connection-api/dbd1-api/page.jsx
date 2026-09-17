@@ -76,7 +76,7 @@ function DbD1Content() {
   const [pendingDelete, setPendingDelete] = useState(null);
 
   const getApiBaseUrl = useCallback(() => {
-    return '';
+    return 'https://topmcqbd.pages.dev';
   }, []);
 
   const fetchDbData = useCallback(async (isManual = false) => {

@@ -68,16 +68,13 @@ export default function DBConnectionCheck() {
     setLoading(true);
     setFetchError(null);
 
-    const isClient = typeof window !== 'undefined';
-    const isLocal = isClient && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-
-    const paidBase = isLocal ? '' : (process.env.NEXT_PUBLIC_PAID_API_URL || 'https://topmcqbd-paid-api.onrender.com');
-    const subjectiveBase = isLocal ? '' : (process.env.NEXT_PUBLIC_SUBJECTIVE_API_URL || 'https://subjective-paid-api.onrender.com');
-    const liveExamBase = isLocal ? '' : (process.env.NEXT_PUBLIC_LIVE_EXAM_API_URL || 'https://live-exam-paid-api.onrender.com');
-    const writtenBase = isLocal ? '' : (process.env.NEXT_PUBLIC_WRITTEN_API_URL || 'https://written-paid-api.onrender.com');
-    const questionBankBase = isLocal ? '' : (process.env.NEXT_PUBLIC_QUESTION_BANK_API_URL || 'https://question-bank-paid-api.onrender.com');
-    const freeBase = isLocal ? '' : (process.env.NEXT_PUBLIC_FREE_API_URL || 'https://topmcqbd-free-api.onrender.com');
-    const d1Base = isLocal ? '' : (process.env.NEXT_PUBLIC_APP_URL || 'https://topmcqbd.pages.dev');
+    const paidBase = process.env.NEXT_PUBLIC_PAID_API_URL || 'https://topmcqbd-paid-api.onrender.com';
+    const subjectiveBase = process.env.NEXT_PUBLIC_SUBJECTIVE_API_URL || 'https://subjective-paid-api.onrender.com';
+    const liveExamBase = process.env.NEXT_PUBLIC_LIVE_EXAM_API_URL || 'https://live-exam-paid-api.onrender.com';
+    const writtenBase = process.env.NEXT_PUBLIC_WRITTEN_API_URL || 'https://written-paid-api.onrender.com';
+    const questionBankBase = process.env.NEXT_PUBLIC_QUESTION_BANK_API_URL || 'https://question-bank-paid-api.onrender.com';
+    const freeBase = process.env.NEXT_PUBLIC_FREE_API_URL || 'https://topmcqbd-free-api.onrender.com';
+    const d1Base = process.env.NEXT_PUBLIC_APP_URL || 'https://topmcqbd.pages.dev';
 
     try {
       // 1. Paid Core DB
