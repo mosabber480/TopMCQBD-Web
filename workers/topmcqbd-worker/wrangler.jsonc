@@ -14,6 +14,13 @@
       "/api/*"
     ]
   },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "topmcqbd-db",
+      "database_id": "6aecb56e-a820-45df-948e-641aeaafd219"
+    }
+  ],
   "vars": {
     "APP_NAME": "TopMCQBD Backup Worker API",
     "JWT_SECRET": "topmcqbd_super_secret_jwt_key_2026",

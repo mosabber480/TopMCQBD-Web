@@ -110,6 +110,21 @@ for (const targetDir of outDirs) {
   console.log('⚡ Compiling Cloudflare Pages Worker into out/_worker.js (Advanced Mode)...');
   try {
     execSync('npx wrangler deploy workers/topmcqbd-worker/src/index.js --config workers/topmcqbd-worker/wrangler.jsonc --dry-run --outfile=out/_worker.js', { stdio: 'inherit' });
+
+    // Extract pure JavaScript from wrangler's multipart payload if needed
+    const rawWorker = fs.readFileSync(path.join(targetDir, '_worker.js'), 'utf8');
+    const marker = 'Content-Disposition: form-data; name="index.js"';
+    const markerIdx = rawWorker.indexOf(marker);
+    if (markerIdx !== -1) {
+      const afterHeader = rawWorker.substring(markerIdx);
+      const bodyStart = afterHeader.search(/\r?\n\r?\n/);
+      const codeWithEnd = afterHeader.substring(bodyStart).trimStart();
+      const lastBoundary = codeWithEnd.lastIndexOf('------formdata');
+      const cleanCode = (lastBoundary !== -1 ? codeWithEnd.substring(0, lastBoundary) : codeWithEnd).trim();
+      fs.writeFileSync(path.join(targetDir, '_worker.js'), cleanCode, 'utf8');
+      console.log('✨ Cleaned out/_worker.js (extracted pure JavaScript from multipart payload)');
+    }
+
     console.log('✅ Successfully bundled out/_worker.js (zero resetState issues)');
   } catch (err) {
     console.error('❌ Failed to bundle out/_worker.js:', err);

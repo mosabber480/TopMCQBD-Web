@@ -1047,13 +1047,6 @@ export default {
       // 7. WEBSITE FRONTEND & STATIC ASSETS HANDLER
       // -------------------------------------------------------------
       if (env.ASSETS) {
-        // Handle root / explicitly
-        if (path === '/' || path === '') {
-          const indexUrl = new URL('/index.html', request.url);
-          const indexRes = await env.ASSETS.fetch(new Request(indexUrl.toString(), request));
-          if (indexRes.status !== 404) return indexRes;
-        }
-
         // 1. Try serving exact asset
         const assetResponse = await env.ASSETS.fetch(request);
         if (assetResponse.status !== 404) {
@@ -1068,22 +1061,15 @@ export default {
           const htmlUrl = new URL(request.url);
           htmlUrl.pathname = `${cleanPath}.html`;
           const htmlRes = await env.ASSETS.fetch(new Request(htmlUrl.toString(), request));
-          if (htmlRes.status !== 404) {
+          if (htmlRes.status === 200) {
             return htmlRes;
           }
 
           // (B) Try /route/index.html
           htmlUrl.pathname = `${cleanPath}/index.html`;
           const subDirRes = await env.ASSETS.fetch(new Request(htmlUrl.toString(), request));
-          if (subDirRes.status !== 404) {
+          if (subDirRes.status === 200) {
             return subDirRes;
-          }
-
-          // (C) SPA fallback to /index.html
-          htmlUrl.pathname = '/index.html';
-          const rootRes = await env.ASSETS.fetch(new Request(htmlUrl.toString(), request));
-          if (rootRes.status !== 404) {
-            return rootRes;
           }
         }
 
