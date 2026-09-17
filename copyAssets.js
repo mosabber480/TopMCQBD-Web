@@ -51,6 +51,8 @@ function copyHtmlFilesRecursively(srcDir, targetDir, currentSubdir = '') {
 
 
 
+import { execSync } from 'child_process';
+
 const outDirs = [
   path.resolve('out')
 ];
@@ -75,8 +77,35 @@ for (const targetDir of outDirs) {
   if (fs.existsSync(nextAppServerDir)) {
     copyHtmlFilesRecursively(nextAppServerDir, targetDir);
   }
+
+  // 4. Create .assetsignore to prevent wrangler from uploading server code as static asset
+  fs.writeFileSync(path.join(targetDir, '.assetsignore'), '_worker.js\n_routes.json\n');
+
+  // 5. Create _routes.json for Cloudflare Pages Advanced Mode
+  const routesJson = {
+    version: 1,
+    include: ["/*"],
+    exclude: [
+      "/_next/static/*",
+      "/favicon.ico",
+      "/images/*",
+      "/assets/*",
+      "/fonts/*"
+    ]
+  };
+  fs.writeFileSync(path.join(targetDir, '_routes.json'), JSON.stringify(routesJson, null, 2));
+
+  // 6. Bundle Cloudflare Pages Advanced Mode Worker (out/_worker.js)
+  console.log('⚡ Compiling Cloudflare Pages Worker into out/_worker.js (Advanced Mode)...');
+  try {
+    execSync('npx wrangler deploy workers/topmcqbd-worker/src/index.js --config workers/topmcqbd-worker/wrangler.jsonc --dry-run --outfile=out/_worker.js', { stdio: 'inherit' });
+    console.log('✅ Successfully bundled out/_worker.js (zero resetState issues)');
+  } catch (err) {
+    console.error('❌ Failed to bundle out/_worker.js:', err);
+    process.exit(1);
+  }
 }
 
-console.log('✅ Synchronized Next.js production build assets to out/');
+console.log('✅ Synchronized Next.js production build assets & _worker.js to out/');
 process.exit(0);
 

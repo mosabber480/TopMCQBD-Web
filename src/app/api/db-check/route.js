@@ -2,9 +2,6 @@ import { NextResponse } from 'next/server';
 import { MongoClient } from 'mongodb';
 import dns from 'dns';
 
-const DIRECT_PAID_URI = 'mongodb://mosabber480_db_user:EScirLEzwgQVVNaB@ac-472re4l-shard-00-00.3ajdj0u.mongodb.net:27017,ac-472re4l-shard-00-01.3ajdj0u.mongodb.net:27017,ac-472re4l-shard-00-02.3ajdj0u.mongodb.net:27017/TopMCQBD_DB?ssl=true&replicaSet=atlas-wzdf1e-shard-0&authSource=admin';
-const DIRECT_FREE_URI = 'mongodb://mosabber480_db_user:VVcrE9PeIIyVlcKU@ac-rw27hdk-shard-00-00.pixb7fx.mongodb.net:27017,ac-rw27hdk-shard-00-01.pixb7fx.mongodb.net:27017,ac-rw27hdk-shard-00-02.pixb7fx.mongodb.net:27017/TopMCQBD_DB_Free?ssl=true&replicaSet=atlas-13msb7-shard-0&authSource=admin';
-
 export const dynamic = 'force-dynamic';
 
 const CORS_HEADERS = {
@@ -51,14 +48,16 @@ export async function GET() {
     }
   };
 
-  // Helper to attempt connection
-  const tryConnect = async (uri, fallbackUri, dbName) => {
+  // Helper to attempt connection with standard mongodb+srv://
+  const tryConnect = async (uri, dbName) => {
     let client;
     const start = Date.now();
     try {
       client = new MongoClient(uri, {
-        connectTimeoutMS: 5000,
-        serverSelectionTimeoutMS: 5000,
+        connectTimeoutMS: 8000,
+        serverSelectionTimeoutMS: 8000,
+        tls: true,
+        family: 4,
       });
       await client.connect();
       const db = client.db(dbName);
@@ -72,26 +71,6 @@ export async function GET() {
       };
     } catch (err) {
       if (client) { try { await client.close(); } catch(e){} }
-      if (fallbackUri) {
-        try {
-          const fallbackClient = new MongoClient(fallbackUri, {
-            connectTimeoutMS: 5000,
-            serverSelectionTimeoutMS: 5000,
-          });
-          await fallbackClient.connect();
-          const db = fallbackClient.db(dbName);
-          await db.command({ ping: 1 });
-          const collections = await db.listCollections().toArray();
-          return {
-            connected: true,
-            latencyMs: Date.now() - start,
-            collections: collections.map(c => c.name),
-            client: fallbackClient
-          };
-        } catch (fallbackErr) {
-          throw fallbackErr;
-        }
-      }
       throw err;
     }
   };
@@ -99,7 +78,7 @@ export async function GET() {
   // 1. Test Paid Database
   let clientPaid;
   try {
-    const resPaid = await tryConnect(MONGODB_URI_PAID, DIRECT_PAID_URI, MONGODB_DB_NAME_PAID);
+    const resPaid = await tryConnect(MONGODB_URI_PAID, MONGODB_DB_NAME_PAID);
     clientPaid = resPaid.client;
     results.paidDb.connected = true;
     results.paidDb.status = 'Connected';
@@ -121,7 +100,7 @@ export async function GET() {
   // 2. Test Free Database
   let clientFree;
   try {
-    const resFree = await tryConnect(MONGODB_URI_FREE, DIRECT_FREE_URI, MONGODB_DB_NAME_FREE);
+    const resFree = await tryConnect(MONGODB_URI_FREE, MONGODB_DB_NAME_FREE);
     clientFree = resFree.client;
     results.freeDb.connected = true;
     results.freeDb.status = 'Connected';
