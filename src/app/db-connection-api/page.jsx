@@ -247,7 +247,7 @@ export default function DBConnectionCheck() {
   }, [checkConnection]);
 
   return (
-    <DbAuthGuard activeRoute="/db-connection">
+    <DbAuthGuard activeRoute="/db-connection-api">
       <main className="db-page-container">
         <div className="db-content-card">
           {/* Header */}
@@ -661,7 +661,7 @@ export default function DBConnectionCheck() {
           </div>
 
           {/* Database Navigation Box */}
-          <DbNavBox activeRoute="/db-connection" />
+          <DbNavBox activeRoute="/db-connection-api" />
 
           {/* Bottom Navigation Links Bar */}
           <div
@@ -702,7 +702,7 @@ export default function DBConnectionCheck() {
 
           .db-content-card {
             width: 100%;
-            max-width: 960px;
+            max-width: 1300px;
             background: #ffffff;
             border: 1px solid #e2e8f0;
             border-radius: 20px;
@@ -846,7 +846,7 @@ export default function DBConnectionCheck() {
 
           .db-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             gap: 20px;
           }
 
@@ -911,6 +911,30 @@ export default function DBConnectionCheck() {
             height: 7px;
             border-radius: 50%;
             background-color: currentColor;
+            flex-shrink: 0;
+            display: inline-block;
+          }
+
+          .pill-success .status-dot {
+            background-color: #16a34a;
+            box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.65);
+            animation: statusDotPulse 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+          }
+
+          .pill-danger .status-dot {
+            background-color: #dc2626;
+          }
+
+          @keyframes statusDotPulse {
+            0% {
+              box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.65);
+            }
+            70% {
+              box-shadow: 0 0 0 5px rgba(22, 163, 74, 0);
+            }
+            100% {
+              box-shadow: 0 0 0 0 rgba(22, 163, 74, 0);
+            }
           }
 
           .card-db-name {
@@ -996,7 +1020,13 @@ export default function DBConnectionCheck() {
             100% { transform: rotate(360deg); }
           }
 
-          @media (max-width: 800px) {
+          @media (max-width: 1100px) {
+            .db-grid {
+              grid-template-columns: repeat(2, 1fr);
+            }
+          }
+
+          @media (max-width: 720px) {
             .db-grid {
               grid-template-columns: 1fr;
             }

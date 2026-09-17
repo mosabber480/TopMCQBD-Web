@@ -201,7 +201,7 @@
     },
     {
       "text": "Database Connection",
-      "url": "/db-connection",
+      "url": "/db-connection-api",
       "icon": "fa-solid fa-arrow-up-right-from-square",
       "color": "primary",
       "targetBlank": true,

@@ -4,104 +4,55 @@ import React from 'react';
 import Link from 'next/link';
 
 export default function DbNavBox({ activeRoute }) {
-  // 12 DB Specific Buttons (3 rows x 4 columns) - Pair colors (No red)
+  // 7 Unified DB Specific Buttons
   const dbButtons = [
     {
-      text: 'Cloudflare D1 Admin',
-      url: '/db-connection/dbd1-admin',
-      altUrl: '/dbd1-admin',
+      text: 'Cloudflare D1',
+      url: '/db-connection-api/dbd1-api',
+      altUrl: '/dbd1-api',
       icon: 'fa-solid fa-bolt',
       bg: '#0284c7', // Sky Blue
     },
     {
-      text: 'Cloudflare D1 Test',
-      url: '/db-connection/dbd1-test',
-      altUrl: '/dbd1-test',
+      text: 'Paid Core DB',
+      url: '/db-connection-api/dbpaid-api',
+      altUrl: '/dbpaid-api',
       icon: 'fa-solid fa-database',
-      bg: '#0284c7', // Sky Blue
-    },
-    {
-      text: 'Paid Core Admin',
-      url: '/db-connection/dbpaid-admin',
-      altUrl: '/dbpaid-admin',
-      icon: 'fa-solid fa-sliders',
       bg: '#4f46e5', // Indigo
     },
     {
-      text: 'Paid Core Test',
-      url: '/db-connection/dbpaid-test',
-      altUrl: '/dbpaid-test',
-      icon: 'fa-solid fa-globe',
-      bg: '#4f46e5', // Indigo
-    },
-    {
-      text: 'Subj MCQs Admin',
-      url: '/db-connection/dbsubjective-admin',
-      altUrl: '/dbsubjective-admin',
+      text: 'Subj MCQs DB',
+      url: '/db-connection-api/dbsubjective-api',
+      altUrl: '/dbsubjective-api',
       icon: 'fa-solid fa-sliders',
       bg: '#9333ea', // Purple
     },
     {
-      text: 'Subj MCQs Test',
-      url: '/db-connection/dbsubjective-test',
-      altUrl: '/dbsubjective-test',
-      icon: 'fa-solid fa-globe',
-      bg: '#9333ea', // Purple
-    },
-    {
-      text: 'Live Exam Admin',
-      url: '/db-connection/dbliveexam-admin',
-      altUrl: '/dbliveexam-admin',
-      icon: 'fa-solid fa-sliders',
+      text: 'Live Exam DB',
+      url: '/db-connection-api/dbliveexam-api',
+      altUrl: '/dbliveexam-api',
+      icon: 'fa-solid fa-bolt-lightning',
       bg: '#059669', // Emerald Green
     },
     {
-      text: 'Live Exam Test',
-      url: '/db-connection/dbliveexam-test',
-      altUrl: '/dbliveexam-test',
-      icon: 'fa-solid fa-globe',
-      bg: '#059669', // Emerald Green
-    },
-    {
-      text: 'Written Admin',
-      url: '/db-connection/dbwritten-admin',
-      altUrl: '/dbwritten-admin',
-      icon: 'fa-solid fa-sliders',
+      text: 'Written DB',
+      url: '/db-connection-api/dbwritten-api',
+      altUrl: '/dbwritten-api',
+      icon: 'fa-solid fa-pen-nib',
       bg: '#d97706', // Amber Golden
     },
     {
-      text: 'Written Test',
-      url: '/db-connection/dbwritten-test',
-      altUrl: '/dbwritten-test',
-      icon: 'fa-solid fa-globe',
-      bg: '#d97706', // Amber Golden
-    },
-    {
-      text: 'Q-Bank Admin',
-      url: '/db-connection/dbquestionbank-admin',
-      altUrl: '/dbquestionbank-admin',
-      icon: 'fa-solid fa-sliders',
+      text: 'Q-Bank DB',
+      url: '/db-connection-api/dbquestionbank-api',
+      altUrl: '/dbquestionbank-api',
+      icon: 'fa-solid fa-layer-group',
       bg: '#ea580c', // Coral Orange
     },
     {
-      text: 'Q-Bank Test',
-      url: '/db-connection/dbquestionbank-test',
-      altUrl: '/dbquestionbank-test',
-      icon: 'fa-solid fa-globe',
-      bg: '#ea580c', // Coral Orange
-    },
-    {
-      text: 'Free MCQ Admin',
-      url: '/db-connection/dbfree-admin',
-      altUrl: '/dbfree-admin',
-      icon: 'fa-solid fa-sliders',
-      bg: '#0d9488', // Teal
-    },
-    {
-      text: 'Free MCQ Test',
-      url: '/db-connection/dbfree-test',
-      altUrl: '/dbfree-test',
-      icon: 'fa-solid fa-globe',
+      text: 'Free MCQ DB',
+      url: '/db-connection-api/dbfree-api',
+      altUrl: '/dbfree-api',
+      icon: 'fa-solid fa-seedling',
       bg: '#0d9488', // Teal
     },
   ];
@@ -118,16 +69,24 @@ export default function DbNavBox({ activeRoute }) {
   };
 
   const isAllDbActive =
-    activeRoute === '/db-connection' || activeRoute === '/db-connection-check' || activeRoute === '/DB';
+    activeRoute === '/db-connection' || activeRoute === '/db-connection-api' || activeRoute === '/db-connection-check' || activeRoute === '/DB';
   const isMongoActive =
-    activeRoute === '/db-connection/db-mongodb-active-connection';
+    activeRoute === '/db-connection-api/db-mongodb-active-connection';
   const isPagesApiActive =
-    activeRoute === '/db-connection/db-pages-api';
+    activeRoute === '/db-connection-api/db-pages-api';
   const isWorkersApiActive =
-    activeRoute === '/db-connection/db-workers-api';
+    activeRoute === '/db-connection-api/db-workers-api';
 
-  const renderButton = (btn) => {
-    const isActive = activeRoute === btn.url || activeRoute === btn.altUrl;
+  const renderButton = (btn, idx, arr) => {
+    const baseSlug = btn.url.replace('/db-connection-api/', '').replace('-api', '');
+    const isActive =
+      activeRoute === btn.url ||
+      activeRoute === btn.altUrl ||
+      activeRoute === `/db-connection-api/${baseSlug}` ||
+      activeRoute === `/${baseSlug}` ||
+      activeRoute === `/db-connection-api/${baseSlug}-admin` ||
+      activeRoute === `/db-connection-api/${baseSlug}-test`;
+    const isSingleLast = arr && arr.length === 3 && idx === 2;
     return (
       <Link
         key={btn.url}
@@ -160,6 +119,7 @@ export default function DbNavBox({ activeRoute }) {
           transition: 'all 0.2s ease',
           width: '100%',
           boxSizing: 'border-box',
+          gridColumn: isSingleLast ? '1 / -1' : undefined,
         }}
       >
         <i
@@ -236,22 +196,15 @@ export default function DbNavBox({ activeRoute }) {
   };
 
   const leftGroup = [
-    dbButtons[0],
-    dbButtons[1],
-    dbButtons[4],
-    dbButtons[5],
-    dbButtons[8],
-    dbButtons[9],
-    dbButtons[12],
-    dbButtons[13],
+    dbButtons[0], // Cloudflare D1
+    dbButtons[1], // Paid Core DB
+    dbButtons[2], // Subj MCQs DB
+    dbButtons[3], // Live Exam DB
   ];
   const rightGroup = [
-    dbButtons[2],
-    dbButtons[3],
-    dbButtons[6],
-    dbButtons[7],
-    dbButtons[10],
-    dbButtons[11],
+    dbButtons[4], // Written DB
+    dbButtons[5], // Q-Bank DB
+    dbButtons[6], // Free MCQ DB
   ];
 
   return (
@@ -262,18 +215,18 @@ export default function DbNavBox({ activeRoute }) {
           <span className="nav-heading">Database Testing & Admin Suite</span>
         </div>
         <div className="title-right">
-          <small className="nav-sub">১৬টি স্পেসিফিক ডাটাবেজ ও ক্লাউড পেজ দ্রুত সুইচ করুন</small>
+          <small className="nav-sub">৭টি স্পেসিফিক ডাটাবেজ ও ক্লাউড পেজ দ্রুত সুইচ করুন</small>
         </div>
       </div>
 
-      {/* 14 Buttons Grid with Center Subtle Line on Desktop */}
+      {/* 7 Buttons Grid with Center Subtle Line on Desktop */}
       <div className="admin-actions-split-wrapper">
         <div className="admin-sub-grid">
-          {leftGroup.map(renderButton)}
+          {leftGroup.map((btn, idx) => renderButton(btn, idx, leftGroup))}
         </div>
         <div className="nav-vertical-divider" />
         <div className="admin-sub-grid">
-          {rightGroup.map(renderButton)}
+          {rightGroup.map((btn, idx) => renderButton(btn, idx, rightGroup))}
         </div>
       </div>
 
@@ -283,7 +236,7 @@ export default function DbNavBox({ activeRoute }) {
         <div className="bottom-hub-left-group">
           {/* ALL DB Hub Button */}
           <Link
-            href="/db-connection"
+            href="/db-connection-api"
             className="all-db-hub-btn"
             style={{
               display: 'inline-flex',
@@ -373,7 +326,7 @@ export default function DbNavBox({ activeRoute }) {
 
           {/* MongoDB Active Connection Button */}
           <Link
-            href="/db-connection/db-mongodb-active-connection"
+            href="/db-connection-api/db-mongodb-active-connection"
             className="mongo-active-btn"
             title="MongoDB 24/7 Active Connection & Keep-Alive Hub"
             style={{
@@ -464,7 +417,7 @@ export default function DbNavBox({ activeRoute }) {
 
           {/* Cloudflare Pages API Button */}
           <Link
-            href="/db-connection/db-pages-api"
+            href="/db-connection-api/db-pages-api"
             className="pages-api-nav-btn"
             title="Cloudflare Pages API Database Testing & Admin Suite"
             style={{
@@ -555,7 +508,7 @@ export default function DbNavBox({ activeRoute }) {
 
           {/* Cloudflare Worker Backup API Button */}
           <Link
-            href="/db-connection/db-workers-api"
+            href="/db-connection-api/db-workers-api"
             className="workers-api-nav-btn"
             title="Cloudflare Worker Backup API Database Testing & Admin Suite"
             style={{

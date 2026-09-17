@@ -87,7 +87,7 @@ const DB_SERVICES = [
 
 export default function DbMongodbActiveConnectionPage() {
   return (
-    <DbAuthGuard activeRoute="/db-connection/db-mongodb-active-connection">
+    <DbAuthGuard activeRoute="/db-connection-api/db-mongodb-active-connection">
       <DbMongodbActiveConnectionContent />
     </DbAuthGuard>
   );
@@ -169,7 +169,7 @@ function DbMongodbActiveConnectionContent() {
 
   return (
     <main style={{ minHeight: '100vh', backgroundColor: '#f8fafc', padding: '32px 20px', fontFamily: "'Hind Siliguri', sans-serif" }}>
-      <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
+      <div style={{ maxWidth: '1300px', margin: '0 auto' }}>
 
         {/* TOP BREADCRUMB & NAV */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '24px' }}>
@@ -587,7 +587,7 @@ function DbMongodbActiveConnectionContent() {
         </div>
 
         {/* Database Navigation Box */}
-        <DbNavBox activeRoute="/db-connection/db-mongodb-active-connection" />
+        <DbNavBox activeRoute="/db-connection-api/db-mongodb-active-connection" />
 
         {/* Bottom Navigation Links Bar */}
         <div

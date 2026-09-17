@@ -7,7 +7,7 @@ export default function DbRedirectPage() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace('/db-connection');
+    router.replace('/db-connection-api');
   }, [router]);
 
   return (
