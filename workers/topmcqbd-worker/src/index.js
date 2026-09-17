@@ -336,6 +336,14 @@ export default {
     const url = new URL(request.url);
     const path = url.pathname;
 
+    // Direct Top-Level Redirects
+    if (path === '/db' || path === '/DB') {
+      return Response.redirect(`${url.origin}/db-connection-api`, 301);
+    }
+    if (path === '/admin') {
+      return Response.redirect(`${url.origin}/admin/dashboard`, 301);
+    }
+
     try {
       // -------------------------------------------------------------
       // API ROUTES (Backend Handlers)

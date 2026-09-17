@@ -1,7 +1,6 @@
-# Cloudflare Pages Edge Redirects
-/db                 /db-connection            302
-/DB                 /db-connection            302
-/db-connection-check /db-connection          302
+/db                 /db-connection-api        301
+/DB                 /db-connection-api        301
+/admin              /admin/dashboard          301
 
 # API Functions Rule
 /api/*              /api/:splat               200
