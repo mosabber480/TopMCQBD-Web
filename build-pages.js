@@ -1,3 +1,14 @@
+/**
+ * ============================================================================
+ * Cloudflare Pages Advanced Mode Build & Edge Compiler (build-pages.js)
+ * ============================================================================
+ * 1. Synchronizes Next.js static assets and HTML pages to /out
+ * 2. Compiles Edge Engine into /out/_worker.js (Advanced Mode) via Wrangler 4
+ * 3. Generates /out/_routes.json for Cloudflare Pages edge routing
+ * 4. Generates /out/.assetsignore to keep server code safe from public download
+ * ============================================================================
+ */
+
 import fs from 'fs';
 import path from 'path';
 

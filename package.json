@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "next dev",
-    "build": "next build && node copyAssets.js",
-    "build:cloudflare": "next build && node copyAssets.js",
+    "build": "next build && node build-pages.js",
+    "pages:build": "next build && node build-pages.js",
+    "build:cloudflare": "next build && node build-pages.js",
     "preview": "next start",
     "start": "next start",
     "seed": "node seedUsers.js",
