@@ -1,9 +1,9 @@
-name = "topmcqbd-web"
-compatibility_date = "2024-09-23"
+name = "topmcqbd"
+compatibility_date = "2026-08-15"
 compatibility_flags = ["nodejs_compat"]
 pages_build_output_dir = "out"
 
 [[d1_databases]]
 binding = "DB"
 database_name = "topmcqbd-db"
-database_id = "6717c9b8-4836-438d-a042-f2a8a65124c6"
+database_id = "6aecb56e-a820-45df-948e-641aeaafd219"

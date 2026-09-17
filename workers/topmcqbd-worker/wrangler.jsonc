@@ -1,7 +1,7 @@
 {
   "name": "topmcqbd-backup-api",
   "main": "src/index.js",
-  "compatibility_date": "2026-09-08",
+  "compatibility_date": "2026-08-15",
   "compatibility_flags": [
     "nodejs_compat"
   ],
