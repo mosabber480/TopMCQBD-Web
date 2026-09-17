@@ -23,3 +23,11 @@ Antigravity AI must automatically recognize, read, and adhere to the project gui
    - `/db-connection-api` এবং এর সকল সাব-পেজ (`/db-pages-api`, `/db-workers-api`, `/dbpaid-api`, `/db-mongodb-active-connection` ইত্যাদি) হলো একান্তই ব্যাকএন্ড ডায়াগনস্টিক ও টেস্ট পেজ।
    - **কঠোর নিয়ম (No Silent Fallback)**: টেস্ট পেজে কোনো সার্ভিস (Render 6x, Pages Functions, Worker API বা D1) ফেইল করলে বা স্লিপে থাকলে, অন্য কোনো সার্ভিস বা এপিআই দিয়ে সাইলেন্ট ফলব্যাক বা ব্যাকআপ দিয়ে চালানো সম্পূর্ণ নিষিদ্ধ। টেস্ট পেজে সরাসরি ব্যর্থতা (Disconnected/Error) দেখাতে হবে, যাতে এডমিন বুঝতে পারেন ঠিক কোন সার্ভিসটি ডাউন।
    - **মূল সাইট বনাম টেস্ট পেজ পার্থক্য**: মূল পাবলিক ওয়েবসাইটে স্মার্ট ফেইলওভার/ব্যাকআপ (Render -> Worker -> Local) যথারীতি সক্রিয় থাকবে যেন ইউজাররা নিরবচ্ছিন্ন সেবা পায়; কিন্তু `/db-connection-api` সুইটে প্রতিটি সার্ভিসকে সম্পূর্ণ আইসোলেটেডভাবে টেস্ট করতে হবে।
+
+6. **No Localhost or Local Node.js API in `/db-connection-api`**:
+   - `/db-connection-api` পেজগুলো ওয়েবসাইটের সাধারণ ইউজার পেজ নয়; শুধুমাত্র ইন্টারনাল ডাটাবেজ ও ক্লাউড ব্যাকএন্ড যাচাই করার টেস্ট পেজ।
+   - লোকালহোস্টে (`http://localhost:3000/`) ব্রাউজ করা হলেও এই পেজগুলোতে কোনো লোকাল API বা লোকাল Node.js ব্যবহার হবে না।
+   - প্রতিটি টেস্ট পেজ সরাসরি ও কেবল তার নির্ধারিত লাইভ ক্লাউড সার্ভিসকেই হিট করবে:
+     * `db-pages-api` ও `dbd1-api` -> Cloudflare Pages Functions Live API (`https://topmcqbd.pages.dev/api/...`).
+     * `db-workers-api` -> Cloudflare Workers Backup Live API (`https://topmcqbd-backup-api.mosabber5266.workers.dev/api/...`).
+     * Render টেস্ট পেজসমূহ -> ডেডিকেটেড Render Live Microservices (`https://*.onrender.com/api/...`).
