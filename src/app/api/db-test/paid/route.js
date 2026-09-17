@@ -10,14 +10,15 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
-const DIRECT_PAID_URI = 'mongodb://mosabber480_db_user:EScirLEzwgQVVNaB@ac-472re4l-shard-00-00.3ajdj0u.mongodb.net:27017,ac-472re4l-shard-00-01.3ajdj0u.mongodb.net:27017,ac-472re4l-shard-00-02.3ajdj0u.mongodb.net:27017/TopMCQBD_DB?ssl=true&replicaSet=atlas-wzdf1e-shard-0&authSource=admin&retryWrites=true&w=majority';
-
 const getPaidDb = async () => {
   try {
     dns.setServers(['8.8.8.8', '1.1.1.1', '8.8.4.4']);
   } catch (e) {}
 
-  const uri = process.env.MONGODB_URI_PAID || DIRECT_PAID_URI;
+  const uri = process.env.MONGODB_URI_PAID;
+  if (!uri) {
+    throw new Error('Environment variable MONGODB_URI_PAID is missing.');
+  }
   const dbName = process.env.MONGODB_DB_NAME_PAID || 'TopMCQBD_DB';
 
   const client = new MongoClient(uri, {

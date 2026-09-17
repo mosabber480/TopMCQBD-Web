@@ -1,5 +1,5 @@
 {
-  "name": "topmcqbd-backup-api",
+  "name": "topmcqbd-web-test-api",
   "main": "src/index.js",
   "compatibility_date": "2026-08-15",
   "compatibility_flags": [
@@ -18,11 +18,11 @@
     {
       "binding": "DB",
       "database_name": "topmcqbd-db",
-      "database_id": "6aecb56e-a820-45df-948e-641aeaafd219"
+      "database_id": "6717c9b8-4836-438d-a042-f2a8a65124c6"
     }
   ],
   "vars": {
-    "APP_NAME": "TopMCQBD Backup Worker API",
+    "APP_NAME": "TopMCQBD Web Test Worker API",
     "JWT_SECRET": "topmcqbd_super_secret_jwt_key_2026",
     "MONGODB_DB_PAID": "TopMCQBD_DB",
     "MONGODB_DB_FREE": "TopMCQBD_DB_Free",

@@ -10,13 +10,13 @@ const DB_CONFIG = {
   id: 'd1',
   name: 'Cloudflare D1 Serverless SQL DB',
   cluster: 'topmcqbd-db',
-  host: 'topmcqbd-web-deploy-test.pages.dev',
+  host: 'topmcqbd.pages.dev',
   targetColl: 'db-d1-test / app_configs',
   badgeColor: '#0284c7',
   badgeBg: '#eff6ff',
   badgeBorder: '#bfdbfe',
   icon: 'fa-solid fa-bolt',
-  hostName: 'topmcqbd-web-deploy-test.pages.dev',
+  hostName: 'topmcqbd.pages.dev',
   apiEndpoint: '/api/db-test/d1',
 };
 
@@ -76,7 +76,11 @@ function DbD1Content() {
   const [pendingDelete, setPendingDelete] = useState(null);
 
   const getApiBaseUrl = useCallback(() => {
-    return process.env.NEXT_PUBLIC_TEST_PAGES_URL || 'https://topmcqbd-web-deploy-test.pages.dev';
+    return (
+      (typeof window !== 'undefined' ? window.location.origin : '') ||
+      process.env.NEXT_PUBLIC_APP_URL ||
+      'https://topmcqbd.pages.dev'
+    );
   }, []);
 
   const fetchDbData = useCallback(async (isManual = false) => {

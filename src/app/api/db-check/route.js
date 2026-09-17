@@ -22,8 +22,8 @@ export async function GET() {
     dns.setServers(['8.8.8.8', '1.1.1.1', '8.8.4.4']);
   } catch (e) {}
 
-  const MONGODB_URI_PAID = process.env.MONGODB_URI_PAID || 'mongodb+srv://mosabber480_db_user:EScirLEzwgQVVNaB@mosabber.3ajdj0u.mongodb.net/TopMCQBD_DB?retryWrites=true&w=majority';
-  const MONGODB_URI_FREE = process.env.MONGODB_URI_FREE || 'mongodb+srv://mosabber480_db_user:VVcrE9PeIIyVlcKU@topmcqbd.pixb7fx.mongodb.net/TopMCQBD_DB_Free?retryWrites=true&w=majority';
+  const MONGODB_URI_PAID = process.env.MONGODB_URI_PAID;
+  const MONGODB_URI_FREE = process.env.MONGODB_URI_FREE;
   const MONGODB_DB_NAME_PAID = process.env.MONGODB_DB_NAME_PAID || 'TopMCQBD_DB';
   const MONGODB_DB_NAME_FREE = process.env.MONGODB_DB_NAME_FREE || 'TopMCQBD_DB_Free';
 

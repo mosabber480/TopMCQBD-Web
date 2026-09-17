@@ -78,6 +78,8 @@ export default function DbNavBox({ activeRoute }) {
     activeRoute === '/db-connection-api/db-test-pages-api';
   const isWorkersApiActive =
     activeRoute === '/db-connection-api/db-workers-api';
+  const isMainWorkersApiActive =
+    activeRoute === '/db-connection-api/db-main-workers-api';
 
   const renderButton = (btn, idx) => {
     const baseSlug = btn.url.replace('/db-connection-api/', '').replace('-api', '');
@@ -669,6 +671,97 @@ export default function DbNavBox({ activeRoute }) {
               </span>
             )}
           </Link>
+
+          {/* Cloudflare Main Worker API (mosabber480) Button */}
+          <Link
+            href="/db-connection-api/db-main-workers-api"
+            className="main-workers-api-nav-btn"
+            title="Cloudflare Main Worker API Database Testing & Admin Suite (topmcqbd-web-test-api.mosabber480.workers.dev)"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              backgroundColor: '#6366f1',
+              color: '#ffffff',
+              textDecoration: 'none',
+              padding: '9px 18px',
+              borderRadius: '7px',
+              fontSize: '13px',
+              fontWeight: '700',
+              boxShadow: isMainWorkersApiActive ? '0 4px 14px rgba(99, 102, 241, 0.45)' : '0 2px 8px rgba(99, 102, 241, 0.25)',
+              border: 'none',
+              outline: 'none',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              lineHeight: 'normal',
+            }}
+          >
+            <i
+              className="fa-solid fa-bolt-lightning"
+              style={{
+                fontSize: '13px',
+                width: '13px',
+                height: '13px',
+                lineHeight: '13px',
+                color: '#ffffff',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transform: 'translateY(-0.5px)',
+              }}
+            />
+            <span
+              style={{
+                color: '#ffffff',
+                textDecoration: 'none',
+                fontSize: '13px',
+                fontWeight: '700',
+                lineHeight: '1',
+                display: 'inline-block',
+                transform: 'translateY(1px)',
+              }}
+            >
+              Main Worker API
+            </span>
+            {isMainWorkersApiActive && (
+              <span
+                className="active-live-bullet"
+                style={{
+                  position: 'relative',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '7px',
+                  height: '7px',
+                  marginLeft: '4px',
+                  transform: 'translateY(0.5px)',
+                }}
+              >
+                <span
+                  style={{
+                    position: 'absolute',
+                    width: '100%',
+                    height: '100%',
+                    borderRadius: '50%',
+                    backgroundColor: '#ffffff',
+                    opacity: 0.75,
+                    animation: 'navPulse 1.4s cubic-bezier(0, 0, 0.2, 1) infinite',
+                  }}
+                />
+                <span
+                  style={{
+                    position: 'relative',
+                    width: '5px',
+                    height: '5px',
+                    borderRadius: '50%',
+                    backgroundColor: '#ffffff',
+                    boxShadow: '0 0 6px #ffffff',
+                  }}
+                />
+              </span>
+            )}
+          </Link>
         </div>
 
         {/* Right: Logout Button */}
@@ -931,6 +1024,33 @@ export default function DbNavBox({ activeRoute }) {
         }
 
         :global(.workers-api-nav-btn span) {
+          color: #ffffff !important;
+          text-decoration: none !important;
+        }
+
+        :global(.main-workers-api-nav-btn),
+        :global(.main-workers-api-nav-btn:link),
+        :global(.main-workers-api-nav-btn:visited),
+        :global(.main-workers-api-nav-btn:hover),
+        :global(.main-workers-api-nav-btn:active) {
+          text-decoration: none !important;
+          color: #ffffff !important;
+          background-color: #6366f1 !important;
+          line-height: 1 !important;
+        }
+
+        :global(.main-workers-api-nav-btn:hover) {
+          filter: brightness(1.12) !important;
+          transform: translateY(-1px);
+          box-shadow: 0 4px 14px rgba(99, 102, 241, 0.45) !important;
+        }
+
+        :global(.main-workers-api-nav-btn i),
+        :global(.main-workers-api-nav-btn svg) {
+          color: #ffffff !important;
+        }
+
+        :global(.main-workers-api-nav-btn span) {
           color: #ffffff !important;
           text-decoration: none !important;
         }

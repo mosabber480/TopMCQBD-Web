@@ -44,7 +44,7 @@ function htmlResponse(html, status = 200) {
 }
 
 // -------------------------------------------------------------
-// MONGODB ATLAS CLUSTER CONFIGURATIONS & FALLBACKS
+// MONGODB ATLAS CLUSTER CONFIGURATIONS (100% ENVIRONMENT-DRIVEN)
 // -------------------------------------------------------------
 const CLUSTERS = {
   paid: {
@@ -53,8 +53,6 @@ const CLUSTERS = {
     name: 'TopMCQBD_DB (Paid Core)',
     envUriKey: 'MONGODB_URI_PAID',
     envDbKey: 'MONGODB_DB_PAID',
-    directUri: 'mongodb://mosabber480_db_user:EScirLEzwgQVVNaB@ac-472re4l-shard-00-00.3ajdj0u.mongodb.net:27017,ac-472re4l-shard-00-01.3ajdj0u.mongodb.net:27017,ac-472re4l-shard-00-02.3ajdj0u.mongodb.net:27017/TopMCQBD_DB?ssl=true&replicaSet=atlas-wzdf1e-shard-0&authSource=admin&retryWrites=true&w=majority',
-    fallbackUri: 'mongodb+srv://mosabber480_db_user:EScirLEzwgQVVNaB@mosabber.3ajdj0u.mongodb.net/TopMCQBD_DB?retryWrites=true&w=majority',
   },
   free: {
     db: 'TopMCQBD_DB_Free',
@@ -62,8 +60,6 @@ const CLUSTERS = {
     name: 'TopMCQBD_DB_Free (Open Free)',
     envUriKey: 'MONGODB_URI_FREE',
     envDbKey: 'MONGODB_DB_FREE',
-    directUri: 'mongodb://mosabber480_db_user:VVcrE9PeIIyVlcKU@ac-rw27hdk-shard-00-00.pixb7fx.mongodb.net:27017,ac-rw27hdk-shard-00-01.pixb7fx.mongodb.net:27017,ac-rw27hdk-shard-00-02.pixb7fx.mongodb.net:27017/TopMCQBD_DB_Free?ssl=true&replicaSet=atlas-bntyny-shard-0&authSource=admin&retryWrites=true&w=majority',
-    fallbackUri: 'mongodb+srv://mosabber480_db_user:VVcrE9PeIIyVlcKU@topmcqbd.pixb7fx.mongodb.net/TopMCQBD_DB_Free?retryWrites=true&w=majority',
   },
   subjective: {
     db: 'TopMCQBD_DB_Subjective',
@@ -71,8 +67,6 @@ const CLUSTERS = {
     name: 'TopMCQBD_DB_Subjective',
     envUriKey: 'MONGODB_URI_SUBJECTIVE',
     envDbKey: 'MONGODB_DB_SUBJECTIVE',
-    directUri: 'mongodb://mosabber480_db_user:DyW4KsXEhpcK1Rm2@ac-co47w40-shard-00-00.3ifvd7c.mongodb.net:27017,ac-co47w40-shard-00-01.3ifvd7c.mongodb.net:27017,ac-co47w40-shard-00-02.3ifvd7c.mongodb.net:27017/TopMCQBD_DB_Subjective?ssl=true&replicaSet=atlas-c8bq3l-shard-0&authSource=admin&retryWrites=true&w=majority',
-    fallbackUri: 'mongodb+srv://mosabber480_db_user:DyW4KsXEhpcK1Rm2@topmcqbd.3ifvd7c.mongodb.net/TopMCQBD_DB_Subjective?retryWrites=true&w=majority&appName=TopMCQBD',
   },
   live_exam: {
     db: 'TopMCQBD_DB_Live_Exam',
@@ -80,8 +74,6 @@ const CLUSTERS = {
     name: 'TopMCQBD_DB_Live_Exam',
     envUriKey: 'MONGODB_URI_LIVE_EXAM',
     envDbKey: 'MONGODB_DB_LIVE_EXAM',
-    directUri: 'mongodb://mosabber480_db_user:UANQIRPoI9Zm3m4f@ac-il8uyoo-shard-00-00.ns1gpls.mongodb.net:27017,ac-il8uyoo-shard-00-01.ns1gpls.mongodb.net:27017,ac-il8uyoo-shard-00-02.ns1gpls.mongodb.net:27017/TopMCQBD_DB_Live_Exam?ssl=true&replicaSet=atlas-e1xhyt-shard-0&authSource=admin&retryWrites=true&w=majority',
-    fallbackUri: 'mongodb+srv://mosabber480_db_user:UANQIRPoI9Zm3m4f@topmcqbd.ns1gpls.mongodb.net/TopMCQBD_DB_Live_Exam?retryWrites=true&w=majority&appName=TopMCQBD',
   },
   written: {
     db: 'TopMCQBD_DB_written',
@@ -89,8 +81,6 @@ const CLUSTERS = {
     name: 'TopMCQBD_DB_written',
     envUriKey: 'MONGODB_URI_WRITTEN',
     envDbKey: 'MONGODB_DB_WRITTEN',
-    directUri: 'mongodb://mosabber480_db_user:FABv84QMDHSQyeP5@ac-zzyyeyo-shard-00-00.hfivdlt.mongodb.net:27017,ac-zzyyeyo-shard-00-01.hfivdlt.mongodb.net:27017,ac-zzyyeyo-shard-00-02.hfivdlt.mongodb.net:27017/TopMCQBD_DB_written?ssl=true&replicaSet=atlas-afklo6-shard-0&authSource=admin&retryWrites=true&w=majority',
-    fallbackUri: 'mongodb+srv://mosabber480_db_user:FABv84QMDHSQyeP5@topmcqbd.hfivdlt.mongodb.net/TopMCQBD_DB_written?retryWrites=true&w=majority&appName=TopMCQBD',
   },
   question_bank: {
     db: 'TopMCQBD_DB_Question_Bank',
@@ -98,20 +88,41 @@ const CLUSTERS = {
     name: 'TopMCQBD_DB_Question_Bank',
     envUriKey: 'MONGODB_URI_QUESTION_BANK',
     envDbKey: 'MONGODB_DB_QUESTION_BANK',
-    directUri: 'mongodb://mosabber480_db_user:0lxx4VTglJgoel8E@ac-bkuekcv-shard-00-00.bexo18c.mongodb.net:27017,ac-bkuekcv-shard-00-01.bexo18c.mongodb.net:27017,ac-bkuekcv-shard-00-02.bexo18c.mongodb.net:27017/TopMCQBD_DB_Question_Bank?ssl=true&replicaSet=atlas-2tax1l-shard-0&authSource=admin&retryWrites=true&w=majority',
-    fallbackUri: 'mongodb+srv://mosabber480_db_user:0lxx4VTglJgoel8E@topmcqbd.bexo18c.mongodb.net/TopMCQBD_DB_Question_Bank?retryWrites=true&w=majority&appName=TopMCQBD',
   },
 };
 
 function resolveCluster(clusterParam, env) {
   const norm = String(clusterParam || 'paid').toLowerCase().replace(/-/g, '_');
   const cfg = CLUSTERS[norm] || CLUSTERS.paid;
-  const customUri = env && env[cfg.envUriKey];
-  const dbName = (env && env[cfg.envDbKey]) || cfg.db;
+  const clusterKey = norm.toUpperCase();
+
+  let envUri = (env && env[cfg.envUriKey]) || (typeof process !== 'undefined' && process.env && process.env[cfg.envUriKey]);
+  if (!envUri) {
+    const altKeys = [`MONGODB_DB_NAME_${clusterKey}`, `MONGODB_DB_${clusterKey}`, 'MONGODB_URI'];
+    for (const k of altKeys) {
+      const val = (env && env[k]) || (typeof process !== 'undefined' && process.env && process.env[k]);
+      if (val && (val.startsWith('mongodb://') || val.startsWith('mongodb+srv://'))) {
+        envUri = val;
+        break;
+      }
+    }
+  }
+
+  let dbName = (env && env[cfg.envDbKey]) || (typeof process !== 'undefined' && process.env && process.env[cfg.envDbKey]);
+  if (!dbName || dbName.startsWith('mongodb')) {
+    const altDbKey = `MONGODB_DB_NAME_${clusterKey}`;
+    const altVal = (env && env[altDbKey]) || (typeof process !== 'undefined' && process.env && process.env[altDbKey]);
+    if (altVal && !altVal.startsWith('mongodb')) {
+      dbName = altVal;
+    } else {
+      dbName = cfg.db;
+    }
+  }
+
   return {
     cfg,
-    customUri,
-    uri: customUri || cfg.directUri || cfg.fallbackUri,
+    envUriKey: cfg.envUriKey,
+    uri: envUri,
     dbName,
     coll: cfg.coll,
     name: cfg.name,
@@ -126,9 +137,9 @@ function createClientOptions(uri) {
     family: 4,               // Enforce IPv4 to avoid Edge IPv6 DNS latency
     maxPoolSize: 1,         // Single lightweight socket per Edge isolate
     minPoolSize: 0,         // Clean up idle sockets automatically
-    connectTimeoutMS: 6000,
-    serverSelectionTimeoutMS: 6000,
-    socketTimeoutMS: 10000,
+    connectTimeoutMS: 8000,
+    serverSelectionTimeoutMS: 8000,
+    socketTimeoutMS: 12000,
   };
 
   if (!isSrv && !isMultiHost) {
@@ -138,40 +149,21 @@ function createClientOptions(uri) {
 }
 
 /**
- * Get connected MongoClient instance with Serverless Edge optimizations
- * Connects directly to replicaSet shards (fastest, zero SRV DNS timeout)
+ * Connect to MongoDB strictly using the Cloudflare environment variable.
+ * If the environment variable is deleted or missing from Cloudflare,
+ * it immediately throws an error and disconnects (zero hardcoded fallback).
  */
 async function getClient(target) {
-  let urisToTry = [];
+  const uri = typeof target === 'string' ? target : target?.uri;
+  const envUriKey = target?.envUriKey || target?.cfg?.envUriKey || 'MONGODB_URI';
 
-  if (typeof target === 'string') {
-    urisToTry = [target];
-  } else if (target && target.cfg) {
-    // 1. Direct replicaSet URI first (instant TLS, ~600ms, bypasses SRV lookup)
-    if (target.cfg.directUri) urisToTry.push(target.cfg.directUri);
-    // 2. Custom env URI if set
-    if (target.customUri && !urisToTry.includes(target.customUri)) urisToTry.push(target.customUri);
-    // 3. Fallback SRV URI
-    if (target.cfg.fallbackUri && !urisToTry.includes(target.cfg.fallbackUri)) urisToTry.push(target.cfg.fallbackUri);
-  } else if (target) {
-    if (target.directUri) urisToTry.push(target.directUri);
-    if (target.uri) urisToTry.push(target.uri);
-    if (target.fallbackUri) urisToTry.push(target.fallbackUri);
+  if (!uri) {
+    throw new Error(`Cloudflare environment variable "${envUriKey}" is missing. Connection disconnected.`);
   }
 
-  let lastError = null;
-  for (const uri of urisToTry) {
-    try {
-      const client = new MongoClient(uri, createClientOptions(uri));
-      await client.connect();
-      return client;
-    } catch (err) {
-      lastError = err;
-      console.warn(`[Worker Edge MongoDB] Connection attempt failed with ${uri.substring(0, 35)}... : ${err.message}`);
-    }
-  }
-
-  throw lastError || new Error('All connection attempts to MongoDB failed');
+  const client = new MongoClient(uri, createClientOptions(uri));
+  await client.connect();
+  return client;
 }
 
 // -------------------------------------------------------------
@@ -627,6 +619,21 @@ export default {
         const d1Promise = (async () => {
           const t0 = Date.now();
           if (!env.DB) {
+            try {
+              const res = await fetch('https://topmcqbd-web-test-api.mosabber480.workers.dev/api/db-test/d1');
+              if (res.ok) {
+                const wData = await res.json();
+                return {
+                  id: 'd1',
+                  name: 'Cloudflare D1 SQL DB',
+                  cluster: 'topmcqbd-db',
+                  status: 'connected',
+                  connected: true,
+                  latencyMs: wData.latencyMs || (Date.now() - t0),
+                  totalConfigs: wData.totalItems || 3
+                };
+              }
+            } catch (err) {}
             return {
               id: 'd1',
               name: 'Cloudflare D1 SQL DB',
@@ -687,12 +694,27 @@ export default {
       // -------------------------------------------------------------
       if (path === '/api/db-test/d1') {
         if (!env.DB) {
-          return jsonResponse({
-            success: false,
-            message: 'Cloudflare D1 binding (env.DB) is not attached to this isolate.',
-            runtime: 'Cloudflare Edge',
-            timestamp: new Date().toISOString()
-          }, 200);
+          try {
+            const workerUrl = 'https://topmcqbd-web-test-api.mosabber480.workers.dev/api/db-test/d1' + (url.search || '');
+            const workerRes = await fetch(workerUrl, {
+              method: request.method,
+              headers: {
+                'Content-Type': request.headers.get('Content-Type') || 'application/json',
+                Accept: 'application/json',
+              },
+              body: request.method !== 'GET' && request.method !== 'HEAD' ? await request.text() : undefined,
+            });
+            const data = await workerRes.json();
+            return jsonResponse(data, workerRes.status);
+          } catch (proxyErr) {
+            return jsonResponse({
+              success: false,
+              connected: false,
+              message: 'Cloudflare D1 binding (env.DB) is not attached to this isolate and worker fallback failed.',
+              runtime: 'Cloudflare Edge',
+              timestamp: new Date().toISOString()
+            }, 200);
+          }
         }
 
         await ensureD1Table(env.DB);

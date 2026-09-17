@@ -10,14 +10,15 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
-const DIRECT_FREE_URI = 'mongodb://mosabber480_db_user:VVcrE9PeIIyVlcKU@ac-rw27hdk-shard-00-00.pixb7fx.mongodb.net:27017,ac-rw27hdk-shard-00-01.pixb7fx.mongodb.net:27017,ac-rw27hdk-shard-00-02.pixb7fx.mongodb.net:27017/TopMCQBD_DB_Free?ssl=true&replicaSet=atlas-bntyny-shard-0&authSource=admin&retryWrites=true&w=majority';
-
 const getFreeDb = async () => {
   try {
     dns.setServers(['8.8.8.8', '1.1.1.1', '8.8.4.4']);
   } catch (e) {}
 
-  const uri = process.env.MONGODB_URI_FREE || DIRECT_FREE_URI;
+  const uri = process.env.MONGODB_URI_FREE;
+  if (!uri) {
+    throw new Error('Environment variable MONGODB_URI_FREE is missing.');
+  }
   const dbName = process.env.MONGODB_DB_NAME_FREE || 'TopMCQBD_DB_Free';
 
   const client = new MongoClient(uri, {
