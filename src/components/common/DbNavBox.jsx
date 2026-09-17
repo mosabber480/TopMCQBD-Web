@@ -52,7 +52,7 @@ export default function DbNavBox({ activeRoute }) {
       text: 'Free MCQ DB',
       url: '/db-connection-api/dbfree-api',
       altUrl: '/dbfree-api',
-      icon: 'fa-solid fa-seedling',
+      icon: 'fa-solid fa-hard-drive',
       bg: '#0d9488', // Teal
     },
   ];
@@ -77,7 +77,7 @@ export default function DbNavBox({ activeRoute }) {
   const isWorkersApiActive =
     activeRoute === '/db-connection-api/db-workers-api';
 
-  const renderButton = (btn, idx, arr) => {
+  const renderButton = (btn, idx) => {
     const baseSlug = btn.url.replace('/db-connection-api/', '').replace('-api', '');
     const isActive =
       activeRoute === btn.url ||
@@ -86,7 +86,6 @@ export default function DbNavBox({ activeRoute }) {
       activeRoute === `/${baseSlug}` ||
       activeRoute === `/db-connection-api/${baseSlug}-admin` ||
       activeRoute === `/db-connection-api/${baseSlug}-test`;
-    const isSingleLast = arr && arr.length === 3 && idx === 2;
     return (
       <Link
         key={btn.url}
@@ -119,7 +118,6 @@ export default function DbNavBox({ activeRoute }) {
           transition: 'all 0.2s ease',
           width: '100%',
           boxSizing: 'border-box',
-          gridColumn: isSingleLast ? '1 / -1' : undefined,
         }}
       >
         <i
@@ -195,18 +193,6 @@ export default function DbNavBox({ activeRoute }) {
     );
   };
 
-  const leftGroup = [
-    dbButtons[0], // Cloudflare D1
-    dbButtons[1], // Paid Core DB
-    dbButtons[2], // Subj MCQs DB
-    dbButtons[3], // Live Exam DB
-  ];
-  const rightGroup = [
-    dbButtons[4], // Written DB
-    dbButtons[5], // Q-Bank DB
-    dbButtons[6], // Free MCQ DB
-  ];
-
   return (
     <div className="db-nav-box-wrapper">
       {/* Top Header */}
@@ -219,15 +205,9 @@ export default function DbNavBox({ activeRoute }) {
         </div>
       </div>
 
-      {/* 7 Buttons Grid with Center Subtle Line on Desktop */}
-      <div className="admin-actions-split-wrapper">
-        <div className="admin-sub-grid">
-          {leftGroup.map((btn, idx) => renderButton(btn, idx, leftGroup))}
-        </div>
-        <div className="nav-vertical-divider" />
-        <div className="admin-sub-grid">
-          {rightGroup.map((btn, idx) => renderButton(btn, idx, rightGroup))}
-        </div>
+      {/* 7 Buttons Grid: Balanced on Desktop & 100% on Mobile */}
+      <div className="admin-actions-grid">
+        {dbButtons.map((btn, idx) => renderButton(btn, idx))}
       </div>
 
       {/* Bottom Dedicated Bar: ALL DB Hub & MongoDB Active Hub (Left) & Logout (Right) */}
@@ -700,25 +680,11 @@ export default function DbNavBox({ activeRoute }) {
           color: #64748b;
         }
 
-        .admin-actions-split-wrapper {
-          display: flex;
-          align-items: flex-start;
-          gap: 12px;
-          width: 100%;
-        }
-
-        .admin-sub-grid {
+        .admin-actions-grid {
           display: grid;
-          grid-template-columns: repeat(2, 1fr);
+          grid-template-columns: repeat(7, 1fr);
           gap: 10px;
-          flex: 1;
-        }
-
-        .nav-vertical-divider {
-          width: 1px;
-          background: linear-gradient(to bottom, #e2e8f0 0%, #cbd5e1 50%, #e2e8f0 100%);
-          margin: 0;
-          flex-shrink: 0;
+          width: 100%;
         }
 
         .bottom-hub-logout-bar {
@@ -893,40 +859,43 @@ export default function DbNavBox({ activeRoute }) {
           align-items: center !important;
         }
 
-        @media (max-width: 992px) {
-          .admin-actions-split-wrapper {
-            flex-direction: column;
+        @media (max-width: 1100px) and (min-width: 769px) {
+          .admin-actions-grid {
+            grid-template-columns: repeat(4, 1fr);
             gap: 10px;
-          }
-          .nav-vertical-divider {
-            width: 100%;
-            height: 1px;
-            margin: 2px 0;
           }
         }
 
-        @media (max-width: 480px) {
-          .admin-sub-grid {
+        @media (max-width: 768px) {
+          .admin-actions-grid {
             grid-template-columns: 1fr;
+            gap: 8px;
+            width: 100%;
           }
-          .nav-vertical-divider {
-            display: none;
+          :global(.db-nav-btn) {
+            width: 100% !important;
+            justify-content: center !important;
           }
           .bottom-hub-logout-bar {
             flex-direction: column;
             align-items: stretch;
+            gap: 8px;
+            width: 100%;
           }
           .bottom-hub-left-group {
             flex-direction: column;
             align-items: stretch;
             width: 100%;
+            gap: 8px;
           }
           :global(.all-db-hub-btn),
           :global(.mongo-active-btn),
           :global(.pages-api-nav-btn),
           :global(.workers-api-nav-btn),
           .bottom-logout-btn {
-            justify-content: center;
+            width: 100% !important;
+            justify-content: center !important;
+            box-sizing: border-box !important;
           }
         }
 

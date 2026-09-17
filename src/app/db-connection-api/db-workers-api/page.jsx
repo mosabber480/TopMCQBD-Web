@@ -2481,7 +2481,7 @@ function DbWorkersApiContent() {
         }
 
         .btn-cancel-gray {
-          background: #6c757d;
+          background: #000000;
           color: #ffffff;
           border: none;
           padding: 9px 16px;
@@ -2492,10 +2492,12 @@ function DbWorkersApiContent() {
           transition: all 0.2s;
           display: inline-flex;
           align-items: center;
+          gap: 6px;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
         }
 
         .btn-cancel-gray:hover {
-          background: #5a6268;
+          background: #27272a;
         }
 
         .btn-submit {
@@ -2554,16 +2556,86 @@ function DbWorkersApiContent() {
           }
         }
 
-        @media (max-width: 640px) {
+        @media (max-width: 768px) {
           .cluster-control-panel {
             padding: 14px;
             border-radius: 12px;
           }
 
+          .cc-split-layout {
+            flex-direction: column;
+            gap: 16px;
+          }
+
+          .cc-panel-dotted-divider {
+            display: none;
+          }
+
           .cc-form-panel,
           .cc-list-panel {
-            padding: 12px;
-            border-radius: 10px;
+            padding: 14px;
+            border-radius: 12px;
+            width: 100%;
+            box-sizing: border-box;
+          }
+
+          .add-btn-wrapper {
+            width: 100%;
+          }
+
+          .btn-add-main {
+            width: 100% !important;
+            justify-content: center !important;
+            padding: 11px 16px !important;
+            box-sizing: border-box !important;
+          }
+
+          .add-row-item {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 8px;
+          }
+
+          .add-row-input {
+            width: 100% !important;
+            min-width: 0 !important;
+            box-sizing: border-box !important;
+          }
+
+          .btn-row-delete {
+            width: 100% !important;
+            justify-content: center !important;
+            padding: 9px 12px !important;
+            box-sizing: border-box !important;
+          }
+
+          .add-rows-actions {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 10px;
+            width: 100%;
+          }
+
+          .btn-add-more-rows {
+            width: 100% !important;
+            justify-content: center !important;
+            padding: 11px 16px !important;
+            box-sizing: border-box !important;
+          }
+
+          .save-cancel-group {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+          }
+
+          .btn-save-all-rows,
+          .btn-cancel-all-rows {
+            width: 100% !important;
+            justify-content: center !important;
+            padding: 11px 16px !important;
+            box-sizing: border-box !important;
           }
 
           .item-row {
@@ -2581,10 +2653,18 @@ function DbWorkersApiContent() {
 
           .item-content {
             width: 100%;
+            min-width: 0;
+          }
+
+          .item-text {
+            word-break: break-word;
+            font-size: 14px;
+            line-height: 1.4;
           }
 
           .item-actions {
             display: flex;
+            flex-direction: row;
             width: 100%;
             gap: 8px;
             padding-top: 8px;
@@ -2592,32 +2672,44 @@ function DbWorkersApiContent() {
           }
 
           .action-btn {
-            flex: 1;
-            justify-content: center;
-            padding: 7px 10px;
-            font-size: 12px;
+            flex: 1 1 50%;
+            width: 50% !important;
+            justify-content: center !important;
+            padding: 9px 12px !important;
+            font-size: 13px !important;
+            height: 38px !important;
+            box-sizing: border-box !important;
           }
 
           .edit-box-inline {
             flex-direction: column;
             align-items: stretch;
+            gap: 8px;
+            width: 100%;
           }
 
           .edit-input {
-            width: 100%;
-            min-width: 0;
+            width: 100% !important;
+            min-width: 0 !important;
+            box-sizing: border-box !important;
           }
 
           .edit-btn-group {
             width: 100%;
             display: flex;
+            flex-direction: row;
+            gap: 8px;
           }
 
           .btn-save-inline,
           .btn-cancel-inline {
-            flex: 1;
-            justify-content: center;
-            text-align: center;
+            flex: 1 1 50%;
+            width: 50% !important;
+            justify-content: center !important;
+            padding: 9px 12px !important;
+            font-size: 13px !important;
+            height: 38px !important;
+            box-sizing: border-box !important;
           }
 
           .dedicated-recheck-box {
@@ -2632,9 +2724,12 @@ function DbWorkersApiContent() {
             align-items: stretch;
           }
 
-          .btn-recheck-all-dedicated {
-            width: 100%;
-            justify-content: center;
+          .btn-recheck-all-dedicated,
+          .btn-header-recheck {
+            width: 100% !important;
+            justify-content: center !important;
+            padding: 10px 16px !important;
+            box-sizing: border-box !important;
           }
 
           #reorder-action-bar,
@@ -2645,12 +2740,35 @@ function DbWorkersApiContent() {
             text-align: center;
           }
 
-          .add-row-item {
-            flex-wrap: wrap;
+          .btn-submit,
+          .btn-danger,
+          .btn-delete-confirm,
+          .btn-delete-cancel,
+          .btn-cancel-gray {
+            width: 100% !important;
+            justify-content: center !important;
+            padding: 11px 16px !important;
+            box-sizing: border-box !important;
           }
 
-          .add-row-input {
-            min-width: 160px;
+          .bottom-nav-row,
+          .bottom-nav-bar {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 10px !important;
+            width: 100%;
+          }
+
+          .bottom-nav-link,
+          :global(.b-link) {
+            width: 100% !important;
+            justify-content: center !important;
+            padding: 11px 16px !important;
+            border-radius: 8px !important;
+            border: 1px solid #cbd5e1 !important;
+            background: #ffffff !important;
+            box-sizing: border-box !important;
+            text-align: center !important;
           }
         }
       `}</style>

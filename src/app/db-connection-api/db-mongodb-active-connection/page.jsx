@@ -292,6 +292,7 @@ function DbMongodbActiveConnectionContent() {
           <button
             onClick={wakeUpAllDatabases}
             disabled={loading}
+            className="wake-up-all-btn"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -315,6 +316,7 @@ function DbMongodbActiveConnectionContent() {
 
         {/* MASTER KEEP-ALIVE URL CARD */}
         <div
+          className="master-url-box"
           style={{
             backgroundColor: '#eff6ff',
             border: '1.5px dashed #3b82f6',
@@ -339,6 +341,7 @@ function DbMongodbActiveConnectionContent() {
 
           <button
             onClick={copyUptimeUrl}
+            className="copy-uptime-btn"
             style={{
               padding: '10px 18px',
               backgroundColor: copiedUrl ? '#16a34a' : '#2563eb',
@@ -568,6 +571,7 @@ function DbMongodbActiveConnectionContent() {
                     href={svc.pingUrl}
                     target="_blank"
                     rel="noreferrer"
+                    className="cluster-direct-test-btn"
                     style={{
                       fontSize: '12px',
                       color: '#0284c7',
@@ -606,6 +610,7 @@ function DbMongodbActiveConnectionContent() {
         >
           <Link
             href="/"
+            className="bottom-nav-link"
             style={{
               color: '#0284c7',
               textDecoration: 'none',
@@ -621,6 +626,7 @@ function DbMongodbActiveConnectionContent() {
           </Link>
           <Link
             href="/admin/dashboard"
+            className="bottom-nav-link"
             style={{
               color: '#0284c7',
               textDecoration: 'none',
@@ -637,6 +643,48 @@ function DbMongodbActiveConnectionContent() {
         </div>
 
       </div>
+
+      <style jsx>{`
+        @media (max-width: 768px) {
+          .wake-up-all-btn {
+            width: 100% !important;
+            justify-content: center !important;
+            padding: 12px 16px !important;
+            box-sizing: border-box !important;
+          }
+
+          .master-url-box {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 12px !important;
+          }
+
+          .copy-uptime-btn {
+            width: 100% !important;
+            justify-content: center !important;
+            padding: 11px 16px !important;
+            box-sizing: border-box !important;
+          }
+
+          .bottom-nav-bar {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 10px !important;
+            width: 100%;
+          }
+
+          .bottom-nav-link {
+            width: 100% !important;
+            justify-content: center !important;
+            padding: 11px 16px !important;
+            border-radius: 8px !important;
+            border: 1px solid #cbd5e1 !important;
+            background: #ffffff !important;
+            box-sizing: border-box !important;
+            text-align: center !important;
+          }
+        }
+      `}</style>
     </main>
   );
 }

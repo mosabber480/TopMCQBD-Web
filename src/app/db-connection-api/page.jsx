@@ -1030,6 +1030,35 @@ export default function DBConnectionCheck() {
             .db-grid {
               grid-template-columns: 1fr;
             }
+
+            .db-control-bar {
+              flex-direction: column;
+              align-items: stretch;
+              gap: 12px;
+            }
+
+            .recheck-btn {
+              width: 100%;
+              justify-content: center;
+              padding: 11px 16px;
+              box-sizing: border-box;
+            }
+
+            .bottom-nav-bar {
+              flex-direction: column !important;
+              align-items: stretch !important;
+              gap: 10px !important;
+            }
+
+            .bottom-nav-link {
+              width: 100%;
+              justify-content: center;
+              padding: 11px 16px;
+              border-radius: 8px;
+              border: 1px solid #cbd5e1;
+              background: #ffffff;
+              box-sizing: border-box;
+            }
           }
         `}</style>
       </main>
