@@ -135,7 +135,7 @@ function QuestionsComponentInternal() {
   const [optionLayout, setOptionLayout] = useState('2q-col'); // Default: '2q-col' (১ লাইনে ২টি প্রশ্ন - উপর-নিচ ক্রম)
   const [showGlobalSettingsMenu, setShowGlobalSettingsMenu] = useState(false);
   const globalSettingsRef = useRef(null);
-  const [globalAccordion, setGlobalAccordion] = useState({ layout: true, font: false, switches: true });
+  const [globalAccordion, setGlobalAccordion] = useState({ layout: true, cutMark: false, font: false, switches: true });
 
   const toggleGlobalAccordion = (sec) => {
     setGlobalAccordion((prev) => ({ ...prev, [sec]: !prev[sec] }));
@@ -145,8 +145,6 @@ function QuestionsComponentInternal() {
   const [cutMark, setCutMark] = useState(0.5); // Default 0.5 cut mark
   const [cutMarkMode, setCutMarkMode] = useState('0.5'); // '0.5' | '0.25' | '0' | 'custom'
   const [customCutMarkInput, setCustomCutMarkInput] = useState('');
-  const [showCutMarkMenu, setShowCutMarkMenu] = useState(false);
-  const cutMarkDropdownRef = useRef(null);
 
   // Font settings states
   const [fontSize, setFontSize] = useState(16); // Default 16px
@@ -157,11 +155,30 @@ function QuestionsComponentInternal() {
 
   const toggleFontAccordion = (sec) => {
     setFontAccordion((prev) => ({
-      size: sec === 'size' ? !prev.size : false,
-      family: sec === 'family' ? !prev.family : false,
-      weight: sec === 'weight' ? !prev.weight : false
+      ...prev,
+      [sec]: !prev[sec]
     }));
   };
+
+  const [globalSettingsMaxHeight, setGlobalSettingsMaxHeight] = useState('calc(100vh - 180px)');
+
+  useEffect(() => {
+    if (showGlobalSettingsMenu && globalSettingsRef.current) {
+      const updateHeight = () => {
+        const rect = globalSettingsRef.current.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - rect.bottom - 16;
+        const targetHeight = Math.max(300, Math.min(650, spaceBelow));
+        setGlobalSettingsMaxHeight(`${targetHeight}px`);
+      };
+      updateHeight();
+      window.addEventListener('resize', updateHeight);
+      window.addEventListener('scroll', updateHeight, { passive: true });
+      return () => {
+        window.removeEventListener('resize', updateHeight);
+        window.removeEventListener('scroll', updateHeight);
+      };
+    }
+  }, [showGlobalSettingsMenu, globalAccordion, fontAccordion]);
 
   const [showLimitMenu, setShowLimitMenu] = useState(false);
   const limitDropdownRef = useRef(null);
@@ -424,14 +441,11 @@ function QuestionsComponentInternal() {
     }
   }, []);
 
-  // Close global settings, limit, range & cut mark menus on click outside
+  // Close global settings, limit & range menus on click outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (globalSettingsRef.current && !globalSettingsRef.current.contains(event.target)) {
         setShowGlobalSettingsMenu(false);
-      }
-      if (cutMarkDropdownRef.current && !cutMarkDropdownRef.current.contains(event.target)) {
-        setShowCutMarkMenu(false);
       }
       if (limitDropdownRef.current && !limitDropdownRef.current.contains(event.target)) {
         setShowLimitMenu(false);
@@ -1150,99 +1164,11 @@ function QuestionsComponentInternal() {
             {categoryParam ? formatCategoryDisplay(categoryParam) : 'সকল প্রশ্নব্যাংক'}
           </div>
           <div className="quiz-header-right-actions">
-            {/* Cut Mark (Negative Marking) Custom Dropdown */}
-            <div className="quiz-layout-dropdown-wrapper" ref={cutMarkDropdownRef}>
-              <button
-                type="button"
-                className="quiz-cut-mark-trigger-btn"
-                onClick={() => setShowCutMarkMenu(!showCutMarkMenu)}
-                title="ভুল উত্তরের জন্য কাট মার্ক পরিবর্তন করুন"
-              >
-                <span>
-                  {cutMark === 0
-                    ? '[ কোনো কাট মার্ক নেই ]'
-                    : `[ প্রতিটি ভুল উত্তরের জন্য ${toBengaliNumber(cutMark)} নম্বর কাটা যাবে ]`}
-                </span>
-                <i className={`fa-solid fa-chevron-${showCutMarkMenu ? 'up' : 'down'}`} style={{ fontSize: '11px', color: '#e74c3c' }}></i>
-              </button>
-
-              {showCutMarkMenu && (
-                <div className="quiz-layout-popup-menu quiz-cut-mark-popup">
-                  <div className="quiz-cut-mark-popup-title">
-                    <i className="fa-solid fa-pen-ruler" style={{ color: '#e74c3c', marginRight: '6px' }}></i>
-                    নেগেটিভ মার্কিং (কাট মার্ক)
-                  </div>
-
-                  <button
-                    type="button"
-                    className={`quiz-layout-menu-item ${cutMarkMode === '0.5' ? 'active' : ''}`}
-                    onClick={() => handleSelectPresetCutMark(0.5, '0.5')}
-                  >
-                    <div className="quiz-layout-radio-circle">
-                      {cutMarkMode === '0.5' && <div className="quiz-layout-radio-inner"></div>}
-                    </div>
-                    <span>০.৫ নম্বর কাটা যাবে (ডিফল্ট)</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    className={`quiz-layout-menu-item ${cutMarkMode === '0.25' ? 'active' : ''}`}
-                    onClick={() => handleSelectPresetCutMark(0.25, '0.25')}
-                  >
-                    <div className="quiz-layout-radio-circle">
-                      {cutMarkMode === '0.25' && <div className="quiz-layout-radio-inner"></div>}
-                    </div>
-                    <span>০.২৫ নম্বর কাটা যাবে</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    className={`quiz-layout-menu-item ${cutMarkMode === '0' ? 'active' : ''}`}
-                    onClick={() => handleSelectPresetCutMark(0, '0')}
-                  >
-                    <div className="quiz-layout-radio-circle">
-                      {cutMarkMode === '0' && <div className="quiz-layout-radio-inner"></div>}
-                    </div>
-                    <span>No Cut Mark (০ নম্বর)</span>
-                  </button>
-
-                  <div className="quiz-cut-mark-divider"></div>
-
-                  <div className="quiz-cut-mark-custom-section">
-                    <div className="quiz-cut-mark-custom-header">
-                      <span>কাস্টম কাট মার্ক:</span>
-                      {cutMarkMode === 'custom' && (
-                        <span className="quiz-cut-mark-badge">সক্রিয়: {toBengaliNumber(cutMark)}</span>
-                      )}
-                    </div>
-                    <div className="quiz-cut-mark-input-row">
-                      <input
-                        type="number"
-                        step="0.05"
-                        min="0"
-                        max="10"
-                        placeholder="যেমন: 0.20 বা 1"
-                        value={customCutMarkInput}
-                        onChange={(e) => setCustomCutMarkInput(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault();
-                            handleApplyCustomCutMark();
-                          }
-                        }}
-                        className="quiz-cut-mark-input"
-                      />
-                      <button
-                        type="button"
-                        className="quiz-cut-mark-apply-btn"
-                        onClick={handleApplyCustomCutMark}
-                      >
-                        সেট করুন
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
+            {/* Negative Marking Note (Display Only) */}
+            <div className="quiz-negative-mark-note">
+              {cutMark === 0
+                ? '[ কোনো কাট মার্ক নেই ]'
+                : `[ প্রতিটি ভুল উত্তরের জন্য ${toBengaliNumber(cutMark)} নম্বর কাটা যাবে ]`}
             </div>
 
             {/* Global MCQ Setting Custom Dropdown Menu */}
@@ -1251,7 +1177,7 @@ function QuestionsComponentInternal() {
                 type="button"
                 className="quiz-layout-trigger-btn quiz-global-settings-trigger"
                 onClick={() => setShowGlobalSettingsMenu(!showGlobalSettingsMenu)}
-                title="Global MCQ Setting (লেআউট, ফন্ট ও ডিসপ্লে সুইচ)"
+                title="Global MCQ Setting (লেআউট, কাট মার্ক, ফন্ট ও ডিসপ্লে সুইচ)"
               >
                 <i className="fa-solid fa-gear" style={{ color: '#007bff' }}></i>
                 <span>Global MCQ Setting</span>
@@ -1259,7 +1185,10 @@ function QuestionsComponentInternal() {
               </button>
 
               {showGlobalSettingsMenu && (
-                <div className="quiz-layout-popup-menu quiz-global-settings-popup">
+                <div
+                  className="quiz-layout-popup-menu quiz-global-settings-popup"
+                  style={{ maxHeight: globalSettingsMaxHeight }}
+                >
                   <div className="quiz-global-popup-header">
                     <div className="quiz-global-popup-title">
                       <i className="fa-solid fa-gear" style={{ color: '#007bff' }}></i>
@@ -1364,7 +1293,100 @@ function QuestionsComponentInternal() {
                     )}
                   </div>
 
-                  {/* Section 2: Font Settings */}
+                  {/* Section 2: Cut Mark (Negative Marking) */}
+                  <div className={`quiz-global-section ${globalAccordion.cutMark ? 'active cutmark-section' : ''}`}>
+                    <div
+                      className="quiz-global-section-header"
+                      onClick={() => toggleGlobalAccordion('cutMark')}
+                      title="নেগেটিভ মার্কিং / কাট মার্ক সেটিংস"
+                    >
+                      <div className="quiz-global-section-header-left">
+                        <i className="fa-solid fa-pen-ruler" style={{ color: '#ef4444' }}></i>
+                        <span>নেগেটিভ মার্কিং (Cut Mark):</span>
+                      </div>
+                      <div className="quiz-global-section-header-right">
+                        <span className="quiz-font-accordion-badge" style={{ color: '#ef4444', borderColor: '#fca5a5', background: '#fef2f2' }}>
+                          <span className="quiz-font-accordion-badge-text">
+                            {cutMark === 0 ? '০ নম্বর' : `${toBengaliNumber(cutMark)} নম্বর`}
+                          </span>
+                        </span>
+                        <i className={`fa-solid fa-${globalAccordion.cutMark ? 'minus' : 'plus'} quiz-font-accordion-plus-minus`}></i>
+                      </div>
+                    </div>
+
+                    {globalAccordion.cutMark && (
+                      <div className="quiz-global-section-body">
+                        <button
+                          type="button"
+                          className={`quiz-layout-menu-item ${cutMarkMode === '0.5' ? 'active' : ''}`}
+                          onClick={() => handleSelectPresetCutMark(0.5, '0.5')}
+                        >
+                          <div className="quiz-layout-radio-circle">
+                            {cutMarkMode === '0.5' && <div className="quiz-layout-radio-inner" style={{ background: '#ef4444' }}></div>}
+                          </div>
+                          <span>০.৫ নম্বর কাটা যাবে (ডিফল্ট)</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          className={`quiz-layout-menu-item ${cutMarkMode === '0.25' ? 'active' : ''}`}
+                          onClick={() => handleSelectPresetCutMark(0.25, '0.25')}
+                        >
+                          <div className="quiz-layout-radio-circle">
+                            {cutMarkMode === '0.25' && <div className="quiz-layout-radio-inner" style={{ background: '#ef4444' }}></div>}
+                          </div>
+                          <span>০.২৫ নম্বর কাটা যাবে</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          className={`quiz-layout-menu-item ${cutMarkMode === '0' ? 'active' : ''}`}
+                          onClick={() => handleSelectPresetCutMark(0, '0')}
+                        >
+                          <div className="quiz-layout-radio-circle">
+                            {cutMarkMode === '0' && <div className="quiz-layout-radio-inner" style={{ background: '#ef4444' }}></div>}
+                          </div>
+                          <span>No Cut Mark (০ নম্বর)</span>
+                        </button>
+
+                        <div className="quiz-cut-mark-custom-card">
+                          <div className="quiz-cut-mark-custom-header">
+                            <span style={{ fontSize: '12px', fontWeight: 600, color: '#475569' }}>কাস্টম কাট মার্ক:</span>
+                            {cutMarkMode === 'custom' && (
+                              <span className="quiz-cut-mark-badge">সক্রিয়: {toBengaliNumber(cutMark)}</span>
+                            )}
+                          </div>
+                          <div className="quiz-cut-mark-input-row">
+                            <input
+                              type="number"
+                              step="0.05"
+                              min="0"
+                              max="10"
+                              placeholder="যেমন: 0.20 বা 1"
+                              value={customCutMarkInput}
+                              onChange={(e) => setCustomCutMarkInput(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  e.preventDefault();
+                                  handleApplyCustomCutMark();
+                                }
+                              }}
+                              className="quiz-cut-mark-input"
+                            />
+                            <button
+                              type="button"
+                              className="quiz-cut-mark-apply-btn"
+                              onClick={handleApplyCustomCutMark}
+                            >
+                              সেট করুন
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Section 3: Font Settings */}
                   <div className={`quiz-global-section ${globalAccordion.font ? 'active font-section' : ''}`}>
                     <div
                       className="quiz-global-section-header"
