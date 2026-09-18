@@ -1,0 +1,628 @@
+===============================================================================
+                 TopMCQBD: Complete Architecture & Deployment Guide
+  (Cloudflare Frontend/D1/CDN + 5x Paid Render APIs + 1x Free Render API + 6x MongoDB Clusters)
+===============================================================================
+
+-------------------------------------------------------------------------------
+1. PROJECT ARCHITECTURE OVERVIEW (প্রজেক্ট আর্কিটেকচার ওভারভিউ)
+-------------------------------------------------------------------------------
+
+* Frontend & Edge Layer: Cloudflare Pages + Cloudflare Functions + Cloudflare CDN
+* Edge SQL Database: Cloudflare D1 Database (For Header, Footer, Announcements & Site Configs)
+* High Concurrency Edge Caching: Optimized for 30,000+ Concurrent/Active Students (0ms Edge Response)
+* Backend API Microservices Layer: 
+  - 5x Paid Render Web Services (Dedicated High Performance Microservices)
+  - 1x Free Render Web Service (High-Traffic Free Practice Engine)
+* Sleep Mode Prevention: UptimeRobot 24/7 Keep-Alive Cron Monitor (5-minute HTTP Ping for all 6 Render services to eliminate cold starts)
+* Database Layer: 6x MongoDB Atlas Clusters (5 Dedicated Paid Clusters + 1 Free Cluster)
+* Microservices Distribution:
+  1. 1st Render Service (Paid Core/Auth) -> Connected to `TopMCQBD_DB`
+  2. 2nd Render Service (Subjective MCQs) -> Connected to `TopMCQBD_DB_Subjective`
+  3. 3rd Render Service (Live Exam Engine) -> Connected to `TopMCQBD_DB_Live_Exam`
+  4. 4th Render Service (Written Exam Engine) -> Connected to `TopMCQBD_DB_written`
+  5. 5th Render Service (Question Bank Engine) -> Connected to `TopMCQBD_DB_Question_Bank`
+  6. 6th Render Service (Free MCQ Engine) -> Connected to `TopMCQBD_DB_Free`
+* Two-Way API Sync: Render APIs fetch live data from Cloudflare D1 and forward updates directly to D1.
+* Framework: Next.js (App Router Architecture) / Node.js
+* Database Drivers: Cloudflare D1 Driver (Binding `DB`) + Native MongoDB Node.js Driver / Mongoose
+* Email Gateway: Brevo API Integration for Password Reset & System Notifications
+* AI Assistant Layer: TopMCQBD AI Tutor Engine (`/api/ask-ai`) with Google Gemini Live Model + Built-in Smart Pedagogical Fallback (Zero Downtime / Quota-Proof).
+
+
+===============================================================================
+2. SYSTEM ARCHITECTURE & WORKFLOW DIAGRAM
+===============================================================================
+
+                        ┌──────────────────────────────────────────────┐
+                        │               CLOUDFLARE LAYER               │
+                        │  • Cloudflare Pages (Next.js Frontend)       │
+                        │  • Global Edge CDN Cache (30,000+ Users)     │
+                        │  • Cloudflare Functions (/functions/api/...) │
+                        └──────────────────────┬───────────────────────┘
+                                               │
+                       ┌───────────────────────┴───────────────────────┐
+                       ▼                                               ▼
+       ┌───────────────────────────────┐               ┌───────────────────────────────┐
+       │     CLOUDFLARE D1 (SQL DB)    │               │      RENDER BACKEND LAYER     │
+       │  • Header & Navigation Menus  │◄─────────────►│   (6x Node.js Web Services)   │
+       │  • Footer & Social Links      │  [Live Sync]  │   [UptimeRobot 24/7 Awake]    │
+       │  • Top Announcement Bar       │               └───────────────┬───────────────┘
+       │  • Home Sliders & Mission     │                               │
+       │  • Policies, Terms, FAQ, About│                               │
+       └───────────────────────────────┘                               │
+                                                                       │
+        ┌───────────────────────────┬───────────────────────────┬──────┴────────┬───────────────────────────┬───────────────────────────┐
+        ▼                           ▼                           ▼               ▼                           ▼                           ▼
+┌───────────────────┐       ┌───────────────────┐       ┌───────────────────┐  ┌───────────────────┐       ┌───────────────────┐       ┌───────────────────┐
+│ RENDER 1 (CORE)   │       │ RENDER 2 (SUBJ)   │       │ RENDER 3 (LIVE)   │  │ RENDER 4 (WRITTEN)│       │ RENDER 5 (Q-BANK) │       │ RENDER 6 (FREE)   │
+│ • Auth / JWT      │       │ • Subjective MCQs │       │ • Live Model Test │  │ • Written Exams   │       │ • Question Bank   │       │ • Free MCQs Engine│
+│ • Payments (TrxID)│       │ • Topic Breakdown │       │ • Realtime Timer  │  │ • Question & Ans  │       │ • Archive & Filter│       │ • Open Question   │
+│ • Subscriptions   │       │ • Subject Filters │       │ • Instant Marking │  │ • Evaluation Logs │       │ • Year & Topic DB │       │ • Fast Free APIs  │
+│ • Admin Suite     │       │ • Solution Bank   │       │ • Leaderboards    │  │ • Submission Bank │       │ • Full Paid Bank  │       │ • High Traffic    │
+└─────────┬─────────┘       └─────────┬─────────┘       └─────────┬─────────┘  └─────────┬─────────┘       └─────────┬─────────┘       └─────────┬─────────┘
+          │                           │                           │                      │                           │                           │
+          ▼                           ▼                           ▼                      ▼                           ▼                           ▼
+┌───────────────────┐       ┌───────────────────┐       ┌───────────────────┐  ┌───────────────────┐       ┌───────────────────┐       ┌───────────────────┐
+│ MONGODB 1 (PAID)  │       │ MONGODB 2 (SUBJ)  │       │ MONGODB 3 (LIVE)  │  │ MONGODB 4 (WRIT)  │       │ MONGODB 5 (Q-BANK)│       │ MONGODB 6 (FREE)  │
+│ DB: TopMCQBD_DB   │       │ DB: TopMCQBD_DB_  │       │ DB: TopMCQBD_DB_  │  │ DB: TopMCQBD_DB_  │       │ DB: TopMCQBD_DB_  │       │ DB: TopMCQBD_DB_  │
+│                   │       │     Subjective    │       │     Live_Exam     │  │     written       │       │     Question_Bank │       │     Free          │
+└───────────────────┘       └───────────────────┘       └───────────────────┘  └───────────────────┘       └───────────────────┘       └───────────────────┘
+
+
+===============================================================================
+3. RESPONSIBILITY & CONTROL MATRIX (কোন অংশ কে কন্ট্রোল করবে)
+===============================================================================
+
+-------------------------------------------------------------------------------
+📌 ১. Cloudflare (Cloudflare Pages + Cloudflare D1 + Cloudflare CDN):
+-------------------------------------------------------------------------------
+* ডাটাবেজ: Cloudflare D1 (`app_configs` table)
+* কন্ট্রোল এরিয়া:
+  - Header Dashboard (`/admin/header-dashboard`): নেভিগেশন বার, মেগা মেনু, লোগো, বাটন।
+  - Footer Dashboard (`/admin/footer-dashboard`): ফুটার কলাম, প্রয়োজনীয় লিংক, সোশাল আইকন, কপিরাইট।
+  - Announcement Bar: সাইটের টপ নোটিশ বার ও লিংক।
+  - Home Dashboard (`/admin/home-dashboard`): ব্যানার স্লাইডার, ডেমো সেকশন টেক্সট, মিশন ও ভিশন।
+  - Policy Dashboard (`/admin/policy-dashboard`): রিফান্ড ও প্রাইভেসি পলিসি HTML।
+  - Admin Menu Dashboard (`/admin/admin-menu-dashboard`): অ্যাডমিন সাইডবার মেনু ও হেডার অ্যাকশন বাটন।
+  - Common Configs: About Us, FAQ, Packages এর বিবরণ ও ইনফরমেশন।
+  - Edge CDN Caching: ৩০,০০০+ ইউজার একযোগে ব্রাউজ করলেও যাতে ০-১ সেকেন্ডে সাইট লোড হয় এবং কোনো ডাটাবেজে লোড না পড়ে।
+
+-------------------------------------------------------------------------------
+📌 ২. Render Service 1 + MongoDB Atlas 1 (Paid Core / Auth / Payments API):
+-------------------------------------------------------------------------------
+* সার্ভার: `https://topmcqbd-paid-api.onrender.com`
+* ডাটাবেজ: `TopMCQBD_DB` (MongoDB Atlas)
+* সচল রাখার ব্যবস্থা: UptimeRobot দিয়ে প্রতি ৫ মিনিটে অটো পিং (Zero Sleep Mode)
+* কন্ট্রোল এরিয়া:
+  - User Authentication: সাইনআপ, লগইন, পাসওয়ার্ড রিসেট, JWT টোকেন ও সিকিউরিটি।
+  - Subscriptions & Payments (`/admin/users`): বিকাশ/নগদ TrxID ভেরিফিকেশন ও এক্টিভেশন।
+  - Admin User Panel: রোলস, পারমিশন ও ইউজার ম্যানেজমেন্ট।
+  - Brevo Email Gateway: পাসওয়ার্ড রিসেট ইমেইল নোটিফিকেশন ডেলিভারি।
+
+-------------------------------------------------------------------------------
+📌 ৩. Render Service 2 + MongoDB Atlas 2 (Subjective MCQs Paid API):
+-------------------------------------------------------------------------------
+* সার্ভার: `https://subjective-paid-api.onrender.com`
+* ডাটাবেজ: `TopMCQBD_DB_Subjective` (MongoDB Atlas)
+* কালেকশন: `db-subjective-test`
+* কন্ট্রোল এরিয়া:
+  - Subjective MCQ Bank: বিষয়ভিত্তিক পেইড প্রশ্নাবলি ও বিস্তারিত ব্যাখ্যা/সমাধান।
+  - Advanced Subject/Chapter Filters: বিষয় ও অধ্যায়ভিত্তিক পেইড কনটেন্ট ব্রাউজিং।
+  - Paid Verification: JWT টোকেন দিয়ে তাৎক্ষণিক পেইড স্ট্যাটাস যাচাই।
+
+-------------------------------------------------------------------------------
+📌 ৪. Render Service 3 + MongoDB Atlas 3 (Live Exam Engine Paid API):
+-------------------------------------------------------------------------------
+* সার্ভার: `https://live-exam-paid-api.onrender.com`
+* ডাটাবেজ: `TopMCQBD_DB_Live_Exam` (MongoDB Atlas)
+* কালেকশন: `db-live-exam-test`
+* কন্ট্রোল এরিয়া:
+  - Live Model Test & Quiz Engine: নির্ধারিত সময়সূচীর লাইভ এক্সাম ও টাইমার।
+  - Real-time Submissions & Negative Marking: ইনস্ট্যান্ট মার্কিং ও স্কোর ক্যালকুলেশন।
+  - Leaderboard & Merit Lists: লাইভ পরীক্ষার ফলাফল ও র‍্যাঙ্কিং।
+
+-------------------------------------------------------------------------------
+📌 ৫. Render Service 4 + MongoDB Atlas 4 (Written Exam Paid API):
+-------------------------------------------------------------------------------
+* সার্ভার: `https://written-paid-api.onrender.com`
+* ডাটাবেজ: `TopMCQBD_DB_written` (MongoDB Atlas)
+* কালেকশন: `db-written-test`
+* কন্ট্রোল এরিয়া:
+  - Written Exam Module: লিখিত পরীক্ষার প্রশ্নাবলী, উত্তরমালিকা ও নির্দেশনা।
+  - Written Evaluation & Submissions: লিখিত উত্তরের মূল্যায়ন ও আর্কাইভ।
+
+-------------------------------------------------------------------------------
+📌 ৬. Render Service 5 + MongoDB Atlas 5 (Question Bank Paid API):
+-------------------------------------------------------------------------------
+* সার্ভার: `https://question-bank-paid-api.onrender.com`
+* ডাটাবেজ: `TopMCQBD_DB_Question_Bank` (MongoDB Atlas)
+* ক্লাস্টার: `topmcqbd.bexo18c.mongodb.net`
+* কন্ট্রোল এরিয়া:
+  - Question Bank Engine (`/question-bank`, `/question-bank-demo`, ইত্যাদি): বিগত সালের প্রশ্ন, বিষয় ও অধ্যায়ভিত্তিক আর্কাইভ।
+  - Advanced Query Engine: দ্রুত ফিল্টারিং এবং হাজার হাজার প্রশ্ন সার্ভিং।
+  - High Concurrency Handling: আলাদা ক্লাস্টার হওয়ায় এক্সাম ও অথ সার্ভারে কোনো চাপ পড়বে না।
+
+-------------------------------------------------------------------------------
+📌 ৭. Render Service 6 + MongoDB Atlas 6 (Free MCQ Backend API):
+-------------------------------------------------------------------------------
+* সার্ভার: `https://topmcqbd-free-api.onrender.com`
+* ডাটাবেজ: `TopMCQBD_DB_Free` (MongoDB Atlas)
+* কন্ট্রোল এরিয়া:
+  - Free MCQs Section (`/free-mcqs`, `/admin/free-mcqs-dashboard`): ওপেন ফ্রি এমসিকিউ ও প্র্যাকটিস।
+  - Open All MCQ Library (`/all-mcq`): সবার জন্য উন্মুক্ত প্রশ্ন ও সমাধান।
+  - Free Model Test Demos: রেজিস্ট্রেশন ছাড়া ডেমো টেস্ট অনুশীলন।
+  - Traffic Isolation: লাখ লাখ ফ্রি স্টুডেন্ট প্র্যাকটিস করলেও পেইড সার্ভারসমূহে কোনো স্লোডাউন পড়বে না।
+
+
+===============================================================================
+4. UPTIMEROBOT 24/7 MONITORING CONFIGURATION (SLEEP MODE ফিক্স)
+===============================================================================
+
+Render Free সার্ভারগুলো যাতে ১৫ মিনিট পর স্লিপ মোডে না যায়, তার জন্য UptimeRobot কনফিগারেশন:
+
+১. Monitor 1 (Paid Core API):
+   - Friendly Name: `TopMCQBD Paid Core API`
+   - URL: `https://topmcqbd-paid-api.onrender.com/api/db-check`
+   - Interval: `Every 5 minutes`
+
+২. Monitor 2 (Subjective API):
+   - Friendly Name: `TopMCQBD Subjective API`
+   - URL: `https://subjective-paid-api.onrender.com/api/db-check`
+   - Interval: `Every 5 minutes`
+
+৩. Monitor 3 (Live Exam API):
+   - Friendly Name: `TopMCQBD Live Exam API`
+   - URL: `https://live-exam-paid-api.onrender.com/api/db-check`
+   - Interval: `Every 5 minutes`
+
+৪. Monitor 4 (Written API):
+   - Friendly Name: `TopMCQBD Written API`
+   - URL: `https://written-paid-api.onrender.com/api/db-check`
+   - Interval: `Every 5 minutes`
+
+৫. Monitor 5 (Question Bank API):
+   - Friendly Name: `TopMCQBD Question Bank API`
+   - URL: `https://question-bank-paid-api.onrender.com/api/db-check`
+   - Interval: `Every 5 minutes`
+
+৬. Monitor 6 (Free API):
+   - Friendly Name: `TopMCQBD Free API`
+   - URL: `https://topmcqbd-free-api.onrender.com/api/db-check`
+   - Interval: `Every 5 minutes`
+
+ফলাফল: ৬টি Render সার্ভারই সার্বক্ষণিক জাগ্রত (24/7 Always Awake) থাকে, ফলে কোনো প্রকার Cold Start বা ৩০ সেকেন্ড ডিলে হয় না।
+
+
+===============================================================================
+5. CLOUDFLARE D1 EDGE API ENDPOINTS (https://topmcqbd.pages.dev/api/...)
+===============================================================================
+
+Cloudflare Pages Functions এッジ নেটওয়ার্কে চলে এবং ক্লাউডফ্লেয়ার D1 ডাটাবেজ ও গ্লোবাল CDN ক্যাশিং নিয়ন্ত্রণ করে:
+
+১. Header, Footer & Announcement API:
+   - Endpoint: `https://topmcqbd.pages.dev/api/layout-config`
+   - Methods: `GET` (CDN Cached), `POST` (D1 Save/Update)
+   - Function File: `functions/api/layout-config.js`
+
+২. Home Page Sliders & Hero API:
+   - Endpoint: `https://topmcqbd.pages.dev/api/home-config`
+   - Methods: `GET` (CDN Cached), `POST` (D1 Save/Update)
+   - Function File: `functions/api/home-config.js`
+
+৩. Admin Sidebar & Quick Buttons API:
+   - Endpoint: `https://topmcqbd.pages.dev/api/sidebar-config`
+   - Methods: `GET` (CDN Cached), `POST` (D1 Save/Update)
+   - Function File: `functions/api/sidebar-config.js`
+
+৪. Privacy & Refund Policy API:
+   - Endpoint: `https://topmcqbd.pages.dev/api/policy`
+   - Methods: `GET` (CDN Cached), `POST` (D1 Save/Update)
+   - Function File: `functions/api/policy.js`
+
+৫. Common Configs (About, FAQ, Packages) API:
+   - Endpoint: `https://topmcqbd.pages.dev/api/common-config`
+   - Parameter: `?key=about-data`, `?key=faq-data`, `?key=packages-data`, `?key=all`
+   - Methods: `GET` (CDN Cached), `POST` (D1 Save/Update)
+   - Function File: `functions/api/common-config.js`
+
+
+===============================================================================
+6. CLOUDFLARE D1 LIMITS & SPECIFICATIONS (৩০,০০০ ইউজারের জন্য)
+===============================================================================
+
+* Free Tier Limits:
+  - Daily Rows Read: ৫,০০০,০০০ (৫০ লাখ) Rows/দিন (সম্পূর্ণ ফ্রি)
+  - Daily Rows Written: ১০০,০০০ (১ লাখ) Rows/দিন (সম্পূর্ণ ফ্রি)
+  - Storage: ৫ GB (আমাদের প্রয়োজন মাত্র কয়েক KB)
+  - Databases: ১০টি ডাটাবেজ
+* Edge CDN Caching:
+  - হেডার, ফুটার ও সাইট কনফিগারেশন Cloudflare Edge CDN-এ ক্যাশ থাকে।
+  - ফলে ৩০,০০০ ইউজার ভিজিট করলেও ৯৯% রিকোয়েস্ট এজ ক্যাশ থেকেই সার্ভিস হয়, D1 ডাটাবেজে মাত্র ১-৫% রিড রিকোয়েস্ট যায়।
+  - ফ্রি প্ল্যানেই এটি লাইফটাইম আনলিমিটেড স্মুথলি চলবে।
+
+
+===============================================================================
+7. CLOUDFLARE D1 DATABASE CONFIGURATION & CREDENTIALS
+===============================================================================
+
+* Database Name: `topmcqbd-db`
+* Database ID: `6717c9b8-4836-438d-a042-f2a8a65124c6`
+* Binding Variable Name: `DB` (কনফিগার করা আছে `wrangler.toml` ফাইলে)
+* Table Name: `app_configs` (SQL স্কিমা ফাইল: `d1-schema.sql`)
+* Hosting Region: Asia Pacific (APAC) — সর্বনিম্ন ল্যাটেন্সি
+* Managed Scope: Header, Mega Menus, Footer, Announcements, Sliders, Policies & Common Configs
+
+
+===============================================================================
+8. RENDER & MONGODB MICROSERVICES MASTER LIST (6x SERVICES)
+===============================================================================
+
+📌 1. Main & Paid Core Backend (TopMCQBD-Web)
+- Render URL: `https://topmcqbd-paid-api.onrender.com`
+- Database: `TopMCQBD_DB`
+- MongoDB URI: `mongodb+srv://mosabber480_db_user:<password>@mosabber.3ajdj0u.mongodb.net/TopMCQBD_DB?retryWrites=true&w=majority`
+- Scope: Auth (JWT), Payments (TrxID), Subscriptions, Admin Users, Brevo Email.
+
+📌 2. Subjective MCQs Paid Backend
+- Render URL: `https://subjective-paid-api.onrender.com`
+- Database: `TopMCQBD_DB_Subjective`
+- Collection: `db-subjective-test`
+- MongoDB URI: `mongodb+srv://mosabber480_db_user:<password>@topmcqbd.3ifvd7c.mongodb.net/TopMCQBD_DB_Subjective?retryWrites=true&w=majority&appName=TopMCQBD`
+- Scope: Paid Subjective MCQs, Topics, Chapter-wise Question Banks.
+
+📌 3. Live Exam Engine Paid Backend
+- Render URL: `https://live-exam-paid-api.onrender.com`
+- Database: `TopMCQBD_DB_Live_Exam`
+- Collection: `db-live-exam-test`
+- MongoDB URI: `mongodb+srv://mosabber480_db_user:<password>@topmcqbd.ns1gpls.mongodb.net/TopMCQBD_DB_Live_Exam?retryWrites=true&w=majority&appName=TopMCQBD`
+- Scope: Live Paid Exams, Realtime Timers, Negative Marking, Leaderboard.
+
+📌 4. Written Exam Paid Backend
+- Render URL: `https://written-paid-api.onrender.com`
+- Database: `TopMCQBD_DB_written`
+- Collection: `db-written-test`
+- MongoDB URI: `mongodb+srv://mosabber480_db_user:<password>@topmcqbd.hfivdlt.mongodb.net/TopMCQBD_DB_written?retryWrites=true&w=majority&appName=TopMCQBD`
+- Scope: Paid Written Examination, Questions, Model Answers, Submissions.
+
+📌 5. Question Bank Paid Backend
+- Render URL: `https://question-bank-paid-api.onrender.com`
+- Database: `TopMCQBD_DB_Question_Bank`
+- Cluster: `topmcqbd.bexo18c.mongodb.net`
+- MongoDB URI: `mongodb+srv://mosabber480_db_user:<password>@topmcqbd.bexo18c.mongodb.net/TopMCQBD_DB_Question_Bank?retryWrites=true&w=majority&appName=TopMCQBD`
+- Scope: Paid Question Bank Engine, Topic/Year-wise Archives, Practice Solutions.
+
+📌 6. Free MCQ Backend (TopMCQBD-Web-Free)
+- Render URL: `https://topmcqbd-free-api.onrender.com`
+- Database: `TopMCQBD_DB_Free`
+- MongoDB URI: `mongodb+srv://mosabber480_db_user:<password>@topmcqbd.pixb7fx.mongodb.net/TopMCQBD_DB_Free?retryWrites=true&w=majority`
+- Scope: High-Traffic Free MCQs, Open Question Bank, Practice Demos.
+
+
+===============================================================================
+9. ENVIRONMENT VARIABLES MASTER LIST (.env)
+===============================================================================
+
+# --- 1. Database Connections ---
+# (A) Paid MongoDB 1 (Core / Auth / User / Payments)
+MONGODB_URI_PAID="mongodb+srv://mosabber480_db_user:<password>@mosabber.3ajdj0u.mongodb.net/TopMCQBD_DB?retryWrites=true&w=majority"
+MONGODB_DB_NAME_PAID="TopMCQBD_DB"
+
+# (B) Paid MongoDB 2 (Subjective MCQs)
+MONGODB_URI_SUBJECTIVE="mongodb+srv://mosabber480_db_user:<password>@topmcqbd.3ifvd7c.mongodb.net/TopMCQBD_DB_Subjective?retryWrites=true&w=majority&appName=TopMCQBD"
+MONGODB_DB_NAME_SUBJECTIVE="TopMCQBD_DB_Subjective"
+
+# (C) Paid MongoDB 3 (Live Exam Engine)
+MONGODB_URI_LIVE_EXAM="mongodb+srv://mosabber480_db_user:<password>@topmcqbd.ns1gpls.mongodb.net/TopMCQBD_DB_Live_Exam?retryWrites=true&w=majority&appName=TopMCQBD"
+MONGODB_DB_NAME_LIVE_EXAM="TopMCQBD_DB_Live_Exam"
+
+# (D) Paid MongoDB 4 (Written Exam)
+MONGODB_URI_WRITTEN="mongodb+srv://mosabber480_db_user:<password>@topmcqbd.hfivdlt.mongodb.net/TopMCQBD_DB_written?retryWrites=true&w=majority&appName=TopMCQBD"
+MONGODB_DB_NAME_WRITTEN="TopMCQBD_DB_written"
+
+# (E) Paid MongoDB 5 (Question Bank Engine)
+MONGODB_URI_QUESTION_BANK="mongodb+srv://mosabber480_db_user:<password>@topmcqbd.bexo18c.mongodb.net/TopMCQBD_DB_Question_Bank?retryWrites=true&w=majority&appName=TopMCQBD"
+MONGODB_DB_NAME_QUESTION_BANK="TopMCQBD_DB_Question_Bank"
+
+# (F) Free MongoDB (Open MCQs & Free Practice)
+MONGODB_URI_FREE="mongodb+srv://mosabber480_db_user:<password>@topmcqbd.pixb7fx.mongodb.net/TopMCQBD_DB_Free?retryWrites=true&w=majority"
+MONGODB_DB_NAME_FREE="TopMCQBD_DB_Free"
+
+# --- 2. Security & Authentication ---
+JWT_SECRET="<your_jwt_secret_key>"
+
+# --- 3. Transactional Email Gateway (Brevo) ---
+BREVO_API_KEY="<your_brevo_api_key>"
+BREVO_SENDER_EMAIL="mosabber480@gmail.com"
+
+# --- 4. AI Engine & Smart Tutor (Google Gemini) ---
+# (অপশনাল: Gemini API Key বসালে লাইভ অনলাইন রিসার্চ করবে, লিমিট শেষ হলে অটোমেটিক Built-in Smart Engine ব্যাকআপে কাজ করবে)
+GEMINI_API_KEY=""
+
+# --- 5. Application & Microservice API URLs ---
+NEXT_PUBLIC_APP_URL="https://topmcqbd.pages.dev"
+NEXT_PUBLIC_PAID_API_URL="https://topmcqbd-paid-api.onrender.com"
+NEXT_PUBLIC_SUBJECTIVE_API_URL="https://subjective-paid-api.onrender.com"
+NEXT_PUBLIC_LIVE_EXAM_API_URL="https://live-exam-paid-api.onrender.com"
+NEXT_PUBLIC_WRITTEN_API_URL="https://written-paid-api.onrender.com"
+NEXT_PUBLIC_QUESTION_BANK_API_URL="https://question-bank-paid-api.onrender.com"
+NEXT_PUBLIC_FREE_API_URL="https://topmcqbd-free-api.onrender.com"
+
+===============================================================================
+10. ACTIVE PAGES & ROUTE INVENTORY (সক্রিয় পেজ ও রুট বিবরণী)
+===============================================================================
+
+[A] Public & User Routes:
+- `/`                               -> Home Page
+- `/about-us`                       -> About Us
+- `/contact`                        -> Contact Us
+- `/packages`                       -> Packages & Subscription Plans
+- `/all-mcq`                        -> All MCQ Categories
+- `/questions`                      -> Live Exam & MCQ Practice Engine
+- `/live-exam-model-test`           -> Scheduled Live Model Tests Master Hub
+- `/live-exam-questions`            -> Live Exam Player (Realtime Timer & Negative Marking)
+- `/live-exam-dashboard`            -> Student Live Exam Performance & Analytics
+- `/national-merit-position`        -> জাতীয় মেরিট পজিশন & Live Leaderboard
+- `/free-mcqs`                      -> Free MCQs & Demo Practice
+- `/question-bank`                  -> Question Bank
+- `/question-bank-demo`             -> Question Bank Demo 1
+- `/question-bank-demo2`            -> Question Bank Demo 2
+- `/full-model-test-demo`           -> Full Model Test Demo
+- `/subjective-model-test-demo`     -> Subjective Model Test Demo
+- `/faq`                            -> FAQ (Frequently Asked Questions)
+- `/privacy-and-refund-policy`      -> Privacy & Refund Policy
+- `/login`                          -> Authentication (Login / Register / Forgot Password)
+- `/profile`                        -> User Profile & Subscription Status
+- `/not-found.jsx` (Error 404)       -> Professional Custom 404 Not Found Page (1300px balanced)
+
+[B] Admin Dashboard Routes:
+- `/admin`                          -> Admin Login / Landing
+- `/admin/dashboard`                -> Main Overview Dashboard
+- `/admin/live-exam-model-dashboard`-> Scheduled Live Model Tests Control Suite
+- `/admin/merit-position-dashboard` -> National Merit Position & Leaderboard Manager
+- `/admin/header-dashboard`         -> Header, Nav Menus & Logo Settings
+- `/admin/footer-dashboard`         -> Footer Columns, Drag-Drop Links & Copyright Settings
+- `/admin/home-dashboard`           -> Home Banner Sliders & Section Settings
+- `/admin/admin-menu-dashboard`     -> Admin Sidebar & Header Action Buttons
+- `/admin/packages-dashboard`       -> Pricing Packages Settings
+- `/admin/questions-dashboard`      -> MCQ Questions & Categories Management
+- `/admin/free-mcqs-dashboard`      -> Free MCQs Management
+- `/admin/users`                    -> Users List & Manual Subscription Approval
+- `/admin/about-dashboard`          -> About Us Page Content Editor
+- `/admin/policy-dashboard`         -> Policy & Terms Content Editor
+- `/admin/admin-profile`            -> Admin Profile & Password Management
+
+[C] Database Management & Diagnostics (DB Suite - /db-connection-api):
+* দ্রষ্টব্য: এই পেজগুলো ওয়েবসাইটের সাধারণ পাবলিক পেজ নয়। এগুলো শুধুমাত্র ইন্টারনাল ডাটাবেজ ও ক্লাউড ব্যাকএন্ড যাচাই ও টেস্ট করার পেজ।
+* কোনো অবস্থাতেই http://localhost:3000/ বা লোকাল Node.js API ব্যবহার হবে না; প্রতিটি পেজ সরাসরি তার নির্ধারিত লাইভ সার্ভিস টেস্ট করে।
+- `/db-connection-api`                                -> Main Live Database Diagnostics Hub (7x Services)
+- `/DB`                                               -> Database Quick Redirect (/db-connection-api)
+- `/db-connection-api/db-mongodb-active-connection`   -> 1-Click All MongoDB + D1 Wakeup Ping Suite
+- `/db-connection-api/db-pages-api`                   -> Cloudflare Pages Functions Direct MongoDB Atlas Test
+- `/db-connection-api/db-workers-api`                 -> Cloudflare Workers Backup Live API Test
+- `/db-connection-api/dbd1-api`                       -> Cloudflare Pages D1 SQL Database Live Test
+- `/db-connection-api/dbpaid-api`                     -> Paid Core DB Live Test (topmcqbd-paid-api.onrender.com)
+- `/db-connection-api/dbfree-api`                     -> Free Practice DB Live Test (topmcqbd-free-api.onrender.com)
+- `/db-connection-api/dbsubjective-api`               -> Subjective DB Live Test (subjective-paid-api.onrender.com)
+- `/db-connection-api/dbliveexam-api`                 -> Live Exam DB Live Test (live-exam-paid-api.onrender.com)
+- `/db-connection-api/dbwritten-api`                  -> Written DB Live Test (written-paid-api.onrender.com)
+- `/db-connection-api/dbquestionbank-api`             -> Question Bank DB Live Test (question-bank-paid-api.onrender.com)
+
+
+===============================================================================
+11. NEXT.JS FOLDER STRUCTURE (প্রজেক্ট ফোল্ডার স্ট্রাকচার)
+===============================================================================
+
+📁 TopMCQBD-Web/
+├── 📁 functions/                              # Cloudflare Pages Edge Functions
+│   └── 📁 api/
+│       ├── 📄 layout-config.js               # Header, Footer, Announcement API
+│       ├── 📄 home-config.js                 # Home Banner Sliders & Sections API
+│       ├── 📄 sidebar-config.js              # Admin Sidebar & Action Buttons API
+│       ├── 📄 policy.js                      # Privacy & Refund Policy API
+│       └── 📄 common-config.js               # Common D1 Configs (About, FAQ, etc.)
+│
+├── 📁 public/                                 # Static Assets (Images, Icons, Fonts)
+│   ├── 📁 images/
+│   └── 📄 favicon.ico
+│
+├── 📁 src/
+│   ├── 📁 app/                               # Next.js App Router Architecture
+│   │   ├── 📄 layout.js                      # Root Layout (Font, Metadata)
+│   │   ├── 📄 globals.css                    # Master Global CSS & Design System
+│   │   ├── 📄 pages-style.css                # Pre-bundled Zero-Delay Page CSS
+│   │   ├── 📄 not-found.jsx                  # Custom 404 Not Found Page (1300px)
+│   │   ├── 📄 page.jsx                       # Home Landing Page
+│   │   │
+│   │   ├── 📁 about-us/
+│   │   │   └── 📄 page.jsx                   # About Us Page
+│   │   ├── 📁 contact/
+│   │   │   └── 📄 page.jsx                   # Contact Page
+│   │   ├── 📁 packages/
+│   │   │   └── 📄 page.jsx                   # Subscription Packages & Pricing
+│   │   ├── 📁 all-mcq/
+│   │   │   └── 📄 page.jsx                   # All MCQ Category Directory
+│   │   ├── 📁 questions/
+│   │   │   └── 📄 page.jsx                   # Live Exam & Question Practice Engine
+│   │   ├── 📁 free-mcqs/
+│   │   │   └── 📄 page.jsx                   # Free MCQ Practice Section
+│   │   ├── 📁 question-bank/
+│   │   │   └── 📄 page.jsx                   # Question Bank
+│   │   ├── 📁 question-bank-demo/
+│   │   │   └── 📄 page.jsx                   # Question Bank Demo 1
+│   │   ├── 📁 question-bank-demo2/
+│   │   │   └── 📄 page.jsx                   # Question Bank Demo 2
+│   │   ├── 📁 full-model-test-demo/
+│   │   │   └── 📄 page.jsx                   # Full Model Test Demo
+│   │   ├── 📁 subjective-model-test-demo/
+│   │   │   └── 📄 page.jsx                   # Subjective Model Test Demo
+│   │   ├── 📁 faq/
+│   │   │   └── 📄 page.jsx                   # FAQ Page
+│   │   ├── 📁 privacy-and-refund-policy/
+│   │   │   └── 📄 page.jsx                   # Refund & Privacy Policy
+│   │   ├── 📁 login/
+│   │   │   └── 📄 page.jsx                   # Login, Register & Reset Password
+│   │   ├── 📁 profile/
+│   │   │   └── 📄 page.jsx                   # User Dashboard & Subscription History
+│   │   │
+│   │   ├── 📁 admin/                         # Admin Control Dashboards
+│   │   │   ├── 📄 page.jsx                   # Admin Entry / Login
+│   │   │   ├── 📁 dashboard/
+│   │   │   │   └── 📄 page.jsx               # Main Overview Dashboard
+│   │   │   ├── 📁 header-dashboard/
+│   │   │   │   └── 📄 page.jsx               # Header & Navigation Menus Editor
+│   │   │   ├── 📁 footer-dashboard/
+│   │   │   │   └── 📄 page.jsx               # Footer Columns & Links Editor
+│   │   │   ├── 📁 home-dashboard/
+│   │   │   │   └── 📄 page.jsx               # Home Banner Sliders & Hero Editor
+│   │   │   ├── 📁 admin-menu-dashboard/
+│   │   │   │   └── 📄 page.jsx               # Sidebar Menus & Action Buttons Editor
+│   │   │   ├── 📁 packages-dashboard/
+│   │   │   │   └── 📄 page.jsx               # Pricing & Packages Editor
+│   │   │   ├── 📁 questions-dashboard/
+│   │   │   │   └── 📄 page.jsx               # MCQ Questions & Categories Manager
+│   │   │   ├── 📁 free-mcqs-dashboard/
+│   │   │   │   └── 📄 page.jsx               # Free MCQs Manager
+│   │   │   ├── 📁 users/
+│   │   │   │   └── 📄 page.jsx               # User List & Manual Plan Approval
+│   │   │   ├── 📁 about-dashboard/
+│   │   │   │   └── 📄 page.jsx               # About Us Editor
+│   │   │   ├── 📁 policy-dashboard/
+│   │   │   │   └── 📄 page.jsx               # Policy Editor
+│   │   │   └── 📁 admin-profile/
+│   │   │       └── 📄 page.jsx               # Admin Profile & Password Change
+│   │   │
+│   │   ├── 📁 DB/
+│   │   │   └── 📄 page.jsx                   # DB Shortcut Redirect
+│   │   └── 📁 db-connection/                 # DB Management & Diagnostic Suite
+│   │       ├── 📄 page.jsx                   # Main DB Hub
+│   │       ├── 📁 dbpaid-admin/ & 📁 dbpaid-test/
+│   │       ├── 📁 dbfree-admin/ & 📁 dbfree-test/
+│   │       ├── 📁 dbd1-admin/ & 📁 dbd1-test/
+│   │       ├── 📁 dbliveexam-admin/ & 📁 dbliveexam-test/
+│   │       ├── 📁 dbsubjective-admin/ & 📁 dbsubjective-test/
+│   │       ├── 📁 dbwritten-admin/ & 📁 dbwritten-test/
+│   │       └── 📁 dbquestionbank-admin/ & 📁 dbquestionbank-test/
+│   │
+│   ├── 📁 components/
+│   │   ├── 📁 layout/                        # App Layout Components
+│   │   │   ├── 📄 AppLayoutWrapper.jsx       # Reactive D1 Config Sync Wrapper
+│   │   │   ├── 📄 Header.jsx                 # Dynamic Navigation & Mega Menus
+│   │   │   ├── 📄 Footer.jsx                 # Dynamic Footer with 5 Columns
+│   │   │   ├── 📄 AnnouncementBar.jsx        # Edge Notice Bar
+│   │   │   └── 📄 TopAlert.jsx               # Notification Bar
+│   │   ├── 📁 admin/                         # Admin UI Components
+│   │   │   ├── 📄 AdminLayoutWrapper.jsx     # Admin Shell & Permissions
+│   │   │   ├── 📄 AdminSidebar.jsx           # D1-Powered Admin Sidebar
+│   │   │   ├── 📄 AdminHeader.jsx            # Admin Topbar with Quick Buttons
+│   │   │   └── 📄 Toast.jsx                  # Floating Notifications
+│   │   └── 📁 common/                        # Reusable Components
+│   │       ├── 📄 AiChatDrawer.jsx           # TopMCQBD Floating AI Assistant & Chat Popup
+│   │       └── 📄 DbAuthGuard.jsx            # DB Suite Security Guard
+│   │
+│   ├── 📁 data/                              # Local Fallbacks & Default Layout JSONs
+│   │   ├── 📄 layout-config.json
+│   │   └── 📄 sidebar-config.json
+│   │
+│   └── 📁 lib/                               # Helpers, DB Drivers & Auth Utilities
+│       ├── 📄 config.js
+│       └── 📄 utils.js
+│
+├── 📄 .env                                   # Production Environment Variables & Secrets
+├── 📄 wrangler.toml                          # Cloudflare Pages & D1 Binding Configuration
+└── 📄 package.json                           # Dependencies & Scripts
+===============================================================================
+
+
+===============================================================================
+12. TOPMCQBD AI TUTOR & SMART FAIL-SAFE WORKFLOW (AI শিক্ষক ও ব্যাকআপ আর্কিটেকচার)
+===============================================================================
+
+
+[ক] MCQ প্রশ্ন সমাধান ফ্লো (ইনলাইন 'Ask AI'):
+                  ┌───────────────────────────────┐
+                  │   ইউজার 'Ask AI' বাটনে চাপল   │
+                  └───────────────┬───────────────┘
+                                  │
+                                  ▼
+                    ┌───────────────────────────┐
+                    │ GEMINI_API_KEY আছে কি না? │
+                    └───────┬───────────┬───────┘
+                     হাঁ     │           │ না
+            ┌───────────────┘           └───────────────┐
+            ▼                                           ▼
+┌───────────────────────┐                   ┌───────────────────────┐
+│ Gemini AI-কে রিকোয়েস্ট │                   │   Built-in Smart      │
+│ পাঠানো হলো            │                   │   Engine থেকে উত্তর   │
+└───────────┬───────────┘                   │   তৈরি করা হলো        │
+            │                               └───────────┬───────────┘
+   সফল? ┌────┴────┐ লিমিট শেষ / ফেইল্ড?                  │
+  ┌─────┘         └─────┐                               │
+  ▼                     ▼                               │
+┌──────────────┐   ┌───────────────────────────┐        │
+│ Gemini থেকে  │   │ অটোমেটিক Built-in Smart   │        │
+│ লাইভ উত্তর   │   │ Engine ব্যাকআপ চালু হবে!   │◄───────┘
+└──────────────┘   └─────────────┬─────────────┘
+                                 │
+                                 ▼
+                     ┌───────────────────────┐
+                     │ শিক্ষার্থী উত্তর পেল ✅│
+                     └───────────────────────┘
+
+[খ] চ্যাটবক্সে কাস্টম প্রশ্ন টাইপ করলে (Manual Search Typing & 4 AI Redirection):
+                  ┌─────────────────────────────────────────┐
+                  │  শিক্ষার্থী ইনপুট বক্সে প্রশ্ন টাইপ করল  │
+                  └────────────────────┬────────────────────┘
+                                       │
+                                       ▼
+                  ┌─────────────────────────────────────────┐
+                  │  সার্ভার ট্রাফিকের নোটিশ ও টাইপকৃত     │
+                  │  প্রশ্ন প্রদর্শন (Custom Query Box)     │
+                  └────────────────────┬────────────────────┘
+                                       │
+            ┌──────────────────────────┼──────────────────────────┐
+            │                          │                          │
+            ▼                          ▼                          ▼
+┌───────────────────────┐  ┌───────────────────────┐  ┌───────────────────────┐
+│ ১. ChatGPT            │  │ ২. Google Gemini      │  │ ৩. Duck.ai Chat       │
+│ • ১-ক্লিকে প্রম্পটসহ │  │ • ১-ক্লিকে প্রশ্ন অটো │  │ • ১০০% নো-লগইন        │
+│   ChatGPT ওপেন হবে    │  │   ক্লিপবোর্ডে কপি হবে  │  │ • GPT-4o / Claude 3   │
+│ • https://chatgpt.com │  │ • https://gemini.google│  │ • https://duckduckgo  │
+└───────────────────────┘  └───────────────────────┘  └───────────────────────┘
+                                       │
+                                       ▼
+                           ┌───────────────────────┐
+                           │ ৪. Google AI Search   │
+                           │ • নো-লগইন AI Overviews│
+                           │ • https://google.com  │
+                           └───────────────────────┘
+
+📌 AI সিস্টেমের প্রধান বৈশিষ্ট্য ও সুবিধাসমূহ:
+1. জিরো ফেইলিউর (Zero Failure): গুগলের ফ্রি Gemini API লিমিট (Rate Limit/Quota 429) শেষ হলেও কোনো এরর আসবে না।
+2. ইনস্ট্যান্ট ব্যাকআপ: Gemini ফেইল করলে স্বয়ংক্রিয়ভাবে Built-in Smart Engine সঠিক উত্তর ও অপশন বিশ্লেষণ প্রদর্শন করবে।
+3. সম্পূর্ণ রেসপনসিভ: প্রতিটি প্রশ্নের টেক্সটের শেষেই ইনলাইন "Ask AI" বাটন এবং নিচে সার্বক্ষণিক AI চ্যাট উইজেট সংযুক্ত।
+4. ম্যানুয়াল সার্চে ৪টি AI রিডাইরেক্ট কার্ড: ব্যবহারকারী চ্যাটবক্সে নিজে যেকোনো প্রশ্ন বা রিসার্চ টাইপ করলে তাকে পুনরায় টাইপ করার ঝামেলা ছাড়াই ৪টি পৃথক পৃথক বক্স ও বোতামের মাধ্যমে সরাসরি বিশ্বের সেরা ৪টি ইঞ্জিনে নিয়ে যাওয়ার সুবিধা দেওয়া হয়েছে:
+   - ChatGPT: সরাসরি URL প্যারামিটারে প্রশ্ন নিয়ে চালু হয়।
+   - Google Gemini: স্মার্ট অটো-ক্লিপবোর্ড কপি সিস্টেম (ক্লিক করলেই কপি হয়ে অ্যাপ ওপেন হয়)।
+   - Duck.ai Chat: কোনো অ্যাকাউন্ট বা লগইন ছাড়াই GPT-4o ও Claude AI এর উত্তর দেয়।
+   - Google Search: সরাসরি গুগলের লাইভ AI Overview ও ওয়েব রেজাল্ট প্রদর্শন করে।
+
+===============================================================================
+13. CLOUDFLARE DUAL-ACCOUNT ARCHITECTURE & MANUAL DEPLOYMENT CONTROL
+===============================================================================
+
+1. Cloudflare Account 1 (Main Website / Pages Functions):
+   - Production Domain: https://topmcqbd.pages.dev
+   - Cloudflare Account: mosabber480 (Gmail Account 1)
+   - Deployment Command: npm run pages:deploy
+
+2. Cloudflare Account 2 (Backup Gateway / Worker API):
+   - Backup Live Domain: https://topmcqbd-backup-api.mosabber5266.workers.dev
+   - Cloudflare Account: mosabber5266 (Gmail Account 2 — সম্পূর্ণ পৃথক Cloudflare একাউন্ট)
+   - Deployment Command: npm run worker:deploy
+
+3. STRICT MANUAL WRANGLER AUTH DIRECTIVE (USER ONLY):
+   - একাউন্ট ১ থেকে একাউন্ট ২ তে স্যুইচ করার জন্য বা ডিপ্লয় করার পূর্বে টার্মিনাল/CMD থেকে
+     `npx wrangler logout` এবং `npx wrangler login` কমান্ড দুটি শুধুমাত্র ইউজার নিজে
+     ম্যানুয়ালি রান ও কন্ট্রোল করবেন (Gemini বা কোনো AI এজেন্ট স্বয়ংক্রিয়ভাবে
+     লগআউট বা লগইন করার চেষ্টা করবে না)।
+===============================================================================
