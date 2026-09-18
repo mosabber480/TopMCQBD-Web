@@ -21,6 +21,12 @@ const FONT_FAMILIES = [
     family: "'Hind Siliguri', sans-serif"
   },
   {
+    id: 'kalpurush',
+    name: 'Kalpurush / Noto Serif',
+    sub: 'কালপুরুষ (বই ও পত্রিকার ক্লাসিক ফন্ট)',
+    family: "'Kalpurush', 'Noto Serif Bengali', serif"
+  },
+  {
     id: 'tiro-bangla',
     name: 'Tiro Bangla',
     sub: 'তিরো বাংলা (মার্জিত ও ফরমাল সেরিফ)',
@@ -49,12 +55,6 @@ const FONT_FAMILIES = [
     name: 'Arial',
     sub: 'অ্যারিয়াল (ইউনিভার্সাল ও স্ট্যান্ডার্ড)',
     family: "Arial, 'Noto Sans Bengali', sans-serif"
-  },
-  {
-    id: 'noto-sans-math',
-    name: 'Noto Sans Math',
-    sub: 'নোটো সান্স ম্যাথ (ম্যাথ ও টেক্সট)',
-    family: "'Noto Sans Math', 'Noto Sans Bengali', sans-serif"
   }
 ];
 
@@ -133,13 +133,8 @@ function QuestionsComponentInternal() {
   const [showTime, setShowTime] = useState(false); // Default OFF
   const [showScore, setShowScore] = useState(true); // Default ON
   const [optionLayout, setOptionLayout] = useState('2q-col'); // Default: '2q-col' (১ লাইনে ২টি প্রশ্ন - উপর-নিচ ক্রম)
-  const [showGlobalSettingsMenu, setShowGlobalSettingsMenu] = useState(false);
-  const globalSettingsRef = useRef(null);
-  const [globalAccordion, setGlobalAccordion] = useState({ layout: true, font: false, switches: true });
-
-  const toggleGlobalAccordion = (sec) => {
-    setGlobalAccordion((prev) => ({ ...prev, [sec]: !prev[sec] }));
-  };
+  const [showLayoutMenu, setShowLayoutMenu] = useState(false);
+  const layoutDropdownRef = useRef(null);
 
   // Cut mark / negative marking states
   const [cutMark, setCutMark] = useState(0.5); // Default 0.5 cut mark
@@ -153,14 +148,12 @@ function QuestionsComponentInternal() {
   const [fontFamily, setFontFamily] = useState("'Noto Sans Bengali', sans-serif");
   const [fontWeight, setFontWeight] = useState('regular'); // 'thin' | 'regular' | 'medium' | 'bold'
   const [customFontSizeInput, setCustomFontSizeInput] = useState('');
+  const [showFontMenu, setShowFontMenu] = useState(false);
   const [fontAccordion, setFontAccordion] = useState({ size: true, family: false, weight: false });
+  const fontDropdownRef = useRef(null);
 
   const toggleFontAccordion = (sec) => {
-    setFontAccordion((prev) => ({
-      size: sec === 'size' ? !prev.size : false,
-      family: sec === 'family' ? !prev.family : false,
-      weight: sec === 'weight' ? !prev.weight : false
-    }));
+    setFontAccordion((prev) => ({ ...prev, [sec]: !prev[sec] }));
   };
 
   const [showLimitMenu, setShowLimitMenu] = useState(false);
@@ -403,11 +396,7 @@ function QuestionsComponentInternal() {
       }
       const savedFontFamily = localStorage.getItem('topmcqbd_font_family');
       if (savedFontFamily) {
-        if (FONT_FAMILIES.some((f) => f.family === savedFontFamily)) {
-          setFontFamily(savedFontFamily);
-        } else {
-          setFontFamily("'Noto Sans Bengali', sans-serif");
-        }
+        setFontFamily(savedFontFamily);
       }
       const savedFontWeight = localStorage.getItem('topmcqbd_font_weight');
       if (savedFontWeight && ['thin', 'regular', 'medium', 'bold'].includes(savedFontWeight)) {
@@ -424,14 +413,17 @@ function QuestionsComponentInternal() {
     }
   }, []);
 
-  // Close global settings, limit, range & cut mark menus on click outside
+  // Close layout, limit, range, font & cut mark menus on click outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (globalSettingsRef.current && !globalSettingsRef.current.contains(event.target)) {
-        setShowGlobalSettingsMenu(false);
+      if (layoutDropdownRef.current && !layoutDropdownRef.current.contains(event.target)) {
+        setShowLayoutMenu(false);
       }
       if (cutMarkDropdownRef.current && !cutMarkDropdownRef.current.contains(event.target)) {
         setShowCutMarkMenu(false);
+      }
+      if (fontDropdownRef.current && !fontDropdownRef.current.contains(event.target)) {
+        setShowFontMenu(false);
       }
       if (limitDropdownRef.current && !limitDropdownRef.current.contains(event.target)) {
         setShowLimitMenu(false);
@@ -1245,432 +1237,299 @@ function QuestionsComponentInternal() {
               )}
             </div>
 
-            {/* Global MCQ Setting Custom Dropdown Menu */}
-            <div className="quiz-layout-dropdown-wrapper" ref={globalSettingsRef}>
+            {/* Option Layout Custom Dropdown Menu */}
+            <div className="quiz-layout-dropdown-wrapper hide-on-mobile" ref={layoutDropdownRef}>
               <button
                 type="button"
-                className="quiz-layout-trigger-btn quiz-global-settings-trigger"
-                onClick={() => setShowGlobalSettingsMenu(!showGlobalSettingsMenu)}
-                title="Global MCQ Setting (লেআউট, ফন্ট ও ডিসপ্লে সুইচ)"
+                className="quiz-layout-trigger-btn"
+                onClick={() => setShowLayoutMenu(!showLayoutMenu)}
+                title="অপশন লেআউট পরিবর্তন করুন"
               >
-                <i className="fa-solid fa-gear" style={{ color: '#007bff' }}></i>
-                <span>Global MCQ Setting</span>
-                <i className={`fa-solid fa-chevron-${showGlobalSettingsMenu ? 'up' : 'down'}`} style={{ fontSize: '11px', color: '#64748b' }}></i>
+                <i className="fa-solid fa-table-cells-large" style={{ color: '#007bff' }}></i>
+                <span>লেআউট</span>
+                <i className={`fa-solid fa-chevron-${showLayoutMenu ? 'up' : 'down'}`} style={{ fontSize: '11px', color: '#64748b' }}></i>
               </button>
 
-              {showGlobalSettingsMenu && (
-                <div className="quiz-layout-popup-menu quiz-global-settings-popup">
-                  <div className="quiz-global-popup-header">
-                    <div className="quiz-global-popup-title">
-                      <i className="fa-solid fa-gear" style={{ color: '#007bff' }}></i>
-                      <span>Global MCQ Setting</span>
+              {showLayoutMenu && (
+                <div className="quiz-layout-popup-menu">
+                  <button
+                    type="button"
+                    className={`quiz-layout-menu-item ${optionLayout === '2q-col' ? 'active' : ''}`}
+                    onClick={() => { setOptionLayout('2q-col'); setShowLayoutMenu(false); }}
+                  >
+                    <div className="quiz-layout-radio-circle">
+                      {optionLayout === '2q-col' && <div className="quiz-layout-radio-inner"></div>}
                     </div>
-                    <button
-                      type="button"
-                      className="quiz-popup-close-mini"
-                      onClick={() => setShowGlobalSettingsMenu(false)}
-                      title="বন্ধ করুন"
-                    >
-                      <i className="fa-solid fa-xmark"></i>
-                    </button>
+                    <span>১ লাইনে ২টি প্রশ্ন (উপর-নিচ ক্রম)</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className={`quiz-layout-menu-item ${optionLayout === '2q-row' ? 'active' : ''}`}
+                    onClick={() => { setOptionLayout('2q-row'); setShowLayoutMenu(false); }}
+                  >
+                    <div className="quiz-layout-radio-circle">
+                      {optionLayout === '2q-row' && <div className="quiz-layout-radio-inner"></div>}
+                    </div>
+                    <span>১ লাইনে ২টি প্রশ্ন (পাশাপাশি ক্রম)</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className={`quiz-layout-menu-item ${optionLayout === '4' ? 'active' : ''}`}
+                    onClick={() => { setOptionLayout('4'); setShowLayoutMenu(false); }}
+                  >
+                    <div className="quiz-layout-radio-circle">
+                      {optionLayout === '4' && <div className="quiz-layout-radio-inner"></div>}
+                    </div>
+                    <span>১ লাইনে ৪টি অপশন</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className={`quiz-layout-menu-item ${optionLayout === '2' ? 'active' : ''}`}
+                    onClick={() => { setOptionLayout('2'); setShowLayoutMenu(false); }}
+                  >
+                    <div className="quiz-layout-radio-circle">
+                      {optionLayout === '2' && <div className="quiz-layout-radio-inner"></div>}
+                    </div>
+                    <span>১ লাইনে ২টি অপশন</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className={`quiz-layout-menu-item ${optionLayout === '1' ? 'active' : ''}`}
+                    onClick={() => { setOptionLayout('1'); setShowLayoutMenu(false); }}
+                  >
+                    <div className="quiz-layout-radio-circle">
+                      {optionLayout === '1' && <div className="quiz-layout-radio-inner"></div>}
+                    </div>
+                    <span>১ লাইনে ১টি অপশন</span>
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Font Settings Custom Dropdown Menu */}
+            <div className="quiz-layout-dropdown-wrapper" ref={fontDropdownRef}>
+              <button
+                type="button"
+                className="quiz-layout-trigger-btn"
+                onClick={() => setShowFontMenu(!showFontMenu)}
+                title="ফন্ট সাইজ ও ফন্ট ফ্যামিলি পরিবর্তন করুন"
+              >
+                <i className="fa-solid fa-font" style={{ color: '#007bff' }}></i>
+                <span>ফন্ট</span>
+                <i className={`fa-solid fa-chevron-${showFontMenu ? 'up' : 'down'}`} style={{ fontSize: '11px', color: '#64748b' }}></i>
+              </button>
+
+              {showFontMenu && (
+                <div className="quiz-layout-popup-menu quiz-font-popup">
+                  <div className="quiz-font-popup-title">
+                    <i className="fa-solid fa-sliders" style={{ color: '#007bff', marginRight: '6px' }}></i>
+                    ফন্ট সেটিংস (Font Settings)
                   </div>
 
-                  {/* Section 1: Option Layout */}
-                  <div className={`quiz-global-section ${globalAccordion.layout ? 'active layout-section' : ''}`}>
-                    <div
-                      className="quiz-global-section-header"
-                      onClick={() => toggleGlobalAccordion('layout')}
-                      title="অপশন লেআউট সেটিংস"
-                    >
-                      <div className="quiz-global-section-header-left">
-                        <i className="fa-solid fa-table-cells-large" style={{ color: '#007bff' }}></i>
-                        <span>লেআউট (Option Layout):</span>
-                      </div>
-                      <div className="quiz-global-section-header-right">
-                        <span className="quiz-font-accordion-badge">
-                          <span className="quiz-font-accordion-badge-text">
-                            {optionLayout === '2q-col'
-                              ? '২টি প্রশ্ন (উপর-নিচ)'
-                              : optionLayout === '2q-row'
-                              ? '২টি প্রশ্ন (পাশাপাশি)'
-                              : optionLayout === '4'
-                              ? '১ লাইনে ৪টি'
-                              : optionLayout === '2'
-                              ? '১ লাইনে ২টি'
-                              : '১ লাইনে ১টি'}
-                          </span>
-                        </span>
-                        <i className={`fa-solid fa-${globalAccordion.layout ? 'minus' : 'plus'} quiz-font-accordion-plus-minus`}></i>
-                      </div>
+                  {/* Section 1: Font Size Accordion */}
+                  <div
+                    className={`quiz-font-accordion-header ${fontAccordion.size ? 'active' : ''}`}
+                    onClick={() => toggleFontAccordion('size')}
+                    title="ফন্ট সাইজ অপশন খুলতে বা বন্ধ করতে ক্লিক করুন"
+                  >
+                    <div className="quiz-font-accordion-header-left">
+                      <i className="fa-solid fa-text-height" style={{ color: '#007bff' }}></i>
+                      <span>ফন্ট সাইজ:</span>
                     </div>
-
-                    {globalAccordion.layout && (
-                      <div className="quiz-global-section-body">
-                        <button
-                          type="button"
-                          className={`quiz-layout-menu-item ${optionLayout === '2q-col' ? 'active' : ''}`}
-                          onClick={() => setOptionLayout('2q-col')}
-                        >
-                          <div className="quiz-layout-radio-circle">
-                            {optionLayout === '2q-col' && <div className="quiz-layout-radio-inner"></div>}
-                          </div>
-                          <span>১ লাইনে ২টি প্রশ্ন (উপর-নিচ ক্রম)</span>
-                        </button>
-
-                        <button
-                          type="button"
-                          className={`quiz-layout-menu-item ${optionLayout === '2q-row' ? 'active' : ''}`}
-                          onClick={() => setOptionLayout('2q-row')}
-                        >
-                          <div className="quiz-layout-radio-circle">
-                            {optionLayout === '2q-row' && <div className="quiz-layout-radio-inner"></div>}
-                          </div>
-                          <span>১ লাইনে ২টি প্রশ্ন (পাশাপাশি ক্রম)</span>
-                        </button>
-
-                        <button
-                          type="button"
-                          className={`quiz-layout-menu-item ${optionLayout === '4' ? 'active' : ''}`}
-                          onClick={() => setOptionLayout('4')}
-                        >
-                          <div className="quiz-layout-radio-circle">
-                            {optionLayout === '4' && <div className="quiz-layout-radio-inner"></div>}
-                          </div>
-                          <span>১ লাইনে ৪টি অপশন</span>
-                        </button>
-
-                        <button
-                          type="button"
-                          className={`quiz-layout-menu-item ${optionLayout === '2' ? 'active' : ''}`}
-                          onClick={() => setOptionLayout('2')}
-                        >
-                          <div className="quiz-layout-radio-circle">
-                            {optionLayout === '2' && <div className="quiz-layout-radio-inner"></div>}
-                          </div>
-                          <span>১ লাইনে ২টি অপশন</span>
-                        </button>
-
-                        <button
-                          type="button"
-                          className={`quiz-layout-menu-item ${optionLayout === '1' ? 'active' : ''}`}
-                          onClick={() => setOptionLayout('1')}
-                        >
-                          <div className="quiz-layout-radio-circle">
-                            {optionLayout === '1' && <div className="quiz-layout-radio-inner"></div>}
-                          </div>
-                          <span>১ লাইনে ১টি অপশন</span>
-                        </button>
-                      </div>
-                    )}
+                    <div className="quiz-font-accordion-header-right">
+                      <span className="quiz-font-accordion-badge">
+                        <span className="quiz-font-accordion-badge-text">{fontSize} px</span>
+                      </span>
+                      <i className={`fa-solid fa-chevron-${fontAccordion.size ? 'up' : 'down'} quiz-font-accordion-chevron`}></i>
+                    </div>
                   </div>
 
-                  {/* Section 2: Font Settings */}
-                  <div className={`quiz-global-section ${globalAccordion.font ? 'active font-section' : ''}`}>
-                    <div
-                      className="quiz-global-section-header"
-                      onClick={() => toggleGlobalAccordion('font')}
-                      title="ফন্ট সেটিংস"
-                    >
-                      <div className="quiz-global-section-header-left">
-                        <i className="fa-solid fa-font" style={{ color: '#0284c7' }}></i>
-                        <span>ফন্ট সেটিংস (Font):</span>
+                  {fontAccordion.size && (
+                    <div className="quiz-font-accordion-body">
+                      <div className="quiz-font-size-pills">
+                        <button
+                          type="button"
+                          className={`quiz-font-size-pill ${fontSize === 14 ? 'active' : ''}`}
+                          onClick={() => handleSelectFontSize(14)}
+                        >
+                          14 px
+                        </button>
+                        <button
+                          type="button"
+                          className={`quiz-font-size-pill ${fontSize === 15 ? 'active' : ''}`}
+                          onClick={() => handleSelectFontSize(15)}
+                        >
+                          15 px
+                        </button>
+                        <button
+                          type="button"
+                          className={`quiz-font-size-pill ${fontSize === 16 ? 'active' : ''}`}
+                          onClick={() => handleSelectFontSize(16)}
+                        >
+                          16 px (ডিফল্ট)
+                        </button>
                       </div>
-                      <div className="quiz-global-section-header-right">
-                        <span className="quiz-font-accordion-badge">
-                          <span className="quiz-font-accordion-badge-text">৩টি অপশন</span>
-                        </span>
-                        <i className={`fa-solid fa-${globalAccordion.font ? 'minus' : 'plus'} quiz-font-accordion-plus-minus`}></i>
+
+                      <div className="quiz-font-size-pills">
+                        <button
+                          type="button"
+                          className={`quiz-font-size-pill ${fontSize === 17 ? 'active' : ''}`}
+                          onClick={() => handleSelectFontSize(17)}
+                        >
+                          17 px
+                        </button>
+                        <button
+                          type="button"
+                          className={`quiz-font-size-pill ${fontSize === 18 ? 'active' : ''}`}
+                          onClick={() => handleSelectFontSize(18)}
+                        >
+                          18 px
+                        </button>
+                        <button
+                          type="button"
+                          className={`quiz-font-size-pill ${fontSize === 19 ? 'active' : ''}`}
+                          onClick={() => handleSelectFontSize(19)}
+                        >
+                          19 px
+                        </button>
+                        <button
+                          type="button"
+                          className={`quiz-font-size-pill ${fontSize === 20 ? 'active' : ''}`}
+                          onClick={() => handleSelectFontSize(20)}
+                        >
+                          20 px
+                        </button>
                       </div>
-                    </div>
 
-                    {globalAccordion.font && (
-                      <div className="quiz-global-section-body">
-                        {/* Section 2.1: Font Size Accordion */}
-                        <div className={`quiz-font-sub-group ${fontAccordion.size ? 'active' : ''}`}>
-                          <div
-                            className={`quiz-font-accordion-header quiz-font-sub-header ${fontAccordion.size ? 'active' : ''}`}
-                            onClick={() => toggleFontAccordion('size')}
-                          >
-                            <div className="quiz-font-accordion-header-left">
-                              <i className="fa-solid fa-text-height" style={{ color: '#0284c7', fontSize: '12px' }}></i>
-                              <span style={{ fontSize: '12.5px', fontWeight: 600 }}>ফন্ট সাইজ:</span>
-                            </div>
-                            <div className="quiz-font-accordion-header-right">
-                              <span className="quiz-font-accordion-badge" style={{ fontSize: '11px' }}>
-                                <span className="quiz-font-accordion-badge-text">{fontSize} px</span>
-                              </span>
-                              <i className={`fa-solid fa-chevron-${fontAccordion.size ? 'up' : 'down'} quiz-font-accordion-chevron`}></i>
-                            </div>
-                          </div>
-
-                          {fontAccordion.size && (
-                            <div className="quiz-global-sub-card">
-                              <div className="quiz-font-size-pills">
-                                <button
-                                  type="button"
-                                  className={`quiz-font-size-pill ${fontSize === 14 ? 'active' : ''}`}
-                                  onClick={() => handleSelectFontSize(14)}
-                                >
-                                  14 px
-                                </button>
-                                <button
-                                  type="button"
-                                  className={`quiz-font-size-pill ${fontSize === 15 ? 'active' : ''}`}
-                                  onClick={() => handleSelectFontSize(15)}
-                                >
-                                  15 px
-                                </button>
-                                <button
-                                  type="button"
-                                  className={`quiz-font-size-pill ${fontSize === 16 ? 'active' : ''}`}
-                                  onClick={() => handleSelectFontSize(16)}
-                                >
-                                  16 px (ডিফল্ট)
-                                </button>
-                              </div>
-
-                              <div className="quiz-font-size-pills">
-                                <button
-                                  type="button"
-                                  className={`quiz-font-size-pill ${fontSize === 17 ? 'active' : ''}`}
-                                  onClick={() => handleSelectFontSize(17)}
-                                >
-                                  17 px
-                                </button>
-                                <button
-                                  type="button"
-                                  className={`quiz-font-size-pill ${fontSize === 18 ? 'active' : ''}`}
-                                  onClick={() => handleSelectFontSize(18)}
-                                >
-                                  18 px
-                                </button>
-                                <button
-                                  type="button"
-                                  className={`quiz-font-size-pill ${fontSize === 19 ? 'active' : ''}`}
-                                  onClick={() => handleSelectFontSize(19)}
-                                >
-                                  19 px
-                                </button>
-                                <button
-                                  type="button"
-                                  className={`quiz-font-size-pill ${fontSize === 20 ? 'active' : ''}`}
-                                  onClick={() => handleSelectFontSize(20)}
-                                >
-                                  20 px
-                                </button>
-                              </div>
-
-                              <div className="quiz-font-custom-section">
-                                <div className="quiz-font-custom-header">
-                                  <span>কাস্টম সাইজ (১০ - ৩৬ px):</span>
-                                  {![14, 15, 16, 17, 18, 19, 20].includes(fontSize) && (
-                                    <span className="quiz-font-badge">সক্রিয়: {toBengaliNumber(fontSize)} px</span>
-                                  )}
-                                </div>
-                                <div className="quiz-font-custom-size-row">
-                                  <input
-                                    type="number"
-                                    min="10"
-                                    max="36"
-                                    placeholder="যেমন: 22"
-                                    value={customFontSizeInput}
-                                    onChange={(e) => setCustomFontSizeInput(e.target.value)}
-                                    onKeyDown={(e) => {
-                                      if (e.key === 'Enter') {
-                                        e.preventDefault();
-                                        handleApplyCustomFontSize();
-                                      }
-                                    }}
-                                    className="quiz-font-input"
-                                  />
-                                  <button
-                                    type="button"
-                                    className="quiz-font-apply-btn"
-                                    onClick={handleApplyCustomFontSize}
-                                  >
-                                    সেট করুন
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
+                      <div className="quiz-font-custom-section">
+                        <div className="quiz-font-custom-header">
+                          <span>কাস্টম সাইজ (১০ - ৩৬ px):</span>
+                          {![14, 15, 16, 17, 18, 19, 20].includes(fontSize) && (
+                            <span className="quiz-font-badge">সক্রিয়: {toBengaliNumber(fontSize)} px</span>
                           )}
                         </div>
-
-                        {/* Section 2.2: Font Family Accordion */}
-                        <div className={`quiz-font-sub-group ${fontAccordion.family ? 'active' : ''}`}>
-                          <div
-                            className={`quiz-font-accordion-header quiz-font-sub-header ${fontAccordion.family ? 'active' : ''}`}
-                            onClick={() => toggleFontAccordion('family')}
+                        <div className="quiz-font-custom-size-row">
+                          <input
+                            type="number"
+                            min="10"
+                            max="36"
+                            placeholder="যেমন: 22"
+                            value={customFontSizeInput}
+                            onChange={(e) => setCustomFontSizeInput(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                handleApplyCustomFontSize();
+                              }
+                            }}
+                            className="quiz-font-input"
+                          />
+                          <button
+                            type="button"
+                            className="quiz-font-apply-btn"
+                            onClick={handleApplyCustomFontSize}
                           >
-                            <div className="quiz-font-accordion-header-left">
-                              <i className="fa-solid fa-paragraph" style={{ color: '#0284c7', fontSize: '12px' }}></i>
-                              <span style={{ fontSize: '12.5px', fontWeight: 600 }}>ফন্ট ফ্যামিলি:</span>
-                            </div>
-                            <div className="quiz-font-accordion-header-right">
-                              <span className="quiz-font-accordion-badge" style={{ fontFamily, fontSize: '11px', maxWidth: '110px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                <span className="quiz-font-accordion-badge-text">
-                                  {FONT_FAMILIES.find((f) => f.family === fontFamily)?.name || 'Noto Sans'}
-                                </span>
-                              </span>
-                              <i className={`fa-solid fa-chevron-${fontAccordion.family ? 'up' : 'down'} quiz-font-accordion-chevron`}></i>
-                            </div>
-                          </div>
-
-                          {fontAccordion.family && (
-                            <div className="quiz-global-sub-card">
-                              <div className="quiz-font-family-list" style={{ maxHeight: '260px', overflowY: 'auto' }}>
-                                {FONT_FAMILIES.map((font) => (
-                                  <button
-                                    key={font.id}
-                                    type="button"
-                                    className={`quiz-layout-menu-item ${fontFamily === font.family ? 'active' : ''}`}
-                                    onClick={() => handleSelectFontFamily(font.family)}
-                                    style={{ fontFamily: font.family }}
-                                  >
-                                    <div className="quiz-layout-radio-circle">
-                                      {fontFamily === font.family && <div className="quiz-layout-radio-inner"></div>}
-                                    </div>
-                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                                      <span style={{ fontSize: '13px', fontWeight: 600 }}>{font.name}</span>
-                                      <span style={{ fontSize: '11px', color: '#64748b' }}>{font.sub}</span>
-                                    </div>
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
-                          )}
+                            সেট করুন
+                          </button>
                         </div>
-
-                        {/* Section 2.3: Font Weight Accordion */}
-                        <div className={`quiz-font-sub-group ${fontAccordion.weight ? 'active' : ''}`}>
-                          <div
-                            className={`quiz-font-accordion-header quiz-font-sub-header ${fontAccordion.weight ? 'active' : ''}`}
-                            onClick={() => toggleFontAccordion('weight')}
-                          >
-                            <div className="quiz-font-accordion-header-left">
-                              <i className="fa-solid fa-bold" style={{ color: '#0284c7', fontSize: '12px' }}></i>
-                              <span style={{ fontSize: '12.5px', fontWeight: 600 }}>ফন্ট ওয়েট:</span>
-                            </div>
-                            <div className="quiz-font-accordion-header-right">
-                              <span className="quiz-font-accordion-badge" style={{ fontSize: '11px' }}>
-                                <span className="quiz-font-accordion-badge-text">
-                                  {fontWeight === 'thin' ? 'Thin' : fontWeight === 'medium' ? 'Medium' : fontWeight === 'bold' ? 'Bold' : 'Regular'}
-                                </span>
-                              </span>
-                              <i className={`fa-solid fa-chevron-${fontAccordion.weight ? 'up' : 'down'} quiz-font-accordion-chevron`}></i>
-                            </div>
-                          </div>
-
-                          {fontAccordion.weight && (
-                            <div className="quiz-global-sub-card">
-                              <div className="quiz-font-family-list">
-                                {FONT_WEIGHTS.map((item) => (
-                                  <button
-                                    key={item.id}
-                                    type="button"
-                                    className={`quiz-layout-menu-item ${fontWeight === item.value ? 'active' : ''}`}
-                                    onClick={() => handleSelectFontWeight(item.value)}
-                                  >
-                                    <div className="quiz-layout-radio-circle">
-                                      {fontWeight === item.value && <div className="quiz-layout-radio-inner"></div>}
-                                    </div>
-                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                                      <span style={{ fontSize: '13px', fontWeight: item.weight }}>{item.name}</span>
-                                      <span style={{ fontSize: '11px', color: '#64748b' }}>{item.sub}</span>
-                                    </div>
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Section 3: Quiz Switches */}
-                  <div className={`quiz-global-section ${globalAccordion.switches ? 'active switches-section' : ''}`}>
-                    <div
-                      className="quiz-global-section-header"
-                      onClick={() => toggleGlobalAccordion('switches')}
-                      title="কুইজ ডিসপ্লে সুইচসমূহ"
-                    >
-                      <div className="quiz-global-section-header-left">
-                        <i className="fa-solid fa-toggle-on" style={{ color: '#10b981' }}></i>
-                        <span>ডিসপ্লে সুইচ (Switches):</span>
-                      </div>
-                      <div className="quiz-global-section-header-right">
-                        <span className="quiz-font-accordion-badge">
-                          <span className="quiz-font-accordion-badge-text">৩টি অপশন</span>
-                        </span>
-                        <i className={`fa-solid fa-${globalAccordion.switches ? 'minus' : 'plus'} quiz-font-accordion-plus-minus`}></i>
                       </div>
                     </div>
+                  )}
 
-                    {globalAccordion.switches && (
-                      <div className="quiz-global-section-body">
-                        {/* Switch 1: Color */}
-                        <div className="quiz-global-switch-row">
-                          <div className="quiz-global-switch-info">
-                            <span className="quiz-color-dots-icon" style={{ display: 'inline-flex' }}>
-                              <span className="quiz-dot-red"></span>
-                              <span className="quiz-dot-green"></span>
-                            </span>
-                            <div className="quiz-global-switch-text">
-                              <span className="quiz-global-switch-title">কালার হাইলাইট</span>
-                              <span className="quiz-global-switch-sub">সঠিক ও ভুল উত্তরের কালার</span>
-                            </div>
-                          </div>
-                          <label className="quiz-switch">
-                            <input
-                              type="checkbox"
-                              checked={showColor}
-                              onChange={(e) => setShowColor(e.target.checked)}
-                            />
-                            <span className="quiz-slider"></span>
-                          </label>
-                        </div>
+                  <div className="quiz-cut-mark-divider"></div>
 
-                        {/* Switch 2: Show Answer */}
-                        <div className="quiz-global-switch-row">
-                          <div className="quiz-global-switch-info">
-                            <i className="fa-solid fa-circle-check" style={{ color: '#27ae60', fontSize: '15px' }}></i>
-                            <div className="quiz-global-switch-text">
-                              <span className="quiz-global-switch-title">সঠিক উত্তর</span>
-                              <span className="quiz-global-switch-sub">প্রশ্নের নিচে সঠিক উত্তর প্রদর্শন</span>
-                            </div>
-                          </div>
-                          <label className="quiz-switch">
-                            <input
-                              type="checkbox"
-                              checked={showAnswer}
-                              onChange={(e) => setShowAnswer(e.target.checked)}
-                            />
-                            <span className="quiz-slider"></span>
-                          </label>
-                        </div>
-
-                        {/* Switch 3: Explanation */}
-                        <div className="quiz-global-switch-row">
-                          <div className="quiz-global-switch-info">
-                            <i className="fa-solid fa-circle-info" style={{ color: '#0284c7', fontSize: '15px' }}></i>
-                            <div className="quiz-global-switch-text">
-                              <span className="quiz-global-switch-title">ব্যাখ্যা</span>
-                              <span className="quiz-global-switch-sub">উত্তরের সাথে বিস্তারিত ব্যাখ্যা প্রদর্শন</span>
-                            </div>
-                          </div>
-                          <label className="quiz-switch">
-                            <input
-                              type="checkbox"
-                              checked={showExplanation}
-                              onChange={(e) => setShowExplanation(e.target.checked)}
-                            />
-                            <span className="quiz-slider"></span>
-                          </label>
-                        </div>
-                      </div>
-                    )}
+                  {/* Section 2: Font Family Accordion */}
+                  <div
+                    className={`quiz-font-accordion-header ${fontAccordion.family ? 'active' : ''}`}
+                    onClick={() => toggleFontAccordion('family')}
+                    title="ফন্ট ফ্যামিলি অপশন খুলতে বা বন্ধ করতে ক্লিক করুন"
+                  >
+                    <div className="quiz-font-accordion-header-left">
+                      <i className="fa-solid fa-paragraph" style={{ color: '#007bff' }}></i>
+                      <span>ফন্ট ফ্যামিলি:</span>
+                    </div>
+                    <div className="quiz-font-accordion-header-right">
+                      <span className="quiz-font-accordion-badge" style={{ fontFamily }}>
+                        <span className="quiz-font-accordion-badge-text">
+                          {FONT_FAMILIES.find((f) => f.family === fontFamily)?.name || 'Noto Sans Bengali'}
+                        </span>
+                      </span>
+                      <i className={`fa-solid fa-chevron-${fontAccordion.family ? 'up' : 'down'} quiz-font-accordion-chevron`}></i>
+                    </div>
                   </div>
+
+                  {fontAccordion.family && (
+                    <div className="quiz-font-accordion-body">
+                      <div className="quiz-font-family-list">
+                        {FONT_FAMILIES.map((font) => (
+                          <button
+                            key={font.id}
+                            type="button"
+                            className={`quiz-layout-menu-item ${fontFamily === font.family ? 'active' : ''}`}
+                            onClick={() => handleSelectFontFamily(font.family)}
+                            style={{ fontFamily: font.family }}
+                          >
+                            <div className="quiz-layout-radio-circle">
+                              {fontFamily === font.family && <div className="quiz-layout-radio-inner"></div>}
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                              <span style={{ fontSize: '13.5px', fontWeight: 600 }}>{font.name}</span>
+                              <span style={{ fontSize: '11px', color: '#64748b' }}>{font.sub}</span>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="quiz-cut-mark-divider"></div>
+
+                  {/* Section 3: Font Weight Accordion */}
+                  <div
+                    className={`quiz-font-accordion-header ${fontAccordion.weight ? 'active' : ''}`}
+                    onClick={() => toggleFontAccordion('weight')}
+                    title="ফন্ট ওয়েট অপশন খুলতে বা বন্ধ করতে ক্লিক করুন"
+                  >
+                    <div className="quiz-font-accordion-header-left">
+                      <i className="fa-solid fa-bold" style={{ color: '#007bff' }}></i>
+                      <span>ফন্ট ওয়েট:</span>
+                    </div>
+                    <div className="quiz-font-accordion-header-right">
+                      <span className="quiz-font-accordion-badge">
+                        <span className="quiz-font-accordion-badge-text">
+                          {fontWeight === 'thin' ? 'Thin' : fontWeight === 'medium' ? 'Medium' : fontWeight === 'bold' ? 'Bold' : 'Regular'}
+                        </span>
+                      </span>
+                      <i className={`fa-solid fa-chevron-${fontAccordion.weight ? 'up' : 'down'} quiz-font-accordion-chevron`}></i>
+                    </div>
+                  </div>
+
+                  {fontAccordion.weight && (
+                    <div className="quiz-font-accordion-body">
+                      <div className="quiz-font-family-list">
+                        {FONT_WEIGHTS.map((item) => (
+                          <button
+                            key={item.id}
+                            type="button"
+                            className={`quiz-layout-menu-item ${fontWeight === item.value ? 'active' : ''}`}
+                            onClick={() => handleSelectFontWeight(item.value)}
+                          >
+                            <div className="quiz-layout-radio-circle">
+                              {fontWeight === item.value && <div className="quiz-layout-radio-inner"></div>}
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                              <span style={{ fontSize: '13.5px', fontWeight: item.weight }}>{item.name}</span>
+                              <span style={{ fontSize: '11px', color: '#64748b' }}>{item.sub}</span>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -1847,8 +1706,50 @@ function QuestionsComponentInternal() {
               )}
             </div>
 
-            {/* Switches: Time and Score */}
+            {/* Switches (Never Removed, Disabled when Read Mode is ON) */}
             <div className="quiz-switch-group">
+              {/* Color Switch */}
+              <label className="quiz-switch-label">
+                <label className="quiz-switch">
+                  <input
+                    type="checkbox"
+                    checked={showColor}
+                    onChange={(e) => setShowColor(e.target.checked)}
+                  />
+                  <span className="quiz-slider"></span>
+                </label>
+                <span className="quiz-color-dots-icon">
+                  <span className="quiz-dot-red"></span>
+                  <span className="quiz-dot-green"></span>
+                </span>
+              </label>
+
+              {/* Answer Switch */}
+              <label className="quiz-switch-label">
+                <label className="quiz-switch">
+                  <input
+                    type="checkbox"
+                    checked={showAnswer}
+                    onChange={(e) => setShowAnswer(e.target.checked)}
+                  />
+                  <span className="quiz-slider"></span>
+                </label>
+                সঠিক উত্তর
+              </label>
+
+              {/* Explanation Switch */}
+              <label className="quiz-switch-label">
+                <label className="quiz-switch">
+                  <input
+                    type="checkbox"
+                    checked={showExplanation}
+                    onChange={(e) => setShowExplanation(e.target.checked)}
+                  />
+                  <span className="quiz-slider"></span>
+                </label>
+                ব্যাখ্যা
+              </label>
+
               {/* Time Switch (Disabled in Read Mode, never removed) */}
               <label className={`quiz-switch-label ${isReadMode ? 'disabled-switch' : ''}`}>
                 <label className="quiz-switch">
