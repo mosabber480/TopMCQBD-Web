@@ -4,8 +4,8 @@
   - `npm run dev` (Start / manage development server)
   - Build/test validation commands when explicitly needed.
 
-- **Strictly Prohibited Actions**:
-  - **NEVER run `git status`** under any circumstances. Checking `git status` is permanently forbidden.
-  - **NEVER** run `git push` automatically under any circumstances.
-  - Do **NOT** run `git add`, `git commit`, `git status`, `git diff`, or `git push` on your own.
-  - The USER will handle all git staging, checking, committing, and pushing manually.
+- **STRICT GIT PUSH RULE (USER EXPLICIT COMMAND ONLY)**:
+  - **কখনো নিজে নিজে `git push`, `git add` বা `git commit` করা যাবে না।**
+  - AI কখনো নিজের ইচ্ছায় বা স্বয়ংক্রিয়ভাবে গিটহাবে কোনো কিছু পুশ করবে না।
+  - **শুধুমাত্র এবং কেবল যখন ইউজার সরাসরি চ্যাটে বলবেন** (যেমন: "git push koro", "git push dao" ইত্যাদি), ঠিক তখনই ইউজার নির্দেশ দিলে `git push` করা যাবে।
+  - ইউজারের সুস্পষ্ট নির্দেশ ছাড়া যেকোনো প্রকার অটোমেটিক গিট পুশ সম্পূর্ণ নিষিদ্ধ।

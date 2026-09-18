@@ -1,17 +1,21 @@
 # Next.js Project Architecture & Master Developer Guide Rules
 
-> **PERMANENT MEMORY DIRECTIVE: ALL MASTER GUIDES IN ROOT & DATED FOLDERS (`project-guides-*/`)**
-> All `.txt`, `.md`, and `.local.txt` files in `project-guides-2026-09-18/` (or any latest dated `project-guides*/` folder) and in the root directory are official master project guides.
+> **PERMANENT MEMORY DIRECTIVE: ALL MASTER GUIDES IN ROOT & UPDATE FOLDERS (`project-guides-update-date/`)**
+> All `.txt`, `.md`, and `.local.txt` files in `project-guides-update-date/` (or any latest `project-guides*/` folder) and in the root directory are official master project guides.
 > 
 > **OFFICE & HOME WORKSTATION AUTO-SYNC DIRECTIVE:**
 > The user works from two workstations (Office PC and Home PC). Whenever the user provides or updates any guide file in the project from either office or home:
 > 1. Antigravity AI must automatically recognize, read, and immediately integrate all updates into memory and master guides.
 > 2. The user will NOT have to explain the architecture or rules repeatedly.
 > 3. Antigravity AI must strictly adhere to the single source of truth in:
->    - [`project-guides-2026-09-18/cloudflare-pages-workers-api-full-guide.txt`](file:///c:/Users/Mosabber/Downloads/Mosabber/TopMCQBD-Web/project-guides-2026-09-18/cloudflare-pages-workers-api-full-guide.txt)
->    - [`project-guides-2026-09-18/project-guide.local.txt`](file:///c:/Users/Mosabber/Downloads/Mosabber/TopMCQBD-Web/project-guides-2026-09-18/project-guide.local.txt)
->    - [`project-guides-2026-09-18/mongodb-render-cloudflare-full-guide.local.txt`](file:///c:/Users/Mosabber/Downloads/Mosabber/TopMCQBD-Web/project-guides-2026-09-18/mongodb-render-cloudflare-full-guide.local.txt)
->    - [`project-guides-2026-09-18/README.md`](file:///c:/Users/Mosabber/Downloads/Mosabber/TopMCQBD-Web/project-guides-2026-09-18/README.md)
+>    - [`project-guides-update-date/cloudflare-pages-workers-api-full-guide.txt`](file:///c:/Users/Mosabber/Downloads/Mosabber/TopMCQBD-Web/project-guides-update-date/cloudflare-pages-workers-api-full-guide.txt)
+>    - [`project-guides-update-date/project-guide.local.txt`](file:///c:/Users/Mosabber/Downloads/Mosabber/TopMCQBD-Web/project-guides-update-date/project-guide.local.txt)
+>    - [`project-guides-update-date/mongodb-render-cloudflare-full-guide.local.txt`](file:///c:/Users/Mosabber/Downloads/Mosabber/TopMCQBD-Web/project-guides-update-date/mongodb-render-cloudflare-full-guide.local.txt)
+>    - [`project-guides-update-date/README.md`](file:///c:/Users/Mosabber/Downloads/Mosabber/TopMCQBD-Web/project-guides-update-date/README.md)
+> 
+> **OFFLINE MASTER ZIP BACKUP ARCHIVE:**
+> - Location: `C:\Users\Mosabber\Downloads\Mosabber\project-guides-update-date.zip`
+> - Contains all master guides, full architecture details, and `.env` backup.
 
 ### Project Context & Core Rules:
 1. **Architecture & Scope**:

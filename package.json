@@ -12,7 +12,8 @@
     "start": "next start",
     "seed": "node seedUsers.js",
     "sync:d1": "node syncConfigs.js",
-    "pages:deploy": "wrangler pages deploy out --project-name topmcqbd"
+    "pages:deploy": "wrangler pages deploy out --project-name topmcqbd",
+    "worker:deploy": "wrangler deploy --config workers/topmcqbd-worker/wrangler.jsonc"
   },
   "dependencies": {
     "@getbrevo/brevo": "^6.0.2",
