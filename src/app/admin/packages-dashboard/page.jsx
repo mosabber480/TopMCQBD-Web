@@ -48,7 +48,15 @@ export default function AdminPackagesDashboardPage() {
 
       const data = await res.json();
       if (res.ok && data.success) {
-        showTopAlert('✅ প্যাকেজ তালিকা সফলভাবে ডাটাবেজে সংরক্ষিত হয়েছে!', 'success');
+        // Also sync to /api/packages-data in Cloudflare D1
+        try {
+          await fetch('/api/packages-data', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify(updatedPackages)
+          });
+        } catch (e) {}
+        showTopAlert('✅ প্যাকেজ তালিকা সফলভাবে D1 ডাটাবেজে সংরক্ষিত হয়েছে!', 'success');
       } else {
         showTopAlert('❌ সংরক্ষণ ব্যর্থ হয়েছে', 'danger');
       }

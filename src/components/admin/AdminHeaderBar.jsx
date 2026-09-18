@@ -54,7 +54,7 @@ export default function AdminHeaderBar() {
     };
     document.addEventListener('click', handleClickOutside);
 
-    fetch(getPaidApiUrl('/api/sidebar-config'))
+    fetch('/api/sidebar-config')
       .then(res => res.json())
       .then(data => {
         if (data && data.headerButtons && data.headerButtons.length > 0) {
@@ -65,8 +65,17 @@ export default function AdminHeaderBar() {
       })
       .catch(() => {});
 
+    // Listen for live sidebar/header button updates from D1
+    const handleSidebarConfigUpdated = (e) => {
+      if (e && e.detail && e.detail.headerButtons) {
+        setHeaderButtons(e.detail.headerButtons);
+      }
+    };
+    window.addEventListener('sidebar-config-updated', handleSidebarConfigUpdated);
+
     return () => {
       window.removeEventListener('sidebar-toggle', handleSync);
+      window.removeEventListener('sidebar-config-updated', handleSidebarConfigUpdated);
       document.removeEventListener('click', handleClickOutside);
     };
   }, [pathname]);

@@ -201,19 +201,13 @@ export async function onRequestGet(context) {
 
   try {
     if (!env || !env.DB) {
-      try {
-        const workerRes = await fetch('https://topmcqbd-web-test-api.mosabber480.workers.dev/api/db-test/d1');
-        const data = await workerRes.json();
-        return jsonResponse(data, 200);
-      } catch (e) {
-        return jsonResponse({
-          success: false,
-          connected: false,
-          status: 'Error',
-          error: 'Cloudflare D1 binding (DB) is missing and fallback failed.',
-          pingTimeMs: Date.now() - start
-        }, 500);
-      }
+      return jsonResponse({
+        success: false,
+        connected: false,
+        status: 'Error',
+        error: 'Cloudflare D1 binding (DB) is missing.',
+        pingTimeMs: Date.now() - start
+      }, 500);
     }
 
     await ensureAppConfigsTableAndSeed(env.DB);
@@ -284,17 +278,7 @@ export async function onRequestPost(context) {
 
   try {
     if (!env || !env.DB) {
-      try {
-        const workerRes = await fetch('https://topmcqbd-web-test-api.mosabber480.workers.dev/api/db-test/d1', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: await request.text(),
-        });
-        const data = await workerRes.json();
-        return jsonResponse(data, workerRes.status);
-      } catch (e) {
-        return jsonResponse({ success: false, error: 'D1 binding missing' }, 500);
-      }
+      return jsonResponse({ success: false, error: 'D1 binding (DB) is missing' }, 500);
     }
 
     const body = await request.json();
@@ -336,17 +320,7 @@ export async function onRequestPut(context) {
 
   try {
     if (!env || !env.DB) {
-      try {
-        const workerRes = await fetch('https://topmcqbd-web-test-api.mosabber480.workers.dev/api/db-test/d1', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: await request.text(),
-        });
-        const data = await workerRes.json();
-        return jsonResponse(data, workerRes.status);
-      } catch (e) {
-        return jsonResponse({ success: false, error: 'D1 binding missing' }, 500);
-      }
+      return jsonResponse({ success: false, error: 'D1 binding (DB) is missing' }, 500);
     }
 
     const body = await request.json();
@@ -393,16 +367,7 @@ export async function onRequestDelete(context) {
 
   try {
     if (!env || !env.DB) {
-      try {
-        const u = new URL(request.url);
-        const workerRes = await fetch(`https://topmcqbd-web-test-api.mosabber480.workers.dev/api/db-test/d1${u.search}`, {
-          method: 'DELETE',
-        });
-        const data = await workerRes.json();
-        return jsonResponse(data, workerRes.status);
-      } catch (e) {
-        return jsonResponse({ success: false, error: 'D1 binding missing' }, 500);
-      }
+      return jsonResponse({ success: false, error: 'D1 binding (DB) is missing' }, 500);
     }
 
     const url = new URL(request.url);

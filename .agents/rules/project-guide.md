@@ -1,6 +1,14 @@
-# Next.js Project Architecture & Developer Guide Rule
+# Next.js Project Architecture & Master Developer Guide Rules
 
-Antigravity AI must automatically recognize, read, and adhere to the project guides defined in [`project-guide.local.txt`](file:///c:/Users/bdCalling/Downloads/Mosabber/TopMCQBD-Web/project-guide.local.txt), [`cloudflare-pages-workers-master-guide.local.txt`](file:///c:/Users/bdCalling/Downloads/Mosabber/TopMCQBD-Web/cloudflare-pages-workers-master-guide.local.txt), [`cloudflare-pages-mongodb-work.txt`](file:///c:/Users/bdCalling/Downloads/Mosabber/TopMCQBD-Web/cloudflare-pages-mongodb-work.txt), and [`cloudflare-d1-bookmarks-guide.local.txt`](file:///c:/Users/bdCalling/Downloads/Mosabber/TopMCQBD-Web/cloudflare-d1-bookmarks-guide.local.txt).
+> **PERMANENT MEMORY DIRECTIVE: ALL ROOT `.TXT` FILES ARE OFFICIAL MASTER GUIDES**
+> All `.txt` files in the root directory of the project (`c:\Users\Mosabber\Downloads\Mosabber\TopMCQBD-Web\*.txt` and `*.local.txt`) are official master project guide files.
+> Antigravity AI must automatically recognize, read, prioritize, and strictly adhere to the project guides in:
+> 1. [`cloudflare-pages-workers-api-full-guide.txt`](file:///c:/Users/Mosabber/Downloads/Mosabber/TopMCQBD-Web/cloudflare-pages-workers-api-full-guide.txt) — Cloudflare Pages Functions, Workers API, D1 SQL, and Edge MongoDB Architecture.
+> 2. [`project-guide.local.txt`](file:///c:/Users/Mosabber/Downloads/Mosabber/TopMCQBD-Web/project-guide.local.txt) — Master project overview, microservice matrix, collection definitions, credentials, and API mappings.
+> 3. [`mongodb-render-cloudflare-full-guide.local.txt`](file:///c:/Users/Mosabber/Downloads/Mosabber/TopMCQBD-Web/mongodb-render-cloudflare-full-guide.local.txt) — MongoDB Atlas 6x Clusters, 6x Render Microservices, UptimeRobot Keep-Alive, and connection strings.
+> 4. Any other current or future `*.txt` and `*.local.txt` guide files in the project root.
+>
+> Antigravity AI must consult these guide files as the single source of truth for all architectural, coding, database, and deployment tasks.
 
 ### Project Context & Core Rules:
 1. **Architecture & Scope**:
@@ -14,7 +22,7 @@ Antigravity AI must automatically recognize, read, and adhere to the project gui
 
 3. **Environment & Secrets Handling**:
    - Utilize `.env` and `.dev.vars` for secrets (`MONGODB_URI_PAID`, `MONGODB_URI_FREE`, `BREVO_API_KEY`, etc.).
-   - Maintain DNS fallback & direct replica set connection URIs for local Windows development resilience.
+   - **STRICT DIRECTIVE (MANDATORY `mongodb+srv://`)**: Always and exclusively use the standard `mongodb+srv://` connection format for all database URIs across Cloudflare Pages Functions, Cloudflare Workers, and environment configs. Under NO circumstances should direct replica set / shard connection strings (`mongodb://...shard-00-00...`) be used.
 
 4. **Security & Deployment Isolation**:
    - All `*.local.txt` and guide files are local-only developer references. They MUST remain in `.gitignore` and untracked so they are never pushed to GitHub or deployed to Cloudflare.

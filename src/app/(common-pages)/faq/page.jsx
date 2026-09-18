@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-import faqData from '@/data/faq-data.json';
+import faqDataFallback from '@/data/faq-data.json';
 
-const faqs = faqData || [
+const defaultFaqs = faqDataFallback || [
   {
     q: 'TopMCQBD কী এবং কীভাবে কাজ করে?',
     a: 'TopMCQBD একটি স্বয়ংসম্পূর্ণ অনলাইন এমসিকিউ ও মডেল টেস্ট প্ল্যাটফর্ম। এখানে বিসিএস, ব্যাংক, প্রাথমিক শিক্ষক নিয়োগ এবং বিশ্ববিদ্যালয়ের ভর্তি পরীক্ষার জন্য অধ্যায়ভিত্তিক ও বিষয়ভিত্তিক নির্ভুল প্রশ্ন ও ব্যাখ্যা অনুশীলন করা যায়।'
@@ -28,7 +28,19 @@ const faqs = faqData || [
 ];
 
 export default function FAQPage() {
+  const [faqs, setFaqs] = useState(defaultFaqs);
   const [openIndex, setOpenIndex] = useState(0);
+
+  useEffect(() => {
+    fetch('/api/faq-data')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          setFaqs(data);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <>

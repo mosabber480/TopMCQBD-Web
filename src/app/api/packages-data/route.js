@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 const getCloudflareBaseUrl = () => {
-  return (process.env.NEXT_PUBLIC_APP_URL || 'https://topmcqbd.pages.dev').replace(/\/$/, '');
+  return (process.env.CLOUDFLARE_D1_API_URL || 'https://topmcqbd.pages.dev').replace(/\/$/, '');
 };
 
 const getJsonPath = () => path.resolve(process.cwd(), 'src', 'data', 'packages-data.json');
@@ -29,7 +29,7 @@ export async function GET() {
     const cloudflareUrl = getCloudflareBaseUrl();
     const res = await fetch(`${cloudflareUrl}/api/packages-data`, {
       cache: 'no-store',
-      headers: { 'User-Agent': 'TopMCQBD-Render-Sync' }
+      headers: { 'User-Agent': 'TopMCQBD-D1-Sync' }
     });
     if (res.ok) {
       const liveData = await res.json();

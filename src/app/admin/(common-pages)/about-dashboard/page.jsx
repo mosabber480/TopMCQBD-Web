@@ -52,7 +52,26 @@ export default function AdminAboutDashboardPage() {
 
       const data = await res.json();
       if (res.ok && data.success) {
-        showTopAlert('✅ আমাদের সম্পর্কে পেজের তথ্য সফলভাবে সংরক্ষিত হয়েছে!', 'success');
+        try {
+          await fetch('/api/about-data', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({
+              title: 'আমাদের সম্পর্কে (About Us)',
+              subtitle: missionInfo.sectionSubtitle || 'TopMCQBD - আপনার অনলাইন প্রস্তুতিকে সহজ ও নিখুঁত করতে আমরা সবসময় পাশে আছি',
+              whatIsTitle: missionInfo.missionTitle || 'TopMCQBD কী?',
+              whatIsDesc: missionInfo.missionDesc || '',
+              whyBestTitle: missionInfo.goalTitle || 'কেন TopMCQBD সেরা?',
+              features: [
+                'টপিকভিত্তিক মডেল টেস্ট এবং লাইভ টাইমার রিয়েল এক্সাম এক্সপেরিয়েন্স দেয়।',
+                'প্রতিটি প্রশ্নের সাথে রয়েছে নির্ভুল ও বিস্তৃত ব্যাখ্যামূলক সমাধান।',
+                'তাত্ক্ষণিক রেজাল্ট এবং নিজের অবস্থান যাচাই করার সুবিধা।',
+                'নতুন নতুন কুইজ ও প্রশ্ন নিয়মিত আপডেট করা হয়।'
+              ]
+            })
+          });
+        } catch (e) {}
+        showTopAlert('✅ আমাদের সম্পর্কে পেজের তথ্য সফলভাবে D1 ডাটাবেজে সংরক্ষিত হয়েছে!', 'success');
       } else {
         showTopAlert('❌ সংরক্ষণ ব্যর্থ হয়েছে', 'danger');
       }

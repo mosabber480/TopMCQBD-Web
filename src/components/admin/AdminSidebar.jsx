@@ -96,6 +96,21 @@ export default function AdminSidebar() {
     const overlay = document.querySelector('.sidebar-overlay');
     if (sidebar) sidebar.classList.remove('active');
     if (overlay) overlay.classList.remove('active');
+
+    const handleSidebarConfigUpdated = (e) => {
+      if (e && e.detail && e.detail.menus && e.detail.menus.length > 0) {
+        setMenuItems(
+          e.detail.menus.map(item => ({
+            href: item.url || '',
+            icon: item.icon || 'fa-solid fa-circle',
+            label: item.title,
+            subMenus: item.subMenus || []
+          }))
+        );
+      }
+    };
+    window.addEventListener('sidebar-config-updated', handleSidebarConfigUpdated);
+    return () => window.removeEventListener('sidebar-config-updated', handleSidebarConfigUpdated);
   }, [pathname]);
 
   // Set active submenu open on initial route match

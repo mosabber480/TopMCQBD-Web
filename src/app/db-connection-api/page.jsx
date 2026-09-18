@@ -139,30 +139,13 @@ export default function DBConnectionCheck() {
 
       // 7. Cloudflare D1 Database
       const d1Promise = (async () => {
-        try {
-          const res = await fetch(`${d1Base}/api/db-test/d1`, {
-            method: 'GET',
-            cache: 'no-store',
-            headers: { Accept: 'application/json' },
-          });
-          if (res.ok) {
-            const data = await res.json();
-            if (data && data.connected) {
-              return data;
-            }
-          }
-        } catch (e) {
-          console.warn('Primary D1 API error, trying worker fallback:', e);
-        }
-
-        // Direct fallback to live Worker API if Pages isolate is unbound
-        const workerRes = await fetch('https://topmcqbd-web-test-api.mosabber480.workers.dev/api/db-test/d1', {
+        const res = await fetch(`${d1Base}/api/db-test/d1`, {
           method: 'GET',
           cache: 'no-store',
           headers: { Accept: 'application/json' },
         });
-        if (!workerRes.ok) throw new Error(`D1 API HTTP ${workerRes.status}`);
-        return workerRes.json();
+        if (!res.ok) throw new Error(`D1 API HTTP ${res.status}`);
+        return res.json();
       })();
 
       const [paidRes, subjRes, liveRes, writRes, qbRes, freeRes, d1Res] = await Promise.allSettled([

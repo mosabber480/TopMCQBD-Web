@@ -1,10 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import aboutData from '@/data/about-data.json';
 
 export default function AboutUsPage() {
-  const data = aboutData || {
+  const [data, setData] = useState(aboutData || {
     title: "আমাদের সম্পর্কে (About Us)",
     subtitle: "TopMCQBD - আপনার অনলাইন প্রস্তুতিকে সহজ ও নিখুঁত করতে আমরা সবসময় পাশে আছি",
     whatIsTitle: "TopMCQBD কী?",
@@ -16,7 +16,18 @@ export default function AboutUsPage() {
       "তাত্ক্ষণিক রেজাল্ট এবং নিজের অবস্থান যাচাই করার সুবিধা।",
       "নতুন নতুন কুইজ ও প্রশ্ন নিয়মিত আপডেট করা হয়।"
     ]
-  };
+  });
+
+  useEffect(() => {
+    fetch('/api/about-data')
+      .then(res => res.json())
+      .then(d => {
+        if (d && d.title) {
+          setData(d);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <>

@@ -147,23 +147,6 @@
           "icon": "fa-solid fa-circle-dot"
         }
       ]
-    },
-    {
-      "title": "Free User Pages",
-      "url": "",
-      "icon": "fa-solid fa-layer-group",
-      "subMenus": [
-        {
-          "title": "Free Recent Job Categories",
-          "url": "/admin/free-recent-job-solution-categories-dashbaord",
-          "icon": "fa-solid fa-circle-dot"
-        },
-        {
-          "title": "Free Model Test Categories",
-          "url": "/admin/free-model-test-categories-dashbaord",
-          "icon": "fa-solid fa-circle-dot"
-        }
-      ]
     }
   ],
   "headerButtons": [
@@ -201,7 +184,7 @@
     },
     {
       "text": "Database Connection",
-      "url": "/db-connection-api",
+      "url": "/db-connection",
       "icon": "fa-solid fa-arrow-up-right-from-square",
       "color": "primary",
       "targetBlank": true,

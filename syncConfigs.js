@@ -6,7 +6,7 @@
 import fs from 'fs';
 import path from 'path';
 
-const CLOUDFLARE_BASE_URL = (process.env.NEXT_PUBLIC_APP_URL || 'https://topmcqbd.pages.dev').replace(/\/$/, '');
+const CLOUDFLARE_BASE_URL = (process.env.CLOUDFLARE_D1_API_URL || 'https://topmcqbd.pages.dev').replace(/\/$/, '');
 
 const ENDPOINTS = [
   { key: 'layout-config', file: 'layout-config.json', url: `${CLOUDFLARE_BASE_URL}/api/layout-config` },

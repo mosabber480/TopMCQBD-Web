@@ -6,7 +6,7 @@
 
 const DEFAULT_LAYOUT = {
   announcement: {
-    text: "বিসিএস ও সরকারি চাকরির প্রস্তুতি",
+    text: "বিসিএস ও সরকারি চাকরির পরীক্ষায় সফলতার জন্য পূর্ণাঙ্গ প্রস্তুতি",
     link: ""
   },
   header: {
@@ -18,14 +18,143 @@ const DEFAULT_LAYOUT = {
     btnLink: "/contact",
     btnIcon: "fa-solid fa-headset",
     menus: [
-      { title: "হোম", url: "/", icon: "fa-solid fa-house" },
-      { title: "কুইজ অনুশীলন", url: "/questions", icon: "fa-solid fa-bolt", badgeText: "FREE", badgeType: "free" },
-      { title: "সকল MCQ", url: "/all-mcq", icon: "fa-solid fa-layer-group" },
-      { title: "প্যাকেজসমূহ", url: "/packages", icon: "fa-solid fa-box" },
-      { title: "আমাদের সম্পর্কে", url: "/about-us", icon: "fa-solid fa-bullseye" },
-      { title: "যোগাযোগ", url: "/contact" }
+      {
+        title: "হোম",
+        url: "/",
+        icon: "fa-solid fa-house"
+      },
+      {
+        title: "পেইড MCQ",
+        url: "/all-mcq",
+        icon: "fa-solid fa-layer-group",
+        subMenus: [
+          {
+            title: "Subjective Model Test",
+            url: "/subjective-model-test"
+          },
+          {
+            title: "Full Model Test",
+            url: "/full-model-test"
+          },
+          {
+            title: "Question Bank",
+            url: "/question-bank"
+          },
+          {
+            title: "Live Exam",
+            url: "/live-exam-model-test"
+          },
+          {
+            title: "সম্পূর্ণ সাবজেক্টিভ অনুশীলন",
+            url: "/subjective-all-mcqs-Practice-success"
+          }
+        ]
+      },
+      {
+        title: "প্যাকেজসমূহ",
+        url: "/packages",
+        icon: "fa-solid fa-box"
+      },
+      {
+        title: "Free Plan",
+        url: "#",
+        icon: "fa-solid fa-hockey-puck",
+        badgeText: "Free",
+        badgeType: "free",
+        subMenus: [
+          {
+            title: "Recent Job Solution",
+            url: "/free-recent-job-solution",
+            icon: "fa-solid fa-bolt",
+            badgeText: "Free",
+            badgeType: "free"
+          },
+          {
+            title: "Free Model Test",
+            url: "/free-model-test",
+            icon: "fa-solid fa-bolt",
+            badgeText: "Free",
+            badgeType: "free"
+          }
+        ],
+        isMegaMenu: false,
+        megaMenuId: null
+      },
+      {
+        title: "আমাদের সম্পর্কে",
+        url: "/about-us",
+        icon: "fa-solid fa-bullseye"
+      }
     ],
-    megaMenus: []
+    megaMenus: [
+      {
+        id: "mega_1787215391182",
+        title: "মেগা মেনু 1",
+        columns: [
+          {
+            type: "icon",
+            title: "আইকন সার্ভিস কলাম",
+            items: [
+              {
+                iconType: "fontawesome",
+                iconValue: "fa-solid fa-building-columns",
+                title: "Banking",
+                desc: "Store, manage and move your funds safely.",
+                url: "/all-mcq"
+              },
+              {
+                iconType: "flaticon",
+                iconValue: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
+                title: "Online Quiz",
+                desc: "Test your knowledge with daily quizzes.",
+                url: "/all-mcq"
+              }
+            ]
+          },
+          {
+            type: "icon",
+            title: "নতুন আইকন কলাম",
+            items: [
+              {
+                iconType: "fontawesome",
+                iconValue: "fa-solid fa-building-columns",
+                title: "Banking",
+                desc: "Store, manage and move your funds safely.",
+                url: "#"
+              }
+            ]
+          },
+          {
+            type: "info",
+            title: "নতুন তথ্য কলাম",
+            text: "সাইট সম্পর্কে কিছু লিখুন...",
+            iconHtml: "<i class=\"fa-solid fa-circle-info\"></i>"
+          },
+          {
+            type: "links",
+            title: "নতুন লিংক কলাম",
+            links: []
+          }
+        ]
+      },
+      {
+        id: "mega_1787314295206",
+        title: "নতুন মেগা মেনু 2",
+        columns: [
+          {
+            type: "info",
+            title: "নতুন তথ্য কলাম",
+            text: "সাইট সম্পর্কে কিছু লিখুন...",
+            iconHtml: "<i class=\"fa-solid fa-circle-info\"></i>"
+          },
+          {
+            type: "links",
+            title: "নতুন লিংক কলাম",
+            links: []
+          }
+        ]
+      }
+    ]
   },
   footer: {
     columns: [
@@ -44,9 +173,84 @@ const DEFAULT_LAYOUT = {
         type: "links",
         title: "প্রয়োজনীয় লিংক",
         links: [
-          { title: "হোম পেজ", url: "/" },
-          { title: "কুইজ অনুশীলন", url: "/questions" },
-          { title: "সকল প্রশ্ন ক্যাটাগরি", url: "/all-mcq" }
+          {
+            title: "হোম পেজ",
+            url: "/"
+          },
+          {
+            title: "কুইজ অনুশীলন",
+            url: "/quiz"
+          },
+          {
+            title: "সকল প্রশ্ন ক্যাটাগরি",
+            url: "/all-mcq"
+          }
+        ]
+      },
+      {
+        type: "links",
+        title: "নতুন লিংক কলাম",
+        links: [
+          {
+            title: "Test",
+            url: "#"
+          },
+          {
+            title: "Test",
+            url: "#"
+          },
+          {
+            title: "Test",
+            url: "#"
+          },
+          {
+            title: "Test",
+            url: "#"
+          }
+        ]
+      },
+      {
+        type: "links",
+        title: "নতুন কলাম 660",
+        links: [
+          {
+            title: "Test",
+            url: "#"
+          },
+          {
+            title: "Test",
+            url: "#"
+          },
+          {
+            title: "Test56",
+            url: "#"
+          }
+        ]
+      },
+      {
+        type: "icon_links",
+        title: "যোগাযোগ ও সাপোর্ট",
+        links: [
+          {
+            icon: "fa-solid fa-phone",
+            title: "ফোন: ০১৭০০-০০০০০০",
+            url: "tel:01700000000"
+          },
+          {
+            icon: "fa-solid fa-envelope",
+            title: "ইমেইল: support@topmcqbd.com",
+            url: "mailto:support@topmcqbd.com"
+          },
+          {
+            icon: "fa-brands fa-whatsapp",
+            title: "হোয়াটসঅ্যাপ হেল্পলাইন",
+            url: "https://wa.me/8801700000000"
+          },
+          {
+            icon: "fa-solid fa-location-dot",
+            title: "ঢাকা, বাংলাদেশ",
+            url: "#"
+          }
         ]
       }
     ]
@@ -54,9 +258,14 @@ const DEFAULT_LAYOUT = {
   copyright: {
     text: "© 2026 TopMCQBD. সর্বস্বত্ব সংরক্ষিত।",
     links: [
-      { title: "FAQ", url: "/faq" },
-      { title: "Privacy & Refund Policy", url: "/privacy-and-refund-policy" },
-      { title: "System Status", url: "/status.html" }
+      {
+        title: "FAQ",
+        url: "/faq"
+      },
+      {
+        title: "Privacy & Refund Policy",
+        url: "/privacy-and-refund-policy"
+      }
     ]
   }
 };

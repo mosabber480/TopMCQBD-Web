@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import User from '@/models/User';
 import { connectDB } from '@/lib/db';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'topmcqbd_super_secret_jwt_key_2026';
+const JWT_SECRET = process.env.JWT_SECRET || (process.env.NODE_ENV === 'production' ? '' : 'dev_jwt_fallback_secret_key');
 
 export const VALID_PLANS = ['1_month', '3_months', '6_months', '1_year', '2_years', '3_years'];
 

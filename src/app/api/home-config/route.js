@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 const getCloudflareBaseUrl = () => {
-  return (process.env.NEXT_PUBLIC_APP_URL || 'https://topmcqbd.pages.dev').replace(/\/$/, '');
+  return (process.env.CLOUDFLARE_D1_API_URL || 'https://topmcqbd.pages.dev').replace(/\/$/, '');
 };
 
 const getJsonPath = () => path.resolve(process.cwd(), 'src', 'data', 'home-config.json');
@@ -32,7 +32,7 @@ export async function GET() {
     const cloudflareUrl = getCloudflareBaseUrl();
     const res = await fetch(`${cloudflareUrl}/api/home-config`, {
       cache: 'no-store',
-      headers: { 'User-Agent': 'TopMCQBD-Render-Sync' }
+      headers: { 'User-Agent': 'TopMCQBD-D1-Sync' }
     });
     if (res.ok) {
       const liveData = await res.json();
@@ -79,27 +79,6 @@ export async function POST(request) {
       const filePath = getJsonPath();
       fs.writeFileSync(filePath, JSON.stringify(newConfig, null, 2), 'utf8');
     } catch (e) {}
-
-    // 3. MongoDB sync if available
-    try {
-      const { connectDB } = await import('@/lib/db');
-      const HomeConfig = (await import('@/models/HomeConfig')).default;
-      await connectDB();
-      let dbConfig = await HomeConfig.findOne();
-      if (dbConfig) {
-        dbConfig.seoTitle = newConfig.seoTitle || '';
-        dbConfig.seoDescription = newConfig.seoDescription || '';
-        dbConfig.sliders = newConfig.sliders || [];
-        dbConfig.demoQuizzes = newConfig.demoQuizzes || [];
-        dbConfig.packages = newConfig.packages || [];
-        dbConfig.demoSectionInfo = newConfig.demoSectionInfo || { title: '', subtitle: '' };
-        dbConfig.packageSectionInfo = newConfig.packageSectionInfo || { title: '', subtitle: '' };
-        dbConfig.missionSectionInfo = newConfig.missionSectionInfo || null;
-        await dbConfig.save();
-      } else {
-        await HomeConfig.create(newConfig);
-      }
-    } catch (dbErr) {}
 
     return NextResponse.json({
       success: true,

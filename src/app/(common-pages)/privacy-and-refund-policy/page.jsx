@@ -8,7 +8,7 @@ export default function PrivacyPolicyPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetch('/api/policy/get')
+    fetch('/api/policy')
       .then(res => res.json())
       .then(data => {
         if (data?.content) {

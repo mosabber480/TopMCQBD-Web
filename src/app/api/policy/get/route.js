@@ -16,7 +16,7 @@ export async function GET() {
     const cloudflareUrl = getCloudflareBaseUrl();
     const res = await fetch(`${cloudflareUrl}/api/policy`, {
       cache: 'no-store',
-      headers: { 'User-Agent': 'TopMCQBD-Render-Sync' }
+      headers: { 'User-Agent': 'TopMCQBD-D1-Sync' }
     });
     if (res.ok) {
       const liveData = await res.json();

@@ -147,6 +147,11 @@ export default function AdminMenuDashboardPage() {
       if (res.ok && data.success) {
         showTopAlert('✅ সাইডবার ও হেডার কনফিগারেশন সফলভাবে সংরক্ষিত হয়েছে!', 'success');
         setIsReordered(false);
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('sidebar-config-updated', {
+            detail: { menus: formattedMenus, headerButtons: btnsToSave }
+          }));
+        }
         return true;
       } else {
         showTopAlert('❌ ' + (data.message || 'সংরক্ষণ ব্যর্থ হয়েছে'), 'danger');

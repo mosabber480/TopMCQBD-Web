@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 const getCloudflareBaseUrl = () => {
-  return (process.env.NEXT_PUBLIC_APP_URL || 'https://topmcqbd.pages.dev').replace(/\/$/, '');
+  return (process.env.CLOUDFLARE_D1_API_URL || 'https://topmcqbd.pages.dev').replace(/\/$/, '');
 };
 
 const getJsonPath = () => path.resolve(process.cwd(), 'src', 'data', 'sidebar-config.json');
@@ -30,9 +30,9 @@ export async function GET() {
   // 1. Try reading live D1 config from Cloudflare Edge
   try {
     const cloudflareUrl = getCloudflareBaseUrl();
-    const res = await fetch(`${cloudflareUrl}/api/sidebar-config`, {
+    const res = await fetch(`${cloudflareUrl}/api/sidebar-config?_t=${Date.now()}`, {
       cache: 'no-store',
-      headers: { 'User-Agent': 'TopMCQBD-Render-Sync' }
+      headers: { 'User-Agent': 'TopMCQBD-D1-Sync' }
     });
     if (res.ok) {
       const liveData = await res.json();
@@ -43,8 +43,8 @@ export async function GET() {
   } catch (err) {}
 
   // 2. Fallback to local config
-  const config = getLocalSidebarConfig();
-  return NextResponse.json(config);
+  const localConfig = getLocalSidebarConfig();
+  return NextResponse.json(localConfig);
 }
 
 export async function POST(request) {
@@ -81,21 +81,6 @@ export async function POST(request) {
       const filePath = getJsonPath();
       fs.writeFileSync(filePath, JSON.stringify(newConfig, null, 2), 'utf8');
     } catch (e) {}
-
-    // 3. MongoDB sync if available
-    try {
-      const { connectDB } = await import('@/lib/db');
-      const AdminSidebarConfig = (await import('@/models/AdminSidebarConfig')).default;
-      await connectDB();
-      let dbConfig = await AdminSidebarConfig.findOne();
-      if (dbConfig) {
-        if (menus !== undefined) dbConfig.menus = menus;
-        if (headerButtons !== undefined) dbConfig.headerButtons = headerButtons;
-        await dbConfig.save();
-      } else {
-        await AdminSidebarConfig.create(newConfig);
-      }
-    } catch (dbErr) {}
 
     return NextResponse.json({
       success: true,
