@@ -1,14 +1,17 @@
 # Next.js Project Architecture & Master Developer Guide Rules
 
-> **PERMANENT MEMORY DIRECTIVE: ALL ROOT `.TXT` FILES ARE OFFICIAL MASTER GUIDES**
-> All `.txt` files in the root directory of the project (`c:\Users\Mosabber\Downloads\Mosabber\TopMCQBD-Web\*.txt` and `*.local.txt`) are official master project guide files.
-> Antigravity AI must automatically recognize, read, prioritize, and strictly adhere to the project guides in:
-> 1. [`cloudflare-pages-workers-api-full-guide.txt`](file:///c:/Users/Mosabber/Downloads/Mosabber/TopMCQBD-Web/cloudflare-pages-workers-api-full-guide.txt) — Cloudflare Pages Functions, Workers API, D1 SQL, and Edge MongoDB Architecture.
-> 2. [`project-guide.local.txt`](file:///c:/Users/Mosabber/Downloads/Mosabber/TopMCQBD-Web/project-guide.local.txt) — Master project overview, microservice matrix, collection definitions, credentials, and API mappings.
-> 3. [`mongodb-render-cloudflare-full-guide.local.txt`](file:///c:/Users/Mosabber/Downloads/Mosabber/TopMCQBD-Web/mongodb-render-cloudflare-full-guide.local.txt) — MongoDB Atlas 6x Clusters, 6x Render Microservices, UptimeRobot Keep-Alive, and connection strings.
-> 4. Any other current or future `*.txt` and `*.local.txt` guide files in the project root.
->
-> Antigravity AI must consult these guide files as the single source of truth for all architectural, coding, database, and deployment tasks.
+> **PERMANENT MEMORY DIRECTIVE: ALL MASTER GUIDES IN ROOT & DATED FOLDERS (`project-guides-*/`)**
+> All `.txt`, `.md`, and `.local.txt` files in `project-guides-2026-09-18/` (or any latest dated `project-guides*/` folder) and in the root directory are official master project guides.
+> 
+> **OFFICE & HOME WORKSTATION AUTO-SYNC DIRECTIVE:**
+> The user works from two workstations (Office PC and Home PC). Whenever the user provides or updates any guide file in the project from either office or home:
+> 1. Antigravity AI must automatically recognize, read, and immediately integrate all updates into memory and master guides.
+> 2. The user will NOT have to explain the architecture or rules repeatedly.
+> 3. Antigravity AI must strictly adhere to the single source of truth in:
+>    - [`project-guides-2026-09-18/cloudflare-pages-workers-api-full-guide.txt`](file:///c:/Users/Mosabber/Downloads/Mosabber/TopMCQBD-Web/project-guides-2026-09-18/cloudflare-pages-workers-api-full-guide.txt)
+>    - [`project-guides-2026-09-18/project-guide.local.txt`](file:///c:/Users/Mosabber/Downloads/Mosabber/TopMCQBD-Web/project-guides-2026-09-18/project-guide.local.txt)
+>    - [`project-guides-2026-09-18/mongodb-render-cloudflare-full-guide.local.txt`](file:///c:/Users/Mosabber/Downloads/Mosabber/TopMCQBD-Web/project-guides-2026-09-18/mongodb-render-cloudflare-full-guide.local.txt)
+>    - [`project-guides-2026-09-18/README.md`](file:///c:/Users/Mosabber/Downloads/Mosabber/TopMCQBD-Web/project-guides-2026-09-18/README.md)
 
 ### Project Context & Core Rules:
 1. **Architecture & Scope**:
@@ -39,3 +42,14 @@
      * `db-pages-api` ও `dbd1-api` -> Cloudflare Pages Functions Live API (`https://topmcqbd.pages.dev/api/...`).
      * `db-workers-api` -> Cloudflare Workers Backup Live API (`https://topmcqbd-backup-api.mosabber5266.workers.dev/api/...`).
      * Render টেস্ট পেজসমূহ -> ডেডিকেটেড Render Live Microservices (`https://*.onrender.com/api/...`).
+
+7. **Cloudflare Dual-Account Architecture & Manual Deployment Control (USER ONLY)**:
+   - **Cloudflare Account 1 (Pages Main Production)**: `https://topmcqbd.pages.dev`
+     * সংশ্লিষ্ট জিমেইল: `mosabber480` (Gmail Account 1)
+     * কমান্ড: `npm run pages:deploy`
+   - **Cloudflare Account 2 (Worker Backup Gateway)**: `https://topmcqbd-backup-api.mosabber5266.workers.dev`
+     * সংশ্লিষ্ট জিমেইল: `mosabber5266` (Gmail Account 2 — সম্পূর্ণ পৃথক ক্লাউডফ্লেয়ার একাউন্ট)
+     * কমান্ড: `npm run worker:deploy`
+   - **কঠোর নিয়ম (Manual Wrangler Auth Control)**:
+     * দুটি আলাদা একাউন্টে কাজ বা ডিপ্লয় করার সময় একাউন্ট পরিবর্তন করার জন্য `npx wrangler logout` এবং `npx wrangler login` কমান্ড দুটি শুধুমাত্র ইউজার নিজে (ম্যানুয়ালি সিএমডি থেকে) কন্ট্রোল করবেন; Gemini বা AI কখনো স্বয়ংক্রিয়ভাবে লগআউট/লগইন করার চেষ্টা করবে না।
+     * AI ইউজারের নির্দেশনা অনুযায়ী শুধুমাত্র ডিপ্লয় কমান্ডটি চালাবে, কিন্তু ক্রেডেনশিয়াল/টোকেন স্যুইচিংয়ের নিয়ন্ত্রণ একান্তই ইউজারের নিজস্ব দায়িত্বে থাকবে।
