@@ -32,7 +32,8 @@ _worker.bundle
 # Custom Local Guides & Reference Folders
 project-guides*/
 project-guides-update-date/
-project-guides-2026-09-18/
+project-guides-update-date/*
+project-guides*
 *.zip
 next.js project guide.txt
 project-guide.local.txt
@@ -40,6 +41,7 @@ project-guide.local.txt
 *.local.html
 *.local.*
 *guide*.txt
+*guide*
 cloudflare-pages-mongodb-work.txt
 *.guide
 Old-Project/

@@ -17,37 +17,25 @@ export default function AppLayoutWrapper({ children, initialLayoutData }) {
       return;
     }
 
-    // 1. Check if localStorage has cached data
+    // Clean up any legacy localStorage cached layout data
     try {
-      const cached = localStorage.getItem('layout_config_data');
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (parsed && (parsed.header || parsed.footer)) {
-          setLayoutData(parsed);
-        }
-      }
+      localStorage.removeItem('layout_config_data');
     } catch (e) {}
 
-    // 2. Fetch fresh live D1 config once on mount
+    // Fetch fresh live D1/Cloudflare CDN config on mount
     fetch('/api/layout-config')
       .then(res => res.json())
       .then(data => {
         if (data && (data.header || data.footer)) {
           setLayoutData(data);
-          try {
-            localStorage.setItem('layout_config_data', JSON.stringify(data));
-          } catch (e) {}
         }
       })
       .catch(() => {});
 
-    // 3. Listen for real-time updates from admin dashboards
+    // Listen for real-time in-memory updates from admin dashboards
     const handleUpdate = (e) => {
       if (e && e.detail) {
         setLayoutData(e.detail);
-        try {
-          localStorage.setItem('layout_config_data', JSON.stringify(e.detail));
-        } catch (err) {}
       }
     };
 

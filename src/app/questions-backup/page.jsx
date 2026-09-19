@@ -887,6 +887,7 @@ function QuestionsComponentInternal() {
   const correctPercent = (correctCount / totalDisplay) * 100;
   const incorrectPercent = (incorrectCount / totalDisplay) * 100;
   const unansweredPercent = (unansweredCount / totalDisplay) * 100;
+  const isAllAnswered = displayQuestions.length > 0 && (Object.keys(answeredQuestions).length >= displayQuestions.length || popup.isCompletion);
 
   const handleProgressBarMouseMove = (e, type) => {
     let text = '';
@@ -1016,8 +1017,21 @@ function QuestionsComponentInternal() {
         </div>
       )}
 
-      {/* Floating Status Bar (Visible only when paid plan is active) */}
-      {planStatus.isPaid && (
+      {/* Floating Questions Progress Box at Bottom-Left Corner (মোট প্রশ্ন | সম্পন্ন | বাকি) */}
+      {displayQuestions.length > 0 && Object.keys(answeredQuestions).length > 0 && !isReadMode && !isAllAnswered && (
+        <div className="quiz-floating-progress-left">
+          <div className="quiz-progress-pill-badge" title="মোট প্রশ্ন, সম্পন্ন ও বাকি প্রশ্নের লাইভ হিসাব">
+            <span>মোট প্রশ্ন: {toBengaliNumber(displayQuestions.length)}</span>
+            <span className="quiz-pill-divider">|</span>
+            <span>সম্পন্ন: {toBengaliNumber(Object.keys(answeredQuestions).length)}</span>
+            <span className="quiz-pill-divider">|</span>
+            <span>বাকি: {toBengaliNumber(Math.max(0, displayQuestions.length - Object.keys(answeredQuestions).length))}</span>
+          </div>
+        </div>
+      )}
+
+      {/* Floating Status Bar (Timer & Score at Top-Right) */}
+      {displayQuestions.length > 0 && !isReadMode && ((showTime && !isReadMode) || (showScore && !isReadMode)) && (
         <div
           className="quiz-floating-status-bar"
           style={headerOffset !== null ? { top: `${headerOffset}px` } : undefined}
@@ -1035,6 +1049,7 @@ function QuestionsComponentInternal() {
           )}
         </div>
       )}
+
 
       {/* Corner Toast Popup */}
       {popup.visible && (

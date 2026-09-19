@@ -213,8 +213,7 @@ export default function AdminHeaderDashboardPage() {
         setConfig(payload);
         setIsMenuReordered(false);
         try {
-          const prev = JSON.parse(localStorage.getItem('layout_config_data') || '{}');
-          localStorage.setItem('layout_config_data', JSON.stringify({ ...prev, ...payload }));
+          localStorage.removeItem('layout_config_data');
         } catch (e) {}
         if (typeof window !== 'undefined') {
           window.dispatchEvent(new CustomEvent('layout-updated', { detail: payload }));

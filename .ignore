@@ -40,4 +40,11 @@ Thumbs.db
 # Reference project folders (Local reference only - Never push to GitHub or Cloudflare)
 kaj-koresilo-next-cloud-pages-mongodb-project/
 kaj-koresilo-next-cloud-pages-and-workers-mongodb-project/
-kaj-koresilo*
+kaj-koresilo*
+project-guides*/
+project-guides-update-date/
+project-guides-update-date/*
+*.local.html
+*.local.txt
+*guide*
+
