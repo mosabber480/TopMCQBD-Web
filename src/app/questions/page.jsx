@@ -132,9 +132,55 @@ function QuestionsComponentInternal() {
   const [showExplanation, setShowExplanation] = useState(true); // Default ON
   const [showTime, setShowTime] = useState(false); // Default OFF
   const [showScore, setShowScore] = useState(true); // Default ON
-  const [optionLayout, setOptionLayout] = useState('2q-col'); // Default: '2q-col' (১ লাইনে ২টি প্রশ্ন - উপর-নিচ ক্রম)
+  // Layout states: Question Layout ('2q-col' | '2q-row' | '3q-col' | '1q') & Option Layout ('1' | '2' | '4')
+  const [questionLayout, setQuestionLayout] = useState('2q-col'); // Default: '2q-col' (১ লাইনে ২টি প্রশ্ন - উপর-নিচ ক্রম)
+  const [optionLayout, setOptionLayout] = useState('1'); // Default: '1' (১ লাইনে ১টি option)
+  const [layoutSubAccordion, setLayoutSubAccordion] = useState({ style: true, question: true, option: false, middleLine: false });
+  // Middle Line state: 'dotted' (default) | 'solid' | 'none-no-gap' | 'gap-30'
+  const [middleLine, setMiddleLine] = useState('dotted');
   const [showGlobalSettingsMenu, setShowGlobalSettingsMenu] = useState(false);
+  const [showFourOptionConditionHint, setShowFourOptionConditionHint] = useState(false);
+  const [resetSettingsSuccess, setResetSettingsSuccess] = useState(false);
   const globalSettingsRef = useRef(null);
+  const conditionHintRef = useRef(null);
+
+  const toggleLayoutSubAccordion = (sec) => {
+    setLayoutSubAccordion((prev) => ({
+      ...prev,
+      [sec]: !prev[sec]
+    }));
+  };
+
+  const handleSelectQuestionLayout = (layout) => {
+    setQuestionLayout(layout);
+    if (layout === '1q') {
+      setShowFourOptionConditionHint(false);
+    }
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('topmcqbd_question_layout', layout);
+    }
+    // ১ লাইনে ৪টি option: প্রশ্ন Layout >> ১ লাইনে ১টি প্রশ্ন option choose korle sudhu dekhabe ba enable hobe
+    if (layout !== '1q' && optionLayout === '4') {
+      setOptionLayout('1');
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('topmcqbd_option_layout', '1');
+      }
+    }
+  };
+
+  const handleSelectOptionLayout = (layout) => {
+    setOptionLayout(layout);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('topmcqbd_option_layout', layout);
+    }
+  };
+
+  const handleSelectMiddleLine = (line) => {
+    setMiddleLine(line);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('topmcqbd_middle_line', line);
+    }
+  };
 
   // Question Design Style: 'dotted' (default) | 'box'
   const [questionStyle, setQuestionStyle] = useState('dotted');
@@ -152,6 +198,62 @@ function QuestionsComponentInternal() {
     setQuestionStyle(style);
     if (typeof window !== 'undefined') {
       localStorage.setItem('topmcqbd_question_style', style);
+    }
+  };
+
+  // Color Answer Style: 1. Highlight Mode (Scope) & 2. Highlight Color (Style)
+  // highlightMode: 'single' (শুধু নির্বাচিত অপশন হাইলাইট) | 'both' (সঠিক ও ভুল উভয়টি দেখান) | 'neutral' (সঠিক বা ভুল দেখাবে না)
+  const [highlightMode, setHighlightMode] = useState('single');
+  // highlightColor: 'full-bg' | 'border-only' | 'label-only' | 'highlight-and-circle' | 'with-icons' | 'bottom-line' | 'soft-highlight'
+  const [highlightColor, setHighlightColor] = useState('full-bg');
+  const [colorStyleSubAccordion, setColorStyleSubAccordion] = useState({ style: true, color: true });
+
+  const toggleColorStyleSubAccordion = (sec) => {
+    setColorStyleSubAccordion((prev) => ({
+      ...prev,
+      [sec]: !prev[sec]
+    }));
+  };
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedMode = localStorage.getItem('topmcqbd_highlight_mode');
+      if (savedMode === 'single' || savedMode === 'both' || savedMode === 'neutral') {
+        setHighlightMode(savedMode);
+      } else {
+        const legacyStyle = localStorage.getItem('topmcqbd_color_answer_style');
+        if (legacyStyle === 'both-correct-wrong') {
+          setHighlightMode('both');
+        } else {
+          setHighlightMode('single');
+        }
+      }
+
+      const savedColor = localStorage.getItem('topmcqbd_highlight_color');
+      if (['full-bg', 'border-only', 'label-only', 'highlight-and-circle', 'with-icons', 'bottom-line', 'soft-highlight'].includes(savedColor)) {
+        setHighlightColor(savedColor);
+      } else {
+        const legacyStyle = localStorage.getItem('topmcqbd_color_answer_style');
+        if (['border-only', 'label-only', 'highlight-and-circle', 'with-icons', 'bottom-line', 'soft-highlight'].includes(legacyStyle)) {
+          setHighlightColor(legacyStyle);
+        } else {
+          setHighlightColor('full-bg');
+        }
+      }
+    }
+  }, []);
+
+  const handleSelectHighlightMode = (mode) => {
+    setHighlightMode(mode);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('topmcqbd_highlight_mode', mode);
+    }
+  };
+
+  const handleSelectHighlightColor = (color) => {
+    setHighlightColor(color);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('topmcqbd_highlight_color', color);
     }
   };
 
@@ -212,7 +314,7 @@ function QuestionsComponentInternal() {
     }));
   };
 
-  const [globalAccordion, setGlobalAccordion] = useState({ layout: false, questionStyle: false, explanation: false, cutMark: false, font: false, switches: false });
+  const [globalAccordion, setGlobalAccordion] = useState({ layout: false, questionStyle: false, colorAnswerStyle: false, explanation: false, cutMark: false, font: false, switches: false });
   const hasAnyOpenAccordion = Object.values(globalAccordion).some(Boolean);
 
   const toggleGlobalAccordion = (sec) => {
@@ -514,6 +616,29 @@ function QuestionsComponentInternal() {
       if (savedAskAi === 'true') {
         setShowAskAi(true);
       }
+
+      // Load saved Question Layout & Option Layout preferences
+      const savedQLayout = localStorage.getItem('topmcqbd_question_layout');
+      if (savedQLayout && ['2q-col', '2q-row', '3q-col', '3q-row', '1q'].includes(savedQLayout)) {
+        setQuestionLayout(savedQLayout);
+      } else {
+        const legacyLayout = localStorage.getItem('topmcqbd_option_layout');
+        if (legacyLayout === '2q-col' || legacyLayout === '2q-row') {
+          setQuestionLayout(legacyLayout);
+        } else if (legacyLayout === '4' || legacyLayout === '2' || legacyLayout === '1') {
+          setQuestionLayout('1q');
+        }
+      }
+
+      const savedOptLayout = localStorage.getItem('topmcqbd_option_layout');
+      if (savedOptLayout && ['1', '2', '4'].includes(savedOptLayout)) {
+        setOptionLayout(savedOptLayout);
+      }
+
+      const savedMiddleLine = localStorage.getItem('topmcqbd_middle_line');
+      if (savedMiddleLine && ['dotted', 'solid', 'none-no-gap', 'gap-space', 'gap-30'].includes(savedMiddleLine)) {
+        setMiddleLine(savedMiddleLine === 'gap-30' ? 'gap-space' : savedMiddleLine);
+      }
     } catch (e) {
       console.warn('Error reading preferences from localStorage:', e);
     }
@@ -530,6 +655,9 @@ function QuestionsComponentInternal() {
       }
       if (rangeDropdownRef.current && !rangeDropdownRef.current.contains(event.target)) {
         setShowRangeMenu(false);
+      }
+      if (conditionHintRef.current && !conditionHintRef.current.contains(event.target)) {
+        setShowFourOptionConditionHint(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -724,6 +852,82 @@ function QuestionsComponentInternal() {
     try {
       localStorage.setItem('topmcqbd_font_weight', weight);
     } catch (e) {}
+  };
+
+  const handleResetGlobalSettings = () => {
+    // 1. Layout defaults:
+    setQuestionLayout('2q-col');
+    setOptionLayout('1');
+    setMiddleLine('dotted');
+    setLayoutSubAccordion({ style: true, question: true, option: false, middleLine: false });
+    setShowFourOptionConditionHint(false);
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('topmcqbd_question_layout');
+      localStorage.removeItem('topmcqbd_option_layout');
+      localStorage.removeItem('topmcqbd_middle_line');
+    }
+
+    // 2. Question Style default: 'dotted'
+    setQuestionStyle('dotted');
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('topmcqbd_question_style', 'dotted');
+    }
+
+    // Color Answer Style defaults:
+    setHighlightMode('single');
+    setHighlightColor('full-bg');
+    setColorStyleSubAccordion({ style: true, color: true });
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('topmcqbd_highlight_mode', 'single');
+      localStorage.setItem('topmcqbd_highlight_color', 'full-bg');
+      localStorage.removeItem('topmcqbd_color_answer_style');
+    }
+
+    // 3. Explanation Mode default: 'on-select'
+    setExplanationMode('on-select');
+    setLastActiveExplanationMode('on-select');
+    setShowExplanation(true);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('topmcqbd_explanation_mode', 'on-select');
+    }
+
+    // 4. Cut Mark default: 0.5 (mode: '0.5')
+    setCutMark(0.5);
+    setCutMarkMode('0.5');
+    setCustomCutMarkInput('');
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(
+        'topmcqbd_cut_mark_pref',
+        JSON.stringify({
+          cutMark: 0.5,
+          cutMarkMode: '0.5',
+          customValue: ''
+        })
+      );
+    }
+    const newScore = Math.round((correctCount * 1 - incorrectCount * 0.5) * 100) / 100;
+    setScore(newScore);
+
+    // 5. Font Settings defaults: 16px, Noto Sans Bengali, Regular (400)
+    setFontSize(16);
+    setFontFamily("'Noto Sans Bengali', sans-serif");
+    setFontWeight('regular');
+    setCustomFontSizeInput('');
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('topmcqbd_font_size', '16');
+      localStorage.setItem('topmcqbd_font_family', "'Noto Sans Bengali', sans-serif");
+      localStorage.setItem('topmcqbd_font_weight', 'regular');
+    }
+
+    // 6. Switches defaults: showColor = true, showAnswer = false
+    setShowColor(true);
+    setShowAnswer(false);
+
+    // Show temporary success feedback
+    setResetSettingsSuccess(true);
+    setTimeout(() => {
+      setResetSettingsSuccess(false);
+    }, 1200);
   };
 
   const handleTimeOut = () => {
@@ -1067,29 +1271,67 @@ function QuestionsComponentInternal() {
           </div>
         )}
 
-        <div className={`quiz-options-container ${containerLayoutClass || `layout-${optionLayout}`}`}>
+        <div className={`quiz-options-container ${containerLayoutClass || `layout-${optionLayout}`} ans-style-${highlightColor}`}>
           {(q.options || []).map((opt, optIndex) => {
             let btnClass = 'quiz-option-btn';
+            let isOptionCorrect = false;
+            let isOptionIncorrect = false;
 
             if (isReadMode) {
               btnClass += ' disabled';
               if (optIndex === q.ans) {
-                btnClass += showColor ? ' correct' : ' neutral-selected';
+                if (showColor) {
+                  btnClass += ' correct';
+                  isOptionCorrect = true;
+                } else {
+                  btnClass += ' neutral-selected';
+                }
               }
             } else if (isReviewWrongMode) {
               btnClass += ' disabled';
               if (optIndex === q.ans) {
-                btnClass += showColor ? ' correct' : ' neutral-selected';
+                if (showColor) {
+                  btnClass += ' correct';
+                  isOptionCorrect = true;
+                } else {
+                  btnClass += ' neutral-selected';
+                }
               } else if (chosen === optIndex) {
-                btnClass += showColor ? ' incorrect' : ' neutral-selected';
+                if (showColor) {
+                  btnClass += ' incorrect';
+                  isOptionIncorrect = true;
+                } else {
+                  btnClass += ' neutral-selected';
+                }
               }
             } else if (isAnswered) {
               btnClass += ' disabled';
               if (showColor) {
-                if (optIndex === q.ans) {
-                  btnClass += ' correct';
-                } else if (chosen === optIndex) {
-                  btnClass += ' incorrect';
+                if (highlightMode === 'single') {
+                  // শুধু নির্বাচিত অপশন হাইলাইট : শুধুমাত্র নির্বাচিত অপশনে ফলাফল প্রদর্শিত হবে
+                  if (chosen === optIndex) {
+                    if (chosen === q.ans) {
+                      btnClass += ' correct';
+                      isOptionCorrect = true;
+                    } else {
+                      btnClass += ' incorrect';
+                      isOptionIncorrect = true;
+                    }
+                  }
+                } else if (highlightMode === 'both') {
+                  // সঠিক ও ভুল উভয়টি দেখান : ভুল অপশনটি লাল এবং সঠিক অপশনটি সবুজ রঙে উভয় ফলাফল একসাথে দেখানো হবে
+                  if (optIndex === q.ans) {
+                    btnClass += ' correct';
+                    isOptionCorrect = true;
+                  } else if (chosen === optIndex) {
+                    btnClass += ' incorrect';
+                    isOptionIncorrect = true;
+                  }
+                } else if (highlightMode === 'neutral') {
+                  // সঠিক বা ভুল দেখাবে না (শুধু সিলেকশন) : সবুজ বা লাল দেখাবে না, শুধুমাত্র নির্বাচিত অপশনটি সিলেক্টেড থাকবে
+                  if (chosen === optIndex) {
+                    btnClass += ' neutral-selected';
+                  }
                 }
               } else {
                 if (chosen === optIndex) {
@@ -1111,6 +1353,12 @@ function QuestionsComponentInternal() {
                 <div className="quiz-option-text">
                   {opt}
                 </div>
+                {(highlightColor === 'with-icons' || highlightColor === 'highlight-and-circle') && showColor && (isOptionCorrect || isOptionIncorrect) && (
+                  <span className="quiz-option-status-icon">
+                    {isOptionCorrect && <i className="fa-solid fa-circle-check text-success"></i>}
+                    {isOptionIncorrect && <i className="fa-solid fa-circle-xmark text-danger"></i>}
+                  </span>
+                )}
               </button>
             );
           })}
@@ -1560,29 +1808,42 @@ function QuestionsComponentInternal() {
               {showGlobalSettingsMenu && (
                 <div
                   className={`quiz-layout-popup-menu quiz-global-settings-popup ${hasAnyOpenAccordion ? 'has-active-accordion' : ''}`}
-                  style={{ maxHeight: globalSettingsMaxHeight }}
+                  style={{ maxHeight: globalSettingsMaxHeight, padding: '0px' }}
                 >
                   <div className="quiz-global-popup-header">
                     <div className="quiz-global-popup-title">
                       <i className="fa-solid fa-gear" style={{ color: '#007bff' }}></i>
                       <span>প্রশ্ন সেটিংস</span>
                     </div>
-                    <button
-                      type="button"
-                      className="quiz-popup-close-mini"
-                      onClick={() => setShowGlobalSettingsMenu(false)}
-                      title="বন্ধ করুন"
-                    >
-                      <i className="fa-solid fa-xmark"></i>
-                    </button>
+                    <div className="quiz-global-popup-header-actions">
+                      <button
+                        type="button"
+                        className={`quiz-popup-reset-btn ${resetSettingsSuccess ? 'reset-success' : ''}`}
+                        onClick={handleResetGlobalSettings}
+                        title="ডিফল্ট সেটিংসে রিসেট করুন"
+                      >
+                        <i className={`fa-solid ${resetSettingsSuccess ? 'fa-check' : 'fa-rotate-left'}`}></i>
+                        <span>{resetSettingsSuccess ? 'রিসেট সম্পন্ন' : 'রিসেট'}</span>
+                      </button>
+                      <button
+                        type="button"
+                        className="quiz-popup-close-mini"
+                        onClick={() => setShowGlobalSettingsMenu(false)}
+                        title="বন্ধ করুন"
+                      >
+                        <i className="fa-solid fa-xmark"></i>
+                      </button>
+                    </div>
                   </div>
 
-                  {/* Section 1: Option Layout */}
+                  <div className="quiz-global-popup-body" style={{ padding: '13px' }}>
+                    {/* Section 1: Option Layout */}
+                  {/* Section 1: Layout */}
                   <div className={`quiz-global-section layout-section ${globalAccordion.layout ? 'active' : ''}`}>
                     <div
                       className="quiz-global-section-header"
                       onClick={() => toggleGlobalAccordion('layout')}
-                      title="অপশন লেআউট সেটিংস"
+                      title="লেআউট সেটিংস"
                     >
                       <div className="quiz-global-section-header-left">
                         <i className="fa-solid fa-table-cells-large" style={{ color: '#007bff' }}></i>
@@ -1590,17 +1851,7 @@ function QuestionsComponentInternal() {
                       </div>
                       <div className="quiz-global-section-header-right">
                         <span className="quiz-font-accordion-badge">
-                          <span className="quiz-font-accordion-badge-text">
-                            {optionLayout === '2q-col'
-                              ? '২টি প্রশ্ন (উপর-নিচ)'
-                              : optionLayout === '2q-row'
-                              ? '২টি প্রশ্ন (পাশাপাশি)'
-                              : optionLayout === '4'
-                              ? '১ লাইনে ৪টি'
-                              : optionLayout === '2'
-                              ? '১ লাইনে ২টি'
-                              : '১ লাইনে ১টি'}
-                          </span>
+                          <span className="quiz-font-accordion-badge-text">৪টি অপশন</span>
                         </span>
                         <i className={`fa-solid fa-${globalAccordion.layout ? 'minus' : 'plus'} quiz-font-accordion-plus-minus`}></i>
                       </div>
@@ -1608,130 +1859,628 @@ function QuestionsComponentInternal() {
 
                     {globalAccordion.layout && (
                       <div className="quiz-global-section-body">
-                        <button
-                          type="button"
-                          className={`quiz-layout-menu-item ${optionLayout === '2q-col' ? 'active' : ''}`}
-                          onClick={() => setOptionLayout('2q-col')}
-                        >
-                          <div className="quiz-layout-radio-circle">
-                            {optionLayout === '2q-col' && <div className="quiz-layout-radio-inner"></div>}
+                        {/* Sub-Accordion 1: ডিজাইন স্টাইল (Question Style) */}
+                        <div className={`quiz-font-sub-group ${layoutSubAccordion.style ? 'active' : ''}`}>
+                          <div
+                            className={`quiz-font-accordion-header quiz-font-sub-header ${layoutSubAccordion.style ? 'active' : ''}`}
+                            onClick={() => toggleLayoutSubAccordion('style')}
+                          >
+                            <div className="quiz-font-accordion-header-left">
+                              <i className="fa-solid fa-shapes" style={{ color: '#0284c7', fontSize: '12px' }}></i>
+                              <span style={{ fontSize: '12.5px', fontWeight: 600 }}>ডিজাইন স্টাইল (Question Style):</span>
+                            </div>
+                            <div className="quiz-font-accordion-header-right">
+                              <span className="quiz-font-accordion-badge" style={{ fontSize: '11px' }}>
+                                <span className="quiz-font-accordion-badge-text">
+                                  {questionStyle === 'box'
+                                    ? 'বক্স কার্ড'
+                                    : questionStyle === 'circle'
+                                    ? 'সার্কেল অপশন'
+                                    : questionStyle === 'nostyle'
+                                    ? 'নো স্টাইল'
+                                    : 'বর্ডার লাইন'}
+                                </span>
+                              </span>
+                              <i className={`fa-solid fa-chevron-${layoutSubAccordion.style ? 'up' : 'down'} quiz-font-accordion-chevron`}></i>
+                            </div>
                           </div>
-                          <span>১ লাইনে ২টি প্রশ্ন (উপর-নিচ ক্রম)</span>
-                        </button>
 
-                        <button
-                          type="button"
-                          className={`quiz-layout-menu-item ${optionLayout === '2q-row' ? 'active' : ''}`}
-                          onClick={() => setOptionLayout('2q-row')}
-                        >
-                          <div className="quiz-layout-radio-circle">
-                            {optionLayout === '2q-row' && <div className="quiz-layout-radio-inner"></div>}
-                          </div>
-                          <span>১ লাইনে ২টি প্রশ্ন (পাশাপাশি ক্রম)</span>
-                        </button>
+                          {layoutSubAccordion.style && (
+                            <div className="quiz-global-sub-card">
+                              <button
+                                type="button"
+                                className={`quiz-layout-menu-item ${questionStyle === 'dotted' ? 'active' : ''}`}
+                                onClick={() => handleSelectQuestionStyle('dotted')}
+                              >
+                                <div className="quiz-layout-radio-circle">
+                                  {questionStyle === 'dotted' && <div className="quiz-layout-radio-inner"></div>}
+                                </div>
+                                <span>১. বর্ডার লাইন (Border Line)</span>
+                              </button>
 
-                        <button
-                          type="button"
-                          className={`quiz-layout-menu-item ${optionLayout === '4' ? 'active' : ''}`}
-                          onClick={() => setOptionLayout('4')}
-                        >
-                          <div className="quiz-layout-radio-circle">
-                            {optionLayout === '4' && <div className="quiz-layout-radio-inner"></div>}
-                          </div>
-                          <span>১ লাইনে ৪টি অপশন</span>
-                        </button>
+                              <button
+                                type="button"
+                                className={`quiz-layout-menu-item ${questionStyle === 'box' ? 'active' : ''}`}
+                                onClick={() => handleSelectQuestionStyle('box')}
+                              >
+                                <div className="quiz-layout-radio-circle">
+                                  {questionStyle === 'box' && <div className="quiz-layout-radio-inner"></div>}
+                                </div>
+                                <span>২. বক্স কার্ড (Box Card)</span>
+                              </button>
 
-                        <button
-                          type="button"
-                          className={`quiz-layout-menu-item ${optionLayout === '2' ? 'active' : ''}`}
-                          onClick={() => setOptionLayout('2')}
-                        >
-                          <div className="quiz-layout-radio-circle">
-                            {optionLayout === '2' && <div className="quiz-layout-radio-inner"></div>}
-                          </div>
-                          <span>১ লাইনে ২টি অপশন</span>
-                        </button>
+                              <button
+                                type="button"
+                                className={`quiz-layout-menu-item ${questionStyle === 'circle' ? 'active' : ''}`}
+                                onClick={() => handleSelectQuestionStyle('circle')}
+                              >
+                                <div className="quiz-layout-radio-circle">
+                                  {questionStyle === 'circle' && <div className="quiz-layout-radio-inner"></div>}
+                                </div>
+                                <span>৩. সার্কেল অপশন লেবেল (Circle Option Label)</span>
+                              </button>
 
-                        <button
-                          type="button"
-                          className={`quiz-layout-menu-item ${optionLayout === '1' ? 'active' : ''}`}
-                          onClick={() => setOptionLayout('1')}
-                        >
-                          <div className="quiz-layout-radio-circle">
-                            {optionLayout === '1' && <div className="quiz-layout-radio-inner"></div>}
+                              <button
+                                type="button"
+                                className={`quiz-layout-menu-item ${questionStyle === 'nostyle' ? 'active' : ''}`}
+                                onClick={() => handleSelectQuestionStyle('nostyle')}
+                              >
+                                <div className="quiz-layout-radio-circle">
+                                  {questionStyle === 'nostyle' && <div className="quiz-layout-radio-inner"></div>}
+                                </div>
+                                <span>৪. নো স্টাইল (No Style)</span>
+                              </button>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Sub-Accordion 2: প্রশ্ন Layout */}
+                        <div className={`quiz-font-sub-group ${layoutSubAccordion.question ? 'active' : ''}`} style={{ marginTop: '8px' }}>
+                          <div
+                            className={`quiz-font-accordion-header quiz-font-sub-header ${layoutSubAccordion.question ? 'active' : ''}`}
+                            onClick={() => toggleLayoutSubAccordion('question')}
+                          >
+                            <div className="quiz-font-accordion-header-left">
+                              <i className="fa-solid fa-table-columns" style={{ color: '#0284c7', fontSize: '12px' }}></i>
+                              <span style={{ fontSize: '12.5px', fontWeight: 600 }}>প্রশ্ন Layout:</span>
+                            </div>
+                            <div className="quiz-font-accordion-header-right">
+                              <span className="quiz-font-accordion-badge" style={{ fontSize: '11px' }}>
+                                <span className="quiz-font-accordion-badge-text">
+                                  {questionLayout === '2q-col'
+                                    ? '২টি প্রশ্ন (উপর-নিচ)'
+                                    : questionLayout === '2q-row'
+                                    ? '২টি প্রশ্ন (পাশাপাশি)'
+                                    : questionLayout === '3q-col'
+                                    ? '৩টি প্রশ্ন (উপর-নিচ)'
+                                    : questionLayout === '3q-row'
+                                    ? '৩টি প্রশ্ন (পাশাপাশি)'
+                                    : '১টি প্রশ্ন'}
+                                </span>
+                              </span>
+                              <i className={`fa-solid fa-chevron-${layoutSubAccordion.question ? 'up' : 'down'} quiz-font-accordion-chevron`}></i>
+                            </div>
                           </div>
-                          <span>১ লাইনে ১টি অপশন</span>
-                        </button>
+
+                          {layoutSubAccordion.question && (
+                            <div className="quiz-global-sub-card">
+                              <button
+                                type="button"
+                                className={`quiz-layout-menu-item ${questionLayout === '2q-col' ? 'active' : ''}`}
+                                onClick={() => handleSelectQuestionLayout('2q-col')}
+                              >
+                                <div className="quiz-layout-radio-circle">
+                                  {questionLayout === '2q-col' && <div className="quiz-layout-radio-inner"></div>}
+                                </div>
+                                <span>১ লাইনে ২টি প্রশ্ন (উপর-নিচ ক্রম)</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                className={`quiz-layout-menu-item ${questionLayout === '2q-row' ? 'active' : ''}`}
+                                onClick={() => handleSelectQuestionLayout('2q-row')}
+                              >
+                                <div className="quiz-layout-radio-circle">
+                                  {questionLayout === '2q-row' && <div className="quiz-layout-radio-inner"></div>}
+                                </div>
+                                <span>১ লাইনে ২টি প্রশ্ন (পাশাপাশি ক্রম)</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                className={`quiz-layout-menu-item ${questionLayout === '3q-col' ? 'active' : ''}`}
+                                onClick={() => handleSelectQuestionLayout('3q-col')}
+                              >
+                                <div className="quiz-layout-radio-circle">
+                                  {questionLayout === '3q-col' && <div className="quiz-layout-radio-inner"></div>}
+                                </div>
+                                <span>১ লাইনে ৩টি প্রশ্ন (উপর-নিচ ক্রম)</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                className={`quiz-layout-menu-item ${questionLayout === '3q-row' ? 'active' : ''}`}
+                                onClick={() => handleSelectQuestionLayout('3q-row')}
+                              >
+                                <div className="quiz-layout-radio-circle">
+                                  {questionLayout === '3q-row' && <div className="quiz-layout-radio-inner"></div>}
+                                </div>
+                                <span>১ লাইনে ৩টি প্রশ্ন (পাশাপাশি ক্রম)</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                className={`quiz-layout-menu-item ${questionLayout === '1q' ? 'active' : ''}`}
+                                onClick={() => handleSelectQuestionLayout('1q')}
+                              >
+                                <div className="quiz-layout-radio-circle">
+                                  {questionLayout === '1q' && <div className="quiz-layout-radio-inner"></div>}
+                                </div>
+                                <span>১ লাইনে ১টি প্রশ্ন</span>
+                              </button>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Sub-Accordion 2: Option Layout */}
+                        <div className={`quiz-font-sub-group ${layoutSubAccordion.option ? 'active' : ''}`} style={{ marginTop: '8px' }}>
+                          <div
+                            className={`quiz-font-accordion-header quiz-font-sub-header ${layoutSubAccordion.option ? 'active' : ''}`}
+                            onClick={() => toggleLayoutSubAccordion('option')}
+                          >
+                            <div className="quiz-font-accordion-header-left">
+                              <i className="fa-solid fa-list-ol" style={{ color: '#0284c7', fontSize: '12px' }}></i>
+                              <span style={{ fontSize: '12.5px', fontWeight: 600 }}>Option Layout:</span>
+                            </div>
+                            <div className="quiz-font-accordion-header-right">
+                              <span className="quiz-font-accordion-badge" style={{ fontSize: '11px' }}>
+                                <span className="quiz-font-accordion-badge-text">
+                                  {optionLayout === '4'
+                                    ? '১ লাইনে ৪টি'
+                                    : optionLayout === '2'
+                                    ? '১ লাইনে ২টি'
+                                    : '১ লাইনে ১টি'}
+                                </span>
+                              </span>
+                              <i className={`fa-solid fa-chevron-${layoutSubAccordion.option ? 'up' : 'down'} quiz-font-accordion-chevron`}></i>
+                            </div>
+                          </div>
+
+                          {layoutSubAccordion.option && (
+                            <div className="quiz-global-sub-card">
+                              <button
+                                type="button"
+                                className={`quiz-layout-menu-item ${optionLayout === '1' ? 'active' : ''}`}
+                                onClick={() => handleSelectOptionLayout('1')}
+                              >
+                                <div className="quiz-layout-radio-circle">
+                                  {optionLayout === '1' && <div className="quiz-layout-radio-inner"></div>}
+                                </div>
+                                <span>১ লাইনে ১টি option</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                className={`quiz-layout-menu-item ${optionLayout === '2' ? 'active' : ''}`}
+                                onClick={() => handleSelectOptionLayout('2')}
+                              >
+                                <div className="quiz-layout-radio-circle">
+                                  {optionLayout === '2' && <div className="quiz-layout-radio-inner"></div>}
+                                </div>
+                                <span>১ লাইনে ২টি option</span>
+                              </button>
+
+                              {/* ১ লাইনে ৪টি option: প্রশ্ন Layout থেকে ১ লাইনে ১টি প্রশ্ন choose করলে সক্রিয় হবে */}
+                              {questionLayout === '1q' ? (
+                                <button
+                                  type="button"
+                                  className={`quiz-layout-menu-item ${optionLayout === '4' ? 'active' : ''}`}
+                                  onClick={() => handleSelectOptionLayout('4')}
+                                >
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1 }}>
+                                    <div className="quiz-layout-radio-circle">
+                                      {optionLayout === '4' && <div className="quiz-layout-radio-inner"></div>}
+                                    </div>
+                                    <span>১ লাইনে ৪টি option</span>
+                                  </div>
+                                  <span className="quiz-option-active-badge">
+                                    <i className="fa-solid fa-check" style={{ fontSize: '9.5px' }}></i>
+                                    সক্রিয়
+                                  </span>
+                                </button>
+                              ) : (
+                                <div ref={conditionHintRef} style={{ width: '100%' }}>
+                                  <div
+                                    className="quiz-layout-menu-item disabled"
+                                    style={{
+                                      opacity: 0.68,
+                                      cursor: 'not-allowed',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'space-between',
+                                      background: '#f8fafc',
+                                      border: '1px solid #e2e8f0'
+                                    }}
+                                  >
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                      <div className="quiz-layout-radio-circle"></div>
+                                      <span style={{ color: '#64748b' }}>১ লাইনে ৪টি option</span>
+                                    </div>
+                                    <button
+                                      type="button"
+                                      className="quiz-sorto-projojjo-btn"
+                                      onClick={() => setShowFourOptionConditionHint((prev) => !prev)}
+                                      title="শর্ত দেখতে ক্লিক করুন"
+                                    >
+                                      <span>শর্ত প্রযোজ্য</span>
+                                    </button>
+                                  </div>
+
+                                  {showFourOptionConditionHint && (
+                                    <div className="quiz-sorto-projojjo-hint">
+                                      <div className="quiz-sorto-projojjo-hint-text">
+                                        <span>
+                                          প্রশ্ন Layout: থেকে <strong>১ লাইনে ১টি প্রশ্ন</strong> choose করুন।
+                                        </span>
+                                      </div>
+                                      <button
+                                        type="button"
+                                        className="quiz-sorto-projojjo-hint-close"
+                                        onClick={() => setShowFourOptionConditionHint(false)}
+                                        title="বন্ধ করুন"
+                                      >
+                                        <i className="fa-solid fa-xmark"></i>
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Sub-Accordion 4: মাঝের লাইন (Middle Line) */}
+                        <div className={`quiz-font-sub-group ${layoutSubAccordion.middleLine ? 'active' : ''}`} style={{ marginTop: '8px' }}>
+                          <div
+                            className={`quiz-font-accordion-header quiz-font-sub-header ${layoutSubAccordion.middleLine ? 'active' : ''}`}
+                            onClick={() => toggleLayoutSubAccordion('middleLine')}
+                          >
+                            <div className="quiz-font-accordion-header-left">
+                              <i className="fa-solid fa-grip-lines-vertical" style={{ color: '#0284c7', fontSize: '12px' }}></i>
+                              <span style={{ fontSize: '12.5px', fontWeight: 600 }}>মাঝের লাইন (Middle Line):</span>
+                            </div>
+                            <div className="quiz-font-accordion-header-right">
+                              <span className="quiz-font-accordion-badge" style={{ fontSize: '11px' }}>
+                                <span className="quiz-font-accordion-badge-text">
+                                  {middleLine === 'dotted'
+                                    ? 'ডটেড লাইন'
+                                    : middleLine === 'solid'
+                                    ? 'সলিড লাইন'
+                                    : middleLine === 'none-no-gap'
+                                    ? 'লাইন ছাড়া'
+                                    : 'গ্যাপ স্পেস'}
+                                </span>
+                              </span>
+                              <i className={`fa-solid fa-chevron-${layoutSubAccordion.middleLine ? 'up' : 'down'} quiz-font-accordion-chevron`}></i>
+                            </div>
+                          </div>
+
+                          {layoutSubAccordion.middleLine && (
+                            <div className="quiz-global-sub-card">
+                              {/* 1. Dotted Line */}
+                              <button
+                                type="button"
+                                className={`quiz-layout-menu-item quiz-middle-line-item ${middleLine === 'dotted' ? 'active' : ''}`}
+                                onClick={() => handleSelectMiddleLine('dotted')}
+                              >
+                                <div className="quiz-layout-radio-circle">
+                                  {middleLine === 'dotted' && <div className="quiz-layout-radio-inner"></div>}
+                                </div>
+                                <div className="quiz-middle-line-content">
+                                  <span className="quiz-middle-line-title">১. ডটেড লাইন (Dotted Line)</span>
+                                  <span className="quiz-middle-line-desc">কলামগুলোর মাঝে মার্জিত ডটেড ডিভাইডার লাইন থাকবে।</span>
+                                </div>
+                              </button>
+
+                              {/* 2. Solid Line */}
+                              <button
+                                type="button"
+                                className={`quiz-layout-menu-item quiz-middle-line-item ${middleLine === 'solid' ? 'active' : ''}`}
+                                onClick={() => handleSelectMiddleLine('solid')}
+                              >
+                                <div className="quiz-layout-radio-circle">
+                                  {middleLine === 'solid' && <div className="quiz-layout-radio-inner"></div>}
+                                </div>
+                                <div className="quiz-middle-line-content">
+                                  <span className="quiz-middle-line-title">২. সলিড লাইন (Solid Line)</span>
+                                  <span className="quiz-middle-line-desc">কলামগুলোর মাঝে পরিষ্কার সলিড ডিভাইডার লাইন থাকবে।</span>
+                                </div>
+                              </button>
+
+                              {/* 3. No Line No Gap */}
+                              <button
+                                type="button"
+                                className={`quiz-layout-menu-item quiz-middle-line-item ${middleLine === 'none-no-gap' ? 'active' : ''}`}
+                                onClick={() => handleSelectMiddleLine('none-no-gap')}
+                              >
+                                <div className="quiz-layout-radio-circle">
+                                  {middleLine === 'none-no-gap' && <div className="quiz-layout-radio-inner"></div>}
+                                </div>
+                                <div className="quiz-middle-line-content">
+                                  <span className="quiz-middle-line-title">৩. লাইন ও গ্যাপ ছাড়া (No Line, No Gap)</span>
+                                  <span className="quiz-middle-line-desc">কলামগুলোর মাঝে কোনো লাইন বা অতিরিক্ত ব্যবধান থাকবে না।</span>
+                                </div>
+                              </button>
+
+                              {/* 4. Gap Space Only */}
+                              <button
+                                type="button"
+                                className={`quiz-layout-menu-item quiz-middle-line-item ${(middleLine === 'gap-space' || middleLine === 'gap-30') ? 'active' : ''}`}
+                                onClick={() => handleSelectMiddleLine('gap-space')}
+                              >
+                                <div className="quiz-layout-radio-circle">
+                                  {(middleLine === 'gap-space' || middleLine === 'gap-30') && <div className="quiz-layout-radio-inner"></div>}
+                                </div>
+                                <div className="quiz-middle-line-content">
+                                  <span className="quiz-middle-line-title">৪. শুধু গ্যাপ স্পেস (Gap Space Only)</span>
+                                  <span className="quiz-middle-line-desc">মাঝে কোনো লাইন থাকবে না, কলামগুলোর মাঝে স্বাভাবিক ফাঁকা স্থান থাকবে।</span>
+                                </div>
+                              </button>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>
 
-                  {/* Section: Question Design Style */}
-                  <div className={`quiz-global-section style-section ${globalAccordion.questionStyle ? 'active' : ''}`}>
+                  {/* Section: Color Answer Style */}
+                  <div className={`quiz-global-section color-style-section ${globalAccordion.colorAnswerStyle ? 'active' : ''}`}>
                     <div
                       className="quiz-global-section-header"
-                      onClick={() => toggleGlobalAccordion('questionStyle')}
-                      title="কোশ্চেন ডিজাইন স্টাইল সেটিংস"
+                      onClick={() => toggleGlobalAccordion('colorAnswerStyle')}
+                      title="কালার অ্যানসার স্টাইল সেটিংস"
                     >
                       <div className="quiz-global-section-header-left">
-                        <i className="fa-solid fa-shapes" style={{ color: '#0284c7' }}></i>
-                        <span>ডিজাইন স্টাইল (Question Style):</span>
+                        <i className="fa-solid fa-palette" style={{ color: '#0284c7' }}></i>
+                        <span>Color Answer Style:</span>
                       </div>
                       <div className="quiz-global-section-header-right">
                         <span className="quiz-font-accordion-badge">
                           <span className="quiz-font-accordion-badge-text">
-                            {questionStyle === 'box' ? 'বক্স কার্ড' : questionStyle === 'circle' ? 'সার্কেল অপশন' : questionStyle === 'nostyle' ? 'নো স্টাইল' : 'ডটেড লাইন'}
+                            {highlightMode === 'single' ? 'শুধু নির্বাচিত' : highlightMode === 'both' ? 'উভয়টি' : 'সিলেকশন'}
+                            {' · '}
+                            {highlightColor === 'full-bg'
+                              ? 'সলিড'
+                              : highlightColor === 'border-only'
+                              ? 'বর্ডার'
+                              : highlightColor === 'label-only'
+                              ? 'চিহ্ন'
+                              : highlightColor === 'highlight-and-circle'
+                              ? 'আইকন+চিহ্ন'
+                              : highlightColor === 'with-icons'
+                              ? 'আইকন'
+                              : highlightColor === 'bottom-line'
+                              ? 'লাইন'
+                              : 'হালকা'}
                           </span>
                         </span>
-                        <i className={`fa-solid fa-${globalAccordion.questionStyle ? 'minus' : 'plus'} quiz-font-accordion-plus-minus`}></i>
+                        <i className={`fa-solid fa-${globalAccordion.colorAnswerStyle ? 'minus' : 'plus'} quiz-font-accordion-plus-minus`}></i>
                       </div>
                     </div>
 
-                    {globalAccordion.questionStyle && (
+                    {globalAccordion.colorAnswerStyle && (
                       <div className="quiz-global-section-body">
-                        <button
-                          type="button"
-                          className={`quiz-layout-menu-item ${questionStyle === 'dotted' ? 'active' : ''}`}
-                          onClick={() => handleSelectQuestionStyle('dotted')}
-                        >
-                          <div className="quiz-layout-radio-circle">
-                            {questionStyle === 'dotted' && <div className="quiz-layout-radio-inner"></div>}
+                        {/* Sub-Accordion 1: হাইলাইট স্টাইল (১ম অপশন গ্রুপ) */}
+                        <div className={`quiz-font-sub-group ${colorStyleSubAccordion.style ? 'active' : ''}`}>
+                          <div
+                            className={`quiz-font-accordion-header quiz-font-sub-header ${colorStyleSubAccordion.style ? 'active' : ''}`}
+                            onClick={() => toggleColorStyleSubAccordion('style')}
+                          >
+                            <div className="quiz-font-accordion-header-left">
+                              <i className="fa-solid fa-highlighter" style={{ color: '#0284c7', fontSize: '12px' }}></i>
+                              <span style={{ fontSize: '12.5px', fontWeight: 600 }}>হাইলাইট স্টাইল:</span>
+                            </div>
+                            <div className="quiz-font-accordion-header-right">
+                              <span className="quiz-font-accordion-badge" style={{ fontSize: '11px' }}>
+                                <span className="quiz-font-accordion-badge-text">
+                                  {highlightMode === 'single' ? 'শুধু নির্বাচিত' : highlightMode === 'both' ? 'উভয়টি দেখান' : 'সঠিক/ভুল ছাড়া'}
+                                </span>
+                              </span>
+                              <i className={`fa-solid fa-chevron-${colorStyleSubAccordion.style ? 'up' : 'down'} quiz-font-accordion-chevron`}></i>
+                            </div>
                           </div>
-                          <span>১. ডটেড লাইন (Dotted Line)</span>
-                        </button>
 
-                        <button
-                          type="button"
-                          className={`quiz-layout-menu-item ${questionStyle === 'box' ? 'active' : ''}`}
-                          onClick={() => handleSelectQuestionStyle('box')}
-                        >
-                          <div className="quiz-layout-radio-circle">
-                            {questionStyle === 'box' && <div className="quiz-layout-radio-inner"></div>}
-                          </div>
-                          <span>২. বক্স কার্ড (Box Card)</span>
-                        </button>
+                          {colorStyleSubAccordion.style && (
+                            <div className="quiz-global-sub-card">
+                              {/* 1. শুধু নির্বাচিত অপশন হাইলাইট */}
+                              <button
+                                type="button"
+                                className={`quiz-layout-menu-item quiz-color-style-item ${highlightMode === 'single' ? 'active' : ''}`}
+                                onClick={() => handleSelectHighlightMode('single')}
+                              >
+                                <div className="quiz-layout-radio-circle">
+                                  {highlightMode === 'single' && <div className="quiz-layout-radio-inner"></div>}
+                                </div>
+                                <div className="quiz-color-style-content">
+                                  <span className="quiz-color-style-title">শুধু নির্বাচিত অপশন হাইলাইট</span>
+                                  <span className="quiz-color-style-desc">অপশনে ক্লিক করলে শুধুমাত্র নির্বাচিত অপশনের ফলাফল হাইলাইট হবে।</span>
+                                </div>
+                              </button>
 
-                        <button
-                          type="button"
-                          className={`quiz-layout-menu-item ${questionStyle === 'circle' ? 'active' : ''}`}
-                          onClick={() => handleSelectQuestionStyle('circle')}
-                        >
-                          <div className="quiz-layout-radio-circle">
-                            {questionStyle === 'circle' && <div className="quiz-layout-radio-inner"></div>}
-                          </div>
-                          <span>৩. সার্কেল অপশন লেবেল (Circle Option Label)</span>
-                        </button>
+                              {/* 2. সঠিক ও ভুল উভয়টি দেখান */}
+                              <button
+                                type="button"
+                                className={`quiz-layout-menu-item quiz-color-style-item ${highlightMode === 'both' ? 'active' : ''}`}
+                                onClick={() => handleSelectHighlightMode('both')}
+                              >
+                                <div className="quiz-layout-radio-circle">
+                                  {highlightMode === 'both' && <div className="quiz-layout-radio-inner"></div>}
+                                </div>
+                                <div className="quiz-color-style-content">
+                                  <span className="quiz-color-style-title">সঠিক ও ভুল উভয়টি দেখান</span>
+                                  <span className="quiz-color-style-desc">ভুল অপশনটি লাল এবং সঠিক অপশনটি সবুজ রঙে হাইলাইট করে উভয় ফলাফল একসাথে দেখানো হবে।</span>
+                                </div>
+                              </button>
 
-                        <button
-                          type="button"
-                          className={`quiz-layout-menu-item ${questionStyle === 'nostyle' ? 'active' : ''}`}
-                          onClick={() => handleSelectQuestionStyle('nostyle')}
-                        >
-                          <div className="quiz-layout-radio-circle">
-                            {questionStyle === 'nostyle' && <div className="quiz-layout-radio-inner"></div>}
+                              {/* 3. সঠিক বা ভুল দেখাবে না (শুধু সিলেকশন) */}
+                              <button
+                                type="button"
+                                className={`quiz-layout-menu-item quiz-color-style-item ${highlightMode === 'neutral' ? 'active' : ''}`}
+                                onClick={() => handleSelectHighlightMode('neutral')}
+                              >
+                                <div className="quiz-layout-radio-circle">
+                                  {highlightMode === 'neutral' && <div className="quiz-layout-radio-inner"></div>}
+                                </div>
+                                <div className="quiz-color-style-content">
+                                  <span className="quiz-color-style-title">সঠিক বা ভুল দেখাবে না (শুধু সিলেকশন)</span>
+                                  <span className="quiz-color-style-desc">সঠিক বা ভুল কোনো ফলাফল প্রকাশ পাবে না, শুধুমাত্র অপশনটি নির্বাচন করা হয়েছে তা প্রকাশ পাবে।</span>
+                                </div>
+                              </button>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Sub-Accordion 2: হাইলাইট কালার (২য় অপশন গ্রুপ - ৭টি কালার অপশন) */}
+                        <div className={`quiz-font-sub-group ${colorStyleSubAccordion.color ? 'active' : ''}`} style={{ marginTop: '8px' }}>
+                          <div
+                            className={`quiz-font-accordion-header quiz-font-sub-header ${colorStyleSubAccordion.color ? 'active' : ''}`}
+                            onClick={() => toggleColorStyleSubAccordion('color')}
+                          >
+                            <div className="quiz-font-accordion-header-left">
+                              <i className="fa-solid fa-palette" style={{ color: '#0284c7', fontSize: '12px' }}></i>
+                              <span style={{ fontSize: '12.5px', fontWeight: 600 }}>হাইলাইট কালার:</span>
+                            </div>
+                            <div className="quiz-font-accordion-header-right">
+                              <span className="quiz-font-accordion-badge" style={{ fontSize: '11px' }}>
+                                <span className="quiz-font-accordion-badge-text">
+                                  {highlightColor === 'full-bg'
+                                    ? 'পূর্ণ ব্যাকগ্রাউন্ড'
+                                    : highlightColor === 'border-only'
+                                    ? 'শুধু বর্ডার'
+                                    : highlightColor === 'label-only'
+                                    ? 'শুধু চিহ্ন'
+                                    : highlightColor === 'highlight-and-circle'
+                                    ? 'আইকন+চিহ্ন'
+                                    : highlightColor === 'with-icons'
+                                    ? 'আইকন'
+                                    : highlightColor === 'bottom-line'
+                                    ? 'লাইন'
+                                    : 'হালকা হাইলাইট'}
+                                </span>
+                              </span>
+                              <i className={`fa-solid fa-chevron-${colorStyleSubAccordion.color ? 'up' : 'down'} quiz-font-accordion-chevron`}></i>
+                            </div>
                           </div>
-                          <span>৪. নো স্টাইল (No Style)</span>
-                        </button>
+
+                          {colorStyleSubAccordion.color && (
+                            <div className="quiz-global-sub-card">
+                              {/* 1. পূর্ণ ব্যাকগ্রাউন্ড */}
+                              <button
+                                type="button"
+                                className={`quiz-layout-menu-item quiz-color-style-item ${highlightColor === 'full-bg' ? 'active' : ''}`}
+                                onClick={() => handleSelectHighlightColor('full-bg')}
+                              >
+                                <div className="quiz-layout-radio-circle">
+                                  {highlightColor === 'full-bg' && <div className="quiz-layout-radio-inner"></div>}
+                                </div>
+                                <div className="quiz-color-style-content">
+                                  <span className="quiz-color-style-title">পূর্ণ ব্যাকগ্রাউন্ড</span>
+                                  <span className="quiz-color-style-desc">সঠিক বা ভুল অনুযায়ী পুরো অপশনের ব্যাকগ্রাউন্ড সলিড রঙ পরিবর্তন হবে।</span>
+                                </div>
+                              </button>
+
+                              {/* 2. শুধু বর্ডার পরিবর্তন */}
+                              <button
+                                type="button"
+                                className={`quiz-layout-menu-item quiz-color-style-item ${highlightColor === 'border-only' ? 'active' : ''}`}
+                                onClick={() => handleSelectHighlightColor('border-only')}
+                              >
+                                <div className="quiz-layout-radio-circle">
+                                  {highlightColor === 'border-only' && <div className="quiz-layout-radio-inner"></div>}
+                                </div>
+                                <div className="quiz-color-style-content">
+                                  <span className="quiz-color-style-title">শুধু বর্ডার পরিবর্তন</span>
+                                  <span className="quiz-color-style-desc">সঠিক বা ভুল অনুযায়ী শুধু অপশনের বর্ডারের রঙ পরিবর্তন হবে, ব্যাকগ্রাউন্ড অপরিবর্তিত থাকবে।</span>
+                                </div>
+                              </button>
+
+                              {/* 3. শুধু অপশন চিহ্ন পরিবর্তন */}
+                              <button
+                                type="button"
+                                className={`quiz-layout-menu-item quiz-color-style-item ${highlightColor === 'label-only' ? 'active' : ''}`}
+                                onClick={() => handleSelectHighlightColor('label-only')}
+                              >
+                                <div className="quiz-layout-radio-circle">
+                                  {highlightColor === 'label-only' && <div className="quiz-layout-radio-inner"></div>}
+                                </div>
+                                <div className="quiz-color-style-content">
+                                  <span className="quiz-color-style-title">শুধু অপশন চিহ্ন পরিবর্তন</span>
+                                  <span className="quiz-color-style-desc">সঠিক বা ভুল অনুযায়ী শুধু ক, খ, গ, ঘ অপশন লেবেলের রঙ পরিবর্তন হবে।</span>
+                                </div>
+                              </button>
+
+                              {/* 4. আইকন + অপশন চিহ্ন */}
+                              <button
+                                type="button"
+                                className={`quiz-layout-menu-item quiz-color-style-item ${highlightColor === 'highlight-and-circle' ? 'active' : ''}`}
+                                onClick={() => handleSelectHighlightColor('highlight-and-circle')}
+                              >
+                                <div className="quiz-layout-radio-circle">
+                                  {highlightColor === 'highlight-and-circle' && <div className="quiz-layout-radio-inner"></div>}
+                                </div>
+                                <div className="quiz-color-style-content">
+                                  <span className="quiz-color-style-title">আইকন + অপশন চিহ্ন</span>
+                                  <span className="quiz-color-style-desc">সঠিক উত্তরের পাশে ✓ এবং ভুল উত্তরের পাশে ✕ আইকন দেখানোর সাথে ক, খ, গ, ঘ অপশন লেবেলের রঙ পরিবর্তন হবে।</span>
+                                </div>
+                              </button>
+
+                              {/* 5. আইকন দিয়ে দেখান */}
+                              <button
+                                type="button"
+                                className={`quiz-layout-menu-item quiz-color-style-item ${highlightColor === 'with-icons' ? 'active' : ''}`}
+                                onClick={() => handleSelectHighlightColor('with-icons')}
+                              >
+                                <div className="quiz-layout-radio-circle">
+                                  {highlightColor === 'with-icons' && <div className="quiz-layout-radio-inner"></div>}
+                                </div>
+                                <div className="quiz-color-style-content">
+                                  <span className="quiz-color-style-title">আইকন দিয়ে দেখান</span>
+                                  <span className="quiz-color-style-desc">সঠিক উত্তরের পাশে ✓ এবং ভুল উত্তরের পাশে ✕ আইকন দেখিয়ে ফলাফল বোঝানো হবে।</span>
+                                </div>
+                              </button>
+
+                              {/* 6. লাইন দিয়ে দেখান */}
+                              <button
+                                type="button"
+                                className={`quiz-layout-menu-item quiz-color-style-item ${highlightColor === 'bottom-line' ? 'active' : ''}`}
+                                onClick={() => handleSelectHighlightColor('bottom-line')}
+                              >
+                                <div className="quiz-layout-radio-circle">
+                                  {highlightColor === 'bottom-line' && <div className="quiz-layout-radio-inner"></div>}
+                                </div>
+                                <div className="quiz-color-style-content">
+                                  <span className="quiz-color-style-title">লাইন দিয়ে দেখান</span>
+                                  <span className="quiz-color-style-desc">সঠিক বা ভুল অনুযায়ী অপশনের নিচে সবুজ বা লাল লাইন দেখানো হবে, তবে অপশনের ব্যাকগ্রাউন্ড অপরিবর্তিত থাকবে।</span>
+                                </div>
+                              </button>
+
+                              {/* 7. হালকা হাইলাইট */}
+                              <button
+                                type="button"
+                                className={`quiz-layout-menu-item quiz-color-style-item ${highlightColor === 'soft-highlight' ? 'active' : ''}`}
+                                onClick={() => handleSelectHighlightColor('soft-highlight')}
+                              >
+                                <div className="quiz-layout-radio-circle">
+                                  {highlightColor === 'soft-highlight' && <div className="quiz-layout-radio-inner"></div>}
+                                </div>
+                                <div className="quiz-color-style-content">
+                                  <span className="quiz-color-style-title">হালকা হাইলাইট</span>
+                                  <span className="quiz-color-style-desc">সঠিক বা ভুল অনুযায়ী অপশনের ব্যাকগ্রাউন্ডে হালকা সবুজ বা লাল রঙের আভা দেখানো হবে।</span>
+                                </div>
+                              </button>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -2193,6 +2942,7 @@ function QuestionsComponentInternal() {
                       </div>
                     )}
                   </div>
+                  </div>
                 </div>
               )}
             </div>
@@ -2359,38 +3109,80 @@ function QuestionsComponentInternal() {
               </div>
             )}
 
-            {optionLayout === '2q-col' ? (
-              <div className={`quiz-questions-col-wrapper ${questionStyle === 'box' ? 'style-box-mode' : (questionStyle === 'circle' || questionStyle === 'nostyle') ? 'style-nostyle-mode' : ''}`}>
+            {questionLayout === '2q-col' ? (
+              <div className={`quiz-questions-col-wrapper ${questionStyle === 'box' ? 'style-box-mode' : (questionStyle === 'circle' || questionStyle === 'nostyle') ? 'style-nostyle-mode' : ''} midline-${middleLine}`}>
                 <div className="quiz-questions-column">
                   {displayQuestions
                     .slice(0, Math.ceil(displayQuestions.length / 2))
-                    .map((q, idx) => renderQuestionBlock(q, idx, 'layout-1'))}
+                    .map((q, idx) => renderQuestionBlock(q, idx, `layout-${optionLayout}`))}
                 </div>
                 <div className="quiz-questions-column">
                   {displayQuestions
                     .slice(Math.ceil(displayQuestions.length / 2))
                     .map((q, idx) => {
                       const actualIdx = idx + Math.ceil(displayQuestions.length / 2);
-                      return renderQuestionBlock(q, actualIdx, 'layout-1');
+                      return renderQuestionBlock(q, actualIdx, `layout-${optionLayout}`);
                     })}
                 </div>
               </div>
-            ) : optionLayout === '2q-row' ? (
-              <div className={`quiz-questions-col-wrapper ${questionStyle === 'box' ? 'style-box-mode' : (questionStyle === 'circle' || questionStyle === 'nostyle') ? 'style-nostyle-mode' : ''}`}>
+            ) : questionLayout === '2q-row' ? (
+              <div className={`quiz-questions-col-wrapper ${questionStyle === 'box' ? 'style-box-mode' : (questionStyle === 'circle' || questionStyle === 'nostyle') ? 'style-nostyle-mode' : ''} midline-${middleLine}`}>
                 <div className="quiz-questions-column">
                   {displayQuestions
                     .filter((_, idx) => idx % 2 === 0)
-                    .map((q, i) => renderQuestionBlock(q, i * 2, 'layout-1'))}
+                    .map((q, i) => renderQuestionBlock(q, i * 2, `layout-${optionLayout}`))}
                 </div>
                 <div className="quiz-questions-column">
                   {displayQuestions
                     .filter((_, idx) => idx % 2 === 1)
-                    .map((q, i) => renderQuestionBlock(q, i * 2 + 1, 'layout-1'))}
+                    .map((q, i) => renderQuestionBlock(q, i * 2 + 1, `layout-${optionLayout}`))}
+                </div>
+              </div>
+            ) : questionLayout === '3q-col' ? (
+              <div className={`quiz-questions-col-wrapper col-3 ${questionStyle === 'box' ? 'style-box-mode' : (questionStyle === 'circle' || questionStyle === 'nostyle') ? 'style-nostyle-mode' : ''} midline-${middleLine}`}>
+                <div className="quiz-questions-column">
+                  {displayQuestions
+                    .slice(0, Math.ceil(displayQuestions.length / 3))
+                    .map((q, idx) => renderQuestionBlock(q, idx, `layout-${optionLayout}`))}
+                </div>
+                <div className="quiz-questions-column">
+                  {displayQuestions
+                    .slice(Math.ceil(displayQuestions.length / 3), Math.ceil(displayQuestions.length / 3) * 2)
+                    .map((q, idx) => {
+                      const actualIdx = idx + Math.ceil(displayQuestions.length / 3);
+                      return renderQuestionBlock(q, actualIdx, `layout-${optionLayout}`);
+                    })}
+                </div>
+                <div className="quiz-questions-column">
+                  {displayQuestions
+                    .slice(Math.ceil(displayQuestions.length / 3) * 2)
+                    .map((q, idx) => {
+                      const actualIdx = idx + Math.ceil(displayQuestions.length / 3) * 2;
+                      return renderQuestionBlock(q, actualIdx, `layout-${optionLayout}`);
+                    })}
+                </div>
+              </div>
+            ) : questionLayout === '3q-row' ? (
+              <div className={`quiz-questions-col-wrapper col-3 ${questionStyle === 'box' ? 'style-box-mode' : (questionStyle === 'circle' || questionStyle === 'nostyle') ? 'style-nostyle-mode' : ''} midline-${middleLine}`}>
+                <div className="quiz-questions-column">
+                  {displayQuestions
+                    .filter((_, idx) => idx % 3 === 0)
+                    .map((q, i) => renderQuestionBlock(q, i * 3, `layout-${optionLayout}`))}
+                </div>
+                <div className="quiz-questions-column">
+                  {displayQuestions
+                    .filter((_, idx) => idx % 3 === 1)
+                    .map((q, i) => renderQuestionBlock(q, i * 3 + 1, `layout-${optionLayout}`))}
+                </div>
+                <div className="quiz-questions-column">
+                  {displayQuestions
+                    .filter((_, idx) => idx % 3 === 2)
+                    .map((q, i) => renderQuestionBlock(q, i * 3 + 2, `layout-${optionLayout}`))}
                 </div>
               </div>
             ) : (
               <div className={`quiz-questions-wrapper ${questionStyle === 'box' ? 'style-box-mode' : (questionStyle === 'circle' || questionStyle === 'nostyle') ? 'style-nostyle-mode' : ''}`}>
-                {displayQuestions.map((q, qIndex) => renderQuestionBlock(q, qIndex))}
+                {displayQuestions.map((q, qIndex) => renderQuestionBlock(q, qIndex, `layout-${optionLayout}`))}
               </div>
             )}
           </>
