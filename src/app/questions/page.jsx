@@ -89,6 +89,88 @@ const FONT_WEIGHTS = [
   }
 ];
 
+const PRESET_LIST = [
+  { id: 'practice', name: 'অনুশীলন', icon: 'fa-graduation-cap' },
+  { id: 'read', name: 'Read', icon: 'fa-book-open' },
+  { id: 'exam', name: 'Live exam', icon: 'fa-stopwatch' },
+  { id: 'custom', name: 'My setting', icon: 'fa-sliders' }
+];
+
+const DEFAULT_PRESET_PROFILES = {
+  practice: {
+    questionLayout: '2q-col',
+    optionLayout: '1',
+    middleLine: 'dotted',
+    questionStyle: 'dotted',
+    highlightMode: 'single',
+    highlightColor: 'full-bg',
+    explanationMode: 'on-select',
+    showExplanation: true,
+    cutMark: 0.5,
+    cutMarkMode: '0.5',
+    customCutMarkInput: '',
+    fontSize: 16,
+    fontFamily: "'Noto Sans Bengali', sans-serif",
+    fontWeight: 'regular',
+    customFontSizeInput: '',
+    showAnswer: false
+  },
+  read: {
+    questionLayout: '2q-col',
+    optionLayout: '1',
+    middleLine: 'dotted',
+    questionStyle: 'dotted',
+    highlightMode: 'both',
+    highlightColor: 'full-bg',
+    explanationMode: 'on-select',
+    showExplanation: true,
+    cutMark: 0,
+    cutMarkMode: '0',
+    customCutMarkInput: '',
+    fontSize: 16,
+    fontFamily: "'Noto Sans Bengali', sans-serif",
+    fontWeight: 'regular',
+    customFontSizeInput: '',
+    showAnswer: true
+  },
+  exam: {
+    questionLayout: '2q-col',
+    optionLayout: '1',
+    middleLine: 'dotted',
+    questionStyle: 'box',
+    highlightMode: 'neutral',
+    highlightColor: 'full-bg',
+    explanationMode: 'none',
+    showExplanation: false,
+    cutMark: 0.5,
+    cutMarkMode: '0.5',
+    customCutMarkInput: '',
+    fontSize: 16,
+    fontFamily: "'Noto Sans Bengali', sans-serif",
+    fontWeight: 'regular',
+    customFontSizeInput: '',
+    showAnswer: false
+  },
+  custom: {
+    questionLayout: '2q-col',
+    optionLayout: '1',
+    middleLine: 'dotted',
+    questionStyle: 'dotted',
+    highlightMode: 'single',
+    highlightColor: 'full-bg',
+    explanationMode: 'on-select',
+    showExplanation: true,
+    cutMark: 0.5,
+    cutMarkMode: '0.5',
+    customCutMarkInput: '',
+    fontSize: 16,
+    fontFamily: "'Noto Sans Bengali', sans-serif",
+    fontWeight: 'regular',
+    customFontSizeInput: '',
+    showAnswer: false
+  }
+};
+
 function QuestionsComponentInternal() {
   const searchParams = useSearchParams();
   const categoryParam = searchParams.get('category');
@@ -126,6 +208,7 @@ function QuestionsComponentInternal() {
 
   // Toggles (Exact Defaults from quiz.html)
   const [isReadMode, setIsReadMode] = useState(false); // Default OFF
+  const [activeMode, setActiveMode] = useState('practice'); // 'practice' | 'read' | 'exam'
   const [showAskAi, setShowAskAi] = useState(false); // Default OFF (toggled via switcher next to Read Mode)
   const [showColor, setShowColor] = useState(true);
   const [showAnswer, setShowAnswer] = useState(false); // Default OFF
@@ -141,8 +224,30 @@ function QuestionsComponentInternal() {
   const [showGlobalSettingsMenu, setShowGlobalSettingsMenu] = useState(false);
   const [showFourOptionConditionHint, setShowFourOptionConditionHint] = useState(false);
   const [resetSettingsSuccess, setResetSettingsSuccess] = useState(false);
+  const [activePreset, setActivePreset] = useState('practice');
+  const activePresetRef = useRef('practice');
   const globalSettingsRef = useRef(null);
   const conditionHintRef = useRef(null);
+
+  // Preset Profile Helper: Saves setting to active preset profile in localStorage
+  function saveActivePresetSetting(key, value) {
+    if (typeof window === 'undefined') return;
+    try {
+      const currentPreset = activePresetRef.current || 'practice';
+      const raw = localStorage.getItem('topmcqbd_preset_profiles');
+      let profiles = {};
+      if (raw) {
+        try { profiles = JSON.parse(raw); } catch (e) { profiles = {}; }
+      }
+      if (!profiles[currentPreset]) {
+        profiles[currentPreset] = { ...(DEFAULT_PRESET_PROFILES[currentPreset] || DEFAULT_PRESET_PROFILES.practice) };
+      }
+      profiles[currentPreset][key] = value;
+      localStorage.setItem('topmcqbd_preset_profiles', JSON.stringify(profiles));
+    } catch (e) {
+      console.warn('Error saving preset setting:', e);
+    }
+  }
 
   const toggleLayoutSubAccordion = (sec) => {
     setLayoutSubAccordion((prev) => ({
@@ -159,12 +264,14 @@ function QuestionsComponentInternal() {
     if (typeof window !== 'undefined') {
       localStorage.setItem('topmcqbd_question_layout', layout);
     }
+    saveActivePresetSetting('questionLayout', layout);
     // ১ লাইনে ৪টি option: প্রশ্ন Layout >> ১ লাইনে ১টি প্রশ্ন option choose korle sudhu dekhabe ba enable hobe
     if (layout !== '1q' && optionLayout === '4') {
       setOptionLayout('1');
       if (typeof window !== 'undefined') {
         localStorage.setItem('topmcqbd_option_layout', '1');
       }
+      saveActivePresetSetting('optionLayout', '1');
     }
   };
 
@@ -173,6 +280,7 @@ function QuestionsComponentInternal() {
     if (typeof window !== 'undefined') {
       localStorage.setItem('topmcqbd_option_layout', layout);
     }
+    saveActivePresetSetting('optionLayout', layout);
   };
 
   const handleSelectMiddleLine = (line) => {
@@ -180,25 +288,18 @@ function QuestionsComponentInternal() {
     if (typeof window !== 'undefined') {
       localStorage.setItem('topmcqbd_middle_line', line);
     }
+    saveActivePresetSetting('middleLine', line);
   };
 
   // Question Design Style: 'dotted' (default) | 'box'
   const [questionStyle, setQuestionStyle] = useState('dotted');
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const savedStyle = localStorage.getItem('topmcqbd_question_style');
-      if (savedStyle === 'box' || savedStyle === 'dotted' || savedStyle === 'circle' || savedStyle === 'nostyle') {
-        setQuestionStyle(savedStyle);
-      }
-    }
-  }, []);
 
   const handleSelectQuestionStyle = (style) => {
     setQuestionStyle(style);
     if (typeof window !== 'undefined') {
       localStorage.setItem('topmcqbd_question_style', style);
     }
+    saveActivePresetSetting('questionStyle', style);
   };
 
   // Color Answer Style: 1. Highlight Mode (Scope) & 2. Highlight Color (Style)
@@ -215,39 +316,12 @@ function QuestionsComponentInternal() {
     }));
   };
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const savedMode = localStorage.getItem('topmcqbd_highlight_mode');
-      if (savedMode === 'single' || savedMode === 'both' || savedMode === 'neutral') {
-        setHighlightMode(savedMode);
-      } else {
-        const legacyStyle = localStorage.getItem('topmcqbd_color_answer_style');
-        if (legacyStyle === 'both-correct-wrong') {
-          setHighlightMode('both');
-        } else {
-          setHighlightMode('single');
-        }
-      }
-
-      const savedColor = localStorage.getItem('topmcqbd_highlight_color');
-      if (['full-bg', 'border-only', 'label-only', 'highlight-and-circle', 'with-icons', 'bottom-line', 'soft-highlight'].includes(savedColor)) {
-        setHighlightColor(savedColor);
-      } else {
-        const legacyStyle = localStorage.getItem('topmcqbd_color_answer_style');
-        if (['border-only', 'label-only', 'highlight-and-circle', 'with-icons', 'bottom-line', 'soft-highlight'].includes(legacyStyle)) {
-          setHighlightColor(legacyStyle);
-        } else {
-          setHighlightColor('full-bg');
-        }
-      }
-    }
-  }, []);
-
   const handleSelectHighlightMode = (mode) => {
     setHighlightMode(mode);
     if (typeof window !== 'undefined') {
       localStorage.setItem('topmcqbd_highlight_mode', mode);
     }
+    saveActivePresetSetting('highlightMode', mode);
   };
 
   const handleSelectHighlightColor = (color) => {
@@ -255,26 +329,13 @@ function QuestionsComponentInternal() {
     if (typeof window !== 'undefined') {
       localStorage.setItem('topmcqbd_highlight_color', color);
     }
+    saveActivePresetSetting('highlightColor', color);
   };
 
   // Explanation settings: 'on-select' (default) | 'on-button' | 'on-wrong' | 'none'
   const [explanationMode, setExplanationMode] = useState('on-select');
   const [lastActiveExplanationMode, setLastActiveExplanationMode] = useState('on-select');
   const [expandedExplanations, setExpandedExplanations] = useState({});
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const savedExpMode = localStorage.getItem('topmcqbd_explanation_mode');
-      if (['on-select', 'on-button', 'on-wrong', 'none'].includes(savedExpMode)) {
-        setExplanationMode(savedExpMode);
-        if (savedExpMode === 'none') {
-          setShowExplanation(false);
-        } else {
-          setLastActiveExplanationMode(savedExpMode);
-        }
-      }
-    }
-  }, []);
 
   const handleSelectExplanationMode = (mode) => {
     setExplanationMode(mode);
@@ -289,6 +350,8 @@ function QuestionsComponentInternal() {
     } else {
       setShowExplanation(true);
     }
+    saveActivePresetSetting('explanationMode', mode);
+    saveActivePresetSetting('showExplanation', mode !== 'none');
   };
 
   const handleToggleExplanationSwitch = (checked) => {
@@ -340,14 +403,14 @@ function QuestionsComponentInternal() {
     }));
   };
 
-  const [globalSettingsMaxHeight, setGlobalSettingsMaxHeight] = useState('calc(100vh - 180px)');
+  const [globalSettingsMaxHeight, setGlobalSettingsMaxHeight] = useState('calc(100vh - 140px)');
 
   useEffect(() => {
     if (showGlobalSettingsMenu && globalSettingsRef.current) {
       const updateHeight = () => {
         const rect = globalSettingsRef.current.getBoundingClientRect();
         const spaceBelow = window.innerHeight - rect.bottom - 16;
-        const targetHeight = Math.max(300, Math.min(650, spaceBelow));
+        const targetHeight = Math.max(380, Math.min(740, spaceBelow));
         setGlobalSettingsMaxHeight(`${targetHeight}px`);
       };
       updateHeight();
@@ -358,7 +421,7 @@ function QuestionsComponentInternal() {
         window.removeEventListener('scroll', updateHeight);
       };
     }
-  }, [showGlobalSettingsMenu, globalAccordion, fontAccordion]);
+  }, [showGlobalSettingsMenu]);
 
   const [showLimitMenu, setShowLimitMenu] = useState(false);
   const limitDropdownRef = useRef(null);
@@ -374,6 +437,108 @@ function QuestionsComponentInternal() {
   const [score, setScore] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
   const [incorrectCount, setIncorrectCount] = useState(0);
+
+  const applyPresetProfile = (presetId, profileData) => {
+    const merged = {
+      ...(DEFAULT_PRESET_PROFILES[presetId] || DEFAULT_PRESET_PROFILES.practice),
+      ...(profileData || {})
+    };
+
+    // 1. Layout
+    if (merged.questionLayout) {
+      setQuestionLayout(merged.questionLayout);
+      try { localStorage.setItem('topmcqbd_question_layout', merged.questionLayout); } catch (e) {}
+    }
+    if (merged.optionLayout) {
+      setOptionLayout(merged.optionLayout);
+      try { localStorage.setItem('topmcqbd_option_layout', merged.optionLayout); } catch (e) {}
+    }
+    if (merged.middleLine) {
+      setMiddleLine(merged.middleLine);
+      try { localStorage.setItem('topmcqbd_middle_line', merged.middleLine); } catch (e) {}
+    }
+
+    // 2. Question Style
+    if (merged.questionStyle) {
+      setQuestionStyle(merged.questionStyle);
+      try { localStorage.setItem('topmcqbd_question_style', merged.questionStyle); } catch (e) {}
+    }
+
+    // 3. Color Answer Style
+    if (merged.highlightMode) {
+      setHighlightMode(merged.highlightMode);
+      try { localStorage.setItem('topmcqbd_highlight_mode', merged.highlightMode); } catch (e) {}
+    }
+    if (merged.highlightColor) {
+      setHighlightColor(merged.highlightColor);
+      try { localStorage.setItem('topmcqbd_highlight_color', merged.highlightColor); } catch (e) {}
+    }
+
+    // 4. Explanation Mode
+    if (merged.explanationMode) {
+      setExplanationMode(merged.explanationMode);
+      if (merged.explanationMode !== 'none') {
+        setLastActiveExplanationMode(merged.explanationMode);
+        setShowExplanation(true);
+      } else {
+        setShowExplanation(false);
+      }
+      try { localStorage.setItem('topmcqbd_explanation_mode', merged.explanationMode); } catch (e) {}
+    }
+
+    // 5. Cut Mark
+    if (typeof merged.cutMark === 'number') {
+      setCutMark(merged.cutMark);
+      setCutMarkMode(merged.cutMarkMode || '0.5');
+      setCustomCutMarkInput(merged.customCutMarkInput || '');
+      try {
+        localStorage.setItem('topmcqbd_cut_mark_pref', JSON.stringify({
+          cutMark: merged.cutMark,
+          cutMarkMode: merged.cutMarkMode || '0.5',
+          customValue: merged.customCutMarkInput || ''
+        }));
+      } catch (e) {}
+      setScore(Math.round((correctCount * 1 - incorrectCount * merged.cutMark) * 100) / 100);
+    }
+
+    // 6. Font Settings
+    if (merged.fontSize) {
+      setFontSize(merged.fontSize);
+      setCustomFontSizeInput(merged.customFontSizeInput || (![14, 15, 16, 17, 18, 19, 20].includes(merged.fontSize) ? String(merged.fontSize) : ''));
+      try { localStorage.setItem('topmcqbd_font_size', String(merged.fontSize)); } catch (e) {}
+    }
+    if (merged.fontFamily) {
+      setFontFamily(merged.fontFamily);
+      try { localStorage.setItem('topmcqbd_font_family', merged.fontFamily); } catch (e) {}
+    }
+    if (merged.fontWeight) {
+      setFontWeight(merged.fontWeight);
+      try { localStorage.setItem('topmcqbd_font_weight', merged.fontWeight); } catch (e) {}
+    }
+
+    // 7. Switches
+    if (typeof merged.showAnswer === 'boolean') {
+      setShowAnswer(merged.showAnswer);
+    }
+  };
+
+  const handleSelectPreset = (presetId) => {
+    setActivePreset(presetId);
+    activePresetRef.current = presetId;
+    try {
+      localStorage.setItem('topmcqbd_active_preset', presetId);
+      let profiles = {};
+      const raw = localStorage.getItem('topmcqbd_preset_profiles');
+      if (raw) {
+        profiles = JSON.parse(raw);
+      }
+      const profile = profiles[presetId] || DEFAULT_PRESET_PROFILES[presetId];
+      applyPresetProfile(presetId, profile);
+    } catch (e) {
+      console.warn('Error switching preset:', e);
+      applyPresetProfile(presetId, DEFAULT_PRESET_PROFILES[presetId]);
+    }
+  };
 
   // Timer
   const [totalSecondsLeft, setTotalSecondsLeft] = useState(0);
@@ -573,71 +738,108 @@ function QuestionsComponentInternal() {
   // Load saved preferences from localStorage on initial mount
   useEffect(() => {
     try {
-      const saved = localStorage.getItem('topmcqbd_cut_mark_pref');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (typeof parsed.cutMark === 'number') {
-          setCutMark(parsed.cutMark);
-        }
-        if (parsed.cutMarkMode) {
-          setCutMarkMode(parsed.cutMarkMode);
-        }
-        if (parsed.customValue !== undefined) {
-          setCustomCutMarkInput(parsed.customValue);
-        }
+      let savedPreset = 'practice';
+      const ap = localStorage.getItem('topmcqbd_active_preset');
+      if (ap && ['practice', 'read', 'exam', 'custom'].includes(ap)) {
+        savedPreset = ap;
+      }
+      setActivePreset(savedPreset);
+      activePresetRef.current = savedPreset;
+
+      const rawProfiles = localStorage.getItem('topmcqbd_preset_profiles');
+      let profiles = null;
+      if (rawProfiles) {
+        try { profiles = JSON.parse(rawProfiles); } catch (e) { profiles = null; }
       }
 
-      // Load font settings
-      const savedFontSize = localStorage.getItem('topmcqbd_font_size');
-      if (savedFontSize) {
-        const num = parseInt(savedFontSize, 10);
-        if (!isNaN(num) && num >= 10 && num <= 36) {
-          setFontSize(num);
-          if (![14, 15, 16, 17, 18, 19, 20].includes(num)) {
-            setCustomFontSizeInput(String(num));
+      if (profiles && profiles[savedPreset]) {
+        applyPresetProfile(savedPreset, profiles[savedPreset]);
+      } else {
+        // First time initialization / migration from legacy individual keys
+        let legacyPractice = { ...DEFAULT_PRESET_PROFILES.practice };
+
+        // Check cut mark
+        const savedCutMark = localStorage.getItem('topmcqbd_cut_mark_pref');
+        if (savedCutMark) {
+          try {
+            const parsed = JSON.parse(savedCutMark);
+            if (typeof parsed.cutMark === 'number') legacyPractice.cutMark = parsed.cutMark;
+            if (parsed.cutMarkMode) legacyPractice.cutMarkMode = parsed.cutMarkMode;
+            if (parsed.customValue !== undefined) legacyPractice.customCutMarkInput = parsed.customValue;
+          } catch (e) {}
+        }
+
+        // Font
+        const savedFontSize = localStorage.getItem('topmcqbd_font_size');
+        if (savedFontSize) {
+          const num = parseInt(savedFontSize, 10);
+          if (!isNaN(num) && num >= 10 && num <= 36) {
+            legacyPractice.fontSize = num;
+            if (![14, 15, 16, 17, 18, 19, 20].includes(num)) {
+              legacyPractice.customFontSizeInput = String(num);
+            }
           }
         }
-      }
-      const savedFontFamily = localStorage.getItem('topmcqbd_font_family');
-      if (savedFontFamily) {
-        if (FONT_FAMILIES.some((f) => f.family === savedFontFamily)) {
-          setFontFamily(savedFontFamily);
-        } else {
-          setFontFamily("'Noto Sans Bengali', sans-serif");
+        const savedFontFamily = localStorage.getItem('topmcqbd_font_family');
+        if (savedFontFamily && FONT_FAMILIES.some((f) => f.family === savedFontFamily)) {
+          legacyPractice.fontFamily = savedFontFamily;
         }
-      }
-      const savedFontWeight = localStorage.getItem('topmcqbd_font_weight');
-      if (savedFontWeight && ['thin', 'regular', 'medium', 'bold'].includes(savedFontWeight)) {
-        setFontWeight(savedFontWeight);
+        const savedFontWeight = localStorage.getItem('topmcqbd_font_weight');
+        if (savedFontWeight && ['thin', 'regular', 'medium', 'bold'].includes(savedFontWeight)) {
+          legacyPractice.fontWeight = savedFontWeight;
+        }
+
+        // Layout
+        const savedQLayout = localStorage.getItem('topmcqbd_question_layout');
+        if (savedQLayout && ['2q-col', '2q-row', '3q-col', '3q-row', '1q'].includes(savedQLayout)) {
+          legacyPractice.questionLayout = savedQLayout;
+        }
+        const savedOptLayout = localStorage.getItem('topmcqbd_option_layout');
+        if (savedOptLayout && ['1', '2', '4'].includes(savedOptLayout)) {
+          legacyPractice.optionLayout = savedOptLayout;
+        }
+        const savedMiddleLine = localStorage.getItem('topmcqbd_middle_line');
+        if (savedMiddleLine && ['dotted', 'solid', 'none-no-gap', 'gap-space', 'gap-30'].includes(savedMiddleLine)) {
+          legacyPractice.middleLine = savedMiddleLine === 'gap-30' ? 'gap-space' : savedMiddleLine;
+        }
+
+        // Style
+        const savedStyle = localStorage.getItem('topmcqbd_question_style');
+        if (savedStyle && ['box', 'dotted', 'circle', 'nostyle'].includes(savedStyle)) {
+          legacyPractice.questionStyle = savedStyle;
+        }
+        const savedMode = localStorage.getItem('topmcqbd_highlight_mode');
+        if (savedMode && ['single', 'both', 'neutral'].includes(savedMode)) {
+          legacyPractice.highlightMode = savedMode;
+        }
+        const savedColor = localStorage.getItem('topmcqbd_highlight_color');
+        if (savedColor && ['full-bg', 'border-only', 'label-only', 'highlight-and-circle', 'with-icons', 'bottom-line', 'soft-highlight'].includes(savedColor)) {
+          legacyPractice.highlightColor = savedColor;
+        }
+        const savedExpMode = localStorage.getItem('topmcqbd_explanation_mode');
+        if (savedExpMode && ['on-select', 'on-button', 'on-wrong', 'none'].includes(savedExpMode)) {
+          legacyPractice.explanationMode = savedExpMode;
+          legacyPractice.showExplanation = savedExpMode !== 'none';
+        }
+
+        const initialProfiles = {
+          practice: legacyPractice,
+          read: { ...DEFAULT_PRESET_PROFILES.read },
+          exam: { ...DEFAULT_PRESET_PROFILES.exam },
+          custom: { ...legacyPractice }
+        };
+
+        try {
+          localStorage.setItem('topmcqbd_preset_profiles', JSON.stringify(initialProfiles));
+        } catch (e) {}
+
+        applyPresetProfile(savedPreset, initialProfiles[savedPreset]);
       }
 
       // Load saved Ask AI toggle preference
       const savedAskAi = localStorage.getItem('topmcqbd_show_ask_ai');
       if (savedAskAi === 'true') {
         setShowAskAi(true);
-      }
-
-      // Load saved Question Layout & Option Layout preferences
-      const savedQLayout = localStorage.getItem('topmcqbd_question_layout');
-      if (savedQLayout && ['2q-col', '2q-row', '3q-col', '3q-row', '1q'].includes(savedQLayout)) {
-        setQuestionLayout(savedQLayout);
-      } else {
-        const legacyLayout = localStorage.getItem('topmcqbd_option_layout');
-        if (legacyLayout === '2q-col' || legacyLayout === '2q-row') {
-          setQuestionLayout(legacyLayout);
-        } else if (legacyLayout === '4' || legacyLayout === '2' || legacyLayout === '1') {
-          setQuestionLayout('1q');
-        }
-      }
-
-      const savedOptLayout = localStorage.getItem('topmcqbd_option_layout');
-      if (savedOptLayout && ['1', '2', '4'].includes(savedOptLayout)) {
-        setOptionLayout(savedOptLayout);
-      }
-
-      const savedMiddleLine = localStorage.getItem('topmcqbd_middle_line');
-      if (savedMiddleLine && ['dotted', 'solid', 'none-no-gap', 'gap-space', 'gap-30'].includes(savedMiddleLine)) {
-        setMiddleLine(savedMiddleLine === 'gap-30' ? 'gap-space' : savedMiddleLine);
       }
     } catch (e) {
       console.warn('Error reading preferences from localStorage:', e);
@@ -796,6 +998,9 @@ function QuestionsComponentInternal() {
     }
     const newScore = Math.round((correctCount * 1 - incorrectCount * val) * 100) / 100;
     setScore(newScore);
+    saveActivePresetSetting('cutMark', val);
+    saveActivePresetSetting('cutMarkMode', mode);
+    saveActivePresetSetting('customCutMarkInput', '');
   };
 
   const handleApplyCustomCutMark = () => {
@@ -818,6 +1023,9 @@ function QuestionsComponentInternal() {
     }
     const newScore = Math.round((correctCount * 1 - incorrectCount * val) * 100) / 100;
     setScore(newScore);
+    saveActivePresetSetting('cutMark', val);
+    saveActivePresetSetting('cutMarkMode', 'custom');
+    saveActivePresetSetting('customCutMarkInput', customCutMarkInput);
   };
 
   const handleSelectFontSize = (size) => {
@@ -826,6 +1034,8 @@ function QuestionsComponentInternal() {
     try {
       localStorage.setItem('topmcqbd_font_size', String(size));
     } catch (e) {}
+    saveActivePresetSetting('fontSize', size);
+    saveActivePresetSetting('customFontSizeInput', '');
   };
 
   const handleApplyCustomFontSize = () => {
@@ -838,6 +1048,8 @@ function QuestionsComponentInternal() {
     try {
       localStorage.setItem('topmcqbd_font_size', String(num));
     } catch (e) {}
+    saveActivePresetSetting('fontSize', num);
+    saveActivePresetSetting('customFontSizeInput', customFontSizeInput);
   };
 
   const handleSelectFontFamily = (family) => {
@@ -845,6 +1057,7 @@ function QuestionsComponentInternal() {
     try {
       localStorage.setItem('topmcqbd_font_family', family);
     } catch (e) {}
+    saveActivePresetSetting('fontFamily', family);
   };
 
   const handleSelectFontWeight = (weight) => {
@@ -852,76 +1065,24 @@ function QuestionsComponentInternal() {
     try {
       localStorage.setItem('topmcqbd_font_weight', weight);
     } catch (e) {}
+    saveActivePresetSetting('fontWeight', weight);
   };
 
   const handleResetGlobalSettings = () => {
-    // 1. Layout defaults:
-    setQuestionLayout('2q-col');
-    setOptionLayout('1');
-    setMiddleLine('dotted');
+    const currentPreset = activePresetRef.current || 'practice';
+    const defaultProf = DEFAULT_PRESET_PROFILES[currentPreset] || DEFAULT_PRESET_PROFILES.practice;
+    try {
+      const raw = localStorage.getItem('topmcqbd_preset_profiles');
+      let profiles = raw ? JSON.parse(raw) : {};
+      profiles[currentPreset] = { ...defaultProf };
+      localStorage.setItem('topmcqbd_preset_profiles', JSON.stringify(profiles));
+    } catch (e) {}
+
+    applyPresetProfile(currentPreset, defaultProf);
+
     setLayoutSubAccordion({ style: true, question: true, option: false, middleLine: false });
-    setShowFourOptionConditionHint(false);
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('topmcqbd_question_layout');
-      localStorage.removeItem('topmcqbd_option_layout');
-      localStorage.removeItem('topmcqbd_middle_line');
-    }
-
-    // 2. Question Style default: 'dotted'
-    setQuestionStyle('dotted');
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('topmcqbd_question_style', 'dotted');
-    }
-
-    // Color Answer Style defaults:
-    setHighlightMode('single');
-    setHighlightColor('full-bg');
     setColorStyleSubAccordion({ style: true, color: true });
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('topmcqbd_highlight_mode', 'single');
-      localStorage.setItem('topmcqbd_highlight_color', 'full-bg');
-      localStorage.removeItem('topmcqbd_color_answer_style');
-    }
-
-    // 3. Explanation Mode default: 'on-select'
-    setExplanationMode('on-select');
-    setLastActiveExplanationMode('on-select');
-    setShowExplanation(true);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('topmcqbd_explanation_mode', 'on-select');
-    }
-
-    // 4. Cut Mark default: 0.5 (mode: '0.5')
-    setCutMark(0.5);
-    setCutMarkMode('0.5');
-    setCustomCutMarkInput('');
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(
-        'topmcqbd_cut_mark_pref',
-        JSON.stringify({
-          cutMark: 0.5,
-          cutMarkMode: '0.5',
-          customValue: ''
-        })
-      );
-    }
-    const newScore = Math.round((correctCount * 1 - incorrectCount * 0.5) * 100) / 100;
-    setScore(newScore);
-
-    // 5. Font Settings defaults: 16px, Noto Sans Bengali, Regular (400)
-    setFontSize(16);
-    setFontFamily("'Noto Sans Bengali', sans-serif");
-    setFontWeight('regular');
-    setCustomFontSizeInput('');
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('topmcqbd_font_size', '16');
-      localStorage.setItem('topmcqbd_font_family', "'Noto Sans Bengali', sans-serif");
-      localStorage.setItem('topmcqbd_font_weight', 'regular');
-    }
-
-    // 6. Switches defaults: showColor = true, showAnswer = false
-    setShowColor(true);
-    setShowAnswer(false);
+    setShowFourOptionConditionHint(false);
 
     // Show temporary success feedback
     setResetSettingsSuccess(true);
@@ -979,6 +1140,7 @@ function QuestionsComponentInternal() {
     if (isReadMode) {
       setIsReadMode(false);
       setShowScore(true);
+      setActiveMode('practice');
     }
     if ((isRetakeWrongMode || isReviewWrongMode) && originalQuestionsList.length > 0) {
       setDisplayQuestions(originalQuestionsList);
@@ -986,6 +1148,14 @@ function QuestionsComponentInternal() {
       setIsReviewWrongMode(false);
     }
     resetQuizState();
+    if (typeof window !== 'undefined') {
+      setTimeout(() => {
+        const target = document.querySelector('.quiz-container') || document.querySelector('.quiz-top-bar');
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 50);
+    }
   };
 
   // View Wrong Answers & Explanations Handler ("ভুল উত্তর দেখুন")
@@ -1101,9 +1271,30 @@ function QuestionsComponentInternal() {
     resetQuizState();
   };
 
+  // Mode Switch Handler for the Segmented Pill Box (প্র্যাকটিস মোড | পড়ুন মোড)
+  const handleModeChange = (mode) => {
+    setActiveMode(mode);
+
+    if (mode === 'practice') {
+      setIsReadMode(false);
+      setShowScore(true);
+      setShowAnswer(false);
+      resetQuizState();
+    } else if (mode === 'read') {
+      setIsReadMode(true);
+      setShowTime(false);
+      setShowScore(false);
+      setShowColor(true);
+      setShowExplanation(true);
+      setShowAnswer(false);
+      setTimerRunning(false);
+    }
+  };
+
   // Read Mode Switch Toggle Handler
   const handleReadModeToggle = (checked) => {
     setIsReadMode(checked);
+    setActiveMode(checked ? 'read' : 'practice');
     if (checked) {
       // In Read Mode: Time and Score switches are DISABLED with opacity, NOT hidden
       setShowTime(false);
@@ -1157,6 +1348,14 @@ function QuestionsComponentInternal() {
 
     if (Object.keys(newAnswered).length === displayQuestions.length) {
       showCompletionPopup(newScore, newCorrect, newIncorrect);
+      if (typeof window !== 'undefined') {
+        setTimeout(() => {
+          const target = document.querySelector('.quiz-container') || document.querySelector('.quiz-top-bar');
+          if (target) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 150);
+      }
     }
   };
 
@@ -1541,6 +1740,54 @@ function QuestionsComponentInternal() {
         </div>
       )}
 
+      {/* Top Navigation & Mode Switcher Bar matching attached screenshots */}
+      <div className="quiz-top-bar">
+        <div className="quiz-top-bar-left">
+          <div className="quiz-top-breadcrumb">
+            <Link href="/all-mcq" className="quiz-top-page-title" title="সকল MCQ">
+              <span>সকল MCQ</span>
+            </Link>
+          </div>
+
+          {!isReadMode && Object.keys(answeredQuestions).length > 0 && Object.keys(answeredQuestions).length < displayQuestions.length && (
+            <button
+              type="button"
+              className="quiz-top-restart-btn"
+              onClick={resetQuiz}
+              title="পুনরায় সম্পূর্ণ পরীক্ষা / কুইজ শুরু করুন"
+            >
+              <i className="fa-solid fa-rotate-right"></i>
+              <span>পুনরায় অনুশীলন শুরু করুন</span>
+            </button>
+          )}
+        </div>
+
+        <div className="quiz-top-bar-right">
+          {/* Segmented Mode Switcher Box matching Screenshot 2 */}
+          <div className="quiz-mode-switcher-box">
+            <button
+              type="button"
+              className={`quiz-mode-btn ${activeMode === 'practice' ? 'active' : ''}`}
+              onClick={() => handleModeChange('practice')}
+              title="অনুশীলন মোড"
+            >
+              <i className="fa-regular fa-circle-check"></i>
+              <span>অনুশীলন মোড</span>
+            </button>
+
+            <button
+              type="button"
+              className={`quiz-mode-btn ${activeMode === 'read' ? 'active' : ''}`}
+              onClick={() => handleModeChange('read')}
+              title="পড়ুন মোড"
+            >
+              <i className="fa-solid fa-book-open"></i>
+              <span>পড়ুন মোড</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
       <div
         className="quiz-container"
         style={{
@@ -1551,12 +1798,111 @@ function QuestionsComponentInternal() {
           '--quiz-circle-weight': fontWeight === 'thin' ? '500' : fontWeight === 'medium' ? '700' : fontWeight === 'bold' ? '800' : '700'
         }}
       >
+        {/* 1. Completion Summary Banner right below top box when all answers are submitted */}
+        {displayQuestions.length > 0 && Object.keys(answeredQuestions).length === displayQuestions.length && !isReviewWrongMode && !isRetakeWrongMode && (
+          <div className="quiz-completion-banner">
+            <div className="quiz-completion-banner-info">
+              <div className="quiz-completion-banner-icon">
+                <i className="fa-solid fa-circle-check"></i>
+              </div>
+              <div className="quiz-completion-banner-text">
+                <span className="quiz-banner-score-text">
+                  আপনার মোট প্রাপ্ত স্কোর: <strong>{formatScore(score)}</strong>
+                </span>
+                <span className="quiz-banner-divider">|</span>
+                <span className="quiz-banner-wrong-text">
+                  ভুল উত্তর: <strong className={incorrectCount > 0 ? 'text-danger' : 'text-success'}>{toBengaliNumber(incorrectCount)} টি</strong>
+                </span>
+                {incorrectCount === 0 && (
+                  <span className="quiz-banner-perfect-text">🎉 কোনো ভুল নেই, সব উত্তর সঠিক!</span>
+                )}
+              </div>
+            </div>
+
+            <div className="quiz-completion-banner-actions">
+              {incorrectCount > 0 && (
+                <>
+                  <button
+                    type="button"
+                    className="quiz-banner-btn btn-banner-view-wrong"
+                    onClick={handleViewWrongAnswers}
+                  >
+                    <i className="fa-solid fa-eye"></i> ভুল উত্তর দেখুন
+                  </button>
+                  <button
+                    type="button"
+                    className="quiz-banner-btn btn-banner-retake-wrong"
+                    onClick={handleRetakeWrongAnswers}
+                  >
+                    <i className="fa-solid fa-pen-to-square"></i> ভুল উত্তরের ওপর পরীক্ষা দিন
+                  </button>
+                </>
+              )}
+              <button
+                type="button"
+                className="quiz-banner-btn btn-banner-reset-full"
+                onClick={resetQuiz}
+              >
+                <i className="fa-solid fa-rotate-right"></i> পুনরায় সম্পূর্ণ পরীক্ষা দিন
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* 2. Retake Wrong Questions Banner ("ভুল উত্তরের ওপর পরীক্ষা দিন") */}
+        {isRetakeWrongMode && (
+          <div className="quiz-retake-mode-banner">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <i className="fa-solid fa-triangle-exclamation" style={{ color: '#e11d48', fontSize: '18px' }}></i>
+              <span>
+                ভুল উত্তর দেওয়া <strong>{toBengaliNumber(displayQuestions.length)}</strong>টি প্রশ্নের ওপর পুনরায় পরীক্ষা দিচ্ছেন।
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={handleExitRetakeMode}
+              className="btn-exit-retake"
+            >
+              <i className="fa-solid fa-arrow-left"></i> মূল পরীক্ষায় ফিরে যান
+            </button>
+          </div>
+        )}
+
+        {/* 3. View Wrong Answers Banner ("ভুল উত্তর দেখুন") */}
+        {isReviewWrongMode && (
+          <div className="quiz-review-mode-banner">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <i className="fa-solid fa-circle-exclamation" style={{ color: '#d97706', fontSize: '18px' }}></i>
+              <span>
+                ভুল উত্তর দেওয়া <strong>{toBengaliNumber(displayQuestions.length)}</strong>টি প্রশ্নের সঠিক উত্তর ও ব্যাখ্যা নিচে প্রদর্শিত হচ্ছে।
+              </span>
+            </div>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                onClick={handleExitReviewMode}
+                className="btn-banner-reset"
+                style={{ background: '#d97706' }}
+              >
+                <i className="fa-solid fa-arrow-left"></i> মূল পরীক্ষায় ফিরুন
+              </button>
+              <button
+                type="button"
+                onClick={handleRetakeWrongAnswers}
+                className="btn-banner-retake"
+              >
+                <i className="fa-solid fa-pen-to-square"></i> ভুল উত্তরের ওপর পরীক্ষা দিন
+              </button>
+            </div>
+          </div>
+        )}
+
         <h1>Online Questions & Exam Practice</h1>
         <h2>{categoryParam ? formatCategoryDisplay(categoryParam) : 'সাধারণ জ্ঞান ও বিষয়ভিত্তিক প্রশ্নব্যাংক'}</h2>
 
         <div className="quiz-header-info-bar">
           <div className="quiz-exam-path">
-            <i className="fa-solid fa-folder-tree" style={{ marginRight: '6px', color: 'var(--primary, #007bff)' }}></i>
+            <i className="fa-solid fa-square-poll-horizontal" style={{ marginRight: '6px', color: 'var(--primary, #007bff)' }}></i>
             {categoryParam ? formatCategoryDisplay(categoryParam) : 'সকল প্রশ্নব্যাংক'}
           </div>
           <div className="quiz-header-right-actions">
@@ -1577,18 +1923,123 @@ function QuestionsComponentInternal() {
         {/* Controls Bar */}
         <div className="quiz-controls-bar">
           <div className="quiz-nav-actions">
-            {/* Read Mode Switch */}
-            <label className="quiz-switch-label" style={{ background: '#e2e8f0', padding: '4px 12px', borderRadius: '20px', fontWeight: 'bold' }}>
-              <label className="quiz-switch">
-                <input
-                  type="checkbox"
-                  checked={isReadMode}
-                  onChange={(e) => handleReadModeToggle(e.target.checked)}
-                />
-                <span className="quiz-slider"></span>
-              </label>
-              আগে পড়ুন
-            </label>
+            {/* Questions Count Custom Dropdown Menu */}
+            <div className="quiz-layout-dropdown-wrapper" ref={limitDropdownRef}>
+              <button
+                type="button"
+                className="quiz-layout-trigger-btn"
+                onClick={() => setShowLimitMenu(!showLimitMenu)}
+                title="প্রশ্নের সংখ্যা নির্ধারণ করুন"
+              >
+                <i className="fa-solid fa-list-ol" style={{ color: '#007bff' }}></i>
+                <span>
+                  {limit === 'all'
+                    ? 'সকল প্রশ্ন'
+                    : limit === '20'
+                    ? '২০ টি প্রশ্ন'
+                    : limit === '25'
+                    ? '২৫ টি প্রশ্ন'
+                    : limit === '50'
+                    ? '৫০ টি প্রশ্ন'
+                    : limit === '100'
+                    ? '১০০ টি প্রশ্ন'
+                    : 'সকল প্রশ্ন'}
+                </span>
+                <i className={`fa-solid fa-chevron-${showLimitMenu ? 'up' : 'down'}`} style={{ fontSize: '11px', color: '#64748b' }}></i>
+              </button>
+
+              {showLimitMenu && (
+                <div className="quiz-layout-popup-menu">
+                  <button
+                    type="button"
+                    className={`quiz-layout-menu-item ${limit === 'all' ? 'active' : ''}`}
+                    onClick={() => { setLimit('all'); setRangeIndex(0); setShowLimitMenu(false); }}
+                  >
+                    <div className="quiz-layout-radio-circle">
+                      {limit === 'all' && <div className="quiz-layout-radio-inner"></div>}
+                    </div>
+                    <span>সকল প্রশ্ন</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className={`quiz-layout-menu-item ${limit === '20' ? 'active' : ''}`}
+                    onClick={() => { setLimit('20'); setRangeIndex(0); setShowLimitMenu(false); }}
+                  >
+                    <div className="quiz-layout-radio-circle">
+                      {limit === '20' && <div className="quiz-layout-radio-inner"></div>}
+                    </div>
+                    <span>২০ টি প্রশ্ন</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className={`quiz-layout-menu-item ${limit === '25' ? 'active' : ''}`}
+                    onClick={() => { setLimit('25'); setRangeIndex(0); setShowLimitMenu(false); }}
+                  >
+                    <div className="quiz-layout-radio-circle">
+                      {limit === '25' && <div className="quiz-layout-radio-inner"></div>}
+                    </div>
+                    <span>২৫ টি প্রশ্ন</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className={`quiz-layout-menu-item ${limit === '50' ? 'active' : ''}`}
+                    onClick={() => { setLimit('50'); setRangeIndex(0); setShowLimitMenu(false); }}
+                  >
+                    <div className="quiz-layout-radio-circle">
+                      {limit === '50' && <div className="quiz-layout-radio-inner"></div>}
+                    </div>
+                    <span>৫০ টি প্রশ্ন</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className={`quiz-layout-menu-item ${limit === '100' ? 'active' : ''}`}
+                    onClick={() => { setLimit('100'); setRangeIndex(0); setShowLimitMenu(false); }}
+                  >
+                    <div className="quiz-layout-radio-circle">
+                      {limit === '100' && <div className="quiz-layout-radio-inner"></div>}
+                    </div>
+                    <span>১০০ টি প্রশ্ন</span>
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Range Custom Dropdown Menu shown when limit !== 'all' */}
+            {limit !== 'all' && (
+              <div className="quiz-layout-dropdown-wrapper" ref={rangeDropdownRef}>
+                <button
+                  type="button"
+                  className="quiz-layout-trigger-btn"
+                  onClick={() => setShowRangeMenu(!showRangeMenu)}
+                  title="প্রশ্নের রেঞ্জ নির্ধারণ করুন"
+                >
+                  <span>{getRangeOptions().find((o) => o.value === rangeIndex)?.label || '১ - ২০'}</span>
+                  <i className={`fa-solid fa-chevron-${showRangeMenu ? 'up' : 'down'}`} style={{ fontSize: '11px', color: '#64748b' }}></i>
+                </button>
+
+                {showRangeMenu && (
+                  <div className="quiz-layout-popup-menu" style={{ maxHeight: '220px', overflowY: 'auto' }}>
+                    {getRangeOptions().map((opt, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        className={`quiz-layout-menu-item ${rangeIndex === opt.value ? 'active' : ''}`}
+                        onClick={() => { setRangeIndex(opt.value); setShowRangeMenu(false); }}
+                      >
+                        <div className="quiz-layout-radio-circle">
+                          {rangeIndex === opt.value && <div className="quiz-layout-radio-inner"></div>}
+                        </div>
+                        <span>{opt.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Ask AI Switcher */}
             <label
@@ -1621,126 +2072,6 @@ function QuestionsComponentInternal() {
           </div>
 
           <div className="quiz-right-controls-group">
-            {/* Range and Limit filters */}
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              {/* Questions Count Custom Dropdown Menu */}
-              <div className="quiz-layout-dropdown-wrapper" ref={limitDropdownRef}>
-                <button
-                  type="button"
-                  className="quiz-layout-trigger-btn"
-                  onClick={() => setShowLimitMenu(!showLimitMenu)}
-                  title="প্রশ্নের সংখ্যা নির্ধারণ করুন"
-                >
-                  <i className="fa-solid fa-list-ol" style={{ color: '#007bff' }}></i>
-                  <span>
-                    {limit === 'all'
-                      ? 'সকল প্রশ্ন'
-                      : limit === '20'
-                      ? '২০ টি প্রশ্ন'
-                      : limit === '25'
-                      ? '২৫ টি প্রশ্ন'
-                      : limit === '50'
-                      ? '৫০ টি প্রশ্ন'
-                      : limit === '100'
-                      ? '১০০ টি প্রশ্ন'
-                      : 'সকল প্রশ্ন'}
-                  </span>
-                  <i className={`fa-solid fa-chevron-${showLimitMenu ? 'up' : 'down'}`} style={{ fontSize: '11px', color: '#64748b' }}></i>
-                </button>
-
-                {showLimitMenu && (
-                  <div className="quiz-layout-popup-menu">
-                    <button
-                      type="button"
-                      className={`quiz-layout-menu-item ${limit === 'all' ? 'active' : ''}`}
-                      onClick={() => { setLimit('all'); setRangeIndex(0); setShowLimitMenu(false); }}
-                    >
-                      <div className="quiz-layout-radio-circle">
-                        {limit === 'all' && <div className="quiz-layout-radio-inner"></div>}
-                      </div>
-                      <span>সকল প্রশ্ন</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      className={`quiz-layout-menu-item ${limit === '20' ? 'active' : ''}`}
-                      onClick={() => { setLimit('20'); setRangeIndex(0); setShowLimitMenu(false); }}
-                    >
-                      <div className="quiz-layout-radio-circle">
-                        {limit === '20' && <div className="quiz-layout-radio-inner"></div>}
-                      </div>
-                      <span>২০ টি প্রশ্ন</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      className={`quiz-layout-menu-item ${limit === '25' ? 'active' : ''}`}
-                      onClick={() => { setLimit('25'); setRangeIndex(0); setShowLimitMenu(false); }}
-                    >
-                      <div className="quiz-layout-radio-circle">
-                        {limit === '25' && <div className="quiz-layout-radio-inner"></div>}
-                      </div>
-                      <span>২৫ টি প্রশ্ন</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      className={`quiz-layout-menu-item ${limit === '50' ? 'active' : ''}`}
-                      onClick={() => { setLimit('50'); setRangeIndex(0); setShowLimitMenu(false); }}
-                    >
-                      <div className="quiz-layout-radio-circle">
-                        {limit === '50' && <div className="quiz-layout-radio-inner"></div>}
-                      </div>
-                      <span>৫০ টি প্রশ্ন</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      className={`quiz-layout-menu-item ${limit === '100' ? 'active' : ''}`}
-                      onClick={() => { setLimit('100'); setRangeIndex(0); setShowLimitMenu(false); }}
-                    >
-                      <div className="quiz-layout-radio-circle">
-                        {limit === '100' && <div className="quiz-layout-radio-inner"></div>}
-                      </div>
-                      <span>১০০ টি প্রশ্ন</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* Range Custom Dropdown Menu shown to the RIGHT when limit !== 'all' */}
-              {limit !== 'all' && (
-                <div className="quiz-layout-dropdown-wrapper" ref={rangeDropdownRef}>
-                  <button
-                    type="button"
-                    className="quiz-layout-trigger-btn"
-                    onClick={() => setShowRangeMenu(!showRangeMenu)}
-                    title="প্রশ্নের রেঞ্জ নির্ধারণ করুন"
-                  >
-                    <span>{getRangeOptions().find((o) => o.value === rangeIndex)?.label || '১ - ২০'}</span>
-                    <i className={`fa-solid fa-chevron-${showRangeMenu ? 'up' : 'down'}`} style={{ fontSize: '11px', color: '#64748b' }}></i>
-                  </button>
-
-                  {showRangeMenu && (
-                    <div className="quiz-layout-popup-menu" style={{ maxHeight: '220px', overflowY: 'auto' }}>
-                      {getRangeOptions().map((opt, i) => (
-                        <button
-                          key={i}
-                          type="button"
-                          className={`quiz-layout-menu-item ${rangeIndex === opt.value ? 'active' : ''}`}
-                          onClick={() => { setRangeIndex(opt.value); setShowRangeMenu(false); }}
-                        >
-                          <div className="quiz-layout-radio-circle">
-                            {rangeIndex === opt.value && <div className="quiz-layout-radio-inner"></div>}
-                          </div>
-                          <span>{opt.label}</span>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
 
             {/* Switches: Explanation, Time and Score */}
             <div className="quiz-switch-group">
@@ -1836,10 +2167,69 @@ function QuestionsComponentInternal() {
                     </div>
                   </div>
 
-                  <div className="quiz-global-popup-body" style={{ padding: '13px' }}>
-                    {/* Section 1: Option Layout */}
-                  {/* Section 1: Layout */}
-                  <div className={`quiz-global-section layout-section ${globalAccordion.layout ? 'active' : ''}`}>
+                  <div className="quiz-global-popup-body">
+                    {/* Pre-built Preset Profiles Switcher */}
+                    <div className="quiz-presets-wrapper">
+                      <div className="quiz-presets-header">
+                        <span className="quiz-presets-label">
+                          <i className="fa-solid fa-sliders" style={{ color: '#0284c7' }}></i>
+                          <span>প্রি-সেট সেটিংস</span>
+                        </span>
+                        <span className="quiz-preset-current-indicator">
+                          সক্রিয়: <strong>{PRESET_LIST.find((p) => p.id === activePreset)?.name}</strong>
+                        </span>
+                      </div>
+                      <div className="quiz-presets-description">
+                        <span>যেকোনো প্রি-সেট সিলেক্ট করে নিচের ফিচারগুলো নিজের মতো পরিবর্তন করতে পারবেন, যা এই মোডে সংরক্ষিত থাকবে।</span>
+                      </div>
+                      <div className="quiz-presets-bar">
+                        {PRESET_LIST.map((preset) => {
+                          const isActive = activePreset === preset.id;
+                          return (
+                            <button
+                              key={preset.id}
+                              type="button"
+                              className={`quiz-preset-btn ${isActive ? `active preset-${preset.id}` : ''}`}
+                              onClick={() => handleSelectPreset(preset.id)}
+                              title={`${preset.name} মোড সক্রিয় করুন`}
+                            >
+                              <i className={`fa-solid ${preset.icon}`}></i>
+                              <span>{preset.name}</span>
+                              {isActive && <span className="quiz-preset-active-dot"></span>}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Active Preset Features Container Box */}
+                    <div className={`quiz-preset-features-box preset-theme-${activePreset}`}>
+                      <div className="quiz-preset-features-header">
+                        <div className="quiz-preset-features-header-left">
+                          <span className="quiz-preset-features-icon-badge">
+                            <i className={`fa-solid ${PRESET_LIST.find((p) => p.id === activePreset)?.icon || 'fa-sliders'}`}></i>
+                          </span>
+                          <div className="quiz-preset-features-title-group">
+                            <div className="quiz-preset-features-main-title">
+                              <span>&lsquo;{PRESET_LIST.find((p) => p.id === activePreset)?.name}&rsquo; মোডের ফিচারসমূহ</span>
+                              <span className="quiz-preset-features-tag">
+                                {activePreset === 'custom' ? 'ব্যক্তিগত সেটিংস' : 'প্রি-বিল্ট ফিচারস'}
+                              </span>
+                            </div>
+                            <span className="quiz-preset-features-subtitle">
+                              {activePreset === 'practice' && 'সাধারণ অনুশীলন ও অপশনভিত্তিক স্বয়ংক্রিয় ব্যাখ্যা'}
+                              {activePreset === 'read' && 'সঠিক উত্তর সরাসরি প্রদর্শন ও পড়ার সুবিধাজনক মোড'}
+                              {activePreset === 'exam' && 'পরীক্ষার আদলে নিরপেক্ষ ভিউ (কোনো তাত্ক্ষণিক উত্তর নেই)'}
+                              {activePreset === 'custom' && 'আপনার সংরক্ষিত নিজস্ব ব্যক্তিগত সেটিংস ও ফিচারসমূহ'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="quiz-preset-features-body">
+                        {/* Section 1: Option Layout */}
+                        {/* Section 1: Layout */}
+                        <div className={`quiz-global-section layout-section ${globalAccordion.layout ? 'active' : ''}`}>
                     <div
                       className="quiz-global-section-header"
                       onClick={() => toggleGlobalAccordion('layout')}
@@ -2808,7 +3198,7 @@ function QuestionsComponentInternal() {
 
                           {fontAccordion.family && (
                             <div className="quiz-global-sub-card">
-                              <div className="quiz-font-family-list" style={{ maxHeight: '260px', overflowY: 'auto' }}>
+                              <div className="quiz-font-family-list">
                                 {FONT_FAMILIES.map((font) => (
                                   <button
                                     key={font.id}
@@ -2891,7 +3281,7 @@ function QuestionsComponentInternal() {
                       </div>
                       <div className="quiz-global-section-header-right">
                         <span className="quiz-font-accordion-badge">
-                          <span className="quiz-font-accordion-badge-text">২টি অপশন</span>
+                          <span className="quiz-font-accordion-badge-text">১টি অপশন</span>
                         </span>
                         <i className={`fa-solid fa-${globalAccordion.switches ? 'minus' : 'plus'} quiz-font-accordion-plus-minus`}></i>
                       </div>
@@ -2899,29 +3289,7 @@ function QuestionsComponentInternal() {
 
                     {globalAccordion.switches && (
                       <div className="quiz-global-section-body">
-                        {/* Switch 1: Color */}
-                        <div className="quiz-global-switch-row">
-                          <div className="quiz-global-switch-info">
-                            <span className="quiz-color-dots-icon" style={{ display: 'inline-flex' }}>
-                              <span className="quiz-dot-red"></span>
-                              <span className="quiz-dot-green"></span>
-                            </span>
-                            <div className="quiz-global-switch-text">
-                              <span className="quiz-global-switch-title">কালার হাইলাইট</span>
-                              <span className="quiz-global-switch-sub">সঠিক ও ভুল উত্তরের কালার</span>
-                            </div>
-                          </div>
-                          <label className="quiz-switch">
-                            <input
-                              type="checkbox"
-                              checked={showColor}
-                              onChange={(e) => setShowColor(e.target.checked)}
-                            />
-                            <span className="quiz-slider"></span>
-                          </label>
-                        </div>
-
-                        {/* Switch 2: Show Answer */}
+                        {/* Switch: Show Answer */}
                         <div className="quiz-global-switch-row">
                           <div className="quiz-global-switch-info">
                             <i className="fa-solid fa-circle-check" style={{ color: '#27ae60', fontSize: '15px' }}></i>
@@ -2934,7 +3302,11 @@ function QuestionsComponentInternal() {
                             <input
                               type="checkbox"
                               checked={showAnswer}
-                              onChange={(e) => setShowAnswer(e.target.checked)}
+                              onChange={(e) => {
+                                const checked = e.target.checked;
+                                setShowAnswer(checked);
+                                saveActivePresetSetting('showAnswer', checked);
+                              }}
                             />
                             <span className="quiz-slider"></span>
                           </label>
@@ -2942,6 +3314,8 @@ function QuestionsComponentInternal() {
                       </div>
                     )}
                   </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
@@ -2950,56 +3324,7 @@ function QuestionsComponentInternal() {
           </div>
         </div>
 
-        {/* Completion Summary Banner right below controls bar when all answers are submitted */}
-        {displayQuestions.length > 0 && Object.keys(answeredQuestions).length === displayQuestions.length && !isReviewWrongMode && !isRetakeWrongMode && (
-          <div className="quiz-completion-banner">
-            <div className="quiz-completion-banner-info">
-              <div className="quiz-completion-banner-icon">
-                <i className="fa-solid fa-circle-check"></i>
-              </div>
-              <div className="quiz-completion-banner-text">
-                <span className="quiz-banner-score-text">
-                  আপনার মোট প্রাপ্ত স্কোর: <strong>{formatScore(score)}</strong>
-                </span>
-                <span className="quiz-banner-divider">|</span>
-                <span className="quiz-banner-wrong-text">
-                  ভুল উত্তর: <strong className={incorrectCount > 0 ? 'text-danger' : 'text-success'}>{toBengaliNumber(incorrectCount)} টি</strong>
-                </span>
-                {incorrectCount === 0 && (
-                  <span className="quiz-banner-perfect-text">🎉 কোনো ভুল নেই, সব উত্তর সঠিক!</span>
-                )}
-              </div>
-            </div>
 
-            <div className="quiz-completion-banner-actions">
-              {incorrectCount > 0 && (
-                <>
-                  <button
-                    type="button"
-                    className="quiz-banner-btn btn-banner-view-wrong"
-                    onClick={handleViewWrongAnswers}
-                  >
-                    <i className="fa-solid fa-eye"></i> ভুল উত্তর দেখুন
-                  </button>
-                  <button
-                    type="button"
-                    className="quiz-banner-btn btn-banner-retake-wrong"
-                    onClick={handleRetakeWrongAnswers}
-                  >
-                    <i className="fa-solid fa-pen-to-square"></i> ভুল উত্তরের ওপর পরীক্ষা দিন
-                  </button>
-                </>
-              )}
-              <button
-                type="button"
-                className="quiz-banner-btn btn-banner-reset-full"
-                onClick={resetQuiz}
-              >
-                <i className="fa-solid fa-rotate-right"></i> পুনরায় সম্পূর্ণ পরীক্ষা দিন
-              </button>
-            </div>
-          </div>
-        )}
 
         {/* Questions Display */}
         {!planStatus.isPaid ? (
@@ -3061,53 +3386,7 @@ function QuestionsComponentInternal() {
           </p>
         ) : (
           <>
-            {/* Retake Wrong Questions Banner */}
-            {isRetakeWrongMode && (
-              <div className="quiz-retake-mode-banner">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <i className="fa-solid fa-triangle-exclamation" style={{ color: '#e11d48', fontSize: '18px' }}></i>
-                  <span>
-                    ভুল উত্তর দেওয়া <strong>{toBengaliNumber(displayQuestions.length)}</strong>টি প্রশ্নের ওপর পুনরায় পরীক্ষা দিচ্ছেন।
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleExitRetakeMode}
-                  className="btn-exit-retake"
-                >
-                  <i className="fa-solid fa-arrow-left"></i> মূল পরীক্ষায় ফিরে যান
-                </button>
-              </div>
-            )}
 
-            {/* View Wrong Answers Banner */}
-            {isReviewWrongMode && (
-              <div className="quiz-review-mode-banner">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <i className="fa-solid fa-circle-exclamation" style={{ color: '#d97706', fontSize: '18px' }}></i>
-                  <span>
-                    ভুল উত্তর দেওয়া <strong>{toBengaliNumber(displayQuestions.length)}</strong>টি প্রশ্নের সঠিক উত্তর ও ব্যাখ্যা নিচে প্রদর্শিত হচ্ছে।
-                  </span>
-                </div>
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                  <button
-                    type="button"
-                    onClick={handleExitReviewMode}
-                    className="btn-banner-reset"
-                    style={{ background: '#d97706' }}
-                  >
-                    <i className="fa-solid fa-arrow-left"></i> মূল পরীক্ষায় ফিরুন
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleRetakeWrongAnswers}
-                    className="btn-banner-retake"
-                  >
-                    <i className="fa-solid fa-pen-to-square"></i> ভুল উত্তরের ওপর পরীক্ষা দিন
-                  </button>
-                </div>
-              </div>
-            )}
 
             {questionLayout === '2q-col' ? (
               <div className={`quiz-questions-col-wrapper ${questionStyle === 'box' ? 'style-box-mode' : (questionStyle === 'circle' || questionStyle === 'nostyle') ? 'style-nostyle-mode' : ''} midline-${middleLine}`}>
@@ -3188,16 +3467,16 @@ function QuestionsComponentInternal() {
           </>
         )}
 
-        {/* Result Section */}
-        {!loading && displayQuestions.length > 0 && (
+        {/* Result Section: Shown ONLY after all answers are submitted */}
+        {!loading && !isReadMode && displayQuestions.length > 0 && Object.keys(answeredQuestions).length === displayQuestions.length && !isReviewWrongMode && (
           <div className="quiz-result-section">
             <h2>পরীক্ষার ফলাফল</h2>
             <div className="quiz-detailed-stats">
-              সঠিক উত্তর: <span className="quiz-correct-count">{correctCount}</span> টি
+              সঠিক উত্তর: <span className="quiz-correct-count">{toBengaliNumber(correctCount)}</span> টি
               &nbsp;&nbsp;|&nbsp;&nbsp;
-              ভুল উত্তর: <span className="quiz-incorrect-count">{incorrectCount}</span> টি
+              ভুল উত্তর: <span className="quiz-incorrect-count">{toBengaliNumber(incorrectCount)}</span> টি
               &nbsp;&nbsp;|&nbsp;&nbsp;
-              উত্তর দেওয়া হয়নি: <span>{unansweredCount}</span> টি
+              উত্তর দেওয়া হয়নি: <span>{toBengaliNumber(unansweredCount)}</span> টি
             </div>
 
             {/* Progress Bar with Interactive Percentage & Hover Tooltip */}
@@ -3229,7 +3508,7 @@ function QuestionsComponentInternal() {
             </div>
 
             <div id="final-score">
-              আপনার মোট প্রাপ্ত স্কোর: {score.toFixed(1)}
+              আপনার মোট প্রাপ্ত স্কোর: {formatScore(score)}
             </div>
 
             {/* User-requested Result Action Buttons */}
