@@ -96,11 +96,16 @@ const PRESET_LIST = [
   { id: 'custom', name: 'My setting', icon: 'fa-sliders' }
 ];
 
+const BANGLA_LETTERS = ['ক', 'খ', 'গ', 'ঘ', 'ঙ'];
+const ENGLISH_LETTERS = ['A', 'B', 'C', 'D', 'E'];
+
 const DEFAULT_PRESET_PROFILES = {
   practice: {
     questionLayout: '2q-col',
     optionLayout: '1',
     middleLine: 'dotted',
+    middleGap: 20,
+    optionLetter: 'bangla',
     questionStyle: 'dotted',
     highlightMode: 'single',
     highlightColor: 'full-bg',
@@ -119,6 +124,8 @@ const DEFAULT_PRESET_PROFILES = {
     questionLayout: '2q-col',
     optionLayout: '1',
     middleLine: 'dotted',
+    middleGap: 20,
+    optionLetter: 'bangla',
     questionStyle: 'dotted',
     highlightMode: 'both',
     highlightColor: 'full-bg',
@@ -137,6 +144,8 @@ const DEFAULT_PRESET_PROFILES = {
     questionLayout: '2q-col',
     optionLayout: '1',
     middleLine: 'dotted',
+    middleGap: 20,
+    optionLetter: 'bangla',
     questionStyle: 'box',
     highlightMode: 'neutral',
     highlightColor: 'full-bg',
@@ -155,6 +164,8 @@ const DEFAULT_PRESET_PROFILES = {
     questionLayout: '2q-col',
     optionLayout: '1',
     middleLine: 'dotted',
+    middleGap: 20,
+    optionLetter: 'bangla',
     questionStyle: 'dotted',
     highlightMode: 'single',
     highlightColor: 'full-bg',
@@ -218,9 +229,12 @@ function QuestionsComponentInternal() {
   // Layout states: Question Layout ('2q-col' | '2q-row' | '3q-col' | '1q') & Option Layout ('1' | '2' | '4')
   const [questionLayout, setQuestionLayout] = useState('2q-col'); // Default: '2q-col' (১ লাইনে ২টি প্রশ্ন - উপর-নিচ ক্রম)
   const [optionLayout, setOptionLayout] = useState('1'); // Default: '1' (১ লাইনে ১টি option)
-  const [layoutSubAccordion, setLayoutSubAccordion] = useState({ style: true, question: true, option: false, middleLine: false });
-  // Middle Line state: 'dotted' (default) | 'solid' | 'none-no-gap' | 'gap-30'
+  const [layoutSubAccordion, setLayoutSubAccordion] = useState({ style: true, question: true, option: false, middleLine: false, middleGap: false });
+  // Middle Line state: 'dotted' (default) | 'solid' | 'none'
   const [middleLine, setMiddleLine] = useState('dotted');
+  // Middle Gap state: 0 (No Gap) | 20 (default) | 30 | custom
+  const [middleGap, setMiddleGap] = useState(20);
+  const [customMiddleGapInput, setCustomMiddleGapInput] = useState('');
   const [showGlobalSettingsMenu, setShowGlobalSettingsMenu] = useState(false);
   const [showFourOptionConditionHint, setShowFourOptionConditionHint] = useState(false);
   const [resetSettingsSuccess, setResetSettingsSuccess] = useState(false);
@@ -289,6 +303,27 @@ function QuestionsComponentInternal() {
       localStorage.setItem('topmcqbd_middle_line', line);
     }
     saveActivePresetSetting('middleLine', line);
+  };
+
+  const handleSelectMiddleGap = (gap) => {
+    const num = Math.max(0, Math.min(100, parseInt(gap, 10) || 0));
+    setMiddleGap(num);
+    if (![0, 20, 30].includes(num)) {
+      setCustomMiddleGapInput(String(num));
+    } else {
+      setCustomMiddleGapInput('');
+    }
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('topmcqbd_middle_gap', String(num));
+    }
+    saveActivePresetSetting('middleGap', num);
+  };
+
+  const handleApplyCustomMiddleGap = () => {
+    const num = parseInt(customMiddleGapInput, 10);
+    if (!isNaN(num) && num >= 0 && num <= 100) {
+      handleSelectMiddleGap(num);
+    }
   };
 
   // Question Design Style: 'dotted' (default) | 'box'
@@ -377,7 +412,36 @@ function QuestionsComponentInternal() {
     }));
   };
 
-  const [globalAccordion, setGlobalAccordion] = useState({ layout: false, questionStyle: false, colorAnswerStyle: false, explanation: false, cutMark: false, font: false, switches: false });
+  // Option Letter state: 'bangla' (default: ক, খ, গ, ঘ) | 'english' (A, B, C, D)
+  const [optionLetter, setOptionLetter] = useState('bangla');
+
+  const handleSelectOptionLetter = (letter) => {
+    setOptionLetter(letter);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('topmcqbd_option_letter', letter);
+    }
+    saveActivePresetSetting('optionLetter', letter);
+  };
+
+  // Explanation & Answer Sub-Accordion states: { answer: true, explanation: true }
+  const [explanationSubAccordion, setExplanationSubAccordion] = useState({ answer: true, explanation: true });
+
+  const toggleExplanationSubAccordion = (sec) => {
+    setExplanationSubAccordion((prev) => ({
+      ...prev,
+      [sec]: !prev[sec]
+    }));
+  };
+
+  const handleSelectShowAnswer = (val) => {
+    setShowAnswer(val);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('topmcqbd_show_answer', val ? 'true' : 'false');
+    }
+    saveActivePresetSetting('showAnswer', val);
+  };
+
+  const [globalAccordion, setGlobalAccordion] = useState({ layout: false, questionStyle: false, colorAnswerStyle: false, explanation: false, optionLetter: false, cutMark: false, font: false });
   const hasAnyOpenAccordion = Object.values(globalAccordion).some(Boolean);
 
   const toggleGlobalAccordion = (sec) => {
@@ -457,6 +521,11 @@ function QuestionsComponentInternal() {
       setMiddleLine(merged.middleLine);
       try { localStorage.setItem('topmcqbd_middle_line', merged.middleLine); } catch (e) {}
     }
+    if (typeof merged.middleGap === 'number') {
+      setMiddleGap(merged.middleGap);
+      setCustomMiddleGapInput(![0, 20, 30].includes(merged.middleGap) ? String(merged.middleGap) : '');
+      try { localStorage.setItem('topmcqbd_middle_gap', String(merged.middleGap)); } catch (e) {}
+    }
 
     // 2. Question Style
     if (merged.questionStyle) {
@@ -484,6 +553,12 @@ function QuestionsComponentInternal() {
         setShowExplanation(false);
       }
       try { localStorage.setItem('topmcqbd_explanation_mode', merged.explanationMode); } catch (e) {}
+    }
+
+    // Option Letter
+    if (merged.optionLetter) {
+      setOptionLetter(merged.optionLetter);
+      try { localStorage.setItem('topmcqbd_option_letter', merged.optionLetter); } catch (e) {}
     }
 
     // 5. Cut Mark
@@ -695,9 +770,9 @@ function QuestionsComponentInternal() {
       return;
     }
 
-    const bengaliLetters = ['ক', 'খ', 'গ', 'ঘ', 'ঙ'];
+    const activeLetters = optionLetter === 'english' ? ENGLISH_LETTERS : BANGLA_LETTERS;
     const promptText = `প্রশ্ন ${idx + 1}: ${q.q}\nঅপশনসমূহ:\n${(q.options || [])
-      .map((opt, i) => `(${bengaliLetters[i] || i + 1}) ${opt}`)
+      .map((opt, i) => `(${activeLetters[i] || i + 1}) ${opt}`)
       .join('\n')}\nদয়া করে এই MCQ টির সঠিক উত্তর নির্ণয় করে প্রতিটি অপশন বিশ্লেষণসহ বিস্তারিত সহজ বাংলায় বুঝিয়ে দিন।`;
 
     setActiveAiPrompt(promptText);
@@ -799,8 +874,15 @@ function QuestionsComponentInternal() {
           legacyPractice.optionLayout = savedOptLayout;
         }
         const savedMiddleLine = localStorage.getItem('topmcqbd_middle_line');
-        if (savedMiddleLine && ['dotted', 'solid', 'none-no-gap', 'gap-space', 'gap-30'].includes(savedMiddleLine)) {
-          legacyPractice.middleLine = savedMiddleLine === 'gap-30' ? 'gap-space' : savedMiddleLine;
+        if (savedMiddleLine && ['dotted', 'solid', 'none', 'none-no-gap', 'gap-space', 'gap-30'].includes(savedMiddleLine)) {
+          legacyPractice.middleLine = ['none-no-gap', 'gap-space', 'gap-30'].includes(savedMiddleLine) ? 'none' : savedMiddleLine;
+        }
+        const savedMiddleGap = localStorage.getItem('topmcqbd_middle_gap');
+        if (savedMiddleGap !== null) {
+          const num = parseInt(savedMiddleGap, 10);
+          if (!isNaN(num) && num >= 0 && num <= 100) {
+            legacyPractice.middleGap = num;
+          }
         }
 
         // Style
@@ -820,6 +902,14 @@ function QuestionsComponentInternal() {
         if (savedExpMode && ['on-select', 'on-button', 'on-wrong', 'none'].includes(savedExpMode)) {
           legacyPractice.explanationMode = savedExpMode;
           legacyPractice.showExplanation = savedExpMode !== 'none';
+        }
+        const savedOptionLetter = localStorage.getItem('topmcqbd_option_letter');
+        if (savedOptionLetter && ['bangla', 'english'].includes(savedOptionLetter)) {
+          legacyPractice.optionLetter = savedOptionLetter;
+        }
+        const savedShowAnswer = localStorage.getItem('topmcqbd_show_answer');
+        if (savedShowAnswer !== null) {
+          legacyPractice.showAnswer = savedShowAnswer === 'true';
         }
 
         const initialProfiles = {
@@ -1080,8 +1170,9 @@ function QuestionsComponentInternal() {
 
     applyPresetProfile(currentPreset, defaultProf);
 
-    setLayoutSubAccordion({ style: true, question: true, option: false, middleLine: false });
+    setLayoutSubAccordion({ style: true, question: true, option: false, middleLine: false, middleGap: false });
     setColorStyleSubAccordion({ style: true, color: true });
+    setExplanationSubAccordion({ answer: true, explanation: true });
     setShowFourOptionConditionHint(false);
 
     // Show temporary success feedback
@@ -1366,8 +1457,10 @@ function QuestionsComponentInternal() {
   };
 
   const getBanglaLetter = (idx) => {
-    const letters = ['ক', 'খ', 'গ', 'ঘ', 'ঙ'];
-    return letters[idx] || idx + 1;
+    if (optionLetter === 'english') {
+      return ENGLISH_LETTERS[idx] || String.fromCharCode(65 + idx);
+    }
+    return BANGLA_LETTERS[idx] || idx + 1;
   };
 
   const getRangeOptions = () => {
@@ -1563,11 +1656,11 @@ function QuestionsComponentInternal() {
           })}
         </div>
 
-        {/* Correct Answer reveal: Shows after clicking/readMode/fullAnswerView AND when showAnswer switch is ON */}
-        {isAnswerVisible && (
-          <div className="quiz-answer-text" style={{ display: 'block' }}>
-            <i className="fa-solid fa-circle-check" style={{ marginRight: '6px' }}></i>
-            সঠিক উত্তর: {getOptionLabel(q.ans)}. {q.options[q.ans]}
+        {/* Case 1: Standalone Correct Answer (Shows when showAnswer is ON, explanation box is NOT visible, AND not in on-button mode) */}
+        {isAnswerVisible && (!isExplanationVisible || !q.explanation) && (explanationMode !== 'on-button' || !q.explanation) && (
+          <div className="quiz-answer-text">
+            <i className="fa-solid fa-circle-check"></i>
+            <span>সঠিক উত্তর: {getOptionLabel(q.ans)}. {q.options[q.ans]}</span>
           </div>
         )}
 
@@ -1585,10 +1678,18 @@ function QuestionsComponentInternal() {
           </div>
         )}
 
-        {/* Explanation reveal */}
+        {/* Case 2: Unified Explanation Box (Shows explanation, and if showAnswer is ON, embeds correct answer at the top) */}
         {isExplanationVisible && q.explanation && (
-          <div className="quiz-explanation-text" style={{ display: 'block' }}>
-            <strong>ব্যাখ্যা:</strong> {q.explanation}
+          <div className="quiz-explanation-text">
+            {isAnswerVisible && (
+              <div className="quiz-exp-answer-row">
+                <i className="fa-solid fa-circle-check"></i>
+                <span>সঠিক উত্তর: {getOptionLabel(q.ans)}. {q.options[q.ans]}</span>
+              </div>
+            )}
+            <div className="quiz-exp-body-row">
+              <strong>ব্যাখ্যা:</strong> {q.explanation}
+            </div>
           </div>
         )}
       </div>
@@ -2129,7 +2230,7 @@ function QuestionsComponentInternal() {
                 type="button"
                 className="quiz-layout-trigger-btn quiz-global-settings-trigger"
                 onClick={() => setShowGlobalSettingsMenu(!showGlobalSettingsMenu)}
-                title="প্রশ্ন সেটিংস (লেআউট, কাট মার্ক, ফন্ট ও ডিসপ্লে সুইচ)"
+                title="প্রশ্ন সেটিংস (লেআউট, কাট মার্ক, ফন্ট, উত্তর ও ব্যাখ্যা)"
               >
                 <i className="fa-solid fa-gear" style={{ color: '#007bff' }}></i>
                 <span>প্রশ্ন সেটিংস</span>
@@ -2168,8 +2269,8 @@ function QuestionsComponentInternal() {
                   </div>
 
                   <div className="quiz-global-popup-body">
-                    {/* Pre-built Preset Profiles Switcher */}
-                    <div className="quiz-presets-wrapper">
+                    {/* Pre-built Preset Profiles Switcher Header Info */}
+                    <div className="quiz-presets-header-box">
                       <div className="quiz-presets-header">
                         <span className="quiz-presets-label">
                           <i className="fa-solid fa-sliders" style={{ color: '#0284c7' }}></i>
@@ -2182,28 +2283,31 @@ function QuestionsComponentInternal() {
                       <div className="quiz-presets-description">
                         <span>যেকোনো প্রি-সেট সিলেক্ট করে নিচের ফিচারগুলো নিজের মতো পরিবর্তন করতে পারবেন, যা এই মোডে সংরক্ষিত থাকবে।</span>
                       </div>
+                    </div>
+
+                    {/* Preset Tabs & Features Box Container (Connected directly like Tabs with zero gap) */}
+                    <div className={`quiz-preset-tabs-container preset-theme-${activePreset}`}>
                       <div className="quiz-presets-bar">
-                        {PRESET_LIST.map((preset) => {
+                        {PRESET_LIST.map((preset, idx) => {
                           const isActive = activePreset === preset.id;
+                          const isNextActive = PRESET_LIST[idx + 1]?.id === activePreset;
                           return (
                             <button
                               key={preset.id}
                               type="button"
-                              className={`quiz-preset-btn ${isActive ? `active preset-${preset.id}` : ''}`}
+                              className={`quiz-preset-btn ${isActive ? `active preset-${preset.id}` : ''} ${isNextActive ? 'has-active-next' : ''}`}
                               onClick={() => handleSelectPreset(preset.id)}
                               title={`${preset.name} মোড সক্রিয় করুন`}
                             >
                               <i className={`fa-solid ${preset.icon}`}></i>
                               <span>{preset.name}</span>
-                              {isActive && <span className="quiz-preset-active-dot"></span>}
                             </button>
                           );
                         })}
                       </div>
-                    </div>
 
-                    {/* Active Preset Features Container Box */}
-                    <div className={`quiz-preset-features-box preset-theme-${activePreset}`}>
+                      {/* Active Preset Features Container Box (Tab Content) */}
+                      <div className={`quiz-preset-features-box preset-theme-${activePreset}`}>
                       <div className="quiz-preset-features-header">
                         <div className="quiz-preset-features-header-left">
                           <span className="quiz-preset-features-icon-badge">
@@ -2529,7 +2633,7 @@ function QuestionsComponentInternal() {
                           )}
                         </div>
 
-                        {/* Sub-Accordion 4: মাঝের লাইন (Middle Line) */}
+                        {/* Sub-Accordion 4: মাঝের লাইন (Middle Line style) */}
                         <div className={`quiz-font-sub-group ${layoutSubAccordion.middleLine ? 'active' : ''}`} style={{ marginTop: '8px' }}>
                           <div
                             className={`quiz-font-accordion-header quiz-font-sub-header ${layoutSubAccordion.middleLine ? 'active' : ''}`}
@@ -2537,7 +2641,7 @@ function QuestionsComponentInternal() {
                           >
                             <div className="quiz-font-accordion-header-left">
                               <i className="fa-solid fa-grip-lines-vertical" style={{ color: '#0284c7', fontSize: '12px' }}></i>
-                              <span style={{ fontSize: '12.5px', fontWeight: 600 }}>মাঝের লাইন (Middle Line):</span>
+                              <span style={{ fontSize: '12.5px', fontWeight: 600 }}>মাঝের লাইন (Middle Line style):</span>
                             </div>
                             <div className="quiz-font-accordion-header-right">
                               <span className="quiz-font-accordion-badge" style={{ fontSize: '11px' }}>
@@ -2546,9 +2650,7 @@ function QuestionsComponentInternal() {
                                     ? 'ডটেড লাইন'
                                     : middleLine === 'solid'
                                     ? 'সলিড লাইন'
-                                    : middleLine === 'none-no-gap'
-                                    ? 'লাইন ছাড়া'
-                                    : 'গ্যাপ স্পেস'}
+                                    : 'লাইন ছাড়া'}
                                 </span>
                               </span>
                               <i className={`fa-solid fa-chevron-${layoutSubAccordion.middleLine ? 'up' : 'down'} quiz-font-accordion-chevron`}></i>
@@ -2587,35 +2689,130 @@ function QuestionsComponentInternal() {
                                 </div>
                               </button>
 
-                              {/* 3. No Line No Gap */}
+                              {/* 3. No Line */}
                               <button
                                 type="button"
-                                className={`quiz-layout-menu-item quiz-middle-line-item ${middleLine === 'none-no-gap' ? 'active' : ''}`}
-                                onClick={() => handleSelectMiddleLine('none-no-gap')}
+                                className={`quiz-layout-menu-item quiz-middle-line-item ${(middleLine === 'none' || middleLine === 'none-no-gap' || middleLine === 'gap-space' || middleLine === 'gap-30') ? 'active' : ''}`}
+                                onClick={() => handleSelectMiddleLine('none')}
                               >
                                 <div className="quiz-layout-radio-circle">
-                                  {middleLine === 'none-no-gap' && <div className="quiz-layout-radio-inner"></div>}
+                                  {(middleLine === 'none' || middleLine === 'none-no-gap' || middleLine === 'gap-space' || middleLine === 'gap-30') && <div className="quiz-layout-radio-inner"></div>}
                                 </div>
                                 <div className="quiz-middle-line-content">
-                                  <span className="quiz-middle-line-title">৩. লাইন ও গ্যাপ ছাড়া (No Line, No Gap)</span>
-                                  <span className="quiz-middle-line-desc">কলামগুলোর মাঝে কোনো লাইন বা অতিরিক্ত ব্যবধান থাকবে না।</span>
+                                  <span className="quiz-middle-line-title">৩. লাইন ছাড়া (No Line)</span>
+                                  <span className="quiz-middle-line-desc">কলামগুলোর মাঝে কোনো ডিভাইডার লাইন থাকবে না।</span>
+                                </div>
+                              </button>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Sub-Accordion 5: মাঝের লাইন Gap */}
+                        <div className={`quiz-font-sub-group ${layoutSubAccordion.middleGap ? 'active' : ''}`} style={{ marginTop: '8px' }}>
+                          <div
+                            className={`quiz-font-accordion-header quiz-font-sub-header ${layoutSubAccordion.middleGap ? 'active' : ''}`}
+                            onClick={() => toggleLayoutSubAccordion('middleGap')}
+                          >
+                            <div className="quiz-font-accordion-header-left">
+                              <i className="fa-solid fa-arrows-left-right" style={{ color: '#0284c7', fontSize: '12px' }}></i>
+                              <span style={{ fontSize: '12.5px', fontWeight: 600 }}>মাঝের লাইন Gap:</span>
+                            </div>
+                            <div className="quiz-font-accordion-header-right">
+                              <span className="quiz-font-accordion-badge" style={{ fontSize: '11px' }}>
+                                <span className="quiz-font-accordion-badge-text">
+                                  {middleGap === 0
+                                    ? 'No Gap'
+                                    : middleGap === 20
+                                    ? '20px'
+                                    : middleGap === 30
+                                    ? '30px'
+                                    : `${middleGap}px`}
+                                </span>
+                              </span>
+                              <i className={`fa-solid fa-chevron-${layoutSubAccordion.middleGap ? 'up' : 'down'} quiz-font-accordion-chevron`}></i>
+                            </div>
+                          </div>
+
+                          {layoutSubAccordion.middleGap && (
+                            <div className="quiz-global-sub-card">
+                              {/* 1. No Gap */}
+                              <button
+                                type="button"
+                                className={`quiz-layout-menu-item quiz-middle-line-item ${middleGap === 0 ? 'active' : ''}`}
+                                onClick={() => handleSelectMiddleGap(0)}
+                              >
+                                <div className="quiz-layout-radio-circle">
+                                  {middleGap === 0 && <div className="quiz-layout-radio-inner"></div>}
+                                </div>
+                                <div className="quiz-middle-line-content">
+                                  <span className="quiz-middle-line-title">No Gap (০ পিক্সেল)</span>
+                                  <span className="quiz-middle-line-desc">কলাম বা ডিভাইডার লাইনের দুই পাশে কোনো ফাঁকা জায়গা থাকবে না।</span>
                                 </div>
                               </button>
 
-                              {/* 4. Gap Space Only */}
+                              {/* 2. 20px */}
                               <button
                                 type="button"
-                                className={`quiz-layout-menu-item quiz-middle-line-item ${(middleLine === 'gap-space' || middleLine === 'gap-30') ? 'active' : ''}`}
-                                onClick={() => handleSelectMiddleLine('gap-space')}
+                                className={`quiz-layout-menu-item quiz-middle-line-item ${middleGap === 20 ? 'active' : ''}`}
+                                onClick={() => handleSelectMiddleGap(20)}
                               >
                                 <div className="quiz-layout-radio-circle">
-                                  {(middleLine === 'gap-space' || middleLine === 'gap-30') && <div className="quiz-layout-radio-inner"></div>}
+                                  {middleGap === 20 && <div className="quiz-layout-radio-inner"></div>}
                                 </div>
                                 <div className="quiz-middle-line-content">
-                                  <span className="quiz-middle-line-title">৪. শুধু গ্যাপ স্পেস (Gap Space Only)</span>
-                                  <span className="quiz-middle-line-desc">মাঝে কোনো লাইন থাকবে না, কলামগুলোর মাঝে স্বাভাবিক ফাঁকা স্থান থাকবে।</span>
+                                  <span className="quiz-middle-line-title">20px (২০ পিক্সেল - ডিফল্ট)</span>
+                                  <span className="quiz-middle-line-desc">মাঝখানে ২০ পিক্সেল গ্যাপ (ডিভাইডার লাইন থাকলে দুই পাশে ১০ পিক্সেল করে)।</span>
                                 </div>
                               </button>
+
+                              {/* 3. 30px */}
+                              <button
+                                type="button"
+                                className={`quiz-layout-menu-item quiz-middle-line-item ${middleGap === 30 ? 'active' : ''}`}
+                                onClick={() => handleSelectMiddleGap(30)}
+                              >
+                                <div className="quiz-layout-radio-circle">
+                                  {middleGap === 30 && <div className="quiz-layout-radio-inner"></div>}
+                                </div>
+                                <div className="quiz-middle-line-content">
+                                  <span className="quiz-middle-line-title">30px (৩০ পিক্সেল)</span>
+                                  <span className="quiz-middle-line-desc">মাঝখানে ৩০ পিক্সেল গ্যাপ (ডিভাইডার লাইন থাকলে দুই পাশে ১৫ পিক্সেল করে)।</span>
+                                </div>
+                              </button>
+
+                              {/* 4. Custom Gap */}
+                              <div className="quiz-cut-mark-custom-card" style={{ marginTop: '8px', padding: '10px 12px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                                <div className="quiz-cut-mark-custom-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                                  <span style={{ fontSize: '12.5px', fontWeight: 600, color: '#334155' }}>কাস্টম গ্যাপ (Custom Gap):</span>
+                                  {![0, 20, 30].includes(middleGap) && (
+                                    <span className="quiz-font-accordion-badge" style={{ fontSize: '11px', color: '#0284c7', borderColor: '#bae6fd', background: '#f0f9ff' }}>
+                                      সক্রিয়: {middleGap}px
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="quiz-font-custom-input-row" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    max="100"
+                                    placeholder="পিক্সেল (যেমন: 25)"
+                                    value={customMiddleGapInput}
+                                    onChange={(e) => setCustomMiddleGapInput(e.target.value)}
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter') handleApplyCustomMiddleGap();
+                                    }}
+                                    className="quiz-font-input"
+                                    style={{ flex: 1 }}
+                                  />
+                                  <button
+                                    type="button"
+                                    className="quiz-font-apply-btn"
+                                    onClick={handleApplyCustomMiddleGap}
+                                  >
+                                    সেট করুন
+                                  </button>
+                                </div>
+                              </div>
                             </div>
                           )}
                         </div>
@@ -2875,27 +3072,29 @@ function QuestionsComponentInternal() {
                     )}
                   </div>
 
-                  {/* Section: Explanation Settings */}
+                  {/* Section: Answer & Explanation Settings */}
                   <div className={`quiz-global-section explanation-section ${globalAccordion.explanation ? 'active' : ''}`}>
                     <div
                       className="quiz-global-section-header"
                       onClick={() => toggleGlobalAccordion('explanation')}
-                      title="ব্যাখ্যা সেটিংস"
+                      title="উত্তর ও ব্যাখ্যা সেটিংস"
                     >
                       <div className="quiz-global-section-header-left">
-                        <i className="fa-solid fa-circle-info" style={{ color: '#0284c7' }}></i>
-                        <span>ব্যাখ্যা (Explanation):</span>
+                        <i className="fa-solid fa-list-check" style={{ color: '#0284c7' }}></i>
+                        <span>উত্তর ও ব্যাখ্যা (Answer & Explanation):</span>
                       </div>
                       <div className="quiz-global-section-header-right">
                         <span className="quiz-font-accordion-badge">
                           <span className="quiz-font-accordion-badge-text">
+                            {showAnswer ? 'উত্তর: হ্যাঁ' : 'উত্তর: না'}
+                            {' · '}
                             {explanationMode === 'on-select'
-                              ? 'অপশন নির্বাচনে'
+                              ? 'স্বয়ংক্রিয়'
                               : explanationMode === 'on-button'
-                              ? 'বাটনে ক্লিকে'
+                              ? 'বাটনে'
                               : explanationMode === 'on-wrong'
-                              ? 'ভুল উত্তরে'
-                              : 'কোনো ব্যাখ্যা নেই'}
+                              ? 'ভুল হলে'
+                              : 'বন্ধ'}
                           </span>
                         </span>
                         <i className={`fa-solid fa-${globalAccordion.explanation ? 'minus' : 'plus'} quiz-font-accordion-plus-minus`}></i>
@@ -2904,48 +3103,202 @@ function QuestionsComponentInternal() {
 
                     {globalAccordion.explanation && (
                       <div className="quiz-global-section-body">
+                        {/* Sub-Accordion 1: সঠিক উত্তর (Show Answer) */}
+                        <div className={`quiz-font-sub-group ${explanationSubAccordion.answer ? 'active' : ''}`}>
+                          <div
+                            className={`quiz-font-accordion-header quiz-font-sub-header ${explanationSubAccordion.answer ? 'active' : ''}`}
+                            onClick={() => toggleExplanationSubAccordion('answer')}
+                          >
+                            <div className="quiz-font-accordion-header-left">
+                              <i className="fa-solid fa-circle-check" style={{ color: '#10b981', fontSize: '12px' }}></i>
+                              <span style={{ fontSize: '12.5px', fontWeight: 600 }}>সঠিক উত্তর (Show Answer):</span>
+                            </div>
+                            <div className="quiz-font-accordion-header-right">
+                              <span className="quiz-font-accordion-badge" style={{ fontSize: '11px' }}>
+                                <span className="quiz-font-accordion-badge-text">
+                                  {showAnswer ? 'সঠিক উত্তর দেখান (Yes)' : 'সঠিক উত্তর বন্ধ (No)'}
+                                </span>
+                              </span>
+                              <i className={`fa-solid fa-chevron-${explanationSubAccordion.answer ? 'up' : 'down'} quiz-font-accordion-chevron`}></i>
+                            </div>
+                          </div>
+
+                          {explanationSubAccordion.answer && (
+                            <div className="quiz-global-sub-card">
+                              {/* 1. Yes - সঠিক উত্তর দেখান */}
+                              <button
+                                type="button"
+                                className={`quiz-layout-menu-item quiz-color-style-item ${showAnswer ? 'active' : ''}`}
+                                onClick={() => handleSelectShowAnswer(true)}
+                              >
+                                <div className="quiz-layout-radio-circle">
+                                  {showAnswer && <div className="quiz-layout-radio-inner"></div>}
+                                </div>
+                                <div className="quiz-color-style-content">
+                                  <span className="quiz-color-style-title">১. সঠিক উত্তর দেখান (Yes)</span>
+                                  <span className="quiz-color-style-desc">প্রশ্নের নিচে এবং ফলাফল কার্ডে সরাসরি সঠিক উত্তর টেক্সট প্রদর্শন করবে।</span>
+                                </div>
+                              </button>
+
+                              {/* 2. No - সঠিক উত্তর বন্ধ রাখুন */}
+                              <button
+                                type="button"
+                                className={`quiz-layout-menu-item quiz-color-style-item ${!showAnswer ? 'active' : ''}`}
+                                onClick={() => handleSelectShowAnswer(false)}
+                              >
+                                <div className="quiz-layout-radio-circle">
+                                  {!showAnswer && <div className="quiz-layout-radio-inner"></div>}
+                                </div>
+                                <div className="quiz-color-style-content">
+                                  <span className="quiz-color-style-title">২. সঠিক উত্তর বন্ধ রাখুন (No)</span>
+                                  <span className="quiz-color-style-desc">প্রশ্নের নিচে সঠিক উত্তর টেক্সট প্রদর্শিত হবে না।</span>
+                                </div>
+                              </button>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Sub-Accordion 2: ব্যাখ্যা প্রদর্শন (Explanation Mode) */}
+                        <div className={`quiz-font-sub-group ${explanationSubAccordion.explanation ? 'active' : ''}`} style={{ marginTop: '8px' }}>
+                          <div
+                            className={`quiz-font-accordion-header quiz-font-sub-header ${explanationSubAccordion.explanation ? 'active' : ''}`}
+                            onClick={() => toggleExplanationSubAccordion('explanation')}
+                          >
+                            <div className="quiz-font-accordion-header-left">
+                              <i className="fa-solid fa-circle-info" style={{ color: '#0284c7', fontSize: '12px' }}></i>
+                              <span style={{ fontSize: '12.5px', fontWeight: 600 }}>ব্যাখ্যা প্রদর্শন (Explanation Mode):</span>
+                            </div>
+                            <div className="quiz-font-accordion-header-right">
+                              <span className="quiz-font-accordion-badge" style={{ fontSize: '11px' }}>
+                                <span className="quiz-font-accordion-badge-text">
+                                  {explanationMode === 'on-select'
+                                    ? 'অপশন নির্বাচনে'
+                                    : explanationMode === 'on-button'
+                                    ? 'বাটনে ক্লিকে'
+                                    : explanationMode === 'on-wrong'
+                                    ? 'ভুল উত্তরে'
+                                    : 'কোনো ব্যাখ্যা নেই'}
+                                </span>
+                              </span>
+                              <i className={`fa-solid fa-chevron-${explanationSubAccordion.explanation ? 'up' : 'down'} quiz-font-accordion-chevron`}></i>
+                            </div>
+                          </div>
+
+                          {explanationSubAccordion.explanation && (
+                            <div className="quiz-global-sub-card">
+                              <button
+                                type="button"
+                                className={`quiz-layout-menu-item quiz-color-style-item ${explanationMode === 'on-select' ? 'active' : ''}`}
+                                onClick={() => handleSelectExplanationMode('on-select')}
+                              >
+                                <div className="quiz-layout-radio-circle">
+                                  {explanationMode === 'on-select' && <div className="quiz-layout-radio-inner"></div>}
+                                </div>
+                                <div className="quiz-color-style-content">
+                                  <span className="quiz-color-style-title">১. অপশন নির্বাচনে ব্যাখ্যা দেখান</span>
+                                  <span className="quiz-color-style-desc">অপশনে ক্লিক করা মাত্রই স্বয়ংক্রিয়ভাবে বিস্তারিত ব্যাখ্যা দেখা যাবে।</span>
+                                </div>
+                              </button>
+
+                              <button
+                                type="button"
+                                className={`quiz-layout-menu-item quiz-color-style-item ${explanationMode === 'on-button' ? 'active' : ''}`}
+                                onClick={() => handleSelectExplanationMode('on-button')}
+                              >
+                                <div className="quiz-layout-radio-circle">
+                                  {explanationMode === 'on-button' && <div className="quiz-layout-radio-inner"></div>}
+                                </div>
+                                <div className="quiz-color-style-content">
+                                  <span className="quiz-color-style-title">২. ব্যাখ্যা বাটনে ক্লিক করলে দেখান</span>
+                                  <span className="quiz-color-style-desc">ব্যাখ্যা বাটনে ম্যানুয়ালি ক্লিক করলে তখন ব্যাখ্যা উন্মোচিত হবে।</span>
+                                </div>
+                              </button>
+
+                              <button
+                                type="button"
+                                className={`quiz-layout-menu-item quiz-color-style-item ${explanationMode === 'on-wrong' ? 'active' : ''}`}
+                                onClick={() => handleSelectExplanationMode('on-wrong')}
+                              >
+                                <div className="quiz-layout-radio-circle">
+                                  {explanationMode === 'on-wrong' && <div className="quiz-layout-radio-inner"></div>}
+                                </div>
+                                <div className="quiz-color-style-content">
+                                  <span className="quiz-color-style-title">৩. ভুল উত্তরে ব্যাখ্যা দেখান</span>
+                                  <span className="quiz-color-style-desc">শুধুমাত্র ভুল উত্তর নির্বাচন করলে সঠিক সমাধান ও ব্যাখ্যা দেখা যাবে।</span>
+                                </div>
+                              </button>
+
+                              <button
+                                type="button"
+                                className={`quiz-layout-menu-item quiz-color-style-item ${explanationMode === 'none' ? 'active' : ''}`}
+                                onClick={() => handleSelectExplanationMode('none')}
+                              >
+                                <div className="quiz-layout-radio-circle">
+                                  {explanationMode === 'none' && <div className="quiz-layout-radio-inner"></div>}
+                                </div>
+                                <div className="quiz-color-style-content">
+                                  <span className="quiz-color-style-title">৪. কোনো ব্যাখ্যা দেখাবেন না</span>
+                                  <span className="quiz-color-style-desc">প্রশ্নে কোনো প্রকার ব্যাখ্যা বা সমাধানের বাটন প্রদর্শিত হবে না।</span>
+                                </div>
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Section: Option Letter Settings */}
+                  <div className={`quiz-global-section option-letter-section ${globalAccordion.optionLetter ? 'active' : ''}`}>
+                    <div
+                      className="quiz-global-section-header"
+                      onClick={() => toggleGlobalAccordion('optionLetter')}
+                      title="অপশন অক্ষর সেটিংস"
+                    >
+                      <div className="quiz-global-section-header-left">
+                        <i className="fa-solid fa-arrow-down-a-z" style={{ color: '#0284c7' }}></i>
+                        <span>অপশন অক্ষর (Option Letter):</span>
+                      </div>
+                      <div className="quiz-global-section-header-right">
+                        <span className="quiz-font-accordion-badge">
+                          <span className="quiz-font-accordion-badge-text">
+                            {optionLetter === 'english' ? 'A, B, C, D' : 'ক, খ, গ, ঘ'}
+                          </span>
+                        </span>
+                        <i className={`fa-solid fa-${globalAccordion.optionLetter ? 'minus' : 'plus'} quiz-font-accordion-plus-minus`}></i>
+                      </div>
+                    </div>
+
+                    {globalAccordion.optionLetter && (
+                      <div className="quiz-global-section-body">
+                        {/* 1. ক, খ, গ, ঘ (বাংলা অপশন লেবেল) */}
                         <button
                           type="button"
-                          className={`quiz-layout-menu-item ${explanationMode === 'on-select' ? 'active' : ''}`}
-                          onClick={() => handleSelectExplanationMode('on-select')}
+                          className={`quiz-layout-menu-item quiz-middle-line-item ${optionLetter === 'bangla' ? 'active' : ''}`}
+                          onClick={() => handleSelectOptionLetter('bangla')}
                         >
                           <div className="quiz-layout-radio-circle">
-                            {explanationMode === 'on-select' && <div className="quiz-layout-radio-inner"></div>}
+                            {optionLetter === 'bangla' && <div className="quiz-layout-radio-inner"></div>}
                           </div>
-                          <span>অপশন নির্বাচনে ব্যাখ্যা দেখান</span>
+                          <div className="quiz-middle-line-content">
+                            <span className="quiz-middle-line-title">ক, খ, গ, ঘ</span>
+                            <span className="quiz-middle-line-desc">বাংলা অপশন লেবেল</span>
+                          </div>
                         </button>
 
+                        {/* 2. A, B, C, D (ইংরেজি অপশন লেবেল) */}
                         <button
                           type="button"
-                          className={`quiz-layout-menu-item ${explanationMode === 'on-button' ? 'active' : ''}`}
-                          onClick={() => handleSelectExplanationMode('on-button')}
+                          className={`quiz-layout-menu-item quiz-middle-line-item ${optionLetter === 'english' ? 'active' : ''}`}
+                          onClick={() => handleSelectOptionLetter('english')}
                         >
                           <div className="quiz-layout-radio-circle">
-                            {explanationMode === 'on-button' && <div className="quiz-layout-radio-inner"></div>}
+                            {optionLetter === 'english' && <div className="quiz-layout-radio-inner"></div>}
                           </div>
-                          <span>ব্যাখ্যা বাটনে ক্লিক করলে দেখান</span>
-                        </button>
-
-                        <button
-                          type="button"
-                          className={`quiz-layout-menu-item ${explanationMode === 'on-wrong' ? 'active' : ''}`}
-                          onClick={() => handleSelectExplanationMode('on-wrong')}
-                        >
-                          <div className="quiz-layout-radio-circle">
-                            {explanationMode === 'on-wrong' && <div className="quiz-layout-radio-inner"></div>}
+                          <div className="quiz-middle-line-content">
+                            <span className="quiz-middle-line-title">A, B, C, D</span>
+                            <span className="quiz-middle-line-desc">ইংরেজি অপশন লেবেল</span>
                           </div>
-                          <span>ভুল উত্তরে ব্যাখ্যা দেখান</span>
-                        </button>
-
-                        <button
-                          type="button"
-                          className={`quiz-layout-menu-item ${explanationMode === 'none' ? 'active' : ''}`}
-                          onClick={() => handleSelectExplanationMode('none')}
-                        >
-                          <div className="quiz-layout-radio-circle">
-                            {explanationMode === 'none' && <div className="quiz-layout-radio-inner"></div>}
-                          </div>
-                          <span>কোনো ব্যাখ্যা দেখাবেন না</span>
                         </button>
                       </div>
                     )}
@@ -3268,57 +3621,13 @@ function QuestionsComponentInternal() {
                     )}
                   </div>
 
-                  {/* Section 3: Quiz Switches */}
-                  <div className={`quiz-global-section switches-section ${globalAccordion.switches ? 'active' : ''}`}>
-                    <div
-                      className="quiz-global-section-header"
-                      onClick={() => toggleGlobalAccordion('switches')}
-                      title="কুইজ ডিসপ্লে সুইচসমূহ"
-                    >
-                      <div className="quiz-global-section-header-left">
-                        <i className="fa-solid fa-toggle-on" style={{ color: '#10b981' }}></i>
-                        <span>ডিসপ্লে সুইচ (Switches):</span>
-                      </div>
-                      <div className="quiz-global-section-header-right">
-                        <span className="quiz-font-accordion-badge">
-                          <span className="quiz-font-accordion-badge-text">১টি অপশন</span>
-                        </span>
-                        <i className={`fa-solid fa-${globalAccordion.switches ? 'minus' : 'plus'} quiz-font-accordion-plus-minus`}></i>
-                      </div>
-                    </div>
 
-                    {globalAccordion.switches && (
-                      <div className="quiz-global-section-body">
-                        {/* Switch: Show Answer */}
-                        <div className="quiz-global-switch-row">
-                          <div className="quiz-global-switch-info">
-                            <i className="fa-solid fa-circle-check" style={{ color: '#27ae60', fontSize: '15px' }}></i>
-                            <div className="quiz-global-switch-text">
-                              <span className="quiz-global-switch-title">সঠিক উত্তর</span>
-                              <span className="quiz-global-switch-sub">প্রশ্নের নিচে সঠিক উত্তর প্রদর্শন</span>
-                            </div>
-                          </div>
-                          <label className="quiz-switch">
-                            <input
-                              type="checkbox"
-                              checked={showAnswer}
-                              onChange={(e) => {
-                                const checked = e.target.checked;
-                                setShowAnswer(checked);
-                                saveActivePresetSetting('showAnswer', checked);
-                              }}
-                            />
-                            <span className="quiz-slider"></span>
-                          </label>
-                        </div>
-                      </div>
-                    )}
-                  </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              )}
+              </div>
+            )}
             </div>
             </div>
           </div>
@@ -3389,7 +3698,10 @@ function QuestionsComponentInternal() {
 
 
             {questionLayout === '2q-col' ? (
-              <div className={`quiz-questions-col-wrapper ${questionStyle === 'box' ? 'style-box-mode' : (questionStyle === 'circle' || questionStyle === 'nostyle') ? 'style-nostyle-mode' : ''} midline-${middleLine}`}>
+              <div
+                className={`quiz-questions-col-wrapper ${questionStyle === 'box' ? 'style-box-mode' : (questionStyle === 'circle' || questionStyle === 'nostyle') ? 'style-nostyle-mode' : ''} midline-${middleLine}`}
+                style={{ '--quiz-midline-gap': `${middleGap}px`, '--quiz-midline-half-gap': `${middleGap / 2}px` }}
+              >
                 <div className="quiz-questions-column">
                   {displayQuestions
                     .slice(0, Math.ceil(displayQuestions.length / 2))
@@ -3405,7 +3717,10 @@ function QuestionsComponentInternal() {
                 </div>
               </div>
             ) : questionLayout === '2q-row' ? (
-              <div className={`quiz-questions-col-wrapper ${questionStyle === 'box' ? 'style-box-mode' : (questionStyle === 'circle' || questionStyle === 'nostyle') ? 'style-nostyle-mode' : ''} midline-${middleLine}`}>
+              <div
+                className={`quiz-questions-col-wrapper ${questionStyle === 'box' ? 'style-box-mode' : (questionStyle === 'circle' || questionStyle === 'nostyle') ? 'style-nostyle-mode' : ''} midline-${middleLine}`}
+                style={{ '--quiz-midline-gap': `${middleGap}px`, '--quiz-midline-half-gap': `${middleGap / 2}px` }}
+              >
                 <div className="quiz-questions-column">
                   {displayQuestions
                     .filter((_, idx) => idx % 2 === 0)
@@ -3418,7 +3733,10 @@ function QuestionsComponentInternal() {
                 </div>
               </div>
             ) : questionLayout === '3q-col' ? (
-              <div className={`quiz-questions-col-wrapper col-3 ${questionStyle === 'box' ? 'style-box-mode' : (questionStyle === 'circle' || questionStyle === 'nostyle') ? 'style-nostyle-mode' : ''} midline-${middleLine}`}>
+              <div
+                className={`quiz-questions-col-wrapper col-3 ${questionStyle === 'box' ? 'style-box-mode' : (questionStyle === 'circle' || questionStyle === 'nostyle') ? 'style-nostyle-mode' : ''} midline-${middleLine}`}
+                style={{ '--quiz-midline-gap': `${middleGap}px`, '--quiz-midline-half-gap': `${middleGap / 2}px` }}
+              >
                 <div className="quiz-questions-column">
                   {displayQuestions
                     .slice(0, Math.ceil(displayQuestions.length / 3))
@@ -3442,7 +3760,10 @@ function QuestionsComponentInternal() {
                 </div>
               </div>
             ) : questionLayout === '3q-row' ? (
-              <div className={`quiz-questions-col-wrapper col-3 ${questionStyle === 'box' ? 'style-box-mode' : (questionStyle === 'circle' || questionStyle === 'nostyle') ? 'style-nostyle-mode' : ''} midline-${middleLine}`}>
+              <div
+                className={`quiz-questions-col-wrapper col-3 ${questionStyle === 'box' ? 'style-box-mode' : (questionStyle === 'circle' || questionStyle === 'nostyle') ? 'style-nostyle-mode' : ''} midline-${middleLine}`}
+                style={{ '--quiz-midline-gap': `${middleGap}px`, '--quiz-midline-half-gap': `${middleGap / 2}px` }}
+              >
                 <div className="quiz-questions-column">
                   {displayQuestions
                     .filter((_, idx) => idx % 3 === 0)
