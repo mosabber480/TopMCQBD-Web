@@ -98,6 +98,7 @@ const PRESET_LIST = [
 
 const BANGLA_LETTERS = ['ক', 'খ', 'গ', 'ঘ', 'ঙ'];
 const ENGLISH_LETTERS = ['A', 'B', 'C', 'D', 'E'];
+const ENGLISH_LOWERCASE_LETTERS = ['a', 'b', 'c', 'd', 'e'];
 
 const DEFAULT_PRESET_PROFILES = {
   practice: {
@@ -429,7 +430,7 @@ function QuestionsComponentInternal() {
     }));
   };
 
-  // Option Letter state: 'bangla' (default: ক, খ, গ, ঘ) | 'english' (A, B, C, D)
+  // Option Letter state: 'bangla' (default: ক, খ, গ, ঘ) | 'english' (A, B, C, D) | 'english-lower' (a, b, c, d)
   const [optionLetter, setOptionLetter] = useState('bangla');
 
   const handleSelectOptionLetter = (letter) => {
@@ -783,7 +784,11 @@ function QuestionsComponentInternal() {
       return;
     }
 
-    const activeLetters = optionLetter === 'english' ? ENGLISH_LETTERS : BANGLA_LETTERS;
+    const activeLetters = optionLetter === 'english'
+      ? ENGLISH_LETTERS
+      : optionLetter === 'english-lower'
+      ? ENGLISH_LOWERCASE_LETTERS
+      : BANGLA_LETTERS;
     const promptText = `প্রশ্ন ${idx + 1}: ${q.q}\nঅপশনসমূহ:\n${(q.options || [])
       .map((opt, i) => `(${activeLetters[i] || i + 1}) ${opt}`)
       .join('\n')}\nদয়া করে এই MCQ টির সঠিক উত্তর নির্ণয় করে প্রতিটি অপশন বিশ্লেষণসহ বিস্তারিত সহজ বাংলায় বুঝিয়ে দিন।`;
@@ -922,7 +927,7 @@ function QuestionsComponentInternal() {
           }
         }
         const savedOptionLetter = localStorage.getItem('topmcqbd_option_letter');
-        if (savedOptionLetter && ['bangla', 'english'].includes(savedOptionLetter)) {
+        if (savedOptionLetter && ['bangla', 'english', 'english-lower'].includes(savedOptionLetter)) {
           legacyPractice.optionLetter = savedOptionLetter;
         }
         const savedShowAnswer = localStorage.getItem('topmcqbd_show_answer');
@@ -1477,6 +1482,9 @@ function QuestionsComponentInternal() {
   const getBanglaLetter = (idx) => {
     if (optionLetter === 'english') {
       return ENGLISH_LETTERS[idx] || String.fromCharCode(65 + idx);
+    }
+    if (optionLetter === 'english-lower') {
+      return ENGLISH_LOWERCASE_LETTERS[idx] || String.fromCharCode(97 + idx);
     }
     return BANGLA_LETTERS[idx] || idx + 1;
   };
@@ -3302,7 +3310,11 @@ function QuestionsComponentInternal() {
                       <div className="quiz-global-section-header-right">
                         <span className="quiz-font-accordion-badge">
                           <span className="quiz-font-accordion-badge-text">
-                            {optionLetter === 'english' ? 'A, B, C, D' : 'ক, খ, গ, ঘ'}
+                            {optionLetter === 'english'
+                              ? 'A, B, C, D'
+                              : optionLetter === 'english-lower'
+                              ? 'a, b, c, d'
+                              : 'ক, খ, গ, ঘ'}
                           </span>
                         </span>
                         <i className={`fa-solid fa-${globalAccordion.optionLetter ? 'minus' : 'plus'} quiz-font-accordion-plus-minus`}></i>
@@ -3338,6 +3350,21 @@ function QuestionsComponentInternal() {
                           <div className="quiz-middle-line-content">
                             <span className="quiz-middle-line-title">A, B, C, D</span>
                             <span className="quiz-middle-line-desc">ইংরেজি অপশন লেবেল</span>
+                          </div>
+                        </button>
+
+                        {/* 3. a, b, c, d (ইংরেজি ছোট হাতের অপশন লেবেল) */}
+                        <button
+                          type="button"
+                          className={`quiz-layout-menu-item quiz-middle-line-item ${optionLetter === 'english-lower' ? 'active' : ''}`}
+                          onClick={() => handleSelectOptionLetter('english-lower')}
+                        >
+                          <div className="quiz-layout-radio-circle">
+                            {optionLetter === 'english-lower' && <div className="quiz-layout-radio-inner"></div>}
+                          </div>
+                          <div className="quiz-middle-line-content">
+                            <span className="quiz-middle-line-title">a, b, c, d</span>
+                            <span className="quiz-middle-line-desc">ইংরেজি ছোট হাতের অপশন লেবেল</span>
                           </div>
                         </button>
                       </div>
