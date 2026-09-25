@@ -3673,8 +3673,8 @@ input:disabled + .quiz-slider { cursor: not-allowed; background-color: #cbd5e1; 
 
 /* 2 & 3 Questions Column-wise Layout */
 .quiz-questions-col-wrapper {
-  --quiz-midline-gap: 20px;
-  --quiz-midline-half-gap: 10px;
+  --quiz-midline-gap: 60px;
+  --quiz-midline-half-gap: 30px;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 0 !important;
@@ -3951,6 +3951,14 @@ input:disabled + .quiz-slider { cursor: not-allowed; background-color: #cbd5e1; 
   transition: all 0.15s ease;
 }
 
+.quiz-option-circle-letter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  text-align: center;
+}
+
 .quiz-question-block.style-circle .quiz-option-circle {
   display: inline-flex !important;
   align-items: center !important;
@@ -3964,6 +3972,7 @@ input:disabled + .quiz-slider { cursor: not-allowed; background-color: #cbd5e1; 
   color: #475569;
   font-weight: var(--quiz-circle-weight, 700);
   font-size: calc(var(--quiz-font-size, 16px) * 0.8) !important;
+  font-family: var(--quiz-font-family, inherit) !important;
   border: 1.5px solid #cbd5e1;
   flex-shrink: 0;
   transition: all 0.15s ease;
@@ -3971,6 +3980,14 @@ input:disabled + .quiz-slider { cursor: not-allowed; background-color: #cbd5e1; 
   text-align: center;
   box-sizing: border-box;
   padding: 0 !important;
+}
+
+.quiz-question-block.style-circle .quiz-option-circle .quiz-option-circle-letter {
+  transform: translateY(calc(var(--quiz-font-size, 16px) * 0.13));
+}
+
+.quiz-question-block.style-circle .quiz-option-circle:not(:has(.quiz-option-circle-letter)) {
+  padding-top: calc(var(--quiz-font-size, 16px) * 0.16) !important;
 }
 
 .quiz-question-block.style-circle .quiz-option-text {
@@ -4150,6 +4167,12 @@ input:disabled + .quiz-slider { cursor: not-allowed; background-color: #cbd5e1; 
   display: inline !important;
   flex-shrink: 0;
   transition: color 0.15s ease;
+}
+
+.quiz-question-block.style-nostyle .quiz-option-circle .quiz-option-circle-letter {
+  display: inline !important;
+  line-height: inherit !important;
+  transform: none !important;
 }
 
 .quiz-question-block.style-nostyle .quiz-option-text {

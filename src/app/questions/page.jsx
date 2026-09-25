@@ -104,7 +104,7 @@ const DEFAULT_PRESET_PROFILES = {
     questionLayout: '2q-col',
     optionLayout: '1',
     middleLine: 'dotted',
-    middleGap: 20,
+    middleGap: 60,
     optionLetter: 'bangla',
     questionStyle: 'dotted',
     highlightMode: 'single',
@@ -124,7 +124,7 @@ const DEFAULT_PRESET_PROFILES = {
     questionLayout: '2q-col',
     optionLayout: '1',
     middleLine: 'dotted',
-    middleGap: 20,
+    middleGap: 60,
     optionLetter: 'bangla',
     questionStyle: 'dotted',
     highlightMode: 'both',
@@ -144,7 +144,7 @@ const DEFAULT_PRESET_PROFILES = {
     questionLayout: '2q-col',
     optionLayout: '1',
     middleLine: 'dotted',
-    middleGap: 20,
+    middleGap: 60,
     optionLetter: 'bangla',
     questionStyle: 'box',
     highlightMode: 'neutral',
@@ -164,7 +164,7 @@ const DEFAULT_PRESET_PROFILES = {
     questionLayout: '2q-col',
     optionLayout: '1',
     middleLine: 'dotted',
-    middleGap: 20,
+    middleGap: 60,
     optionLetter: 'bangla',
     questionStyle: 'dotted',
     highlightMode: 'single',
@@ -232,8 +232,8 @@ function QuestionsComponentInternal() {
   const [layoutSubAccordion, setLayoutSubAccordion] = useState({ style: true, question: true, option: false, middleLine: false, middleGap: false });
   // Middle Line state: 'dotted' (default) | 'solid' | 'none'
   const [middleLine, setMiddleLine] = useState('dotted');
-  // Middle Gap state: 0 (No Gap) | 20 (default) | 30 | custom
-  const [middleGap, setMiddleGap] = useState(20);
+  // Middle Gap state: 0 (No Gap) | 60 (default) | 80 | custom
+  const [middleGap, setMiddleGap] = useState(60);
   const [customMiddleGapInput, setCustomMiddleGapInput] = useState('');
   const [showGlobalSettingsMenu, setShowGlobalSettingsMenu] = useState(false);
   const [showFourOptionConditionHint, setShowFourOptionConditionHint] = useState(false);
@@ -306,9 +306,9 @@ function QuestionsComponentInternal() {
   };
 
   const handleSelectMiddleGap = (gap) => {
-    const num = Math.max(0, Math.min(100, parseInt(gap, 10) || 0));
+    const num = Math.max(0, Math.min(200, parseInt(gap, 10) || 0));
     setMiddleGap(num);
-    if (![0, 20, 30].includes(num)) {
+    if (![0, 60, 80].includes(num)) {
       setCustomMiddleGapInput(String(num));
     } else {
       setCustomMiddleGapInput('');
@@ -320,8 +320,11 @@ function QuestionsComponentInternal() {
   };
 
   const handleApplyCustomMiddleGap = () => {
-    const num = parseInt(customMiddleGapInput, 10);
-    if (!isNaN(num) && num >= 0 && num <= 100) {
+    let num = parseInt(customMiddleGapInput, 10);
+    if (!isNaN(num)) {
+      if (num < 0) num = 0;
+      if (num > 200) num = 200;
+      setCustomMiddleGapInput(String(num));
       handleSelectMiddleGap(num);
     }
   };
@@ -367,6 +370,14 @@ function QuestionsComponentInternal() {
     saveActivePresetSetting('highlightColor', color);
   };
 
+  const handleSelectShowAnswer = (val) => {
+    setShowAnswer(val);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('topmcqbd_show_answer', val ? 'true' : 'false');
+    }
+    saveActivePresetSetting('showAnswer', val);
+  };
+
   // Explanation settings: 'on-select' (default) | 'on-button' | 'on-wrong' | 'none'
   const [explanationMode, setExplanationMode] = useState('on-select');
   const [lastActiveExplanationMode, setLastActiveExplanationMode] = useState('on-select');
@@ -382,11 +393,16 @@ function QuestionsComponentInternal() {
     }
     if (mode === 'none') {
       setShowExplanation(false);
+      handleSelectShowAnswer(false);
+    } else if (mode === 'answer-only') {
+      setShowExplanation(false);
+      handleSelectShowAnswer(true);
     } else {
       setShowExplanation(true);
+      handleSelectShowAnswer(true);
     }
     saveActivePresetSetting('explanationMode', mode);
-    saveActivePresetSetting('showExplanation', mode !== 'none');
+    saveActivePresetSetting('showExplanation', mode !== 'none' && mode !== 'answer-only');
   };
 
   const handleToggleExplanationSwitch = (checked) => {
@@ -402,6 +418,7 @@ function QuestionsComponentInternal() {
     if (explanationMode === 'on-select') return 'ব্যাখ্যা (স্বয়ংক্রিয়)';
     if (explanationMode === 'on-button') return 'ব্যাখ্যা (ম্যানুয়াল)';
     if (explanationMode === 'on-wrong') return 'ব্যাখ্যা (ভুল প্রশ্নে)';
+    if (explanationMode === 'answer-only') return 'শুধু উত্তর';
     return 'ব্যাখ্যা';
   };
 
@@ -431,14 +448,6 @@ function QuestionsComponentInternal() {
       ...prev,
       [sec]: !prev[sec]
     }));
-  };
-
-  const handleSelectShowAnswer = (val) => {
-    setShowAnswer(val);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('topmcqbd_show_answer', val ? 'true' : 'false');
-    }
-    saveActivePresetSetting('showAnswer', val);
   };
 
   const [globalAccordion, setGlobalAccordion] = useState({ layout: false, questionStyle: false, colorAnswerStyle: false, explanation: false, optionLetter: false, cutMark: false, font: false });
@@ -523,7 +532,7 @@ function QuestionsComponentInternal() {
     }
     if (typeof merged.middleGap === 'number') {
       setMiddleGap(merged.middleGap);
-      setCustomMiddleGapInput(![0, 20, 30].includes(merged.middleGap) ? String(merged.middleGap) : '');
+      setCustomMiddleGapInput(![0, 60, 80].includes(merged.middleGap) ? String(merged.middleGap) : '');
       try { localStorage.setItem('topmcqbd_middle_gap', String(merged.middleGap)); } catch (e) {}
     }
 
@@ -548,7 +557,7 @@ function QuestionsComponentInternal() {
       setExplanationMode(merged.explanationMode);
       if (merged.explanationMode !== 'none') {
         setLastActiveExplanationMode(merged.explanationMode);
-        setShowExplanation(true);
+        setShowExplanation(merged.explanationMode !== 'answer-only');
       } else {
         setShowExplanation(false);
       }
@@ -593,7 +602,11 @@ function QuestionsComponentInternal() {
 
     // 7. Switches
     if (typeof merged.showAnswer === 'boolean') {
-      setShowAnswer(merged.showAnswer);
+      setShowAnswer(merged.explanationMode === 'none' ? false : (merged.explanationMode === 'answer-only' ? true : merged.showAnswer));
+    } else if (merged.explanationMode === 'none') {
+      setShowAnswer(false);
+    } else if (merged.explanationMode === 'answer-only') {
+      setShowAnswer(true);
     }
   };
 
@@ -880,7 +893,7 @@ function QuestionsComponentInternal() {
         const savedMiddleGap = localStorage.getItem('topmcqbd_middle_gap');
         if (savedMiddleGap !== null) {
           const num = parseInt(savedMiddleGap, 10);
-          if (!isNaN(num) && num >= 0 && num <= 100) {
+          if (!isNaN(num) && num >= 0 && num <= 200) {
             legacyPractice.middleGap = num;
           }
         }
@@ -899,9 +912,14 @@ function QuestionsComponentInternal() {
           legacyPractice.highlightColor = savedColor;
         }
         const savedExpMode = localStorage.getItem('topmcqbd_explanation_mode');
-        if (savedExpMode && ['on-select', 'on-button', 'on-wrong', 'none'].includes(savedExpMode)) {
+        if (savedExpMode && ['on-select', 'on-button', 'on-wrong', 'answer-only', 'none'].includes(savedExpMode)) {
           legacyPractice.explanationMode = savedExpMode;
-          legacyPractice.showExplanation = savedExpMode !== 'none';
+          legacyPractice.showExplanation = savedExpMode !== 'none' && savedExpMode !== 'answer-only';
+          if (savedExpMode === 'none') {
+            legacyPractice.showAnswer = false;
+          } else if (savedExpMode === 'answer-only') {
+            legacyPractice.showAnswer = true;
+          }
         }
         const savedOptionLetter = localStorage.getItem('topmcqbd_option_letter');
         if (savedOptionLetter && ['bangla', 'english'].includes(savedOptionLetter)) {
@@ -1517,7 +1535,7 @@ function QuestionsComponentInternal() {
         } else if (isAnswered && chosen !== q.ans) {
           isExplanationVisible = true;
         }
-      } else if (explanationMode === 'none') {
+      } else if (explanationMode === 'none' || explanationMode === 'answer-only') {
         isExplanationVisible = false;
       }
     }
@@ -1640,7 +1658,9 @@ function QuestionsComponentInternal() {
                 onClick={() => handleAnswerClick(qIndex, optIndex)}
               >
                 <div className="quiz-option-circle font-bn">
-                  {getOptionLabel(optIndex)}{questionStyle === 'nostyle' ? '.' : ''}
+                  <span className="quiz-option-circle-letter">
+                    {getOptionLabel(optIndex)}{questionStyle === 'nostyle' ? '.' : ''}
+                  </span>
                 </div>
                 <div className="quiz-option-text">
                   {opt}
@@ -2181,7 +2201,7 @@ function QuestionsComponentInternal() {
                 <label className="quiz-switch">
                   <input
                     type="checkbox"
-                    checked={explanationMode !== 'none' && showExplanation}
+                    checked={explanationMode !== 'none' && (showExplanation || explanationMode === 'answer-only')}
                     onChange={(e) => handleToggleExplanationSwitch(e.target.checked)}
                   />
                   <span className="quiz-slider"></span>
@@ -2722,10 +2742,10 @@ function QuestionsComponentInternal() {
                                 <span className="quiz-font-accordion-badge-text">
                                   {middleGap === 0
                                     ? 'No Gap'
-                                    : middleGap === 20
-                                    ? '20px'
-                                    : middleGap === 30
-                                    ? '30px'
+                                    : middleGap === 60
+                                    ? '60px'
+                                    : middleGap === 80
+                                    ? '80px'
                                     : `${middleGap}px`}
                                 </span>
                               </span>
@@ -2750,41 +2770,41 @@ function QuestionsComponentInternal() {
                                 </div>
                               </button>
 
-                              {/* 2. 20px */}
+                              {/* 2. 60px */}
                               <button
                                 type="button"
-                                className={`quiz-layout-menu-item quiz-middle-line-item ${middleGap === 20 ? 'active' : ''}`}
-                                onClick={() => handleSelectMiddleGap(20)}
+                                className={`quiz-layout-menu-item quiz-middle-line-item ${middleGap === 60 ? 'active' : ''}`}
+                                onClick={() => handleSelectMiddleGap(60)}
                               >
                                 <div className="quiz-layout-radio-circle">
-                                  {middleGap === 20 && <div className="quiz-layout-radio-inner"></div>}
+                                  {middleGap === 60 && <div className="quiz-layout-radio-inner"></div>}
                                 </div>
                                 <div className="quiz-middle-line-content">
-                                  <span className="quiz-middle-line-title">20px (২০ পিক্সেল - ডিফল্ট)</span>
-                                  <span className="quiz-middle-line-desc">মাঝখানে ২০ পিক্সেল গ্যাপ (ডিভাইডার লাইন থাকলে দুই পাশে ১০ পিক্সেল করে)।</span>
+                                  <span className="quiz-middle-line-title">60px (৬০ পিক্সেল - ডিফল্ট)</span>
+                                  <span className="quiz-middle-line-desc">মাঝখানে ৬০ পিক্সেল গ্যাপ (ডিভাইডার লাইন থাকলে দুই পাশে ৩০ পিক্সেল করে)।</span>
                                 </div>
                               </button>
 
-                              {/* 3. 30px */}
+                              {/* 3. 80px */}
                               <button
                                 type="button"
-                                className={`quiz-layout-menu-item quiz-middle-line-item ${middleGap === 30 ? 'active' : ''}`}
-                                onClick={() => handleSelectMiddleGap(30)}
+                                className={`quiz-layout-menu-item quiz-middle-line-item ${middleGap === 80 ? 'active' : ''}`}
+                                onClick={() => handleSelectMiddleGap(80)}
                               >
                                 <div className="quiz-layout-radio-circle">
-                                  {middleGap === 30 && <div className="quiz-layout-radio-inner"></div>}
+                                  {middleGap === 80 && <div className="quiz-layout-radio-inner"></div>}
                                 </div>
                                 <div className="quiz-middle-line-content">
-                                  <span className="quiz-middle-line-title">30px (৩০ পিক্সেল)</span>
-                                  <span className="quiz-middle-line-desc">মাঝখানে ৩০ পিক্সেল গ্যাপ (ডিভাইডার লাইন থাকলে দুই পাশে ১৫ পিক্সেল করে)।</span>
+                                  <span className="quiz-middle-line-title">80px (৮০ পিক্সেল)</span>
+                                  <span className="quiz-middle-line-desc">মাঝখানে ৮০ পিক্সেল গ্যাপ (ডিভাইডার লাইন থাকলে দুই পাশে ৪০ পিক্সেল করে)।</span>
                                 </div>
                               </button>
 
                               {/* 4. Custom Gap */}
                               <div className="quiz-cut-mark-custom-card" style={{ marginTop: '8px', padding: '10px 12px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
                                 <div className="quiz-cut-mark-custom-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                                  <span style={{ fontSize: '12.5px', fontWeight: 600, color: '#334155' }}>কাস্টম গ্যাপ (Custom Gap):</span>
-                                  {![0, 20, 30].includes(middleGap) && (
+                                  <span style={{ fontSize: '12.5px', fontWeight: 600, color: '#334155' }}>কাস্টম গ্যাপ (Custom Gap - সর্বোচ্চ ২০০px):</span>
+                                  {![0, 60, 80].includes(middleGap) && (
                                     <span className="quiz-font-accordion-badge" style={{ fontSize: '11px', color: '#0284c7', borderColor: '#bae6fd', background: '#f0f9ff' }}>
                                       সক্রিয়: {middleGap}px
                                     </span>
@@ -2794,8 +2814,8 @@ function QuestionsComponentInternal() {
                                   <input
                                     type="number"
                                     min="0"
-                                    max="100"
-                                    placeholder="পিক্সেল (যেমন: 25)"
+                                    max="200"
+                                    placeholder="পিক্সেল (যেমন: ২৫ বা ১৫০)"
                                     value={customMiddleGapInput}
                                     onChange={(e) => setCustomMiddleGapInput(e.target.value)}
                                     onKeyDown={(e) => {
@@ -3094,6 +3114,8 @@ function QuestionsComponentInternal() {
                               ? 'বাটনে'
                               : explanationMode === 'on-wrong'
                               ? 'ভুল হলে'
+                              : explanationMode === 'answer-only'
+                              ? 'শুধু উত্তর'
                               : 'বন্ধ'}
                           </span>
                         </span>
@@ -3177,6 +3199,8 @@ function QuestionsComponentInternal() {
                                     ? 'বাটনে ক্লিকে'
                                     : explanationMode === 'on-wrong'
                                     ? 'ভুল উত্তরে'
+                                    : explanationMode === 'answer-only'
+                                    ? 'শুধু উত্তর'
                                     : 'কোনো ব্যাখ্যা নেই'}
                                 </span>
                               </span>
@@ -3228,6 +3252,22 @@ function QuestionsComponentInternal() {
                                 </div>
                               </button>
 
+                              {/* ৪. শুধু উত্তর দেখান */}
+                              <button
+                                type="button"
+                                className={`quiz-layout-menu-item quiz-color-style-item ${explanationMode === 'answer-only' ? 'active' : ''}`}
+                                onClick={() => handleSelectExplanationMode('answer-only')}
+                              >
+                                <div className="quiz-layout-radio-circle">
+                                  {explanationMode === 'answer-only' && <div className="quiz-layout-radio-inner"></div>}
+                                </div>
+                                <div className="quiz-color-style-content">
+                                  <span className="quiz-color-style-title">৪. শুধু উত্তর দেখান</span>
+                                  <span className="quiz-color-style-desc">প্রশ্নে শুধু সঠিক উত্তর প্রদর্শিত হবে, কোনো ব্যাখ্যা প্রদর্শিত হবে না।</span>
+                                </div>
+                              </button>
+
+                              {/* ৫. কোনো ব্যাখ্যা দেখাবেন না */}
                               <button
                                 type="button"
                                 className={`quiz-layout-menu-item quiz-color-style-item ${explanationMode === 'none' ? 'active' : ''}`}
@@ -3237,7 +3277,7 @@ function QuestionsComponentInternal() {
                                   {explanationMode === 'none' && <div className="quiz-layout-radio-inner"></div>}
                                 </div>
                                 <div className="quiz-color-style-content">
-                                  <span className="quiz-color-style-title">৪. কোনো ব্যাখ্যা দেখাবেন না</span>
+                                  <span className="quiz-color-style-title">৫. কোনো ব্যাখ্যা দেখাবেন না</span>
                                   <span className="quiz-color-style-desc">প্রশ্নে কোনো প্রকার ব্যাখ্যা বা সমাধানের বাটন প্রদর্শিত হবে না।</span>
                                 </div>
                               </button>
