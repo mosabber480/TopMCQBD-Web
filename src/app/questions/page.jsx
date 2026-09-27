@@ -163,14 +163,14 @@ const DEFAULT_PRESET_PROFILES = {
   },
   custom: {
     questionLayout: '2q-col',
-    optionLayout: '1',
-    middleLine: 'dotted',
-    middleGap: 60,
+    optionLayout: '2',
+    middleLine: 'none',
+    middleGap: 80,
     optionLetter: 'bangla',
-    questionStyle: 'dotted',
-    highlightMode: 'single',
-    highlightColor: 'full-bg',
-    explanationMode: 'on-select',
+    questionStyle: 'nostyle',
+    highlightMode: 'both',
+    highlightColor: 'with-icons',
+    explanationMode: 'on-wrong',
     showExplanation: true,
     cutMark: 0.5,
     cutMarkMode: '0.5',
@@ -400,7 +400,6 @@ function QuestionsComponentInternal() {
       handleSelectShowAnswer(true);
     } else {
       setShowExplanation(true);
-      handleSelectShowAnswer(true);
     }
     saveActivePresetSetting('explanationMode', mode);
     saveActivePresetSetting('showExplanation', mode !== 'none' && mode !== 'answer-only');
@@ -603,11 +602,15 @@ function QuestionsComponentInternal() {
 
     // 7. Switches
     if (typeof merged.showAnswer === 'boolean') {
-      setShowAnswer(merged.explanationMode === 'none' ? false : (merged.explanationMode === 'answer-only' ? true : merged.showAnswer));
+      const finalShowAns = merged.explanationMode === 'none' ? false : (merged.explanationMode === 'answer-only' ? true : merged.showAnswer);
+      setShowAnswer(finalShowAns);
+      try { localStorage.setItem('topmcqbd_show_answer', String(finalShowAns)); } catch (e) {}
     } else if (merged.explanationMode === 'none') {
       setShowAnswer(false);
+      try { localStorage.setItem('topmcqbd_show_answer', 'false'); } catch (e) {}
     } else if (merged.explanationMode === 'answer-only') {
       setShowAnswer(true);
+      try { localStorage.setItem('topmcqbd_show_answer', 'true'); } catch (e) {}
     }
   };
 
@@ -845,6 +848,21 @@ function QuestionsComponentInternal() {
         try { profiles = JSON.parse(rawProfiles); } catch (e) { profiles = null; }
       }
 
+      // Ensure 'custom' (My setting) default profile matches the new user specification
+      const CUSTOM_PRESET_VERSION = 'v4_my_setting_show_answer_false';
+      const savedCustomVer = localStorage.getItem('topmcqbd_custom_preset_ver');
+      if (savedCustomVer !== CUSTOM_PRESET_VERSION) {
+        if (profiles) {
+          profiles.custom = { ...DEFAULT_PRESET_PROFILES.custom };
+          try {
+            localStorage.setItem('topmcqbd_preset_profiles', JSON.stringify(profiles));
+          } catch (e) {}
+        }
+        try {
+          localStorage.setItem('topmcqbd_custom_preset_ver', CUSTOM_PRESET_VERSION);
+        } catch (e) {}
+      }
+
       if (profiles && profiles[savedPreset]) {
         applyPresetProfile(savedPreset, profiles[savedPreset]);
       } else {
@@ -939,7 +957,7 @@ function QuestionsComponentInternal() {
           practice: legacyPractice,
           read: { ...DEFAULT_PRESET_PROFILES.read },
           exam: { ...DEFAULT_PRESET_PROFILES.exam },
-          custom: { ...legacyPractice }
+          custom: { ...DEFAULT_PRESET_PROFILES.custom }
         };
 
         try {
@@ -1658,6 +1676,18 @@ function QuestionsComponentInternal() {
               }
             }
 
+            const hasColorChange = isOptionCorrect || isOptionIncorrect || btnClass.includes('neutral-selected');
+            const isCircleBadgeInNoStyle = (
+              questionStyle === 'nostyle' &&
+              hasColorChange &&
+              highlightColor !== 'full-bg' &&
+              highlightColor !== 'with-icons'
+            );
+
+            if (isCircleBadgeInNoStyle) {
+              btnClass += ' has-nostyle-circle';
+            }
+
             return (
               <button
                 key={optIndex}
@@ -1667,7 +1697,7 @@ function QuestionsComponentInternal() {
               >
                 <div className="quiz-option-circle font-bn">
                   <span className="quiz-option-circle-letter">
-                    {getOptionLabel(optIndex)}{questionStyle === 'nostyle' ? '.' : ''}
+                    {getOptionLabel(optIndex)}{questionStyle === 'nostyle' && !isCircleBadgeInNoStyle ? '.' : ''}
                   </span>
                 </div>
                 <div className="quiz-option-text">

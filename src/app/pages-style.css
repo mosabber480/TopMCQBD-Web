@@ -4115,16 +4115,7 @@ input:disabled + .quiz-slider { cursor: not-allowed; background-color: #cbd5e1; 
 .quiz-question-block.style-nostyle .quiz-option-btn:active,
 .quiz-question-block.style-nostyle .quiz-option-btn:focus,
 .quiz-question-block.style-nostyle .quiz-option-btn:disabled,
-.quiz-question-block.style-nostyle .quiz-option-btn.disabled,
-.quiz-question-block.style-nostyle .quiz-option-btn.correct,
-.quiz-question-block.style-nostyle .quiz-option-btn.incorrect,
-.quiz-question-block.style-nostyle .quiz-option-btn.neutral-selected,
-.quiz-question-block.style-nostyle .quiz-options-container .quiz-option-btn,
-.quiz-question-block.style-nostyle .quiz-options-container .quiz-option-btn:hover,
-.quiz-question-block.style-nostyle .quiz-options-container .quiz-option-btn:active,
-.quiz-question-block.style-nostyle .quiz-options-container .quiz-option-btn.correct,
-.quiz-question-block.style-nostyle .quiz-options-container .quiz-option-btn.incorrect,
-.quiz-question-block.style-nostyle .quiz-options-container .quiz-option-btn.neutral-selected {
+.quiz-question-block.style-nostyle .quiz-option-btn.disabled {
   background: transparent !important;
   background-color: transparent !important;
   border: none !important;
@@ -4142,15 +4133,10 @@ input:disabled + .quiz-slider { cursor: not-allowed; background-color: #cbd5e1; 
   width: fit-content;
   max-width: 100%;
   cursor: pointer;
-  transition: color 0.15s ease;
+  transition: all 0.15s ease;
 }
 
-.quiz-question-block.style-nostyle .quiz-option-circle,
-.quiz-question-block.style-nostyle .quiz-option-btn:hover .quiz-option-circle,
-.quiz-question-block.style-nostyle .quiz-option-btn:active .quiz-option-circle,
-.quiz-question-block.style-nostyle .quiz-option-btn.correct .quiz-option-circle,
-.quiz-question-block.style-nostyle .quiz-option-btn.incorrect .quiz-option-circle,
-.quiz-question-block.style-nostyle .quiz-option-btn.neutral-selected .quiz-option-circle {
+.quiz-question-block.style-nostyle .quiz-option-circle {
   background: transparent !important;
   background-color: transparent !important;
   border: none !important;
@@ -4166,7 +4152,7 @@ input:disabled + .quiz-slider { cursor: not-allowed; background-color: #cbd5e1; 
   line-height: 1.5 !important;
   display: inline !important;
   flex-shrink: 0;
-  transition: color 0.15s ease;
+  transition: all 0.15s ease;
 }
 
 .quiz-question-block.style-nostyle .quiz-option-circle .quiz-option-circle-letter {
@@ -4182,10 +4168,10 @@ input:disabled + .quiz-slider { cursor: not-allowed; background-color: #cbd5e1; 
   line-height: 1.5;
   color: #1e293b;
   padding: 0 !important;
-  transition: color 0.15s ease;
+  transition: all 0.15s ease;
 }
 
-/* Hover state: text and label turn blue, zero background */
+/* Hover state before selection */
 .quiz-question-block.style-nostyle .quiz-option-btn:hover:not(.disabled) {
   background: transparent !important;
 }
@@ -4207,42 +4193,484 @@ input:disabled + .quiz-slider { cursor: not-allowed; background-color: #cbd5e1; 
   color: #0369a1 !important;
 }
 
-/* Correct state */
-.quiz-question-block.style-nostyle .quiz-option-btn.correct {
+/* ==========================================================================
+   No Style - Circular Option Label for Highlighted / Answered States
+   "je option ba level a color change hobe, sei option ba level sob somoy circle a thakbe"
+   ========================================================================== */
+
+.quiz-question-block.style-nostyle .quiz-option-btn.has-nostyle-circle {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 4px 6px !important;
+}
+
+.quiz-question-block.style-nostyle .quiz-option-btn.has-nostyle-circle .quiz-option-circle {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: calc(var(--quiz-font-size, 16px) * 1.55) !important;
+  height: calc(var(--quiz-font-size, 16px) * 1.55) !important;
+  min-width: calc(var(--quiz-font-size, 16px) * 1.55) !important;
+  min-height: calc(var(--quiz-font-size, 16px) * 1.55) !important;
+  border-radius: 50% !important;
+  font-size: calc(var(--quiz-font-size, 16px) * 0.8) !important;
+  font-family: var(--quiz-font-family, inherit) !important;
+  font-weight: var(--quiz-circle-weight, 700) !important;
+  line-height: 1 !important;
+  text-align: center !important;
+  box-sizing: border-box !important;
+  padding: 0 !important;
+  flex-shrink: 0 !important;
+}
+
+.quiz-question-block.style-nostyle .quiz-option-btn.has-nostyle-circle .quiz-option-circle .quiz-option-circle-letter {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+  text-align: center !important;
+  transform: translateY(calc(var(--quiz-font-size, 16px) * 0.13)) !important;
+}
+
+.quiz-question-block.style-nostyle .quiz-option-btn.has-nostyle-circle .quiz-option-text {
+  display: inline-block !important;
+  transform: translateY(1.5px) !important;
+  line-height: 1.35 !important;
+}
+
+/* ==========================================================================
+   1. পূর্ণ ব্যাকগ্রাউন্ড (ans-style-full-bg / Default No Style)
+   "prothom ta bade baki sob gulote change hobe" -> stays clean text color
+   ========================================================================== */
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-full-bg .quiz-option-btn.correct,
+.quiz-question-block.style-nostyle .quiz-options-container:not([class*="ans-style-"]) .quiz-option-btn.correct,
+.quiz-question-block.style-nostyle .quiz-option-btn.correct:not(.has-nostyle-circle) {
   background: transparent !important;
 }
-.quiz-question-block.style-nostyle .quiz-option-btn.correct .quiz-option-circle {
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-full-bg .quiz-option-btn.correct .quiz-option-circle,
+.quiz-question-block.style-nostyle .quiz-options-container:not([class*="ans-style-"]) .quiz-option-btn.correct .quiz-option-circle,
+.quiz-question-block.style-nostyle .quiz-option-btn.correct:not(.has-nostyle-circle) .quiz-option-circle {
   color: #15803d !important;
   font-weight: 800 !important;
 }
-.quiz-question-block.style-nostyle .quiz-option-btn.correct .quiz-option-text {
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-full-bg .quiz-option-btn.correct .quiz-option-text,
+.quiz-question-block.style-nostyle .quiz-options-container:not([class*="ans-style-"]) .quiz-option-btn.correct .quiz-option-text,
+.quiz-question-block.style-nostyle .quiz-option-btn.correct:not(.has-nostyle-circle) .quiz-option-text {
   color: #15803d !important;
   font-weight: 700 !important;
 }
 
-/* Incorrect state */
-.quiz-question-block.style-nostyle .quiz-option-btn.incorrect {
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-full-bg .quiz-option-btn.incorrect,
+.quiz-question-block.style-nostyle .quiz-options-container:not([class*="ans-style-"]) .quiz-option-btn.incorrect,
+.quiz-question-block.style-nostyle .quiz-option-btn.incorrect:not(.has-nostyle-circle) {
   background: transparent !important;
 }
-.quiz-question-block.style-nostyle .quiz-option-btn.incorrect .quiz-option-circle {
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-full-bg .quiz-option-btn.incorrect .quiz-option-circle,
+.quiz-question-block.style-nostyle .quiz-options-container:not([class*="ans-style-"]) .quiz-option-btn.incorrect .quiz-option-circle,
+.quiz-question-block.style-nostyle .quiz-option-btn.incorrect:not(.has-nostyle-circle) .quiz-option-circle {
   color: #b91c1c !important;
   font-weight: 800 !important;
 }
-.quiz-question-block.style-nostyle .quiz-option-btn.incorrect .quiz-option-text {
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-full-bg .quiz-option-btn.incorrect .quiz-option-text,
+.quiz-question-block.style-nostyle .quiz-options-container:not([class*="ans-style-"]) .quiz-option-btn.incorrect .quiz-option-text,
+.quiz-question-block.style-nostyle .quiz-option-btn.incorrect:not(.has-nostyle-circle) .quiz-option-text {
   color: #b91c1c !important;
   font-weight: 700 !important;
 }
 
-/* Neutral selected state */
-.quiz-question-block.style-nostyle .quiz-option-btn.neutral-selected {
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-full-bg .quiz-option-btn.neutral-selected,
+.quiz-question-block.style-nostyle .quiz-options-container:not([class*="ans-style-"]) .quiz-option-btn.neutral-selected,
+.quiz-question-block.style-nostyle .quiz-option-btn.neutral-selected:not(.has-nostyle-circle) {
   background: transparent !important;
 }
-.quiz-question-block.style-nostyle .quiz-option-btn.neutral-selected .quiz-option-circle {
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-full-bg .quiz-option-btn.neutral-selected .quiz-option-circle,
+.quiz-question-block.style-nostyle .quiz-options-container:not([class*="ans-style-"]) .quiz-option-btn.neutral-selected .quiz-option-circle,
+.quiz-question-block.style-nostyle .quiz-option-btn.neutral-selected:not(.has-nostyle-circle) .quiz-option-circle {
   color: #0284c7 !important;
   font-weight: 800 !important;
 }
-.quiz-question-block.style-nostyle .quiz-option-btn.neutral-selected .quiz-option-text {
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-full-bg .quiz-option-btn.neutral-selected .quiz-option-text,
+.quiz-question-block.style-nostyle .quiz-options-container:not([class*="ans-style-"]) .quiz-option-btn.neutral-selected .quiz-option-text,
+.quiz-question-block.style-nostyle .quiz-option-btn.neutral-selected:not(.has-nostyle-circle) .quiz-option-text {
   color: #0284c7 !important;
+  font-weight: 700 !important;
+}
+
+/* ==========================================================================
+   2. শুধু বর্ডার পরিবর্তন (ans-style-border-only)
+   Option label gets circle with colored border, background transparent
+   ========================================================================== */
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-border-only .quiz-option-btn,
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-border-only .quiz-option-btn:hover,
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-border-only .quiz-option-btn:active,
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-border-only .quiz-option-btn:focus,
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-border-only .quiz-option-btn:disabled,
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-border-only .quiz-option-btn.disabled,
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-border-only .quiz-option-btn.correct,
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-border-only .quiz-option-btn.incorrect,
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-border-only .quiz-option-btn.neutral-selected {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-border-only .quiz-option-btn.correct .quiz-option-circle {
+  background: #dcfce7 !important;
+  border: 1.5px solid #86efac !important;
+  color: #15803d !important;
+  font-weight: 800 !important;
+}
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-border-only .quiz-option-btn.correct .quiz-option-text {
+  color: #15803d !important;
+  font-weight: 700 !important;
+}
+
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-border-only .quiz-option-btn.incorrect .quiz-option-circle {
+  background: #fee2e2 !important;
+  border: 1.5px solid #fca5a5 !important;
+  color: #b91c1c !important;
+  font-weight: 800 !important;
+}
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-border-only .quiz-option-btn.incorrect .quiz-option-text {
+  color: #b91c1c !important;
+  font-weight: 700 !important;
+}
+
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-border-only .quiz-option-btn.neutral-selected .quiz-option-circle {
+  background: #e0f2fe !important;
+  border: 1.5px solid #7dd3fc !important;
+  color: #0369a1 !important;
+  font-weight: 800 !important;
+}
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-border-only .quiz-option-btn.neutral-selected .quiz-option-text {
+  color: #0369a1 !important;
+  font-weight: 700 !important;
+}
+
+/* ==========================================================================
+   3. শুধু অপশন চিহ্ন পরিবর্তন (ans-style-label-only)
+   Option label gets solid colored circular badge with white text
+   ========================================================================== */
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-label-only .quiz-option-btn.correct {
+  background: transparent !important;
+  border: none !important;
+}
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-label-only .quiz-option-btn.correct .quiz-option-circle {
+  background: #16a34a !important;
+  border: 1.5px solid #15803d !important;
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  box-shadow: 0 2px 5px rgba(22, 163, 74, 0.35) !important;
+}
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-label-only .quiz-option-btn.correct .quiz-option-text {
+  color: #15803d !important;
+  font-weight: 700 !important;
+}
+
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-label-only .quiz-option-btn.incorrect {
+  background: transparent !important;
+  border: none !important;
+}
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-label-only .quiz-option-btn.incorrect .quiz-option-circle {
+  background: #dc2626 !important;
+  border: 1.5px solid #b91c1c !important;
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  box-shadow: 0 2px 5px rgba(220, 38, 38, 0.35) !important;
+}
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-label-only .quiz-option-btn.incorrect .quiz-option-text {
+  color: #b91c1c !important;
+  font-weight: 700 !important;
+}
+
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-label-only .quiz-option-btn.neutral-selected {
+  background: transparent !important;
+  border: none !important;
+}
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-label-only .quiz-option-btn.neutral-selected .quiz-option-circle {
+  background: #0284c7 !important;
+  border: 1.5px solid #0369a1 !important;
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  box-shadow: 0 2px 5px rgba(2, 132, 199, 0.35) !important;
+}
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-label-only .quiz-option-btn.neutral-selected .quiz-option-text {
+  color: #0369a1 !important;
+  font-weight: 700 !important;
+}
+
+/* ==========================================================================
+   4. আইকন + অপশন চিহ্ন (ans-style-highlight-and-circle)
+   Option label gets solid colored circular badge + check/cross icon
+   ========================================================================== */
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-highlight-and-circle .quiz-option-btn.correct {
+  background: transparent !important;
+  border: none !important;
+}
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-highlight-and-circle .quiz-option-btn.correct .quiz-option-circle {
+  background: #16a34a !important;
+  border: 1.5px solid #15803d !important;
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  box-shadow: 0 2px 5px rgba(22, 163, 74, 0.35) !important;
+}
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-highlight-and-circle .quiz-option-btn.correct .quiz-option-text {
+  color: #15803d !important;
+  font-weight: 600 !important;
+}
+
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-highlight-and-circle .quiz-option-btn.incorrect {
+  background: transparent !important;
+  border: none !important;
+}
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-highlight-and-circle .quiz-option-btn.incorrect .quiz-option-circle {
+  background: #dc2626 !important;
+  border: 1.5px solid #b91c1c !important;
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  box-shadow: 0 2px 5px rgba(220, 38, 38, 0.35) !important;
+}
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-highlight-and-circle .quiz-option-btn.incorrect .quiz-option-text {
+  color: #b91c1c !important;
+  font-weight: 600 !important;
+}
+
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-highlight-and-circle .quiz-option-btn.neutral-selected {
+  background: transparent !important;
+  border: none !important;
+}
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-highlight-and-circle .quiz-option-btn.neutral-selected .quiz-option-circle {
+  background: #0284c7 !important;
+  border: 1.5px solid #0369a1 !important;
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  box-shadow: 0 2px 5px rgba(2, 132, 199, 0.35) !important;
+}
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-highlight-and-circle .quiz-option-btn.neutral-selected .quiz-option-text {
+  color: #0369a1 !important;
+  font-weight: 600 !important;
+}
+
+/* ==========================================================================
+   5. আইকন দিয়ে দেখান (ans-style-with-icons)
+   "আইকন দিয়ে দেখান - choose korle, option ba level yer background color change hobe na, sudhu icon dekhabe."
+   Zero background color change on option or label, only shows icon
+   ========================================================================== */
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-with-icons .quiz-option-btn,
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-with-icons .quiz-option-btn:hover,
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-with-icons .quiz-option-btn:active,
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-with-icons .quiz-option-btn:focus,
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-with-icons .quiz-option-btn:disabled,
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-with-icons .quiz-option-btn.disabled,
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-with-icons .quiz-option-btn.correct,
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-with-icons .quiz-option-btn.incorrect,
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-with-icons .quiz-option-btn.neutral-selected {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-highlight-and-circle .quiz-option-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-with-icons .quiz-option-circle,
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-with-icons .quiz-option-btn .quiz-option-circle {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  line-height: 1.35 !important;
+}
+
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-with-icons .quiz-option-text,
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-with-icons .quiz-option-btn .quiz-option-text {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  line-height: 1.35 !important;
+}
+
+/* Correct state - colors text & label green, zero border */
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-with-icons .quiz-option-btn.correct .quiz-option-circle {
+  color: #15803d !important;
+  font-weight: 800 !important;
+}
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-with-icons .quiz-option-btn.correct .quiz-option-text {
+  color: #15803d !important;
+  font-weight: 700 !important;
+}
+
+/* Incorrect state - colors text & label red, zero border */
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-with-icons .quiz-option-btn.incorrect .quiz-option-circle {
+  color: #b91c1c !important;
+  font-weight: 800 !important;
+}
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-with-icons .quiz-option-btn.incorrect .quiz-option-text {
+  color: #b91c1c !important;
+  font-weight: 700 !important;
+}
+
+/* Neutral selected state - colors text & label blue, zero border */
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-with-icons .quiz-option-btn.neutral-selected .quiz-option-circle {
+  color: #0284c7 !important;
+  font-weight: 800 !important;
+}
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-with-icons .quiz-option-btn.neutral-selected .quiz-option-text {
+  color: #0284c7 !important;
+  font-weight: 700 !important;
+}
+
+/* Status icon vertically centered with option text & label */
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-with-icons .quiz-option-status-icon,
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-highlight-and-circle .quiz-option-status-icon,
+.quiz-question-block.style-nostyle .quiz-option-status-icon {
+  margin-left: 8px !important;
+  font-size: calc(var(--quiz-font-size, 16px) * 0.95) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  align-self: center !important;
+  line-height: 1 !important;
+  vertical-align: middle !important;
+  transform: translateY(1.5px) !important;
+}
+
+.quiz-question-block.style-nostyle .quiz-option-status-icon i,
+.quiz-option-status-icon i {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+  vertical-align: middle !important;
+}
+
+/* ==========================================================================
+   6. লাইন দিয়ে দেখান (ans-style-bottom-line)
+   Option gets colored bottom line, label gets circular badge
+   ========================================================================== */
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-bottom-line .quiz-option-btn.correct {
+  background: #ffffff !important;
+  border: 1.5px solid #e2e8f0 !important;
+  border-bottom: 4px solid #16a34a !important;
+  border-radius: 8px 8px 6px 6px !important;
+  padding: 5px 12px 5px 8px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+}
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-bottom-line .quiz-option-btn.correct .quiz-option-circle {
+  background: #dcfce7 !important;
+  border: 1.5px solid #16a34a !important;
+  color: #15803d !important;
+  font-weight: 800 !important;
+}
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-bottom-line .quiz-option-btn.correct .quiz-option-text {
+  color: #15803d !important;
+  font-weight: 700 !important;
+}
+
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-bottom-line .quiz-option-btn.incorrect {
+  background: #ffffff !important;
+  border: 1.5px solid #e2e8f0 !important;
+  border-bottom: 4px solid #dc2626 !important;
+  border-radius: 8px 8px 6px 6px !important;
+  padding: 5px 12px 5px 8px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+}
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-bottom-line .quiz-option-btn.incorrect .quiz-option-circle {
+  background: #fee2e2 !important;
+  border: 1.5px solid #dc2626 !important;
+  color: #b91c1c !important;
+  font-weight: 800 !important;
+}
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-bottom-line .quiz-option-btn.incorrect .quiz-option-text {
+  color: #b91c1c !important;
+  font-weight: 700 !important;
+}
+
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-bottom-line .quiz-option-btn.neutral-selected {
+  background: #ffffff !important;
+  border: 1.5px solid #e2e8f0 !important;
+  border-bottom: 4px solid #0284c7 !important;
+  border-radius: 8px 8px 6px 6px !important;
+  padding: 5px 12px 5px 8px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+}
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-bottom-line .quiz-option-btn.neutral-selected .quiz-option-circle {
+  background: #e0f2fe !important;
+  border: 1.5px solid #0284c7 !important;
+  color: #0369a1 !important;
+  font-weight: 800 !important;
+}
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-bottom-line .quiz-option-btn.neutral-selected .quiz-option-text {
+  color: #0369a1 !important;
+  font-weight: 700 !important;
+}
+
+/* ==========================================================================
+   7. হালকা হাইলাইট (ans-style-soft-highlight)
+   Option gets soft tinted background, label gets circular badge
+   ========================================================================== */
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-soft-highlight .quiz-option-btn.correct {
+  background: #dcfce7 !important;
+  border: 1px solid #86efac !important;
+  border-radius: 8px !important;
+  padding: 4px 10px !important;
+}
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-soft-highlight .quiz-option-btn.correct .quiz-option-circle {
+  background: #bbf7d0 !important;
+  border: 1.5px solid #86efac !important;
+  color: #14532d !important;
+  font-weight: 800 !important;
+}
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-soft-highlight .quiz-option-btn.correct .quiz-option-text {
+  color: #15803d !important;
+  font-weight: 700 !important;
+}
+
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-soft-highlight .quiz-option-btn.incorrect {
+  background: #fee2e2 !important;
+  border: 1px solid #fca5a5 !important;
+  border-radius: 8px !important;
+  padding: 4px 10px !important;
+}
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-soft-highlight .quiz-option-btn.incorrect .quiz-option-circle {
+  background: #fecaca !important;
+  border: 1.5px solid #fca5a5 !important;
+  color: #7f1d1d !important;
+  font-weight: 800 !important;
+}
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-soft-highlight .quiz-option-btn.incorrect .quiz-option-text {
+  color: #b91c1c !important;
+  font-weight: 700 !important;
+}
+
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-soft-highlight .quiz-option-btn.neutral-selected {
+  background: #e0f2fe !important;
+  border: 1px solid #7dd3fc !important;
+  border-radius: 8px !important;
+  padding: 4px 10px !important;
+}
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-soft-highlight .quiz-option-btn.neutral-selected .quiz-option-circle {
+  background: #bae6fd !important;
+  border: 1.5px solid #7dd3fc !important;
+  color: #0369a1 !important;
+  font-weight: 800 !important;
+}
+.quiz-question-block.style-nostyle .quiz-options-container.ans-style-soft-highlight .quiz-option-btn.neutral-selected .quiz-option-text {
+  color: #0369a1 !important;
   font-weight: 700 !important;
 }
 
