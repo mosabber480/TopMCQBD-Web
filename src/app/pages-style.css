@@ -4992,9 +4992,7 @@ input:disabled + .quiz-slider { cursor: not-allowed; background-color: #cbd5e1; 
 .quiz-question-block.style-nostyle .quiz-option-status-icon,
 .quiz-question-block.style-bracket .quiz-options-container.ans-style-with-icons .quiz-option-status-icon,
 .quiz-question-block.style-bracket .quiz-options-container.ans-style-highlight-and-circle .quiz-option-status-icon,
-.quiz-question-block.style-bracket .quiz-option-status-icon,
-.quiz-options-container.ans-style-with-icons .quiz-option-status-icon,
-.quiz-options-container.ans-style-highlight-and-circle .quiz-option-status-icon {
+.quiz-question-block.style-bracket .quiz-option-status-icon {
   margin-left: 8px !important;
   font-size: calc(var(--quiz-font-size, 16px) * 0.95) !important;
   display: inline-flex !important;
@@ -5003,7 +5001,23 @@ input:disabled + .quiz-slider { cursor: not-allowed; background-color: #cbd5e1; 
   align-self: center !important;
   line-height: 1 !important;
   vertical-align: middle !important;
-  transform: translateY(calc(var(--quiz-font-size, 16px) * -0.155)) !important;
+  transform: none !important;
+  padding: 0 !important;
+}
+
+.quiz-options-container.ans-style-with-icons .quiz-option-status-icon,
+.quiz-options-container.ans-style-highlight-and-circle .quiz-option-status-icon,
+.quiz-options-container .quiz-option-status-icon,
+.quiz-question-block .quiz-option-status-icon {
+  margin-left: auto !important;
+  font-size: calc(var(--quiz-font-size, 16px) * 0.95) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  align-self: center !important;
+  line-height: 1 !important;
+  vertical-align: middle !important;
+  transform: none !important;
   padding: 0 !important;
 }
 
@@ -7409,7 +7423,7 @@ input:disabled + .quiz-slider { cursor: not-allowed; background-color: #cbd5e1; 
   flex-shrink: 0 !important;
   padding-left: 6px;
   vertical-align: middle !important;
-  transform: translateY(calc(var(--quiz-font-size, 16px) * -0.155)) !important;
+  transform: none !important;
 }
 .quiz-options-container .quiz-option-status-icon .text-success,
 .quiz-question-block .quiz-option-status-icon .text-success {

@@ -103,14 +103,14 @@ const ENGLISH_LOWERCASE_LETTERS = ['a', 'b', 'c', 'd', 'e'];
 const DEFAULT_PRESET_PROFILES = {
   practice: {
     questionLayout: '2q-col',
-    optionLayout: '1',
+    optionLayout: '2',
     middleLine: 'dotted',
     bottomLine: 'dotted',
     middleGap: 60,
     optionLetter: 'bangla',
     questionStyle: 'dotted',
     highlightMode: 'single',
-    highlightColor: 'full-bg',
+    highlightColor: 'highlight-and-circle',
     explanationMode: 'on-select',
     showExplanation: true,
     cutMark: 0.5,
@@ -121,18 +121,20 @@ const DEFAULT_PRESET_PROFILES = {
     fontWeight: 'regular',
     customFontSizeInput: '',
     answerMode: 'none',
-    showAnswer: false
+    showAnswer: false,
+    showTime: false,
+    showScore: true
   },
   read: {
-    questionLayout: '2q-col',
-    optionLayout: '1',
-    middleLine: 'dotted',
-    bottomLine: 'dotted',
-    middleGap: 60,
+    questionLayout: '1q',
+    optionLayout: '4',
+    middleLine: 'none',
+    bottomLine: 'none',
+    middleGap: 0,
     optionLetter: 'bangla',
-    questionStyle: 'dotted',
+    questionStyle: 'box',
     highlightMode: 'both',
-    highlightColor: 'full-bg',
+    highlightColor: 'soft-highlight',
     explanationMode: 'on-select',
     showExplanation: true,
     cutMark: 0,
@@ -142,17 +144,19 @@ const DEFAULT_PRESET_PROFILES = {
     fontFamily: "'Noto Sans Bengali', sans-serif",
     fontWeight: 'regular',
     customFontSizeInput: '',
-    answerMode: 'on-select',
-    showAnswer: true
+    answerMode: 'explanation-only',
+    showAnswer: false,
+    showTime: false,
+    showScore: false
   },
   exam: {
     questionLayout: '2q-col',
-    optionLayout: '1',
+    optionLayout: '2',
     middleLine: 'dotted',
     bottomLine: 'none',
-    middleGap: 60,
+    middleGap: 80,
     optionLetter: 'bangla',
-    questionStyle: 'box',
+    questionStyle: 'circle',
     highlightMode: 'neutral',
     highlightColor: 'full-bg',
     explanationMode: 'none',
@@ -165,7 +169,9 @@ const DEFAULT_PRESET_PROFILES = {
     fontWeight: 'regular',
     customFontSizeInput: '',
     answerMode: 'none',
-    showAnswer: false
+    showAnswer: false,
+    showTime: true,
+    showScore: true
   },
   custom: {
     questionLayout: '2q-col',
@@ -187,7 +193,9 @@ const DEFAULT_PRESET_PROFILES = {
     fontWeight: 'regular',
     customFontSizeInput: '',
     answerMode: 'on-wrong',
-    showAnswer: true
+    showAnswer: true,
+    showTime: false,
+    showScore: true
   }
 };
 
@@ -689,11 +697,43 @@ function QuestionsComponentInternal() {
       try { localStorage.setItem('topmcqbd_show_answer', 'false'); } catch (e) {}
     }
     try { localStorage.setItem('topmcqbd_answer_mode', resolvedAnsMode); } catch (e) {}
+    // 8. Time & Score Switches
+    if (typeof merged.showTime === 'boolean') {
+      setShowTime(merged.showTime);
+      try { localStorage.setItem('topmcqbd_show_time', merged.showTime ? 'true' : 'false'); } catch (e) {}
+    }
+    if (typeof merged.showScore === 'boolean') {
+      setShowScore(merged.showScore);
+      try { localStorage.setItem('topmcqbd_show_score', merged.showScore ? 'true' : 'false'); } catch (e) {}
+    }
   };
 
   const handleSelectPreset = (presetId) => {
     setActivePreset(presetId);
     activePresetRef.current = presetId;
+    if (presetId === 'exam') {
+      setIsReadMode(false);
+      setActiveMode('exam');
+      setGlobalAccordion((prev) => ({ ...prev, layout: true }));
+      setLayoutSubAccordion({ style: true, question: true, option: true, middleLine: true, bottomLine: true, middleGap: true });
+    } else if (presetId === 'read') {
+      setIsReadMode(true);
+      setActiveMode('read');
+      setGlobalAccordion((prev) => ({ ...prev, layout: true, colorAnswerStyle: true, explanation: true }));
+      setLayoutSubAccordion({ style: true, question: true, option: true, middleLine: true, bottomLine: true, middleGap: true });
+      setColorStyleSubAccordion({ style: true, color: true });
+      setExplanationSubAccordion({ answer: true, explanation: true });
+    } else if (presetId === 'practice') {
+      setIsReadMode(false);
+      setActiveMode('practice');
+      setGlobalAccordion({ layout: true, questionStyle: false, colorAnswerStyle: false, explanation: false, optionLetter: false, cutMark: false, font: false });
+      setLayoutSubAccordion({ style: true, question: true, option: true, middleLine: true, bottomLine: true, middleGap: true });
+      setColorStyleSubAccordion({ style: true, color: true });
+      setExplanationSubAccordion({ answer: true, explanation: true });
+    } else {
+      setIsReadMode(false);
+      setActiveMode('practice');
+    }
     try {
       localStorage.setItem('topmcqbd_active_preset', presetId);
       let profiles = {};
@@ -925,10 +965,10 @@ function QuestionsComponentInternal() {
         try { profiles = JSON.parse(rawProfiles); } catch (e) { profiles = null; }
       }
 
-      // Ensure 'custom' (My setting) default profile matches the new user specification
-      const CUSTOM_PRESET_VERSION = 'v5_my_setting_bottom_line_none_answer_on_wrong';
+      // Ensure 'custom' (My setting), 'exam' (Live exam), 'read' & 'practice' default profiles match latest specifications
+      const PRESET_VERSION = 'v9_practice_preset_opt2_icon_circle';
       const savedCustomVer = localStorage.getItem('topmcqbd_custom_preset_ver');
-      if (savedCustomVer !== CUSTOM_PRESET_VERSION) {
+      if (savedCustomVer !== PRESET_VERSION) {
         if (!profiles) {
           profiles = {
             practice: { ...DEFAULT_PRESET_PROFILES.practice },
@@ -937,15 +977,24 @@ function QuestionsComponentInternal() {
             custom: { ...DEFAULT_PRESET_PROFILES.custom }
           };
         } else {
+          profiles.practice = { ...DEFAULT_PRESET_PROFILES.practice };
+          profiles.read = { ...DEFAULT_PRESET_PROFILES.read };
+          profiles.exam = { ...DEFAULT_PRESET_PROFILES.exam };
           profiles.custom = { ...DEFAULT_PRESET_PROFILES.custom };
         }
         try {
           localStorage.setItem('topmcqbd_preset_profiles', JSON.stringify(profiles));
         } catch (e) {}
         try {
-          localStorage.setItem('topmcqbd_custom_preset_ver', CUSTOM_PRESET_VERSION);
+          localStorage.setItem('topmcqbd_custom_preset_ver', PRESET_VERSION);
         } catch (e) {}
-        if (savedPreset === 'custom') {
+        if (savedPreset === 'practice') {
+          applyPresetProfile('practice', DEFAULT_PRESET_PROFILES.practice);
+        } else if (savedPreset === 'read') {
+          applyPresetProfile('read', DEFAULT_PRESET_PROFILES.read);
+        } else if (savedPreset === 'exam') {
+          applyPresetProfile('exam', DEFAULT_PRESET_PROFILES.exam);
+        } else if (savedPreset === 'custom') {
           applyPresetProfile('custom', DEFAULT_PRESET_PROFILES.custom);
         }
       }
@@ -1304,7 +1353,18 @@ function QuestionsComponentInternal() {
 
     applyPresetProfile(currentPreset, defaultProf);
 
-    setLayoutSubAccordion({ style: true, question: true, option: false, middleLine: false, bottomLine: false, middleGap: false });
+    if (currentPreset === 'read') {
+      setGlobalAccordion((prev) => ({ ...prev, layout: true, colorAnswerStyle: true, explanation: true }));
+      setLayoutSubAccordion({ style: true, question: true, option: true, middleLine: true, bottomLine: true, middleGap: true });
+    } else if (currentPreset === 'exam') {
+      setGlobalAccordion((prev) => ({ ...prev, layout: true }));
+      setLayoutSubAccordion({ style: true, question: true, option: true, middleLine: true, bottomLine: true, middleGap: true });
+    } else if (currentPreset === 'practice') {
+      setGlobalAccordion({ layout: true, questionStyle: false, colorAnswerStyle: false, explanation: false, optionLetter: false, cutMark: false, font: false });
+      setLayoutSubAccordion({ style: true, question: true, option: true, middleLine: true, bottomLine: true, middleGap: true });
+    } else {
+      setLayoutSubAccordion({ style: true, question: true, option: false, middleLine: false, bottomLine: false, middleGap: false });
+    }
     setColorStyleSubAccordion({ style: true, color: true });
     setExplanationSubAccordion({ answer: true, explanation: true });
     setShowFourOptionConditionHint(false);
@@ -2386,6 +2446,8 @@ function QuestionsComponentInternal() {
                     onChange={(e) => {
                       if (!isReadMode) {
                         setShowTime(e.target.checked);
+                        try { localStorage.setItem('topmcqbd_show_time', e.target.checked ? 'true' : 'false'); } catch (err) {}
+                        saveActivePresetSetting('showTime', e.target.checked);
                         if (e.target.checked) resetQuizState();
                       }
                     }}
@@ -2403,7 +2465,11 @@ function QuestionsComponentInternal() {
                     checked={showScore}
                     disabled={isReadMode}
                     onChange={(e) => {
-                      if (!isReadMode) setShowScore(e.target.checked);
+                      if (!isReadMode) {
+                        setShowScore(e.target.checked);
+                        try { localStorage.setItem('topmcqbd_show_score', e.target.checked ? 'true' : 'false'); } catch (err) {}
+                        saveActivePresetSetting('showScore', e.target.checked);
+                      }
                     }}
                   />
                   <span className="quiz-slider"></span>
